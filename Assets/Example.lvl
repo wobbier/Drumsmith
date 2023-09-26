@@ -1,0 +1,70 @@
+{
+    "Cores": null,
+    "Scene": [
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ClearColor": [
+                        0.5010928511619568,
+                        0.7880434989929199,
+                        0.769329309463501
+                    ],
+                    "ClearType": "Color",
+                    "Far": 2000.0,
+                    "IsCurrent": true,
+                    "Near": 0.10000000149011612,
+                    "Type": "Camera",
+                    "Zoom": 45.0
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Main Camera"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "FilePath": "Assets/UI/SongList.html",
+                    "Type": "ExampleMenuController"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "UI"
+        }
+    ]
+}

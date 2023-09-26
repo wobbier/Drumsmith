@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<style>
+    body{
+        background-color: #0000001c;
+        color: #ffffff;
+    }
+
+    #myDivContainer{
+        height: 75%;
+        overflow: scroll;
+    }
+
+    .dynamic-div
+    {
+
+    }
+    
+    .dynamic-div:hover
+    {
+        background-color: rgba(97, 97, 97, 0.192);
+    }
+
+    .dynamic-div .album-art
+    {
+        width: 150px;
+        height: 150px;
+        background-size: cover;
+        background-color: white;
+        float: left;
+    }
+
+    .dynamic-div .album-title
+    {
+        float: left;
+    }
+    
+    .dynamic-div .album-stats
+    {
+        float: left;
+    }
+
+    .clearfix::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+    </style>
+</style>
+<head>
+</head>
+
+<body>
+
+    <!-- Parent div where dynamic divs will be added -->
+    <div id="myDivContainer">
+        <h3>My Dynamic Divs:</h3>
+        <div class="dynamic-div">
+            <div class="album-art" style="background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');">
+            </div>
+            <div class="album-title">
+                <h1>Album Title</h1>
+            </div>
+            <div class="album-stats">
+                <h1>Album Title</h1>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <button onclick="fillDivs()">Fill Divs</button>
+
+    <script>
+        function ClearTrackList() {
+            // Fetch the container div
+            const containerDiv = document.getElementById('myDivContainer');
+
+            // Clear previous divs
+            const oldDivs = containerDiv.querySelectorAll('.dynamic-div');
+            oldDivs.forEach(div => div.remove());
+        }
+        function AddTrack(track, imageSrc) {
+            // Fetch the container div
+            const containerDiv = document.getElementById('myDivContainer');
+            const textContent = track + "<img src='file:///" + imageSrc + "'/>";
+            const dynamicDiv = document.createElement('div');
+            dynamicDiv.classList.add('dynamic-div');
+
+            dynamicDiv.innerHTML = `
+            <div class="dynamic-div">
+            <div class="album-art" style="background-image: url('file:///${imageSrc}');">
+            </div>
+            <div class="album-title">
+                <h1>${track}</h1>
+            </div>
+            <div class="album-stats">
+                <h1>${track}</h1>
+            </div>
+            <div class="clearfix"></div>
+        </div>`;
+
+            // Create and append text content
+            //const textNode = document.createTextNode(track);
+            //dynamicDiv.appendChild(textNode);
+
+            //// Create and append image
+            //const image = document.createElement('img');
+            //image.src = "file:///" + imageSrc;
+            //image.alt = track;
+            //dynamicDiv.appendChild(image);
+
+            containerDiv.appendChild(dynamicDiv);
+        }
+        function fillDivs() {
+            // Fetch the container div
+            const containerDiv = document.getElementById('myDivContainer');
+            //ClearTrackList();
+            // Sample data to populate the divs
+            const items = [
+                { text: 'Data 1', imgSrc: '../DLC/ExampleSong/this_suffering_cover.jpg' },
+                { text: 'Data 2', imgSrc: 'file:///M:/Projects/ME/Drumsmith/Assets/DLC/ExampleSong2/album.jpg' },
+                { text: 'Data 3', imgSrc: 'image3.jpg' },
+                { text: 'Data 4', imgSrc: 'image4.jpg' }
+            ];
+
+            // Loop through each item and create a div for it
+            items.forEach(item => {
+                AddTrack(item.text, item.imgSrc);
+                //const dynamicDiv = document.createElement('div');
+                //dynamicDiv.classList.add('dynamic-div');
+                //// Create and append text content
+                //const textNode = document.createTextNode(item.text);
+                //dynamicDiv.appendChild(textNode);
+                //
+                //// Create and append image
+                //const image = document.createElement('img');
+                //image.src = item.imgSrc;
+                //image.alt = item.text;
+                //dynamicDiv.appendChild(image);
+                //
+                //containerDiv.appendChild(dynamicDiv);
+            });
+        }
+    </script>
+
+</body>
+
+</html>
