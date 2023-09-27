@@ -12,6 +12,7 @@ public:
 	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
 
 	void LoadScene(const ultralight::JSObject& thisObject, const ultralight::JSArgs& args);
+	void SelectTrackToPlay(const ultralight::JSObject& thisObject, const ultralight::JSArgs& args);
 
 	TrackDatabase m_database;
 

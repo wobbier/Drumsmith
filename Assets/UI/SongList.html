@@ -89,7 +89,7 @@
             dynamicDiv.classList.add('dynamic-div');
 
             dynamicDiv.innerHTML = `
-            <div class="dynamic-div" onclick="PlaySound('${track.TrackSource}')">
+            <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}')" onmousehover="PlaySound('${track.TrackSource}')">
             <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
             </div>
             <div class="album-title">

@@ -1,5 +1,9 @@
 {
-    "Cores": null,
+    "Cores": [
+        {
+            "Type": "ExampleCore"
+        }
+    ],
     "Scene": [
         {
             "Components": [

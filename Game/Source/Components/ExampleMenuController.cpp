@@ -2,6 +2,7 @@
 
 #include <Events/SceneEvents.h>
 #include "CoreGame/TrackList.h"
+#include "Events/GameEvents.h"
 
 ExampleMenuController::ExampleMenuController()
     : BasicUIView( "ExampleMenuController" )
@@ -32,6 +33,7 @@ void ExampleMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultral
     BasicUIView::OnUILoad( GlobalWindow, Caller );
 
     GlobalWindow["LoadScene"] = BindJSCallback( &ExampleMenuController::LoadScene );
+    GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &ExampleMenuController::SelectTrackToPlay );
     ExecuteScript( "ClearTrackList();" );
 
     for( auto it : TrackDatabase::GetInstance().m_trackList.m_tracks )
@@ -52,5 +54,14 @@ void ExampleMenuController::LoadScene( const ultralight::JSObject& thisObject, c
     LoadSceneEvent evt;
     ultralight::String path = args[0].ToString();
     evt.Level = std::string( path.utf8().data() );
+    evt.Fire();
+}
+
+void ExampleMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    ultralight::String path = args[0].ToString();
+
+    LaunchPlayTrackEvent evt;
+    evt.TrackID = std::string( path.utf8().data() );
     evt.Fire();
 }

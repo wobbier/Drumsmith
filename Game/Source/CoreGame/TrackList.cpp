@@ -1,5 +1,6 @@
 #include "TrackList.h"
 #include <filesystem>
+#include "Core\Assert.h"
 
 TrackList::TrackList()
     : ConfigFile(Path("Assets/TrackDatabase.json"))
@@ -77,4 +78,25 @@ void TrackData::OnLoadConfig( const json& outJson )
     }
     m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
+    m_noteSpeed = outJson["NoteSpeed"];
+}
+
+void TrackData::LoadNoteData()
+{
+    ME_ASSERT_MSG( !Root.empty(), "Trying to read an empty track file." );
+
+    if( Root.contains( "Notes" ) )
+    {
+        json& noteData = Root["Notes"];
+        m_noteData.reserve( noteData.size() );
+        for( json& note : noteData )
+        {
+            NoteData noteEntry;
+            noteEntry.m_editorLane = note["EditorLane"];
+            noteEntry.m_noteName = note["NoteName"];
+            noteEntry.m_triggerTime = note["TriggerTime"];
+
+            m_noteData.push_back( noteEntry );
+        }
+    }
 }
