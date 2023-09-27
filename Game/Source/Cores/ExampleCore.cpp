@@ -140,7 +140,14 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
     PlayAudioEvent evt( inTrackData.m_trackSourcePath );
     evt.Callback = [this]( SharedPtr<AudioSource> inSource )
     {
-        m_currentTrack = inSource;
+        if( m_currentTrack != inSource )
+        {
+            if( m_currentTrack )
+            {
+                m_currentTrack->Stop( true );
+            }
+            m_currentTrack = inSource;
+        }
     };
     evt.Fire();
 }
