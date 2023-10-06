@@ -1,1 +1,58 @@
-{"PadMap":[{"ID":0,"KB":4,"MIDI":0,"NAME":"Bass"},{"ID":1,"KB":26,"MIDI":0,"NAME":"Snare"},{"ID":2,"KB":29,"MIDI":0,"NAME":"HighTom"},{"ID":3,"KB":10,"MIDI":0,"NAME":"MidTom"},{"ID":4,"KB":11,"MIDI":0,"NAME":"FloorTom"},{"ID":5,"KB":22,"MIDI":0,"NAME":"OpenHiHat"},{"ID":6,"KB":4,"MIDI":0,"NAME":"ClosedHiHat"},{"ID":7,"KB":27,"MIDI":0,"NAME":"Crash"},{"ID":8,"KB":29,"MIDI":0,"NAME":"Ride"}]}
+{
+ "PadMap": [
+  {
+   "ID": 0,
+   "KB": 5,
+   "MIDI": 0,
+   "NAME": "Bass"
+  },
+  {
+   "ID": 1,
+   "KB": 22,
+   "MIDI": 0,
+   "NAME": "Snare"
+  },
+  {
+   "ID": 2,
+   "KB": 23,
+   "MIDI": 0,
+   "NAME": "HighTom"
+  },
+  {
+   "ID": 3,
+   "KB": 28,
+   "MIDI": 0,
+   "NAME": "MidTom"
+  },
+  {
+   "ID": 4,
+   "KB": 24,
+   "MIDI": 0,
+   "NAME": "FloorTom"
+  },
+  {
+   "ID": 5,
+   "KB": 10,
+   "MIDI": 0,
+   "NAME": "OpenHiHat"
+  },
+  {
+   "ID": 6,
+   "KB": 11,
+   "MIDI": 0,
+   "NAME": "ClosedHiHat"
+  },
+  {
+   "ID": 7,
+   "KB": 6,
+   "MIDI": 0,
+   "NAME": "Crash"
+  },
+  {
+   "ID": 8,
+   "KB": 21,
+   "MIDI": 0,
+   "NAME": "Ride"
+  }
+ ]
+}

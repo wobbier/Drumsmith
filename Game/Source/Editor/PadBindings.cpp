@@ -117,7 +117,7 @@ void PadBindingWidget::Render()
         }
 
         File outFile( Path("Assets/Config/PadMappings.json"));
-        outFile.Write( mappings.saveData.dump() );
+        outFile.Write( mappings.saveData.dump(1) );
     }
     ImGui::PopStyleColor( 3 );
 
