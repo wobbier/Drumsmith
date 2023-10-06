@@ -8,6 +8,9 @@
 #include "Core/Assert.h"
 #include "Components/Camera.h"
 #include "Events/AudioEvents.h"
+#include "Engine/Engine.h"
+#include "Editor/PadBindings.h"
+#include "Mathf.h"
 
 ExampleCore::ExampleCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
@@ -77,15 +80,42 @@ void ExampleCore::OnEntityRemoved( Entity& InEntity )
 
 void ExampleCore::Update( const UpdateContext& context )
 {
-    auto& entities = GetEntities();
-    for( auto ent : entities )
+    if( !m_currentTrack )
     {
+        return;
     }
+    Input& gameInput = GetEngine().GetInput();
+    PadMappingStorage& storage = PadMappingStorage::GetInstance();
+
+    auto& entities = GetEntities();
+
+    std::vector<Entity>::iterator noteItr = entities.begin();
+    for( auto it = noteItr; it != entities.end(); ++it )
+    {
+        NoteTrigger& note = it->GetComponent<NoteTrigger>();
+        const unsigned int triggerTime = (unsigned int)(note.TriggerTime * 1000.f);
+        const unsigned int noteTime = m_currentTrack->GetPositionMs();
+
+        if( Mathf::Abs( (float)( noteTime - triggerTime ) ) < 200 )
+        {
+            // drunk me fucked this up
+            for( auto& pad : storage.mappedPads )
+            {
+                std::string con = ConvertPadToLane( pad.padId );
+                if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && con == note.EditorLane )
+                {
+                    it->MarkForDelete();
+                }
+            }
+        }
+    }
+
     if( m_currentTrack )
     {
         auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
         camTransform.SetPosition( { 0,0,(float)m_currentTrack->GetPositionMs() / 1000 } );
     }
+
 
 }
 
@@ -135,6 +165,9 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
         }
         auto& modelComp = note->AddComponent<Model>( "Assets/cube.obj" );
         auto& noteComp = note->AddComponent<NoteTrigger>();
+        noteComp.TriggerTime = it.m_triggerTime;
+        noteComp.NoteName = it.m_noteName;
+        noteComp.EditorLane = it.m_editorLane;
     }
 
     PlayAudioEvent evt( inTrackData.m_trackSourcePath );
@@ -162,6 +195,24 @@ void ExampleCore::ShutdownTrack()
     }
 }
 
+
+int32_t ExampleCore::LegacyConvertLane( const std::string& lane )
+{
+    if( lane == "bass1" )
+    {
+        return PadId::Bass;
+    }
+    return -1;
+}
+
+const char* ExampleCore::ConvertPadToLane( int16_t lane )
+{
+    if( lane == PadId::Bass )
+    {
+        return "bass1";
+    }
+    return "";
+}
 
 #if USING( ME_EDITOR )
 

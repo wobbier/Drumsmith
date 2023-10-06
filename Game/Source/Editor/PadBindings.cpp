@@ -3,6 +3,7 @@
 #include "Engine/Engine.h"
 #include <memory>
 #include "File.h"
+#include "UI/Colors.h"
 
 #if USING(ME_EDITOR)
 
@@ -81,7 +82,26 @@ void PadBindingWidget::Render()
 
     }
 
-    if( ImGui::Button( "Save Pad Mappings", { -1, 0 } ) )
+    float remainingSpace = ImGui::GetContentRegionAvail().x;
+
+    ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ACCENT_RED );
+    ImGui::PushStyleColor( ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV( .0f, 0.8f, 0.8f ) );
+    if( ImGui::Button( "Reset Bindings", { remainingSpace / 2.f, 0.f } ) )
+    {
+        for( auto& pad : mappings.mappedPads )
+        {
+            pad.keyboardBinding = 0;
+            pad.midiBinding = 0;
+        }
+    }
+    ImGui::PopStyleColor( 2 );
+
+    ImGui::SameLine();
+
+    ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor::HSV( 2.f / 7.0f, 0.6f, 0.6f ) );
+    ImGui::PushStyleColor( ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV( 2.f / 7.0f, 0.7f, 0.7f ) );
+    ImGui::PushStyleColor( ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV( 2.f / 7.0f, 0.8f, 0.8f ) );
+    if( ImGui::Button( "Save Pad Mappings", { -1.f, 0 } ) )
     {
         mappings.saveData.clear();
 
@@ -99,6 +119,7 @@ void PadBindingWidget::Render()
         File outFile( Path("Assets/Config/PadMappings.json"));
         outFile.Write( mappings.saveData.dump() );
     }
+    ImGui::PopStyleColor( 3 );
 
     if( ImGui::CollapsingHeader( "RAW JSON" ) )
     {

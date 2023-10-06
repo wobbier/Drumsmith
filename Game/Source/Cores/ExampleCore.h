@@ -4,6 +4,7 @@
 #include "Events/EventReceiver.h"
 #include "CoreGame/TrackList.h"
 #include "Components/Audio/AudioSource.h"
+#include <unordered_map>
 
 class ExampleCore final
 	: public Core<ExampleCore>
@@ -23,6 +24,9 @@ public:
 
 	void SetupTrack( TrackData& inTrackData );
 	void ShutdownTrack();
+
+	int32_t LegacyConvertLane( const std::string& lane );
+	const char* ConvertPadToLane( int16_t lane );
 
 	std::map<std::string, EntityHandle> m_lanes;
 	SharedPtr<AudioSource> m_currentTrack;
