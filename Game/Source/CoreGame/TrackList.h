@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "Editor/PadBindings.h"
 
 struct NoteData
 {
@@ -10,8 +11,9 @@ struct NoteData
     //    "instanceID": -53520
     //}
 
-    uint8_t m_editorLane = 0;
+    PadId m_editorLane = PadId::Invalid;
     float   m_triggerTime = 0.f;
+    // delete this
     std::string m_noteName;
 };
 

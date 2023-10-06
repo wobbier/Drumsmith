@@ -124,7 +124,7 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
         EntityHandle note = world.CreateEntity();
         auto& transform = note->AddComponent<Transform>();
         transform.SetPosition( Vector3( 0, 0, it.m_triggerTime * inTrackData.m_noteSpeed ) );
-        transform.SetName( it.m_noteName + std::to_string( it.m_editorLane ) );
+        transform.SetName( it.m_noteName + std::to_string( (uint8_t)it.m_editorLane ) );
         if( m_lanes[it.m_noteName] )
         {
             transform.SetParent( m_lanes[it.m_noteName]->GetComponent<Transform>() );
