@@ -79,6 +79,7 @@ void TrackData::OnLoadConfig( const json& outJson )
     m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
     m_noteSpeed = outJson["NoteSpeed"];
+    m_duration = outJson["Duration"];
 }
 
 void TrackData::LoadNoteData()
