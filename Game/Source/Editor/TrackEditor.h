@@ -17,6 +17,10 @@ class TrackEditor
 {
 public:
     static constexpr const float kNoteHeight = 10.f;
+    static constexpr float kDefaultMaxKeyframeWidth = 1.0f / 16.0f;
+    static constexpr float kMaxKeyframeWidth = 20.0f;
+    static constexpr float kMinKeyframeWidth = 0.5f;
+    static constexpr float kBaseZoomFactor = 1.1f;
 
     TrackEditor();
     ~TrackEditor();
@@ -35,6 +39,8 @@ public:
     bool IsWindowHovered = false;
 
     int GetNoteColor( PadId inId );
+    float GetNoteWidth( float timelineSizeScale );
+    float CalculateZoom();
 
     Path SelectedTrackLocation;
     int SelectedTrackIndex = 0;

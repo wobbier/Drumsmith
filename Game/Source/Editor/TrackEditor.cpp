@@ -36,11 +36,22 @@ void TrackEditor::Update()
 {
 }
 
+float TrackEditor::GetNoteWidth(float timelineSizeScale)
+{
+    float scaledWidth = kDefaultMaxKeyframeWidth * timelineSizeScale;
+    return std::clamp( scaledWidth, kMinKeyframeWidth, kMaxKeyframeWidth );
+}
+
+float TrackEditor::CalculateZoom()
+{
+    return std::powf( kBaseZoomFactor, ScrollDelta );
+}
+
 void TrackEditor::Render()
 {
     //ScrollDelta += GetEngine().GetEditorInput().GetMouseScrollDelta().x;
 
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar;
+    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     ImGui::Begin( "Track Editor", &IsOpen, windowFlags );
     if( ImGui::BeginMenuBar() )
     {
@@ -103,12 +114,11 @@ void TrackEditor::Render()
     }
 
 
-
     TimelineSize = trackData.m_duration;
 
-    float scaleFactor = ( ScrollDelta * 50 );
+    float timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
+    float timelineSizeZoomed = TimelineSize * timelineSizeScale;
 
-    float timelineSizeZoomed = TimelineSize + scaleFactor;
     float timelineHeight = ( kNoteHeight + 5.f ) * PadId::COUNT;
     ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
 
@@ -129,10 +139,10 @@ void TrackEditor::Render()
 
     for( NoteData& note : trackData.m_noteData )
     {
-        float notePosX = canvas_pos.x + ( note.m_triggerTime * ScrollDelta );
+        float notePosX = canvas_pos.x + ( note.m_triggerTime * timelineSizeScale );
         float notePosY = canvas_pos.y + ( note.m_editorLane * kNoteHeight ) + ( note.m_editorLane * 5.f );
         ImVec2 timelinePos = { notePosX, notePosY };
-        drawList->AddRectFilled( timelinePos, ImVec2( timelinePos.x  + 2.f/*+ ( 1.f * ScrollDelta/10.f )*/, timelinePos.y + canvas_size.y ), (ImU32)GetNoteColor( note.m_editorLane ) );
+        drawList->AddRectFilled( timelinePos, ImVec2( timelinePos.x + GetNoteWidth(timelineSizeScale)/*+ ( 1.f * ScrollDelta/10.f )*/, timelinePos.y + canvas_size.y ), (ImU32)GetNoteColor( note.m_editorLane ) );
     }
 
     if( TrackPreview )
