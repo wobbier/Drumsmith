@@ -4,6 +4,7 @@
 #include "Components\Audio\AudioSource.h"
 #include "Events\GameEvents.h"
 #include "Events\AudioEvents.h"
+#include "Mathf.h"
 
 
 TrackEditor::TrackEditor()
@@ -25,7 +26,7 @@ void TrackEditor::Init()
     {
         track.LoadNoteData();
     }
-
+    hitNotes.resize( (int)PadId::COUNT );
 }
 
 void TrackEditor::Destroy()
@@ -36,7 +37,7 @@ void TrackEditor::Update()
 {
 }
 
-float TrackEditor::GetNoteWidth(float timelineSizeScale)
+float TrackEditor::GetNoteWidth( float timelineSizeScale )
 {
     float scaledWidth = kDefaultMaxKeyframeWidth * timelineSizeScale;
     return std::clamp( scaledWidth, kMinKeyframeWidth, kMaxKeyframeWidth );
@@ -54,7 +55,7 @@ float TrackEditor::ScaleValue( float inValue )
 
 bool TrackEditor::CullVisual( float posx )
 {
-    if (posx > WindowContentSize )
+    if( posx > WindowContentSize )
     {
         return true;
     }
@@ -69,76 +70,14 @@ void TrackEditor::Render()
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     ImGui::Begin( "Track Editor", &IsOpen, windowFlags );
     //ImGui::SetScrollX( ImGui::GetScrollX() );
-    if( ImGui::BeginMenuBar() )
-    {
-        if( ImGui::BeginMenu( "File" ) )
-        {
-            if( ImGui::MenuItem( "Open Track" ) )
-            {
-                auto callback = [this]( Path selectedAsset )
-                {
-                    SelectedTrackLocation = Path( selectedAsset.GetDirectoryString() + "NoteData.txt" );
 
-                    if( !SelectedTrackLocation.Exists )
-                    {
-                        YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath );
-                    }
-                };
-                RequestAssetSelectionEvent evt( callback, AssetType::Audio );
-                evt.Fire();
-            }
-
-            if( ImGui::MenuItem( "Save Track" ) )
-            {
-                trackData.Save();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::Text(std::to_string(CalculateZoom()).c_str());
-        ImGui::EndMenuBar();
-    }
-
-
-    if( SelectedTrackLocation.Exists )
-    {
-        ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
-        int i = 0;
-        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
-        {
-            if( Path( track.m_trackSourcePath ).FullPath == SelectedTrackLocation.FullPath )
-            {
-                SelectedTrackIndex = i;
-            }
-            ++i;
-        }
-        if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ImGui::Button( "Play" ) )
-        {
-            PlayAudioEvent evt;
-            evt.SourceName = std::string( SelectedTrackLocation.GetDirectoryString() + std::string( "Track.mp3" ) );
-            evt.Callback = [this]( SharedPtr<AudioSource> inSource )
-            {
-                TrackPreview = inSource;
-            };
-            evt.Fire();
-        }
-        else if( TrackPreview && TrackPreview->IsPlaying() )
-        {
-            if( ImGui::Button( "Stop" ) )
-            {
-                TrackPreview->Stop();
-            }
-        }
-    }
-    else
-    {
-        SelectedTrackLocation = Path( Path( trackData.m_trackSourcePath ).GetDirectoryString() + "NoteData.txt" );
-    }
-
+    DrawMenuBar();
+    DrawTrackControls();
 
     TimelineSize = trackData.m_duration;
 
-    float timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
-    float timelineSizeZoomed = TimelineSize * timelineSizeScale;
+    timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
+    timelineSizeZoomed = TimelineSize * timelineSizeScale;
 
     float timelineHeight = ( kNoteHeight + kLaneSpacing ) * PadId::COUNT;
     WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
@@ -149,17 +88,18 @@ void TrackEditor::Render()
     ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
     float windowPos = ImGui::GetWindowPos().x;
     ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
-    ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
 
     if( TrackPreview )
     {
         float progress = (float)TrackPreview->GetPositionMs() / 1000.f;
 
+        ImGui::SetNextItemWidth( timelineSizeZoomed );
         if( ImGui::SliderFloat( "##SeekSlider", &progress, 0, (float)TrackPreview->GetLength() / 1000.f, "%.3f" ) )
         {
             TrackPreview->SetPositionMs( progress * 1000.f );
         }
     }
+    ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
@@ -234,8 +174,8 @@ void TrackEditor::Render()
             ImVec2 rect( timelinePos.x + GetNoteWidth( timelineSizeScale ), timelinePos.y + canvas_size.y );
             if( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
             {
-                if ( canvas_pos.x + relativeMouseX > timelinePos.x && canvas_pos.x + relativeMouseX < rect.x
-                     && canvas_pos.y + relativeMouseY > timelinePos.y && canvas_pos.y + relativeMouseY < rect.y )
+                if( canvas_pos.x + relativeMouseX > timelinePos.x && canvas_pos.x + relativeMouseX < rect.x
+                    && canvas_pos.y + relativeMouseY > timelinePos.y && canvas_pos.y + relativeMouseY < rect.y )
                 {
                     doubleClickHandled = true;
                     trackData.m_noteData.erase( note );
@@ -276,8 +216,170 @@ void TrackEditor::Render()
 
     ImGui::EndChildFrame();
 
+    DrawPadPreview();
+
     IsWindowHovered = true;// ImGui::IsWindowHovered();
     ImGui::End();
+}
+
+void TrackEditor::DrawTrackControls()
+{
+    TrackData& trackData = GetCurrentTrackData();
+    if( SelectedTrackLocation.Exists )
+    {
+        ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
+        int i = 0;
+        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+        {
+            if( Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
+            {
+                SelectedTrackIndex = i;
+            }
+            ++i;
+        }
+        if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ImGui::Button( "Play" ) )
+        {
+            PlayAudioEvent evt;
+            evt.SourceName = std::string( SelectedTrackLocation.GetDirectoryString() + std::string( "Track.mp3" ) );
+            evt.Callback = [this]( SharedPtr<AudioSource> inSource )
+            {
+                TrackPreview = inSource;
+            };
+            evt.Fire();
+        }
+        else if( TrackPreview && TrackPreview->IsPlaying() )
+        {
+            if( TrackPreview->IsPaused() )
+            {
+                if( ImGui::Button( "Resume" ) )
+                {
+                    TrackPreview->Resume();
+                }
+            }
+            else
+            {
+                if( ImGui::Button( "Pause" ) )
+                {
+                    TrackPreview->Pause();
+                }
+            }
+            if( ImGui::Button( "Stop" ) )
+            {
+                TrackPreview->Stop();
+            }
+        }
+    }
+    else
+    {
+        SelectedTrackLocation = Path( Path( trackData.m_trackSourcePath ).GetDirectoryString() + "NoteData.txt" );
+    }
+}
+
+TrackData& TrackEditor::GetCurrentTrackData()
+{
+    return TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
+}
+
+void TrackEditor::DrawMenuBar()
+{
+    TrackData& trackData = GetCurrentTrackData();
+    if( ImGui::BeginMenuBar() )
+    {
+        if( ImGui::BeginMenu( "File" ) )
+        {
+            if( ImGui::MenuItem( "Open Track" ) )
+            {
+                auto callback = [this]( Path selectedAsset )
+                {
+                    SelectedTrackLocation = Path( selectedAsset.GetDirectoryString() + "NoteData.txt" );
+
+                    if( !SelectedTrackLocation.Exists )
+                    {
+                        YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath );
+                    }
+                };
+                RequestAssetSelectionEvent evt( callback, AssetType::Audio );
+                evt.Fire();
+            }
+
+            if( ImGui::MenuItem( "Save Track" ) )
+            {
+                trackData.Clear();
+                trackData.Save();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::Text( std::to_string( CalculateZoom() ).c_str() );
+        ImGui::EndMenuBar();
+    }
+}
+
+void TrackEditor::DrawPadPreview()
+{
+    if( ImGui::CollapsingHeader( "Pad Preview" ) )
+    {
+        auto& trackData = GetCurrentTrackData();
+        ImVec2 outerWindowSize = ImGui::GetWindowSize();
+        ImGui::SetCursorPosX( ImGui::GetScrollX() );
+        const float xSpacing = 5.f;
+        ImGui::BeginChildFrame( 2, { outerWindowSize.x - xSpacing, 55.f}, ImGuiWindowFlags_NoScrollWithMouse);
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+        ImVec2 canvas_size = { timelineSizeZoomed, kNoteHeight };
+        ImVec2 windowSize = ImGui::GetWindowSize();
+
+        if( TrackPreview )
+        {
+            if( TrackPreview->GetPositionMs() < m_cachedTimestamp )
+            {
+                m_closestNoteIndex = 0;
+            }
+            m_cachedTimestamp = TrackPreview->GetPositionMs();
+        }
+
+        if( TrackPreview )
+        {
+            for( size_t i = m_closestNoteIndex; i < trackData.m_noteData.size(); ++i )
+            {
+                auto& currentNote = trackData.m_noteData[i];
+                float triggerTime = currentNote.m_triggerTime * 1000.f;
+                float timeDiff = triggerTime - m_cachedTimestamp;
+                if( Mathf::Abs( timeDiff ) <= 50.f )
+                {
+                    hitNotes[(int)currentNote.m_editorLane] = true;
+                }
+                if( timeDiff > 500 )
+                {
+                    break;
+                }
+                if( timeDiff <= -500 )
+                {
+                    m_closestNoteIndex = i;
+                    //m_closestNoteIndex = i;
+                }
+            }
+
+
+            for( int i = 0; i < (int)PadId::COUNT; ++i )
+            {
+                ImVec2 padPos = { canvas_pos.x + ( ( windowSize.x / (int)PadId::COUNT ) * i ), canvas_pos.y };
+                ImVec2 padSize = { padPos.x + ( windowSize.x / (int)PadId::COUNT ) - xSpacing, padPos.y + 50 };
+                if( hitNotes[i] )
+                {
+                    drawList->AddRectFilled( padPos, padSize, (ImU32)GetNoteColor( (PadId)i ) );
+                }
+                else
+                {
+                    drawList->AddRect( padPos, padSize, (ImU32)GetNoteColor( (PadId)i ) );
+                }
+
+                hitNotes[i] = false;
+            }
+        }
+
+        ImGui::EndChildFrame();
+    }
 }
 
 bool TrackEditor::OnEvent( const BaseEvent& evt )

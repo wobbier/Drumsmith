@@ -15,6 +15,11 @@ struct NoteData
     float   m_triggerTime = 0.f;
     // delete this
     std::string m_noteName;
+
+    bool operator==( const NoteData& other ) const
+    {
+        return m_triggerTime == other.m_triggerTime && m_editorLane == other.m_editorLane;
+    }
 };
 
 class TrackData

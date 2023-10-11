@@ -110,6 +110,28 @@ void ExampleCore::OnStart()
         Transform* lane = scene->GetRootTransform()->GetChildByName( "Bass1" );
         m_lanes["bass1"] = lane->Parent;
     }
+
+    // Ride
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "ride1" );
+        m_lanes["ride1"] = lane->Parent;
+    }
+
+    // Tom1
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "tom1" );
+        m_lanes["tom1"] = lane->Parent;
+    }
+    // Tom2
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "tom2" );
+        m_lanes["tom2"] = lane->Parent;
+    }
+    // Tom3
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "tom3" );
+        m_lanes["tom3"] = lane->Parent;
+    }
 }
 
 

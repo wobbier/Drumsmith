@@ -6,6 +6,7 @@
 #include "PadBindings.h"
 #include "Path.h"
 #include "Pointers.h"
+#include "CoreGame/TrackList.h"
 
 class AudioSource;
 
@@ -33,6 +34,14 @@ public:
     void Update() override;
     void Render() override;
 
+    void DrawTrackControls();
+
+    TrackData& GetCurrentTrackData();
+
+    void DrawMenuBar();
+
+    void DrawPadPreview();
+
     float TimelineSize = 2000.f;
 
     bool OnEvent( const BaseEvent& evt ) override;
@@ -51,6 +60,14 @@ public:
     int SelectedTrackIndex = 0;
 
     SharedPtr<AudioSource> TrackPreview = nullptr;
+private:
+    float timelineSizeScale = 1.f;
+    float timelineSizeZoomed = 1.f;
+
+    std::size_t m_closestNoteIndex = 0;
+    float m_cachedTimestamp = 0.f;
+    std::vector<bool> hitNotes;
+
 };
 
 ME_REGISTER_EDITOR_WIDGET( TrackEditor );

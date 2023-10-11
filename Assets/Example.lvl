@@ -115,7 +115,7 @@
                         0.0
                     ],
                     "Scale": [
-                        1.0,
+                        4.0,
                         0.30000001192092896,
                         0.10000000149011612
                     ],
@@ -189,6 +189,102 @@
             ],
             "DestroyOnLoad": true,
             "Name": "UI"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "ride1"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "tom1"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "tom2"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "tom3"
         }
     ]
 }
