@@ -32,6 +32,8 @@ public:
 	SharedPtr<AudioSource> m_currentTrack;
     void OnStart() override;
 
+	EntityHandle TrackMover;
+
 private:
 #if USING( ME_EDITOR )
 	virtual void OnEditorInspect() final;

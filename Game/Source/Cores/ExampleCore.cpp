@@ -69,7 +69,8 @@ void ExampleCore::Update( const UpdateContext& context )
 
     if( m_currentTrack )
     {
-        auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
+        //auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
+        auto& camTransform = TrackMover->GetComponent<Transform>();
         camTransform.SetPosition( { 0,0,(float)m_currentTrack->GetPositionMs() / 1000 } );
     }
 
@@ -131,6 +132,11 @@ void ExampleCore::OnStart()
     {
         Transform* lane = scene->GetRootTransform()->GetChildByName( "tom3" );
         m_lanes["tom3"] = lane->Parent;
+    }
+    // Tom3
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "TrackMover" );
+        TrackMover = lane->Parent;
     }
 }
 

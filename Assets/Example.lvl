@@ -146,43 +146,6 @@
                     "Type": "Transform"
                 },
                 {
-                    "ClearColor": [
-                        0.5010928511619568,
-                        0.7880434989929199,
-                        0.769329309463501
-                    ],
-                    "ClearType": "Color",
-                    "Far": 2000.0,
-                    "IsCurrent": true,
-                    "Near": 0.10000000149011612,
-                    "Type": "Camera",
-                    "Zoom": 45.0
-                }
-            ],
-            "DestroyOnLoad": true,
-            "Name": "Main Camera"
-        },
-        {
-            "Components": [
-                {
-                    "Position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "Rotation": [
-                        0.0,
-                        -0.0,
-                        0.0
-                    ],
-                    "Scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "Type": "Transform"
-                },
-                {
                     "FilePath": "Assets/UI/SongList.html",
                     "Type": "ExampleMenuController"
                 }
@@ -285,6 +248,169 @@
             ],
             "DestroyOnLoad": true,
             "Name": "tom3"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        191.8000030517578
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        0.30000001192092896,
+                        1.0,
+                        2.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Material": {
+                        "DiffuseColor": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Textures": {
+                            "Diffuse": {
+                                "Path": "Assets/Textures/UVTest.png",
+                                "RenderMode": "Opaque"
+                            }
+                        },
+                        "Tiling": [
+                            1.0,
+                            1.0
+                        ],
+                        "Type": "DiffuseMaterial"
+                    },
+                    "MeshType": "Model",
+                    "Type": "Mesh"
+                },
+                {
+                    "ModelPath": "Engine/Assets/Plane.fbx",
+                    "Type": "Model"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Ground"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                4.0,
+                                -5.0
+                            ],
+                            "Rotation": [
+                                15.000000953674316,
+                                -0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "ClearColor": [
+                                0.5010928511619568,
+                                0.7880434989929199,
+                                0.769329309463501
+                            ],
+                            "ClearType": "Color",
+                            "Far": 2000.0,
+                            "IsCurrent": true,
+                            "Near": 0.10000000149011612,
+                            "Type": "Camera",
+                            "Zoom": 45.0
+                        }
+                    ],
+                    "DestroyOnLoad": true,
+                    "Name": "Main Camera"
+                },
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.32495224475860596,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                -0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                0.0010000000474974513
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Material": {
+                                "DiffuseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "Textures": {
+                                    "Diffuse": {
+                                        "Path": "Engine/Assets/Textures/DefaultAlpha.png",
+                                        "RenderMode": "Opaque"
+                                    }
+                                },
+                                "Tiling": [
+                                    1.0,
+                                    1.0
+                                ],
+                                "Type": "DiffuseMaterial"
+                            },
+                            "MeshType": "Model",
+                            "Type": "Mesh"
+                        },
+                        {
+                            "ModelPath": "Assets/Plane.fbx",
+                            "Type": "Model"
+                        }
+                    ],
+                    "DestroyOnLoad": true,
+                    "Name": "Bar"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "TrackMover"
         }
     ]
 }
