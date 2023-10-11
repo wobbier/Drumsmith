@@ -17,6 +17,7 @@ class TrackEditor
 {
 public:
     static constexpr const float kNoteHeight = 10.f;
+    static constexpr const float kLaneSpacing = 5.f;
     static constexpr float kDefaultMaxKeyframeWidth = 1.0f / 16.0f;
     static constexpr float kMaxKeyframeWidth = 20.0f;
     static constexpr float kMinKeyframeWidth = 0.5f;

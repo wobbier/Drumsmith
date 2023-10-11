@@ -30,6 +30,7 @@ public:
 
 	std::map<std::string, EntityHandle> m_lanes;
 	SharedPtr<AudioSource> m_currentTrack;
+    void OnStart() override;
 
 private:
 #if USING( ME_EDITOR )

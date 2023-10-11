@@ -64,6 +64,7 @@ bool TrackEditor::CullVisual( float posx )
 void TrackEditor::Render()
 {
     //ScrollDelta += GetEngine().GetEditorInput().GetMouseScrollDelta().x;
+    auto& trackData = TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     ImGui::Begin( "Track Editor", &IsOpen, windowFlags );
@@ -86,13 +87,17 @@ void TrackEditor::Render()
                 RequestAssetSelectionEvent evt( callback, AssetType::Audio );
                 evt.Fire();
             }
+
+            if( ImGui::MenuItem( "Save Track" ) )
+            {
+                trackData.Save();
+            }
             ImGui::EndMenu();
         }
         ImGui::Text(std::to_string(CalculateZoom()).c_str());
         ImGui::EndMenuBar();
     }
 
-    auto& trackData = TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
 
     if( SelectedTrackLocation.Exists )
     {
@@ -135,12 +140,13 @@ void TrackEditor::Render()
     float timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
     float timelineSizeZoomed = TimelineSize * timelineSizeScale;
 
-    float timelineHeight = ( kNoteHeight + 5.f ) * PadId::COUNT;
+    float timelineHeight = ( kNoteHeight + kLaneSpacing ) * PadId::COUNT;
     WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
 
     ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
     ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
     ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
+    ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
     float windowPos = ImGui::GetWindowPos().x;
     ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
     ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
@@ -161,6 +167,10 @@ void TrackEditor::Render()
 
     ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
     ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
+    float relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
+    float relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
+    ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
+    ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
 
 
     float numBars = 0;
@@ -206,12 +216,11 @@ void TrackEditor::Render()
         }
     }
 
-
-
-    for( NoteData& note : trackData.m_noteData )
+    bool doubleClickHandled = false;
+    for( auto note = trackData.m_noteData.begin(); note != trackData.m_noteData.end(); note++ )
     {
-        float notePosX = canvas_pos.x + ( note.m_triggerTime * timelineSizeScale );
-        float notePosY = canvas_pos.y + ( note.m_editorLane * kNoteHeight ) + ( note.m_editorLane * 5.f );
+        float notePosX = canvas_pos.x + ( note->m_triggerTime * timelineSizeScale );
+        float notePosY = canvas_pos.y + ( note->m_editorLane * kNoteHeight ) + ( note->m_editorLane * kLaneSpacing );
         ImVec2 timelinePos = { notePosX, notePosY };
 
         numNotes++;
@@ -222,9 +231,39 @@ void TrackEditor::Render()
         }
         else
         {
-            drawList->AddRectFilled( timelinePos, ImVec2( timelinePos.x + GetNoteWidth( timelineSizeScale )/*+ ( 1.f * ScrollDelta/10.f )*/, timelinePos.y + canvas_size.y ), (ImU32)GetNoteColor( note.m_editorLane ) );
+            ImVec2 rect( timelinePos.x + GetNoteWidth( timelineSizeScale ), timelinePos.y + canvas_size.y );
+            if( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+            {
+                if ( canvas_pos.x + relativeMouseX > timelinePos.x && canvas_pos.x + relativeMouseX < rect.x
+                     && canvas_pos.y + relativeMouseY > timelinePos.y && canvas_pos.y + relativeMouseY < rect.y )
+                {
+                    doubleClickHandled = true;
+                    trackData.m_noteData.erase( note );
+                    break;
+                }
+            }
+            drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, (ImU32)GetNoteColor( note->m_editorLane ) );
         }
     }
+
+    if( !doubleClickHandled && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) && TrackPreview )
+    {
+        NoteData newNote;
+        PadId id = Bass;
+        for( int i = (int)id; i < PadId::COUNT; ++i )
+        {
+            if( relativeMouseY > ( i * kNoteHeight ) + ( i * kLaneSpacing ) )
+            {
+                id = (PadId)i;
+            }
+        }
+        newNote.m_editorLane = id;
+        newNote.m_noteName = PadUtils::GetPadId( id );
+        float percent = relativeMouseX / timelineSizeZoomed;
+        newNote.m_triggerTime = ( TrackPreview->GetLength() * percent ) / 1000.f;
+        trackData.m_noteData.push_back( newNote );
+    }
+
     ImGui::Text( ( "Num Culled: " + std::to_string( numCulled ) ).c_str() );
 
     if( TrackPreview )

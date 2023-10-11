@@ -11,6 +11,7 @@
 #include "Engine/Engine.h"
 #include "Editor/PadBindings.h"
 #include "Mathf.h"
+#include "Cores/SceneCore.h"
 
 ExampleCore::ExampleCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
@@ -23,51 +24,7 @@ ExampleCore::ExampleCore()
 
 void ExampleCore::Init()
 {
-    World& world = GetWorld();
 
-    // open_hh
-    {
-        EntityHandle lane1 = world.CreateEntity();
-        auto& snareLane = lane1->AddComponent<Transform>( "open_hh" );
-        snareLane.SetPosition( { -3, 1, 0 } );
-        snareLane.SetScale( { 1, .3f, .1f } );
-        m_lanes["open_hh"] = lane1;
-    }
-
-    // open_hh
-    {
-        EntityHandle lane1 = world.CreateEntity();
-        auto& snareLane = lane1->AddComponent<Transform>( "closed_hh" );
-        snareLane.SetPosition( { -3, 1, 0 } );
-        snareLane.SetScale( { 1, .3f, .1f } );
-        m_lanes["closed_hh"] = lane1;
-    }
-
-    // Snare1
-    {
-        EntityHandle lane1 = world.CreateEntity();
-        auto& snareLane = lane1->AddComponent<Transform>( "Snare1" );
-        snareLane.SetPosition( { -2, 0, 0 } );
-        snareLane.SetScale( { 1, .3f, .1f } );
-        m_lanes["snare1"] = lane1;
-    }
-    // Crash1
-    {
-        EntityHandle lane1 = world.CreateEntity();
-        auto& snareLane = lane1->AddComponent<Transform>( "Crash1" );
-        snareLane.SetPosition( { 2, 0, 0 } );
-        snareLane.SetScale( { 1, .3f, .1f } );
-        m_lanes["crash1"] = lane1;
-    }
-
-    // Kick
-    {
-        EntityHandle lane1 = world.CreateEntity();
-        auto& snareLane = lane1->AddComponent<Transform>( "Bass1" );
-        snareLane.SetPosition( { 0, -2, 0 } );
-        snareLane.SetScale( { 1, .3f, .1f } );
-        m_lanes["bass1"] = lane1;
-    }
 }
 
 void ExampleCore::OnEntityAdded( Entity& NewEntity )
@@ -118,6 +75,43 @@ void ExampleCore::Update( const UpdateContext& context )
 
 
 }
+
+void ExampleCore::OnStart()
+{
+    World& world = GetWorld();
+    m_lanes.clear();
+
+    SceneCore* scene = static_cast<SceneCore*>( world.GetCore( SceneCore::GetTypeId() ) );
+    // open_hh
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "open_hh" );
+        m_lanes["open_hh"] = lane->Parent;
+    }
+
+    // open_hh
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "closed_hh" );
+        m_lanes["closed_hh"] = lane->Parent;
+    }
+
+    // Snare1
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "Snare1" );
+        m_lanes["snare1"] = lane->Parent;
+    }
+    // Crash1
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "Crash1" );
+        m_lanes["crash1"] = lane->Parent;
+    }
+
+    // Kick
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "Bass1" );
+        m_lanes["bass1"] = lane->Parent;
+    }
+}
+
 
 
 bool ExampleCore::OnEvent( const BaseEvent& evt )

@@ -54,6 +54,37 @@ namespace PadUtils
         }
         return "";
     }
+
+    static const char* GetPadId( int16_t inPadId )
+    {
+        switch( inPadId )
+        {
+        case Invalid:
+            break;
+        case Bass:
+            return "bass1";
+        case Snare:
+            return "snare1";
+        case HighTom:
+            return "tom1";
+        case MidTom:
+            return "tom2";
+        case FloorTom:
+            return "tom3";
+        case OpenHiHat:
+            return "open_hh";
+        case ClosedHiHat:
+            return "closed_hh";
+        case Crash:
+            return "crash1";
+        case Ride:
+            return "ride1";
+        case COUNT:
+        default:
+            break;
+        }
+        return "";
+    }
 }
 
 struct PadDefinition

@@ -9,6 +9,126 @@
             "Components": [
                 {
                     "Position": [
+                        -3.0,
+                        1.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "open_hh"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        -3.0,
+                        1.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "closed_hh"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        -2.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Snare1"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        2.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Crash1"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        -2.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        0.30000001192092896,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Bass1"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
                         0.0,
                         0.0,
                         0.0

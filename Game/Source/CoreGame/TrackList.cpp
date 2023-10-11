@@ -64,6 +64,24 @@ TrackData::TrackData( const Path& inPath )
 
 void TrackData::OnSave( json& outJson )
 {
+    outJson["SongName"] = m_trackName;
+    outJson["SongArtist"] = m_artistName;
+    //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
+    //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
+    outJson["NoteSpeed"] = m_noteSpeed;
+    outJson["Duration"] = m_duration;
+    outJson["BPM"] = m_bpm;
+
+    json& noteData = outJson["Notes"];
+    for( NoteData& note : m_noteData )
+    {
+        json noteEntry;
+        noteEntry["EditorLane"] = note.m_editorLane;
+        noteEntry["NoteName"] = note.m_noteName;
+        noteEntry["TriggerTime"] = note.m_triggerTime;
+
+        noteData.push_back( noteEntry );
+    }
 }
 
 void TrackData::OnLoadConfig( const json& outJson )
