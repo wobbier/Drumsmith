@@ -21,6 +21,7 @@ public:
     static constexpr float kMaxKeyframeWidth = 20.0f;
     static constexpr float kMinKeyframeWidth = 0.5f;
     static constexpr float kBaseZoomFactor = 1.1f;
+    static constexpr float kBeatsPerMeasure = 4.0f; // For now, we do 4/4 time
 
     TrackEditor();
     ~TrackEditor();
@@ -41,6 +42,9 @@ public:
     int GetNoteColor( PadId inId );
     float GetNoteWidth( float timelineSizeScale );
     float CalculateZoom();
+    float ScaleValue( float inValue );
+    bool CullVisual(float posx);
+    float WindowContentSize = 1.f;
 
     Path SelectedTrackLocation;
     int SelectedTrackIndex = 0;

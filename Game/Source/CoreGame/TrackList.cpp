@@ -80,6 +80,7 @@ void TrackData::OnLoadConfig( const json& outJson )
     m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
     m_noteSpeed = outJson["NoteSpeed"];
     m_duration = outJson["Duration"];
+    m_bpm = outJson["BPM"];
 }
 
 void TrackData::LoadNoteData()

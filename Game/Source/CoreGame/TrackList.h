@@ -36,6 +36,7 @@ public:
     std::string m_trackSourcePath;
     float m_noteSpeed = 1.f;
     float m_duration = 1.f;
+    int m_bpm = 69.f;
     std::vector<NoteData> m_noteData;
 };
 
