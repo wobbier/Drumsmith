@@ -70,8 +70,8 @@ void ExampleCore::Update( const UpdateContext& context )
     if( m_currentTrack )
     {
         //auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
-        auto& camTransform = TrackMover->GetComponent<Transform>();
-        camTransform.SetPosition( { 0,0,(float)m_currentTrack->GetPositionMs() / 1000 } );
+        Transform& camTransform = TrackMover->GetComponent<Transform>();
+        camTransform.SetPosition( { 0,0,((float)m_currentTrack->GetPositionMs() / 1000.f) * m_trackData->m_noteSpeed } );
     }
 
 
@@ -148,7 +148,7 @@ bool ExampleCore::OnEvent( const BaseEvent& evt )
     {
         const LaunchPlayTrackEvent& event = static_cast<const LaunchPlayTrackEvent&>( evt );
 
-        for( auto it : TrackDatabase::GetInstance().m_trackList.m_tracks )
+        for( auto& it : TrackDatabase::GetInstance().m_trackList.m_tracks )
         {
             if( it.m_trackName == event.TrackID )
             {
@@ -166,6 +166,7 @@ bool ExampleCore::OnEvent( const BaseEvent& evt )
 void ExampleCore::SetupTrack( TrackData& inTrackData )
 {
     ShutdownTrack();
+    m_trackData = &inTrackData;
 
     inTrackData.LoadNoteData();
 

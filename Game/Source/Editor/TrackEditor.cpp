@@ -5,6 +5,7 @@
 #include "Events\GameEvents.h"
 #include "Events\AudioEvents.h"
 #include "Mathf.h"
+#include "Engine\Engine.h"
 
 
 TrackEditor::TrackEditor()
@@ -224,6 +225,7 @@ void TrackEditor::Render()
 
 void TrackEditor::DrawTrackControls()
 {
+    Input& input = GetEngine().GetEditorInput();
     TrackData& trackData = GetCurrentTrackData();
     if( SelectedTrackLocation.Exists )
     {
@@ -237,7 +239,7 @@ void TrackEditor::DrawTrackControls()
             }
             ++i;
         }
-        if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ImGui::Button( "Play" ) )
+        if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ( ImGui::Button( "Play" ) || input.WasKeyPressed( KeyCode::Space ) ) )
         {
             PlayAudioEvent evt;
             evt.SourceName = std::string( SelectedTrackLocation.GetDirectoryString() + std::string( "Track.mp3" ) );
@@ -251,14 +253,14 @@ void TrackEditor::DrawTrackControls()
         {
             if( TrackPreview->IsPaused() )
             {
-                if( ImGui::Button( "Resume" ) )
+                if( ImGui::Button( "Resume" ) || input.WasKeyPressed( KeyCode::Space ) )
                 {
                     TrackPreview->Resume();
                 }
             }
             else
             {
-                if( ImGui::Button( "Pause" ) )
+                if( ImGui::Button( "Pause" ) || input.WasKeyPressed( KeyCode::Space ) )
                 {
                     TrackPreview->Pause();
                 }
@@ -322,7 +324,7 @@ void TrackEditor::DrawPadPreview()
         ImVec2 outerWindowSize = ImGui::GetWindowSize();
         ImGui::SetCursorPosX( ImGui::GetScrollX() );
         const float xSpacing = 5.f;
-        ImGui::BeginChildFrame( 2, { outerWindowSize.x - xSpacing, 55.f}, ImGuiWindowFlags_NoScrollWithMouse);
+        ImGui::BeginChildFrame( 2, { outerWindowSize.x - xSpacing, 55.f }, ImGuiWindowFlags_NoScrollWithMouse );
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();

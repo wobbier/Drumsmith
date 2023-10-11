@@ -33,6 +33,7 @@ public:
     void OnStart() override;
 
 	EntityHandle TrackMover;
+	TrackData* m_trackData = nullptr;
 
 private:
 #if USING( ME_EDITOR )
