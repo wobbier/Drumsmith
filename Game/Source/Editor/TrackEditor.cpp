@@ -183,26 +183,29 @@ void TrackEditor::Render()
                     break;
                 }
             }
-            drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, (ImU32)GetNoteColor( note->m_editorLane ) );
+            drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, (ImU32)PadUtils::GetNoteColorABGR( note->m_editorLane ) );
         }
     }
 
     if( !doubleClickHandled && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) && TrackPreview )
     {
-        NoteData newNote;
-        PadId id = Bass;
-        for( int i = (int)id; i < PadId::COUNT; ++i )
+        if( relativeMouseY > 0 && relativeMouseY < timelineHeight )
         {
-            if( relativeMouseY > ( i * kNoteHeight ) + ( i * kLaneSpacing ) )
+            NoteData newNote;
+            PadId id = Bass;
+            for( int i = (int)id; i < PadId::COUNT; ++i )
             {
-                id = (PadId)i;
+                if( relativeMouseY > ( i * kNoteHeight ) + ( i * kLaneSpacing ) )
+                {
+                    id = (PadId)i;
+                }
             }
+            newNote.m_editorLane = id;
+            newNote.m_noteName = PadUtils::GetPadId( id );
+            float percent = relativeMouseX / timelineSizeZoomed;
+            newNote.m_triggerTime = ( TrackPreview->GetLength() * percent ) / 1000.f;
+            trackData.m_noteData.push_back( newNote );
         }
-        newNote.m_editorLane = id;
-        newNote.m_noteName = PadUtils::GetPadId( id );
-        float percent = relativeMouseX / timelineSizeZoomed;
-        newNote.m_triggerTime = ( TrackPreview->GetLength() * percent ) / 1000.f;
-        trackData.m_noteData.push_back( newNote );
     }
 
     ImGui::Text( ( "Num Culled: " + std::to_string( numCulled ) ).c_str() );
@@ -369,11 +372,11 @@ void TrackEditor::DrawPadPreview()
                 ImVec2 padSize = { padPos.x + ( windowSize.x / (int)PadId::COUNT ) - xSpacing, padPos.y + 50 };
                 if( hitNotes[i] )
                 {
-                    drawList->AddRectFilled( padPos, padSize, (ImU32)GetNoteColor( (PadId)i ) );
+                    drawList->AddRectFilled( padPos, padSize, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ) );
                 }
                 else
                 {
-                    drawList->AddRect( padPos, padSize, (ImU32)GetNoteColor( (PadId)i ) );
+                    drawList->AddRect( padPos, padSize, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ) );
                 }
 
                 hitNotes[i] = false;
@@ -396,25 +399,4 @@ bool TrackEditor::OnEvent( const BaseEvent& evt )
         ScrollDelta += event.Scroll.y;
     }
     return false;
-}
-
-int TrackEditor::GetNoteColor( PadId inId )
-{
-    switch( inId )
-    {
-    case PadId::Bass:
-        return 0xFF4A9FE5;
-    case PadId::Snare:
-        return 0xFF334FCB;
-    case PadId::ClosedHiHat:
-    case PadId::OpenHiHat:
-        return 0xFF73EDF3;
-    case PadId::HighTom:
-        return 0xFFC38839;
-    case PadId::MidTom:
-    case PadId::Crash:
-    case PadId::FloorTom:
-        return 0xFFA0C263;
-    }
-    return 0xFFFFFFFF;
 }

@@ -1,0 +1,49 @@
+{
+    "Components": [
+        {
+            "Position": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Rotation": [
+                0.0,
+                -0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                0.5,
+                0.20000000298023224
+            ],
+            "Type": "Transform"
+        },
+        {
+            "Material": {
+                "DiffuseColor": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Textures": {
+                    "Diffuse": {
+                        "Path": "Assets/default.png",
+                        "RenderMode": "Opaque"
+                    }
+                },
+                "Tiling": [
+                    1.0,
+                    1.0
+                ],
+                "Type": "DiffuseMaterial"
+            },
+            "MeshType": "Model",
+            "Type": "Mesh"
+        },
+        {
+            "ModelPath": "Assets/cube.obj",
+            "Type": "Model"
+        }
+    ],
+    "Name": "BasicNotePrefab"
+}

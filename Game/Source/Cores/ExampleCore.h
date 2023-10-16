@@ -29,6 +29,7 @@ public:
 	const char* ConvertPadToLane( int16_t lane );
 
 	std::map<std::string, EntityHandle> m_lanes;
+	std::map<PadId, std::string> m_notePrefabs;
 	SharedPtr<AudioSource> m_currentTrack;
     void OnStart() override;
 

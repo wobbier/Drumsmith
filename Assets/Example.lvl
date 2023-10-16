@@ -115,8 +115,8 @@
                         0.0
                     ],
                     "Scale": [
-                        4.0,
-                        0.20000000298023224,
+                        1.0,
+                        1.0,
                         1.0
                     ],
                     "Type": "Transform"
@@ -157,8 +157,8 @@
             "Components": [
                 {
                     "Position": [
-                        0.0,
-                        0.0,
+                        2.0537426471710205,
+                        0.8188475966453552,
                         0.0
                     ],
                     "Rotation": [
@@ -255,7 +255,7 @@
                     "Position": [
                         0.0,
                         0.0,
-                        191.8000030517578
+                        199.9499969482422
                     ],
                     "Rotation": [
                         0.0,
@@ -278,13 +278,13 @@
                         ],
                         "Textures": {
                             "Diffuse": {
-                                "Path": "Engine/Assets/Textures/UVTest.png",
+                                "Path": "Assets/Textures/Track44.png",
                                 "RenderMode": "Opaque"
                             }
                         },
                         "Tiling": [
                             1.0,
-                            1.0
+                            27.152000427246094
                         ],
                         "Type": "DiffuseMaterial"
                     },
@@ -323,9 +323,9 @@
                         },
                         {
                             "ClearColor": [
-                                0.5010928511619568,
-                                0.7880434989929199,
-                                0.769329309463501
+                                0.0,
+                                0.0,
+                                0.0
                             ],
                             "ClearType": "Color",
                             "Far": 2000.0,
@@ -343,7 +343,7 @@
                         {
                             "Position": [
                                 0.0,
-                                0.32495224475860596,
+                                0.03700000047683716,
                                 0.0
                             ],
                             "Rotation": [
@@ -411,6 +411,56 @@
             ],
             "DestroyOnLoad": true,
             "Name": "TrackMover"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        5.0,
+                        0.20000000298023224,
+                        0.10000000149011612
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Material": {
+                        "DiffuseColor": [
+                            1.0,
+                            0.489130437374115,
+                            0.0
+                        ],
+                        "Textures": {
+                            "Diffuse": {
+                                "Path": "Assets/default.png",
+                                "RenderMode": "Opaque"
+                            }
+                        },
+                        "Tiling": [
+                            1.0,
+                            1.0
+                        ],
+                        "Type": "DiffuseMaterial"
+                    },
+                    "MeshType": "Model",
+                    "Type": "Mesh"
+                },
+                {
+                    "ModelPath": "Engine/Assets/cube.obj",
+                    "Type": "Model"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "BassNotePrefab"
         }
     ]
 }

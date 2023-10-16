@@ -12,6 +12,7 @@
 #include "Editor/PadBindings.h"
 #include "Mathf.h"
 #include "Cores/SceneCore.h"
+#include "Components/Graphics/Mesh.h"
 
 ExampleCore::ExampleCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
@@ -81,6 +82,9 @@ void ExampleCore::OnStart()
 {
     World& world = GetWorld();
     m_lanes.clear();
+
+    m_notePrefabs[PadId::Bass] = "Assets/Prefabs/Notes/BassNotePrefab.prefab";
+
 
     SceneCore* scene = static_cast<SceneCore*>( world.GetCore( SceneCore::GetTypeId() ) );
     // open_hh
@@ -174,8 +178,16 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
 
     for( auto& it : inTrackData.m_noteData )
     {
-        EntityHandle note = world.CreateEntity();
-        auto& transform = note->AddComponent<Transform>();
+        std::string prefabName = "Assets/Prefabs/Notes/BasicNotePrefab.prefab";
+        if( !m_notePrefabs[it.m_editorLane].empty() )
+        {
+            prefabName = m_notePrefabs[it.m_editorLane];
+        }
+        EntityHandle note = world.CreateFromPrefab( prefabName );
+
+        auto& transform = note->GetComponent<Transform>();
+        auto& meshComp = note->GetComponent<Mesh>();
+        meshComp.MeshMaterial->DiffuseColor = PadUtils::GetNoteColor( it.m_editorLane );
         transform.SetPosition( Vector3( 0, 0, it.m_triggerTime * inTrackData.m_noteSpeed ) );
         transform.SetName( it.m_noteName + std::to_string( (uint8_t)it.m_editorLane ) );
         if( m_lanes[it.m_noteName] )
@@ -186,7 +198,6 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
         {
             ME_ASSERT_MSG( false, "Unhandled note lane." );
         }
-        auto& modelComp = note->AddComponent<Model>( "Assets/cube.obj" );
         auto& noteComp = note->AddComponent<NoteTrigger>();
         noteComp.TriggerTime = it.m_triggerTime;
         noteComp.NoteName = it.m_noteName;

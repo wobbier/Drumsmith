@@ -49,7 +49,6 @@ public:
     float ScrollDelta = 0.f;
     bool IsWindowHovered = false;
 
-    int GetNoteColor( PadId inId );
     float GetNoteWidth( float timelineSizeScale );
     float CalculateZoom();
     float ScaleValue( float inValue );

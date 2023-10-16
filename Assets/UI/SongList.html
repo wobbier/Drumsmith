@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html>
 <style>
-    body{
-        margin:0;
+    body {
+        margin: 0;
         background-color: #0000001c;
         color: #ffffff;
     }
 
-    #myDivContainer{
+    #myDivContainer {
         height: 90%;
         width: 100%;
         position: absolute;
         overflow: scroll;
     }
 
-    .dynamic-div
-    {
+    .dynamic-div {
         margin-bottom: 10px;
     }
-    
-    .dynamic-div:hover
-    {
+
+    .dynamic-div:hover {
         background-color: rgba(97, 97, 97, 0.192);
     }
 
-    .dynamic-div .album-art
-    {
+    .dynamic-div .album-art {
         width: 150px;
         height: 150px;
         background-size: cover;
@@ -33,15 +30,13 @@
         float: left;
     }
 
-    .dynamic-div .album-title
-    {
+    .dynamic-div .album-title {
         float: left;
         width: max-content;
         padding-left: 10px;
     }
-    
-    .dynamic-div .album-stats
-    {
+
+    .dynamic-div .album-stats {
         float: left;
     }
 
@@ -50,18 +45,21 @@
         clear: both;
         display: table;
     }
-    </style>
 </style>
+</style>
+
 <head>
 </head>
 
 <body>
 
+    <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
     <!-- Parent div where dynamic divs will be added -->
     <div id="myDivContainer">
         <h3>Track List:</h3>
         <div class="dynamic-div" onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')">
-            <div class="album-art" style="background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');">
+            <div class="album-art"
+                style="background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');">
             </div>
             <div class="album-title">
                 <h1>Album Title</h1>
@@ -82,6 +80,16 @@
             const oldDivs = containerDiv.querySelectorAll('.dynamic-div');
             oldDivs.forEach(div => div.remove());
         }
+
+        function ToggleTrackListVisibility() {
+            var x = document.getElementById("myDivContainer");
+            if (x.style.display === "none" || x.style.display === "") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
         function AddTrack(track) {
             // Fetch the container div
             const containerDiv = document.getElementById('myDivContainer');

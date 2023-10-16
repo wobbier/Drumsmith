@@ -6,6 +6,7 @@
 #include <vector>
 #include "Engine/Input.h"
 #include "JSON.h"
+#include "Math/Vector3.h"
 
 enum PadId
 {
@@ -85,6 +86,45 @@ namespace PadUtils
         }
         return "";
     }
+
+    static int GetNoteColorABGR( PadId inId )
+    {
+        switch( inId )
+        {
+        case PadId::Bass:
+            return 0xFF4A9FE5;
+        case PadId::Snare:
+            return 0xFF334FCB;
+        case PadId::ClosedHiHat:
+        case PadId::OpenHiHat:
+            return 0xFF73EDF3;
+        case PadId::HighTom:
+            return 0xFFC38839;
+        case PadId::MidTom:
+        case PadId::Crash:
+        case PadId::FloorTom:
+            return 0xFFA0C263;
+        }
+        return 0xFFFFFFFF;
+    }
+
+    static Vector3 HexToVector4( uint32_t hexColor )
+    {
+        Vector3 vec;
+
+        //vec.a = ( hexColor >> 24 ) & 0xFF; // Extract alpha
+        vec.z = ( hexColor >> 16 ) & 0xFF; // Extract blue
+        vec.y = ( hexColor >> 8 ) & 0xFF;  // Extract green
+        vec.x = hexColor & 0xFF;         // Extract red
+
+        return vec / 255.f;
+    }
+
+    static Vector3 GetNoteColor( PadId inId )
+    {
+        return HexToVector4( GetNoteColorABGR( inId ) );
+    }
+
 }
 
 struct PadDefinition
