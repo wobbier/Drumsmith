@@ -13,6 +13,7 @@ struct NoteData
 
     PadId m_editorLane = PadId::Invalid;
     float   m_triggerTime = 0.f;
+    uint32_t   m_triggerTimeMS = 0u;
     // delete this
     std::string m_noteName;
 

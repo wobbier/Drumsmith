@@ -88,6 +88,7 @@ void TrackData::OnSave( json& outJson )
         noteEntry["EditorLane"] = note.m_editorLane;
         noteEntry["NoteName"] = note.m_noteName;
         noteEntry["TriggerTime"] = note.m_triggerTime;
+        noteEntry["TriggerTimeMS"] = (uint32_t)(note.m_triggerTime * 1000.f);
 
         noteData.push_back( noteEntry );
     }
@@ -121,9 +122,11 @@ void TrackData::LoadNoteData()
         for( json& note : noteData )
         {
             NoteData noteEntry;
-            noteEntry.m_editorLane = note["EditorLane"];
-            noteEntry.m_noteName = note["NoteName"];
+            noteEntry.m_editorLane = PadUtils::GetNewPadId( note["NoteName"] );
+            noteEntry.m_noteName = PadUtils::GetPadId( noteEntry.m_editorLane );
             noteEntry.m_triggerTime = note["TriggerTime"];
+            if(note.contains("TriggerTimeMS") )
+            noteEntry.m_triggerTimeMS = note["TriggerTimeMS"];
 
             m_noteData.push_back( noteEntry );
         }

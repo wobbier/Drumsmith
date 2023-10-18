@@ -71,8 +71,11 @@ void TrackEditor::Render()
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     ImGui::Begin( "Track Editor", &IsOpen, windowFlags );
     //ImGui::SetScrollX( ImGui::GetScrollX() );
+    ImVec2 windowCursorPos = ImGui::GetCursorPos();
 
     DrawMenuBar();
+
+    ImGui::SetCursorPosX( windowCursorPos.x );
     DrawTrackControls();
 
     TimelineSize = trackData.m_duration;
@@ -83,21 +86,26 @@ void TrackEditor::Render()
     float timelineHeight = ( kNoteHeight + kLaneSpacing ) * PadId::COUNT;
     WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
 
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
     float windowPos = ImGui::GetWindowPos().x;
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
 
     if( TrackPreview )
     {
-        float progress = (float)TrackPreview->GetPositionMs() / 1000.f;
+        float progress = (float)TrackPreview->GetPositionMs();
 
         ImGui::SetNextItemWidth( timelineSizeZoomed );
-        if( ImGui::SliderFloat( "##SeekSlider", &progress, 0, (float)TrackPreview->GetLength() / 1000.f, "%.3f" ) )
+        if( ImGui::SliderFloat( "##SeekSlider", &progress, 0, (float)TrackPreview->GetLength(), "%.3f" ) )
         {
-            TrackPreview->SetPositionMs( progress * 1000.f );
+            TrackPreview->SetPositionMs( progress );
         }
     }
     ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
@@ -106,11 +114,15 @@ void TrackEditor::Render()
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
     ImVec2 canvas_size = { timelineSizeZoomed, kNoteHeight };
 
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
     float relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
     float relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
+    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
     ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
 
 
@@ -230,8 +242,10 @@ void TrackEditor::DrawTrackControls()
 {
     Input& input = GetEngine().GetEditorInput();
     TrackData& trackData = GetCurrentTrackData();
+    ImVec2 windowCursorPos = ImGui::GetCursorPos();
     if( SelectedTrackLocation.Exists )
     {
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
         int i = 0;
         for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
@@ -242,6 +256,8 @@ void TrackEditor::DrawTrackControls()
             }
             ++i;
         }
+
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ( ImGui::Button( "Play" ) || input.WasKeyPressed( KeyCode::Space ) ) )
         {
             PlayAudioEvent evt;
@@ -256,6 +272,7 @@ void TrackEditor::DrawTrackControls()
         {
             if( TrackPreview->IsPaused() )
             {
+                ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
                 if( ImGui::Button( "Resume" ) || input.WasKeyPressed( KeyCode::Space ) )
                 {
                     TrackPreview->Resume();
@@ -263,11 +280,13 @@ void TrackEditor::DrawTrackControls()
             }
             else
             {
+                ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
                 if( ImGui::Button( "Pause" ) || input.WasKeyPressed( KeyCode::Space ) )
                 {
                     TrackPreview->Pause();
                 }
             }
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
             if( ImGui::Button( "Stop" ) )
             {
                 TrackPreview->Stop();
@@ -368,8 +387,10 @@ void TrackEditor::DrawPadPreview()
 
             for( int i = 0; i < (int)PadId::COUNT; ++i )
             {
-                ImVec2 padPos = { canvas_pos.x + ( ( windowSize.x / (int)PadId::COUNT ) * i ), canvas_pos.y };
-                ImVec2 padSize = { padPos.x + ( windowSize.x / (int)PadId::COUNT ) - xSpacing, padPos.y + 50 };
+                const float kPadHeight = 50.f;
+                float padWidth = ( windowSize.x / (int)PadId::COUNT );
+                ImVec2 padPos = { canvas_pos.x + ( padWidth * i ), canvas_pos.y };
+                ImVec2 padSize = { padPos.x + padWidth - xSpacing, padPos.y + kPadHeight };
                 if( hitNotes[i] )
                 {
                     drawList->AddRectFilled( padPos, padSize, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ) );
@@ -378,6 +399,10 @@ void TrackEditor::DrawPadPreview()
                 {
                     drawList->AddRect( padPos, padSize, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ) );
                 }
+                const char* text = PadUtils::GetPadName( (PadId)i );
+                ImVec2 textSize = ImGui::CalcTextSize( text );
+                ImVec2 textPos = { (padPos.x + padWidth / 2.f) - ( textSize.x / 2.f ), canvas_pos.y + (( kPadHeight / 2.f ) - (textSize.y / 2.f))};
+                drawList->AddText( textPos, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ), text );
 
                 hitNotes[i] = false;
             }
