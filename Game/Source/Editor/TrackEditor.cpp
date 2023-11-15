@@ -6,6 +6,7 @@
 #include "Events\AudioEvents.h"
 #include "Mathf.h"
 #include "Engine\Engine.h"
+#include "optick.h"
 
 
 TrackEditor::TrackEditor()
@@ -65,6 +66,22 @@ bool TrackEditor::CullVisual( float posx )
 
 void TrackEditor::Render()
 {
+    OPTICK_CATEGORY( "TrackEditor::Render", Optick::Category::UI );
+
+    if( SelectedTrackIndex < 0 )
+    {
+        int i = 0;
+        SelectedTrackIndex = 0;
+        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+        {
+            if( SelectedTrackLocation.Exists && Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
+            {
+                SelectedTrackIndex = i;
+            }
+            ++i;
+        }
+    }
+
     //ScrollDelta += GetEngine().GetEditorInput().GetMouseScrollDelta().x;
     auto& trackData = TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
 
@@ -85,21 +102,25 @@ void TrackEditor::Render()
 
     float timelineHeight = ( kNoteHeight + kLaneSpacing ) * PadId::COUNT;
     WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
-
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
-    float windowPos = ImGui::GetWindowPos().x;
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
+    float windowPos = 0.f;
+    {
+        OPTICK_CATEGORY( "Debug Text", Optick::Category::Debug );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
+        windowPos = ImGui::GetWindowPos().x;
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
+    }
 
     if( TrackPreview )
     {
+        OPTICK_CATEGORY( "TrackPreview", Optick::Category::Debug );
         float progress = (float)TrackPreview->GetPositionMs();
 
         ImGui::SetNextItemWidth( timelineSizeZoomed );
@@ -113,17 +134,24 @@ void TrackEditor::Render()
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
     ImVec2 canvas_size = { timelineSizeZoomed, kNoteHeight };
-
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
-    float relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
-    float relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
-    ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-    ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
+    {
+        OPTICK_CATEGORY( "SetCursorPosX", Optick::Category::Debug );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+    }
+    float relativeMouseX = 0.f;
+    float relativeMouseY = 0.f;
+    {
+        OPTICK_CATEGORY( "Debug Info", Optick::Category::Debug );
+        ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
+        float relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
+        float relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
+        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
+    }
 
 
     float numBars = 0;
@@ -132,6 +160,7 @@ void TrackEditor::Render()
     float numCulled = 0;
     // Track Lines
     {
+        OPTICK_CATEGORY( "Track Lines", Optick::Category::UI );
         float secondsPerMeasure = kBeatsPerMeasure * ( 60.f / trackData.m_bpm );
         float scaledSecondsPerMeasure = secondsPerMeasure * ( CalculateZoom() );
         for( float position = 0; position <= WindowContentSize; position += ScaleValue( secondsPerMeasure ) )
@@ -170,32 +199,35 @@ void TrackEditor::Render()
     }
 
     bool doubleClickHandled = false;
-    for( auto note = trackData.m_noteData.begin(); note != trackData.m_noteData.end(); note++ )
     {
-        float notePosX = canvas_pos.x + ( note->m_triggerTime * timelineSizeScale );
-        float notePosY = canvas_pos.y + ( note->m_editorLane * kNoteHeight ) + ( note->m_editorLane * kLaneSpacing );
-        ImVec2 timelinePos = { notePosX, notePosY };
+        OPTICK_CATEGORY( "Draw Note Data", Optick::Category::UI );
+        for( auto note = trackData.m_noteData.begin(); note != trackData.m_noteData.end(); note++ )
+        {
+            float notePosX = canvas_pos.x + ( note->m_triggerTime * timelineSizeScale );
+            float notePosY = canvas_pos.y + ( note->m_editorLane * kNoteHeight ) + ( note->m_editorLane * kLaneSpacing );
+            ImVec2 timelinePos = { notePosX, notePosY };
 
-        numNotes++;
-        if( CullVisual( timelinePos.x ) )
-        {
-            numCulled++;
-            //break;
-        }
-        else
-        {
-            ImVec2 rect( timelinePos.x + GetNoteWidth( timelineSizeScale ), timelinePos.y + canvas_size.y );
-            if( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+            numNotes++;
+            if( CullVisual( timelinePos.x ) )
             {
-                if( canvas_pos.x + relativeMouseX > timelinePos.x && canvas_pos.x + relativeMouseX < rect.x
-                    && canvas_pos.y + relativeMouseY > timelinePos.y && canvas_pos.y + relativeMouseY < rect.y )
-                {
-                    doubleClickHandled = true;
-                    trackData.m_noteData.erase( note );
-                    break;
-                }
+                numCulled++;
+                //break;
             }
-            drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, (ImU32)PadUtils::GetNoteColorABGR( note->m_editorLane ) );
+            else
+            {
+                ImVec2 rect( timelinePos.x + GetNoteWidth( timelineSizeScale ), timelinePos.y + canvas_size.y );
+                if( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+                {
+                    if( canvas_pos.x + relativeMouseX > timelinePos.x && canvas_pos.x + relativeMouseX < rect.x
+                        && canvas_pos.y + relativeMouseY > timelinePos.y && canvas_pos.y + relativeMouseY < rect.y )
+                    {
+                        doubleClickHandled = true;
+                        trackData.m_noteData.erase( note );
+                        break;
+                    }
+                }
+                drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, (ImU32)PadUtils::GetNoteColorABGR( note->m_editorLane ) );
+            }
         }
     }
 
@@ -240,6 +272,8 @@ void TrackEditor::Render()
 
 void TrackEditor::DrawTrackControls()
 {
+    OPTICK_CATEGORY( "Track Controls", Optick::Category::UI );
+
     Input& input = GetEngine().GetEditorInput();
     TrackData& trackData = GetCurrentTrackData();
     ImVec2 windowCursorPos = ImGui::GetCursorPos();
@@ -247,15 +281,6 @@ void TrackEditor::DrawTrackControls()
     {
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
-        int i = 0;
-        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
-        {
-            if( Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
-            {
-                SelectedTrackIndex = i;
-            }
-            ++i;
-        }
 
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ( ImGui::Button( "Play" ) || input.WasKeyPressed( KeyCode::Space ) ) )
@@ -306,6 +331,7 @@ TrackData& TrackEditor::GetCurrentTrackData()
 
 void TrackEditor::DrawMenuBar()
 {
+    OPTICK_CATEGORY( "Menu Bar", Optick::Category::UI );
     TrackData& trackData = GetCurrentTrackData();
     if( ImGui::BeginMenuBar() )
     {

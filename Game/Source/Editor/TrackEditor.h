@@ -56,7 +56,7 @@ public:
     float WindowContentSize = 1.f;
 
     Path SelectedTrackLocation;
-    int SelectedTrackIndex = 0;
+    int SelectedTrackIndex = -1;
 
     SharedPtr<AudioSource> TrackPreview = nullptr;
 private:

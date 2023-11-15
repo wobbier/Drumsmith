@@ -4,6 +4,7 @@
 #include <memory>
 #include "File.h"
 #include "UI/Colors.h"
+#include "optick.h"
 
 #if USING(ME_EDITOR)
 
@@ -68,6 +69,7 @@ void PadBindingWidget::Update()
 
 void PadBindingWidget::Render()
 {
+    OPTICK_CATEGORY( "PadBindingWidget", Optick::Category::UI );
     ImGui::Begin( "Pad Bindings", &IsOpen );
     auto& mappings = PadMappingStorage::GetInstance();
 

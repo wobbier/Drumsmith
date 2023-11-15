@@ -81,8 +81,8 @@
             "Components": [
                 {
                     "Position": [
+                        -4.0,
                         2.0,
-                        0.0,
                         0.0
                     ],
                     "Rotation": [
@@ -157,8 +157,8 @@
             "Components": [
                 {
                     "Position": [
-                        2.0537426471710205,
-                        0.8188475966453552,
+                        2.5,
+                        1.0,
                         0.0
                     ],
                     "Rotation": [
@@ -229,7 +229,7 @@
             "Components": [
                 {
                     "Position": [
-                        0.0,
+                        2.0,
                         0.0,
                         0.0
                     ],
@@ -461,6 +461,30 @@
             ],
             "DestroyOnLoad": true,
             "Name": "BassNotePrefab"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        3.0,
+                        1.25,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "crash2"
         }
     ]
 }

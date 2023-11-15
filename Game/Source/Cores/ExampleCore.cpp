@@ -109,6 +109,11 @@ void ExampleCore::OnStart()
         Transform* lane = scene->GetRootTransform()->GetChildByName( "Crash1" );
         m_lanes["crash1"] = lane->Parent;
     }
+    // Crash2
+    {
+        Transform* lane = scene->GetRootTransform()->GetChildByName( "crash2" );
+        m_lanes["crash2"] = lane->Parent;
+    }
 
     // Kick
     {

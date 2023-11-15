@@ -42,35 +42,6 @@ enum PadId
 
 namespace PadUtils
 {
-    static int ConvertOldToNew( OldPadId inId )
-    {
-        switch( inId )
-        {
-        case Bass:
-            return (int)PadId::Bass;
-        case Snare:
-            return (int)PadId::Snare;
-        case HighTom:
-            return (int)PadId::HighTom;
-        case MidTom:
-            return (int)PadId::MidTom;
-        case FloorTom:
-            return (int)PadId::FloorTom;
-        case OpenHiHat:
-            return (int)PadId::OpenHiHat;
-        case ClosedHiHat:
-            return (int)PadId::ClosedHiHat;
-        case Crash1:
-            return (int)PadId::Crash1;
-        case Ride:
-            return (int)PadId::Ride;
-        case Invalid:
-        case COUNT:
-        default:
-            ME_ASSERT_MSG( false, "WTF? You didn't cover em all.");
-            break;
-        }
-    }
     static const char* GetPadName( int16_t inPadId )
     {
         switch( inPadId )
@@ -95,12 +66,15 @@ namespace PadUtils
             return "Crash";
         case Ride:
             return "Ride";
+        case Crash2:
+            return "Crash2";
         case COUNT:
         default:
             break;
         }
         return "";
     }
+
 
     static const char* GetPadId( int16_t inPadId )
     {
@@ -126,12 +100,17 @@ namespace PadUtils
             return "crash1";
         case Ride:
             return "ride1";
+        case Crash2:
+            return "crash2";
         case COUNT:
         default:
             break;
         }
+        ME_ASSERT_MSG(false, "Dumbass note name" );
         return "";
     }
+
+
     static PadId GetNewPadId( std::string inPadId )
     {
         if( inPadId == "bass1" )
@@ -150,36 +129,14 @@ namespace PadUtils
             return PadId::ClosedHiHat;
         if( inPadId == "crash1" )
             return PadId::Crash1;
+        if( inPadId == "crash2" )
+            return PadId::Crash2;
         if( inPadId == "ride1" )
             return PadId::Ride;
-        //switch( inPadId )
-        //{
-        //case Invalid:
-        //    break;
-        //case "bass1":
-        //    return PadId::Bass;
-        ////case Snare:
-        ////    return "snare1";
-        ////case HighTom:
-        ////    return "tom1";
-        ////case MidTom:
-        ////    return "tom2";
-        ////case FloorTom:
-        ////    return "tom3";
-        ////case OpenHiHat:
-        ////    return "open_hh";
-        ////case ClosedHiHat:
-        ////    return "closed_hh";
-        ////case Crash1:
-        ////    return "crash1";
-        ////case Ride:
-        ////    return "ride1";
-        //case COUNT:
-        //default:
-        //    break;
-        //}
+        ME_ASSERT_MSG( false, "Unhandles note name" );
         return PadId::COUNT;
     }
+
 
     static int GetNoteColorABGR( PadId inId )
     {
@@ -202,6 +159,7 @@ namespace PadUtils
         return 0xFFFFFFFF;
     }
 
+
     static Vector3 HexToVector4( uint32_t hexColor )
     {
         Vector3 vec;
@@ -213,6 +171,7 @@ namespace PadUtils
 
         return vec / 255.f;
     }
+
 
     static Vector3 GetNoteColor( PadId inId )
     {
