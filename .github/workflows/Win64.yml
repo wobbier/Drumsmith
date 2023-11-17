@@ -2,9 +2,9 @@ name: Windows
 
 on:
   push:
-    branches: [master, motivation]
+    branches: [main]
   pull_request:
-    branches: [master, motivation]
+    branches: [main]
 
   workflow_dispatch:
 
