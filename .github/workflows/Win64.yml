@@ -28,7 +28,12 @@ jobs:
     steps:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
-
+        
+      - name: Check out repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          
       - name: Install Mono
         shell: cmd
         run: choco install mono
@@ -37,19 +42,21 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "5.0.100"
+        
+      - name: Generate third party solutions
+        shell: cmd
+        run: |
+          cd Engine/ThirdParty
+          call GenerateSolutions.bat
+          cd ../../
+          
+      - name: Generate a new project
+        shell: cmd
+        run: dir && cd Project && dir && call GenerateSolution.bat && cd .. && dir
 
       - name: Copy Assets
         shell: cmd
         run: call CopyAssets.bat
-        
-      - name: Generate a new project
-        shell: cmd
-        run: dir
-            - cd Project
-            - dir
-            - call GenerateSolution.bat
-            - cd ..
-            - dir
 
       - name: Compile Tools
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
