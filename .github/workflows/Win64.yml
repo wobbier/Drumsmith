@@ -29,19 +29,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - name: change dirs
-        run: |
-          ls
           
-      - name: Generate a new project
+      - name: Generate ThirdParty Modules
         shell: cmd
         run: |
           cd Engine/ThirdParty
           call GenerateSolutions.bat
           cd ../../
 
-      - name: Generate a new project
+      - name: Generate Project Files
         shell: cmd
         run: cd Project && call GenerateSolution.bat && cd ../
 
