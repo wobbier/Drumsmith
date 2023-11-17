@@ -38,9 +38,18 @@ jobs:
         with:
           dotnet-version: "5.0.100"
 
+      - name: Copy Assets
+        shell: cmd
+        run: call CopyAssets.bat
+        
       - name: Generate a new project
         shell: cmd
-        run: cd Project && call GenerateSolution.bat && cd ..
+        run: dir
+            - cd Project
+            - dir
+            - call GenerateSolution.bat
+            - cd ..
+            - dir
 
       - name: Compile Tools
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
