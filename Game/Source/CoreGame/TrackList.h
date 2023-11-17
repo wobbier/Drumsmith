@@ -40,6 +40,7 @@ public:
     std::string m_artistName;
     std::string m_albumArtPath;
     std::string m_trackSourcePath;
+    std::string m_trackFileName;
     float m_noteSpeed = 1.f;
     float m_duration = 1.f;
     int m_bpm = 69.f;

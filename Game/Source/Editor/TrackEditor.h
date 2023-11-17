@@ -66,7 +66,7 @@ private:
     std::size_t m_closestNoteIndex = 0;
     float m_cachedTimestamp = 0.f;
     std::vector<bool> hitNotes;
-
+    void ResetTrack();
 };
 
 ME_REGISTER_EDITOR_WIDGET( TrackEditor );

@@ -64,22 +64,27 @@ bool TrackEditor::CullVisual( float posx )
     return false;
 }
 
+void TrackEditor::ResetTrack()
+{
+    int i = 0;
+    SelectedTrackIndex = 0;
+    for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+    {
+        if( SelectedTrackLocation.Exists && Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
+        {
+            SelectedTrackIndex = i;
+        }
+        ++i;
+    }
+}
+
 void TrackEditor::Render()
 {
     OPTICK_CATEGORY( "TrackEditor::Render", Optick::Category::UI );
 
     if( SelectedTrackIndex < 0 )
     {
-        int i = 0;
-        SelectedTrackIndex = 0;
-        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
-        {
-            if( SelectedTrackLocation.Exists && Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
-            {
-                SelectedTrackIndex = i;
-            }
-            ++i;
-        }
+        ResetTrack();
     }
 
     //ScrollDelta += GetEngine().GetEditorInput().GetMouseScrollDelta().x;
@@ -145,8 +150,8 @@ void TrackEditor::Render()
         ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
-        float relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
-        float relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
+        relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
+        relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
@@ -275,10 +280,10 @@ void TrackEditor::DrawTrackControls()
     OPTICK_CATEGORY( "Track Controls", Optick::Category::UI );
 
     Input& input = GetEngine().GetEditorInput();
-    TrackData& trackData = GetCurrentTrackData();
     ImVec2 windowCursorPos = ImGui::GetCursorPos();
     if( SelectedTrackLocation.Exists )
     {
+        TrackData& trackData = GetCurrentTrackData();
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
 
@@ -286,7 +291,7 @@ void TrackEditor::DrawTrackControls()
         if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ( ImGui::Button( "Play" ) || input.WasKeyPressed( KeyCode::Space ) ) )
         {
             PlayAudioEvent evt;
-            evt.SourceName = std::string( SelectedTrackLocation.GetDirectoryString() + std::string( "Track.mp3" ) );
+            evt.SourceName = std::string( trackData.m_trackSourcePath );
             evt.Callback = [this]( SharedPtr<AudioSource> inSource )
             {
                 TrackPreview = inSource;
@@ -320,6 +325,7 @@ void TrackEditor::DrawTrackControls()
     }
     else
     {
+        TrackData& trackData = GetCurrentTrackData();
         SelectedTrackLocation = Path( Path( trackData.m_trackSourcePath ).GetDirectoryString() + "NoteData.txt" );
     }
 }
@@ -347,6 +353,7 @@ void TrackEditor::DrawMenuBar()
                     {
                         YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath );
                     }
+                    ResetTrack();
                 };
                 RequestAssetSelectionEvent evt( callback, AssetType::Audio );
                 evt.Fire();

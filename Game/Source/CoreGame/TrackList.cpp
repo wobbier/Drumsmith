@@ -105,7 +105,16 @@ void TrackData::OnLoadConfig( const json& outJson )
         m_artistName = outJson["SongArtist"];
     }
     m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "Album.png";
-    m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "Track.mp3";
+    if ( outJson.contains("TrackFileName") )
+    {
+        m_trackFileName = outJson["TrackFileName"];
+        m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + std::string(outJson["TrackFileName"]);
+    }
+    else
+    {
+        m_trackFileName = "Track.mp3";
+        m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + m_trackFileName;
+    }
     m_noteSpeed = outJson["NoteSpeed"];
     m_duration = outJson["Duration"];
     m_bpm = outJson["BPM"];
