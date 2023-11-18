@@ -8,6 +8,7 @@
 #include "Engine\Engine.h"
 #include "optick.h"
 
+#if USING(ME_EDITOR)
 
 TrackEditor::TrackEditor()
     : HavanaWidget( "Track Editor" )
@@ -458,3 +459,5 @@ bool TrackEditor::OnEvent( const BaseEvent& evt )
     }
     return false;
 }
+
+#endif

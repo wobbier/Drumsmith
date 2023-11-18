@@ -6,7 +6,9 @@ class NoteTrigger
 {
 public:
     NoteTrigger();
+#if USING(ME_EDITOR)
     void OnEditorInspect() override;
+#endif
 
     float TriggerTime = 0.f;
     std::string NoteName;
