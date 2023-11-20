@@ -7,6 +7,7 @@
 #include "Mathf.h"
 #include "Engine\Engine.h"
 #include "optick.h"
+#include "misc/cpp/imgui_stdlib.h"
 
 #if USING(ME_EDITOR)
 
@@ -106,22 +107,28 @@ void TrackEditor::Render()
     timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
     timelineSizeZoomed = TimelineSize * timelineSizeScale;
 
-    float timelineHeight = ( kNoteHeight + kLaneSpacing ) * PadId::COUNT;
+    float timelineHeight = ( m_noteHeight + kLaneSpacing ) * PadId::COUNT;
     WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
     float windowPos = 0.f;
     {
         OPTICK_CATEGORY( "Debug Text", Optick::Category::Debug );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
+        if( m_showDebugInfo )
+        {
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
+        }
         windowPos = ImGui::GetWindowPos().x;
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
+        if( m_showDebugInfo )
+        {
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
+        }
     }
 
     if( TrackPreview )
@@ -139,7 +146,7 @@ void TrackEditor::Render()
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-    ImVec2 canvas_size = { timelineSizeZoomed, kNoteHeight };
+    ImVec2 canvas_size = { timelineSizeZoomed, m_noteHeight };
     {
         OPTICK_CATEGORY( "SetCursorPosX", Optick::Category::Debug );
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
@@ -147,16 +154,22 @@ void TrackEditor::Render()
     float relativeMouseX = 0.f;
     float relativeMouseY = 0.f;
     {
-        OPTICK_CATEGORY( "Debug Info", Optick::Category::Debug );
-        ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
+        if( m_showDebugInfo )
+        {
+            OPTICK_CATEGORY( "Debug Info", Optick::Category::Debug );
+            ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
+        }
         relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
         relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
+        if( m_showDebugInfo )
+        {
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
+            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
+        }
     }
 
 
@@ -210,7 +223,7 @@ void TrackEditor::Render()
         for( auto note = trackData.m_noteData.begin(); note != trackData.m_noteData.end(); note++ )
         {
             float notePosX = canvas_pos.x + ( note->m_triggerTime * timelineSizeScale );
-            float notePosY = canvas_pos.y + ( note->m_editorLane * kNoteHeight ) + ( note->m_editorLane * kLaneSpacing );
+            float notePosY = canvas_pos.y + ( note->m_editorLane * m_noteHeight ) + ( note->m_editorLane * kLaneSpacing );
             ImVec2 timelinePos = { notePosX, notePosY };
 
             numNotes++;
@@ -245,7 +258,7 @@ void TrackEditor::Render()
             PadId id = Bass;
             for( int i = (int)id; i < PadId::COUNT; ++i )
             {
-                if( relativeMouseY > ( i * kNoteHeight ) + ( i * kLaneSpacing ) )
+                if( relativeMouseY > ( i * m_noteHeight ) + ( i * kLaneSpacing ) )
                 {
                     id = (PadId)i;
                 }
@@ -258,7 +271,10 @@ void TrackEditor::Render()
         }
     }
 
-    ImGui::Text( ( "Num Culled: " + std::to_string( numCulled ) ).c_str() );
+    if( m_showDebugInfo )
+    {
+        ImGui::Text( ( "Num Culled: " + std::to_string( numCulled ) ).c_str() );
+    }
 
     if( TrackPreview )
     {
@@ -287,6 +303,18 @@ void TrackEditor::DrawTrackControls()
         TrackData& trackData = GetCurrentTrackData();
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
+        ImGui::InputText( "Track Name", &trackData.m_trackName );
+        ImGui::InputText( "Artist", &trackData.m_artistName );
+        ImGui::SliderFloat( "Note Height", &m_noteHeight, 10.f, 50.f, "%.1f" );
+        //if( ImGui::Button( !SelectedTrackLocation.Exists ? "Select Asset" : SelectedTrackLocation.GetLocalPath().data(), { 200.f, 10.f } ) )
+        //{
+        //    RequestAssetSelectionEvent evt( [this]( Path selectedAsset ) {
+        //        
+        //        //ClearData();
+        //        //FilePath = selectedAsset;
+        //        }, AssetType::Audio );
+        //    evt.Fire();
+        //}
 
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
         if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ( ImGui::Button( "Play" ) || input.WasKeyPressed( KeyCode::Space ) ) )
@@ -317,7 +345,8 @@ void TrackEditor::DrawTrackControls()
                     TrackPreview->Pause();
                 }
             }
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+            ImGui::SameLine(  );
+            //ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
             if( ImGui::Button( "Stop" ) )
             {
                 TrackPreview->Stop();
@@ -368,13 +397,14 @@ void TrackEditor::DrawMenuBar()
             ImGui::EndMenu();
         }
         ImGui::Text( std::to_string( CalculateZoom() ).c_str() );
+        ImGui::Checkbox( "Show Debug Info", &m_showDebugInfo );
         ImGui::EndMenuBar();
     }
 }
 
 void TrackEditor::DrawPadPreview()
 {
-    if( ImGui::CollapsingHeader( "Pad Preview" ) )
+    if( ImGui::CollapsingHeader( "Pad Preview", &m_showPadPreview ) )
     {
         auto& trackData = GetCurrentTrackData();
         ImVec2 outerWindowSize = ImGui::GetWindowSize();
@@ -384,7 +414,7 @@ void TrackEditor::DrawPadPreview()
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-        ImVec2 canvas_size = { timelineSizeZoomed, kNoteHeight };
+        ImVec2 canvas_size = { timelineSizeZoomed, m_noteHeight };
         ImVec2 windowSize = ImGui::GetWindowSize();
 
         if( TrackPreview )

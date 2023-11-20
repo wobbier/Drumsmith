@@ -17,7 +17,6 @@ class TrackEditor
     , public EventReceiver
 {
 public:
-    static constexpr const float kNoteHeight = 10.f;
     static constexpr const float kLaneSpacing = 5.f;
     static constexpr float kDefaultMaxKeyframeWidth = 1.0f / 16.0f;
     static constexpr float kMaxKeyframeWidth = 20.0f;
@@ -67,6 +66,11 @@ private:
     float m_cachedTimestamp = 0.f;
     std::vector<bool> hitNotes;
     void ResetTrack();
+    bool m_showDebugInfo = false;
+    float m_noteHeight = 20.f;
+    float m_timeSignature = 4.f;
+    float m_timeSignature2 = 4.f;
+    bool m_showPadPreview = true;
 };
 
 ME_REGISTER_EDITOR_WIDGET( TrackEditor );

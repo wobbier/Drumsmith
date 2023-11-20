@@ -80,6 +80,7 @@ void TrackData::OnSave( json& outJson )
     outJson["NoteSpeed"] = m_noteSpeed;
     outJson["Duration"] = m_duration;
     outJson["BPM"] = m_bpm;
+    outJson["TrackFileName"] = m_trackFileName;
 
     json& noteData = outJson["Notes"];
     for( NoteData& note : m_noteData )
