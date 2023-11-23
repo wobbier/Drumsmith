@@ -28,6 +28,7 @@ void GameApp::OnInitialize()
 {
 	GetEngine().LoadScene("Assets/Example.lvl");
 #if !USING( ME_EDITOR )
+	// I don't need this, it's an fmod issue not being set up
 	GetEngine().GetWorld().lock()->Start();
 #endif
 }

@@ -165,9 +165,9 @@ namespace PadUtils
         Vector3 vec;
 
         //vec.a = ( hexColor >> 24 ) & 0xFF; // Extract alpha
-        vec.z = ( hexColor >> 16 ) & 0xFF; // Extract blue
-        vec.y = ( hexColor >> 8 ) & 0xFF;  // Extract green
-        vec.x = hexColor & 0xFF;         // Extract red
+        vec.z = static_cast<float>( ( hexColor >> 16 ) & 0xFF ); // Extract blue
+        vec.y = static_cast<float>( ( hexColor >> 8 ) & 0xFF );  // Extract green
+        vec.x = static_cast<float>( hexColor & 0xFF );           // Extract red
 
         return vec / 255.f;
     }
