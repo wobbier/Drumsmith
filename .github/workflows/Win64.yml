@@ -61,7 +61,7 @@ jobs:
       - name: Compile Tools
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
         shell: cmd
-        run: msbuild Drumsmith.sln /property:Configuration="Editor_Release"
+        run: msbuild Drumsmith.sln /property:Configuration="Editor_Debug"
 
       - name: Compile Project
         shell: cmd
@@ -75,8 +75,8 @@ jobs:
         shell: cmd
         continue-on-error: true
         run: |
-          robocopy ".build/Release/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
-          robocopy "Engine/Tools" ".build\\Editor_Release\\Engine\\Tools" *.* /w:0 /r:1 /v /E
+          robocopy ".build/Release/Assets" ".build\\Editor_Debug\\Assets" *.* /w:0 /r:1 /v /E
+          robocopy "Engine/Tools" ".build\\Editor_Debug\\Engine\\Tools" *.* /w:0 /r:1 /v /E
 
       - name: Archive Editor
         if: ${{ matrix.buildconfig == 'Editor' }}
@@ -98,16 +98,24 @@ jobs:
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
         shell: cmd
         run: |
-          cd ".build/Editor_Release/"
+          cd ".build/Editor_Debug/"
           call Havana.exe -CompileAssets
           cd ../../
+
+      - name: Archive ALL Assets
+        if: ${{ matrix.buildconfig == 'Game_Win64' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Drumsmith v${{github.run_number}} - Game_Win64_${{matrix.configuration}} Raw Assets
+          path: |
+            .build/Editor_Debug/Assets
 
       - name: Copy Cooked Assets
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
         shell: cmd
         continue-on-error: true
         run: |
-          robocopy ".build/Editor_Release/Assets" ".build\\Game_Win64_${{matrix.configuration}}\\Assets" *.* /w:0 /r:1 /v /E
+          robocopy ".build/Editor_Debug/Assets" ".build\\Game_Win64_${{matrix.configuration}}\\Assets" *.* /w:0 /r:1 /v /E
 
       - name: Archive Build
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
@@ -117,24 +125,13 @@ jobs:
           path: |
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/AppX
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.lib
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.pdb
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.exp
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.log
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.png
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.jpg
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.frag
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.vert
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.var
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.sh
 
       - name: Copy Tools Assets
         shell: cmd
         continue-on-error: true
         run: |
-          robocopy "Engine/Tools/HUB/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
-          robocopy "Engine/Tools/HUB" ".build\\Editor_Release" *.exe /w:0 /r:1 /v /E
+          robocopy "Engine/Tools/HUB/Assets" ".build\\Editor_Debug\\Assets" *.* /w:0 /r:1 /v /E
+          robocopy "Engine/Tools/HUB" ".build\\Editor_Debug" *.exe /w:0 /r:1 /v /E
 
       - name: Archive Tools
         if: ${{ matrix.buildconfig == 'Editor' }}
