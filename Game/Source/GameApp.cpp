@@ -27,6 +27,9 @@ void GameApp::OnEnd()
 void GameApp::OnInitialize()
 {
 	GetEngine().LoadScene("Assets/Example.lvl");
+#if !USING( ME_EDITOR )
+	GetEngine().GetWorld().lock()->Start();
+#endif
 }
 
 void GameApp::PostRender()

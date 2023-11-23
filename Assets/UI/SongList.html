@@ -87,7 +87,7 @@
 
         function ToggleTrackListVisibility() {
             var x = document.getElementById("myDivContainer");
-            if (x.style.display === "none" || x.style.display === "") {
+            if (x.style.display === "none") { //  || x.style.display === ""
                 x.style.display = "block";
             } else {
                 x.style.display = "none";
@@ -101,7 +101,7 @@
             dynamicDiv.classList.add('dynamic-div');
 
             dynamicDiv.innerHTML = `
-            <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}')" onmousehover="PlaySound('${track.TrackSource}')">
+            <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmousehover="PlaySound('${track.TrackSource}')">
             <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
             </div>
             <div class="album-title">
