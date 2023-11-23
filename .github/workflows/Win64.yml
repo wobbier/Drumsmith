@@ -75,8 +75,8 @@ jobs:
         shell: cmd
         continue-on-error: true
         run: |
-          robocopy ".build/Release/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
-          robocopy "Engine/Tools" ".build\\Editor_Release\\Engine\\Tools" *.* /w:0 /r:1 /v /E
+          robocopy ".build/Release/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E & exit 0
+          robocopy "Engine/Tools" ".build\\Editor_Release\\Engine\\Tools" *.* /w:0 /r:1 /v /E & exit 0
 
       - name: Archive Editor
         if: ${{ matrix.buildconfig == 'Editor' }}
@@ -107,7 +107,7 @@ jobs:
         shell: cmd
         continue-on-error: true
         run: |
-          robocopy ".build/Editor_Release/Assets" ".build\\Game_Win64_${{matrix.configuration}}\\Assets" *.* /w:0 /r:1 /v /E
+          robocopy ".build/Editor_Release/Assets" ".build\\Game_Win64_${{matrix.configuration}}\\Assets" *.* /w:0 /r:1 /v /E & exit 0
 
       - name: Archive Build
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
@@ -133,8 +133,8 @@ jobs:
         shell: cmd
         continue-on-error: true
         run: |
-          robocopy "Engine/Tools/HUB/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
-          robocopy "Engine/Tools/HUB" ".build\\Editor_Release" *.exe /w:0 /r:1 /v /E
+          robocopy "Engine/Tools/HUB/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E & exit 0
+          robocopy "Engine/Tools/HUB" ".build\\Editor_Release" *.exe /w:0 /r:1 /v /E & exit 0
 
       - name: Archive Tools
         if: ${{ matrix.buildconfig == 'Editor' }}
