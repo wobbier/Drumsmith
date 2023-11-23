@@ -76,7 +76,7 @@ namespace PadUtils
     }
 
 
-    static const char* GetPadName( PadId inPadId )
+    inline static const char* GetPadName( PadId inPadId )
     {
         return GetPadName( static_cast<int16_t>( inPadId ) );
     }
@@ -117,7 +117,7 @@ namespace PadUtils
     }
 
 
-    static const char* GetPadId( PadId inPadId )
+    inline static const char* GetPadId( PadId inPadId )
     {
         return GetPadId( static_cast<int16_t>( inPadId ) );
     }
@@ -185,7 +185,7 @@ namespace PadUtils
     }
 
 
-    static Vector3 GetNoteColor( PadId inId )
+    inline static Vector3 GetNoteColor( PadId inId )
     {
         return HexToVector4( GetNoteColorABGR( inId ) );
     }
