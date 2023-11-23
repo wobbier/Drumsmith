@@ -45,6 +45,7 @@ void ExampleMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultral
         trackData["ArtistName"] = it.m_artistName;
         trackData["AlbumArt"] = songImage;
         trackData["TrackSource"] = it.m_trackSourcePath;
+        trackData["NoteCount"] = it.m_noteData.size();
         ExecuteScript( "AddTrack(" + trackData.dump() + "); " );
     }
 }

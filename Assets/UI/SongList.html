@@ -40,6 +40,9 @@
         float: left;
     }
 
+    .dynamic-div .note-count {
+        float: right;
+    }
     .clearfix::after {
         content: "";
         clear: both;
@@ -65,6 +68,7 @@
                 <h1>Album Title</h1>
                 <h2>Album Artist</h2>
             </div>
+            <div class="note-count">23</div>
             <div class="clearfix"></div>
         </div>
     </div>
@@ -104,6 +108,7 @@
                 <h1>${track.TrackName}</h1>
                 <h2>${track.ArtistName}</h2>
             </div>
+            <div class="note-count">Note Count: ${track.NoteCount}</div>
             <div class="clearfix"></div>
         </div>`;
 

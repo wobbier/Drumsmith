@@ -108,6 +108,7 @@ void TrackEditor::Render()
     timelineSizeZoomed = TimelineSize * timelineSizeScale;
 
     float timelineHeight = ( m_noteHeight + kLaneSpacing ) * PadId::COUNT;
+    float scrollOffsetX = ImGui::GetScrollX();
     WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
     float windowPos = 0.f;
     {
@@ -143,7 +144,7 @@ void TrackEditor::Render()
         }
     }
     ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
-
+    bool isTimelineHovered = ImGui::IsWindowHovered();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
     ImVec2 canvas_size = { timelineSizeZoomed, m_noteHeight };
@@ -217,6 +218,30 @@ void TrackEditor::Render()
         }
     }
 
+    // Hover row selection color and labels
+    if( relativeMouseY > 0 && relativeMouseY < timelineHeight )
+    {
+        PadId id = Bass;
+        for( int i = (int)id; i < PadId::COUNT; ++i )
+        {
+            if( relativeMouseY > ( i * m_noteHeight ) + ( i * kLaneSpacing ) )
+            {
+                id = (PadId)i;
+            }
+
+            ImGui::SetCursorPosY( ( (int)i * ( m_noteHeight + kLaneSpacing ) ) + kLaneSpacing );
+            ImGui::SetCursorPosX( scrollOffsetX + kLaneSpacing );
+            ImGui::Text( PadUtils::GetPadName( (PadId)i ) );
+        }
+        float notePosX = canvas_pos.x;
+        float notePosY = canvas_pos.y + ((int)id * (m_noteHeight + kLaneSpacing));
+        ImVec2 timelinePos = { notePosX, notePosY };
+        ImVec2 rect( timelinePos.x + timelineSizeZoomed, notePosY + m_noteHeight );
+
+        drawList->AddRectFilled( timelinePos, rect, (ImU32)0x11FFFFFF ); // AGBR
+    }
+
+    // Adding Notes
     bool doubleClickHandled = false;
     {
         OPTICK_CATEGORY( "Draw Note Data", Optick::Category::UI );
@@ -250,6 +275,7 @@ void TrackEditor::Render()
         }
     }
 
+    // Removing Notes
     if( !doubleClickHandled && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) && TrackPreview )
     {
         if( relativeMouseY > 0 && relativeMouseY < timelineHeight )
@@ -288,7 +314,7 @@ void TrackEditor::Render()
 
     DrawPadPreview();
 
-    IsWindowHovered = true;// ImGui::IsWindowHovered();
+    IsWindowHovered = ImGui::IsWindowHovered() || isTimelineHovered;
     ImGui::End();
 }
 
@@ -485,8 +511,8 @@ bool TrackEditor::OnEvent( const BaseEvent& evt )
     if( IsWindowHovered && evt.GetEventId() == MouseScrollEvent::GetEventId() )
     {
         const MouseScrollEvent& event = static_cast<const MouseScrollEvent&>( evt );
-        ScrollDelta += event.Scroll.y;
-    }
+            ScrollDelta += event.Scroll.y;
+        }
     return false;
 }
 
