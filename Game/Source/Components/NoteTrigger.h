@@ -1,5 +1,6 @@
 #pragma once
 #include "ECS\Component.h"
+#include "Editor\PadBindings.h"
 
 class NoteTrigger
     : public Component<NoteTrigger>
@@ -12,7 +13,8 @@ public:
 
     float TriggerTime = 0.f;
     std::string NoteName;
-    std::string EditorLane;
+    PadId EditorLane;
+    std::string EditorLaneName;
 
 protected:
     void OnSerialize( json& outJson ) override;

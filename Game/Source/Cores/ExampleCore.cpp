@@ -59,8 +59,7 @@ void ExampleCore::Update( const UpdateContext& context )
             // drunk me fucked this up
             for( auto& pad : storage.mappedPads )
             {
-                std::string con = ConvertPadToLane( pad.padId );
-                if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && con == note.EditorLane )
+                if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && pad.padId == note.EditorLane )
                 {
                     it->MarkForDelete();
                 }
@@ -207,6 +206,7 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
         noteComp.TriggerTime = it.m_triggerTime;
         noteComp.NoteName = it.m_noteName;
         noteComp.EditorLane = it.m_editorLane;
+        noteComp.EditorLaneName = PadUtils::GetPadName( it.m_editorLane );
     }
 
     PlayAudioEvent evt( inTrackData.m_trackSourcePath );

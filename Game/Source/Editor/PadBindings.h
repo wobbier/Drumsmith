@@ -76,6 +76,12 @@ namespace PadUtils
     }
 
 
+    static const char* GetPadName( PadId inPadId )
+    {
+        return GetPadName( static_cast<int16_t>( inPadId ) );
+    }
+
+
     static const char* GetPadId( int16_t inPadId )
     {
         switch( inPadId )
@@ -108,6 +114,12 @@ namespace PadUtils
         }
         ME_ASSERT_MSG(false, "Dumbass note name" );
         return "";
+    }
+
+
+    static const char* GetPadId( PadId inPadId )
+    {
+        return GetPadId( static_cast<int16_t>( inPadId ) );
     }
 
 
