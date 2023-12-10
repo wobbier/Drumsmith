@@ -1,0 +1,49 @@
+{
+    "Components": [
+        {
+            "Position": [
+                -0.01562570035457611,
+                0.8473235368728638,
+                0.0
+            ],
+            "Rotation": [
+                0.0,
+                -0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Type": "Transform"
+        },
+        {
+            "Material": {
+                "DiffuseColor": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Textures": {
+                    "Diffuse": {
+                        "Path": "Assets/Textures/NoteTexture.png",
+                        "RenderMode": "Opaque"
+                    }
+                },
+                "Tiling": [
+                    1.0,
+                    1.0
+                ],
+                "Type": "DiffuseMaterial"
+            },
+            "MeshType": "Model",
+            "Type": "Mesh"
+        },
+        {
+            "ModelPath": "Assets/Models/Notes/NewNote.obj",
+            "Type": "Model"
+        }
+    ],
+    "Name": "NewBaseNote"
+}

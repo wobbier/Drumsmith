@@ -42,11 +42,49 @@ bool KeybindButton( int inImGUIID, int* outKey, bool* waitingforkey, std::string
     return false;
 }
 
+bool MidiBindButton( int inImGUIID, MidiDeviceManager& inDeviceManager, int* outKey, bool* waitingforkey, std::string inLabel = "", const ImVec2& size_arg = ImVec2( 0, 0 ) )
+{
+    ImGui::PushID( inImGUIID );
+
+    Input& editorInput = GetEngine().GetEditorInput();
+    if( !( *waitingforkey ) )
+    {
+        if( ImGui::Button( ( (KeyCode)( *outKey ) == KeyCode::Unknown ) ? std::string( inLabel + "Not Bound" ).c_str() : std::string( inLabel + std::to_string( *outKey ) ).c_str(), size_arg ) )
+        {
+            *(int*)waitingforkey = true;
+
+            inDeviceManager.ClearAllPendingMessages();
+        }
+    }
+    else
+    {
+        ImGui::Button( "...", size_arg );
+        if( editorInput.WasKeyPressed( KeyCode::Escape ) )
+        {
+            *(int*)waitingforkey = false;
+            ImGui::PopID();
+            return false;
+        }
+
+        MidiMessage message = inDeviceManager.GetNextMessage();
+        if( message.Encode() > 0 )
+        {
+            *(int*)outKey = (int)message.m_data1;
+            *(int*)waitingforkey = false;
+            ImGui::PopID();
+            return true;
+        }
+    }
+    ImGui::PopID();
+    return false;
+}
+
 PadBindingWidget::PadBindingWidget()
     : HavanaWidget( "Pad Bindings" )
 {
     memset( &keyCatchState[0], 0, PadId::COUNT );
     memset( &midiCatchState[0], 0, PadId::COUNT );
+    m_midiDeviceManager.OpenAllDevices();
 }
 
 
@@ -71,6 +109,21 @@ void PadBindingWidget::Render()
 {
     OPTICK_CATEGORY( "PadBindingWidget", Optick::Category::UI );
     ImGui::Begin( "Pad Bindings", &IsOpen );
+    {
+        HavanaUtils::Label( "Midi Device" );
+        if( ImGui::BeginCombo( "##Device", m_selectedMidiDeviceName.empty() ? "Select a device" : m_selectedMidiDeviceName.c_str() ) )
+        {
+            for (int i = 0; i < m_midiDeviceManager.GetNumActiveDevices(); ++i)
+            {
+                if( ImGui::Selectable( m_midiDeviceManager.GetDeviceName(i).c_str() ) )
+                {
+                    m_selectedMidiDeviceName = m_midiDeviceManager.GetDeviceName( i );
+                }
+            }
+            
+            ImGui::EndCombo();
+        }
+    }
     auto& mappings = PadMappingStorage::GetInstance();
 
     for( int16_t id = PadId::Invalid + 1; id < PadId::COUNT; ++id )
@@ -80,7 +133,7 @@ void PadBindingWidget::Render()
         float remainingSpace = ImGui::GetContentRegionAvail().x;
         KeybindButton( id, &thing.keyboardBinding, &keyCatchState[id], "Keyboard: ", { remainingSpace / 2.f, 0 } );
         ImGui::SameLine();
-        KeybindButton( id + PadId::COUNT, &thing.midiBinding, &midiCatchState[id], "Midi Pad: ", { -1.f, 0 } );
+        MidiBindButton( id + PadId::COUNT, m_midiDeviceManager, &thing.midiBinding, &midiCatchState[id], "Midi Pad: ", { -1.f, 0 } );
 
     }
 
@@ -88,11 +141,18 @@ void PadBindingWidget::Render()
 
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ACCENT_RED );
     ImGui::PushStyleColor( ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV( .0f, 0.8f, 0.8f ) );
-    if( ImGui::Button( "Reset Bindings", { remainingSpace / 2.f, 0.f } ) )
+    if( ImGui::Button( "Reset Keyboard", { remainingSpace / 4.f, 0.f } ) )
     {
         for( auto& pad : mappings.mappedPads )
         {
             pad.keyboardBinding = 0;
+        }
+    }
+    ImGui::SameLine();
+    if( ImGui::Button( "Reset MIDI", { remainingSpace / 4.f, 0.f } ) )
+    {
+        for( auto& pad : mappings.mappedPads )
+        {
             pad.midiBinding = 0;
         }
     }

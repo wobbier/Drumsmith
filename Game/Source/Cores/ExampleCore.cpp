@@ -182,7 +182,7 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
 
     for( auto& it : inTrackData.m_noteData )
     {
-        std::string prefabName = "Assets/Prefabs/Notes/BasicNotePrefab.prefab";
+        std::string prefabName = "Assets/Prefabs/Notes/NewBaseNote.prefab";
         if( !m_notePrefabs[it.m_editorLane].empty() )
         {
             prefabName = m_notePrefabs[it.m_editorLane];

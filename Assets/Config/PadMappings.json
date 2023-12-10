@@ -3,7 +3,7 @@
   {
    "ID": 0,
    "KB": 5,
-   "MIDI": 0,
+   "MIDI": 84,
    "NAME": "Bass"
   },
   {
@@ -15,7 +15,7 @@
   {
    "ID": 2,
    "KB": 23,
-   "MIDI": 0,
+   "MIDI": 83,
    "NAME": "HighTom"
   },
   {
@@ -53,6 +53,12 @@
    "KB": 21,
    "MIDI": 0,
    "NAME": "Ride"
+  },
+  {
+   "ID": 9,
+   "KB": 0,
+   "MIDI": 59,
+   "NAME": "Crash2"
   }
  ]
 }

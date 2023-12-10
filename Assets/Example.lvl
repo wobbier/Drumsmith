@@ -485,6 +485,224 @@
             ],
             "DestroyOnLoad": true,
             "Name": "crash2"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                -0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Material": {
+                                "DiffuseColor": [
+                                    0.9945651888847351,
+                                    0.10269967466592789,
+                                    0.10269967466592789
+                                ],
+                                "Textures": {
+                                    "Diffuse": {
+                                        "Path": "Assets/Models/Sponza/textures/sponza_floor_a_diff.png",
+                                        "RenderMode": "Opaque"
+                                    }
+                                },
+                                "Tiling": [
+                                    1.0,
+                                    1.0
+                                ],
+                                "Type": "DiffuseMaterial"
+                            },
+                            "MeshType": "Model",
+                            "Type": "Mesh"
+                        }
+                    ],
+                    "DestroyOnLoad": true,
+                    "Name": "Cube"
+                },
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                -0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Material": {
+                                "DiffuseColor": [
+                                    0.2862745225429535,
+                                    0.2862745225429535,
+                                    0.2862745225429535
+                                ],
+                                "Textures": {
+                                    "Diffuse": {
+                                        "Path": "Assets/default.png",
+                                        "RenderMode": "Opaque"
+                                    }
+                                },
+                                "Tiling": [
+                                    1.0,
+                                    1.0
+                                ],
+                                "Type": "DiffuseMaterial"
+                            },
+                            "MeshType": "Model",
+                            "Type": "Mesh"
+                        }
+                    ],
+                    "DestroyOnLoad": true,
+                    "Name": "Cube.001"
+                },
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                -0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Material": {
+                                "DiffuseColor": [
+                                    0.2880434989929199,
+                                    0.2880434989929199,
+                                    0.2880434989929199
+                                ],
+                                "Textures": {
+                                    "Diffuse": {
+                                        "Path": "Assets/default.png",
+                                        "RenderMode": "Opaque"
+                                    }
+                                },
+                                "Tiling": [
+                                    1.0,
+                                    1.0
+                                ],
+                                "Type": "DiffuseMaterial"
+                            },
+                            "MeshType": "Model",
+                            "Type": "Mesh"
+                        }
+                    ],
+                    "DestroyOnLoad": true,
+                    "Name": "Cube.002"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.24816864728927612,
+                        0.0
+                    ],
+                    "Rotation": [
+                        -5.009110282117035e-06,
+                        -89.9208755493164,
+                        -5.009110282117035e-06
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Models/Notes/BaseNote.obj",
+                    "Type": "Model"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "New Entity"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        -0.01562570035457611,
+                        0.8473235368728638,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Material": {
+                        "DiffuseColor": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Textures": {
+                            "Diffuse": {
+                                "Path": "Assets/Textures/NoteTexture.png",
+                                "RenderMode": "Opaque"
+                            }
+                        },
+                        "Tiling": [
+                            1.0,
+                            1.0
+                        ],
+                        "Type": "DiffuseMaterial"
+                    },
+                    "MeshType": "Model",
+                    "Type": "Mesh"
+                },
+                {
+                    "ModelPath": "Assets/Models/Notes/NewNote.obj",
+                    "Type": "Model"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "New Entity"
         }
     ]
 }
