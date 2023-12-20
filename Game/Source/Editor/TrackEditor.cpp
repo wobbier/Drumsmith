@@ -15,6 +15,7 @@ TrackEditor::TrackEditor()
     : HavanaWidget( "Track Editor" )
 {
     EventManager::GetInstance().RegisterReceiver( this, { MouseScrollEvent::GetEventId() } );
+    //m_manager.OpenAllDevices();
 }
 
 
@@ -331,7 +332,16 @@ void TrackEditor::DrawTrackControls()
         ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
         ImGui::InputText( "Track Name", &trackData.m_trackName );
         ImGui::InputText( "Artist", &trackData.m_artistName );
+        ImGui::InputInt( "BPM", &trackData.m_bpm, 1, 10 );
         ImGui::SliderFloat( "Note Height", &m_noteHeight, 10.f, 50.f, "%.1f" );
+        if( TrackPreview )
+        {
+            float newFrequency = TrackPreview->GetPlaybackSpeed();
+            if( ImGui::SliderFloat( "Playback Speed", &newFrequency, 0.f, 2.f, "%.02f" ) )
+            {
+                TrackPreview->SetPlaybackSpeed( newFrequency );
+            }
+        }
         //if( ImGui::Button( !SelectedTrackLocation.Exists ? "Select Asset" : SelectedTrackLocation.GetLocalPath().data(), { 200.f, 10.f } ) )
         //{
         //    RequestAssetSelectionEvent evt( [this]( Path selectedAsset ) {

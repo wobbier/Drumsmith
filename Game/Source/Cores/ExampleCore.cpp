@@ -14,6 +14,8 @@
 #include "Cores/SceneCore.h"
 #include "Components/Graphics/Mesh.h"
 
+DISABLE_OPTIMIZATION;
+
 ExampleCore::ExampleCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
 {
@@ -21,11 +23,11 @@ ExampleCore::ExampleCore()
     LaunchPlayTrackEvent::GetEventId()
     };
     EventManager::GetInstance().RegisterReceiver( this, events );
+    m_midi.OpenAllDevices();
 }
 
 void ExampleCore::Init()
 {
-
 }
 
 void ExampleCore::OnEntityAdded( Entity& NewEntity )
@@ -47,6 +49,12 @@ void ExampleCore::Update( const UpdateContext& context )
 
     auto& entities = GetEntities();
 
+    MidiMessage msg = m_midi.GetNextMessage();
+    if( msg.Encode() > 0 )
+    {
+        BRUH_FMT( "Midid %s", msg.ToString().c_str() );
+    }
+
     std::vector<Entity>::iterator noteItr = entities.begin();
     for( auto it = noteItr; it != entities.end(); ++it )
     {
@@ -62,6 +70,17 @@ void ExampleCore::Update( const UpdateContext& context )
                 if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && pad.padId == note.EditorLane )
                 {
                     it->MarkForDelete();
+                }
+            }
+
+            if( msg.Encode() > 0 )
+            {
+                for( auto& pad : storage.mappedPads )
+                {
+                    if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                    {
+                        it->MarkForDelete();
+                    }
                 }
             }
         }

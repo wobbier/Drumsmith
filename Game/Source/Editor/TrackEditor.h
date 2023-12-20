@@ -7,6 +7,7 @@
 #include "Path.h"
 #include "Pointers.h"
 #include "CoreGame/TrackList.h"
+#include <MidiDeviceManager.h>
 
 class AudioSource;
 
@@ -71,6 +72,7 @@ private:
     float m_timeSignature = 4.f;
     float m_timeSignature2 = 4.f;
     bool m_showPadPreview = true;
+    MidiDeviceManager m_manager;
 };
 
 ME_REGISTER_EDITOR_WIDGET( TrackEditor );

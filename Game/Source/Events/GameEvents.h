@@ -1,5 +1,7 @@
 #pragma once
+#include <functional>
 
+class AudioSource;
 
 class LaunchPlayTrackEvent
     : public Event<LaunchPlayTrackEvent>
@@ -10,4 +12,5 @@ public:
     {
     }
     std::string TrackID;
+    std::function<void( AudioSource* )> Callback;
 };

@@ -5,6 +5,7 @@
 #include "CoreGame/TrackList.h"
 #include "Components/Audio/AudioSource.h"
 #include <unordered_map>
+#include <MidiDeviceManager.h>
 
 class ExampleCore final
 	: public Core<ExampleCore>
@@ -40,6 +41,8 @@ private:
 #if USING( ME_EDITOR )
 	virtual void OnEditorInspect() final;
 #endif
+
+	MidiDeviceManager m_midi;
 };
 
 ME_REGISTER_CORE(ExampleCore)

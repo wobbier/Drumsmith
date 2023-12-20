@@ -263,7 +263,7 @@
                         0.0
                     ],
                     "Scale": [
-                        0.30000001192092896,
+                        1.0,
                         1.0,
                         2.0
                     ],
@@ -292,7 +292,7 @@
                     "Type": "Mesh"
                 },
                 {
-                    "ModelPath": "Assets/Plane.fbx",
+                    "ModelPath": "Engine/Assets/Plane.fbx",
                     "Type": "Model"
                 }
             ],
@@ -381,7 +381,7 @@
                             "Type": "Mesh"
                         },
                         {
-                            "ModelPath": "Engine/Assets/Plane.fbx",
+                            "ModelPath": "Assets/Plane.fbx",
                             "Type": "Model"
                         }
                     ],
@@ -441,7 +441,7 @@
                         ],
                         "Textures": {
                             "Diffuse": {
-                                "Path": "Assets/default.png",
+                                "Path": "Engine/Assets/default.png",
                                 "RenderMode": "Opaque"
                             }
                         },
@@ -455,7 +455,7 @@
                     "Type": "Mesh"
                 },
                 {
-                    "ModelPath": "Engine/Assets/cube.obj",
+                    "ModelPath": "Assets/cube.obj",
                     "Type": "Model"
                 }
             ],
@@ -563,7 +563,7 @@
                                 ],
                                 "Textures": {
                                     "Diffuse": {
-                                        "Path": "Assets/default.png",
+                                        "Path": "Engine/Assets/default.png",
                                         "RenderMode": "Opaque"
                                     }
                                 },
@@ -609,7 +609,7 @@
                                 ],
                                 "Textures": {
                                     "Diffuse": {
-                                        "Path": "Assets/default.png",
+                                        "Path": "Engine/Assets/default.png",
                                         "RenderMode": "Opaque"
                                     }
                                 },

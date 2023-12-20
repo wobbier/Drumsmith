@@ -6,16 +6,62 @@
         background-color: #0000001c;
         color: #ffffff;
     }
+    .no-select {
+        -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                    user-select: none; /* Non-prefixed version, currently */
+    }
+
+    .main-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Adjust this as per your requirement */
+    }
+
+    .header {
+        height: auto;
+    }
+
+    .content {
+        flex-grow: 1;
+        display: flex;
+    }
+
+    #background {
+        background-color: #000000ab;
+        z-index: -99;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
 
     #myDivContainer {
-        height: 90%;
-        width: 100%;
-        position: absolute;
+        flex-grow: 1;
         overflow: scroll;
+    }
+
+    #trackDetails {
+        width: 200px;
     }
 
     .dynamic-div {
         margin-bottom: 10px;
+    }
+
+    .dynamic-div::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 20%; /* Adjust this value to control the height of the fade */
+        -webkit-mask-image: -webkit-gradient(linear, left 90%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)))
+        /* Use rgba(0, 0, 0, 0) to rgba(0, 0, 0, 1) for a black fade */
     }
 
     .dynamic-div:hover {
@@ -55,26 +101,37 @@
 </head>
 
 <body>
+    <div id="background"></div>
+    <div class="main-container no-select">
+        <div class="header">
+            <img src="file:///Assets/Textures/2x/Asset 2@2x.png" />
+            <br />
+            <img src="file:///Assets/Textures/Bar3.png" />
 
-    <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
-    <!-- Parent div where dynamic divs will be added -->
-    <div id="myDivContainer">
-        <h3>Track List:</h3>
-        <div class="dynamic-div" onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')">
-            <div class="album-art"
-                style="background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');">
+            <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
+
+            <a href="#" onclick="fillDivs()">Fill Divs</a>
+        </div>
+        <div class="content">
+            <!-- Parent div where dynamic divs will be added -->
+            <div id="myDivContainer">
+                <div class="dynamic-div" onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')">
+                    <div class="album-art"
+                        style="background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');">
+                    </div>
+                    <div class="album-title">
+                        <h1>Album Title</h1>
+                        <h2>Album Artist</h2>
+                    </div>
+                    <div class="note-count">23</div>
+                    <div class="clearfix"></div>
+                </div>
             </div>
-            <div class="album-title">
-                <h1>Album Title</h1>
-                <h2>Album Artist</h2>
+            <div id="trackDetails">
+                Test
             </div>
-            <div class="note-count">23</div>
-            <div class="clearfix"></div>
         </div>
     </div>
-
-    <button onclick="fillDivs()">Fill Divs</button>
-
     <script>
         function ClearTrackList() {
             // Fetch the container div
@@ -87,10 +144,17 @@
 
         function ToggleTrackListVisibility() {
             var x = document.getElementById("myDivContainer");
+            var bg = document.getElementById("background");
             if (x.style.display === "none") { //  || x.style.display === ""
                 x.style.display = "block";
             } else {
                 x.style.display = "none";
+            }
+            
+            if (bg.style.display === "none") { //  || x.style.display === ""
+                bg.style.display = "block";
+            } else {
+                bg.style.display = "none";
             }
         }
 

@@ -84,7 +84,7 @@ PadBindingWidget::PadBindingWidget()
 {
     memset( &keyCatchState[0], 0, PadId::COUNT );
     memset( &midiCatchState[0], 0, PadId::COUNT );
-    m_midiDeviceManager.OpenAllDevices();
+    //m_midiDeviceManager.OpenAllDevices();
 }
 
 
