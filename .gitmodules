@@ -2,9 +2,6 @@
 	path = Engine
 	url = https://github.com/wobbier/MitchEngine
 	branch = master
-[submodule "Assets/DLC"]
-	path = Assets/DLC
-	url = https://github.com/wobbier/DrumsmithDLC
 [submodule "ThirdParty/USB-MIDI"]
 	path = ThirdParty/USB-MIDI
 	url = https://github.com/wobbier/USB-MIDI/

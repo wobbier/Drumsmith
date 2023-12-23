@@ -13,7 +13,7 @@ class ExampleCore final
 {
 public:
 	ExampleCore();
-	~ExampleCore() = default;
+	~ExampleCore();
 
 	virtual void Init() final;
 
@@ -40,6 +40,13 @@ public:
 private:
 #if USING( ME_EDITOR )
 	virtual void OnEditorInspect() final;
+
+	void OnAddedToWorld() override;
+
+	void OnRemovedFromWorld() override;
+
+	void OnStop() override;
+
 #endif
 
 	MidiDeviceManager m_midi;

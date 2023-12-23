@@ -19,15 +19,36 @@ DISABLE_OPTIMIZATION;
 ExampleCore::ExampleCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
 {
-    std::vector<TypeId> events = {
-    LaunchPlayTrackEvent::GetEventId()
-    };
-    EventManager::GetInstance().RegisterReceiver( this, events );
     m_midi.OpenAllDevices();
+}
+
+ExampleCore::~ExampleCore()
+{
 }
 
 void ExampleCore::Init()
 {
+}
+
+void ExampleCore::OnAddedToWorld()
+{
+    std::vector<TypeId> events = {
+    LaunchPlayTrackEvent::GetEventId()
+    };
+    EventManager::GetInstance().RegisterReceiver( this, events );
+}
+
+void ExampleCore::OnRemovedFromWorld()
+{
+    EventManager::GetInstance().DeRegisterReciever( this );
+}
+
+void ExampleCore::OnStop()
+{
+    if( m_currentTrack )
+    {
+        m_currentTrack->Stop();
+    }
 }
 
 void ExampleCore::OnEntityAdded( Entity& NewEntity )
@@ -59,7 +80,7 @@ void ExampleCore::Update( const UpdateContext& context )
     for( auto it = noteItr; it != entities.end(); ++it )
     {
         NoteTrigger& note = it->GetComponent<NoteTrigger>();
-        const unsigned int triggerTime = (unsigned int)(note.TriggerTime * 1000.f);
+        const unsigned int triggerTime = (unsigned int)( note.TriggerTime * 1000.f );
         const unsigned int noteTime = m_currentTrack->GetPositionMs();
 
         if( Mathf::Abs( (float)( noteTime - triggerTime ) ) < 200 )
@@ -90,7 +111,7 @@ void ExampleCore::Update( const UpdateContext& context )
     {
         //auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
         Transform& camTransform = TrackMover->GetComponent<Transform>();
-        camTransform.SetPosition( { 0,0,((float)m_currentTrack->GetPositionMs() / 1000.f) * m_trackData->m_noteSpeed } );
+        camTransform.SetPosition( { 0,0,( (float)m_currentTrack->GetPositionMs() / 1000.f ) * m_trackData->m_noteSpeed } );
     }
 
 

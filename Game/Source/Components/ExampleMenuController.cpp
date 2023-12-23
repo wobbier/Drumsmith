@@ -32,7 +32,6 @@ void ExampleMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultral
 {
     BasicUIView::OnUILoad( GlobalWindow, Caller );
 
-    GlobalWindow["LoadScene"] = BindJSCallback( &ExampleMenuController::LoadScene );
     GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &ExampleMenuController::SelectTrackToPlay );
     ExecuteScript( "ClearTrackList();" );
 
@@ -48,14 +47,6 @@ void ExampleMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultral
         trackData["NoteCount"] = it.m_noteData.size();
         ExecuteScript( "AddTrack(" + trackData.dump() + "); " );
     }
-}
-
-void ExampleMenuController::LoadScene( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    LoadSceneEvent evt;
-    ultralight::String path = args[0].ToString();
-    evt.Level = std::string( path.utf8().data() );
-    evt.Fire();
 }
 
 void ExampleMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )

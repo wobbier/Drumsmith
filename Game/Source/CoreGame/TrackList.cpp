@@ -129,6 +129,7 @@ void TrackData::LoadNoteData()
     if( Root.contains( "Notes" ) )
     {
         json& noteData = Root["Notes"];
+        m_noteData.clear();
         m_noteData.reserve( noteData.size() );
         for( json& note : noteData )
         {

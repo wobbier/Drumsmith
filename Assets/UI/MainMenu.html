@@ -1,0 +1,46 @@
+<html>
+<head>
+    <style>
+        body{
+            font-family: 'Coolvetica Rg';
+        }
+
+        .hover-underline-animation {
+            display: inline-block;
+            position: relative;
+            color: #0087ca;
+            /*background-image: url('file:///Assets/Textures/Bar3.png');*/
+        }
+
+        .hover-underline-animation:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #0087ca;
+            /*background-image: url('file:///Assets/Textures/Bar3.png');*/
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        .hover-underline-animation:hover:after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="file:///Assets/Textures/2x/Asset 2@2x.png" />
+    <br />
+    <img src="file:///Assets/Textures/Bar3.png" /><br />
+    <p onclick="LoadScene('Assets/Example.lvl')" class="hover-underline-animation">PLAY</p><br />
+    <p class="hover-underline-animation">PRACTICE</p><br />
+    <p class="hover-underline-animation">SETTINGS</p><br />
+    <p class="hover-underline-animation">EXIT</p>
+</body>
+
+</html>
