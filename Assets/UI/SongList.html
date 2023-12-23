@@ -23,6 +23,16 @@
 
     .header {
         height: auto;
+        padding: 5px;
+    }
+    .header a {
+        margin: 10px;
+        color: rgba(255, 255, 255, 0.842);
+        text-decoration: none;
+    }
+    .header a:hover {
+        color: white;
+        text-decoration: underline;
     }
 
     .content {
@@ -104,10 +114,6 @@
     <div id="background"></div>
     <div class="main-container no-select">
         <div class="header">
-            <img src="file:///Assets/Textures/2x/Asset 2@2x.png" />
-            <br />
-            <img src="file:///Assets/Textures/Bar3.png" />
-
             <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
 
             <a href="#" onclick="fillDivs()">Fill Divs</a>
