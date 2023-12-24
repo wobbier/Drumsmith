@@ -1,4 +1,4 @@
-#include <Cores/ExampleCore.h>
+#include <Cores/NoteHighwayCore.h>
 #include <Components/Transform.h>
 #include "Events/GameEvents.h"
 #include "CoreGame/TrackList.h"
@@ -14,23 +14,21 @@
 #include "Cores/SceneCore.h"
 #include "Components/Graphics/Mesh.h"
 
-DISABLE_OPTIMIZATION;
-
-ExampleCore::ExampleCore()
+NoteHighwayCore::NoteHighwayCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
 {
     m_midi.OpenAllDevices();
 }
 
-ExampleCore::~ExampleCore()
+NoteHighwayCore::~NoteHighwayCore()
 {
 }
 
-void ExampleCore::Init()
+void NoteHighwayCore::Init()
 {
 }
 
-void ExampleCore::OnAddedToWorld()
+void NoteHighwayCore::OnAddedToWorld()
 {
     std::vector<TypeId> events = {
     LaunchPlayTrackEvent::GetEventId()
@@ -38,12 +36,12 @@ void ExampleCore::OnAddedToWorld()
     EventManager::GetInstance().RegisterReceiver( this, events );
 }
 
-void ExampleCore::OnRemovedFromWorld()
+void NoteHighwayCore::OnRemovedFromWorld()
 {
     EventManager::GetInstance().DeRegisterReciever( this );
 }
 
-void ExampleCore::OnStop()
+void NoteHighwayCore::OnStop()
 {
     if( m_currentTrack )
     {
@@ -51,15 +49,15 @@ void ExampleCore::OnStop()
     }
 }
 
-void ExampleCore::OnEntityAdded( Entity& NewEntity )
+void NoteHighwayCore::OnEntityAdded( Entity& NewEntity )
 {
 }
 
-void ExampleCore::OnEntityRemoved( Entity& InEntity )
+void NoteHighwayCore::OnEntityRemoved( Entity& InEntity )
 {
 }
 
-void ExampleCore::Update( const UpdateContext& context )
+void NoteHighwayCore::Update( const UpdateContext& context )
 {
     if( !m_currentTrack )
     {
@@ -117,7 +115,7 @@ void ExampleCore::Update( const UpdateContext& context )
 
 }
 
-void ExampleCore::OnStart()
+void NoteHighwayCore::OnStart()
 {
     World& world = GetWorld();
     m_lanes.clear();
@@ -190,20 +188,12 @@ void ExampleCore::OnStart()
 
 
 
-bool ExampleCore::OnEvent( const BaseEvent& evt )
+bool NoteHighwayCore::OnEvent( const BaseEvent& evt )
 {
     if( evt.GetEventId() == LaunchPlayTrackEvent::GetEventId() )
     {
         const LaunchPlayTrackEvent& event = static_cast<const LaunchPlayTrackEvent&>( evt );
-
-        for( auto& it : TrackDatabase::GetInstance().m_trackList.m_tracks )
-        {
-            if( it.m_trackName == event.TrackID )
-            {
-                SetupTrack( it );
-                break;
-            }
-        }
+        SetupTrack( TrackDatabase::GetInstance().m_trackList.m_tracks[event.TrackIndex]);
         return true;
     }
 
@@ -211,7 +201,7 @@ bool ExampleCore::OnEvent( const BaseEvent& evt )
 }
 
 
-void ExampleCore::SetupTrack( TrackData& inTrackData )
+void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
 {
     ShutdownTrack();
     m_trackData = &inTrackData;
@@ -265,7 +255,7 @@ void ExampleCore::SetupTrack( TrackData& inTrackData )
 }
 
 
-void ExampleCore::ShutdownTrack()
+void NoteHighwayCore::ShutdownTrack()
 {
     auto& entities = GetEntities();
     for( auto ent : entities )
@@ -275,7 +265,7 @@ void ExampleCore::ShutdownTrack()
 }
 
 
-int32_t ExampleCore::LegacyConvertLane( const std::string& lane )
+int32_t NoteHighwayCore::LegacyConvertLane( const std::string& lane )
 {
     if( lane == "bass1" )
     {
@@ -284,7 +274,7 @@ int32_t ExampleCore::LegacyConvertLane( const std::string& lane )
     return -1;
 }
 
-const char* ExampleCore::ConvertPadToLane( int16_t lane )
+const char* NoteHighwayCore::ConvertPadToLane( int16_t lane )
 {
     if( lane == PadId::Bass )
     {
@@ -295,7 +285,7 @@ const char* ExampleCore::ConvertPadToLane( int16_t lane )
 
 #if USING( ME_EDITOR )
 
-void ExampleCore::OnEditorInspect()
+void NoteHighwayCore::OnEditorInspect()
 {
 }
 

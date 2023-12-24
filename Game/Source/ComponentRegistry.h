@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Components/ExampleMenuController.h"
+#include "Components/TrackListMenuController.h"
 #include "Components/MainMenuController.h"
 #include "Components/NoteTrigger.h"
-#include "Cores/ExampleCore.h"
+#include "Cores/NoteHighwayCore.h"
 #include "Editor/TrackEditor.h"
 #include "Editor/PadBindings.h"

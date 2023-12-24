@@ -2,6 +2,7 @@
 #include <Components/UI/BasicUIView.h>
 #include "CoreGame/TrackList.h"
 #include "Components/Audio/AudioSource.h"
+#include "Math/Random.h"
 
 class MainMenuController final
 	: public BasicUIView
@@ -15,6 +16,10 @@ public:
 	SharedPtr<AudioSource> m_currentTrack;
 
 	void PlayNextRandomTrack();
+
+    void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+
+	Random64 m_random;
 };
 
 ME_REGISTER_COMPONENT( MainMenuController );

@@ -7,13 +7,13 @@
 #include <unordered_map>
 #include <MidiDeviceManager.h>
 
-class ExampleCore final
-	: public Core<ExampleCore>
+class NoteHighwayCore final
+	: public Core<NoteHighwayCore>
 	, public EventReceiver
 {
 public:
-	ExampleCore();
-	~ExampleCore();
+	NoteHighwayCore();
+	~NoteHighwayCore();
 
 	virtual void Init() final;
 
@@ -52,4 +52,4 @@ private:
 	MidiDeviceManager m_midi;
 };
 
-ME_REGISTER_CORE(ExampleCore)
+ME_REGISTER_CORE(NoteHighwayCore)

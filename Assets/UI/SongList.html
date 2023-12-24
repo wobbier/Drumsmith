@@ -140,6 +140,15 @@
         </div>
     </div>
     <script>
+        var timer;
+        function DelayedTrackPreview(trackIndex) {
+            clearTimeout(timer);
+
+            timer = setTimeout(function() {
+                PlayTrackPreview( trackIndex );
+            }, 250);
+        }
+
         function ClearTrackList() {
             // Fetch the container div
             const containerDiv = document.getElementById('myDivContainer');
@@ -172,7 +181,7 @@
             dynamicDiv.classList.add('dynamic-div');
 
             dynamicDiv.innerHTML = `
-            <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmousehover="PlaySound('${track.TrackSource}')">
+            <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
             <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
             </div>
             <div class="album-title">

@@ -96,6 +96,16 @@
             clear: both;
             display: table;
         }
+        
+        #track-radio a {
+            margin: 10px;
+            color: rgba(255, 255, 255, 0.842);
+            text-decoration: none;
+        }
+        #track-radio a:hover {
+            color: white;
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -117,9 +127,10 @@
         </div>
         <div class="clearfix"></div>
         <div id="track-artist">
-            EXAMPLE TITLE
+            EXAMPLE ARTIST
         </div>
         <div class="clearfix"></div>
+        <a href="#" onclick="SkipTrack()">Skip</a>
     </div>
     <script>
         

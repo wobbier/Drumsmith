@@ -1,7 +1,7 @@
 {
     "Cores": [
         {
-            "Type": "ExampleCore"
+            "Type": "NoteHighwayCore"
         }
     ],
     "Scene": [
@@ -147,7 +147,7 @@
                 },
                 {
                     "FilePath": "Assets/UI/SongList.html",
-                    "Type": "ExampleMenuController"
+                    "Type": "TrackListMenuController"
                 }
             ],
             "DestroyOnLoad": true,

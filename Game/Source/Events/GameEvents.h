@@ -12,5 +12,6 @@ public:
     {
     }
     std::string TrackID;
+    int TrackIndex = 0;
     std::function<void( AudioSource* )> Callback;
 };

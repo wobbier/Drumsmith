@@ -3,19 +3,20 @@
 #include "CoreGame/TrackList.h"
 #include "Components/Audio/AudioSource.h"
 
-class ExampleMenuController final
+class TrackListMenuController final
 	: public BasicUIView
 {
 public:
-	ExampleMenuController();
+	TrackListMenuController();
 
 	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
 
     void SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+	void PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
 
 	TrackDatabase m_database;
 
 	SharedPtr<AudioSource> m_currentTrack;
 };
 
-ME_REGISTER_COMPONENT(ExampleMenuController);
+ME_REGISTER_COMPONENT(TrackListMenuController);

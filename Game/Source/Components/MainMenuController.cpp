@@ -4,7 +4,6 @@
 #include "CoreGame/TrackList.h"
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
-#include <random>
 
 MainMenuController::MainMenuController()
     : BasicUIView( "MainMenuController" )
@@ -41,7 +40,7 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
 
     PlayNextRandomTrack();
 
-    //GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &ExampleMenuController::SelectTrackToPlay );
+    GlobalWindow["SkipTrack"] = BindJSCallback( &MainMenuController::SkipTrack );
 
 }
 
@@ -49,16 +48,10 @@ void MainMenuController::PlayNextRandomTrack()
 {
     auto& trackExample = TrackDatabase::GetInstance().m_trackList.m_tracks;
 
-    std::random_device rd;
-    std::mt19937 gen( rd() );
-    std::uniform_int_distribution<> distrib( 0, trackExample.size() - 1 );
-
-    int randomIndex = distrib( gen );
+    int randomIndex = m_random( 0, trackExample.size() - 1 );
     auto& randomElement = trackExample[randomIndex];
 
-
-    TrackRadio::GetInstance().m_currentTrack = &randomElement;
-    TrackRadio::GetInstance().Play();
+    TrackRadio::GetInstance().Play( &randomElement );
 
     {
         Path dlcTest = Path( randomElement.m_albumArtPath );
@@ -71,4 +64,9 @@ void MainMenuController::PlayNextRandomTrack()
         trackData["NoteCount"] = randomElement.m_noteData.size();
         ExecuteScript( "DisplayTrack(" + trackData.dump() + "); " );
     }
+}
+
+void MainMenuController::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    PlayNextRandomTrack();
 }

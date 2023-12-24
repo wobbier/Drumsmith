@@ -1,15 +1,24 @@
 #include "TrackRadio.h"
 #include "Events/AudioEvents.h"
+#include "CoreGame/TrackList.h"
 
-void TrackRadio::Play()
+void TrackRadio::Play( TrackData* inTrackData )
 {
-    m_currentlyPlaying = AudioSource(m_currentTrack->m_trackSourcePath);
+    if( !inTrackData || inTrackData == m_currentTrack )
+    {
+        return;
+    }
+
+    Stop();
+    m_currentTrack = inTrackData;
+
+    m_currentlyPlaying = AudioSource( m_currentTrack->m_trackSourcePath );
     SharedPtr<AudioSource> source;
     PlayAudioEvent evt;
     evt.SourceName = m_currentlyPlaying.FilePath.FullPath;
     evt.StartPercent = m_currentTrack->m_previewPercent;
     evt.Volume = 0.05f;
-    
+
     evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { m_currentlyPlayingPtr = loadedAudio; };
     evt.Fire();
 }

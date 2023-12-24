@@ -174,6 +174,15 @@ void TrackEditor::Render()
         }
     }
 
+    // Preview Marker
+    if( TrackPreview )
+    {
+        float totalSongTime = ( TrackPreview->GetLength() / 1000.f );
+        float songTime = ( ( TrackPreview->GetLength() * trackData.m_previewPercent ) / 1000.f );
+        float scrubberX = canvas_pos.x + ( ( timelineSizeZoomed * ( songTime / totalSongTime ) ) );
+        drawList->AddLine( { scrubberX, canvas_pos.y }, { scrubberX, canvas_pos.y + timelineHeight }, 0xFFF00FFF );
+    }
+
 
     float numBars = 0;
     float numSubBars = 0;
@@ -334,6 +343,14 @@ void TrackEditor::DrawTrackControls()
         ImGui::InputText( "Artist", &trackData.m_artistName );
         ImGui::InputInt( "BPM", &trackData.m_bpm, 1, 10 );
         ImGui::SliderFloat( "Note Height", &m_noteHeight, 10.f, 50.f, "%.1f" );
+        if( ImGui::Button( "Set Track Preview Marker" ) )
+        {
+            if( TrackPreview )
+            {
+                // I should visually display this
+                trackData.m_previewPercent = (TrackPreview->GetPositionMs() / (float)TrackPreview->GetLength());
+            }
+        }
         if( TrackPreview )
         {
             float newFrequency = TrackPreview->GetPlaybackSpeed();
