@@ -7,6 +7,7 @@
             background-image: url('file:///Assets/UI/Textures/drums-bg.png');
             background-position: center;
             background-size: cover;
+            color: white;
         }
 
         .hover-underline-animation {
@@ -56,6 +57,7 @@
             height: 100%;
             position: fixed;
             min-height: 100%;
+            background-color: rgba(0, 0, 0, 0.52);
             top: 0;
             z-index: -1;
         }
@@ -67,6 +69,32 @@
         .main-menu {
             margin-left: 50px;
             margin-top: 50px;
+        }
+
+        #track-radio{
+            width: 600px;
+            height: 200px;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            background: rgba(36, 36, 36, 0.376);
+        }
+        #track-radio img {
+            width: 200px;
+            height: 200px;
+            float: left;
+        }
+
+        #track-radio div {
+            margin-left: 10px;
+            float: left;
+            font-size: xx-large;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
         }
     </style>
 </head>
@@ -82,6 +110,46 @@
         <p class="hover-underline-animation orange">SETTINGS</p><br />
         <p class="hover-underline-animation red" onclick="Quit()">EXIT</p>
     </div>
+    <div id="track-radio">
+        <img id="track-art" /> <!-- src="file:///Assets/DLC/LearnToFly/Album.png" -->
+        <div id="track-title">
+            EXAMPLE TITLE
+        </div>
+        <div class="clearfix"></div>
+        <div id="track-artist">
+            EXAMPLE TITLE
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <script>
+        
+        function DisplayTrack(track) {
+            // Fetch the container div
+            const containerDiv = document.getElementById('track-radio');
+
+            var imageContainer = document.getElementById('track-art');
+            imageContainer.src = `file:///${track.AlbumArt}`;
+            
+            var trackTitle = document.getElementById('track-title');
+            trackTitle.textContent = `${track.TrackName}`;
+            
+            var trackArtist = document.getElementById('track-artist');
+            trackArtist.textContent = `${track.ArtistName}`;
+            /*
+            dynamicDiv.innerHTML = `
+                <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmousehover="PlaySound('${track.TrackSource}')">
+                <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
+                </div>
+                <div class="album-title">
+                    <h1>${track.TrackName}</h1>
+                    <h2>${track.ArtistName}</h2>
+                </div>
+                <div class="note-count">Note Count: ${track.NoteCount}</div>
+                <div class="clearfix"></div>
+            </div>`;
+            containerDiv.appendChild(dynamicDiv);*/
+        }
+    </script>
 </body>
 
 </html>

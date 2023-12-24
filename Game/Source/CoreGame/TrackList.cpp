@@ -82,6 +82,7 @@ void TrackData::OnSave( json& outJson )
     outJson["Duration"] = m_duration;
     outJson["BPM"] = m_bpm;
     outJson["TrackFileName"] = m_trackFileName;
+    outJson["PreviewPercent"] = m_previewPercent;
 
     json& noteData = outJson["Notes"];
     for( NoteData& note : m_noteData )
@@ -117,6 +118,12 @@ void TrackData::OnLoadConfig( const json& outJson )
         m_trackFileName = "Track.mp3";
         m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + m_trackFileName;
     }
+
+    if( outJson.contains( "PreviewPercent" ) )
+    {
+        m_previewPercent = outJson["PreviewPercent"];
+    }
+
     m_noteSpeed = outJson["NoteSpeed"];
     m_duration = outJson["Duration"];
     m_bpm = outJson["BPM"];

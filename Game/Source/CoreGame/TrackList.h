@@ -43,6 +43,7 @@ public:
     std::string m_trackFileName;
     float m_noteSpeed = 1.f;
     float m_duration = 1.f;
+    float m_previewPercent = 0.f;
     int m_bpm = 69;
     std::vector<NoteData> m_noteData;
 };
