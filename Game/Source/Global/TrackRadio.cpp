@@ -2,7 +2,7 @@
 #include "Events/AudioEvents.h"
 #include "CoreGame/TrackList.h"
 
-void TrackRadio::Play( TrackData* inTrackData )
+void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
 {
     if( !inTrackData || inTrackData == m_currentTrack )
     {
@@ -16,7 +16,10 @@ void TrackRadio::Play( TrackData* inTrackData )
     SharedPtr<AudioSource> source;
     PlayAudioEvent evt;
     evt.SourceName = m_currentlyPlaying.FilePath.FullPath;
-    evt.StartPercent = m_currentTrack->m_previewPercent;
+    if( inUsePreviewMarker )
+    {
+        evt.StartPercent = m_currentTrack->m_previewPercent;
+    }
     evt.Volume = 0.05f;
 
     evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { m_currentlyPlayingPtr = loadedAudio; };

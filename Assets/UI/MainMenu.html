@@ -106,6 +106,23 @@
             color: white;
             text-decoration: underline;
         }
+
+
+        #track-radio {
+            /*width: 300px;
+            height: 100px;
+            background-color: #f1f1f1;*/
+            position: fixed;
+            bottom: 10px;
+            right: -600px; /* Initially off-screen */
+            z-index: 100;
+            transition: right 0.5s;
+        }
+
+        #track-radio.visible {
+            right: 10px; /* Slide in */
+        }
+
     </style>
 </head>
 
@@ -120,7 +137,7 @@
         <p class="hover-underline-animation orange">SETTINGS</p><br />
         <p class="hover-underline-animation red" onclick="Quit()">EXIT</p>
     </div>
-    <div id="track-radio">
+    <div id="track-radio" onmouseover="ShowTrackRadio()">
         <img id="track-art" /> <!-- src="file:///Assets/DLC/LearnToFly/Album.png" -->
         <div id="track-title">
             EXAMPLE TITLE
@@ -133,7 +150,22 @@
         <a href="#" onclick="SkipTrack()">Skip</a>
     </div>
     <script>
-        
+        var timer;
+        function ShowTrackRadio() {
+            clearTimeout(timer);
+            if(!document.getElementById('track-radio').classList.contains('visible'))
+            {
+                document.getElementById('track-radio').classList.toggle('visible');
+            }
+            timer = setTimeout(function() {
+                if(document.getElementById('track-radio').classList.contains('visible'))
+                {
+                    document.getElementById('track-radio').classList.toggle('visible');
+                }
+            }, 15000);
+        }
+
+
         function DisplayTrack(track) {
             // Fetch the container div
             const containerDiv = document.getElementById('track-radio');
@@ -146,7 +178,13 @@
             
             var trackArtist = document.getElementById('track-artist');
             trackArtist.textContent = `${track.ArtistName}`;
+            ShowTrackRadio();
             /*
+            document.getElementById('track-radio').addEventListener('click', function() {
+                document.getElementById('track-radio').classList.toggle('visible');
+            });
+
+            
             dynamicDiv.innerHTML = `
                 <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmousehover="PlaySound('${track.TrackSource}')">
                 <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">

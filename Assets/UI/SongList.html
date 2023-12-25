@@ -53,10 +53,21 @@
     #myDivContainer {
         flex-grow: 1;
         overflow: scroll;
+        padding: 5px;
+        padding-right: 15px;
     }
 
     #trackDetails {
-        width: 200px;
+        width: 25%;
+        padding: 5px;
+    }
+
+    #trackDetails .album-art {
+        background-color: #000000ab;
+    }
+    #trackDetails .album-art img{
+        width: 100%;
+        height:auto;
     }
 
     .dynamic-div {
@@ -105,7 +116,6 @@
         display: table;
     }
 </style>
-</style>
 
 <head>
 </head>
@@ -116,11 +126,23 @@
         <div class="header">
             <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
 
-            <a href="#" onclick="fillDivs()">Fill Divs</a>
+            <!--a href="#" onclick="fillDivs()">Fill Divs</a-->
             <a href="#" onclick="LoadScene('Assets/MainMenu.lvl')">Main Menu</a>
         </div>
-        <div class="content">
-            <!-- Parent div where dynamic divs will be added -->
+        <div id="trackPanel" class="content">
+            <div id="trackDetails">
+                <div class="album-art">
+                    <img src="file:///${track.AlbumArt}" />
+                </div>
+                <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
+                    <div class="album-title">
+                        <h1>${track.TrackName}</h1>
+                        <h2>${track.ArtistName}</h2>
+                    </div>
+                    <div class="note-count">Note Count: ${track.NoteCount}</div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
             <div id="myDivContainer">
                 <div class="dynamic-div" onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')">
                     <div class="album-art"
@@ -134,16 +156,13 @@
                     <div class="clearfix"></div>
                 </div>
             </div>
-            <div id="trackDetails">
-                Test
-            </div>
         </div>
     </div>
     <script>
         var timer;
         function DelayedTrackPreview(trackIndex) {
             clearTimeout(timer);
-
+            RequestDetailsPanelUpdate(trackIndex);
             timer = setTimeout(function() {
                 PlayTrackPreview( trackIndex );
             }, 250);
@@ -159,10 +178,10 @@
         }
 
         function ToggleTrackListVisibility() {
-            var x = document.getElementById("myDivContainer");
+            var x = document.getElementById("trackPanel");
             var bg = document.getElementById("background");
             if (x.style.display === "none") { //  || x.style.display === ""
-                x.style.display = "block";
+                x.style.display = "flex";
             } else {
                 x.style.display = "none";
             }
@@ -203,6 +222,23 @@
             //dynamicDiv.appendChild(image);
 
             containerDiv.appendChild(dynamicDiv);
+        }
+        function UpdateDetailsPanel(track)
+        {
+            const containerDiv = document.getElementById('trackDetails');
+            
+            containerDiv.innerHTML = `
+                <div class="album-art">
+                    <img src="file:///${track.AlbumArt}" />
+                </div>
+                <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
+                <div class="album-title">
+                    <h1>${track.TrackName}</h1>
+                    <h2>${track.ArtistName}</h2>
+                </div>
+                <div class="note-count">Note Count: ${track.NoteCount}</div>
+                <div class="clearfix"></div>
+            </div>`;
         }
         function fillDivs() {
             // Fetch the container div

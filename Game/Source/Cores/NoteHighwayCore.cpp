@@ -68,16 +68,14 @@ void NoteHighwayCore::Update( const UpdateContext& context )
 
     auto& entities = GetEntities();
 
-    MidiMessage msg = m_midi.GetNextMessage();
-    if( msg.Encode() > 0 )
-    {
-        BRUH_FMT( "Midid %s", msg.ToString().c_str() );
-    }
-
     std::vector<Entity>::iterator noteItr = entities.begin();
+
+    // I need to keep track of where we are in a track to avoid itr on entities
+    bool handled = false;
     for( auto it = noteItr; it != entities.end(); ++it )
     {
         NoteTrigger& note = it->GetComponent<NoteTrigger>();
+        // I should unify the time
         const unsigned int triggerTime = (unsigned int)( note.TriggerTime * 1000.f );
         const unsigned int noteTime = m_currentTrack->GetPositionMs();
 
@@ -89,19 +87,33 @@ void NoteHighwayCore::Update( const UpdateContext& context )
                 if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && pad.padId == note.EditorLane )
                 {
                     it->MarkForDelete();
+                    handled = true;
                 }
             }
 
-            if( msg.Encode() > 0 )
+            while( m_midi.HasMessages() && !handled )
             {
-                for( auto& pad : storage.mappedPads )
+                MidiMessage msg = m_midi.GetNextMessage();
+
+                if( msg.Encode() > 0 )
                 {
-                    if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                    BRUH_FMT( "Midid %s", msg.ToString().c_str() );
+                    for( auto& pad : storage.mappedPads )
                     {
-                        it->MarkForDelete();
+                        if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                        {
+                            it->MarkForDelete();
+                            handled = true;
+                        }
                     }
                 }
             }
+        }
+
+        // This is correct, right?
+        if (handled)
+        {
+            break;
         }
     }
 

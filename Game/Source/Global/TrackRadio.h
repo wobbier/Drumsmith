@@ -17,7 +17,7 @@ class TrackRadio
 public:
     TrackRadio() = default;
 
-    void Play( TrackData* inTrackData );
+    void Play( TrackData* inTrackData, bool inUsePreviewMarker = true );
     void Stop();
 
     TrackData* m_currentTrack = nullptr;

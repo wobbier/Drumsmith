@@ -35,6 +35,7 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
 
     GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &TrackListMenuController::SelectTrackToPlay );
     GlobalWindow["PlayTrackPreview"] = BindJSCallback( &TrackListMenuController::PlayTrackPreview );
+    GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &TrackListMenuController::RequestDetailsPanelUpdate );
     ExecuteScript( "ClearTrackList();" );
 
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
@@ -52,6 +53,7 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
         uiTrackData["TrackIndex"] = i;
         ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
     }
+    RequestDetailsPanelUpdate_Internal( 0 );
 }
 
 void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -79,4 +81,30 @@ void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& this
         return;
     }
     TrackRadio::GetInstance().Play( &trackList[str] );
+}
+
+void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    int trackIndex = args[0].ToInteger();
+
+    RequestDetailsPanelUpdate_Internal( trackIndex );
+}
+
+void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
+{
+    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    //for( int i = 0; i < trackList.size(); ++i )
+    {
+        auto& trackData = trackList[trackIndex];
+        Path dlcTest = Path( trackData.m_albumArtPath );
+        std::string songImage = dlcTest.GetLocalPathString();
+        json uiTrackData;
+        uiTrackData["TrackName"] = trackData.m_trackName;
+        uiTrackData["ArtistName"] = trackData.m_artistName;
+        uiTrackData["AlbumArt"] = songImage;
+        uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
+        uiTrackData["NoteCount"] = trackData.m_noteData.size();
+        uiTrackData["TrackIndex"] = trackIndex;
+        ExecuteScript( "UpdateDetailsPanel(" + uiTrackData.dump() + "); " );
+    }
 }

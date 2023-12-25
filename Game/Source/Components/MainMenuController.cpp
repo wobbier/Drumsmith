@@ -51,7 +51,7 @@ void MainMenuController::PlayNextRandomTrack()
     int randomIndex = m_random( 0, trackExample.size() - 1 );
     auto& randomElement = trackExample[randomIndex];
 
-    TrackRadio::GetInstance().Play( &randomElement );
+    TrackRadio::GetInstance().Play( &randomElement, false );
 
     {
         Path dlcTest = Path( randomElement.m_albumArtPath );
