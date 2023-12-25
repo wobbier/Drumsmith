@@ -18,7 +18,12 @@ public:
 	virtual void Init() final;
 
 	virtual void OnEntityAdded(Entity& NewEntity) final;
-	virtual void OnEntityRemoved(Entity& InEntity) final;
+    virtual void OnEntityRemoved( Entity& InEntity ) final;
+
+    void OnAddedToWorld() override;
+    void OnRemovedFromWorld() override;
+
+    void OnStop() override;
 
     virtual void Update( const UpdateContext& context ) final;
     bool OnEvent( const BaseEvent& evt ) override;
@@ -40,12 +45,6 @@ public:
 private:
 #if USING( ME_EDITOR )
 	virtual void OnEditorInspect() final;
-
-	void OnAddedToWorld() override;
-
-	void OnRemovedFromWorld() override;
-
-	void OnStop() override;
 
 #endif
 
