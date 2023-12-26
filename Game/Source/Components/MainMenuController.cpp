@@ -46,27 +46,32 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
 
 void MainMenuController::PlayNextRandomTrack()
 {
-    auto& trackExample = TrackDatabase::GetInstance().m_trackList.m_tracks;
-
-    int randomIndex = m_random( 0, trackExample.size() - 1 );
-    auto& randomElement = trackExample[randomIndex];
-
-    TrackRadio::GetInstance().Play( &randomElement, false );
-
+    TrackData* randomElement = TrackRadio::GetInstance().m_currentTrack;
+    if( !TrackRadio::GetInstance().m_currentlyPlayingPtr || !TrackRadio::GetInstance().m_currentlyPlayingPtr->IsPlaying() )
     {
-        Path dlcTest = Path( randomElement.m_albumArtPath );
+        auto& trackExample = TrackDatabase::GetInstance().m_trackList.m_tracks;
+
+        int randomIndex = m_random( 0, trackExample.size() - 1 );
+        randomElement = &trackExample[randomIndex];
+        TrackRadio::GetInstance().Play( randomElement, false );
+    }
+
+    if (randomElement)
+    {
+        Path dlcTest = Path( randomElement->m_albumArtPath );
         std::string songImage = dlcTest.GetLocalPathString();
         json trackData;
-        trackData["TrackName"] = randomElement.m_trackName;
-        trackData["ArtistName"] = randomElement.m_artistName;
+        trackData["TrackName"] = randomElement->m_trackName;
+        trackData["ArtistName"] = randomElement->m_artistName;
         trackData["AlbumArt"] = songImage;
-        trackData["TrackSource"] = randomElement.m_trackSourcePath;
-        trackData["NoteCount"] = randomElement.m_noteData.size();
+        trackData["TrackSource"] = randomElement->m_trackSourcePath;
+        trackData["NoteCount"] = randomElement->m_noteData.size();
         ExecuteScript( "DisplayTrack(" + trackData.dump() + "); " );
     }
 }
 
 void MainMenuController::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
+    TrackRadio::GetInstance().Stop();
     PlayNextRandomTrack();
 }

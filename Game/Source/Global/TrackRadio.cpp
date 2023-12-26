@@ -20,7 +20,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
     {
         evt.StartPercent = m_currentTrack->m_previewPercent;
     }
-    evt.Volume = 0.05f;
+    evt.Volume = 0.25f;
 
     evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { m_currentlyPlayingPtr = loadedAudio; };
     evt.Fire();
