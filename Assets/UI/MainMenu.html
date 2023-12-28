@@ -1,217 +1,22 @@
 <html>
 <head>
     <style>
-        /* http://meyerweb.com/eric/tools/css/reset/ 
-        v2.0 | 20110126
-        License: none (public domain)
-        */
-
-        html, body, div, span, applet, object, iframe,
-        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-        a, abbr, acronym, address, big, cite, code,
-        del, dfn, em, img, ins, kbd, q, s, samp,
-        small, strike, strong, sub, sup, tt, var,
-        b, u, i, center,
-        dl, dt, dd, ol, ul, li,
-        fieldset, form, label, legend,
-        table, caption, tbody, tfoot, thead, tr, th, td,
-        article, aside, canvas, details, embed, 
-        figure, figcaption, footer, header, hgroup, 
-        menu, nav, output, ruby, section, summary,
-        time, mark, audio, video {
-            margin: 0;
-            padding: 0;
-            border: 0;
-            font-size: 100%;
-            font: inherit;
-            vertical-align: baseline;
-        }
-        /* HTML5 display-role reset for older browsers */
-        article, aside, details, figcaption, figure, 
-        footer, header, hgroup, menu, nav, section {
-            display: block;
-        }
-        body {
-            line-height: 1;
-        }
-        ol, ul {
-            list-style: none;
-        }
-        blockquote, q {
-            quotes: none;
-        }
-        blockquote:before, blockquote:after,
-        q:before, q:after {
-            content: '';
-            content: none;
-        }
-        table {
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-
-        body{
-            font-family: 'Coolvetica Rg';
-            margin: 0;
-            background-image: url('file:///Assets/UI/Textures/drums-bg.png');
-            background-position: center;
-            background-size: cover;
-            color: white;
-        }
-
-        .hover-underline-animation {
-            display: inline-block;
+        .scroll-container {
+            width: 100px; /* Adjust as needed */
+            height:50px;
+            overflow: hidden;
+            white-space: nowrap;
             position: relative;
-            color: white;
-            font-size: 48px;
-            font-weight: bolder;
-            margin-top: 25px;
-            margin-bottom: 0;
-            /*background-image: url('file:///Assets/Textures/Bar3.png');*/
         }
 
-        .hover-underline-animation:after {
-            content: '';
+        .scroll-content {
             position: absolute;
-            width: 100%;
-            transform: scaleX(0);
-            height: 4px;
-            bottom: 0;
             left: 0;
-            background-color: #0087ca;
-            /*background-image: url('file:///Assets/Textures/Bar3.png');*/
-            transform-origin: bottom right;
-            transition: transform 0.25s ease-out;
+            transition: left 5s linear; /* Adjust time as needed */
         }
-
-        .hover-underline-animation.red:after {
-            background-color: #ca0032;
-        }
-        
-        .hover-underline-animation.orange:after {
-            background-color: #ca5100;
-        }
-        
-        .hover-underline-animation.green:after {
-            background-color: #5bca00;
-        }
-
-        .hover-underline-animation:hover:after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
-
-        .background {
-            width: 100%;
-            height: 100%;
-            position: fixed;
-            min-height: 100%;
-            background-color: rgba(0, 0, 0, 0.52);
-            top: 0;
-            z-index: -1;
-        }
-
-        .underline-bar{
-            margin-bottom: 25px;
-        }
-
-        .main-menu {
-            margin-left: 50px;
-            margin-top: 50px;
-        }
-
-        #track-radio{
-            width: 600px;
-            height: 200px;
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            background: rgba(36, 36, 36, 0.376);
-        }
-
-        .track-art{
-            display: flex;
-        }
-        .track-details{
-            margin-left: 15px;
-            margin: 15px;
-            position: relative;
-            width: inherit;
-        }
-        #track-radio img {
-            width: 200px;
-            height: 200px;
-        }
-
-        #track-radio div {
-        }
-        #track-title {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        #track-artist {
-            font-size: 18px;
-        }
-
-        .clearfix::after {
-            content: "";
-            clear: both;
-            display: table;
-        }
-        
-        #track-radio .skip-track {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            padding:15px;
-            background-color: rgba(255, 255, 255, 0.164);
-        }
-        
-        #track-radio .skip-track:hover {
-            text-decoration: underline;
-        }
-        #track-radio .skip-track a {
-            margin: 10px;
-            color: rgba(255, 255, 255, 0.842);
-            text-decoration: none;
-        }
-
-        #track-radio a {
-            margin: 10px;
-            color: rgba(255, 255, 255, 0.842);
-            text-decoration: none;
-        }
-        #track-radio a:hover {
-            color: white;
-            text-decoration: underline;
-        }
-        #track-radio-hover {
-            width: 300px;
-            height: 200px;
-            /*background-color: #f1f1f1;*/
-            position: fixed;
-            bottom: 10px;
-            right: 0; /* Initially off-screen */
-            z-index: 0;
-        }
-
-        #track-radio {
-            /*width: 300px;
-            height: 100px;
-            background-color: #f1f1f1;*/
-            position: fixed;
-            bottom: 10px;
-            right: -600px; /* Initially off-screen */
-            z-index: 100;
-            transition: right 0.5s;
-            display: flex;
-        }
-
-        #track-radio.visible {
-            right: 10px; /* Slide in */
-        }
-
     </style>
+    <link rel="stylesheet" href="css/Core.css">
+    <link rel="stylesheet" href="css/MainMenu.css">
 </head>
 
 <body>
@@ -231,8 +36,8 @@
             <img id="track-art" /> <!-- src="file:///Assets/DLC/LearnToFly/Album.png" -->
         </div>
         <div class="track-details">
-            <div id="track-title">
-                EXAMPLE TITLE
+            <div id="track-title" class="scroll-container">
+                <div id="track-title-scroll" class="scroll-content">EXAMPLE TITLE</div>
             </div>
             <div class="clearfix"></div>
             <div id="track-artist">
@@ -244,7 +49,16 @@
             </div>
         </div>
     </div>
+    <!--div id="text-container1" class="scroll-container">
+        <span id="scrolling-text1" class="scroll-content">Your long text goes here...</span>
+    </div>
+    <div id="text-container2" class="scroll-container">
+        <span id="scrolling-text2" class="scroll-content">Your looooooooong text goes here...</span>
+    </div-->
+    <script src="js/Common.js"></script>
     <script>
+        setupScrollingText('track-title', 'track-title-scroll');
+
         var timer;
         function ShowTrackRadio() {
             clearTimeout(timer);
