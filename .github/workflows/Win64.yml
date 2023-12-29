@@ -118,8 +118,6 @@ jobs:
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.pdb
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.exp
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.log
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.png
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.jpg
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.frag
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.vert
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.var
