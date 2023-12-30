@@ -38,6 +38,7 @@ public:
 
     std::string m_trackName;
     std::string m_artistName;
+    std::string m_albumName;
     std::string m_albumArtPath;
     std::string m_trackSourcePath;
     std::string m_trackFileName;

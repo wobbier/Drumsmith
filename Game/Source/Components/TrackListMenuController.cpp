@@ -47,6 +47,7 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
         json uiTrackData;
         uiTrackData["TrackName"] = trackData.m_trackName;
         uiTrackData["ArtistName"] = trackData.m_artistName;
+        uiTrackData["AlbumName"] = trackData.m_albumName;
         uiTrackData["AlbumArt"] = songImage;
         uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
         uiTrackData["NoteCount"] = trackData.m_noteData.size();
@@ -101,6 +102,7 @@ void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex
         json uiTrackData;
         uiTrackData["TrackName"] = trackData.m_trackName;
         uiTrackData["ArtistName"] = trackData.m_artistName;
+        uiTrackData["AlbumName"] = trackData.m_albumName;
         uiTrackData["AlbumArt"] = songImage;
         uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
         uiTrackData["NoteCount"] = trackData.m_noteData.size();

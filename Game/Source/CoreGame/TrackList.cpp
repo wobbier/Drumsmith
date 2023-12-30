@@ -76,6 +76,7 @@ void TrackData::OnSave( json& outJson )
     m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end()), m_noteData.end() );
     outJson["SongName"] = m_trackName;
     outJson["SongArtist"] = m_artistName;
+    outJson["AlbumName"] = m_albumName;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
     outJson["NoteSpeed"] = m_noteSpeed;
@@ -106,6 +107,10 @@ void TrackData::OnLoadConfig( const json& outJson )
     if( outJson.contains( "SongArtist" ) )
     {
         m_artistName = outJson["SongArtist"];
+    }
+    if( outJson.contains( "AlbumName" ) )
+    {
+        m_albumName = outJson["AlbumName"];
     }
     m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "Album.png";
     if ( outJson.contains("TrackFileName") )
