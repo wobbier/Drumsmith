@@ -347,7 +347,6 @@ void TrackEditor::DrawTrackControls()
         {
             if( TrackPreview )
             {
-                // I should visually display this
                 trackData.m_previewPercent = (TrackPreview->GetPositionMs() / (float)TrackPreview->GetLength());
             }
         }

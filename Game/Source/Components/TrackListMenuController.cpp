@@ -60,9 +60,11 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
 void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     ultralight::String path = args[0].ToString();
+    int index = args[1].ToInteger();
 
     LaunchPlayTrackEvent evt;
     evt.TrackID = std::string( path.utf8().data() );
+    evt.TrackIndex = index;
     evt.Fire();
 }
 

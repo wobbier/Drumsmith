@@ -24,4 +24,7 @@ public:
 
     AudioSource m_currentlyPlaying;
     SharedPtr<AudioSource> m_currentlyPlayingPtr;
+    std::vector<SharedPtr<AudioSource>> m_currentStems;
+private:
+    bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
 };

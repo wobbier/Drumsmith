@@ -1,6 +1,8 @@
 #include "TrackRadio.h"
 #include "Events/AudioEvents.h"
 #include "CoreGame/TrackList.h"
+#include "Path.h"
+
 
 void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
 {
@@ -11,20 +13,94 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
 
     Stop();
     m_currentTrack = inTrackData;
+    Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );
 
-    m_currentlyPlaying = AudioSource( m_currentTrack->m_trackSourcePath );
-    SharedPtr<AudioSource> source;
-    PlayAudioEvent evt;
-    evt.SourceName = m_currentlyPlaying.FilePath.FullPath;
-    if( inUsePreviewMarker )
     {
-        evt.StartPercent = m_currentTrack->m_previewPercent;
-    }
-    evt.Volume = 0.25f;
 
-    evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { m_currentlyPlayingPtr = loadedAudio; };
-    evt.Fire();
+        m_currentlyPlaying = AudioSource( m_currentTrack->m_trackSourcePath );
+        SharedPtr<AudioSource> source;
+        PlayAudioEvent evt;
+        if( previewPath.Exists )
+        {
+            evt.SourceName = previewPath.FullPath;
+        }
+        else
+        {
+            evt.SourceName = m_currentlyPlaying.FilePath.FullPath;
+        }
+        if( inUsePreviewMarker )
+        {
+            evt.StartPercent = m_currentTrack->m_previewPercent;
+        }
+        evt.Volume = 0.25f;
+
+        evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop(); m_currentlyPlayingPtr = loadedAudio; };
+        evt.Fire();
+    }
+
+    if( !previewPath.Exists )
+    {
+        PlayStem( "crowd.ogg", inUsePreviewMarker );
+        PlayStem( "drums_1.ogg", inUsePreviewMarker );
+        PlayStem( "drums_2.ogg", inUsePreviewMarker );
+        PlayStem( "drums_3.ogg", inUsePreviewMarker );
+        PlayStem( "drums_4.ogg", inUsePreviewMarker );
+        PlayStem( "guitar.ogg", inUsePreviewMarker );
+        PlayStem( "vocals.ogg", inUsePreviewMarker );
+        PlayStem( "rhythm.ogg", inUsePreviewMarker );
+
+        for( auto ptr : m_currentStems )
+        {
+            if( ptr )
+            {
+                if( inUsePreviewMarker )
+                {
+                    ptr->SetPositionPercent(m_currentTrack->m_previewPercent);
+                }
+                ptr->Play( true );
+                if( inUsePreviewMarker )
+                {
+                    ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
+                }
+            }
+        }
+    }
+    if( m_currentlyPlayingPtr )
+    {
+        if( inUsePreviewMarker )
+        {
+            m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
+        }
+        m_currentlyPlayingPtr->Play();
+        if( inUsePreviewMarker )
+        {
+            m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
+        }
+    }
 }
+
+
+bool TrackRadio::PlayStem( const char* inFileName, bool inUsePreviewMarker )
+{
+    Path drumsPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + inFileName );
+    if( drumsPath.Exists )
+    {
+        SharedPtr<AudioSource> source;
+        PlayAudioEvent evt;
+        evt.SourceName = drumsPath.FullPath;
+        if( inUsePreviewMarker )
+        {
+            evt.StartPercent = m_currentTrack->m_previewPercent;
+        }
+        evt.Volume = 0.25f;
+
+        evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop();  m_currentStems.push_back( loadedAudio ); };
+        evt.Fire();
+        return true;
+    }
+    return false;
+}
+
 
 void TrackRadio::Stop()
 {
@@ -32,4 +108,12 @@ void TrackRadio::Stop()
     {
         m_currentlyPlayingPtr->Stop();
     }
+    for( auto ptr : m_currentStems )
+    {
+        if( ptr )
+        {
+            ptr->Stop( true );
+        }
+    }
+    m_currentStems.clear();
 }

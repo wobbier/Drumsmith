@@ -27,6 +27,7 @@ class TrackData
     : public ConfigFile
 {
 public:
+    TrackData() = default;
     TrackData( const Path& inPath );
 
     void OnSave( json& outJson ) override;
@@ -44,6 +45,7 @@ public:
     std::string m_trackFileName;
     float m_noteSpeed = 1.f;
     float m_duration = 1.f;
+    float m_durationMS = 1.f;
     float m_previewPercent = 0.f;
     int m_bpm = 69;
     std::vector<NoteData> m_noteData;
