@@ -8,6 +8,17 @@ body{
     color: white;
 }
 
+.menu-text {
+    display: inline-block;
+    position: relative;
+    color: white;
+    font-size: 48px;
+    font-weight: bolder;
+    margin-top: 25px;
+    margin-bottom: 0;
+    /*background-image: url('file:///Assets/Textures/Bar3.png');*/
+}
+
 .hover-underline-animation {
     display: inline-block;
     position: relative;

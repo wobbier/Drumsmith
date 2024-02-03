@@ -29,6 +29,8 @@ TrackListMenuController::TrackListMenuController()
     };
 }
 
+#if USING( ME_UI )
+
 void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
 {
     BasicUIView::OnUILoad( GlobalWindow, Caller );
@@ -112,3 +114,5 @@ void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex
         ExecuteScript( "UpdateDetailsPanel(" + uiTrackData.dump() + "); " );
     }
 }
+
+#endif

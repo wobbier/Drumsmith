@@ -123,6 +123,20 @@ TrackDatabase::TrackDatabase()
         {
             if( entry.is_directory() )
             {
+                // #TODO: Support MIDI DLC files
+                bool midiFormat = fileExistsInDirectory( entry.path(), "notes.mid" );
+                if( midiFormat )
+                {
+                    continue;
+                }
+
+                // #TODO: Do we even support OPUS? I would need to convert it for fmod...
+                bool opusFormat = fileExistsInDirectory( entry.path(), "song.opus" );
+                if( opusFormat )
+                {
+                    continue;
+                }
+
                 // Check for any Custom DLC from other formats
                 bool exists = fileExistsInDirectory( entry.path(), "song.ini" );
                 if( exists )

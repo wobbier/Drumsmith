@@ -16,12 +16,20 @@ public class SharpGameProject : BaseGameProject
     public override void ConfigureWin64(Project.Configuration conf, CommonTarget target)
     {
         base.ConfigureWin64(conf, target);
-        conf.Defines.Add("LIBREMIDI_HEADER_ONLY");
-        conf.Defines.Add("LIBREMIDI_NO_BOOST");
-        conf.ExportDefines.Add("LIBREMIDI_HEADER_ONLY");
-        conf.ExportDefines.Add("LIBREMIDI_NO_BOOST");
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/libremidi/include"));
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
+        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
+        conf.LibraryFiles.Add("rtmidi");
+        conf.LibraryFiles.Add("winmm.lib");
+    }
+
+    public override void ConfigureUWP(Configuration conf, CommonTarget target)
+    {
+        base.ConfigureUWP(conf, target);
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
+        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
+        conf.LibraryFiles.Add("rtmidi");
         conf.LibraryFiles.Add("winmm.lib");
     }
 }
@@ -36,6 +44,7 @@ public class SharpGameSolution : BaseGameSolution
 
         Globals.FMOD_Win64_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/";
         Globals.FMOD_UWP_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Universal Windows Platform/";
+        Globals.MONO_Win64_Dir = string.Empty;
     }
 }
 
@@ -43,6 +52,11 @@ public class SharpGameSolution : BaseGameSolution
 public class UserGameScript : GameScript
 {
     public UserGameScript() : base() { }
+
+    public override void ConfigureAll(Configuration conf, CommonTarget target)
+    {
+        base.ConfigureAll(conf, target);
+    }
 }
 
 [Generate]

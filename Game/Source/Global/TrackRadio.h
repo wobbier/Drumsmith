@@ -19,6 +19,7 @@ public:
 
     void Play( TrackData* inTrackData, bool inUsePreviewMarker = true );
     void Stop();
+    void SetVolume( float inVolume );
 
     TrackData* m_currentTrack = nullptr;
 

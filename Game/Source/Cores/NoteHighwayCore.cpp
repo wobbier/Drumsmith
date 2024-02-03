@@ -17,7 +17,9 @@
 NoteHighwayCore::NoteHighwayCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
 {
+#if USING(ME_PLATFORM_WIN64)
     m_midi.OpenAllDevices();
+#endif
 }
 
 NoteHighwayCore::~NoteHighwayCore()
@@ -91,6 +93,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
                 }
             }
 
+#if USING(ME_PLATFORM_WIN64)
             while( m_midi.HasMessages() && !handled )
             {
                 MidiMessage msg = m_midi.GetNextMessage();
@@ -108,6 +111,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
                     }
                 }
             }
+#endif
         }
 
         // This is correct, right?

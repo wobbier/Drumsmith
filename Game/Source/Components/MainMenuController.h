@@ -11,14 +11,15 @@ public:
     MainMenuController();
     virtual ~MainMenuController();
 
+#if USING( ME_UI )
 	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
-
-	SharedPtr<AudioSource> m_currentTrack;
+    void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+#endif
 
 	void PlayNextRandomTrack();
-
-    void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-
+	SharedPtr<AudioSource> m_currentTrack;
 	Random64 m_random;
 };
 

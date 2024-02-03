@@ -48,7 +48,9 @@ private:
 
 #endif
 
+#if USING(ME_PLATFORM_WIN64)
 	MidiDeviceManager m_midi;
+#endif
 };
 
 ME_REGISTER_CORE(NoteHighwayCore)

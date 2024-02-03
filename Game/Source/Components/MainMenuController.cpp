@@ -4,6 +4,7 @@
 #include "CoreGame/TrackList.h"
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
+#include "Config/GameSettings.h"
 
 MainMenuController::MainMenuController()
     : BasicUIView( "MainMenuController" )
@@ -34,6 +35,8 @@ MainMenuController::~MainMenuController()
     TrackRadio::GetInstance().Stop();
 }
 
+#if USING( ME_UI )
+
 void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
 {
     BasicUIView::OnUILoad( GlobalWindow, Caller );
@@ -41,8 +44,31 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
     PlayNextRandomTrack();
 
     GlobalWindow["SkipTrack"] = BindJSCallback( &MainMenuController::SkipTrack );
+    GlobalWindow["SetRadioVolume"] = BindJSCallback( &MainMenuController::SetRadioVolume );
+    GlobalWindow["SaveSettings"] = BindJSCallback( &MainMenuController::SaveSettings );
 
 }
+
+void MainMenuController::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    TrackRadio::GetInstance().Stop();
+    PlayNextRandomTrack();
+}
+
+void MainMenuController::SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    float volume = (float)args[0].ToNumber();
+    volume = volume / 100.f;
+    TrackRadio::GetInstance().SetVolume(volume);
+    GameSettings::GetInstance().RadioVolume = volume;
+}
+
+void MainMenuController::SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    GameSettings::GetInstance().Save();
+}
+
+#endif
 
 void MainMenuController::PlayNextRandomTrack()
 {
@@ -56,7 +82,7 @@ void MainMenuController::PlayNextRandomTrack()
         TrackRadio::GetInstance().Play( randomElement, false );
     }
 
-    if (randomElement)
+    if( randomElement )
     {
         Path dlcTest = Path( randomElement->m_albumArtPath );
         std::string songImage = dlcTest.GetLocalPathString();
@@ -68,10 +94,4 @@ void MainMenuController::PlayNextRandomTrack()
         trackData["NoteCount"] = randomElement->m_noteData.size();
         ExecuteScript( "DisplayTrack(" + trackData.dump() + "); " );
     }
-}
-
-void MainMenuController::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    TrackRadio::GetInstance().Stop();
-    PlayNextRandomTrack();
 }

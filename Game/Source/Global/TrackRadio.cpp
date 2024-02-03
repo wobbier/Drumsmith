@@ -2,7 +2,8 @@
 #include "Events/AudioEvents.h"
 #include "CoreGame/TrackList.h"
 #include "Path.h"
-
+#include "Mathf.h"
+#include "Config/GameSettings.h"
 
 void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
 {
@@ -32,7 +33,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
         {
             evt.StartPercent = m_currentTrack->m_previewPercent;
         }
-        evt.Volume = 0.25f;
+        evt.Volume = GameSettings::GetInstance().RadioVolume;
 
         evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop(); m_currentlyPlayingPtr = loadedAudio; };
         evt.Fire();
@@ -55,7 +56,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
             {
                 if( inUsePreviewMarker )
                 {
-                    ptr->SetPositionPercent(m_currentTrack->m_previewPercent);
+                    ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
                 }
                 ptr->Play( true );
                 if( inUsePreviewMarker )
@@ -72,6 +73,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
             m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
         }
         m_currentlyPlayingPtr->Play();
+        m_currentlyPlayingPtr->SetVolume( GameSettings::GetInstance().RadioVolume );
         if( inUsePreviewMarker )
         {
             m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
@@ -92,7 +94,7 @@ bool TrackRadio::PlayStem( const char* inFileName, bool inUsePreviewMarker )
         {
             evt.StartPercent = m_currentTrack->m_previewPercent;
         }
-        evt.Volume = 0.25f;
+        evt.Volume = GameSettings::GetInstance().RadioVolume;
 
         evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop();  m_currentStems.push_back( loadedAudio ); };
         evt.Fire();
@@ -116,4 +118,12 @@ void TrackRadio::Stop()
         }
     }
     m_currentStems.clear();
+}
+
+void TrackRadio::SetVolume( float inVolume )
+{
+    if( m_currentlyPlayingPtr )
+    {
+        m_currentlyPlayingPtr->SetVolume( Mathf::Clamp( 0.f, 1.f, inVolume ) );
+    }
 }
