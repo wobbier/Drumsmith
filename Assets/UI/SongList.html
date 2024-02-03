@@ -1,79 +1,79 @@
 <!DOCTYPE html>
 <html>
-<style>
+  <style>
     body {
-        margin: 0;
-        background-color: #0000001c;
-        color: #ffffff;
+      margin: 0;
+      background-color: #0000001c;
+      color: #ffffff;
     }
     .no-select {
-        -webkit-touch-callout: none; /* iOS Safari */
-            -webkit-user-select: none; /* Safari */
-            -khtml-user-select: none; /* Konqueror HTML */
-            -moz-user-select: none; /* Old versions of Firefox */
-                -ms-user-select: none; /* Internet Explorer/Edge */
-                    user-select: none; /* Non-prefixed version, currently */
+      -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+      -khtml-user-select: none; /* Konqueror HTML */
+      -moz-user-select: none; /* Old versions of Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+      user-select: none; /* Non-prefixed version, currently */
     }
 
     .main-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh; /* Adjust this as per your requirement */
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* Adjust this as per your requirement */
     }
 
     .header {
-        height: auto;
-        padding: 5px;
+      height: auto;
+      padding: 5px;
     }
     .header a {
-        margin: 10px;
-        color: rgba(255, 255, 255, 0.842);
-        text-decoration: none;
+      margin: 10px;
+      color: rgba(255, 255, 255, 0.842);
+      text-decoration: none;
     }
     .header a:hover {
-        color: white;
-        text-decoration: underline;
+      color: white;
+      text-decoration: underline;
     }
 
     .content {
-        flex-grow: 1;
-        display: flex;
+      flex-grow: 1;
+      display: flex;
     }
 
     #background {
-        background-color: #000000ab;
-        z-index: -99;
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
+      background-color: #000000ab;
+      z-index: -99;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
     }
 
     #myDivContainer {
-        flex-grow: 1;
-        overflow: scroll;
-        padding: 5px;
-        padding-right: 15px;
+      flex-grow: 1;
+      overflow: scroll;
+      padding: 5px;
+      padding-right: 15px;
     }
 
     #trackDetails {
-        width: 25%;
-        padding: 5px;
+      width: 25%;
+      padding: 5px;
     }
 
     #trackDetails .album-art {
-        background-color: #000000ab;
+      background-color: #000000ab;
     }
-    #trackDetails .album-art img{
-        width: 100%;
-        height:auto;
+    #trackDetails .album-art img {
+      width: 100%;
+      height: auto;
     }
 
     .dynamic-div {
-        margin-bottom: 10px;
+      margin-bottom: 10px;
     }
-/* 
+    /* 
     .dynamic-div::after {
         content: '';
         position: absolute;
@@ -86,120 +86,131 @@
     }
 */
     .dynamic-div:hover {
-        background-color: rgba(97, 97, 97, 0.192);
+      background-color: rgba(97, 97, 97, 0.192);
     }
 
     .dynamic-div .album-art {
-        width: 150px;
-        height: 150px;
-        background-size: cover;
-        background-color: white;
-        float: left;
+      width: 150px;
+      height: 150px;
+      background-size: cover;
+      background-color: white;
+      float: left;
     }
 
     .dynamic-div .album-title {
-        float: left;
-        width: max-content;
-        padding-left: 10px;
+      float: left;
+      width: max-content;
+      padding-left: 10px;
     }
 
     .dynamic-div .album-stats {
-        float: left;
+      float: left;
     }
 
     .dynamic-div .note-count {
-        float: right;
+      float: right;
     }
     .clearfix::after {
-        content: "";
-        clear: both;
-        display: table;
+      content: "";
+      clear: both;
+      display: table;
     }
-</style>
+  </style>
 
-<head>
-</head>
+  <head> </head>
 
-<body>
+  <body>
     <div id="background"></div>
     <div class="main-container no-select">
-        <div class="header">
-            <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
+      <div class="header">
+        <a href="#" onclick="ToggleTrackListVisibility()">View Track List</a>
 
-            <!--a href="#" onclick="fillDivs()">Fill Divs</a-->
-            <a href="#" onclick="LoadScene('Assets/MainMenu.lvl')">Main Menu</a>
-        </div>
-        <div id="trackPanel" class="content">
-            <div id="trackDetails">
-                <div class="album-art">
-                    <img src="file:///${track.AlbumArt}" />
-                </div>
-                <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
-                    <div class="album-title">
-                        <h1>${track.TrackName}</h1>
-                        <h2>${track.ArtistName}</h2>
-                    </div>
-                    <div class="note-count">Note Count: ${track.NoteCount}</div>
-                    <div class="clearfix"></div>
-                </div>
+        <!--a href="#" onclick="fillDivs()">Fill Divs</a-->
+        <a href="#" onclick="LoadScene('Assets/MainMenu.lvl')">Main Menu</a>
+      </div>
+      <div id="trackPanel" class="content">
+        <div id="trackDetails">
+          <div class="album-art">
+            <img src="file:///${track.AlbumArt}" />
+          </div>
+          <div
+            class="dynamic-div"
+            onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();"
+            onmouseover="DelayedTrackPreview('${track.TrackIndex}')"
+          >
+            <div class="album-title">
+              <h1>${track.TrackName}</h1>
+              <h2>${track.ArtistName}</h2>
             </div>
-            <div id="myDivContainer">
-                <div class="dynamic-div" onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')">
-                    <div class="album-art"
-                        style="background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');">
-                    </div>
-                    <div class="album-title">
-                        <h1>Album Title</h1>
-                        <h2>Album Artist</h2>
-                    </div>
-                    <div class="note-count">23</div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
+            <div class="note-count">Note Count: ${track.NoteCount}</div>
+            <div class="clearfix"></div>
+          </div>
         </div>
+        <div id="myDivContainer">
+          <div
+            class="dynamic-div"
+            onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')"
+          >
+            <div
+              class="album-art"
+              style="
+                background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');
+              "
+            ></div>
+            <div class="album-title">
+              <h1>Album Title</h1>
+              <h2>Album Artist</h2>
+            </div>
+            <div class="note-count">23</div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <script>
-        var timer;
-        function DelayedTrackPreview(trackIndex) {
-            clearTimeout(timer);
-            RequestDetailsPanelUpdate(trackIndex);
-            timer = setTimeout(function() {
-                PlayTrackPreview( trackIndex );
-            }, 250);
+      var timer;
+      function DelayedTrackPreview(trackIndex) {
+        clearTimeout(timer);
+        RequestDetailsPanelUpdate(trackIndex);
+        timer = setTimeout(function () {
+          PlayTrackPreview(trackIndex);
+        }, 250);
+      }
+
+      function ClearTrackList() {
+        // Fetch the container div
+        const containerDiv = document.getElementById("myDivContainer");
+
+        // Clear previous divs
+        const oldDivs = containerDiv.querySelectorAll(".dynamic-div");
+        oldDivs.forEach((div) => div.remove());
+      }
+
+      function ToggleTrackListVisibility() {
+        var x = document.getElementById("trackPanel");
+        var bg = document.getElementById("background");
+        if (x.style.display === "none") {
+          //  || x.style.display === ""
+          x.style.display = "flex";
+        } else {
+          x.style.display = "none";
         }
 
-        function ClearTrackList() {
-            // Fetch the container div
-            const containerDiv = document.getElementById('myDivContainer');
-
-            // Clear previous divs
-            const oldDivs = containerDiv.querySelectorAll('.dynamic-div');
-            oldDivs.forEach(div => div.remove());
+        if (bg.style.display === "none") {
+          //  || x.style.display === ""
+          bg.style.display = "block";
+        } else {
+          bg.style.display = "none";
         }
+      }
 
-        function ToggleTrackListVisibility() {
-            var x = document.getElementById("trackPanel");
-            var bg = document.getElementById("background");
-            if (x.style.display === "none") { //  || x.style.display === ""
-                x.style.display = "flex";
-            } else {
-                x.style.display = "none";
-            }
-            
-            if (bg.style.display === "none") { //  || x.style.display === ""
-                bg.style.display = "block";
-            } else {
-                bg.style.display = "none";
-            }
-        }
+      function AddTrack(track) {
+        // Fetch the container div
+        const containerDiv = document.getElementById("myDivContainer");
+        const dynamicDiv = document.createElement("div");
+        dynamicDiv.classList.add("dynamic-div");
 
-        function AddTrack(track) {
-            // Fetch the container div
-            const containerDiv = document.getElementById('myDivContainer');
-            const dynamicDiv = document.createElement('div');
-            dynamicDiv.classList.add('dynamic-div');
-
-            dynamicDiv.innerHTML = `
+        dynamicDiv.innerHTML = `
             <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
             <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
             </div>
@@ -211,23 +222,22 @@
             <div class="clearfix"></div>
         </div>`;
 
-            // Create and append text content
-            //const textNode = document.createTextNode(track);
-            //dynamicDiv.appendChild(textNode);
+        // Create and append text content
+        //const textNode = document.createTextNode(track);
+        //dynamicDiv.appendChild(textNode);
 
-            //// Create and append image
-            //const image = document.createElement('img');
-            //image.src = "file:///" + imageSrc;
-            //image.alt = track;
-            //dynamicDiv.appendChild(image);
+        //// Create and append image
+        //const image = document.createElement('img');
+        //image.src = "file:///" + imageSrc;
+        //image.alt = track;
+        //dynamicDiv.appendChild(image);
 
-            containerDiv.appendChild(dynamicDiv);
-        }
-        function UpdateDetailsPanel(track)
-        {
-            const containerDiv = document.getElementById('trackDetails');
-            
-            containerDiv.innerHTML = `
+        containerDiv.appendChild(dynamicDiv);
+      }
+      function UpdateDetailsPanel(track) {
+        const containerDiv = document.getElementById("trackDetails");
+
+        containerDiv.innerHTML = `
                 <div class="album-art">
                     <img src="file:///${track.AlbumArt}" />
                 </div>
@@ -240,39 +250,46 @@
                 <div class="note-count">Note Count: ${track.NoteCount}</div>
                 <div class="clearfix"></div>
             </div>`;
-        }
-        function fillDivs() {
-            // Fetch the container div
-            const containerDiv = document.getElementById('myDivContainer');
-            //ClearTrackList();
-            // Sample data to populate the divs
-            const items = [
-                { TrackName: 'Data 1', ArtistName: 'Data 1', AlbumArt: '../DLC/ExampleSong/this_suffering_cover.jpg' },
-                { TrackName: 'Data 2', ArtistName: 'Data 2', AlbumArt: 'file:///M:/Projects/ME/Drumsmith/Assets/DLC/ExampleSong2/album.jpg' },
-                { TrackName: 'Data 3', ArtistName: 'Data 3', AlbumArt: 'image3.jpg' },
-                { TrackName: 'Data 4', ArtistName: 'Data 4', AlbumArt: 'image4.jpg' }
-            ];
+      }
+      function fillDivs() {
+        // Fetch the container div
+        const containerDiv = document.getElementById("myDivContainer");
+        //ClearTrackList();
+        // Sample data to populate the divs
+        const items = [
+          {
+            TrackName: "Data 1",
+            ArtistName: "Data 1",
+            AlbumArt: "../DLC/ExampleSong/this_suffering_cover.jpg",
+          },
+          {
+            TrackName: "Data 2",
+            ArtistName: "Data 2",
+            AlbumArt:
+              "file:///M:/Projects/ME/Drumsmith/Assets/DLC/ExampleSong2/album.jpg",
+          },
+          { TrackName: "Data 3", ArtistName: "Data 3", AlbumArt: "image3.jpg" },
+          { TrackName: "Data 4", ArtistName: "Data 4", AlbumArt: "image4.jpg" },
+        ];
 
-            // Loop through each item and create a div for it
-            items.forEach(item => {
-                AddTrack(item);
-                //const dynamicDiv = document.createElement('div');
-                //dynamicDiv.classList.add('dynamic-div');
-                //// Create and append text content
-                //const textNode = document.createTextNode(item.text);
-                //dynamicDiv.appendChild(textNode);
-                //
-                //// Create and append image
-                //const image = document.createElement('img');
-                //image.src = item.imgSrc;
-                //image.alt = item.text;
-                //dynamicDiv.appendChild(image);
-                //
-                //containerDiv.appendChild(dynamicDiv);
-            });
-        }
+        // Loop through each item and create a div for it
+        items.forEach((item) => {
+          AddTrack(item);
+          //const dynamicDiv = document.createElement('div');
+          //dynamicDiv.classList.add('dynamic-div');
+          //// Create and append text content
+          //const textNode = document.createTextNode(item.text);
+          //dynamicDiv.appendChild(textNode);
+          //
+          //// Create and append image
+          //const image = document.createElement('img');
+          //image.src = item.imgSrc;
+          //image.alt = item.text;
+          //dynamicDiv.appendChild(image);
+          //
+          //containerDiv.appendChild(dynamicDiv);
+        });
+      }
     </script>
-
-</body>
-
+  </body>
 </html>

@@ -49,6 +49,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
         PlayStem( "guitar.ogg", inUsePreviewMarker );
         PlayStem( "vocals.ogg", inUsePreviewMarker );
         PlayStem( "rhythm.ogg", inUsePreviewMarker );
+        PlayStem( "keys.ogg", inUsePreviewMarker );
 
         for( auto ptr : m_currentStems )
         {
@@ -59,6 +60,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
                     ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
                 }
                 ptr->Play( true );
+                ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
                 if( inUsePreviewMarker )
                 {
                     ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
@@ -122,8 +124,17 @@ void TrackRadio::Stop()
 
 void TrackRadio::SetVolume( float inVolume )
 {
+    float volumeClamped = Mathf::Clamp( 0.f, 1.f, inVolume );
     if( m_currentlyPlayingPtr )
     {
-        m_currentlyPlayingPtr->SetVolume( Mathf::Clamp( 0.f, 1.f, inVolume ) );
+        m_currentlyPlayingPtr->SetVolume( volumeClamped );
+    }
+
+    for( auto ptr : m_currentStems )
+    {
+        if( ptr )
+        {
+            ptr->SetVolume( volumeClamped );
+        }
     }
 }

@@ -42,6 +42,7 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
     BasicUIView::OnUILoad( GlobalWindow, Caller );
 
     PlayNextRandomTrack();
+    ExecuteScript( "setRadioInitialValue(" + std::to_string( GameSettings::GetInstance().RadioVolume * 100 ) + ")" );
 
     GlobalWindow["SkipTrack"] = BindJSCallback( &MainMenuController::SkipTrack );
     GlobalWindow["SetRadioVolume"] = BindJSCallback( &MainMenuController::SetRadioVolume );

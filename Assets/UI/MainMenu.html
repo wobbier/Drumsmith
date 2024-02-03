@@ -2,7 +2,6 @@
   <head>
     <style>
       .scroll-container {
-        width: 100px;
         /* Adjust as needed */
         height: 50px;
         overflow: hidden;
@@ -101,7 +100,7 @@
       <div class="track-details">
         <div id="track-title" class="scroll-container">
           <div id="track-title-scroll" class="scroll-content">
-            EXAMPLE TITLE
+            EXAMPLE TITLEAAAAAAAAAAAAAAAAAA
           </div>
         </div>
         <div class="clearfix"></div>
@@ -112,21 +111,12 @@
         </div>
       </div>
     </div>
-    <div id="text-container1" class="scroll-container">
-      <span id="scrolling-text1" class="scroll-content"
-        >Your long text goes here...</span
-      >
-    </div>
-    <div id="text-container2" class="scroll-container">
-      <span id="scrolling-text2" class="scroll-content"
-        >Your looooooooong text goes here...</span
-      >
-    </div>
     <script src="js/Common.js"></script>
     <script>
-      setupScrollingText("track-title", "track-title-scroll");
-      setupScrollingText("text-container1", "scroll-container");
-      setupScrollingText("text-container2", "scroll-container");
+      const titleTrackScrolling = setupScrollingText(
+        "track-title",
+        "track-title-scroll"
+      );
 
       var timer;
       function ShowTrackRadio() {
@@ -152,8 +142,9 @@
         var imageContainer = document.getElementById("track-art");
         imageContainer.src = `file:///${track.AlbumArt}`;
 
-        var trackTitle = document.getElementById("track-title");
-        trackTitle.textContent = `${track.TrackName}`;
+        //var trackTitle = document.getElementById("track-title");
+        //trackTitle.textContent = `${track.TrackName}`;
+        titleTrackScrolling.updateText(`${track.TrackName}`);
 
         var trackArtist = document.getElementById("track-artist");
         trackArtist.textContent = `${track.ArtistName}`;
@@ -188,6 +179,10 @@
           menu.classList.add("active");
           content.classList.add("content-fade");
         }
+      }
+
+      function setRadioInitialValue(value) {
+        document.getElementById("radio-volume").value = value;
       }
     </script>
     <script>
