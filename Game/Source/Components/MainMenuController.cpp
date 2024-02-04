@@ -47,6 +47,7 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
     GlobalWindow["SkipTrack"] = BindJSCallback( &MainMenuController::SkipTrack );
     GlobalWindow["SetRadioVolume"] = BindJSCallback( &MainMenuController::SetRadioVolume );
     GlobalWindow["SaveSettings"] = BindJSCallback( &MainMenuController::SaveSettings );
+    GlobalWindow["ConvertCustomDLC"] = BindJSCallback( &MainMenuController::ConvertCustomDLC );
 
 }
 
@@ -67,6 +68,11 @@ void MainMenuController::SetRadioVolume( const ultralight::JSObject& thisObject,
 void MainMenuController::SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     GameSettings::GetInstance().Save();
+}
+
+void MainMenuController::ConvertCustomDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    TrackDatabase::GetInstance().ExportMidiTrackMetaData();
 }
 
 #endif

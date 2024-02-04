@@ -16,6 +16,7 @@ public:
     void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void ConvertCustomDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
 #endif
 
 	void PlayNextRandomTrack();

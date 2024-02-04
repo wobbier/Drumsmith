@@ -24,16 +24,19 @@ struct NoteData
 };
 
 class TrackData
-    : public ConfigFile
 {
 public:
     TrackData() = default;
     TrackData( const Path& inPath );
 
-    void OnSave( json& outJson ) override;
+    void Save();
+    void Load();
 
+    void OnSaveTrackData( json& outJson );
+    void OnSaveNoteData( json& outJson );
 
-    void OnLoadConfig( const json& outJson ) override;
+    void OnLoadTrackData( const json& outJson );
+    void OnLoadNoteData( const json& outJson );
 
     void LoadNoteData();
 
@@ -48,7 +51,11 @@ public:
     float m_durationMS = 1.f;
     float m_previewPercent = 0.f;
     int m_bpm = 69;
+
     std::vector<NoteData> m_noteData;
+
+private:
+    std::string m_directory;
 };
 
 class TrackList
@@ -68,6 +75,8 @@ class TrackDatabase
     ME_SINGLETON_DEFINITION( TrackDatabase );
 public:
     TrackDatabase();
+
+    void ExportMidiTrackMetaData();
 
     TrackList m_trackList;
 };

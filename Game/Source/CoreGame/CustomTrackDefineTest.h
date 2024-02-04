@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 #include "Singleton.h"
+#include "Path.h"
 
 struct SyncTrack
 {
@@ -51,4 +52,5 @@ public:
 
     LegacySongMetaData readSongMetaData( const std::string& filePath );
     Song readSongFile( const std::string& filePath );
+    bool ParseMidi( Path& inFilePath );
 };

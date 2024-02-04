@@ -18,8 +18,6 @@ public:
     void RequestDetailsPanelUpdate_Internal( int trackIndex );
 #endif
 
-	TrackDatabase m_database;
-
 	SharedPtr<AudioSource> m_currentTrack;
 };
 

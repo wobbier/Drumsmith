@@ -17,9 +17,11 @@ public class SharpGameProject : BaseGameProject
     {
         base.ConfigureWin64(conf, target);
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/midifile/include"));
         conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
         conf.LibraryFiles.Add("rtmidi");
+        conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
     }
 
@@ -27,9 +29,11 @@ public class SharpGameProject : BaseGameProject
     {
         base.ConfigureUWP(conf, target);
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/midifile/include"));
         conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
         conf.LibraryFiles.Add("rtmidi");
+        conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
     }
 }

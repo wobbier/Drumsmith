@@ -42,6 +42,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
     if( !previewPath.Exists )
     {
         PlayStem( "crowd.ogg", inUsePreviewMarker );
+        PlayStem( "drums.ogg", inUsePreviewMarker );
         PlayStem( "drums_1.ogg", inUsePreviewMarker );
         PlayStem( "drums_2.ogg", inUsePreviewMarker );
         PlayStem( "drums_3.ogg", inUsePreviewMarker );
@@ -125,14 +126,14 @@ void TrackRadio::Stop()
 void TrackRadio::SetVolume( float inVolume )
 {
     float volumeClamped = Mathf::Clamp( 0.f, 1.f, inVolume );
-    if( m_currentlyPlayingPtr )
+    if( m_currentlyPlayingPtr && m_currentlyPlayingPtr->IsPlaying() )
     {
         m_currentlyPlayingPtr->SetVolume( volumeClamped );
     }
 
     for( auto ptr : m_currentStems )
     {
-        if( ptr )
+        if( ptr && ptr->IsPlaying() )
         {
             ptr->SetVolume( volumeClamped );
         }

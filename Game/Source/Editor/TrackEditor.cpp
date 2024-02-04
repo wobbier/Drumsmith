@@ -443,7 +443,6 @@ void TrackEditor::DrawMenuBar()
 
             if( ImGui::MenuItem( "Save Track" ) )
             {
-                trackData.Clear();
                 trackData.Save();
             }
             ImGui::EndMenu();

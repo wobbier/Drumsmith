@@ -8,3 +8,6 @@
 [submodule "ThirdParty/rtmidi"]
 	path = ThirdParty/rtmidi
 	url = https://github.com/thestk/rtmidi
+[submodule "ThirdParty/midifile"]
+	path = ThirdParty/midifile
+	url = https://github.com/craigsapp/midifile

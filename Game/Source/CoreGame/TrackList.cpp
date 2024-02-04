@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "Core\Assert.h"
 #include "CustomTrackDefineTest.h"
+#include "JSON.h"
 
 DISABLE_OPTIMIZATION;
 
@@ -58,9 +59,6 @@ TrackData ConvertFromLegacy( const std::string& inTrackDirectory, Song& inLegacy
     // bro 💀 https://xkcd.com/927/
     LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( inTrackDirectory + "/song.ini" );
 
-    // We want a clean file for now.
-    outNewTrack.Clear();
-
     outNewTrack.m_trackName = metadata.m_name;
     outNewTrack.m_artistName = metadata.m_artist;
     if( metadata.m_previewStartTime > 0 )
@@ -96,14 +94,14 @@ TrackData ConvertFromLegacy( const std::string& inTrackDirectory, Song& inLegacy
     outNewTrack.m_noteSpeed = 10;//(float)inLegacyData.syncTracks[0].value >> 3;
 
 
-    for (auto& mapIt : inLegacyData.easyDrums)
+    for( auto& mapIt : inLegacyData.easyDrums )
     {
         for( auto& it : mapIt.second )
         {
             NoteData newNote;
             newNote.m_triggerTime = it.time / 1000.f;
             newNote.m_triggerTimeMS = it.time;
-            newNote.m_editorLane = ConvertLegacyPad(it.values[0]);
+            newNote.m_editorLane = ConvertLegacyPad( it.values[0] );
             newNote.m_noteName = PadUtils::GetPadId( newNote.m_editorLane );
             outNewTrack.m_noteData.emplace_back( newNote );
         }
@@ -117,7 +115,7 @@ TrackData ConvertFromLegacy( const std::string& inTrackDirectory, Song& inLegacy
 TrackDatabase::TrackDatabase()
 {
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;  // Replace with your directory path
-
+    std::vector<Path> m_drumlessSongs;
     try {
         for( const auto& entry : fs::directory_iterator( rootPath ) )
         {
@@ -127,6 +125,12 @@ TrackDatabase::TrackDatabase()
                 bool midiFormat = fileExistsInDirectory( entry.path(), "notes.mid" );
                 if( midiFormat )
                 {
+                    //Path midiPath = Path( std::string( entry.path().u8string() ) );
+                    //    
+                    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                    //{
+                    //    m_drumlessSongs.push_back( midiPath );
+                    //}
                     continue;
                 }
 
@@ -134,6 +138,7 @@ TrackDatabase::TrackDatabase()
                 bool opusFormat = fileExistsInDirectory( entry.path(), "song.opus" );
                 if( opusFormat )
                 {
+                    YIKES( entry.path().u8string().c_str() );
                     continue;
                 }
 
@@ -148,7 +153,7 @@ TrackDatabase::TrackDatabase()
                         rbCustomTrack = CustomTrackDefineTest::GetInstance().readSongFile( chartFilePath.FullPath );
                     }
                     TrackData newTrack = TrackData( Path( chartFilePath.GetDirectoryString() + "/NoteData.txt" ) );
-                    
+
                     m_trackList.m_tracks.push_back( ConvertFromLegacy( chartFilePath.GetDirectoryString(), rbCustomTrack, newTrack ) );
                     //newTrack.Save();
                 }
@@ -173,25 +178,99 @@ TrackDatabase::TrackDatabase()
         std::cout << e.what() << std::endl;
     }
 
+    for (auto& path : m_drumlessSongs)
+    {
+        YIKES(path.FullPath.c_str());
+    }
+}
+
+void TrackDatabase::ExportMidiTrackMetaData()
+{
+    fs::path rootPath = Path( "Assets/DLC" ).FullPath;
+    try {
+        for( const auto& entry : fs::directory_iterator( rootPath ) )
+        {
+            if( !entry.is_directory() )
+            {
+                continue;
+            }
+
+            // #TODO: Support MIDI DLC files
+            bool midiFormat = fileExistsInDirectory( entry.path(), "notes.mid" );
+            if( midiFormat )
+            {
+                Path midiPath = Path( std::string( entry.path().u8string() ) );
+
+                LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( midiPath.FullPath + "/song.ini" );
+
+                json iniMetaData;
+                iniMetaData["TrackName"] = metadata.m_name;
+
+                File iniOutput( Path( midiPath.FullPath + "/TrackData.txt" ) );
+                iniOutput.Write( iniMetaData.dump( 1 ) );
+
+                if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                {
+                }
+                continue;
+            }
+        }
+    }
+    catch( fs::filesystem_error& e ) {
+        std::cout << e.what() << std::endl;
+    }
 }
 
 TrackData::TrackData( const Path& inPath )
-    : ConfigFile( inPath )
 {
-
+    if( inPath.IsFile )
+    {
+        m_directory = inPath.GetDirectoryString();
+    }
+    else
+    {
+        m_directory = inPath.FullPath;
+    }
 }
 
-void TrackData::OnSave( json& outJson )
+void TrackData::Save()
 {
-    std::sort( m_noteData.begin(), m_noteData.end(), []( NoteData& first, NoteData& second )
+    {
+        json metaData;
+        OnSaveTrackData( metaData );
+        File metaFile( Path( m_directory + "/TrackData.txt" ) );
+        metaFile.Write( metaData.dump( 1 ) );
+    }
+
+    if( !m_noteData.empty() )
+    {
+        json metaData;
+        OnSaveNoteData( metaData );
+        File metaFile( Path( m_directory + "/NoteData.txt" ) );
+        metaFile.Write( metaData.dump( 1 ) );
+    }
+}
+
+void TrackData::Load()
+{
+    {
+        Path trackDataFile( m_directory + "/TrackData.txt" );
+        if( trackDataFile.Exists )
         {
-            if( first.m_triggerTime != second.m_triggerTime )
-            {
-                return first.m_triggerTime < second.m_triggerTime;
-            }
-            return first.m_editorLane < second.m_editorLane;
-        } );
-    m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
+            File metaFile( trackDataFile );
+            json metaData = json::parse( metaFile.Read() );
+            OnLoadTrackData( metaData );
+        }
+    }
+    //{
+    //    File metaFile( Path( m_directory + "/NoteData.txt" ) );
+    //    json metaData = json::parse( metaFile.Read() );
+    //    OnLoadConfig( metaData );
+    //}
+}
+
+void TrackData::OnSaveTrackData( json& outJson )
+{
     outJson["SongName"] = m_trackName;
     outJson["SongArtist"] = m_artistName;
     outJson["AlbumName"] = m_albumName;
@@ -202,6 +281,19 @@ void TrackData::OnSave( json& outJson )
     outJson["BPM"] = m_bpm;
     outJson["TrackFileName"] = m_trackFileName;
     outJson["PreviewPercent"] = m_previewPercent;
+}
+
+void TrackData::OnSaveNoteData( json& outJson )
+{
+    std::sort( m_noteData.begin(), m_noteData.end(), []( NoteData& first, NoteData& second )
+        {
+            if( first.m_triggerTime != second.m_triggerTime )
+            {
+                return first.m_triggerTime < second.m_triggerTime;
+            }
+            return first.m_editorLane < second.m_editorLane;
+        } );
+    m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
 
     json& noteData = outJson["Notes"];
     for( NoteData& note : m_noteData )
@@ -216,7 +308,7 @@ void TrackData::OnSave( json& outJson )
     }
 }
 
-void TrackData::OnLoadConfig( const json& outJson )
+void TrackData::OnLoadTrackData( const json& outJson )
 {
     if( outJson.contains( "SongName" ) )
     {
@@ -230,16 +322,16 @@ void TrackData::OnLoadConfig( const json& outJson )
     {
         m_albumName = outJson["AlbumName"];
     }
-    m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "Album.png";
+    m_albumArtPath = m_directory + "/Album.png";
     if( outJson.contains( "TrackFileName" ) )
     {
         m_trackFileName = outJson["TrackFileName"];
-        m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + std::string( outJson["TrackFileName"] );
+        m_trackSourcePath = m_directory + "/" + std::string( outJson["TrackFileName"] );
     }
     else
     {
         m_trackFileName = "Track.mp3";
-        m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + m_trackFileName;
+        m_trackSourcePath = m_directory + "/" + m_trackFileName;
     }
 
     if( outJson.contains( "PreviewPercent" ) )
@@ -252,13 +344,22 @@ void TrackData::OnLoadConfig( const json& outJson )
     m_bpm = outJson["BPM"];
 }
 
+void TrackData::OnLoadNoteData( const json& outJson )
+{
+
+}
+
 void TrackData::LoadNoteData()
 {
     // #TODO: Temp, might be a custom format charted file
-    if( !m_configFile.FilePath.Exists )
+    Path noteDataFile( m_directory + "/NoteData.txt" );
+    if( !noteDataFile.Exists )
     {
         return;
     }
+
+    File metaFile( noteDataFile );
+    json Root = json::parse( metaFile.Read() );
 
     ME_ASSERT_MSG( !Root.empty(), "Trying to read an empty track file." );
 

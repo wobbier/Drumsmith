@@ -1,5 +1,7 @@
 #include "CustomTrackDefineTest.h"
 #include "Dementia.h"
+#include "MidiFile.h"
+#include "Options.h"
 DISABLE_OPTIMIZATION;
 
 
@@ -135,7 +137,68 @@ Song CustomTrackDefineTest::readSongFile( const std::string& filePath )
         }
     }
     song.noteCount = noteTotal;
-
+    ParseMidi( Path(filePath) );
     return song;
+}
+
+bool CustomTrackDefineTest::ParseMidi(Path& inFilePath)
+{
+    smf::MidiFile midifile;
+    midifile.read( Path( inFilePath.FullPath + "/notes.mid" ).FullPath );
+    midifile.doTimeAnalysis();
+    midifile.linkNotePairs();
+    //midifile.splitTracks();
+
+    int tracks = midifile.getTrackCount();
+
+    {
+        bool foundTrackName = false;
+        bool hasDrums = false;
+        for( int track = 0; track < tracks; track++ ) {
+            if( hasDrums )
+            {
+                break;
+            }
+
+            for( int event = 0; event < midifile[track].size(); event++ ) {
+                if( midifile[track][event].isTrackName() )
+                {
+                    std::cout << midifile[track][event].getMetaContent().c_str() << std::endl;
+                    if( midifile[track][event].getMetaContent() == "PART DRUMS" )
+                    {
+                        hasDrums = true;
+                        break;
+                    }
+                    foundTrackName = true;
+                }
+                else
+                {
+                    //break;
+                }
+            }
+        }
+        return hasDrums;
+    }
+    std::cout << "TPQ: " << midifile.getTicksPerQuarterNote() << std::endl;
+    if( tracks > 1 ) std::cout << "TRACKS: " << tracks << std::endl;
+    for( int track = 0; track < tracks; track++ ) {
+        if( tracks > 1 ) std::cout << "\nTrack " << track << std::endl;
+        std::cout << "Tick\tSeconds\tDur\tMessage" << std::endl;
+        for( int event = 0; event < midifile[track].size(); event++ ) {
+            if( midifile[track][event].isTrackName() )
+            {
+                std::cout << midifile[track][event].getMetaContent().c_str();
+            }
+            std::cout << std::dec << midifile[track][event].tick;
+            std::cout << '\t' << std::dec << midifile[track][event].seconds;
+            std::cout << '\t';
+            if( midifile[track][event].isNoteOn() )
+                std::cout << midifile[track][event].getDurationInSeconds();
+            std::cout << '\t' << std::hex;
+            for( int i = 0; i < midifile[track][event].size(); i++ )
+                std::cout << (int)midifile[track][event][i] << ' ';
+            std::cout << std::endl;
+        }
+    }
 }
 
