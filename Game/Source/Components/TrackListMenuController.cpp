@@ -51,6 +51,9 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
         uiTrackData["ArtistName"] = trackData.m_artistName;
         uiTrackData["AlbumName"] = trackData.m_albumName;
         uiTrackData["AlbumArt"] = songImage;
+        uiTrackData["Genre"] = trackData.m_genre;
+        uiTrackData["Year"] = trackData.m_year;
+        uiTrackData["Icon"] = trackData.m_icon;
         uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
         uiTrackData["NoteCount"] = trackData.m_noteData.size();
         uiTrackData["TrackIndex"] = i;
@@ -64,6 +67,7 @@ void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thi
     ultralight::String path = args[0].ToString();
     int index = args[1].ToInteger();
 
+    TrackRadio::GetInstance().Stop();
     LaunchPlayTrackEvent evt;
     evt.TrackID = std::string( path.utf8().data() );
     evt.TrackIndex = index;
@@ -107,6 +111,9 @@ void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex
         uiTrackData["TrackName"] = trackData.m_trackName;
         uiTrackData["ArtistName"] = trackData.m_artistName;
         uiTrackData["AlbumName"] = trackData.m_albumName;
+        uiTrackData["Genre"] = trackData.m_genre;
+        uiTrackData["Year"] = trackData.m_year;
+        uiTrackData["Icon"] = trackData.m_icon;
         uiTrackData["AlbumArt"] = songImage;
         uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
         uiTrackData["NoteCount"] = trackData.m_noteData.size();

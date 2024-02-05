@@ -47,10 +47,12 @@ private:
 	virtual void OnEditorInspect() final;
 
 #endif
+    bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
 
 #if USING(ME_PLATFORM_WIN64)
 	MidiDeviceManager m_midi;
 #endif
+    std::vector<SharedPtr<AudioSource>> m_currentStems;
 };
 
 ME_REGISTER_CORE(NoteHighwayCore)

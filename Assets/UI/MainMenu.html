@@ -17,10 +17,10 @@
       }
 
       .menu {
-        width: 400px;
+        width: 500px;
         position: fixed;
         top: 50px;
-        left: -400px;
+        left: -500px;
         /* Start offscreen */
         opacity: 0;
         transition: left 0.3s ease, opacity 0.3s ease;
@@ -70,14 +70,15 @@
         class="hover-underline-animation"
         onclick="toggleMenu(); SaveSettings()"
       >
-        Back
+        < Back
       </p>
       <br />
       <br />
       <p class="menu-text">Enable Radio</p>
       <input type="checkbox" name="EnableRadio" id="radio-enabled" />
       <br />
-      <p class="menu-text">Radio Volume</p>
+      <p class="menu-text" id="menu-volume-text">Radio Volume</p>
+      <br />
       <input
         type="range"
         name="RadioVolume"
@@ -88,7 +89,9 @@
         value="50"
       />
       <br />
-      <input type="text" name="TestText" id="test-text" />
+      <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">
+        Convert Custom DLC
+      </p>
     </div>
 
     <div id="track-radio-hover" onmouseover="ShowTrackRadio()"></div>
@@ -183,6 +186,9 @@
 
       function setRadioInitialValue(value) {
         document.getElementById("radio-volume").value = value;
+        document.getElementById(
+          "menu-volume-text"
+        ).textContent = `Radio Volume: ${value}%`;
       }
     </script>
     <script>
@@ -190,6 +196,9 @@
         document
           .getElementById("radio-volume")
           .addEventListener("input", function () {
+            document.getElementById(
+              "menu-volume-text"
+            ).textContent = `Radio Volume: ${this.value}%`;
             SetRadioVolume(this.value);
           });
       });

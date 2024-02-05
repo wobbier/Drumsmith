@@ -54,13 +54,16 @@ PadId ConvertLegacyPad( int inPad )
 }
 
 
-TrackData ConvertFromLegacy( const std::string& inTrackDirectory, Song& inLegacyData, TrackData& outNewTrack )
+LegacySongMetaData ConvertFromLegacy( const std::string& inTrackDirectory, TrackData& outNewTrack )
 {
     // bro 💀 https://xkcd.com/927/
     LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( inTrackDirectory + "/song.ini" );
 
     outNewTrack.m_trackName = metadata.m_name;
     outNewTrack.m_artistName = metadata.m_artist;
+    outNewTrack.m_genre = metadata.m_genre;
+    outNewTrack.m_year = std::stoi( metadata.m_year );
+    outNewTrack.m_icon = metadata.m_icon;
     if( metadata.m_previewStartTime > 0 )
     {
         outNewTrack.m_previewPercent = ( metadata.m_previewStartTime / (float)metadata.m_songLength );
@@ -73,43 +76,31 @@ TrackData ConvertFromLegacy( const std::string& inTrackDirectory, Song& inLegacy
     {
         albumArtPath = Path( inTrackDirectory + "/album.png" );
     }
+    ME_ASSERT( albumArtPath.Exists );
     outNewTrack.m_albumArtPath = albumArtPath.GetLocalPathString();
 
     // I don't know how much this differs from chart to chart
 
-    Path songFile( inTrackDirectory + "song.ogg" );
+    Path songFile( inTrackDirectory + "/song.ogg" );
     if( !songFile.Exists )
     {
         // opus will require some manual converting... as fmod doesn't support this type atm
-        outNewTrack.m_trackFileName = "song.opus";
-        outNewTrack.m_trackSourcePath = inTrackDirectory + "song.opus";
+        //outNewTrack.m_trackFileName = "song.opus";
+        //outNewTrack.m_trackSourcePath = inTrackDirectory + "song.opus";
     }
     else
     {
         outNewTrack.m_trackFileName = "song.ogg";
-        outNewTrack.m_trackSourcePath = inTrackDirectory + "song.ogg";
+        outNewTrack.m_trackSourcePath = inTrackDirectory + "/song.ogg";
     }
 
     outNewTrack.m_bpm = 110;//(float)inLegacyData.syncTracks[0].value >> 3;
     outNewTrack.m_noteSpeed = 10;//(float)inLegacyData.syncTracks[0].value >> 3;
 
-
-    for( auto& mapIt : inLegacyData.easyDrums )
-    {
-        for( auto& it : mapIt.second )
-        {
-            NoteData newNote;
-            newNote.m_triggerTime = it.time / 1000.f;
-            newNote.m_triggerTimeMS = it.time;
-            newNote.m_editorLane = ConvertLegacyPad( it.values[0] );
-            newNote.m_noteName = PadUtils::GetPadId( newNote.m_editorLane );
-            outNewTrack.m_noteData.emplace_back( newNote );
-        }
-    }
     outNewTrack.m_bpm = 180.f;
 
     outNewTrack.Save();
-    return outNewTrack;
+    return metadata;
 }
 
 TrackDatabase::TrackDatabase()
@@ -121,16 +112,16 @@ TrackDatabase::TrackDatabase()
         {
             if( entry.is_directory() )
             {
-                // #TODO: Support MIDI DLC files
-                bool midiFormat = fileExistsInDirectory( entry.path(), "notes.mid" );
-                if( midiFormat )
+                // #TODO: Support CHART DLC files
+                bool chartFormat = fileExistsInDirectory( entry.path(), "notes.chart" );
+                if( chartFormat )
                 {
-                    //Path midiPath = Path( std::string( entry.path().u8string() ) );
-                    //    
-                    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
-                    //{
-                    //    m_drumlessSongs.push_back( midiPath );
-                    //}
+                //    //Path midiPath = Path( std::string( entry.path().u8string() ) );
+                //    //    
+                //    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                //    //{
+                //    //    m_drumlessSongs.push_back( midiPath );
+                //    //}
                     continue;
                 }
 
@@ -143,26 +134,26 @@ TrackDatabase::TrackDatabase()
                 }
 
                 // Check for any Custom DLC from other formats
-                bool exists = fileExistsInDirectory( entry.path(), "song.ini" );
-                if( exists )
+                //bool exists = fileExistsInDirectory( entry.path(), "song.ini" );
+                //if( exists )
+                //{
+                //    Path chartFilePath = Path( entry.path().u8string() + "/notes.chart" );
+                //    Song rbCustomTrack;
+                //    if( chartFilePath.Exists )
+                //    {
+                //        rbCustomTrack = CustomTrackDefineTest::GetInstance().readSongFile( chartFilePath.FullPath );
+                //    }
+                //    TrackData newTrack = TrackData( Path( chartFilePath.GetDirectoryString() + "/NoteData.txt" ) );
+                //
+                //    m_trackList.m_tracks.push_back( ConvertFromLegacy( chartFilePath.GetDirectoryString(), rbCustomTrack, newTrack ) );
+                //    //newTrack.Save();
+                //}
+                //else
                 {
-                    Path chartFilePath = Path( entry.path().u8string() + "/notes.chart" );
-                    Song rbCustomTrack;
-                    if( chartFilePath.Exists )
-                    {
-                        rbCustomTrack = CustomTrackDefineTest::GetInstance().readSongFile( chartFilePath.FullPath );
-                    }
-                    TrackData newTrack = TrackData( Path( chartFilePath.GetDirectoryString() + "/NoteData.txt" ) );
-
-                    m_trackList.m_tracks.push_back( ConvertFromLegacy( chartFilePath.GetDirectoryString(), rbCustomTrack, newTrack ) );
-                    //newTrack.Save();
-                }
-                else
-                {
-                    bool exists = fileExistsInDirectory( entry.path(), "NoteData.txt" );
+                    bool exists = fileExistsInDirectory( entry.path(), "TrackData.txt" );
                     if( exists )
                     {
-                        m_trackList.m_tracks.emplace_back( TrackData( Path( entry.path().u8string() + "/NoteData.txt" ) ) );
+                        m_trackList.m_tracks.emplace_back( TrackData( Path( entry.path().u8string() + "/TrackData.txt" ) ) );
                         m_trackList.m_tracks.back().Load();
                         std::cout << "File exists in directory: " << entry.path().u8string() << std::endl;
                     }
@@ -178,9 +169,9 @@ TrackDatabase::TrackDatabase()
         std::cout << e.what() << std::endl;
     }
 
-    for (auto& path : m_drumlessSongs)
+    for( auto& path : m_drumlessSongs )
     {
-        YIKES(path.FullPath.c_str());
+        YIKES( path.FullPath.c_str() );
     }
 }
 
@@ -201,17 +192,20 @@ void TrackDatabase::ExportMidiTrackMetaData()
             {
                 Path midiPath = Path( std::string( entry.path().u8string() ) );
 
-                LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( midiPath.FullPath + "/song.ini" );
-
-                json iniMetaData;
-                iniMetaData["TrackName"] = metadata.m_name;
-
-                File iniOutput( Path( midiPath.FullPath + "/TrackData.txt" ) );
-                iniOutput.Write( iniMetaData.dump( 1 ) );
-
-                if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                TrackData newTrack = TrackData( Path( midiPath.FullPath + "/NoteData.txt" ) );
+                LegacySongMetaData legacyTrack = ConvertFromLegacy( midiPath.FullPath, newTrack );
+                if( CustomTrackDefineTest::GetInstance().ParseMidi( midiPath, newTrack, legacyTrack ) )
                 {
+                    m_trackList.m_tracks.push_back( newTrack );
                 }
+                //LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( midiPath.FullPath + "/song.ini" );
+                //
+                //json iniMetaData;
+                //iniMetaData["TrackName"] = metadata.m_name;
+                //
+                //File iniOutput( Path( midiPath.FullPath + "/TrackData.txt" ) );
+                //iniOutput.Write( iniMetaData.dump( 1 ) );
+
                 continue;
             }
         }
@@ -274,6 +268,11 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["SongName"] = m_trackName;
     outJson["SongArtist"] = m_artistName;
     outJson["AlbumName"] = m_albumName;
+    outJson["Genre"] = m_genre;
+    outJson["Year"] = m_year;
+    outJson["Icon"] = m_icon;
+    outJson["AlbumArtPath"] = m_albumArtPath;
+    outJson["AlbumArtFileName"] = m_albumArtFilename;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
     outJson["NoteSpeed"] = m_noteSpeed;
@@ -281,6 +280,7 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["BPM"] = m_bpm;
     outJson["TrackFileName"] = m_trackFileName;
     outJson["PreviewPercent"] = m_previewPercent;
+    outJson["NoteCount"] = m_noteCount;
 }
 
 void TrackData::OnSaveNoteData( json& outJson )
@@ -322,7 +322,31 @@ void TrackData::OnLoadTrackData( const json& outJson )
     {
         m_albumName = outJson["AlbumName"];
     }
+    if( outJson.contains( "Genre" ) )
+    {
+        m_genre = outJson["Genre"];
+    }
+    if( outJson.contains( "Year" ) )
+    {
+        m_year = outJson["Year"];
+    }
+    if( outJson.contains( "Icon" ) )
+    {
+        m_icon = outJson["Icon"];
+    }
+    if( outJson.contains( "NoteCount" ) )
+    {
+        m_noteCount = outJson["NoteCount"];
+    }
     m_albumArtPath = m_directory + "/Album.png";
+    if( outJson.contains( "AlbumArtPath" ) )
+    {
+        m_albumArtPath = outJson["AlbumArtPath"];
+    }
+    if( outJson.contains( "AlbumArtFilename" ) )
+    {
+        m_albumArtFilename = outJson["AlbumArtFilename"];
+    }
     if( outJson.contains( "TrackFileName" ) )
     {
         m_trackFileName = outJson["TrackFileName"];
@@ -339,9 +363,18 @@ void TrackData::OnLoadTrackData( const json& outJson )
         m_previewPercent = outJson["PreviewPercent"];
     }
 
-    m_noteSpeed = outJson["NoteSpeed"];
-    m_duration = outJson["Duration"];
-    m_bpm = outJson["BPM"];
+    if( outJson.contains( "NoteSpeed" ) )
+    {
+        m_noteSpeed = outJson["NoteSpeed"];
+    }
+    if( outJson.contains( "Duration" ) )
+    {
+        m_duration = outJson["Duration"];
+    }
+    if( outJson.contains( "BPM" ) )
+    {
+        m_bpm = outJson["BPM"];
+    }
 }
 
 void TrackData::OnLoadNoteData( const json& outJson )

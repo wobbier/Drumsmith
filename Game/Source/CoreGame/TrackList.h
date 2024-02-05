@@ -43,7 +43,11 @@ public:
     std::string m_trackName;
     std::string m_artistName;
     std::string m_albumName;
+    std::string m_genre;
+    std::string m_icon;
+    int m_year = 1994;
     std::string m_albumArtPath;
+    std::string m_albumArtFilename;
     std::string m_trackSourcePath;
     std::string m_trackFileName;
     float m_noteSpeed = 1.f;
@@ -51,6 +55,8 @@ public:
     float m_durationMS = 1.f;
     float m_previewPercent = 0.f;
     int m_bpm = 69;
+    int m_noteCount = 0;
+    bool m_proDrums = false;
 
     std::vector<NoteData> m_noteData;
 

@@ -106,7 +106,6 @@ bool TrackRadio::PlayStem( const char* inFileName, bool inUsePreviewMarker )
     return false;
 }
 
-
 void TrackRadio::Stop()
 {
     if( m_currentlyPlayingPtr )

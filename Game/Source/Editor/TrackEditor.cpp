@@ -29,7 +29,7 @@ void TrackEditor::Init()
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
     for( auto& track : trackList )
     {
-        track.LoadNoteData();
+        //track.LoadNoteData();
     }
     hitNotes.resize( (int)PadId::COUNT );
 }

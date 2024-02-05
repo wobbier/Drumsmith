@@ -5,6 +5,7 @@
 #include <sstream>
 #include "Singleton.h"
 #include "Path.h"
+#include "TrackList.h"
 
 struct SyncTrack
 {
@@ -26,7 +27,9 @@ struct LegacySongMetaData
     std::string m_album;
     std::string m_genre;
     std::string m_year;
-    int m_songLength;
+    std::string m_icon;
+    int m_songLength = 0;
+    bool m_proDrums = false;
     std::string m_charter;
     int m_previewStartTime = -1;
     std::string m_flavorText;
@@ -52,5 +55,5 @@ public:
 
     LegacySongMetaData readSongMetaData( const std::string& filePath );
     Song readSongFile( const std::string& filePath );
-    bool ParseMidi( Path& inFilePath );
+    bool ParseMidi( Path& inFilePath, TrackData& outTrackData, LegacySongMetaData& inLegacyData );
 };

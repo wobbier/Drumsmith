@@ -203,6 +203,23 @@ void NoteHighwayCore::OnStart()
 }
 
 
+bool NoteHighwayCore::PlayStem( const char* inFileName, bool inUsePreviewMarker )
+{
+    Path drumsPath = Path( Path( m_trackData->m_trackSourcePath ).GetDirectoryString() + inFileName );
+    if( drumsPath.Exists )
+    {
+        SharedPtr<AudioSource> source;
+        PlayAudioEvent evt;
+        evt.SourceName = drumsPath.FullPath;
+        evt.Volume = 1.f;// GameSettings::GetInstance().RadioVolume;
+
+        evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop();  m_currentStems.push_back( loadedAudio ); };
+        evt.Fire();
+        return true;
+    }
+    return false;
+}
+
 
 bool NoteHighwayCore::OnEvent( const BaseEvent& evt )
 {
@@ -255,6 +272,18 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
         noteComp.EditorLaneName = PadUtils::GetPadName( it.m_editorLane );
     }
 
+    bool inUsePreviewMarker = false;
+    PlayStem( "crowd.ogg", inUsePreviewMarker );
+    PlayStem( "drums.ogg", inUsePreviewMarker );
+    PlayStem( "drums_1.ogg", inUsePreviewMarker );
+    PlayStem( "drums_2.ogg", inUsePreviewMarker );
+    PlayStem( "drums_3.ogg", inUsePreviewMarker );
+    PlayStem( "drums_4.ogg", inUsePreviewMarker );
+    PlayStem( "guitar.ogg", inUsePreviewMarker );
+    PlayStem( "vocals.ogg", inUsePreviewMarker );
+    PlayStem( "rhythm.ogg", inUsePreviewMarker );
+    PlayStem( "keys.ogg", inUsePreviewMarker );
+
     PlayAudioEvent evt( inTrackData.m_trackSourcePath );
     evt.Callback = [this]( SharedPtr<AudioSource> inSource )
     {
@@ -265,9 +294,24 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
                 m_currentTrack->Stop( true );
             }
             m_currentTrack = inSource;
+            m_currentTrack->Stop( true );
         }
     };
     evt.Fire();
+
+    for( auto ptr : m_currentStems )
+    {
+        if( ptr )
+        {
+            ptr->Play( false );
+            //ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
+        }
+    }
+    if( m_currentTrack )
+    {
+        m_currentTrack->Play( false );
+        //m_currentTrack->SetVolume( GameSettings::GetInstance().RadioVolume );
+    }
 }
 
 
@@ -278,6 +322,19 @@ void NoteHighwayCore::ShutdownTrack()
     {
         ent.MarkForDelete();
     }
+
+    if( m_currentTrack )
+    {
+        m_currentTrack->Stop();
+    }
+    for( auto ptr : m_currentStems )
+    {
+        if( ptr )
+        {
+            ptr->Stop( true );
+        }
+    }
+    m_currentStems.clear();
 }
 
 

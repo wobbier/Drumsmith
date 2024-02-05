@@ -212,11 +212,13 @@
 
         dynamicDiv.innerHTML = `
             <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
-            <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
+            <!--div class="album-art" style="background-image: url('file:///${track.AlbumArt}');"-->
+            <img class="album-art" src="file:///${track.AlbumArt}" />
             </div>
             <div class="album-title">
                 <h1>${track.TrackName}</h1>
                 <h2>${track.ArtistName}</h2>
+                <h3>${track.Year}</h3>
             </div>
             <div class="note-count">Note Count: ${track.NoteCount}</div>
             <div class="clearfix"></div>
@@ -246,6 +248,8 @@
                     <h1>${track.TrackName}</h1>
                     <h2>${track.ArtistName}</h2>
                     <h3>${track.AlbumName}</h3>
+                    <h3>${track.Genre}</h3>
+                    <h3>${track.Year}</h3>
                 </div>
                 <div class="note-count">Note Count: ${track.NoteCount}</div>
                 <div class="clearfix"></div>
