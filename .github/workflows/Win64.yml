@@ -91,6 +91,7 @@ jobs:
         shell: cmd
         run: |
           cd ".build/Editor_Release/"
+          dir
           call Havana.exe -CompileAssets
           cd ../../
 
@@ -156,4 +157,5 @@ jobs:
         with:
           name: ${{matrix.buildconfig}}_${{matrix.configuration}} Release Editor v${{github.run_number}}
           path: |
+            .build/Editor_Release/**/*.*
             .build/Editor_Release/*.*
