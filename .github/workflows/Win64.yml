@@ -149,3 +149,11 @@ jobs:
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.log
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Tools/Optick.exe
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Tools/Win64/*.*
+
+      - name: Archive Editor Folder
+        if: ${{ matrix.buildconfig == 'Game_Win64' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{matrix.buildconfig}}_${{matrix.configuration}} Release Editor v${{github.run_number}}
+          path: |
+            .build/Editor_Release/*.*
