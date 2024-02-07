@@ -33,10 +33,6 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           submodules: recursive
-          
-      - name: Install Mono
-        shell: cmd
-        run: choco install mono
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
