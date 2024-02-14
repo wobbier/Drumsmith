@@ -131,7 +131,8 @@
     }
     .sidebar {
       position: fixed;
-      top: 50px; /* Same as header height */
+      top: 0;
+      right: 0; /* Same as header height */
       bottom: 50px; /* Same as footer height */
       width: 400px; /* Adjust based on your needs */
       overflow-y: auto; /* Allows scrolling within the sidebar if content overflows */
@@ -140,8 +141,8 @@
       position: absolute;
       top: 50px; /* Adjust based on header height */
       bottom: 50px; /* Adjust based on footer height */
-      left: 400px; /* Adjust based on sidebar width */
-      right: 0;
+      left: 0; /* Adjust based on sidebar width */
+      right: 400px;
       overflow-y: auto; /* Allows scrolling within the content area */
       padding: 20px; /* Optional padding for aesthetics */
     }
@@ -186,7 +187,6 @@
         </div>
       </div>
     </div>
-
     <div id="myDivContainer" class="main-content">
       <div
         class="dynamic-div"

@@ -38,6 +38,15 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "5.0.100"
+
+      - name: Download ZIP from secret URL
+        run: curl -L -o file.zip ${{ secrets.FMOD_WIN64 }}
+
+      - name: Create target directory
+        run: mkdir -p Engine/ThirdParty/FMOD
+
+      - name: Unzip the downloaded file to specific directory
+        run: unzip file.zip -d Engine/ThirdParty/FMOD
         
       - name: Generate third party solutions
         shell: cmd
