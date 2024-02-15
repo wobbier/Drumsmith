@@ -27,7 +27,9 @@ jobs:
 
     steps:
       - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
         
       - name: Check out repo
         uses: actions/checkout@v4.1.1
@@ -35,17 +37,17 @@ jobs:
           submodules: recursive
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "5.0.100"
 
-      - name: Download ZIP from secret URL
+      - name: Download FMOD from Private URL
         run: curl -L -o file.zip ${{ secrets.FMOD_WIN64 }}
 
       - name: Create target directory
         run: mkdir -p Engine/ThirdParty/FMOD
 
-      - name: Unzip the downloaded file to specific directory
+      - name: Unzip FMOD to ThirdParty folder
         run: unzip file.zip -d Engine/ThirdParty/FMOD
         
       - name: Generate third party solutions
@@ -73,17 +75,17 @@ jobs:
         run: call CopyAssets.bat
 
       - name: Copy Editor Assets
-        shell: cmd
+        shell: pwsh
         continue-on-error: true
         run: |
-          robocopy ".build/Release/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
-          robocopy "Engine/Tools" ".build\\Editor_Release\\Engine\\Tools" *.* /w:0 /r:1 /v /E
+          robocopy ".build/Release/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy "Engine/Tools" ".build\\Editor_Release\\Engine\\Tools" *.* /w:0 /r:1 /v /E ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
 
       - name: Archive Editor
         if: ${{ matrix.buildconfig == 'Editor' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: Drumsmith v${{github.run_number}} - Editor
+          name: Drumsmith v${{github.run_number}} - Editor ${{matrix.configuration}}
           path: |
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/AppX
@@ -106,14 +108,14 @@ jobs:
 
       - name: Copy Cooked Assets
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
-        shell: cmd
+        shell: pwsh
         continue-on-error: true
         run: |
-          robocopy ".build/Editor_Release/Assets" ".build\\Game_Win64_${{matrix.configuration}}\\Assets" *.* /w:0 /r:1 /v /E
+          robocopy ".build/Editor_Release/Assets" ".build\\Game_Win64_${{matrix.configuration}}\\Assets" *.* /w:0 /r:1 /v /E ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
 
       - name: Archive Build
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Drumsmith v${{github.run_number}} - ${{matrix.buildconfig}}_${{matrix.configuration}}
           path: |
@@ -130,39 +132,15 @@ jobs:
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.sh
 
       - name: Copy Tools Assets
-        shell: cmd
+        shell: pwsh
         continue-on-error: true
         run: |
-          robocopy "Engine/Tools/HUB/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
-          robocopy "Engine/Tools/HUB" ".build\\Editor_Release" *.exe /w:0 /r:1 /v /E
+          robocopy "Engine/Tools/HUB/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy "Engine/Tools/HUB" ".build\\Editor_Release" *.exe /w:0 /r:1 /v /E ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
 
-      - name: Archive Tools
-        if: ${{ matrix.buildconfig == 'Editor' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: HUB v${{github.run_number}}
-          path: |
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/HUB.exe
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/Close.png
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/Minimize.png
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/VS.png
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/GEN.png
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/LOGO.png
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/shaderc.exe
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/texturec.exe
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.dll
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/AppX
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/Tools/**/*.*
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.lib
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.pdb
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.exp
-            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.log
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Tools/Optick.exe
-            .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Tools/Win64/*.*
-
-      - name: Archive Editor Folder
+      - name: Full Archive Editor Folder
         if: ${{ matrix.buildconfig == 'Game_Win64' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{matrix.buildconfig}}_${{matrix.configuration}} Release Editor v${{github.run_number}}
           path: |
