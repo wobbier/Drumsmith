@@ -42,6 +42,9 @@ public:
 	EntityHandle TrackMover;
 	TrackData* m_trackData = nullptr;
 
+	void Pause();
+	void Resume();
+
 private:
 #if USING( ME_EDITOR )
 	virtual void OnEditorInspect() final;

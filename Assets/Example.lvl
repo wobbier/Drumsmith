@@ -146,8 +146,8 @@
                     "Type": "Transform"
                 },
                 {
-                    "FilePath": "Assets/UI/SongList.html",
-                    "Type": "TrackListMenuController"
+                    "FilePath": "Assets/UI/InGameMenu.html",
+                    "Type": "InGameMenuController"
                 }
             ],
             "DestroyOnLoad": true,
@@ -328,9 +328,9 @@
                                 0.0
                             ],
                             "ClearType": "Color",
-                            "Far": 2000.0,
+                            "Far": 60.0,
                             "IsCurrent": true,
-                            "Near": 0.10000000149011612,
+                            "Near": 1,
                             "Type": "Camera",
                             "Zoom": 45.0
                         }

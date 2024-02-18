@@ -15,3 +15,23 @@ public:
     int TrackIndex = 0;
     std::function<void( AudioSource* )> Callback;
 };
+
+class InGamePauseCurrentTrack
+    : public Event<InGamePauseCurrentTrack>
+{
+public:
+    InGamePauseCurrentTrack()
+        : Event()
+    {
+    }
+};
+
+class InGameResumeCurrentTrack
+    : public Event<InGameResumeCurrentTrack>
+{
+public:
+    InGameResumeCurrentTrack()
+        : Event()
+    {
+    }
+};

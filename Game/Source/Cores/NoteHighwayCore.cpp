@@ -33,7 +33,9 @@ void NoteHighwayCore::Init()
 void NoteHighwayCore::OnAddedToWorld()
 {
     std::vector<TypeId> events = {
-    LaunchPlayTrackEvent::GetEventId()
+    LaunchPlayTrackEvent::GetEventId(),
+    InGamePauseCurrentTrack::GetEventId(),
+    InGameResumeCurrentTrack::GetEventId()
     };
     EventManager::GetInstance().RegisterReceiver( this, events );
 }
@@ -115,7 +117,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         }
 
         // This is correct, right?
-        if (handled)
+        if( handled )
         {
             break;
         }
@@ -202,7 +204,6 @@ void NoteHighwayCore::OnStart()
     }
 }
 
-
 bool NoteHighwayCore::PlayStem( const char* inFileName, bool inUsePreviewMarker )
 {
     Path drumsPath = Path( Path( m_trackData->m_trackSourcePath ).GetDirectoryString() + inFileName );
@@ -226,8 +227,16 @@ bool NoteHighwayCore::OnEvent( const BaseEvent& evt )
     if( evt.GetEventId() == LaunchPlayTrackEvent::GetEventId() )
     {
         const LaunchPlayTrackEvent& event = static_cast<const LaunchPlayTrackEvent&>( evt );
-        SetupTrack( TrackDatabase::GetInstance().m_trackList.m_tracks[event.TrackIndex]);
+        SetupTrack( TrackDatabase::GetInstance().m_trackList.m_tracks[event.TrackIndex] );
         return true;
+    }
+    if( evt.GetEventId() == InGameResumeCurrentTrack::GetEventId() )
+    {
+        Resume();
+    }
+    if( evt.GetEventId() == InGamePauseCurrentTrack::GetEventId() )
+    {
+        Pause();
     }
 
     return false;
@@ -286,17 +295,17 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
 
     PlayAudioEvent evt( inTrackData.m_trackSourcePath );
     evt.Callback = [this]( SharedPtr<AudioSource> inSource )
-    {
-        if( m_currentTrack != inSource )
         {
-            if( m_currentTrack )
+            if( m_currentTrack != inSource )
             {
+                if( m_currentTrack )
+                {
+                    m_currentTrack->Stop( true );
+                }
+                m_currentTrack = inSource;
                 m_currentTrack->Stop( true );
             }
-            m_currentTrack = inSource;
-            m_currentTrack->Stop( true );
-        }
-    };
+        };
     evt.Fire();
 
     for( auto ptr : m_currentStems )
@@ -304,13 +313,11 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
         if( ptr )
         {
             ptr->Play( false );
-            //ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
         }
     }
     if( m_currentTrack )
     {
         m_currentTrack->Play( false );
-        //m_currentTrack->SetVolume( GameSettings::GetInstance().RadioVolume );
     }
 }
 
@@ -337,6 +344,35 @@ void NoteHighwayCore::ShutdownTrack()
     m_currentStems.clear();
 }
 
+void NoteHighwayCore::Pause()
+{
+    if( m_currentTrack )
+    {
+        m_currentTrack->Pause();
+    }
+    for( auto ptr : m_currentStems )
+    {
+        if( ptr )
+        {
+            ptr->Pause();
+        }
+    }
+}
+
+void NoteHighwayCore::Resume()
+{
+    if( m_currentTrack )
+    {
+        m_currentTrack->Resume();
+    }
+    for( auto ptr : m_currentStems )
+    {
+        if( ptr )
+        {
+            ptr->Resume();
+        }
+    }
+}
 
 int32_t NoteHighwayCore::LegacyConvertLane( const std::string& lane )
 {

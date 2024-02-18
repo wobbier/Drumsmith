@@ -68,10 +68,16 @@ void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thi
     int index = args[1].ToInteger();
 
     TrackRadio::GetInstance().Stop();
-    LaunchPlayTrackEvent evt;
-    evt.TrackID = std::string( path.utf8().data() );
-    evt.TrackIndex = index;
-    evt.Fire();
+    SharedPtr<LoadSceneEvent> loadSceneEvent = MakeShared<LoadSceneEvent>();
+    loadSceneEvent->Level = "Assets/Example.lvl";
+    EventManager::GetInstance().QueueEvent( loadSceneEvent );
+
+    loadSceneEvent->Callback = [path, index]() {
+        LaunchPlayTrackEvent evt;
+        evt.TrackID = std::string( path.utf8().data() );
+        evt.TrackIndex = index;
+        evt.Fire();
+    };
 }
 
 void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
