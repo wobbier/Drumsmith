@@ -9,8 +9,8 @@
             "Components": [
                 {
                     "Position": [
-                        -3.0,
-                        1.0,
+                        -2.5,
+                        0.0,
                         0.0
                     ],
                     "Rotation": [
@@ -33,8 +33,8 @@
             "Components": [
                 {
                     "Position": [
-                        -3.0,
-                        1.0,
+                        -2.5,
+                        0.0,
                         0.0
                     ],
                     "Rotation": [
@@ -57,7 +57,7 @@
             "Components": [
                 {
                     "Position": [
-                        -2.0,
+                        -1.0,
                         0.0,
                         0.0
                     ],
@@ -158,7 +158,7 @@
                 {
                     "Position": [
                         2.5,
-                        1.0,
+                        0.0,
                         0.0
                     ],
                     "Rotation": [
@@ -310,7 +310,7 @@
                                 -5.0
                             ],
                             "Rotation": [
-                                15.000000953674316,
+                                20.0,
                                 -0.0,
                                 0.0
                             ],
@@ -330,7 +330,7 @@
                             "ClearType": "Color",
                             "Far": 60.0,
                             "IsCurrent": true,
-                            "Near": 1,
+                            "Near": 1.0,
                             "Type": "Camera",
                             "Zoom": 45.0
                         }
@@ -467,7 +467,7 @@
                 {
                     "Position": [
                         3.0,
-                        1.25,
+                        0.0,
                         0.0
                     ],
                     "Rotation": [

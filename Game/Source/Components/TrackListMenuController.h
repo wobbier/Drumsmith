@@ -13,6 +13,7 @@ public:
 	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
 
     void SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate_Internal( int trackIndex );

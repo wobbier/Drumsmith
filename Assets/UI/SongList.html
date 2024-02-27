@@ -305,7 +305,10 @@
                 </div>
                 <div class="note-count">Note Count: ${track.NoteCount}</div>
                 <div class="clearfix"></div>
-            </div>`;
+            </div>
+                <div class="dynamic-div" onclick="ViewTrackStats('${track.TrackName}');">
+                  View Stats
+                </div>`;
       }
       function fillDivs() {
         // Fetch the container div

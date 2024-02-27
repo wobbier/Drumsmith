@@ -37,6 +37,7 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
 
     GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &TrackListMenuController::SelectTrackToPlay );
     GlobalWindow["PlayTrackPreview"] = BindJSCallback( &TrackListMenuController::PlayTrackPreview );
+    GlobalWindow["ViewTrackStats"] = BindJSCallback( &TrackListMenuController::ViewTrackStats );
     GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &TrackListMenuController::RequestDetailsPanelUpdate );
     ExecuteScript( "ClearTrackList();" );
 
@@ -78,6 +79,23 @@ void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thi
         evt.TrackIndex = index;
         evt.Fire();
     };
+}
+
+void TrackListMenuController::ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    //ultralight::String path = args[0].ToString();
+    //int index = args[1].ToInteger();
+
+    SharedPtr<LoadSceneEvent> loadSceneEvent = MakeShared<LoadSceneEvent>();
+    loadSceneEvent->Level = "Assets/TrackStats.lvl";
+    EventManager::GetInstance().QueueEvent( loadSceneEvent );
+
+    //loadSceneEvent->Callback = [path, index]() {
+    //    LaunchPlayTrackEvent evt;
+    //    evt.TrackID = std::string( path.utf8().data() );
+    //    evt.TrackIndex = index;
+    //    evt.Fire();
+    //    };
 }
 
 void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
