@@ -1,0 +1,135 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #0000001c;
+    color: #ffffff;
+    height: 100%;
+    overflow: hidden; /* Prevent scrolling of the entire page */
+    background-image: url("file:///Assets/UI/Textures/track-bg.png");
+    background-position: center;
+    background-size: cover;
+  }
+
+  .main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Adjust this as per your requirement */
+  }
+
+  .header a {
+    margin: 10px;
+    color: rgba(255, 255, 255, 0.842);
+    text-decoration: none;
+  }
+  .header a:hover {
+    color: white;
+    text-decoration: underline;
+  }
+
+  .content {
+    flex-grow: 1;
+    display: flex;
+  }
+
+  .background {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    min-height: 100%;
+    background-color: rgba(0, 0, 0, 0.52);
+    top: 0;
+    z-index: -1;
+  }
+
+  #trackDetails {
+    width: 400px;
+    padding: 5px;
+  }
+
+  #trackDetails .album-art {
+    background-color: #000000ab;
+    width: 100%;
+  }
+  #trackDetails .album-art img {
+    width: 100%;
+    height: auto;
+  }
+
+  .dynamic-div {
+    margin-bottom: 10px;
+  }
+  /* 
+  .dynamic-div::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 20%; /* Adjust this value to control the height of the fade 
+      -webkit-mask-image: -webkit-gradient(linear, left 90%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)))
+      Use rgba(0, 0, 0, 0) to rgba(0, 0, 0, 1) for a black fade 
+  }
+*/
+  .dynamic-div:hover {
+    background-color: rgba(97, 97, 97, 0.192);
+  }
+
+  .dynamic-div .album-art {
+    width: 200px;
+    height: 200px;
+    background-size: cover;
+    background-color: white;
+    float: left;
+  }
+
+  .dynamic-div .album-title {
+    float: left;
+    width: max-content;
+    padding-left: 10px;
+  }
+
+  .dynamic-div .album-stats {
+    float: left;
+  }
+
+  .dynamic-div .note-count {
+    float: right;
+  }
+  .clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+
+  .header,
+  .footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+  .header {
+    top: 0;
+    height: 50px; /* Adjust based on your needs */
+  }
+  .footer {
+    bottom: 0;
+    height: 50px; /* Adjust based on your needs */
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0; /* Same as header height */
+    bottom: 50px; /* Same as footer height */
+    width: 400px; /* Adjust based on your needs */
+    overflow-y: auto; /* Allows scrolling within the sidebar if content overflows */
+  }
+  .main-content {
+    position: absolute;
+    top: 50px; /* Adjust based on header height */
+    bottom: 50px; /* Adjust based on footer height */
+    left: 0; /* Adjust based on sidebar width */
+    right: 400px;
+    overflow-y: auto; /* Allows scrolling within the content area */
+    padding: 20px; /* Optional padding for aesthetics */
+  }

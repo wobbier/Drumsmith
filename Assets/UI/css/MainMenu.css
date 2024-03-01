@@ -6,6 +6,7 @@ body{
     background-position: center;
     background-size: cover;
     color: white;
+    user-select: none !important;
 }
 
 .menu-text {
@@ -64,11 +65,9 @@ body{
 #track-radio div {
 }
 #track-title {
-    font-size: 28px;
     margin-bottom: 10px;
 }
 #track-artist {
-    font-size: 18px;
 }
 
 .clearfix::after {
@@ -87,6 +86,8 @@ body{
 
 #track-radio .skip-track:hover {
     text-decoration: underline;
+    color: white;
+    cursor: pointer;
 }
 #track-radio .skip-track a {
     margin: 10px;
@@ -98,10 +99,6 @@ body{
     margin: 10px;
     color: rgba(255, 255, 255, 0.842);
     text-decoration: none;
-}
-#track-radio a:hover {
-    color: white;
-    text-decoration: underline;
 }
 #track-radio-hover {
     width: 300px;

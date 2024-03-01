@@ -65,3 +65,48 @@ function setupScrollingText(containerId, textId) {
     stop,
   };
 }
+
+function applyScrollFadeAnimation(
+  elementId,
+  initialDelay = 1000,
+  scrollAnimationTime = 5000,
+  fadeOutInTime = 2000
+) {
+  const textElement = document.getElementById(elementId);
+  if (!textElement) return; // Exit if the element does not exist
+
+  function startAnimation() {
+    const wrapperWidth = textElement.parentElement.offsetWidth;
+    const textWidth = textElement.offsetWidth;
+    const distanceToScroll = textWidth - wrapperWidth;
+
+    // Step 2: Start scrolling after a delay
+    setTimeout(() => {
+      textElement.style.transition = `transform ${scrollAnimationTime}ms linear`;
+      textElement.style.transform = `translateX(-${distanceToScroll}px)`;
+    }, initialDelay); // Delay before scrolling starts
+
+    // Step 3: Fade out after reaching the end
+    setTimeout(() => {
+      textElement.style.transition = `opacity ${fadeOutInTime / 2}ms linear`;
+      textElement.style.opacity = "0";
+    }, scrollAnimationTime + initialDelay); // After scrolling ends
+
+    // Step 4: Reset to start position and fade in
+    setTimeout(() => {
+      textElement.style.transition = "none";
+      textElement.style.transform = "translateX(0)";
+      textElement.style.opacity = "0";
+
+      setTimeout(() => {
+        textElement.style.transition = `opacity ${fadeOutInTime / 2}ms linear`;
+        textElement.style.opacity = "1";
+      }, 100); // Brief pause before fading in
+
+      // Wait for the fade in to complete before starting the next cycle
+      setTimeout(startAnimation, fadeOutInTime);
+    }, scrollAnimationTime + initialDelay + fadeOutInTime);
+  }
+
+  startAnimation();
+}

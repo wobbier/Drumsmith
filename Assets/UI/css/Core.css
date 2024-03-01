@@ -30,6 +30,8 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
     line-height: 1;
+    -webkit-user-select: none;
+    user-select: none;
 }
 ol, ul {
     list-style: none;
@@ -45,4 +47,27 @@ q:before, q:after {
 table {
     border-collapse: collapse;
     border-spacing: 0;
+}
+
+/* Styles */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+.BoldRegular {
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.Regular {
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.BoldRegular.Large {
+    font-size: 40px;
+}
+
+.Regular.Small {
+    font-size: 28px;
 }
