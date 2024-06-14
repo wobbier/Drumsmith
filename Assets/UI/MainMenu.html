@@ -88,6 +88,7 @@
         max="100"
         step="1"
         value="50"
+        class="slider"
       />
       <br />
       <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">
@@ -102,6 +103,19 @@
         <!-- src="file:///Assets/DLC/LearnToFly/Album.png" -->
       </div>
       <div class="track-details">
+        <div class="wrapper">
+          <div id="scrollingText1" class="scroll-text">
+            This is a very long text that needs to scroll to be fully visible.
+            Let's scroll!
+          </div>
+        </div>
+        <div class="wrapper">
+          a
+          <div id="scrollingText2" class="scroll-text">
+            Another long text for a different element. It will also scroll!
+          </div>
+        </div>
+
         <div id="track-title" class="scroll-container">
           <div id="track-title-scroll" class="scroll-content BoldRegular Large">
             EXAMPLE TITLEAAAAAAAAAAAAAAAAAA
@@ -121,6 +135,8 @@
         "track-title",
         "track-title-scroll"
       );
+      applyScrollFadeAnimation("scrollingText1");
+      applyScrollFadeAnimation("scrollingText2", 2000, 7000, 3000); // With different timing parameters
 
       var timer;
       function ShowTrackRadio() {
