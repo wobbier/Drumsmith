@@ -22,6 +22,8 @@ public:
     void Stop();
     void SetVolume( float inVolume );
 
+    void TryPlayNextTrack();
+
     TrackData* m_currentTrack = nullptr;
 
     AudioSource m_currentlyPlaying;

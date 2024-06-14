@@ -13,6 +13,9 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
     }
 
     Stop();
+    bool isAsync = true;
+
+
     m_currentTrack = inTrackData;
     Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );
 
@@ -145,6 +148,43 @@ void TrackRadio::SetVolume( float inVolume )
         if( ptr && ptr->IsPlaying() )
         {
             ptr->SetVolume( volumeClamped );
+        }
+    }
+}
+
+void TrackRadio::TryPlayNextTrack()
+{
+    if( !m_currentlyPlayingPtr )
+    {
+        return;
+    }
+    else
+    {
+        bool loaded = m_currentlyPlayingPtr->IsLoaded();
+
+        for( auto ptr : m_currentStems )
+        {
+            if( ptr && ptr->IsPlaying() )
+            {
+                loaded = loaded && ptr->IsLoaded();
+            }
+        }
+
+
+        if (loaded)
+        {
+            if( m_currentlyPlayingPtr && m_currentlyPlayingPtr->IsPlaying() )
+            {
+                m_currentlyPlayingPtr->Play();
+            }
+
+            for( auto ptr : m_currentStems )
+            {
+                if( ptr )
+                {
+                    ptr->Play();
+                }
+            }
         }
     }
 }
