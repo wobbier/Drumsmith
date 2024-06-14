@@ -102,3 +102,12 @@ void MainMenuController::PlayNextRandomTrack()
         ExecuteScript( "DisplayTrack(" + trackData.dump() + "); " );
     }
 }
+
+void MainMenuController::OnUpdate()
+{
+    // hack imo
+    if( !TrackRadio::GetInstance().IsPlaying() )
+    {
+        PlayNextRandomTrack();
+    }
+}

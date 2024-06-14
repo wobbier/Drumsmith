@@ -20,7 +20,10 @@ public:
 #endif
 
 	void PlayNextRandomTrack();
-	SharedPtr<AudioSource> m_currentTrack;
+
+    void OnUpdate() override;
+
+    SharedPtr<AudioSource> m_currentTrack;
 	Random64 m_random;
 };
 

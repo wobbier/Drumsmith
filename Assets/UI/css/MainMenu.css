@@ -45,7 +45,7 @@ body{
     position: fixed;
     bottom: 0;
     right: 0;
-    background: rgba(36, 36, 36, 0.376);
+    background: rgba(36, 36, 36, 0);
 }
 
 .track-art{
@@ -116,12 +116,13 @@ body{
     background-color: #f1f1f1;*/
     position: fixed;
     bottom: 10px;
-    right: -600px; /* Initially off-screen */
+    right: -390px; /* Initially off-screen */
     z-index: 100;
     transition: right 0.5s;
     display: flex;
 }
 
 #track-radio.visible {
-    right: 10px; /* Slide in */
+    right: 10px; /* Slide in to full view */
+    background: rgba(36, 36, 36, 0.376);
 }

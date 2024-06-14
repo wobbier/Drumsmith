@@ -85,6 +85,16 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
 }
 
 
+bool TrackRadio::IsPlaying() const
+{
+    if( m_currentlyPlayingPtr )
+    {
+        return m_currentlyPlayingPtr->IsPlaying();
+    }
+    return false;
+}
+
+
 bool TrackRadio::PlayStem( const char* inFileName, bool inUsePreviewMarker )
 {
     Path drumsPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + inFileName );

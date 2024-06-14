@@ -18,6 +18,7 @@ public:
     TrackRadio() = default;
 
     void Play( TrackData* inTrackData, bool inUsePreviewMarker = true );
+    bool IsPlaying() const;
     void Stop();
     void SetVolume( float inVolume );
 
