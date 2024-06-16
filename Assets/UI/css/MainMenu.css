@@ -117,7 +117,7 @@ body{
     position: fixed;
     bottom: 10px;
     right: -390px; /* Initially off-screen */
-    z-index: 100;
+    z-index: 0;
     transition: right 0.5s;
     display: flex;
 }

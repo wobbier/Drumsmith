@@ -106,7 +106,6 @@ body {
     position: fixed;
     left: 0;
     right: 0;
-    z-index: 100;
   }
   .header {
     top: 0;
@@ -136,19 +135,4 @@ body {
 
   #filterMenu {
     background: black;
-  }
-  .menu {
-    width: 500px;
-    position: fixed;
-    top: 50px;
-    left: -500px;
-    /* Start offscreen */
-    opacity: 0;
-    transition: left 0.3s ease, opacity 0.3s ease;
-  }
-
-  .menu.active {
-    left: 50px;
-    /* Slide in */
-    opacity: 1;
   }

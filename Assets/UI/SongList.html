@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/Core.css" />
     <link rel="stylesheet" href="css/TrackList.css" />
+    <link rel="stylesheet" href="css/Flyout.css" />
   </head>
   <body id="main-body">
     <div id="background" class="background"></div>
@@ -65,32 +66,33 @@
         <div class="clearfix"></div>
       </div>
     </div>
-
-    <div class="footer">
-      <p onclick="toggleFlyout('filterMenu', 'myDivContainer');"><img src="file:///Assets/UI/Textures/Tab_Key_Light.png" height="100%" /> Sorting (Ascending)</p>
-    </div>
-    
-    <div id="filterMenu" class="options-menu menu">
+    <div id="filterMenu" class="flyout right">
       <p
         class="hover-underline-animation"
-        onclick="toggleFlyout('filterMenu', 'myDivContainer');"
+        onclick="closeFlyout('filterMenu');"
       >
         < Back
       </p>
       <br />
       <br />
-      <p class="menu-text" onclick="FilterSortTracks(0)">Default</p>
-      <p class="menu-text" onclick="FilterSortTracks(1)">Title</p>
-      <p class="menu-text" onclick="FilterSortTracks(2)">Artist</p>
-      <p class="menu-text" onclick="FilterSortTracks(3)">Year</p>
+      <p class="menu-text flyout-select" onclick="FilterSortTracks(0); closeFlyout('filterMenu');">Default</p>
+      <p class="menu-text flyout-select" onclick="FilterSortTracks(1); closeFlyout('filterMenu');">Title</p>
+      <p class="menu-text flyout-select" onclick="FilterSortTracks(2); closeFlyout('filterMenu');">Artist</p>
+      <p class="menu-text flyout-select" onclick="FilterSortTracks(3); closeFlyout('filterMenu');">Year</p>
     </div>
+    
+    <div class="footer">
+      <p class="openButton" onclick="openFlyout('filterMenu')"><img src="file:///Assets/UI/Textures/Tab_Key_Light.png" height="100%" /> Sorting (Ascending)</p>
+    </div>
+    
     <script>
       document.addEventListener("keydown", function (event) {
         if (event.key === "Tab" || event.keyCode === 9) {
-          toggleFlyout('filterMenu', 'myDivContainer');
+          openFlyout('filterMenu')
         }
       });
     </script>
+    <script src="js/Flyout.js"></script>
     <script src="js/TrackList.js"></script>
     <script src="js/Common.js"></script>
   </body>
