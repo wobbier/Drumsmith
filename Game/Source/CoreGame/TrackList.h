@@ -76,6 +76,19 @@ public:
     std::vector<TrackData> m_tracks;
 };
 
+enum class TrackListSort : uint32_t
+{
+    None = 0,
+    Title = 1 << 1,
+    Artist = 1 << 2,
+    Year = 1 << 3,
+};
+
+enum class TrackListFilter : uint32_t
+{
+    None = 0,
+};
+
 class TrackDatabase
 {
     ME_SINGLETON_DEFINITION( TrackDatabase );
@@ -85,4 +98,6 @@ public:
     void ExportMidiTrackMetaData();
 
     TrackList m_trackList;
+
+    std::vector<unsigned int> m_sortedIndices;
 };

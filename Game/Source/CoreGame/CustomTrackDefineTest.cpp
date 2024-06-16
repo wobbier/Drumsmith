@@ -1,7 +1,7 @@
 #include "CustomTrackDefineTest.h"
 #include "Dementia.h"
-#include "MidiFile.h"
-#include "Options.h"
+//#include "MidiFile.h"
+//#include "Options.h"
 #include "Core\Assert.h"
 #include "Editor\PadBindings.h"
 DISABLE_OPTIMIZATION;
@@ -186,109 +186,109 @@ PadId GetNoteIdFromLegacy(int inNoteName)
 
 bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData, LegacySongMetaData& inLegacyData )
 {
-    smf::MidiFile midifile;
-    midifile.read( Path( inFilePath.FullPath + "/notes.mid" ).FullPath );
-    midifile.doTimeAnalysis();
-    midifile.linkNotePairs();
-    //midifile.splitTracks();
-
-    outTrackData.m_noteData.clear();
-
-    int tracks = midifile.getTrackCount();
-
-    bool hasDrums = false;
-    int drumTrackIndex = 0;
-    {
-        bool foundTrackName = false;
-        for( int track = 0; track < tracks; track++ ) {
-            if( hasDrums )
-            {
-                break;
-            }
-
-            for( int event = 0; event < midifile[track].size(); event++ ) {
-                if( midifile[track][event].isTrackName() )
-                {
-                    std::cout << midifile[track][event].getMetaContent().c_str() << std::endl;
-                    if( midifile[track][event].getMetaContent() == "PART DRUMS" )
-                    {
-                        hasDrums = true;
-                        drumTrackIndex = track;
-                        break;
-                    }
-                    foundTrackName = true;
-                }
-                else
-                {
-                    //break;
-                }
-            }
-        }
-    }
-    if( !hasDrums )
-    {
-        return false;
-    }
-
-    auto& drumTrack = midifile[drumTrackIndex];
-    std::cout << "TPQ: " << midifile.getTicksPerQuarterNote() << std::endl;
-    if( tracks > 1 ) std::cout << "\nTrack " << drumTrackIndex << std::endl;
-    std::cout << "Tick\tSeconds\tDur\tMessage" << std::endl;
-    outTrackData.m_noteCount = 0;
-
-    for( int event = 0; event < drumTrack.size(); event++ )
-    {
-        if( inLegacyData.m_proDrums )
-        {
-            //std::cout << std::dec << drumTrack[event].tick;
-            //std::cout << '\t' << std::dec << drumTrack[event].seconds;
-            //std::cout << '\t';
-            //if( drumTrack[event].isNoteOn() )
-            //    std::cout << drumTrack[event].getDurationInSeconds();
-            //std::cout << '\t' << std::hex;
-            //for( int i = 0; i < drumTrack[event].size(); i++ )
-            //    std::cout << (int)drumTrack[event][i] << ' ';
-            //std::cout << std::endl;
-            //std::cout << std::dec << drumTrack[event].getP0() << std::endl;
-            int drumNote = drumTrack[event].getP1();
-            if(drumNote > 100 || drumNote < 60 )
-            std::cout << std::dec << drumNote << std::endl;
-            //std::cout << drumTrack[event].getP2() << std::endl;
-            //std::cout << drumTrack[event].getP3() << std::endl;
-            //ME_ASSERT( drumNote >= 60 && drumNote <= 100);
-        }
-        else
-        {
-            int drumNote = drumTrack[event].getP1();
-            if( drumNote >= 96 && drumNote <= 100 )
-            {
-                outTrackData.m_noteCount++;
-                outTrackData.m_bpm = drumTrack[event].getTempoBPM();
-                NoteData newNote;
-                newNote.m_triggerTime = (float)drumTrack[event].seconds;
-                newNote.m_triggerTimeMS = newNote.m_triggerTime * 100.f;
-
-                std::cout << std::dec << drumTrack[event].tick;
-                std::cout << '\t' << std::dec << drumTrack[event].seconds;
-                std::cout << '\t';
-                if( drumTrack[event].isNoteOn() )
-                    std::cout << drumTrack[event].getDurationInSeconds();
-                //std::cout << '\t' << std::hex;
-                //for( int i = 0; i < drumTrack[event].size(); i++ )
-                //    std::cout << (int)drumTrack[event][i] << ' ';
-                std::cout << std::endl;
-                std::cout << std::dec << drumTrack[event].getP0() << std::endl;
-                std::cout << drumNote << std::endl;
-                //std::cout << drumTrack[event].getP2() << std::endl;
-                //std::cout << drumTrack[event].getP3() << std::endl;
-                //ME_ASSERT( drumNote >= 60 && drumNote <= 100);
-                newNote.m_editorLane = GetNoteIdFromLegacy( drumNote );
-                newNote.m_noteName = PadUtils::GetPadId( newNote.m_editorLane );
-                outTrackData.m_noteData.push_back( newNote );
-            }
-        }
-    }
-
+//    smf::MidiFile midifile;
+//    midifile.read( Path( inFilePath.FullPath + "/notes.mid" ).FullPath );
+//    midifile.doTimeAnalysis();
+//    midifile.linkNotePairs();
+//    //midifile.splitTracks();
+//
+//    outTrackData.m_noteData.clear();
+//
+//    int tracks = midifile.getTrackCount();
+//
+//    bool hasDrums = false;
+//    int drumTrackIndex = 0;
+//    {
+//        bool foundTrackName = false;
+//        for( int track = 0; track < tracks; track++ ) {
+//            if( hasDrums )
+//            {
+//                break;
+//            }
+//
+//            for( int event = 0; event < midifile[track].size(); event++ ) {
+//                if( midifile[track][event].isTrackName() )
+//                {
+//                    std::cout << midifile[track][event].getMetaContent().c_str() << std::endl;
+//                    if( midifile[track][event].getMetaContent() == "PART DRUMS" )
+//                    {
+//                        hasDrums = true;
+//                        drumTrackIndex = track;
+//                        break;
+//                    }
+//                    foundTrackName = true;
+//                }
+//                else
+//                {
+//                    //break;
+//                }
+//            }
+//        }
+//    }
+//    if( !hasDrums )
+//    {
+//        return false;
+//    }
+//
+//    auto& drumTrack = midifile[drumTrackIndex];
+//    std::cout << "TPQ: " << midifile.getTicksPerQuarterNote() << std::endl;
+//    if( tracks > 1 ) std::cout << "\nTrack " << drumTrackIndex << std::endl;
+//    std::cout << "Tick\tSeconds\tDur\tMessage" << std::endl;
+//    outTrackData.m_noteCount = 0;
+//
+//    for( int event = 0; event < drumTrack.size(); event++ )
+//    {
+//        if( inLegacyData.m_proDrums )
+//        {
+//            //std::cout << std::dec << drumTrack[event].tick;
+//            //std::cout << '\t' << std::dec << drumTrack[event].seconds;
+//            //std::cout << '\t';
+//            //if( drumTrack[event].isNoteOn() )
+//            //    std::cout << drumTrack[event].getDurationInSeconds();
+//            //std::cout << '\t' << std::hex;
+//            //for( int i = 0; i < drumTrack[event].size(); i++ )
+//            //    std::cout << (int)drumTrack[event][i] << ' ';
+//            //std::cout << std::endl;
+//            //std::cout << std::dec << drumTrack[event].getP0() << std::endl;
+//            int drumNote = drumTrack[event].getP1();
+//            if(drumNote > 100 || drumNote < 60 )
+//            std::cout << std::dec << drumNote << std::endl;
+//            //std::cout << drumTrack[event].getP2() << std::endl;
+//            //std::cout << drumTrack[event].getP3() << std::endl;
+//            //ME_ASSERT( drumNote >= 60 && drumNote <= 100);
+//        }
+//        else
+//        {
+//            int drumNote = drumTrack[event].getP1();
+//            if( drumNote >= 96 && drumNote <= 100 )
+//            {
+//                outTrackData.m_noteCount++;
+//                outTrackData.m_bpm = drumTrack[event].getTempoBPM();
+//                NoteData newNote;
+//                newNote.m_triggerTime = (float)drumTrack[event].seconds;
+//                newNote.m_triggerTimeMS = newNote.m_triggerTime * 100.f;
+//
+//                std::cout << std::dec << drumTrack[event].tick;
+//                std::cout << '\t' << std::dec << drumTrack[event].seconds;
+//                std::cout << '\t';
+//                if( drumTrack[event].isNoteOn() )
+//                    std::cout << drumTrack[event].getDurationInSeconds();
+//                //std::cout << '\t' << std::hex;
+//                //for( int i = 0; i < drumTrack[event].size(); i++ )
+//                //    std::cout << (int)drumTrack[event][i] << ' ';
+//                std::cout << std::endl;
+//                std::cout << std::dec << drumTrack[event].getP0() << std::endl;
+//                std::cout << drumNote << std::endl;
+//                //std::cout << drumTrack[event].getP2() << std::endl;
+//                //std::cout << drumTrack[event].getP3() << std::endl;
+//                //ME_ASSERT( drumNote >= 60 && drumNote <= 100);
+//                newNote.m_editorLane = GetNoteIdFromLegacy( drumNote );
+//                newNote.m_noteName = PadUtils::GetPadId( newNote.m_editorLane );
+//                outTrackData.m_noteData.push_back( newNote );
+//            }
+//        }
+//    }
+//
     return true;
 }
 

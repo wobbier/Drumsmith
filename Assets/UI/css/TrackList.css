@@ -133,3 +133,22 @@ body {
     overflow-y: auto; /* Allows scrolling within the content area */
     padding: 20px; /* Optional padding for aesthetics */
   }
+
+  #filterMenu {
+    background: black;
+  }
+  .menu {
+    width: 500px;
+    position: fixed;
+    top: 50px;
+    left: -500px;
+    /* Start offscreen */
+    opacity: 0;
+    transition: left 0.3s ease, opacity 0.3s ease;
+  }
+
+  .menu.active {
+    left: 50px;
+    /* Slide in */
+    opacity: 1;
+  }

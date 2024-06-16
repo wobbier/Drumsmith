@@ -75,6 +75,18 @@ function AddTrack(track) {
   containerDiv.appendChild(dynamicDiv);
 }
 
+function AddCategory(name) {
+  const containerDiv = document.getElementById("myDivContainer");
+  const dynamicDiv = document.createElement("div");
+  dynamicDiv.classList.add("dynamic-div");
+  dynamicDiv.classList.add("BoldRegular");
+  dynamicDiv.classList.add("Large");
+
+  dynamicDiv.innerHTML = name;
+
+  containerDiv.appendChild(dynamicDiv);
+}
+
 function UpdateDetailsPanel(track) {
   const containerDiv = document.getElementById("trackDetails");
 

@@ -44,6 +44,9 @@
       </div>
     </div>
     <div id="myDivContainer" class="main-content">
+      <div class="dynamic-div BoldRegular Large">
+      2009
+      </div>
       <div
         class="dynamic-div"
         onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')"
@@ -64,9 +67,31 @@
     </div>
 
     <div class="footer">
-      <img src="file:///Assets/UI/Textures/Tab_Key_Light.png" height="100%" />
-      Sorting (Ascending)
+      <p onclick="toggleFlyout('filterMenu', 'myDivContainer');"><img src="file:///Assets/UI/Textures/Tab_Key_Light.png" height="100%" /> Sorting (Ascending)</p>
     </div>
+    
+    <div id="filterMenu" class="options-menu menu">
+      <p
+        class="hover-underline-animation"
+        onclick="toggleFlyout('filterMenu', 'myDivContainer');"
+      >
+        < Back
+      </p>
+      <br />
+      <br />
+      <p class="menu-text" onclick="FilterSortTracks(0)">Default</p>
+      <p class="menu-text" onclick="FilterSortTracks(1)">Title</p>
+      <p class="menu-text" onclick="FilterSortTracks(2)">Artist</p>
+      <p class="menu-text" onclick="FilterSortTracks(3)">Year</p>
+    </div>
+    <script>
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Tab" || event.keyCode === 9) {
+          toggleFlyout('filterMenu', 'myDivContainer');
+        }
+      });
+    </script>
     <script src="js/TrackList.js"></script>
+    <script src="js/Common.js"></script>
   </body>
 </html>

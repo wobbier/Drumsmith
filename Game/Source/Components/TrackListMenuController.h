@@ -15,6 +15,7 @@ public:
     void SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void FilterSortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate_Internal( int trackIndex );
 #endif

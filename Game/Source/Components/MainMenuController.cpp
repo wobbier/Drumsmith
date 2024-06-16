@@ -83,7 +83,10 @@ void MainMenuController::PlayNextRandomTrack()
     if( !TrackRadio::GetInstance().m_currentlyPlayingPtr || !TrackRadio::GetInstance().m_currentlyPlayingPtr->IsPlaying() )
     {
         auto& trackExample = TrackDatabase::GetInstance().m_trackList.m_tracks;
-
+        if( trackExample.empty() )
+        {
+            return;
+        }
         int randomIndex = m_random( 0, trackExample.size() - 1 );
         randomElement = &trackExample[randomIndex];
         TrackRadio::GetInstance().Play( randomElement, false );

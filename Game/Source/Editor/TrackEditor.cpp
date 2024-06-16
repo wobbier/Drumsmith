@@ -85,6 +85,11 @@ void TrackEditor::Render()
 {
     OPTICK_CATEGORY( "TrackEditor::Render", Optick::Category::UI );
 
+    if( TrackDatabase::GetInstance().m_trackList.m_tracks.empty() )
+    {
+        return;
+    }
+
     if( SelectedTrackIndex < 0 )
     {
         ResetTrack();
