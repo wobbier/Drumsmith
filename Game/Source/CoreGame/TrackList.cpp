@@ -217,6 +217,16 @@ void TrackDatabase::ExportMidiTrackMetaData()
 
 std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
 {
+    if( inSortBy != m_currentSort )
+    {
+        m_needsSort = true;
+    }
+
+    if( !m_needsSort && !m_pendingInitialSort )
+    {
+        return m_sortedIndices;
+    }
+
     auto& trackList = m_trackList.m_tracks;
     auto& sortedTracks = m_sortedIndices;
     sortedTracks.clear();
@@ -225,6 +235,7 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
     {
         sortedTracks.push_back( i );
     }
+    m_currentSort = inSortBy;
 
     switch( inSortBy )
     {
@@ -247,6 +258,9 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
     case TrackListSort::None:
         break;
     }
+
+    m_pendingInitialSort = false;
+    m_needsSort = false;
 
     return m_sortedIndices;
 }

@@ -20,6 +20,8 @@ public:
     void RequestDetailsPanelUpdate_Internal( int trackIndex );
 
     void DumpTrackData( json& outJson, TrackData inTrackData, int inIndex );
+
+    void RefreshTrackList( TrackListSort inSortType );
 #endif
 
 	SharedPtr<AudioSource> m_currentTrack;

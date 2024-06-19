@@ -99,7 +99,9 @@ public:
     void ExportMidiTrackMetaData();
 
     std::vector<unsigned int>& SortTracks( TrackListSort inSortBy );
-
+    TrackListSort m_currentSort = TrackListSort::None;
+    bool m_needsSort = true;
+    bool m_pendingInitialSort = true;
     TrackList m_trackList;
 
     std::vector<unsigned int> m_sortedIndices;

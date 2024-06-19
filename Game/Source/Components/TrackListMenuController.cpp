@@ -40,19 +40,8 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
     GlobalWindow["FilterSortTracks"] = BindJSCallback( &TrackListMenuController::FilterSortTracks );
     GlobalWindow["ViewTrackStats"] = BindJSCallback( &TrackListMenuController::ViewTrackStats );
     GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &TrackListMenuController::RequestDetailsPanelUpdate );
-    ExecuteScript( "ClearTrackList();" );
-
-    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    auto& sortedTrackList = TrackDatabase::GetInstance().m_sortedIndices;
-    TrackDatabase::GetInstance().SortTracks( TrackListSort::Artist );
-    for( int i = 0; i < sortedTrackList.size(); ++i )
-    {
-        auto& trackData = trackList[sortedTrackList[i]];
-        json uiTrackData;
-        DumpTrackData( uiTrackData, trackData, sortedTrackList[i]);
-        ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
-    }
-    RequestDetailsPanelUpdate_Internal( 0 );
+    
+    RefreshTrackList( TrackListSort::Artist );
 }
 
 void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -112,12 +101,51 @@ void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& this
 {
     int trackIndex = args[0].ToInteger();
     TrackListSort sortType = (TrackListSort)trackIndex;
+    RefreshTrackList( sortType );
+}
 
+void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    int trackIndex = args[0].ToInteger();
+
+    RequestDetailsPanelUpdate_Internal( trackIndex );
+}
+
+void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
+{
+    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    //for( int i = 0; i < trackList.size(); ++i )
+    {
+        auto& trackData = trackList[trackIndex];
+        json uiTrackData;
+        DumpTrackData( uiTrackData, trackData, trackIndex );
+        ExecuteScript( "UpdateDetailsPanel(" + uiTrackData.dump() + "); " );
+    }
+}
+
+void TrackListMenuController::DumpTrackData( json& outJson, TrackData inTrackData, int inIndex )
+{
+    Path dlcTest = Path( inTrackData.m_albumArtPath );
+    std::string songImage = dlcTest.GetLocalPathString();
+    outJson["TrackName"] = inTrackData.m_trackName;
+    outJson["ArtistName"] = inTrackData.m_artistName;
+    outJson["AlbumName"] = inTrackData.m_albumName;
+    outJson["Genre"] = inTrackData.m_genre;
+    outJson["Year"] = inTrackData.m_year;
+    outJson["Icon"] = inTrackData.m_icon;
+    outJson["AlbumArt"] = songImage;
+    outJson["TrackSource"] = inTrackData.m_trackSourcePath;
+    outJson["NoteCount"] = inTrackData.m_noteData.size();
+    outJson["TrackIndex"] = inIndex;
+}
+
+void TrackListMenuController::RefreshTrackList( TrackListSort inSortType )
+{
     ExecuteScript( "ClearTrackList();" );
 
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
     auto& sortedTracks = TrackDatabase::GetInstance().m_sortedIndices;
-    TrackDatabase::GetInstance().SortTracks( sortType );
+    TrackDatabase::GetInstance().SortTracks( inSortType );
 
     int cachedYear = -1;
     std::string cachedChar;
@@ -127,7 +155,7 @@ void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& this
         auto& trackData = trackList[sortedTracks[i]];
 
         bool needsHeader = false;
-        switch( sortType )
+        switch( inSortType )
         {
         case TrackListSort::Title:
             if( cachedChar.empty() || cachedChar[0] != trackData.m_trackName[0] )
@@ -167,41 +195,6 @@ void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& this
         ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
     }
     RequestDetailsPanelUpdate_Internal( 0 );
-}
-
-void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    int trackIndex = args[0].ToInteger();
-
-    RequestDetailsPanelUpdate_Internal( trackIndex );
-}
-
-void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
-{
-    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    //for( int i = 0; i < trackList.size(); ++i )
-    {
-        auto& trackData = trackList[trackIndex];
-        json uiTrackData;
-        DumpTrackData( uiTrackData, trackData, trackIndex );
-        ExecuteScript( "UpdateDetailsPanel(" + uiTrackData.dump() + "); " );
-    }
-}
-
-void TrackListMenuController::DumpTrackData( json& outJson, TrackData inTrackData, int inIndex )
-{
-    Path dlcTest = Path( inTrackData.m_albumArtPath );
-    std::string songImage = dlcTest.GetLocalPathString();
-    outJson["TrackName"] = inTrackData.m_trackName;
-    outJson["ArtistName"] = inTrackData.m_artistName;
-    outJson["AlbumName"] = inTrackData.m_albumName;
-    outJson["Genre"] = inTrackData.m_genre;
-    outJson["Year"] = inTrackData.m_year;
-    outJson["Icon"] = inTrackData.m_icon;
-    outJson["AlbumArt"] = songImage;
-    outJson["TrackSource"] = inTrackData.m_trackSourcePath;
-    outJson["NoteCount"] = inTrackData.m_noteData.size();
-    outJson["TrackIndex"] = inIndex;
 }
 
 #endif
