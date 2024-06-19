@@ -43,22 +43,13 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
     ExecuteScript( "ClearTrackList();" );
 
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    for( int i = 0; i < trackList.size(); ++i )
+    auto& sortedTrackList = TrackDatabase::GetInstance().m_sortedIndices;
+    TrackDatabase::GetInstance().SortTracks( TrackListSort::Artist );
+    for( int i = 0; i < sortedTrackList.size(); ++i )
     {
-        auto& trackData = trackList[i];
-        Path dlcTest = Path( trackData.m_albumArtPath );
-        std::string songImage = dlcTest.GetLocalPathString();
+        auto& trackData = trackList[sortedTrackList[i]];
         json uiTrackData;
-        uiTrackData["TrackName"] = trackData.m_trackName;
-        uiTrackData["ArtistName"] = trackData.m_artistName;
-        uiTrackData["AlbumName"] = trackData.m_albumName;
-        uiTrackData["AlbumArt"] = songImage;
-        uiTrackData["Genre"] = trackData.m_genre;
-        uiTrackData["Year"] = trackData.m_year;
-        uiTrackData["Icon"] = trackData.m_icon;
-        uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
-        uiTrackData["NoteCount"] = trackData.m_noteData.size();
-        uiTrackData["TrackIndex"] = i;
+        DumpTrackData( uiTrackData, trackData, sortedTrackList[i]);
         ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
     }
     RequestDetailsPanelUpdate_Internal( 0 );
@@ -120,35 +111,13 @@ void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& this
 void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     int trackIndex = args[0].ToInteger();
+    TrackListSort sortType = (TrackListSort)trackIndex;
 
     ExecuteScript( "ClearTrackList();" );
 
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
     auto& sortedTracks = TrackDatabase::GetInstance().m_sortedIndices;
-    sortedTracks.clear();
-    sortedTracks.reserve( trackList.size() );
-    for( int i = 0; i < trackList.size(); ++i )
-    {
-        sortedTracks.push_back( i );
-    }
-    if( trackIndex == 1 )
-    {
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList, trackIndex]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_trackName < trackList[second].m_trackName;
-            } );
-    }
-    if( trackIndex == 2 )
-    {
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList, trackIndex]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_artistName < trackList[second].m_artistName;
-            } );
-    }
-    if( trackIndex == 3 )
-    {
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList, trackIndex]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_year < trackList[second].m_year;
-            } );
-    }
+    TrackDatabase::GetInstance().SortTracks( sortType );
 
     int cachedYear = -1;
     std::string cachedChar;
@@ -158,38 +127,39 @@ void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& this
         auto& trackData = trackList[sortedTracks[i]];
 
         bool needsHeader = false;
-        if( trackIndex == 1 && (cachedChar.empty() || cachedChar[0] != trackData.m_trackName[0] ) )
+        switch( sortType )
         {
-            cachedChar = trackData.m_trackName[0];
-            headerName = cachedChar;
-            needsHeader = true;
-        }
-        if( trackIndex == 2 && ( cachedChar.empty() || cachedChar[0] != trackData.m_artistName[0] ) )
-        {
-            cachedChar = trackData.m_artistName[0];
-            headerName = cachedChar;
-            needsHeader = true;
-        }
-        if( trackIndex == 3 && cachedYear != trackData.m_year )
-        {
-            cachedYear = trackData.m_year;
-            headerName = std::to_string( trackData.m_year );
-            needsHeader = true;
+        case TrackListSort::Title:
+            if( cachedChar.empty() || cachedChar[0] != trackData.m_trackName[0] )
+            {
+                cachedChar = trackData.m_trackName[0];
+                headerName = cachedChar;
+                needsHeader = true;
+            }
+            break;
+        case TrackListSort::Artist:
+            if( cachedChar.empty() || cachedChar[0] != trackData.m_artistName[0] )
+            {
+                cachedChar = trackData.m_artistName[0];
+                headerName = cachedChar;
+                needsHeader = true;
+            }
+            break;
+        case TrackListSort::Year:
+            if( cachedYear != trackData.m_year )
+            {
+                cachedYear = trackData.m_year;
+                headerName = std::to_string( trackData.m_year );
+                needsHeader = true;
+            }
+            break;
+        case TrackListSort::None:
+        default:
+            break;
         }
 
-        Path dlcTest = Path( trackData.m_albumArtPath );
-        std::string songImage = dlcTest.GetLocalPathString();
         json uiTrackData;
-        uiTrackData["TrackName"] = trackData.m_trackName;
-        uiTrackData["ArtistName"] = trackData.m_artistName;
-        uiTrackData["AlbumName"] = trackData.m_albumName;
-        uiTrackData["AlbumArt"] = songImage;
-        uiTrackData["Genre"] = trackData.m_genre;
-        uiTrackData["Year"] = trackData.m_year;
-        uiTrackData["Icon"] = trackData.m_icon;
-        uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
-        uiTrackData["NoteCount"] = trackData.m_noteData.size();
-        uiTrackData["TrackIndex"] = sortedTracks[i];
+        DumpTrackData( uiTrackData, trackData, sortedTracks[i] );
         if( needsHeader )
         {
             ExecuteScript( "AddCategory('" + headerName + "'); " );
@@ -212,21 +182,26 @@ void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex
     //for( int i = 0; i < trackList.size(); ++i )
     {
         auto& trackData = trackList[trackIndex];
-        Path dlcTest = Path( trackData.m_albumArtPath );
-        std::string songImage = dlcTest.GetLocalPathString();
         json uiTrackData;
-        uiTrackData["TrackName"] = trackData.m_trackName;
-        uiTrackData["ArtistName"] = trackData.m_artistName;
-        uiTrackData["AlbumName"] = trackData.m_albumName;
-        uiTrackData["Genre"] = trackData.m_genre;
-        uiTrackData["Year"] = trackData.m_year;
-        uiTrackData["Icon"] = trackData.m_icon;
-        uiTrackData["AlbumArt"] = songImage;
-        uiTrackData["TrackSource"] = trackData.m_trackSourcePath;
-        uiTrackData["NoteCount"] = trackData.m_noteData.size();
-        uiTrackData["TrackIndex"] = trackIndex;
+        DumpTrackData( uiTrackData, trackData, trackIndex );
         ExecuteScript( "UpdateDetailsPanel(" + uiTrackData.dump() + "); " );
     }
+}
+
+void TrackListMenuController::DumpTrackData( json& outJson, TrackData inTrackData, int inIndex )
+{
+    Path dlcTest = Path( inTrackData.m_albumArtPath );
+    std::string songImage = dlcTest.GetLocalPathString();
+    outJson["TrackName"] = inTrackData.m_trackName;
+    outJson["ArtistName"] = inTrackData.m_artistName;
+    outJson["AlbumName"] = inTrackData.m_albumName;
+    outJson["Genre"] = inTrackData.m_genre;
+    outJson["Year"] = inTrackData.m_year;
+    outJson["Icon"] = inTrackData.m_icon;
+    outJson["AlbumArt"] = songImage;
+    outJson["TrackSource"] = inTrackData.m_trackSourcePath;
+    outJson["NoteCount"] = inTrackData.m_noteData.size();
+    outJson["TrackIndex"] = inIndex;
 }
 
 #endif

@@ -51,28 +51,16 @@
       <img src="file:///Assets/Textures/2x/Asset 2@2x.png" />
       <br />
       <img src="file:///Assets/Textures/Bar3.png" class="underline-bar" /><br />
-      <p
-        onclick="LoadScene('Assets/TrackList.lvl')"
-        class="hover-underline-animation"
-      >
-        PLAY
-      </p>
+      <p onclick="LoadScene('Assets/TrackList.lvl')" class="hover-underline-animation">PLAY</p>
       <br />
       <p class="hover-underline-animation green">PRACTICE</p>
       <br />
-      <p class="hover-underline-animation orange" onclick="toggleMenu()">
-        SETTINGS
-      </p>
+      <p class="hover-underline-animation orange" onclick="toggleMenu()">SETTINGS</p>
       <br />
       <p class="hover-underline-animation red" onclick="Quit()">EXIT</p>
     </div>
     <div id="settingsMenu" class="options-menu menu">
-      <p
-        class="hover-underline-animation"
-        onclick="toggleMenu(); SaveSettings()"
-      >
-        < Back
-      </p>
+      <p class="hover-underline-animation" onclick="toggleMenu(); SaveSettings()">< Back</p>
       <br />
       <br />
       <p class="menu-text">Enable Radio</p>
@@ -80,20 +68,9 @@
       <br />
       <p class="menu-text" id="menu-volume-text">Radio Volume</p>
       <br />
-      <input
-        type="range"
-        name="RadioVolume"
-        id="radio-volume"
-        min="0"
-        max="100"
-        step="1"
-        value="50"
-        class="slider"
-      />
+      <input type="range" name="RadioVolume" id="radio-volume" min="0" max="100" step="1" value="50" class="slider" />
       <br />
-      <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">
-        Convert Custom DLC
-      </p>
+      <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">Convert Custom DLC</p>
     </div>
 
     <div id="track-radio-hover" onmouseover="ShowTrackRadio()"></div>
@@ -105,8 +82,7 @@
       <div class="track-details">
         <div class="wrapper">
           <div id="scrollingText1" class="scroll-text">
-            This is a very long text that needs to scroll to be fully visible.
-            Let's scroll!
+            This is a very long text that needs to scroll to be fully visible. Let's scroll!
           </div>
         </div>
         <div class="wrapper">
@@ -117,9 +93,7 @@
         </div>
 
         <div id="track-title" class="scroll-container">
-          <div id="track-title-scroll" class="scroll-content BoldRegular Large">
-            EXAMPLE TITLE
-          </div>
+          <div id="track-title-scroll" class="scroll-content BoldRegular Large">EXAMPLE TITLE</div>
         </div>
         <div class="clearfix"></div>
         <div id="track-artist" class="Regular Small">EXAMPLE ARTIST</div>
@@ -131,44 +105,37 @@
     </div>
     <script src="js/Common.js"></script>
     <script>
-      const titleTrackScrolling = setupScrollingText(
-        "track-title",
-        "track-title-scroll"
-      );
-      applyScrollFadeAnimation("scrollingText1");
-      applyScrollFadeAnimation("scrollingText2", 2000, 7000, 3000); // With different timing parameters
+      const titleTrackScrolling = setupScrollingText("track-title", "track-title-scroll")
+      applyScrollFadeAnimation("scrollingText1")
+      applyScrollFadeAnimation("scrollingText2", 2000, 7000, 3000) // With different timing parameters
 
-      var timer;
+      var timer
       function ShowTrackRadio() {
-        clearTimeout(timer);
-        if (
-          !document.getElementById("track-radio").classList.contains("visible")
-        ) {
-          document.getElementById("track-radio").classList.toggle("visible");
+        clearTimeout(timer)
+        if (!document.getElementById("track-radio").classList.contains("visible")) {
+          document.getElementById("track-radio").classList.toggle("visible")
         }
         timer = setTimeout(function () {
-          if (
-            document.getElementById("track-radio").classList.contains("visible")
-          ) {
-            document.getElementById("track-radio").classList.toggle("visible");
+          if (document.getElementById("track-radio").classList.contains("visible")) {
+            document.getElementById("track-radio").classList.toggle("visible")
           }
-        }, 15000);
+        }, 15000)
       }
 
       function DisplayTrack(track) {
         // Fetch the container div
-        const containerDiv = document.getElementById("track-radio");
+        const containerDiv = document.getElementById("track-radio")
 
-        var imageContainer = document.getElementById("track-art");
-        imageContainer.src = `file:///${track.AlbumArt}`;
+        var imageContainer = document.getElementById("track-art")
+        imageContainer.src = `file:///${track.AlbumArt}`
 
         //var trackTitle = document.getElementById("track-title");
         //trackTitle.textContent = `${track.TrackName}`;
-        titleTrackScrolling.updateText(`${track.TrackName}`);
+        titleTrackScrolling.updateText(`${track.TrackName}`)
 
-        var trackArtist = document.getElementById("track-artist");
-        trackArtist.textContent = `${track.ArtistName}`;
-        ShowTrackRadio();
+        var trackArtist = document.getElementById("track-artist")
+        trackArtist.textContent = `${track.ArtistName}`
+        ShowTrackRadio()
         /*
       document.getElementById('track-radio').addEventListener('click', function() {
           document.getElementById('track-radio').classList.toggle('visible');
@@ -189,36 +156,30 @@
       containerDiv.appendChild(dynamicDiv);*/
       }
       function toggleMenu() {
-        const menu = document.getElementById("settingsMenu");
-        const content = document.getElementById("mainMenu");
+        const menu = document.getElementById("settingsMenu")
+        const content = document.getElementById("mainMenu")
 
         if (menu.classList.contains("active")) {
-          menu.classList.remove("active");
-          content.classList.remove("content-fade");
+          menu.classList.remove("active")
+          content.classList.remove("content-fade")
         } else {
-          menu.classList.add("active");
-          content.classList.add("content-fade");
+          menu.classList.add("active")
+          content.classList.add("content-fade")
         }
       }
 
       function setRadioInitialValue(value) {
-        document.getElementById("radio-volume").value = value;
-        document.getElementById(
-          "menu-volume-text"
-        ).textContent = `Radio Volume: ${value}%`;
+        document.getElementById("radio-volume").value = value
+        document.getElementById("menu-volume-text").textContent = `Radio Volume: ${value}%`
       }
     </script>
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
-        document
-          .getElementById("radio-volume")
-          .addEventListener("input", function () {
-            document.getElementById(
-              "menu-volume-text"
-            ).textContent = `Radio Volume: ${this.value}%`;
-            SetRadioVolume(this.value);
-          });
-      });
+        document.getElementById("radio-volume").addEventListener("input", function () {
+          document.getElementById("menu-volume-text").textContent = `Radio Volume: ${this.value}%`
+          SetRadioVolume(this.value)
+        })
+      })
     </script>
   </body>
 </html>

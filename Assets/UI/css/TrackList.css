@@ -1,64 +1,78 @@
+html,
 body {
-    margin: 0;
-    padding: 0;
-    background-color: #0000001c;
-    color: #ffffff;
-    height: 100%;
-    overflow: hidden; /* Prevent scrolling of the entire page */
-    background-image: url("file:///Assets/UI/Textures/track-bg.png");
-    background-position: center;
-    background-size: cover;
-  }
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0000001c;
+  color: #ffffff;
+  overflow: hidden; /* Prevent scrolling of the entire page */
+  background-image: url("file:///Assets/UI/Textures/track-bg.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
 
-  .main-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh; /* Adjust this as per your requirement */
-  }
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.781); /* Adjust the alpha value for darkness */
+  z-index: 0; /* Ensure the overlay is on top of the background image */
+}
 
-  .header a {
-    margin: 10px;
-    color: rgba(255, 255, 255, 0.842);
-    text-decoration: none;
-  }
-  .header a:hover {
-    color: white;
-    text-decoration: underline;
-  }
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Adjust this as per your requirement */
+}
 
-  .content {
-    flex-grow: 1;
-    display: flex;
-  }
+.header a {
+  margin: 10px;
+  color: rgba(255, 255, 255, 0.842);
+  text-decoration: none;
+}
+.header a:hover {
+  color: white;
+  text-decoration: underline;
+}
 
-  .background {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    min-height: 100%;
-    background-color: rgba(0, 0, 0, 0.52);
-    top: 0;
-    z-index: -1;
-  }
+.content {
+  flex-grow: 1;
+  display: flex;
+}
 
-  #trackDetails {
-    width: 400px;
-    padding: 5px;
-  }
+.background {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  min-height: 100%;
+  background-color: rgba(0, 0, 0, 0.52);
+  top: 0;
+  z-index: -1;
+}
 
-  #trackDetails .album-art {
-    background-color: #000000ab;
-    width: 100%;
-  }
-  #trackDetails .album-art img {
-    width: 100%;
-    height: auto;
-  }
+#trackDetails {
+  width: 400px;
+  padding: 5px;
+}
 
-  .dynamic-div {
-    margin-bottom: 10px;
-  }
-  /* 
+#trackDetails .album-art {
+  background-color: #000000ab;
+  width: 100%;
+}
+#trackDetails .album-art img {
+  width: 100%;
+  height: auto;
+}
+
+.dynamic-div {
+  margin-bottom: 10px;
+}
+/* 
   .dynamic-div::after {
       content: '';
       position: absolute;
@@ -70,69 +84,97 @@ body {
       Use rgba(0, 0, 0, 0) to rgba(0, 0, 0, 1) for a black fade 
   }
 */
-  .dynamic-div:hover {
-    background-color: rgba(97, 97, 97, 0.192);
-  }
+.dynamic-div:hover {
+  background-color: rgba(97, 97, 97, 0.192);
+}
 
-  .dynamic-div .album-art {
-    width: 200px;
-    height: 200px;
-    background-size: cover;
-    background-color: white;
-    float: left;
-  }
+.dynamic-div .album-art {
+  width: 200px;
+  height: 200px;
+  background-size: cover;
+  background-color: white;
+  float: left;
+}
 
-  .dynamic-div .album-title {
-    float: left;
-    width: max-content;
-    padding-left: 10px;
-  }
+.dynamic-div .album-title {
+  float: left;
+  width: max-content;
+  padding-left: 10px;
+}
 
-  .dynamic-div .album-stats {
-    float: left;
-  }
+.dynamic-div .album-stats {
+  float: left;
+}
 
-  .dynamic-div .note-count {
-    float: right;
-  }
-  .clearfix::after {
-    content: "";
-    clear: both;
-    display: table;
-  }
+.dynamic-div .note-count {
+  float: right;
+}
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
 
-  .header,
-  .footer {
-    position: fixed;
-    left: 0;
-    right: 0;
-  }
-  .header {
-    top: 0;
-    height: 50px; /* Adjust based on your needs */
-  }
-  .footer {
-    bottom: 0;
-    height: 50px; /* Adjust based on your needs */
-  }
-  .sidebar {
-    position: fixed;
-    top: 0;
-    right: 0; /* Same as header height */
-    bottom: 50px; /* Same as footer height */
-    width: 400px; /* Adjust based on your needs */
-    overflow-y: auto; /* Allows scrolling within the sidebar if content overflows */
-  }
-  .main-content {
-    position: absolute;
-    top: 50px; /* Adjust based on header height */
-    bottom: 50px; /* Adjust based on footer height */
-    left: 0; /* Adjust based on sidebar width */
-    right: 400px;
-    overflow-y: auto; /* Allows scrolling within the content area */
-    padding: 20px; /* Optional padding for aesthetics */
-  }
+.header,
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+.header {
+  top: 0;
+  height: 50px; /* Adjust based on your needs */
+  display: flex;
+}
+.footer {
+  bottom: 0;
+  height: 50px; /* Adjust based on your needs */
+  display: flex;
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0; /* Same as header height */
+  bottom: 50px; /* Same as footer height */
+  width: 400px; /* Adjust based on your needs */
+  overflow-y: auto; /* Allows scrolling within the sidebar if content overflows */
+}
+.main-content {
+  position: absolute;
+  top: 50px; /* Adjust based on header height */
+  bottom: 50px; /* Adjust based on footer height */
+  left: 0; /* Adjust based on sidebar width */
+  right: 400px;
+  overflow-y: auto; /* Allows scrolling within the content area */
+  padding: 20px; /* Optional padding for aesthetics */
+}
 
-  #filterMenu {
-    background: black;
-  }
+#filterMenu {
+  background: black;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  text-align: center;
+}
+.filter-button img {
+  margin-right: 5px;
+  height: 50px;
+  width: auto;
+  vertical-align: middle;
+}
+.filter-button span {
+  vertical-align: middle;
+}
+.filter-button:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}

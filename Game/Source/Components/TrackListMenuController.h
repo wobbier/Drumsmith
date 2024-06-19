@@ -18,6 +18,8 @@ public:
     void FilterSortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate_Internal( int trackIndex );
+
+    void DumpTrackData( json& outJson, TrackData inTrackData, int inIndex );
 #endif
 
 	SharedPtr<AudioSource> m_currentTrack;

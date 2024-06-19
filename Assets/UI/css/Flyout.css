@@ -1,63 +1,62 @@
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-    z-index: 1;
-  }
-  
-  .flyout {
-    position: fixed;
-    top: 0;
-    right: -340px; /* adjusted for padding */
-    width: 300px;
-    height: 100%;
-    background: rgb(26, 26, 26) !important;
-    z-index: 2;
-    padding: 20px;
-  }
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
 
-  .flyout.left {
-    left: -340px; /* adjusted for padding */
-    transition: left 0.3s ease;
-  }
-  .flyout.left.open {
-    left: 0; /* adjusted for padding */
-  }
-  
-  .flyout.right {
-    right: -340px; /* adjusted for padding */
-    transition: right 0.3s ease;
-  }
-  .flyout.right.open {
-    right: 0; /* adjusted for padding */
-  }
-  
-  .flyout.open {
-    right: 0;
-  }
-  
-  .overlay.show {
-    opacity: 1;
-    visibility: visible;
-  }
-  .flyout-select {
-      width: 100%;
-      height: 50px;
-      line-height: 50px;
-      vertical-align: middle;
-      padding-left: 15px;
-      box-sizing: border-box;
-      background: rgba(255, 255, 255, 0.075);
-      margin-bottom: 5px;
-  }
-  .flyout-select:hover {
-      background: rgba(255, 255, 255, 0.158);
-      outline:1px solid white;
-  }
-  
+.flyout {
+  position: fixed;
+  top: 0;
+  right: -340px; /* adjusted for padding */
+  width: 300px;
+  height: 100%;
+  background: rgb(26, 26, 26) !important;
+  z-index: 2;
+  padding: 20px;
+}
+
+.flyout.left {
+  left: -340px; /* adjusted for padding */
+  transition: left 0.3s ease;
+}
+.flyout.left.open {
+  left: 0; /* adjusted for padding */
+}
+
+.flyout.right {
+  right: -340px; /* adjusted for padding */
+  transition: right 0.3s ease;
+}
+.flyout.right.open {
+  right: 0; /* adjusted for padding */
+}
+
+.flyout.open {
+  right: 0;
+}
+
+.overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.flyout-select {
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  vertical-align: middle;
+  padding-left: 15px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.075);
+  margin-bottom: 5px;
+}
+.flyout-select:hover {
+  background: rgba(255, 255, 255, 0.158);
+  outline: 1px solid white;
+}

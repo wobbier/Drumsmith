@@ -215,6 +215,42 @@ void TrackDatabase::ExportMidiTrackMetaData()
     }
 }
 
+std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
+{
+    auto& trackList = m_trackList.m_tracks;
+    auto& sortedTracks = m_sortedIndices;
+    sortedTracks.clear();
+    sortedTracks.reserve( trackList.size() );
+    for( int i = 0; i < trackList.size(); ++i )
+    {
+        sortedTracks.push_back( i );
+    }
+
+    switch( inSortBy )
+    {
+    case TrackListSort::Title:
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
+            return trackList[first].m_trackName < trackList[second].m_trackName;
+            } );
+        break;
+    case TrackListSort::Artist:
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
+            return trackList[first].m_artistName < trackList[second].m_artistName;
+            } );
+        break;
+    case TrackListSort::Year:
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
+            return trackList[first].m_year < trackList[second].m_year;
+            } );
+        break;
+    default:
+    case TrackListSort::None:
+        break;
+    }
+
+    return m_sortedIndices;
+}
+
 TrackData::TrackData( const Path& inPath )
 {
     if( inPath.IsFile )

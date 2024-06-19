@@ -79,14 +79,15 @@ public:
 enum class TrackListSort : uint32_t
 {
     None = 0,
-    Title = 1 << 1,
-    Artist = 1 << 2,
-    Year = 1 << 3,
+    Title,
+    Artist,
+    Year,
 };
 
 enum class TrackListFilter : uint32_t
 {
     None = 0,
+    Drumsmith = 1 << 1
 };
 
 class TrackDatabase
@@ -96,6 +97,8 @@ public:
     TrackDatabase();
 
     void ExportMidiTrackMetaData();
+
+    std::vector<unsigned int>& SortTracks( TrackListSort inSortBy );
 
     TrackList m_trackList;
 
