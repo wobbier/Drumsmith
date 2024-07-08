@@ -94,7 +94,10 @@ void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& this
     {
         return;
     }
-    TrackRadio::GetInstance().Play( &trackList[str] );
+    RadioArgs radioArgs;
+    radioArgs.CurrentTrack = &trackList[str];
+    radioArgs.UsePreviewMarker = true;
+    TrackRadio::GetInstance().Play( radioArgs );
 }
 
 void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -195,6 +198,11 @@ void TrackListMenuController::RefreshTrackList( TrackListSort inSortType )
         ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
     }
     RequestDetailsPanelUpdate_Internal( 0 );
+}
+
+void TrackListMenuController::OnUpdate()
+{
+    TrackRadio::GetInstance().Update();
 }
 
 #endif

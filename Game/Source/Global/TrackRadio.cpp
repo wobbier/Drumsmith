@@ -5,18 +5,21 @@
 #include "Mathf.h"
 #include "Config/GameSettings.h"
 
-void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
+void TrackRadio::Play( RadioArgs inTrackArgs )
 {
-    if( !inTrackData || inTrackData == m_currentTrack )
+    if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrack == m_currentTrack )
     {
         return;
     }
-
     Stop();
+    m_radioArgs = inTrackArgs;
     bool isAsync = true;
 
-
-    m_currentTrack = inTrackData;
+    //if( m_currentlyPlayingPtr && !m_currentlyPlayingPtr->IsLoaded() )
+    //{
+    //    return;
+    //}
+    m_currentTrack = inTrackArgs.CurrentTrack;
     Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );
 
     {
@@ -24,6 +27,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
         m_currentlyPlaying = AudioSource( m_currentTrack->m_trackSourcePath );
         SharedPtr<AudioSource> source;
         PlayAudioEvent evt;
+        evt.Immediate = true;
         if( previewPath.Exists )
         {
             evt.SourceName = previewPath.FullPath;
@@ -32,7 +36,7 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
         {
             evt.SourceName = m_currentlyPlaying.FilePath.FullPath;
         }
-        if( inUsePreviewMarker )
+        if( inTrackArgs.UsePreviewMarker )
         {
             evt.StartPercent = m_currentTrack->m_previewPercent;
         }
@@ -44,28 +48,28 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
 
     if( !previewPath.Exists )
     {
-        PlayStem( "crowd.ogg", inUsePreviewMarker );
-        PlayStem( "drums.ogg", inUsePreviewMarker );
-        PlayStem( "drums_1.ogg", inUsePreviewMarker );
-        PlayStem( "drums_2.ogg", inUsePreviewMarker );
-        PlayStem( "drums_3.ogg", inUsePreviewMarker );
-        PlayStem( "drums_4.ogg", inUsePreviewMarker );
-        PlayStem( "guitar.ogg", inUsePreviewMarker );
-        PlayStem( "vocals.ogg", inUsePreviewMarker );
-        PlayStem( "rhythm.ogg", inUsePreviewMarker );
-        PlayStem( "keys.ogg", inUsePreviewMarker );
+        PlayStem( "crowd.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "drums.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "drums_1.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "drums_2.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "drums_3.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "drums_4.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "guitar.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "vocals.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "rhythm.ogg", inTrackArgs.UsePreviewMarker );
+        PlayStem( "keys.ogg", inTrackArgs.UsePreviewMarker );
 
         for( auto ptr : m_currentStems )
         {
             if( ptr )
             {
-                if( inUsePreviewMarker )
+                if( inTrackArgs.UsePreviewMarker )
                 {
                     ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
                 }
                 ptr->Play( true );
                 ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
-                if( inUsePreviewMarker )
+                if( inTrackArgs.UsePreviewMarker )
                 {
                     ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
                 }
@@ -74,17 +78,18 @@ void TrackRadio::Play( TrackData* inTrackData, bool inUsePreviewMarker )
     }
     if( m_currentlyPlayingPtr )
     {
-        if( inUsePreviewMarker )
+        if( inTrackArgs.UsePreviewMarker )
         {
             m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
         }
         m_currentlyPlayingPtr->Play();
         m_currentlyPlayingPtr->SetVolume( GameSettings::GetInstance().RadioVolume );
-        if( inUsePreviewMarker )
+        if( inTrackArgs.UsePreviewMarker )
         {
             m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
         }
     }
+    m_radioState = RadioState::Loading;
 }
 
 
@@ -106,6 +111,7 @@ bool TrackRadio::PlayStem( const char* inFileName, bool inUsePreviewMarker )
         SharedPtr<AudioSource> source;
         PlayAudioEvent evt;
         evt.SourceName = drumsPath.FullPath;
+        evt.Immediate = true;
         if( inUsePreviewMarker )
         {
             evt.StartPercent = m_currentTrack->m_previewPercent;
@@ -133,6 +139,7 @@ void TrackRadio::Stop()
         }
     }
     m_currentStems.clear();
+    m_radioState = RadioState::None;
 }
 
 void TrackRadio::SetVolume( float inVolume )
@@ -164,18 +171,19 @@ void TrackRadio::TryPlayNextTrack()
 
         for( auto ptr : m_currentStems )
         {
-            if( ptr && ptr->IsPlaying() )
+            if( ptr )
             {
                 loaded = loaded && ptr->IsLoaded();
             }
         }
 
-
         if (loaded)
         {
-            if( m_currentlyPlayingPtr && m_currentlyPlayingPtr->IsPlaying() )
+            m_currentlyPlayingPtr->Play();
+            m_currentlyPlayingPtr->SetVolume( GameSettings::GetInstance().RadioVolume );
+            if( m_radioArgs.UsePreviewMarker )
             {
-                m_currentlyPlayingPtr->Play();
+                m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
             }
 
             for( auto ptr : m_currentStems )
@@ -183,8 +191,38 @@ void TrackRadio::TryPlayNextTrack()
                 if( ptr )
                 {
                     ptr->Play();
+                    ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
+                    if( m_radioArgs.UsePreviewMarker )
+                    {
+                        ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
+                    }
                 }
             }
+            m_radioState = RadioState::Playing;
         }
     }
+}
+
+void TrackRadio::Update()
+{
+    if( m_radioState == RadioState::Loading )
+    {
+        if( m_currentlyPlayingPtr && !m_currentlyPlayingPtr->IsPlaying() )
+        {
+            TryPlayNextTrack();
+        }
+    }
+
+    if( m_radioState == RadioState::Playing )
+    {
+        if( m_currentlyPlayingPtr && !m_currentlyPlayingPtr->IsPlaying() )
+        {
+            m_radioState = RadioState::None;
+        }
+    }
+}
+
+bool TrackRadio::CanPlayNextTrack() const
+{
+    return m_radioState == RadioState::None;
 }

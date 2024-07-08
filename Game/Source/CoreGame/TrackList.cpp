@@ -3,6 +3,7 @@
 #include "Core/Assert.h"
 #include "CustomTrackDefineTest.h"
 #include "JSON.h"
+#include "Utils/StringUtils.h"
 
 DISABLE_OPTIMIZATION;
 
@@ -362,15 +363,15 @@ void TrackData::OnLoadTrackData( const json& outJson )
 {
     if( outJson.contains( "SongName" ) )
     {
-        m_trackName = outJson["SongName"];
+        m_trackName = StringUtils::TrimLeadingSpaces( outJson["SongName"] );
     }
     if( outJson.contains( "SongArtist" ) )
     {
-        m_artistName = outJson["SongArtist"];
+        m_artistName = StringUtils::TrimLeadingSpaces( outJson["SongArtist"] );
     }
     if( outJson.contains( "AlbumName" ) )
     {
-        m_albumName = outJson["AlbumName"];
+        m_albumName = StringUtils::TrimLeadingSpaces( outJson["AlbumName"] );
     }
     if( outJson.contains( "Genre" ) )
     {

@@ -80,7 +80,8 @@ void MainMenuController::ConvertCustomDLC( const ultralight::JSObject& thisObjec
 void MainMenuController::PlayNextRandomTrack()
 {
     TrackData* randomElement = TrackRadio::GetInstance().m_currentTrack;
-    if( !TrackRadio::GetInstance().m_currentlyPlayingPtr || !TrackRadio::GetInstance().m_currentlyPlayingPtr->IsPlaying() )
+
+    if( ( !TrackRadio::GetInstance().m_currentlyPlayingPtr || !TrackRadio::GetInstance().m_currentlyPlayingPtr->IsPlaying() ) )
     {
         auto& trackExample = TrackDatabase::GetInstance().m_trackList.m_tracks;
         if( trackExample.empty() )
@@ -89,7 +90,11 @@ void MainMenuController::PlayNextRandomTrack()
         }
         int randomIndex = m_random( 0, trackExample.size() - 1 );
         randomElement = &trackExample[randomIndex];
-        TrackRadio::GetInstance().Play( randomElement, false );
+
+        RadioArgs radioArgs;
+        radioArgs.CurrentTrack = randomElement;
+        radioArgs.UsePreviewMarker = false;
+        TrackRadio::GetInstance().Play( radioArgs );
     }
 
     if( randomElement )
@@ -108,8 +113,8 @@ void MainMenuController::PlayNextRandomTrack()
 
 void MainMenuController::OnUpdate()
 {
-    // hack imo
-    if( !TrackRadio::GetInstance().IsPlaying() )
+    TrackRadio::GetInstance().Update();
+    if( TrackRadio::GetInstance().CanPlayNextTrack() )
     {
         PlayNextRandomTrack();
     }

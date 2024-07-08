@@ -22,6 +22,7 @@ public:
     void DumpTrackData( json& outJson, TrackData inTrackData, int inIndex );
 
     void RefreshTrackList( TrackListSort inSortType );
+    void OnUpdate() override;
 #endif
 
 	SharedPtr<AudioSource> m_currentTrack;
