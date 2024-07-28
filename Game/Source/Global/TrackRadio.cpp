@@ -130,12 +130,16 @@ void TrackRadio::Stop()
     if( m_currentlyPlayingPtr )
     {
         m_currentlyPlayingPtr->Stop();
+        StopAudioEvent evt;
+        evt.SourceName = m_currentTrack->m_trackSourcePath;
+        evt.Fire();
     }
     for( auto ptr : m_currentStems )
     {
         if( ptr )
         {
             ptr->Stop( true );
+            ptr.reset();
         }
     }
     m_currentStems.clear();

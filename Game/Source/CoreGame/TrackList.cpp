@@ -117,22 +117,22 @@ TrackDatabase::TrackDatabase()
                 bool chartFormat = fileExistsInDirectory( entry.path(), "notes.chart" );
                 if( chartFormat )
                 {
-                //    //Path midiPath = Path( std::string( entry.path().u8string() ) );
-                //    //    
-                //    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
-                //    //{
-                //    //    m_drumlessSongs.push_back( midiPath );
-                //    //}
+                    //Path midiPath = Path( std::string( entry.path().u8string() ) );
+                    //    
+                    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                    //{
+                    //    m_drumlessSongs.push_back( midiPath );
+                    //}
                     continue;
                 }
 
                 // #TODO: Do we even support OPUS? I would need to convert it for fmod...
-                bool opusFormat = fileExistsInDirectory( entry.path(), "song.opus" );
-                if( opusFormat )
-                {
-                    YIKES( entry.path().u8string().c_str() );
-                    continue;
-                }
+                //bool opusFormat = fileExistsInDirectory( entry.path(), "song.opus" );
+                //if( opusFormat )
+                //{
+                //    YIKES( entry.path().u8string().c_str() );
+                //    continue;
+                //}
 
                 // Check for any Custom DLC from other formats
                 //bool exists = fileExistsInDirectory( entry.path(), "song.ini" );
