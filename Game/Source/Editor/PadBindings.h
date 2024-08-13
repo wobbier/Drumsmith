@@ -8,6 +8,7 @@
 #include "JSON.h"
 #include "Math/Vector3.h"
 #include "Core/Assert.h"
+#include "Midi/MidiDevice.h"
 
 enum class  OldPadId
 {

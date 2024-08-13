@@ -23,6 +23,16 @@ public class SharpGameProject : BaseGameProject
         conf.LibraryFiles.Add("rtmidi");
         conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
+
+        {
+            var copyDirBuildStep = new Configuration.BuildStepCopy(
+                Path.Combine(Globals.RootDir, $@"ThirdParty/Bin/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}/"),
+                Globals.RootDir + "/.build/[target.Name]");
+
+            copyDirBuildStep.IsFileCopy = false;
+            copyDirBuildStep.CopyPattern = "*.dll";
+            conf.EventPostBuildExe.Add(copyDirBuildStep);
+        }
     }
 
     public override void ConfigureUWP(Configuration conf, CommonTarget target)

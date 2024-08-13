@@ -8,6 +8,8 @@
 #include "Engine\Engine.h"
 #include "optick.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "RtMidi.h"
+#include "Utils\HavanaUtils.h"
 
 #if USING(ME_EDITOR)
 
@@ -69,13 +71,22 @@ bool TrackEditor::CullVisual( float posx )
 
 void TrackEditor::ResetTrack()
 {
-    int i = 0;
     SelectedTrackIndex = 0;
+    if( !SelectedTrackLocation.Exists )
+    {
+        return;
+    }
+
+    int i = 0;
     for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
     {
-        if( SelectedTrackLocation.Exists && Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
+        std::cout << Path( track.m_trackSourcePath ).GetDirectoryString().c_str() << std::endl;
+        std::cout << SelectedTrackLocation.GetDirectoryString().c_str() << std::endl;
+        if( Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
         {
             SelectedTrackIndex = i;
+            TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex].LoadNoteData();
+            return;
         }
         ++i;
     }
@@ -107,7 +118,31 @@ void TrackEditor::Render()
 
     ImGui::SetCursorPosX( windowCursorPos.x );
     DrawTrackControls();
+    auto& m_midi = MidiDevice::GetInstance();
+    {
+        static std::string m_selectedMidiDeviceName;
+        HavanaUtils::Label( "Midi Device" );
+        if( ImGui::BeginCombo( "##Device", m_selectedMidiDeviceName.empty() ? "Select a device" : m_selectedMidiDeviceName.c_str() ) )
+        {
+            for( int i = 0; i < m_midi.m_devices.size(); ++i )
+            {
+                if( ImGui::Selectable( m_midi.m_devices[i].Name.c_str()) )
+                {
+                    m_selectedMidiDeviceName = m_midi.m_devices[i].Name;
+                    m_midi.OpenMidiDevice( i );
+                    m_midi.PumpMessages();
+                }
+            }
 
+            ImGui::EndCombo();
+        }
+    }
+    //m_midi.IsPaused = !ImGui::IsWindowFocused();
+
+    if( ImGui::IsWindowFocused() )
+    {
+        m_midi.PumpMessages();
+    }
     TimelineSize = trackData.m_duration;
 
     timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
