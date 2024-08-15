@@ -20,10 +20,8 @@ x86/
 build/
 .build/
 bld/
-[Bb]in/
 [Oo]bj/
 [Bb]uild/
-!**/Source/**/Debug
 # Visual Studo 2015 cache/options directory
 .vs/
 
@@ -211,3 +209,5 @@ engine.txt
 imgui.ini
 
 !ThirdParty/Lib/**/*.*
+!ThirdParty/Bin/**/*.*
+default
