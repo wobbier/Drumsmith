@@ -4,6 +4,7 @@
 #include "CustomTrackDefineTest.h"
 #include "JSON.h"
 #include "Utils/StringUtils.h"
+#include "CLog.h"
 
 DISABLE_OPTIMIZATION;
 
@@ -156,11 +157,17 @@ TrackDatabase::TrackDatabase()
                     {
                         m_trackList.m_tracks.emplace_back( TrackData( Path( entry.path().u8string() + "/TrackData.txt" ) ) );
                         m_trackList.m_tracks.back().Load();
-                        std::cout << "File exists in directory: " << entry.path().u8string() << std::endl;
+
+                        Path trackPath( m_trackList.m_tracks.back().m_trackSourcePath );
+                        if( !trackPath.Exists )
+                        {
+                            YIKES_FMT( "Song does not exist in directory: %s", m_trackList.m_tracks.back().m_trackFileName.c_str() );
+                            continue;
+                        }
                     }
                     else
                     {
-                        std::cout << "File does not exist in directory: " << entry.path().u8string() << std::endl;
+                        YIKES_FMT( "TrackData.txt doesn't exist for: %s", entry.path().u8string().c_str() );
                     }
                 }
             }

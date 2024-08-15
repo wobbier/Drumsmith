@@ -73,7 +73,8 @@ private:
     float m_timeSignature = 4.f;
     float m_timeSignature2 = 4.f;
     bool m_showPadPreview = true;
-    MidiDeviceManager m_manager;
+    // Maybe store this in the midi file?
+    std::vector<MidiMessageNew> m_messages;
 };
 
 ME_REGISTER_EDITOR_WIDGET( TrackEditor );

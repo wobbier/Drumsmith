@@ -121,15 +121,21 @@ jobs:
           path: |
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}
             .build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets
+            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/Havana
+            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/Assets/UI/**/*.dds
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/AppX
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.lib
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.pdb
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.exp
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.log
+            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/*.map
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.frag
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.vert
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.var
             !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.sh
+            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.blend
+            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.blend1
+            !.build/${{matrix.buildconfig}}_${{matrix.configuration}}/**/*.mtl
 
       - name: Copy Tools Assets
         shell: pwsh

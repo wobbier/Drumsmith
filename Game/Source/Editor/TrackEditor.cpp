@@ -17,7 +17,6 @@ TrackEditor::TrackEditor()
     : HavanaWidget( "Track Editor" )
 {
     EventManager::GetInstance().RegisterReceiver( this, { MouseScrollEvent::GetEventId() } );
-    //m_manager.OpenAllDevices();
 }
 
 
@@ -121,12 +120,12 @@ void TrackEditor::Render()
     auto& m_midi = MidiDevice::GetInstance();
     {
         static std::string m_selectedMidiDeviceName;
-        HavanaUtils::Label( "Midi Device" );
-        if( ImGui::BeginCombo( "##Device", m_selectedMidiDeviceName.empty() ? "Select a device" : m_selectedMidiDeviceName.c_str() ) )
+        //HavanaUtils::Label( "Midi Device" );
+        if( ImGui::BeginCombo( "Midi Device", m_selectedMidiDeviceName.empty() ? "Select a device" : m_selectedMidiDeviceName.c_str() ) )
         {
             for( int i = 0; i < m_midi.m_devices.size(); ++i )
             {
-                if( ImGui::Selectable( m_midi.m_devices[i].Name.c_str()) )
+                if( ImGui::Selectable( m_midi.m_devices[i].Name.c_str() ) )
                 {
                     m_selectedMidiDeviceName = m_midi.m_devices[i].Name;
                     m_midi.OpenMidiDevice( i );
@@ -141,7 +140,7 @@ void TrackEditor::Render()
 
     if( ImGui::IsWindowFocused() )
     {
-        m_midi.PumpMessages();
+        m_messages = m_midi.PumpMessages();
     }
     TimelineSize = trackData.m_duration;
 
@@ -284,7 +283,7 @@ void TrackEditor::Render()
             ImGui::Text( PadUtils::GetPadName( (PadId)i ) );
         }
         float notePosX = canvas_pos.x;
-        float notePosY = canvas_pos.y + ((int)id * (m_noteHeight + kLaneSpacing));
+        float notePosY = canvas_pos.y + ( (int)id * ( m_noteHeight + kLaneSpacing ) );
         ImVec2 timelinePos = { notePosX, notePosY };
         ImVec2 rect( timelinePos.x + timelineSizeZoomed, notePosY + m_noteHeight );
 
@@ -387,7 +386,7 @@ void TrackEditor::DrawTrackControls()
         {
             if( TrackPreview )
             {
-                trackData.m_previewPercent = (TrackPreview->GetPositionMs() / (float)TrackPreview->GetLength());
+                trackData.m_previewPercent = ( TrackPreview->GetPositionMs() / (float)TrackPreview->GetLength() );
             }
         }
         if( TrackPreview )
@@ -414,9 +413,9 @@ void TrackEditor::DrawTrackControls()
             PlayAudioEvent evt;
             evt.SourceName = std::string( trackData.m_trackSourcePath );
             evt.Callback = [this]( SharedPtr<AudioSource> inSource )
-            {
-                TrackPreview = inSource;
-            };
+                {
+                    TrackPreview = inSource;
+                };
             evt.Fire();
         }
         else if( TrackPreview && TrackPreview->IsPlaying() )
@@ -437,7 +436,7 @@ void TrackEditor::DrawTrackControls()
                     TrackPreview->Pause();
                 }
             }
-            ImGui::SameLine(  );
+            ImGui::SameLine();
             //ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
             if( ImGui::Button( "Stop" ) )
             {
@@ -468,15 +467,15 @@ void TrackEditor::DrawMenuBar()
             if( ImGui::MenuItem( "Open Track" ) )
             {
                 auto callback = [this]( Path selectedAsset )
-                {
-                    SelectedTrackLocation = Path( selectedAsset.GetDirectoryString() + "NoteData.txt" );
-
-                    if( !SelectedTrackLocation.Exists )
                     {
-                        YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath );
-                    }
-                    ResetTrack();
-                };
+                        SelectedTrackLocation = Path( selectedAsset.GetDirectoryString() + "NoteData.txt" );
+
+                        if( !SelectedTrackLocation.Exists )
+                        {
+                            YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath );
+                        }
+                        ResetTrack();
+                    };
                 RequestAssetSelectionEvent evt( callback, AssetType::Audio );
                 evt.Fire();
             }
@@ -500,7 +499,7 @@ void TrackEditor::DrawPadPreview()
         auto& trackData = GetCurrentTrackData();
         ImVec2 outerWindowSize = ImGui::GetWindowSize();
         ImGui::SetCursorPosX( ImGui::GetScrollX() );
-        const float xSpacing = 5.f;
+        const float xSpacing = 10.f;
         ImGui::BeginChildFrame( 2, { outerWindowSize.x - xSpacing, 55.f }, ImGuiWindowFlags_NoScrollWithMouse );
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -517,6 +516,8 @@ void TrackEditor::DrawPadPreview()
             m_cachedTimestamp = TrackPreview->GetPositionMs();
         }
 
+
+        PadMappingStorage& storage = PadMappingStorage::GetInstance();
         if( TrackPreview )
         {
             for( size_t i = m_closestNoteIndex; i < trackData.m_noteData.size(); ++i )
@@ -528,6 +529,7 @@ void TrackEditor::DrawPadPreview()
                 {
                     hitNotes[(int)currentNote.m_editorLane] = true;
                 }
+
                 if( timeDiff > 500 )
                 {
                     break;
@@ -538,12 +540,30 @@ void TrackEditor::DrawPadPreview()
                     //m_closestNoteIndex = i;
                 }
             }
+            static std::vector<bool> padStates;
+            padStates.resize( (int)PadId::COUNT );
+            for( auto msg : m_messages )
+            {
+                for( auto& pad : storage.mappedPads )
+                {
+                    if( pad.midiBinding == msg.m_data1 )
+                    {
+                        //hitNotes[(int)pad.padId] = msg.IsOnType();
+                        padStates[(int)pad.padId] = msg.IsOnType();
+                    }
+                }
+            }
+
+            for( int i = 0; i < padStates.size(); ++i )
+            {
+                hitNotes[i] = padStates[i] || hitNotes[i];
+            }
 
 
             for( int i = 0; i < (int)PadId::COUNT; ++i )
             {
                 const float kPadHeight = 50.f;
-                float padWidth = ( windowSize.x / (int)PadId::COUNT );
+                float padWidth = ( (windowSize.x-5.f) / (int)PadId::COUNT );
                 ImVec2 padPos = { canvas_pos.x + ( padWidth * i ), canvas_pos.y };
                 ImVec2 padSize = { padPos.x + padWidth - xSpacing, padPos.y + kPadHeight };
                 if( hitNotes[i] )
@@ -556,7 +576,7 @@ void TrackEditor::DrawPadPreview()
                 }
                 const char* text = PadUtils::GetPadName( (PadId)i );
                 ImVec2 textSize = ImGui::CalcTextSize( text );
-                ImVec2 textPos = { (padPos.x + padWidth / 2.f) - ( textSize.x / 2.f ), canvas_pos.y + (( kPadHeight / 2.f ) - (textSize.y / 2.f))};
+                ImVec2 textPos = { ( padPos.x + padWidth / 2.f ) - ( textSize.x / 2.f ), canvas_pos.y + ( ( kPadHeight / 2.f ) - ( textSize.y / 2.f ) ) };
                 drawList->AddText( textPos, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ), text );
 
                 hitNotes[i] = false;
@@ -576,8 +596,8 @@ bool TrackEditor::OnEvent( const BaseEvent& evt )
     if( IsWindowHovered && evt.GetEventId() == MouseScrollEvent::GetEventId() )
     {
         const MouseScrollEvent& event = static_cast<const MouseScrollEvent&>( evt );
-            ScrollDelta += event.Scroll.y;
-        }
+        ScrollDelta += event.Scroll.y;
+    }
     return false;
 }
 
