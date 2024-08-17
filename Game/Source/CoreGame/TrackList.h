@@ -35,8 +35,8 @@ public:
     void OnSaveTrackData( json& outJson );
     void OnSaveNoteData( json& outJson );
 
-    void OnLoadTrackData( const json& outJson );
-    void OnLoadNoteData( const json& outJson );
+    void OnLoadTrackData( const json& inJson );
+    void OnLoadNoteData( const json& inJson );
 
     void LoadNoteData();
 
@@ -50,6 +50,7 @@ public:
     std::string m_albumArtFilename;
     std::string m_trackSourcePath;
     std::string m_trackFileName;
+    std::string m_dlcSource;
     float m_noteSpeed = 1.f;
     float m_duration = 1.f;
     float m_durationMS = 1.f;
@@ -86,8 +87,26 @@ enum class TrackListSort : uint32_t
 
 enum class TrackListFilter : uint32_t
 {
+    // This isn't gonna work
     None = 0,
-    Drumsmith = 1 << 1
+    Drumsmith = 1,
+    RockBand,
+    RockBand2,
+    RockBand3,
+    RockBand4,
+    RockBandBlitz,
+    GuitarHero,
+    GuitarHero2,
+    GuitarHero3,
+    GuitarHero4,
+    GuitarHero5,
+    GuitarHero5DLC,
+    GreenDayRockBand,
+    GuitarHeroWorldTour,
+    GuitarHeroWorldTourDLC, // maybe group this?
+    LegoRockBand,
+    Other,
+    Count
 };
 
 class TrackDatabase
@@ -98,11 +117,20 @@ public:
 
     void ExportMidiTrackMetaData();
 
-    std::vector<unsigned int>& SortTracks( TrackListSort inSortBy );
+    std::vector<unsigned int>& SortTracks( TrackListSort inSortBy, TrackListFilter inFilterBy );
+    std::vector<unsigned int>& FilterTracks( TrackListFilter inFilterBy );
+
+    void GatherFilterCounts();
+
+    std::string GetFilterName( TrackListFilter inFilter );
+
     TrackListSort m_currentSort = TrackListSort::None;
+    TrackListFilter m_currentFilter = TrackListFilter::None;
     bool m_needsSort = true;
     bool m_pendingInitialSort = true;
     TrackList m_trackList;
 
+    int m_sortedSize = 0;
     std::vector<unsigned int> m_sortedIndices;
+    std::vector<unsigned int> m_filterMatches;
 };

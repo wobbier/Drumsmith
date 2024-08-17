@@ -37,12 +37,16 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
 
     GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &TrackListMenuController::SelectTrackToPlay );
     GlobalWindow["PlayTrackPreview"] = BindJSCallback( &TrackListMenuController::PlayTrackPreview );
-    GlobalWindow["FilterSortTracks"] = BindJSCallback( &TrackListMenuController::FilterSortTracks );
+    GlobalWindow["FilterSortTracks"] = BindJSCallback( &TrackListMenuController::SortTracks );
+    GlobalWindow["FilterTracks"] = BindJSCallback( &TrackListMenuController::FilterTracks );
     GlobalWindow["ViewTrackStats"] = BindJSCallback( &TrackListMenuController::ViewTrackStats );
     GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &TrackListMenuController::RequestDetailsPanelUpdate );
+    // Move to a base Drumsmith UI class
+    GlobalWindow["EditTrack"] = BindJSCallback( &TrackListMenuController::EditTrack );
     
-    RefreshTrackList( TrackListSort::Artist );
+    RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, TrackDatabase::GetInstance().m_currentFilter );
 }
+
 
 void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
@@ -62,6 +66,7 @@ void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thi
     };
 }
 
+
 void TrackListMenuController::ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     //ultralight::String path = args[0].ToString();
@@ -78,6 +83,22 @@ void TrackListMenuController::ViewTrackStats( const ultralight::JSObject& thisOb
     //    evt.Fire();
     //    };
 }
+
+
+void TrackListMenuController::EditTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    if( args.empty() || !args[0].IsString() )
+    {
+        BRUH( "EditTrack(string) argument mismatch." );
+        return;
+    }
+    ultralight::String str = args[0].ToString();
+    std::string str2( str.utf8().data() );
+    EditTrackEvent evt;
+    evt.FileName = str2;
+    evt.Fire();
+}
+
 
 void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
@@ -100,11 +121,18 @@ void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& this
     TrackRadio::GetInstance().Play( radioArgs );
 }
 
-void TrackListMenuController::FilterSortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+void TrackListMenuController::SortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     int trackIndex = args[0].ToInteger();
     TrackListSort sortType = (TrackListSort)trackIndex;
-    RefreshTrackList( sortType );
+    RefreshTrackList( sortType, TrackDatabase::GetInstance().m_currentFilter );
+}
+
+void TrackListMenuController::FilterTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    int trackIndex = args[0].ToInteger();
+    TrackListFilter filterType = (TrackListFilter)trackIndex;
+    RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, filterType);
 }
 
 void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -142,13 +170,13 @@ void TrackListMenuController::DumpTrackData( json& outJson, TrackData inTrackDat
     outJson["TrackIndex"] = inIndex;
 }
 
-void TrackListMenuController::RefreshTrackList( TrackListSort inSortType )
+void TrackListMenuController::RefreshTrackList( TrackListSort inSortType, TrackListFilter inFilterType )
 {
     ExecuteScript( "ClearTrackList();" );
 
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
     auto& sortedTracks = TrackDatabase::GetInstance().m_sortedIndices;
-    TrackDatabase::GetInstance().SortTracks( inSortType );
+    TrackDatabase::GetInstance().SortTracks( inSortType, inFilterType );
 
     int cachedYear = -1;
     std::string cachedChar;
@@ -197,6 +225,24 @@ void TrackListMenuController::RefreshTrackList( TrackListSort inSortType )
         }
         ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
     }
+    json filterData;
+    json noneEntry;
+    noneEntry["FilterName"] = TrackDatabase::GetInstance().GetFilterName( TrackListFilter::None );
+    noneEntry["FilterID"] = 0;
+    noneEntry["Count"] = TrackDatabase::GetInstance().m_trackList.m_tracks.size();
+    filterData.push_back( noneEntry );
+    for (int i = 0; i < TrackDatabase::GetInstance().m_filterMatches.size(); ++i)
+    {
+        if( TrackDatabase::GetInstance().m_filterMatches[i] > 0 )
+        {
+            json filterEntry;
+            filterEntry["FilterName"] = TrackDatabase::GetInstance().GetFilterName((TrackListFilter)i);
+            filterEntry["FilterID"] = i;
+            filterEntry["Count"] = TrackDatabase::GetInstance().m_filterMatches[i];
+            filterData.push_back( filterEntry );
+        }
+    }
+    ExecuteScript( "SetFilters(" + filterData.dump() + "); " );
     RequestDetailsPanelUpdate_Internal( 0 );
 }
 

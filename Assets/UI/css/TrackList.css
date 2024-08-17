@@ -151,6 +151,8 @@ body::before {
 
 #filterMenu {
   background: black;
+  overflow: scroll;
+  height: 100%;
 }
 
 .filter-button {

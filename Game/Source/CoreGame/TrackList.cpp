@@ -223,13 +223,13 @@ void TrackDatabase::ExportMidiTrackMetaData()
     }
 }
 
-std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
+std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy, TrackListFilter inFilterBy )
 {
-    if( inSortBy != m_currentSort )
+    if( inSortBy != m_currentSort || inFilterBy != m_currentFilter )
     {
         m_needsSort = true;
     }
-
+    GatherFilterCounts();
     if( !m_needsSort && !m_pendingInitialSort )
     {
         return m_sortedIndices;
@@ -241,9 +241,60 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
     sortedTracks.reserve( trackList.size() );
     for( int i = 0; i < trackList.size(); ++i )
     {
-        sortedTracks.push_back( i );
+        bool passesFilter = false;
+        BRUH( trackList[i].m_dlcSource );
+        switch( inFilterBy )
+        {
+        case TrackListFilter::Drumsmith:
+            passesFilter = trackList[i].m_dlcSource == "DS";
+            break;
+        case TrackListFilter::RockBand:
+            passesFilter = trackList[i].m_dlcSource == "rb1";
+            break;
+        case TrackListFilter::RockBand2:
+            passesFilter = trackList[i].m_dlcSource == "rb2";
+            break;
+        case TrackListFilter::RockBand3:
+            passesFilter = trackList[i].m_dlcSource == "rb3";
+            break;
+        case TrackListFilter::RockBand4:
+            passesFilter = trackList[i].m_dlcSource == "rb4";
+            break;
+        case TrackListFilter::RockBandBlitz:
+            passesFilter = trackList[i].m_dlcSource == "rbb";
+            break;
+        case TrackListFilter::LegoRockBand:
+            passesFilter = trackList[i].m_dlcSource == "lrb";
+            break;
+        case TrackListFilter::GreenDayRockBand:
+            passesFilter = trackList[i].m_dlcSource == "gdrb";
+            break;
+        case TrackListFilter::GuitarHero5:
+            passesFilter = trackList[i].m_dlcSource == "gh5";
+            break;
+        case TrackListFilter::GuitarHero5DLC:
+            passesFilter = trackList[i].m_dlcSource == "gh5dlc";
+            break;
+        case TrackListFilter::GuitarHeroWorldTour:
+            passesFilter = trackList[i].m_dlcSource == "ghwt";
+            break;
+        case TrackListFilter::GuitarHeroWorldTourDLC:
+            passesFilter = trackList[i].m_dlcSource == "ghwtdlc";
+            break;
+        case TrackListFilter::None:
+        default:
+            passesFilter = true;
+            break;
+        }
+
+        if( passesFilter )
+        {
+            sortedTracks.push_back( i );
+        }
     }
     m_currentSort = inSortBy;
+    m_currentFilter = inFilterBy;
+    m_sortedSize = sortedTracks.size();
 
     switch( inSortBy )
     {
@@ -271,6 +322,128 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy )
     m_needsSort = false;
 
     return m_sortedIndices;
+}
+
+std::vector<unsigned int>& TrackDatabase::FilterTracks( TrackListFilter inFilterBy )
+{
+    return m_sortedIndices;
+}
+
+void TrackDatabase::GatherFilterCounts()
+{
+    auto& trackList = m_trackList.m_tracks;
+    m_filterMatches.clear();
+    m_filterMatches.resize( (int)TrackListFilter::Count );
+    for( int i = 0; i < trackList.size(); ++i )
+    {
+        if( trackList[i].m_dlcSource == "DS" )
+        {
+            m_filterMatches[(int)TrackListFilter::Drumsmith]++;
+        }
+        else if( trackList[i].m_dlcSource == "rb1" )
+        {
+            m_filterMatches[(int)TrackListFilter::RockBand]++;
+        }
+        else if( trackList[i].m_dlcSource == "rb2" )
+        {
+            m_filterMatches[(int)TrackListFilter::RockBand2]++;
+        }
+        else if( trackList[i].m_dlcSource == "rb3" )
+        {
+            m_filterMatches[(int)TrackListFilter::RockBand3]++;
+        }
+        else if( trackList[i].m_dlcSource == "rb3dlc" ) // This is messy, just make it a part of regular RB?
+        {
+            m_filterMatches[(int)TrackListFilter::RockBand3]++;
+        }
+        else if( trackList[i].m_dlcSource == "rb4" )
+        {
+            m_filterMatches[(int)TrackListFilter::RockBand4]++;
+        }
+        else if( trackList[i].m_dlcSource == "lrb" )
+        {
+            m_filterMatches[(int)TrackListFilter::LegoRockBand]++;
+        }
+        else if( trackList[i].m_dlcSource == "gdrb" )
+        {
+            m_filterMatches[(int)TrackListFilter::GreenDayRockBand]++;
+        }
+        else if( trackList[i].m_dlcSource == "rbb" )
+        {
+            m_filterMatches[(int)TrackListFilter::RockBandBlitz]++;
+        }
+        else if( trackList[i].m_dlcSource == "gh" )
+        {
+            m_filterMatches[(int)TrackListFilter::GuitarHero]++;
+        }
+        else if( trackList[i].m_dlcSource == "ghwt" )
+        {
+            m_filterMatches[(int)TrackListFilter::GuitarHeroWorldTour]++;
+        }
+        else if( trackList[i].m_dlcSource == "ghwtdlc" )
+        {
+            m_filterMatches[(int)TrackListFilter::GuitarHeroWorldTourDLC]++;
+        }
+        else if( trackList[i].m_dlcSource == "gh5" )
+        {
+            m_filterMatches[(int)TrackListFilter::GuitarHero5]++;
+        }
+        else if( trackList[i].m_dlcSource == "gh5dlc" )
+        {
+            m_filterMatches[(int)TrackListFilter::GuitarHero5DLC]++;
+        }
+        else
+        {
+            YIKES_FMT( "Unhandled %s", trackList[i].m_dlcSource.c_str() );
+        }
+    }
+}
+
+std::string TrackDatabase::GetFilterName( TrackListFilter inFilter )
+{
+    switch( inFilter )
+    {
+    case TrackListFilter::Drumsmith:
+        return "Drumsmith";
+    case TrackListFilter::RockBand:
+        return "Rock Band";
+    case TrackListFilter::RockBand2:
+        return "Rock Band 2";
+    case TrackListFilter::RockBand3:
+        return "Rock Band 3";
+    case TrackListFilter::RockBand4:
+        return "Rock Band 4";
+    case TrackListFilter::RockBandBlitz:
+        return "Rock Band: Blitz";
+    case TrackListFilter::GuitarHero:
+        return "Guitar Hero";
+    case TrackListFilter::GuitarHero2:
+        return "Guitar Hero 2";
+    case TrackListFilter::GuitarHero3:
+        return "Guitar Hero 3";
+    case TrackListFilter::GuitarHero4:
+        return "Guitar Hero 4";
+    case TrackListFilter::GuitarHero5:
+        return "Guitar Hero 5";
+    case TrackListFilter::GuitarHero5DLC:
+        return "Guitar Hero 5 DLC";
+    case TrackListFilter::GreenDayRockBand:
+        return "Rock Band: Green Day";
+    case TrackListFilter::GuitarHeroWorldTour:
+        return "Guitar Hero: World Tour";
+    case TrackListFilter::GuitarHeroWorldTourDLC:
+        return "Guitar Hero: World Tour DLC";
+    case TrackListFilter::LegoRockBand:
+        return "Lego: Rock Band";
+    case TrackListFilter::Other:
+        return "Other";
+    case TrackListFilter::None:
+    case TrackListFilter::Count:
+    default:
+        return "None";
+        break;
+    }
+    return "Other";
 }
 
 TrackData::TrackData( const Path& inPath )
@@ -331,6 +504,7 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["Icon"] = m_icon;
     outJson["AlbumArtPath"] = m_albumArtPath;
     outJson["AlbumArtFileName"] = m_albumArtFilename;
+    outJson["DLCSource"] = m_dlcSource;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
     outJson["NoteSpeed"] = m_noteSpeed;
@@ -366,49 +540,54 @@ void TrackData::OnSaveNoteData( json& outJson )
     }
 }
 
-void TrackData::OnLoadTrackData( const json& outJson )
+void TrackData::OnLoadTrackData( const json& inJson )
 {
-    if( outJson.contains( "SongName" ) )
+    if( inJson.contains( "SongName" ) )
     {
-        m_trackName = StringUtils::TrimLeadingSpaces( outJson["SongName"] );
+        m_trackName = StringUtils::TrimLeadingSpaces( inJson["SongName"] );
     }
-    if( outJson.contains( "SongArtist" ) )
+    if( inJson.contains( "SongArtist" ) )
     {
-        m_artistName = StringUtils::TrimLeadingSpaces( outJson["SongArtist"] );
+        m_artistName = StringUtils::TrimLeadingSpaces( inJson["SongArtist"] );
     }
-    if( outJson.contains( "AlbumName" ) )
+    if( inJson.contains( "AlbumName" ) )
     {
-        m_albumName = StringUtils::TrimLeadingSpaces( outJson["AlbumName"] );
+        m_albumName = StringUtils::TrimLeadingSpaces( inJson["AlbumName"] );
     }
-    if( outJson.contains( "Genre" ) )
+    if( inJson.contains( "Genre" ) )
     {
-        m_genre = outJson["Genre"];
+        m_genre = StringUtils::TrimLeadingSpaces( inJson["Genre"] );
     }
-    if( outJson.contains( "Year" ) )
+    if( inJson.contains( "Year" ) )
     {
-        m_year = outJson["Year"];
+        m_year = inJson["Year"];
     }
-    if( outJson.contains( "Icon" ) )
+    if( inJson.contains( "Icon" ) )
     {
-        m_icon = outJson["Icon"];
+        m_icon = StringUtils::TrimLeadingSpaces( inJson["Icon"] );
+        m_dlcSource = m_icon;
     }
-    if( outJson.contains( "NoteCount" ) )
+    if( inJson.contains( "NoteCount" ) )
     {
-        m_noteCount = outJson["NoteCount"];
+        m_noteCount = inJson["NoteCount"];
+    }
+    if( inJson.contains( "DLCSource" ) )
+    {
+        m_dlcSource = inJson["DLCSource"];
     }
     m_albumArtPath = m_directory + "/Album.png";
-    if( outJson.contains( "AlbumArtPath" ) )
+    if( inJson.contains( "AlbumArtPath" ) )
     {
-        m_albumArtPath = outJson["AlbumArtPath"];
+        m_albumArtPath = inJson["AlbumArtPath"];
     }
-    if( outJson.contains( "AlbumArtFilename" ) )
+    if( inJson.contains( "AlbumArtFilename" ) )
     {
-        m_albumArtFilename = outJson["AlbumArtFilename"];
+        m_albumArtFilename = inJson["AlbumArtFilename"];
     }
-    if( outJson.contains( "TrackFileName" ) )
+    if( inJson.contains( "TrackFileName" ) )
     {
-        m_trackFileName = outJson["TrackFileName"];
-        m_trackSourcePath = m_directory + "/" + std::string( outJson["TrackFileName"] );
+        m_trackFileName = inJson["TrackFileName"];
+        m_trackSourcePath = m_directory + "/" + std::string( inJson["TrackFileName"] );
     }
     else
     {
@@ -416,28 +595,44 @@ void TrackData::OnLoadTrackData( const json& outJson )
         m_trackSourcePath = m_directory + "/" + m_trackFileName;
     }
 
-    if( outJson.contains( "PreviewPercent" ) )
+    if( inJson.contains( "PreviewPercent" ) )
     {
-        m_previewPercent = outJson["PreviewPercent"];
+        m_previewPercent = inJson["PreviewPercent"];
     }
 
-    if( outJson.contains( "NoteSpeed" ) )
+    if( inJson.contains( "NoteSpeed" ) )
     {
-        m_noteSpeed = outJson["NoteSpeed"];
+        m_noteSpeed = inJson["NoteSpeed"];
     }
-    if( outJson.contains( "Duration" ) )
+    if( inJson.contains( "Duration" ) )
     {
-        m_duration = outJson["Duration"];
+        m_duration = inJson["Duration"];
     }
-    if( outJson.contains( "BPM" ) )
+    if( inJson.contains( "BPM" ) )
     {
-        m_bpm = outJson["BPM"];
+        m_bpm = inJson["BPM"];
     }
 }
 
-void TrackData::OnLoadNoteData( const json& outJson )
+void TrackData::OnLoadNoteData( const json& inJson )
 {
+    if( inJson.contains( "Notes" ) )
+    {
+        const json& noteData = inJson["Notes"];
+        m_noteData.clear();
+        m_noteData.reserve( noteData.size() );
+        for( const json& note : noteData )
+        {
+            NoteData noteEntry;
+            noteEntry.m_editorLane = PadUtils::GetNewPadId( note["NoteName"] );
+            noteEntry.m_noteName = PadUtils::GetPadId( noteEntry.m_editorLane );
+            noteEntry.m_triggerTime = note["TriggerTime"];
+            if( note.contains( "TriggerTimeMS" ) )
+                noteEntry.m_triggerTimeMS = note["TriggerTimeMS"];
 
+            m_noteData.push_back( noteEntry );
+        }
+    }
 }
 
 void TrackData::LoadNoteData()
@@ -454,21 +649,5 @@ void TrackData::LoadNoteData()
 
     ME_ASSERT_MSG( !Root.empty(), "Trying to read an empty track file." );
 
-    if( Root.contains( "Notes" ) )
-    {
-        json& noteData = Root["Notes"];
-        m_noteData.clear();
-        m_noteData.reserve( noteData.size() );
-        for( json& note : noteData )
-        {
-            NoteData noteEntry;
-            noteEntry.m_editorLane = PadUtils::GetNewPadId( note["NoteName"] );
-            noteEntry.m_noteName = PadUtils::GetPadId( noteEntry.m_editorLane );
-            noteEntry.m_triggerTime = note["TriggerTime"];
-            if( note.contains( "TriggerTimeMS" ) )
-                noteEntry.m_triggerTimeMS = note["TriggerTimeMS"];
-
-            m_noteData.push_back( noteEntry );
-        }
-    }
+    OnLoadNoteData( Root );
 }

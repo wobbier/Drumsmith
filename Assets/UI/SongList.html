@@ -43,7 +43,10 @@
     </div>
     <div id="myDivContainer" class="main-content">
       <div class="dynamic-div BoldRegular Large">2009</div>
-      <div class="dynamic-div" onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')">
+      <div
+        class="dynamic-div"
+        onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')"
+      >
         <div
           class="album-art"
           style="
@@ -59,18 +62,60 @@
       </div>
     </div>
     <div id="filterMenu" class="flyout right">
-      <p class="hover-underline-animation" onclick="closeFlyout('filterMenu');">< Back</p>
+      <p class="hover-underline-animation" onclick="closeFlyout('filterMenu');">
+        < Back
+      </p>
       <br />
+      <h1>Sort</h1>
       <br />
-      <p class="menu-text flyout-select" onclick="FilterSortTracks(0); closeFlyout('filterMenu');">Default</p>
-      <p class="menu-text flyout-select" onclick="FilterSortTracks(1); closeFlyout('filterMenu');">Title</p>
-      <p class="menu-text flyout-select" onclick="FilterSortTracks(2); closeFlyout('filterMenu');">Artist</p>
-      <p class="menu-text flyout-select" onclick="FilterSortTracks(3); closeFlyout('filterMenu');">Year</p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(0); closeFlyout('filterMenu');"
+      >
+        Default
+      </p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(1); closeFlyout('filterMenu');"
+      >
+        Title
+      </p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(2); closeFlyout('filterMenu');"
+      >
+        Artist
+      </p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(3); closeFlyout('filterMenu');"
+      >
+        Year
+      </p>
+      <br />
+      <h1>Filter</h1>
+      <br />
+      <div id="TrackFilters">
+        <p
+          class="menu-text flyout-select"
+          onclick="FilterTracks(0); closeFlyout('filterMenu');"
+        >
+          None
+        </p>
+        <br />
+      </div>
     </div>
 
     <div class="footer">
-      <button class="openButton filter-button" onclick="openFlyout('filterMenu')">
-        <img class="openButton" src="file:///Assets/UI/Textures/Tab_Key_Light.png" alt="Icon" />
+      <button
+        class="openButton filter-button"
+        onclick="openFlyout('filterMenu')"
+      >
+        <img
+          class="openButton"
+          src="file:///Assets/UI/Textures/Tab_Key_Light.png"
+          alt="Icon"
+        />
         <span class="openButton">Sorting (Ascending)</span>
       </button>
     </div>
@@ -78,9 +123,9 @@
     <script>
       document.addEventListener("keydown", function (event) {
         if (event.key === "Tab" || event.keyCode === 9) {
-          openFlyout("filterMenu")
+          openFlyout("filterMenu");
         }
-      })
+      });
     </script>
     <script src="js/Flyout.js"></script>
     <script src="js/TrackList.js"></script>

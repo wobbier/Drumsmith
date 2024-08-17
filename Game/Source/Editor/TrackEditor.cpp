@@ -16,7 +16,7 @@
 TrackEditor::TrackEditor()
     : HavanaWidget( "Track Editor" )
 {
-    EventManager::GetInstance().RegisterReceiver( this, { MouseScrollEvent::GetEventId() } );
+    EventManager::GetInstance().RegisterReceiver( this, { MouseScrollEvent::GetEventId(), EditTrackEvent::GetEventId() } );
 }
 
 
@@ -107,6 +107,7 @@ void TrackEditor::Render()
 
     //ScrollDelta += GetEngine().GetEditorInput().GetMouseScrollDelta().x;
     auto& trackData = TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
+    DrawTrackControls();
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     ImGui::Begin( "Track Editor", &IsOpen, windowFlags );
@@ -116,7 +117,6 @@ void TrackEditor::Render()
     DrawMenuBar();
 
     ImGui::SetCursorPosX( windowCursorPos.x );
-    DrawTrackControls();
     auto& m_midi = MidiDevice::GetInstance();
     {
         static std::string m_selectedMidiDeviceName;
@@ -359,6 +359,26 @@ void TrackEditor::Render()
         drawList->AddLine( { scrubberX, canvas_pos.y }, { scrubberX, canvas_pos.y + timelineHeight }, 0xFFFFFFFF );
     }
 
+    if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
+    {
+        PadMappingStorage& storage = PadMappingStorage::GetInstance();
+        for( auto msg : m_messages )
+        {
+            for( PadDefinition& pad : storage.mappedPads )
+            {
+                if( pad.midiBinding == msg.m_data1 && msg.IsOnType() )
+                {
+                    NoteData newNote;
+                    newNote.m_editorLane = (PadId)pad.padId;
+                    newNote.m_noteName = PadUtils::GetPadId( pad.padId );
+                    float songTime = ( TrackPreview->GetPositionMs() / 1000.f );
+                    newNote.m_triggerTime = songTime;
+                    trackData.m_noteData.push_back( newNote );
+                }
+            }
+        }
+    }
+
     ImGui::EndChildFrame();
 
     DrawPadPreview();
@@ -371,9 +391,16 @@ void TrackEditor::DrawTrackControls()
 {
     OPTICK_CATEGORY( "Track Controls", Optick::Category::UI );
 
+    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+    ImGui::Begin( "Track Details", &IsOpen, windowFlags );
+    if( !SelectedTrackLocation.Exists )
+    {
+        TrackData& trackData = GetCurrentTrackData();
+        SelectedTrackLocation = Path( Path( trackData.m_trackSourcePath ).GetDirectoryString() + "NoteData.txt" );
+    }
+
     Input& input = GetEngine().GetEditorInput();
     ImVec2 windowCursorPos = ImGui::GetCursorPos();
-    if( SelectedTrackLocation.Exists )
     {
         TrackData& trackData = GetCurrentTrackData();
         ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
@@ -444,11 +471,7 @@ void TrackEditor::DrawTrackControls()
             }
         }
     }
-    else
-    {
-        TrackData& trackData = GetCurrentTrackData();
-        SelectedTrackLocation = Path( Path( trackData.m_trackSourcePath ).GetDirectoryString() + "NoteData.txt" );
-    }
+    ImGui::End();
 }
 
 TrackData& TrackEditor::GetCurrentTrackData()
@@ -485,6 +508,10 @@ void TrackEditor::DrawMenuBar()
                 trackData.Save();
             }
             ImGui::EndMenu();
+        }
+        if( ImGui::Button( m_recordingActive ? "Stop Recording" : "Start Recording" ) )
+        {
+            m_recordingActive = !m_recordingActive;
         }
         ImGui::Text( std::to_string( CalculateZoom() ).c_str() );
         ImGui::Checkbox( "Show Debug Info", &m_showDebugInfo );
@@ -598,6 +625,19 @@ bool TrackEditor::OnEvent( const BaseEvent& evt )
         const MouseScrollEvent& event = static_cast<const MouseScrollEvent&>( evt );
         ScrollDelta += event.Scroll.y;
     }
+    if( evt.GetEventId() == EditTrackEvent::GetEventId() )
+    {
+        const EditTrackEvent& event = static_cast<const EditTrackEvent&>( evt );
+        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+        {
+            if( track.m_trackName == event.FileName )
+            {
+                SelectedTrackLocation = Path( track.m_trackSourcePath );
+                ResetTrack();
+            }
+        }
+    }
+    
     return false;
 }
 

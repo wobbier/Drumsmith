@@ -35,3 +35,16 @@ public:
     {
     }
 };
+
+
+class EditTrackEvent
+    : public Event<EditTrackEvent>
+{
+public:
+    EditTrackEvent()
+        : Event()
+    {
+    }
+    std::string FileName;
+};
+

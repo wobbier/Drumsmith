@@ -58,7 +58,11 @@ function AddTrack(track) {
           <h2 class="Regular Small">${track.ArtistName}</h2>
           <h3>${track.Year}</h3>
       </div>
-      <div class="note-count">Note Count: ${track.NoteCount}</div>
+      <div class="note-count">Note Count: ${track.NoteCount}</div>`;
+  if (AreToolsEnabled()) {
+    dynamicDiv.innerHTML += `<div onclick="EditTrack('${track.TrackName}')">DEV TOOLS ENABLED</div>`;
+  }
+  dynamicDiv.innerHTML += `
       <div class="clearfix"></div>
   </div>`;
 
@@ -163,3 +167,19 @@ AddTrack({
     "M:/Projects/ME/Drumsmith/Assets/DLC/30 Seconds to Mars - The Kill//song.ogg",
   Year: 2006,
 });
+
+function SetFilters(inFilters) {
+  const filtersDiv = document.getElementById("TrackFilters");
+  filtersDiv.innerHTML = "";
+  inFilters.forEach((filter) => {
+    filtersDiv.innerHTML += `<p
+    class="menu-text flyout-select"
+    onclick="FilterTracks(${filter.FilterID}); closeFlyout('filterMenu');"
+  >
+  ${filter.FilterName} (${filter.Count})
+  </p>`;
+  });
+  filtersDiv.innerHTML += `
+  <br />
+  <br />`;
+}

@@ -15,13 +15,15 @@ public:
     void SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void FilterSortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void FilterTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void EditTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate_Internal( int trackIndex );
 
     void DumpTrackData( json& outJson, TrackData inTrackData, int inIndex );
 
-    void RefreshTrackList( TrackListSort inSortType );
+    void RefreshTrackList( TrackListSort inSortType, TrackListFilter inFilterType );
     void OnUpdate() override;
 #endif
 
