@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="">
   <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <link rel="icon" href="favicon.ico"/>
-    <title>ui</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
     <style>
       .scroll-container {
         /* Adjust as needed */
@@ -46,21 +46,23 @@
         opacity: 0;
       }
     </style>
-    <link rel="stylesheet" href="css/Core.css"/>
-    <link rel="stylesheet" href="css/MainMenu2.css"/>
-    <link rel="stylesheet" href="css/Buttons.css"/>
-  <script defer="defer" src="js/chunk-vendors.js"></script><script defer="defer" src="js/MainMenu.js"></script><link href="css/MainMenu.css" rel="stylesheet"></head>
+    <link rel="stylesheet" href="<%= BASE_URL %>css/Core.css" />
+    <link rel="stylesheet" href="<%= BASE_URL %>css/MainMenu2.css" />
+    <link rel="stylesheet" href="<%= BASE_URL %>css/Buttons.css" />
+  </head>
   <body>
     <div class="background"></div>
     <noscript>
-      <strong>We're sorry but ui doesn't work
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
         properly without JavaScript enabled. Please enable it to
-        continue.</strong>
+        continue.</strong
+      >
     </noscript>
     <div id="main-menu-app"></div>
 
     <!-- built files will be auto injected -->
-    <script src="js/Common.js"></script>
+    <script src="<%= BASE_URL %>js/Common.js"></script>
     <script>
       const titleTrackScrolling = setupScrollingText(
         "track-title",

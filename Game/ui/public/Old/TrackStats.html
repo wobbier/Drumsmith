@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <style>
+      .scroll-container {
+        /* Adjust as needed */
+        height: 50px;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+      }
+
+      .scroll-content {
+        position: absolute;
+        left: 0;
+        transition: left 5s linear;
+        /* Adjust time as needed */
+      }
+
+      .menu {
+        width: 500px;
+        position: fixed;
+        top: 50px;
+        left: -500px;
+        /* Start offscreen */
+        opacity: 0;
+        transition: left 0.3s ease, opacity 0.3s ease;
+      }
+
+      .menu.active {
+        left: 50px;
+        /* Slide in */
+        opacity: 1;
+      }
+
+      #mainMenu {
+        transition: opacity 0.3s ease;
+      }
+
+      .content-fade {
+        opacity: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="css/Core.css" />
+    <link rel="stylesheet" href="css/MainMenu.css" />
+    <link rel="stylesheet" href="css/Buttons.css" />
+  </head>
+
+  <body>
+    <div class="background"></div>
+    <div id="mainMenu" class="main-menu">
+      <p
+        onclick="LoadScene('Assets/TrackList.lvl')"
+        class="hover-underline-animation"
+      >
+        < Back
+      </p>
+      <br />
+    </div>
+    <div>
+      <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      const ctx = document.getElementById("myChart");
+      var firstTest = {
+        type: "bar",
+        data: {
+          labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+          datasets: [
+            {
+              label: "# of Votes",
+              data: [12, 19, 3, 5, 2, 3],
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+                "rgba(255, 205, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(201, 203, 207, 0.2)",
+              ],
+              borderColor: [
+                "rgb(255, 99, 132)",
+                "rgb(255, 159, 64)",
+                "rgb(255, 205, 86)",
+                "rgb(75, 192, 192)",
+                "rgb(54, 162, 235)",
+                "rgb(153, 102, 255)",
+                "rgb(201, 203, 207)",
+              ],
+              borderWidth: 1,
+            },
+            {
+              label: "2 of Votes",
+              data: [12, 49, 3, 5, 2, 3],
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+                "rgba(255, 205, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(201, 203, 207, 0.2)",
+              ],
+              borderColor: [
+                "rgb(255, 99, 132)",
+                "rgb(255, 159, 64)",
+                "rgb(255, 205, 86)",
+                "rgb(75, 192, 192)",
+                "rgb(54, 162, 235)",
+                "rgb(153, 102, 255)",
+                "rgb(201, 203, 207)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      };
+      new Chart(ctx, firstTest);
+    </script>
+
+    <script src="js/Common.js"></script>
+    <script>
+      const titleTrackScrolling = setupScrollingText(
+        "track-title",
+        "track-title-scroll"
+      );
+    </script>
+  </body>
+</html>

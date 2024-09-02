@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/Core.css" />
+    <link rel="stylesheet" href="css/TrackList.css" />
+    <link rel="stylesheet" href="css/Flyout.css" />
+  </head>
+  <body id="main-body">
+    <div id="header" class="header">
+      <!--a href="#" onclick="fillDivs()">Fill Divs</a-->
+      <button class="filter-button" onclick="LoadScene('Assets/MainMenu.lvl')">
+        <img src="file:///Assets/UI/Textures/Esc_Key_Light.png" alt="Icon" />
+        <span>Main Menu</span>
+      </button>
+      <button class="filter-button" onclick="ToggleTrackListVisibility()">
+        <span>View Track List</span>
+      </button>
+    </div>
+
+    <div id="sidebar" class="sidebar">
+      <!-- Sidebar content (navigation, links, etc.) -->
+      <div id="trackPanel" class="content">
+        <div id="trackDetails">
+          <div class="album-art">
+            <img src="file:///${track.AlbumArt}" width="100%" />
+          </div>
+          <div
+            class="dynamic-div"
+            onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();"
+            onmouseover="DelayedTrackPreview('${track.TrackIndex}')"
+          >
+            <div class="album-title">
+              <h1>${track.TrackName}</h1>
+              <h2>${track.ArtistName}</h2>
+            </div>
+            <div class="note-count">Note Count: ${track.NoteCount}</div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="myDivContainer" class="main-content">
+      <div class="dynamic-div BoldRegular Large">2009</div>
+      <div
+        class="dynamic-div"
+        onclick="PlaySound('Assets/DLC/ExampleSong/Track.mp3')"
+      >
+        <div
+          class="album-art"
+          style="
+            background-image: url('https://magazine.artland.com/wp-content/uploads/2020/02/Webp.net-compress-image-67-1.jpg');
+          "
+        ></div>
+        <div class="album-title">
+          <h1>Album Title</h1>
+          <h2>Album Artist</h2>
+        </div>
+        <div class="note-count">23</div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    <div id="filterMenu" class="flyout right">
+      <p class="hover-underline-animation" onclick="closeFlyout('filterMenu');">
+        < Back
+      </p>
+      <br />
+      <h1>Sort</h1>
+      <br />
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(0); closeFlyout('filterMenu');"
+      >
+        Default
+      </p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(1); closeFlyout('filterMenu');"
+      >
+        Title
+      </p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(2); closeFlyout('filterMenu');"
+      >
+        Artist
+      </p>
+      <p
+        class="menu-text flyout-select"
+        onclick="FilterSortTracks(3); closeFlyout('filterMenu');"
+      >
+        Year
+      </p>
+      <br />
+      <h1>Filter</h1>
+      <br />
+      <div id="TrackFilters">
+        <p
+          class="menu-text flyout-select"
+          onclick="FilterTracks(0); closeFlyout('filterMenu');"
+        >
+          None
+        </p>
+        <br />
+      </div>
+    </div>
+
+    <div class="footer">
+      <button
+        class="openButton filter-button"
+        onclick="openFlyout('filterMenu')"
+      >
+        <img
+          class="openButton"
+          src="file:///Assets/UI/Textures/Tab_Key_Light.png"
+          alt="Icon"
+        />
+        <span class="openButton">Sorting (Ascending)</span>
+      </button>
+    </div>
+
+    <script>
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Tab" || event.keyCode === 9) {
+          openFlyout("filterMenu");
+        }
+      });
+
+      function AddTrack2(track) {
+        // Fetch the container div
+        const containerDiv = document.getElementById("myDivContainer");
+        const dynamicDiv = document.createElement("div");
+        dynamicDiv.classList.add("dynamic-div");
+
+        dynamicDiv.innerHTML = `
+      <div class="dynamic-div" onclick="DownloadDLC('${track}');" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
+      <img class="album-art" src="https://dlc.mitch.gg/${track.FolderPath}/${track.AlbumArtFileName}" />
+      </div>
+      <div class="album-title">
+          <h1 class="BoldRegular Large">${track.SongName}</h1>
+          <h2 class="Regular Small">${track.SongArtist}</h2>
+          <h3>${track.Year}</h3>
+      </div>
+      <div class="note-count">Note Count: ${track.NoteCount}</div>`;
+        dynamicDiv.innerHTML += `
+      <div class="clearfix"></div>
+  </div>`;
+        console.log(
+          `https://dlc.mitch.gg/${track.FolderPath}/${track.AlbumArtFileName}`
+        );
+        containerDiv.appendChild(dynamicDiv);
+      }
+      fetch("https://dlc.mitch.gg/dlc_index.json")
+        .then((response) => response.json())
+        .then((data) => {
+          // Example: Access a specific property
+          //console.log("Title:", data.title);
+
+          // Example: Loop through an array
+          data.forEach((item) => {
+            console.log(item.SongName);
+            if (!item.AlbumArtFileName) {
+              item.AlbumArtFileName = "Album.png";
+            }
+            AddTrack2(item);
+          });
+        })
+        .catch((error) => console.error("Error:", error));
+    </script>
+    <script src="js/Flyout.js"></script>
+    <script src="js/TrackList.js"></script>
+    <script src="js/Common.js"></script>
+  </body>
+</html>
