@@ -5,6 +5,7 @@
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
 #include "Config/GameSettings.h"
+#include "Web/HttpDownload.h"
 
 MainMenuController::MainMenuController()
     : BasicUIView( "MainMenuController" )
@@ -46,6 +47,8 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
 
     GlobalWindow["SkipTrack"] = BindJSCallback( &MainMenuController::SkipTrack );
     GlobalWindow["SetRadioVolume"] = BindJSCallback( &MainMenuController::SetRadioVolume );
+    GlobalWindow["GetDLCURL_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetDLCURL );
+    GlobalWindow["SetDLCURL_Internal"] = BindJSCallback( &MainMenuController::SetDLCURL );
     GlobalWindow["SaveSettings"] = BindJSCallback( &MainMenuController::SaveSettings );
     GlobalWindow["ConvertCustomDLC"] = BindJSCallback( &MainMenuController::ConvertCustomDLC );
 
@@ -61,8 +64,24 @@ void MainMenuController::SetRadioVolume( const ultralight::JSObject& thisObject,
 {
     float volume = (float)args[0].ToNumber();
     volume = volume / 100.f;
-    TrackRadio::GetInstance().SetVolume(volume);
+    TrackRadio::GetInstance().SetVolume( volume );
     GameSettings::GetInstance().RadioVolume = volume;
+}
+
+ultralight::JSValue MainMenuController::GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    return ultralight::JSValue( GameSettings::GetInstance().DLCURL.c_str() );
+}
+
+void MainMenuController::SetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    ultralight::String url = args[0].ToString();
+    std::string urlConv( url.utf8().data() );
+
+    if( Web::DownloadFile( urlConv, "/dlc_index.json", Path( "Assets/DLC/dlc_index.json" ) ) )
+    {
+        GameSettings::GetInstance().DLCURL = urlConv;
+    }
 }
 
 void MainMenuController::SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )

@@ -1,12 +1,18 @@
 
 body{
-    font-family: 'Coolvetica Rg';
+    font-family: 'Coolvetica Rg', 'Roboto';
     margin: 0;
     background-image: url('/img/drums-bg.png');
     background-position: center;
     background-size: cover;
     color: white;
     user-select: none !important;
+    top: 0;
+    position: fixed;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-repeat: no-repeat;
 }
 
 .menu-text {

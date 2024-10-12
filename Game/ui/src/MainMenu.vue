@@ -59,6 +59,9 @@
         value="50"
         class="slider"
       />
+      <p class="menu-text" id="menu-volume-text">DLC Server</p>
+      <br />
+      <input type="text" v-model="inputText" @keydown.enter="SetDLCURL" placeholder="content.store.com">
       <br />
       <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">
         Convert Custom DLC
@@ -99,7 +102,6 @@
       </div>
     </div>
   </template>
-  
   <script>
   import MenuItem from './components/MainMenuOption.vue';
   
@@ -107,10 +109,36 @@
     components: {
       MenuItem
     },
+    computed: {
+      inputText: {
+        get() {
+          if (typeof GetDLCURL_Internal === 'function') {
+            // eslint-disable-next-line
+            return GetDLCURL_Internal(); // Call the WebAssembly function
+          }
+          return "test";
+        },
+        set(value) {
+          if (typeof SetDLCURL_Internal === 'function') {
+            // eslint-disable-next-line
+            SetDLCURL_Internal(value); // Pass the value to the WebAssembly function
+          }
+        }
+      }
+    },
     methods: {
       loadScene(scene) {
-        // eslint-disable-next-line
-        LoadScene(scene);
+        if (typeof LoadScene === 'function') {
+            // eslint-disable-next-line
+            LoadScene(scene);
+        }
+        window.location.href="/SongList.html";
+      },
+      SetDLCURL() {
+        if (typeof SetDLCURL_Internal === 'function') {
+            // eslint-disable-next-line
+            SetDLCURL_Internal(this.inputText);
+        }
       },
       practice() {
         console.log('Starting practice mode');

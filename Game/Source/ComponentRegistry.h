@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Components/TrackListMenuController.h"
+#include "Components/DLCMenuController.h"
 #include "Components/TrackStatsMenuController.h"
 #include "Components/MainMenuController.h"
 #include "Components/InGameMenuController.h"

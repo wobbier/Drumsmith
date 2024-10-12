@@ -115,6 +115,7 @@ class TrackDatabase
 public:
     TrackDatabase();
 
+    void Reload();
     void ExportMidiTrackMetaData();
 
     std::vector<unsigned int>& SortTracks( TrackListSort inSortBy, TrackListFilter inFilterBy );

@@ -107,6 +107,13 @@ LegacySongMetaData ConvertFromLegacy( const std::string& inTrackDirectory, Track
 
 TrackDatabase::TrackDatabase()
 {
+    Reload();
+}
+
+
+void TrackDatabase::Reload()
+{
+    m_trackList.Clear();
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;  // Replace with your directory path
     std::vector<Path> m_drumlessSongs;
     try {
@@ -182,6 +189,7 @@ TrackDatabase::TrackDatabase()
         YIKES( path.FullPath.c_str() );
     }
 }
+
 
 void TrackDatabase::ExportMidiTrackMetaData()
 {

@@ -21,6 +21,7 @@ void GameSettings::Save()
 {
     RootJson = json();
     RootJson["RadioVolume"] = RadioVolume;
+    RootJson["DLCURL"] = DLCURL;
 
     Path settingsFilePath( "Settings.json" );
     File settingsFile( settingsFilePath );
@@ -38,6 +39,11 @@ void GameSettings::Load()
     if( RootJson.contains( "RadioVolume" ) )
     {
         RadioVolume = RootJson["RadioVolume"];
+    }
+
+    if( RootJson.contains( "DLCURL" ) )
+    {
+        DLCURL = RootJson["DLCURL"];
     }
 }
 

@@ -12,6 +12,7 @@ public:
     void Save();
 
     float RadioVolume = .5f;
+    std::string DLCURL;
 
 private:
     json RootJson;

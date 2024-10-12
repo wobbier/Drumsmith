@@ -62,8 +62,11 @@ function AddTrack(track) {
   if (AreToolsEnabled()) {
     dynamicDiv.innerHTML += `<div onclick="EditTrack('${track.TrackName}')">DEV TOOLS ENABLED</div>`;
   }
+  if (track.FolderPath) {
+    dynamicDiv.innerHTML += `<div onclick="DownloadDLC('${track.FolderPath}')">DEV TOOLS ENABLED</div>`;
+  }
   dynamicDiv.innerHTML += `
-      <div class="clearfix"></div>
+      <div class="clearfix"></div>fasdfasdfasdfasdf
   </div>`;
 
   // Create and append text content
