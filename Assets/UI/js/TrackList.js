@@ -42,6 +42,15 @@ function ToggleTrackListVisibility() {
   }
 }
 
+function TryAreToolsEnabled() {
+  
+  if (typeof AreToolsEnabled === 'function') {
+    // eslint-disable-next-line
+    return AreToolsEnabled();
+  }
+  return false;
+}
+
 function AddTrack(track) {
   // Fetch the container div
   const containerDiv = document.getElementById("myDivContainer");
@@ -59,7 +68,7 @@ function AddTrack(track) {
           <h3>${track.Year}</h3>
       </div>
       <div class="note-count">Note Count: ${track.NoteCount}</div>`;
-  if (AreToolsEnabled()) {
+  if (TryAreToolsEnabled()) {
     dynamicDiv.innerHTML += `<div onclick="EditTrack('${track.TrackName}')">DEV TOOLS ENABLED</div>`;
   }
   if (track.FolderPath) {

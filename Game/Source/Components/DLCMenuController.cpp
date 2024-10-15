@@ -13,32 +13,35 @@ DLCMenuController::DLCMenuController()
 {
     FilePath = Path( "Assets/UI/DLC.html" );
     m_playAudioCallback = [this]( SharedPtr<AudioSource> playedAudioSource )
+    {
+        if( m_currentTrack != playedAudioSource )
         {
-            if( m_currentTrack != playedAudioSource )
+            if( m_currentTrack )
             {
-                if( m_currentTrack )
-                {
-                    m_currentTrack->Stop( true );
-                }
-                m_currentTrack = playedAudioSource;
+                m_currentTrack->Stop( true );
             }
-            else
+            m_currentTrack = playedAudioSource;
+        }
+        else
+        {
+            if( m_currentTrack && m_currentTrack->IsPlaying() )
             {
-                if( m_currentTrack && m_currentTrack->IsPlaying() )
-                {
-                    m_currentTrack->Stop( true );
-                }
+                m_currentTrack->Stop( true );
             }
-        };
-        //std::string url = "dlc_index.json"; // Replace with the actual file URL
-        //std::string path = Path("Assets/DLC/dlc_cache.txt").FullPath;
-        //
-        //std::cout << "Starting file download..." << std::endl;
-        //download_file( url, path );
-
+        }
+    };
 }
 
 #if USING( ME_UI )
+
+
+void DLCMenuController::OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
+{
+    BasicUIView::OnJSReady( GlobalWindow, Caller );
+
+    GlobalWindow["GetDLCURL"] = BindJSCallbackWithRetval( &DLCMenuController::GetDLCURL );
+}
+
 
 void DLCMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
 {
@@ -51,6 +54,7 @@ void DLCMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight
     GlobalWindow["ViewTrackStats"] = BindJSCallback( &DLCMenuController::ViewTrackStats );
     GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &DLCMenuController::RequestDetailsPanelUpdate );
     GlobalWindow["DownloadDLC"] = BindJSCallback( &DLCMenuController::DownloadDLC );
+
     // Move to a base Drumsmith UI class
     GlobalWindow["EditTrack"] = BindJSCallback( &DLCMenuController::EditTrack );
 
@@ -73,7 +77,7 @@ void DLCMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObjec
         evt.TrackID = std::string( path.utf8().data() );
         evt.TrackIndex = index;
         evt.Fire();
-        };
+    };
 }
 
 
@@ -112,7 +116,7 @@ void DLCMenuController::EditTrack( const ultralight::JSObject& thisObject, const
 
 void DownloadDLC_Internal( std::string inURL, std::string inFolder, std::string inFile )
 {
-    Web::DownloadFile( inURL, inFolder + "/" + inFile, Path( "Assets/DLC/" + inFolder + "/" + inFile ) );
+    Web::DownloadFile( inURL + "/" + inFolder + "/" + inFile, Path("Assets/DLC/" + inFolder + "/" + inFile));
 }
 
 void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -153,6 +157,11 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
     TrackDatabase::GetInstance().Reload();
 }
 
+
+ultralight::JSValue DLCMenuController::GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    return ultralight::JSValue( GameSettings::GetInstance().DLCURL.c_str() );
+}
 
 void DLCMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
@@ -199,6 +208,11 @@ void DLCMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& t
 void DLCMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
 {
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( trackList.size() == 0 )
+    {
+        return;
+    }
+
     //for( int i = 0; i < trackList.size(); ++i )
     {
         auto& trackData = trackList[trackIndex];

@@ -12,7 +12,8 @@ public:
     virtual ~MainMenuController();
 
 #if USING( ME_UI )
-	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
+    void OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
+    void OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
     void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     ultralight::JSValue GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );

@@ -21,7 +21,7 @@
       <MenuItem 
         text="DLC" 
         colorClass="pink" 
-        :onClick="() => loadScene('Assets/DLC.lvl')" 
+        :onClick="() => LoadDLCScene('Assets/DLC.lvl')" 
       />
       <br />
       <MenuItem 
@@ -61,11 +61,17 @@
       />
       <p class="menu-text" id="menu-volume-text">DLC Server</p>
       <br />
-      <input type="text" v-model="inputText" @keydown.enter="SetDLCURL" placeholder="content.store.com">
+      <input type="text" v-model="inputText" @keydown.enter="SetDLCURL">
       <br />
       <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">
         Convert Custom DLC
       </p>
+      
+      <MenuItem 
+        text="Save Settings" 
+        colorClass="greed" 
+        :onClick="saveSettings" 
+      />
     </div>
 
     <div id="track-radio-hover" onmouseover="ShowTrackRadio()"></div>
@@ -116,7 +122,7 @@
             // eslint-disable-next-line
             return GetDLCURL_Internal(); // Call the WebAssembly function
           }
-          return "test";
+          return "dlc.example.com";
         },
         set(value) {
           if (typeof SetDLCURL_Internal === 'function') {
@@ -133,6 +139,13 @@
             LoadScene(scene);
         }
         window.location.href="/SongList.html";
+      },
+      LoadDLCScene(scene) {
+        if (typeof LoadScene === 'function') {
+            // eslint-disable-next-line
+            LoadScene(scene);
+        }
+        window.location.href="/DLC.html";
       },
       SetDLCURL() {
         if (typeof SetDLCURL_Internal === 'function') {
@@ -156,22 +169,22 @@
           content.classList.add("content-fade");
         }
       },
-        saveSettings() {
-            if (typeof SaveSettings === 'function') {
-                // eslint-disable-next-line
-                SaveSettings();
-            }
-        },
-        closeSettings() {
+      saveSettings() {
+        if (typeof SaveSettings === 'function') {
             // eslint-disable-next-line
-            this.toggleMenu();
-            this.saveSettings();
-        },
+            SaveSettings();
+        }
+      },
+      closeSettings() {
+        // eslint-disable-next-line
+        this.toggleMenu();
+        this.saveSettings();
+      },
       quit() {
-            if (typeof Quit === 'function') {
-                // eslint-disable-next-line
-                Quit();
-            }
+        if (typeof Quit === 'function') {
+            // eslint-disable-next-line
+            Quit();
+        }
       }
     }
   };

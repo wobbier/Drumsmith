@@ -38,6 +38,15 @@ MainMenuController::~MainMenuController()
 
 #if USING( ME_UI )
 
+
+void MainMenuController::OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
+{
+    BasicUIView::OnJSReady( GlobalWindow, Caller );
+
+    GlobalWindow["GetDLCURL_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetDLCURL );
+}
+
+
 void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
 {
     BasicUIView::OnUILoad( GlobalWindow, Caller );
@@ -47,7 +56,6 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
 
     GlobalWindow["SkipTrack"] = BindJSCallback( &MainMenuController::SkipTrack );
     GlobalWindow["SetRadioVolume"] = BindJSCallback( &MainMenuController::SetRadioVolume );
-    GlobalWindow["GetDLCURL_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetDLCURL );
     GlobalWindow["SetDLCURL_Internal"] = BindJSCallback( &MainMenuController::SetDLCURL );
     GlobalWindow["SaveSettings"] = BindJSCallback( &MainMenuController::SaveSettings );
     GlobalWindow["ConvertCustomDLC"] = BindJSCallback( &MainMenuController::ConvertCustomDLC );
@@ -73,12 +81,13 @@ ultralight::JSValue MainMenuController::GetDLCURL( const ultralight::JSObject& t
     return ultralight::JSValue( GameSettings::GetInstance().DLCURL.c_str() );
 }
 
+
 void MainMenuController::SetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     ultralight::String url = args[0].ToString();
     std::string urlConv( url.utf8().data() );
 
-    if( Web::DownloadFile( urlConv, "/dlc_index.json", Path( "Assets/DLC/dlc_index.json" ) ) )
+    if( Web::DownloadFile( urlConv + "/dlc_index.json", Path("Assets/DLC/dlc_index.json")) )
     {
         GameSettings::GetInstance().DLCURL = urlConv;
     }

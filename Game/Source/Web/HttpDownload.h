@@ -3,5 +3,6 @@
 
 namespace Web
 {
-    int DownloadFile( const std::string& inServer, const std::string& inPath, const Path& outPath );
+    bool DownloadFile( const std::string& inURL, const Path& outPath );
+    bool SplitUrl( std::string url, std::string& baseUrl, std::string& path, bool& isSecure );
 }

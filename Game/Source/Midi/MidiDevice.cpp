@@ -9,6 +9,8 @@ MidiDevice::MidiDevice()
         m_midiIn = new RtMidiIn();
     }
     catch( RtMidiError& error ) {
+        delete m_midiIn;
+        m_midiIn = nullptr;
         error.printMessage();
         return;
     }
@@ -41,7 +43,6 @@ void MidiDevice::RefreshDevices()
     unsigned int nPorts = m_midiIn->getPortCount();
     if( nPorts == 0 ) {
         BRUH( "No MIDI input ports available!" );
-        delete m_midiIn;
         return;
     }
 
@@ -56,6 +57,11 @@ void MidiDevice::RefreshDevices()
 
 std::vector<MidiMessageNew> MidiDevice::PumpMessages()
 {
+    if( !m_midiIn )
+    {
+        return {};
+    }
+
     std::vector<MidiMessageNew> messages;
     // Infinite loop to keep reading incoming MIDI messages.
     while( !IsPaused ) {

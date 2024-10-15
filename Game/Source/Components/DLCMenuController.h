@@ -10,7 +10,8 @@ public:
     DLCMenuController();
 
 #if USING( ME_UI )
-	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
+    void OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
+    void OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
 
     void SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
@@ -19,6 +20,7 @@ public:
     void FilterTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void EditTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void DownloadDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    ultralight::JSValue GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void RequestDetailsPanelUpdate_Internal( int trackIndex );
 
@@ -26,6 +28,7 @@ public:
 
     void RefreshTrackList( TrackListSort inSortType, TrackListFilter inFilterType );
     void OnUpdate() override;
+
 #endif
 
 	SharedPtr<AudioSource> m_currentTrack;

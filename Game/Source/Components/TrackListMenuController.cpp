@@ -145,6 +145,11 @@ void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObj
 void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
 {
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( trackList.empty() )
+    {
+        return;
+    }
+
     //for( int i = 0; i < trackList.size(); ++i )
     {
         auto& trackData = trackList[trackIndex];

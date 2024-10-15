@@ -133,6 +133,7 @@ void TrackRadio::Stop()
         StopAudioEvent evt;
         evt.SourceName = m_currentTrack->m_trackSourcePath;
         evt.Fire();
+        m_currentlyPlayingPtr.reset();
     }
     for( auto ptr : m_currentStems )
     {
