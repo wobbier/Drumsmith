@@ -127,12 +127,12 @@
         }
       });
 
-      function TryGetDLCURL(){
-          if (typeof GetDLCURL_Internal === 'function') {
-            // eslint-disable-next-line
-            return GetDLCURL();
-          }
-          return "test.domain.com";
+      function TryGetDLCURL() {
+        if (typeof GetDLCURL === "function") {
+          // eslint-disable-next-line
+          return GetDLCURL();
+        }
+        return "test.domain.com";
       }
 
       function AddTrack2(track) {
@@ -144,8 +144,12 @@
         const trackJson = JSON.stringify(track).replace(/"/g, "&quot;");
 
         dynamicDiv.innerHTML = `
-      <div class="dynamic-div" onclick="DownloadDLC('${trackJson}');" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
-      <img class="album-art" src="http://${TryGetDLCURL()}/${track.FolderPath}/${track.AlbumArtFileName}" />
+      <div class="dynamic-div" onclick="DownloadDLC('${trackJson}');" onmouseover="DelayedTrackPreview('${
+          track.TrackIndex
+        }')">
+      <img class="album-art" src="http://${TryGetDLCURL()}/${
+          track.FolderPath
+        }/${track.AlbumArtFileName}" />
       </div>
       <div class="album-title">
           <h1 class="BoldRegular Large">${track.SongName}</h1>

@@ -69,64 +69,6 @@
     <!-- built files will be auto injected -->
     <script src="<%= BASE_URL %>js/Common.js"></script>
     <script>
-      const titleTrackScrolling = setupScrollingText(
-        "track-title",
-        "track-title-scroll"
-      );
-      applyScrollFadeAnimation("scrollingText1");
-      applyScrollFadeAnimation("scrollingText2", 2000, 7000, 3000); // With different timing parameters
-
-      var timer;
-      function ShowTrackRadio() {
-        clearTimeout(timer);
-        if (
-          !document.getElementById("track-radio").classList.contains("visible")
-        ) {
-          document.getElementById("track-radio").classList.toggle("visible");
-        }
-        timer = setTimeout(function () {
-          if (
-            document.getElementById("track-radio").classList.contains("visible")
-          ) {
-            document.getElementById("track-radio").classList.toggle("visible");
-          }
-        }, 15000);
-      }
-
-      function DisplayTrack(track) {
-        // Fetch the container div
-        const containerDiv = document.getElementById("track-radio");
-
-        var imageContainer = document.getElementById("track-art");
-        imageContainer.src = `file:///${track.AlbumArt}`;
-
-        //var trackTitle = document.getElementById("track-title");
-        //trackTitle.textContent = `${track.TrackName}`;
-        titleTrackScrolling.updateText(`${track.TrackName}`);
-
-        var trackArtist = document.getElementById("track-artist");
-        trackArtist.textContent = `${track.ArtistName}`;
-        ShowTrackRadio();
-        /*
-      document.getElementById('track-radio').addEventListener('click', function() {
-          document.getElementById('track-radio').classList.toggle('visible');
-      });
-
-      
-      dynamicDiv.innerHTML = `
-          <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmousehover="PlaySound('${track.TrackSource}')">
-          <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
-          </div>
-          <div class="album-title">
-              <h1>${track.TrackName}</h1>
-              <h2>${track.ArtistName}</h2>
-          </div>
-          <div class="note-count">Note Count: ${track.NoteCount}</div>
-          <div class="clearfix"></div>
-      </div>`;
-      containerDiv.appendChild(dynamicDiv);*/
-      }
-
       function setRadioInitialValue(value) {
         document.getElementById("radio-volume").value = value;
         document.getElementById(

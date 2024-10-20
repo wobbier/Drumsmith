@@ -135,7 +135,7 @@ void MainMenuController::PlayNextRandomTrack()
         trackData["AlbumArt"] = songImage;
         trackData["TrackSource"] = randomElement->m_trackSourcePath;
         trackData["NoteCount"] = randomElement->m_noteData.size();
-        ExecuteScript( "DisplayTrack(" + trackData.dump() + "); " );
+        ExecuteScript( "window.DisplayTrack(" + trackData.dump() + "); " );
     }
 }
 

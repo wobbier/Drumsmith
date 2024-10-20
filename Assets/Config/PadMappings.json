@@ -3,61 +3,61 @@
   {
    "ID": 0,
    "KB": 5,
-   "MIDI": 84,
+   "MIDI": 0,
    "NAME": "Bass"
   },
   {
    "ID": 1,
    "KB": 22,
-   "MIDI": 83,
+   "MIDI": 40,
    "NAME": "Snare"
   },
   {
    "ID": 2,
    "KB": 23,
-   "MIDI": 81,
+   "MIDI": 48,
    "NAME": "HighTom"
   },
   {
    "ID": 3,
    "KB": 28,
-   "MIDI": 79,
+   "MIDI": 45,
    "NAME": "MidTom"
   },
   {
    "ID": 4,
    "KB": 24,
-   "MIDI": 77,
+   "MIDI": 43,
    "NAME": "FloorTom"
   },
   {
    "ID": 5,
    "KB": 10,
-   "MIDI": 76,
+   "MIDI": 46,
    "NAME": "OpenHiHat"
   },
   {
    "ID": 6,
    "KB": 11,
-   "MIDI": 74,
+   "MIDI": 0,
    "NAME": "ClosedHiHat"
   },
   {
    "ID": 7,
    "KB": 6,
-   "MIDI": 72,
+   "MIDI": 49,
    "NAME": "Crash"
   },
   {
    "ID": 8,
    "KB": 21,
-   "MIDI": 71,
+   "MIDI": 51,
    "NAME": "Ride"
   },
   {
    "ID": 9,
    "KB": 0,
-   "MIDI": 69,
+   "MIDI": 51,
    "NAME": "Crash2"
   }
  ]

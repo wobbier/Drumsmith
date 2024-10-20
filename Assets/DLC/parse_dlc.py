@@ -16,18 +16,15 @@ def scan_and_collect_data(root_dir):
     
     # Walk through the directory
     for subdir, _, files in os.walk(root_dir):
+
         # Gather all files in the current directory
         all_files = os.listdir(subdir)
-        
-        # Calculate the relative path from the root directory
         relative_folder_path = os.path.relpath(subdir, root_dir)
-        
-        # Find the first image file in the folder
         album_art = find_album_art(all_files)
-        
+
         for file in files:
             # Process only .txt files
-            if file == 'TrackData.txt':
+            if file.endswith('TrackData.txt'):
                 file_path = os.path.join(subdir, file)
                 
                 # Read and parse the JSON content from the .txt file
@@ -42,9 +39,9 @@ def scan_and_collect_data(root_dir):
                             "SongArtist": data.get("SongArtist"),
                             "Year": data.get("Year"),
                             "DLCSource": data.get("DLCSource"),
-                            "FolderPath": relative_folder_path,  # Add the relative folder path to the exported data
-                            "FilesInFolder": all_files,  # Add the list of files in the folder
-                            "AlbumArtFileName": album_art  # Add the album art file name if found
+                            "AlbumArtFileName": album_art,
+                            "FolderPath": relative_folder_path,  # Add the folder path to the exported data
+                            "FilesInFolder": all_files  # Add the list of files in the folder
                         }
 
                         master_index.append(extracted_data)
@@ -65,7 +62,7 @@ def write_master_index(master_index, output_file):
 
 if __name__ == "__main__":
     # Specify the directory to scan and the output file
-    root_directory = "."  # Replace with your directory path
+    root_directory = "./"  # Replace with your directory path
     output_file = "dlc_index.json"
 
     # Scan the directory and collect data
