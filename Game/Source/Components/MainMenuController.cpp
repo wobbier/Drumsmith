@@ -109,7 +109,7 @@ void MainMenuController::PlayNextRandomTrack()
 {
     TrackData* randomElement = TrackRadio::GetInstance().m_currentTrack;
 
-    if( ( !TrackRadio::GetInstance().m_currentlyPlayingPtr || !TrackRadio::GetInstance().m_currentlyPlayingPtr->IsPlaying() ) )
+    if( !TrackRadio::GetInstance().IsPlaying() )
     {
         auto& trackExample = TrackDatabase::GetInstance().m_trackList.m_tracks;
         if( trackExample.empty() )

@@ -3,6 +3,7 @@
 #include "Components/Audio/AudioSource.h"
 #include "CoreGame/TrackList.h"
 #include "Pointers.h"
+#include "CoreGame/AudioPack.h"
 
 class TrackData;
 
@@ -16,6 +17,7 @@ enum class RadioState
 {
     None = 0,
     Loading,
+    Seeking,
     Playing,
     Paused
 };
@@ -31,7 +33,6 @@ public:
     void Stop();
     void SetVolume( float inVolume );
 
-    void TryPlayNextTrack();
     void Update();
     bool CanPlayNextTrack() const;
 
@@ -42,6 +43,7 @@ public:
     std::vector<SharedPtr<AudioSource>> m_currentStems;
     RadioState m_radioState = RadioState::None;
     RadioArgs m_radioArgs;
+    AudioPack m_audioPack;
 private:
 
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );

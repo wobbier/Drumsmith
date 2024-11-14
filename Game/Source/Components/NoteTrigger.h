@@ -1,5 +1,6 @@
 #pragma once
 #include "ECS\Component.h"
+#include "ECS\ComponentDetail.h"
 #include "Editor\PadBindings.h"
 
 class NoteTrigger
@@ -20,3 +21,5 @@ protected:
     void OnSerialize( json& outJson ) override;
     void OnDeserialize( const json& inJson ) override;
 };
+
+ME_REGISTER_COMPONENT_FOLDER( NoteTrigger, "Game" );
