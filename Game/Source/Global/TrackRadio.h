@@ -33,7 +33,7 @@ public:
     void Stop();
     void SetVolume( float inVolume );
 
-    void Update();
+    void Update( float dt );
     bool CanPlayNextTrack() const;
 
     TrackData* m_currentTrack = nullptr;
@@ -47,5 +47,6 @@ public:
 private:
 
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
+    float m_delayTimer = 0.f;
 
 };

@@ -2,6 +2,8 @@
 #include "TrackList.h"
 #include "Components\Audio\AudioSource.h"
 
+namespace FMOD { class ChannelGroup; }
+
 class AudioPack
 {
 public:
@@ -15,6 +17,7 @@ public:
     void Stop();
 
     void SetVolume( float inVolumePercent );
+    float GetVolume();
     void Seek( float inSeekPercent );
     float GetPositionMs();
 
@@ -26,4 +29,5 @@ private:
     // awful
     TrackData* m_trackData = nullptr;
     std::vector<AudioSource> m_sounds;
+    FMOD::ChannelGroup* syncGroup = nullptr;
 };

@@ -24,7 +24,7 @@ public:
 
 	void PlayNextRandomTrack();
 
-    void OnUpdate() override;
+    void OnUpdate( float dt ) override;
 
     SharedPtr<AudioSource> m_currentTrack;
 	Random64 m_random;

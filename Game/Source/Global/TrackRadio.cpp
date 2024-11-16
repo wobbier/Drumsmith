@@ -49,7 +49,7 @@ void TrackRadio::SetVolume( float inVolume )
 }
 
 
-void TrackRadio::Update()
+void TrackRadio::Update( float dt )
 {
     if( m_radioState == RadioState::Loading )
     {
@@ -64,12 +64,14 @@ void TrackRadio::Update()
             if( m_radioArgs.UsePreviewMarker )
             {
                 m_audioPack.Seek( m_currentTrack->m_previewPercent );
+                m_delayTimer = 1;
                 m_radioState = RadioState::Seeking;
             }
             else
             {
                 m_radioState = RadioState::Playing;
             }
+            return;
         }
     }
 
@@ -81,9 +83,15 @@ void TrackRadio::Update()
         }
         else
         {
+            //if( m_delayTimer >= 0 )
+            //{
+            //    m_delayTimer -= dt;
+            //    return;
+            //}
             m_audioPack.Resume();
             m_radioState = RadioState::Playing;
         }
+        return;
     }
 
     if( m_radioState == RadioState::Playing )

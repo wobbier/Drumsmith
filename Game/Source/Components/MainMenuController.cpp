@@ -139,9 +139,9 @@ void MainMenuController::PlayNextRandomTrack()
     }
 }
 
-void MainMenuController::OnUpdate()
+void MainMenuController::OnUpdate( float dt )
 {
-    TrackRadio::GetInstance().Update();
+    TrackRadio::GetInstance().Update(dt);
     if( TrackRadio::GetInstance().CanPlayNextTrack() )
     {
         PlayNextRandomTrack();

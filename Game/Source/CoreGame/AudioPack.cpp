@@ -3,6 +3,7 @@
 #include "Engine\Engine.h"
 #include "Resources\SoundResource.h"
 #include "Resource\ResourceCache.h"
+#include <fmod.hpp>
 
 AudioPack::AudioPack( TrackData& inTrackData )
 {
@@ -11,7 +12,7 @@ AudioPack::AudioPack( TrackData& inTrackData )
     LoadStem( m_trackData->m_trackFileName.c_str() );
     LoadStem( "crowd.ogg" );
     LoadStem( "drums.ogg" );
-    LoadStem( "drums.mp3" );
+    //LoadStem( "drums.mp3" );
     LoadStem( "drums_1.ogg" );
     LoadStem( "drums_2.ogg" );
     LoadStem( "drums_3.ogg" );
@@ -20,6 +21,12 @@ AudioPack::AudioPack( TrackData& inTrackData )
     LoadStem( "vocals.ogg" );
     LoadStem( "rhythm.ogg" );
     LoadStem( "keys.ogg" );
+    //GetEngine().AudioThread->GetSystem()->createChannelGroup( m_trackData->m_trackName.c_str(), &syncGroup );
+    //
+    //for (auto& song : m_sounds)
+    //{
+    //    song.ChannelHandle->setChannelGroup( syncGroup );
+    //}
 }
 
 
@@ -46,6 +53,7 @@ void AudioPack::Play()
 
 void AudioPack::Pause()
 {
+    //syncGroup->setPaused( true );
     for( auto& sound : m_sounds )
     {
         sound.Pause();
@@ -55,6 +63,7 @@ void AudioPack::Pause()
 
 void AudioPack::Resume()
 {
+    //syncGroup->setPaused( false );
     for( auto& sound : m_sounds )
     {
         sound.Resume();
@@ -80,14 +89,37 @@ void AudioPack::SetVolume( float inVolumePercent )
 }
 
 
+float AudioPack::GetVolume()
+{
+    return m_sounds[0].GetVolume();
+}
+
+
 void AudioPack::Seek( float inSeekPercent )
 {
     Pause();
+
     float timestamp = m_sounds[0].GetLength() * inSeekPercent;
+
     for( auto& sound : m_sounds )
     {
         sound.SetPositionMs( timestamp );
+
     }
+    //while( !IsReady() )
+    //{
+    //}
+    //unsigned long long dspClock1;
+    //m_sounds[0].ChannelHandle->getDSPClock( nullptr, &dspClock1 );
+    //unsigned long long bufferLength = 16384; // Adjust this based on your audio system
+    //unsigned long long startTime = dspClock1 + bufferLength;
+    //
+    //
+    //for( auto& sound : m_sounds )
+    //{
+    //    sound.ChannelHandle->setDelay( startTime, 0, false );
+    //}
+    //Resume();
 }
 
 

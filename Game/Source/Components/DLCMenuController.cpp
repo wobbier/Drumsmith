@@ -314,9 +314,9 @@ void DLCMenuController::RefreshTrackList( TrackListSort inSortType, TrackListFil
     RequestDetailsPanelUpdate_Internal( 0 );
 }
 
-void DLCMenuController::OnUpdate()
+void DLCMenuController::OnUpdate( float dt )
 {
-    TrackRadio::GetInstance().Update();
+    TrackRadio::GetInstance().Update( dt );
 }
 
 #endif
