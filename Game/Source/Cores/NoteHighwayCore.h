@@ -57,6 +57,7 @@ private:
 #endif
 	AudioPack m_currentTrackPack;
 	bool m_hasStartedTrackYet = false;
+	float m_drumVolume = 1.f;
 };
 
 ME_REGISTER_CORE(NoteHighwayCore)

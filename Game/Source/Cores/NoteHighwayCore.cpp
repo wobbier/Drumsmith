@@ -78,26 +78,30 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     std::vector<Entity>::iterator noteItr = entities.begin();
 
     // I need to keep track of where we are in a track to avoid itr on entities
+    // this whole shit is fucked
     bool handled = false;
+    const unsigned int noteTime = m_currentTrackPack.GetPositionMs();
     for( auto it = noteItr; it != entities.end(); ++it )
     {
         NoteTrigger& note = it->GetComponent<NoteTrigger>();
-        // I should unify the time
-        const unsigned int triggerTime = (unsigned int)( note.TriggerTime * 1000.f );
-        const unsigned int noteTime = m_currentTrackPack.GetPositionMs();
 
-        if( Mathf::Abs( (float)( noteTime - triggerTime ) ) < 200 )
+        const unsigned int triggerTime = note.TriggerTimeMS;
+        float hitWindow = Mathf::Abs( (float)( (float)noteTime - (float)triggerTime ) );
+        if( hitWindow < 50.f )
         {
             // drunk me fucked this up
             for( auto& pad : storage.mappedPads )
             {
                 if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && pad.padId == note.EditorLane )
                 {
+                    m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume + .5f );
                     it->MarkForDelete();
                     handled = true;
                 }
             }
-
+            m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume - context.GetDeltaTime() );
+            m_currentTrackPack.SetDrumVolume( Mathf::Clamp( 0.f, 1.f, m_drumVolume ) );
+            //it->MarkForDelete();
 #if USING(ME_PLATFORM_WIN64)
             while( m_midi.HasMessages() && !handled )
             {
@@ -261,6 +265,7 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
         }
         auto& noteComp = note->AddComponent<NoteTrigger>();
         noteComp.TriggerTime = it.m_triggerTime;
+        noteComp.TriggerTimeMS = it.m_triggerTimeMS;
         noteComp.NoteName = it.m_noteName;
         noteComp.EditorLane = it.m_editorLane;
         noteComp.EditorLaneName = PadUtils::GetPadName( it.m_editorLane );

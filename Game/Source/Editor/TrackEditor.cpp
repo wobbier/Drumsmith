@@ -248,7 +248,7 @@ void TrackEditor::Render()
                 }
                 if( CalculateZoom() > 400.f )
                 {
-                    float subMeasures = ( kBeatsPerMeasure / 4.f ) * ( 60.f / trackData.m_bpm );
+                    float subMeasures = ( kBeatsPerMeasure / kSubMeasure ) * ( 60.f / trackData.m_bpm );
                     for( float pos = position + subMeasures; pos < WindowContentSize; pos += ScaleValue( subMeasures ) )
                     {
                         numSubBars++;
@@ -371,10 +371,24 @@ void TrackEditor::Render()
                     NoteData newNote;
                     newNote.m_editorLane = (PadId)pad.padId;
                     newNote.m_noteName = PadUtils::GetPadId( pad.padId );
-                    float songTime = ( TrackPreview->GetPositionMs() / 1000.f );
-                    newNote.m_triggerTime = songTime;
+                    newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
+                    newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
                     trackData.m_noteData.push_back( newNote );
                 }
+            }
+        }
+
+        Input& gameInput = GetEngine().GetEditorInput();
+        for( auto& pad : storage.mappedPads )
+        {
+            if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) )
+            {
+                NoteData newNote;
+                newNote.m_editorLane = (PadId)pad.padId;
+                newNote.m_noteName = PadUtils::GetPadId( pad.padId );
+                newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
+                newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
+                trackData.m_noteData.push_back( newNote );
             }
         }
     }
@@ -409,6 +423,12 @@ void TrackEditor::DrawTrackControls()
         ImGui::InputText( "Artist", &trackData.m_artistName );
         ImGui::InputInt( "BPM", &trackData.m_bpm, 1, 10 );
         ImGui::SliderFloat( "Note Height", &m_noteHeight, 10.f, 50.f, "%.1f" );
+        if( TrackPreview )
+        {
+            float trackVolume = TrackPreview->GetVolume();
+            ImGui::SliderFloat( "Volume", &trackVolume, 0.f, 1.f, "%.1f" );
+            TrackPreview->SetVolume( trackVolume );
+        }
         if( ImGui::Button( "Set Track Preview Marker" ) )
         {
             if( TrackPreview )
@@ -423,6 +443,25 @@ void TrackEditor::DrawTrackControls()
             {
                 TrackPreview->SetPlaybackSpeed( newFrequency );
             }
+        }
+        DrawNoteSnappingControls();
+        if( ImGui::Button( "Delete All Bass Notes" ) )
+        {
+            trackData.m_noteData.erase( std::remove_if( trackData.m_noteData.begin(), trackData.m_noteData.end(),
+                []( const NoteData& note )
+                {
+                    return note.m_editorLane == PadId::Bass; // Condition for erasing
+                } ),
+                trackData.m_noteData.end() );
+        }
+        if( ImGui::Button( "Delete All Snare Notes" ) )
+        {
+            trackData.m_noteData.erase( std::remove_if( trackData.m_noteData.begin(), trackData.m_noteData.end(),
+                []( const NoteData& note )
+                {
+                    return note.m_editorLane == PadId::Snare; // Condition for erasing
+                } ),
+                trackData.m_noteData.end() );
         }
         //if( ImGui::Button( !SelectedTrackLocation.Exists ? "Select Asset" : SelectedTrackLocation.GetLocalPath().data(), { 200.f, 10.f } ) )
         //{
@@ -473,6 +512,48 @@ void TrackEditor::DrawTrackControls()
     }
     ImGui::End();
 }
+
+
+void TrackEditor::DrawNoteSnappingControls()
+{
+    static int selectedInterval = 1; // Default to 1/4 note
+    static const char* snappingOptions[] = { "1/4", "1/8", "1/16" };
+    static const float beatFractions[] = { 0.25f, 0.125f, 0.0625f }; // Fraction of a beat
+    static bool useBPM = false;
+
+    //ImGui::Begin( "Note Snapping" );
+
+    // Dropdown for snapping type
+    ImGui::Checkbox( "Use BPM for Snapping", &useBPM );
+    if( ImGui::BeginCombo( "Snapping Interval", snappingOptions[selectedInterval] ) )
+    {
+        for( int i = 0; i < IM_ARRAYSIZE( snappingOptions ); ++i )
+        {
+            if( ImGui::Selectable( snappingOptions[i], selectedInterval == i ) )
+            {
+                selectedInterval = i;
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    // Button to perform snapping
+    if( ImGui::Button( "Snap Notes" ) )
+    {
+        float beatFraction = beatFractions[selectedInterval];
+        float intervalMS = useBPM ? ( 60000.0f / GetCurrentTrackData().m_bpm ) * beatFraction
+            : ( 1000.0f * beatFraction );
+        for( auto& note : GetCurrentTrackData().m_noteData )
+        {
+// Snap TriggerTimeMS to the nearest multiple of intervalMS
+            note.m_triggerTimeMS = std::round( note.m_triggerTimeMS / static_cast<float>( intervalMS ) ) * intervalMS;
+            note.m_triggerTime = note.m_triggerTimeMS / 1000.f;
+        }
+    }
+
+    //ImGui::End();
+}
+
 
 TrackData& TrackEditor::GetCurrentTrackData()
 {

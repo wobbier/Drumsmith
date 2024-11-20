@@ -13,6 +13,7 @@ public:
 #endif
 
     float TriggerTime = 0.f;
+    float TriggerTimeMS = 0.f;
     std::string NoteName;
     PadId EditorLane;
     std::string EditorLaneName;

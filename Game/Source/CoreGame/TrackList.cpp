@@ -527,14 +527,19 @@ void TrackData::OnSaveNoteData( json& outJson )
 {
     std::sort( m_noteData.begin(), m_noteData.end(), []( NoteData& first, NoteData& second )
         {
-            if( first.m_triggerTime != second.m_triggerTime )
+            if( first.m_triggerTimeMS != second.m_triggerTimeMS )
             {
-                return first.m_triggerTime < second.m_triggerTime;
+                return first.m_triggerTimeMS < second.m_triggerTimeMS;
             }
             return first.m_editorLane < second.m_editorLane;
         } );
-    m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
-
+    //m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
+    m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end(),
+        []( const NoteData& first, const NoteData& second ) {
+            return first.m_triggerTimeMS == second.m_triggerTimeMS &&
+                first.m_editorLane == second.m_editorLane;
+        } ),
+        m_noteData.end() );
     json& noteData = outJson["Notes"];
     for( NoteData& note : m_noteData )
     {

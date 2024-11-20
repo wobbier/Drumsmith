@@ -17,6 +17,7 @@ public:
     void Stop();
 
     void SetVolume( float inVolumePercent );
+    void SetDrumVolume( float inVolumePercent );
     float GetVolume();
     void Seek( float inSeekPercent );
     float GetPositionMs();
@@ -25,9 +26,11 @@ public:
     bool IsPlaying() const;
 
 private:
-    bool LoadStem( const char* inFileName );
+    bool LoadStem( const char* inFileName, bool isDrumTrack = false );
+    bool LoadURL( const char* inURL, bool isDrumTrack = false );
     // awful
     TrackData* m_trackData = nullptr;
     std::vector<AudioSource> m_sounds;
+    std::vector<int> m_drumTracks;
     FMOD::ChannelGroup* syncGroup = nullptr;
 };

@@ -3,13 +3,13 @@
   {
    "ID": 0,
    "KB": 5,
-   "MIDI": 0,
+   "MIDI": 84,
    "NAME": "Bass"
   },
   {
    "ID": 1,
    "KB": 22,
-   "MIDI": 40,
+   "MIDI": 71,
    "NAME": "Snare"
   },
   {
@@ -39,7 +39,7 @@
   {
    "ID": 6,
    "KB": 11,
-   "MIDI": 0,
+   "MIDI": 83,
    "NAME": "ClosedHiHat"
   },
   {
@@ -51,7 +51,7 @@
   {
    "ID": 8,
    "KB": 21,
-   "MIDI": 51,
+   "MIDI": 66,
    "NAME": "Ride"
   },
   {
