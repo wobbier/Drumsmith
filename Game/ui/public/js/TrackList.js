@@ -43,8 +43,7 @@ function ToggleTrackListVisibility() {
 }
 
 function TryAreToolsEnabled() {
-  
-  if (typeof AreToolsEnabled === 'function') {
+  if (typeof AreToolsEnabled === "function") {
     // eslint-disable-next-line
     return AreToolsEnabled();
   }
@@ -75,7 +74,7 @@ function AddTrack(track) {
     dynamicDiv.innerHTML += `<div onclick="DownloadDLC('${track.FolderPath}')">DEV TOOLS ENABLED</div>`;
   }
   dynamicDiv.innerHTML += `
-      <div class="clearfix"></div>fasdfasdfasdfasdf
+      <div class="clearfix"></div>
   </div>`;
 
   // Create and append text content

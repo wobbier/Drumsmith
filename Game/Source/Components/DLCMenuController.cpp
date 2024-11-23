@@ -11,7 +11,7 @@
 DLCMenuController::DLCMenuController()
     : BasicUIView( "DLCMenuController" )
 {
-    FilePath = Path( "Assets/UI/DLC.html" );
+    FilePath = Path( "Assets/UI/DLC_NEW.html" );
     m_playAudioCallback = [this]( SharedPtr<AudioSource> playedAudioSource )
     {
         if( m_currentTrack != playedAudioSource )

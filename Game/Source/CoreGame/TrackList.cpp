@@ -188,6 +188,12 @@ void TrackDatabase::Reload()
     {
         YIKES( path.FullPath.c_str() );
     }
+
+    //for (auto& path : m_trackList.m_tracks)
+    //{
+    //    path.LoadNoteData();
+    //    path.Save();
+    //}
 }
 
 
@@ -504,9 +510,9 @@ void TrackData::Load()
 
 void TrackData::OnSaveTrackData( json& outJson )
 {
-    outJson["SongName"] = m_trackName;
-    outJson["SongArtist"] = m_artistName;
-    outJson["AlbumName"] = m_albumName;
+    outJson["Title"] = m_trackName;
+    outJson["Artist"] = m_artistName;
+    outJson["Album"] = m_albumName;
     outJson["Genre"] = m_genre;
     outJson["Year"] = m_year;
     outJson["Icon"] = m_icon;
@@ -559,13 +565,26 @@ void TrackData::OnLoadTrackData( const json& inJson )
     {
         m_trackName = StringUtils::TrimLeadingSpaces( inJson["SongName"] );
     }
+    if( inJson.contains( "Title" ) )
+    {
+        m_trackName = StringUtils::TrimLeadingSpaces( inJson["Title"] );
+    }
     if( inJson.contains( "SongArtist" ) )
     {
         m_artistName = StringUtils::TrimLeadingSpaces( inJson["SongArtist"] );
     }
+    if( inJson.contains( "Artist" ) )
+    {
+        m_artistName = StringUtils::TrimLeadingSpaces( inJson["Artist"] );
+    }
     if( inJson.contains( "AlbumName" ) )
     {
         m_albumName = StringUtils::TrimLeadingSpaces( inJson["AlbumName"] );
+    }
+
+    if( inJson.contains( "Album" ) )
+    {
+        m_albumName = StringUtils::TrimLeadingSpaces( inJson["Album"] );
     }
     if( inJson.contains( "Genre" ) )
     {

@@ -19,6 +19,12 @@ module.exports = defineConfig({
       template: "public/MainMenu.html",
       filename: "MainMenu.html",
     },
+    DLC: {
+      // entry for the first additional page
+      entry: "src/DLC.js",
+      template: "public/DLC_NEW.html",
+      filename: "DLC_NEW.html",
+    },
   },
   configureWebpack: (config) => {
     // Find the HtmlWebpackPlugin in the plugins array and modify its options
