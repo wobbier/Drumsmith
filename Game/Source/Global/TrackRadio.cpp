@@ -55,6 +55,8 @@ void TrackRadio::Update( float dt )
     {
         if( !m_audioPack.IsReady() )
         {
+            // this feels weird, but okay??
+            m_audioPack.Play();
             return;
         }
         else

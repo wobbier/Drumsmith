@@ -6,30 +6,37 @@
 #include "Global/TrackRadio.h"
 #include "Web/HttpDownload.h"
 #include "Config/GameSettings.h"
+#include "UI/TrackRadioUtils.h"
 
 
 DLCMenuController::DLCMenuController()
     : BasicUIView( "DLCMenuController" )
+    , m_radioUtils( new TrackRadioUtils( *this ) )
 {
     FilePath = Path( "Assets/UI/DLC_NEW.html" );
     m_playAudioCallback = [this]( SharedPtr<AudioSource> playedAudioSource )
-    {
-        if( m_currentTrack != playedAudioSource )
         {
-            if( m_currentTrack )
+            if( m_currentTrack != playedAudioSource )
             {
-                m_currentTrack->Stop( true );
+                if( m_currentTrack )
+                {
+                    m_currentTrack->Stop( true );
+                }
+                m_currentTrack = playedAudioSource;
             }
-            m_currentTrack = playedAudioSource;
-        }
-        else
-        {
-            if( m_currentTrack && m_currentTrack->IsPlaying() )
+            else
             {
-                m_currentTrack->Stop( true );
+                if( m_currentTrack && m_currentTrack->IsPlaying() )
+                {
+                    m_currentTrack->Stop( true );
+                }
             }
-        }
-    };
+        };
+}
+
+DLCMenuController::~DLCMenuController()
+{
+    delete m_radioUtils;
 }
 
 #if USING( ME_UI )
@@ -46,6 +53,9 @@ void DLCMenuController::OnJSReady( ultralight::JSObject& GlobalWindow, ultraligh
 void DLCMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
 {
     BasicUIView::OnUILoad( GlobalWindow, Caller );
+
+    m_radioUtils->OnUILoad( GlobalWindow, Caller );
+    m_radioUtils->PlayNextRandomTrack();
 
     GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &DLCMenuController::SelectTrackToPlay );
     GlobalWindow["PlayTrackPreview"] = BindJSCallback( &DLCMenuController::PlayTrackPreview );
@@ -72,12 +82,13 @@ void DLCMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObjec
     loadSceneEvent->Level = "Assets/Example.lvl";
     EventManager::GetInstance().QueueEvent( loadSceneEvent );
 
-    loadSceneEvent->Callback = [path, index]() {
-        LaunchPlayTrackEvent evt;
-        evt.TrackID = std::string( path.utf8().data() );
-        evt.TrackIndex = index;
-        evt.Fire();
-    };
+    loadSceneEvent->Callback = [path, index]()
+        {
+            LaunchPlayTrackEvent evt;
+            evt.TrackID = std::string( path.utf8().data() );
+            evt.TrackIndex = index;
+            evt.Fire();
+        };
 }
 
 
@@ -116,7 +127,7 @@ void DLCMenuController::EditTrack( const ultralight::JSObject& thisObject, const
 
 void DownloadDLC_Internal( std::string inURL, std::string inFolder, std::string inFile )
 {
-    Web::DownloadFile( inURL + "/" + inFolder + "/" + inFile, Path("Assets/DLC/" + inFolder + "/" + inFile));
+    Web::DownloadFile( inURL + "/" + inFolder + "/" + inFile, Path( "Assets/DLC/" + inFolder + "/" + inFile ) );
 }
 
 void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -129,8 +140,9 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
     //}
     //std::string lmfaooo = str.utf8().data();
     //json data = json::parse( lmfaooo );
-    try {
-    // Parse the JSON string
+    try
+    {
+// Parse the JSON string
         nlohmann::json trackData = nlohmann::json::parse( jsonStr );
 
         // Access properties of the track object
@@ -142,19 +154,22 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
         std::vector<std::string> filesInFolder = trackData["FilesInFolder"].get<std::vector<std::string>>();
 
         // Loop through each file in FilesInFolder and download it
-        for( const auto& fileName : filesInFolder ) {
-            // Download each file from the folder path
+        for( const auto& fileName : filesInFolder )
+        {
+// Download each file from the folder path
             DownloadDLC_Internal( GameSettings::GetInstance().DLCURL, folderPath, fileName );
         }
 
         // Optional: Log successful download
         std::cout << "Downloaded DLC for song: " << songName << " by " << songArtist << std::endl;
     }
-    catch( const std::exception& e ) {
+    catch( const std::exception& e )
+    {
         std::cerr << "Error parsing JSON: " << e.what() << std::endl;
     }
     TrackRadio::GetInstance().Stop();
     TrackDatabase::GetInstance().Reload();
+    m_radioUtils->PlayNextRandomTrack();
 }
 
 
@@ -165,6 +180,7 @@ ultralight::JSValue DLCMenuController::GetDLCURL( const ultralight::JSObject& th
 
 void DLCMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
+    // stupid, make it not a string??
     if( args.empty() || !args[0].IsString() )
     {
         BRUH( "PlaySound(string) argument mismatch." );
@@ -316,7 +332,7 @@ void DLCMenuController::RefreshTrackList( TrackListSort inSortType, TrackListFil
 
 void DLCMenuController::OnUpdate( float dt )
 {
-    TrackRadio::GetInstance().Update( dt );
+    m_radioUtils->OnUpdate( dt );
 }
 
 #endif

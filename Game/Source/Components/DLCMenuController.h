@@ -3,11 +3,14 @@
 #include "CoreGame/TrackList.h"
 #include "Components/Audio/AudioSource.h"
 
+class TrackRadioUtils;
+
 class DLCMenuController final
 	: public BasicUIView
 {
 public:
     DLCMenuController();
+    ~DLCMenuController();
 
 #if USING( ME_UI )
     void OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
@@ -32,6 +35,7 @@ public:
 #endif
 
 	SharedPtr<AudioSource> m_currentTrack;
+    TrackRadioUtils* m_radioUtils = nullptr;
 };
 
 ME_REGISTER_COMPONENT( DLCMenuController );

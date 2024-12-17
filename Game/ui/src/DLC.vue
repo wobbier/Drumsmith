@@ -23,10 +23,9 @@
       <div class="clearfix"></div>
 
       <div v-for="(track, itemIndex) in group.items" :key="itemIndex" class="dynamic-div"
-        @click="playSound(track.TrackSource)">
+        @mouseenter="() => DelayedTrackPreview(track)">
 
-        <div class="dynamic-div" @click="SelectTrackToPlay(track.Title, itemIndex); ToggleTrackListVisibility();"
-          @mouseenter="DelayedTrackPreview(track)">
+        <div class="dynamic-div" @click="() => SelectTrackToPlay(track.Title, itemIndex)">
           <img v-if="!track?.FolderPath" class="album-art" src="file:///{{track.AlbumArt}}" />
           <img v-if="track?.FolderPath" class="album-art" :src="`http://${this.TryGetDLCURL()}/${track.FolderPath
             }/${track.AlbumArtFileName}`" />
@@ -80,17 +79,20 @@
       <span class="openButton">Sorting (Ascending)</span>
     </button>
   </div>
+  <TrackRadio />
 </template>
 
 <script>
 import DetailsPanel from './components/TrackList/DetailsPanel.vue';
+import TrackRadio from './components/TrackRadio.vue';
 
 var timer;
 
 export default {
   name: 'DLC',
   components: {
-    DetailsPanel
+    DetailsPanel,
+    TrackRadio
   },
   data() {
     return {
@@ -187,7 +189,7 @@ export default {
         // eslint-disable-next-line
         return GetDLCURL();
       }
-      return "test.domain.com";
+      return process.env.VUE_APP_DRUMSMITH_DLC_URL || "test.domain.com";
     },
     TryDownloadDLC(dlcData) {
       if (typeof DownloadDLC === "function") {

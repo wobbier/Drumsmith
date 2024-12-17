@@ -55,9 +55,10 @@ function AddTrack(track) {
   const containerDiv = document.getElementById("myDivContainer");
   const dynamicDiv = document.createElement("div");
   dynamicDiv.classList.add("dynamic-div");
+  dynamicDiv.onmouseover = () => DelayedTrackPreview(`${track.TrackIndex}`);
 
   dynamicDiv.innerHTML = `
-      <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();" onmouseover="DelayedTrackPreview('${track.TrackIndex}')">
+      <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}', '${track.TrackIndex}'); ToggleTrackListVisibility();">
       <!--div class="album-art" style="background-image: url('file:///${track.AlbumArt}');"-->
       <img class="album-art" src="file:///${track.AlbumArt}" />
       </div>

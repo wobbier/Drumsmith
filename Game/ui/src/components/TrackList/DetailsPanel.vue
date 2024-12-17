@@ -4,7 +4,7 @@
         <img v-if="track?.FolderPath" class="album-art" :src="`http://${track.DLCURL}/${track.FolderPath
             }/${track.AlbumArtFileName}`" />
     </div>
-    <div class="dynamic-div" @click="selectTrackToPlay(track.Title); toggleTrackListVisibility()">
+    <div class="dynamic-div">
         <div class="album-title">
             <h1>{{ track.Title }}</h1>
             <h2>{{ track.Artist }}</h2>
