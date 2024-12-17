@@ -114,6 +114,7 @@ TrackDatabase::TrackDatabase()
 void TrackDatabase::Reload()
 {
     m_trackList.Clear();
+    m_trackList.m_tracks.clear();
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;  // Replace with your directory path
     std::vector<Path> m_drumlessSongs;
     try {
@@ -122,17 +123,17 @@ void TrackDatabase::Reload()
             if( entry.is_directory() )
             {
                 // #TODO: Support CHART DLC files
-                bool chartFormat = fileExistsInDirectory( entry.path(), "notes.chart" );
-                if( chartFormat )
-                {
-                    //Path midiPath = Path( std::string( entry.path().u8string() ) );
-                    //    
-                    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
-                    //{
-                    //    m_drumlessSongs.push_back( midiPath );
-                    //}
-                    continue;
-                }
+                //bool chartFormat = fileExistsInDirectory( entry.path(), "notes.chart" );
+                //if( chartFormat )
+                //{
+                //    //Path midiPath = Path( std::string( entry.path().u8string() ) );
+                //    //    
+                //    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                //    //{
+                //    //    m_drumlessSongs.push_back( midiPath );
+                //    //}
+                //    continue;
+                //}
 
                 // #TODO: Do we even support OPUS? I would need to convert it for fmod...
                 //bool opusFormat = fileExistsInDirectory( entry.path(), "song.opus" );

@@ -37,9 +37,9 @@
           <h3>{{ track.Year }}</h3>
         </div>
         <div class="note-count">Note Count: {{ track.NoteCount }}</div>
-        <div v-if="TryAreToolsEnabled()" onclick="EditTrack('${track.TrackName}')">DEV TOOLS
+        <div v-if="TryAreToolsEnabled()" @click="() => EditTrack(track.TrackName)">DEV TOOLS
           ENABLED</div>
-        <div v-if="track?.FolderPath ?? false" onclick="DownloadDLC('${track.FolderPath}')">DOWNLOAD TRACK</div>
+        <div v-if="track?.FolderPath ?? false" @click="() => TryDownloadDLC(track)">DOWNLOAD TRACK</div>
         <div class="clearfix"></div>
       </div>
 
@@ -188,6 +188,12 @@ export default {
         return GetDLCURL();
       }
       return "test.domain.com";
+    },
+    TryDownloadDLC(dlcData) {
+      if (typeof DownloadDLC === "function") {
+        // eslint-disable-next-line
+        DownloadDLC(JSON.stringify(dlcData));
+      }
     },
     RequestDetailsPanelUpdate2(trackIndex) {
       if (typeof RequestDetailsPanelUpdate === "function") {

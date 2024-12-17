@@ -135,8 +135,8 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
 
         // Access properties of the track object
         std::string folderPath = trackData["FolderPath"];
-        std::string songName = trackData["SongName"];
-        std::string songArtist = trackData["SongArtist"];
+        std::string songName = trackData["Title"];
+        std::string songArtist = trackData["Artist"];
         //int noteCount = trackData["NoteCount"];
         // Get the list of files in the folder
         std::vector<std::string> filesInFolder = trackData["FilesInFolder"].get<std::vector<std::string>>();
