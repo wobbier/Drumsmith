@@ -10,6 +10,7 @@ class TrackData;
 struct RadioArgs
 {
     TrackData* CurrentTrack = nullptr;
+    int CurrentTrackIndex = 0;
     bool UsePreviewMarker = false;
 };
 
@@ -47,6 +48,7 @@ public:
 private:
 
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
+    int m_currentTrackIndex = 0;
     float m_delayTimer = 0.f;
-
+    float m_previewPercent = 0.f;
 };

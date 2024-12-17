@@ -134,6 +134,7 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
 {
     ultralight::JSString str = args[0].ToString();
     std::string jsonStr = ultralight::String( str ).utf8().data();
+    std::string folderPath;
     //if( str.HasProperty( "FolderPath" ) )
     //{
     //    folderPath = ultralight::String(str["FolderPath"].ToString()).utf8().data();
@@ -146,7 +147,7 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
         nlohmann::json trackData = nlohmann::json::parse( jsonStr );
 
         // Access properties of the track object
-        std::string folderPath = trackData["FolderPath"];
+        folderPath = trackData["FolderPath"];
         std::string songName = trackData["Title"];
         std::string songArtist = trackData["Artist"];
         //int noteCount = trackData["NoteCount"];
@@ -167,9 +168,17 @@ void DLCMenuController::DownloadDLC( const ultralight::JSObject& thisObject, con
     {
         std::cerr << "Error parsing JSON: " << e.what() << std::endl;
     }
-    TrackRadio::GetInstance().Stop();
-    TrackDatabase::GetInstance().Reload();
-    m_radioUtils->PlayNextRandomTrack();
+    //TrackRadio::GetInstance().Stop();
+    bool isNew = TrackDatabase::GetInstance().RegisterNewTrack( folderPath );
+    //TrackDatabase::GetInstance().Reload();
+    if( isNew )
+    {
+        m_radioUtils->PlayLatestTrack();
+    }
+    else
+    {
+        m_radioUtils->PlayNextRandomTrack();
+    }
 }
 
 
@@ -196,6 +205,7 @@ void DLCMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject
     }
     RadioArgs radioArgs;
     radioArgs.CurrentTrack = &trackList[str];
+    radioArgs.CurrentTrackIndex = str;
     radioArgs.UsePreviewMarker = true;
     TrackRadio::GetInstance().Play( radioArgs );
 }

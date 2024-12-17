@@ -29,9 +29,12 @@ void TrackList::OnLoadConfig( const json& outJson )
 
 namespace fs = std::filesystem;
 
-bool fileExistsInDirectory( const fs::path& dirPath, const std::string& fileName ) {
-    for( const auto& entry : fs::directory_iterator( dirPath ) ) {
-        if( entry.is_regular_file() && entry.path().filename() == fileName ) {
+bool fileExistsInDirectory( const fs::path& dirPath, const std::string& fileName )
+{
+    for( const auto& entry : fs::directory_iterator( dirPath ) )
+    {
+        if( entry.is_regular_file() && entry.path().filename() == fileName )
+        {
             return true;
         }
     }
@@ -117,7 +120,8 @@ void TrackDatabase::Reload()
     m_trackList.m_tracks.clear();
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;  // Replace with your directory path
     std::vector<Path> m_drumlessSongs;
-    try {
+    try
+    {
         for( const auto& entry : fs::directory_iterator( rootPath ) )
         {
             if( entry.is_directory() )
@@ -181,7 +185,8 @@ void TrackDatabase::Reload()
             }
         }
     }
-    catch( fs::filesystem_error& e ) {
+    catch( fs::filesystem_error& e )
+    {
         std::cout << e.what() << std::endl;
     }
 
@@ -198,10 +203,36 @@ void TrackDatabase::Reload()
 }
 
 
+bool TrackDatabase::RegisterNewTrack( const std::string& inDirectory )
+{
+    auto it = std::find_if( m_trackList.m_tracks.begin(), m_trackList.m_tracks.end(),
+        [&]( const TrackData& track )
+        {
+            return track.m_trackSourcePath.rfind( inDirectory ) != std::string::npos;
+        } );
+
+    if( it != m_trackList.m_tracks.end() )
+    {
+        YIKES_FMT( "Track already registered for directory: %s", inDirectory.c_str() );
+        return false;
+    }
+
+    m_trackList.m_tracks.emplace_back( TrackData( Path( "Assets/DLC/" + inDirectory + "/TrackData.txt" ) ) );
+    m_trackList.m_tracks.back().Load();
+
+    Path trackPath( m_trackList.m_tracks.back().m_trackSourcePath );
+    if( !trackPath.Exists )
+    {
+        YIKES_FMT( "Song does not exist in directory: %s", m_trackList.m_tracks.back().m_trackFileName.c_str() );
+    }
+    return true;
+}
+
 void TrackDatabase::ExportMidiTrackMetaData()
 {
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;
-    try {
+    try
+    {
         for( const auto& entry : fs::directory_iterator( rootPath ) )
         {
             if( !entry.is_directory() )
@@ -233,7 +264,8 @@ void TrackDatabase::ExportMidiTrackMetaData()
             }
         }
     }
-    catch( fs::filesystem_error& e ) {
+    catch( fs::filesystem_error& e )
+    {
         std::cout << e.what() << std::endl;
     }
 }
@@ -314,18 +346,21 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy, Tr
     switch( inSortBy )
     {
     case TrackListSort::Title:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_trackName < trackList[second].m_trackName;
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+            {
+                return trackList[first].m_trackName < trackList[second].m_trackName;
             } );
         break;
     case TrackListSort::Artist:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_artistName < trackList[second].m_artistName;
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+            {
+                return trackList[first].m_artistName < trackList[second].m_artistName;
             } );
         break;
     case TrackListSort::Year:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_year < trackList[second].m_year;
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+            {
+                return trackList[first].m_year < trackList[second].m_year;
             } );
         break;
     default:
@@ -518,7 +553,7 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["Year"] = m_year;
     outJson["Icon"] = m_icon;
     outJson["AlbumArtPath"] = m_albumArtPath;
-    outJson["AlbumArtFileName"] = Path(m_albumArtPath).GetFileNameString();
+    outJson["AlbumArtFileName"] = Path( m_albumArtPath ).GetFileNameString();
     outJson["DLCSource"] = m_dlcSource;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
@@ -542,7 +577,8 @@ void TrackData::OnSaveNoteData( json& outJson )
         } );
     //m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
     m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end(),
-        []( const NoteData& first, const NoteData& second ) {
+        []( const NoteData& first, const NoteData& second )
+        {
             return first.m_triggerTimeMS == second.m_triggerTimeMS &&
                 first.m_editorLane == second.m_editorLane;
         } ),

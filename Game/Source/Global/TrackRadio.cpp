@@ -7,7 +7,8 @@
 
 void TrackRadio::Play( RadioArgs inTrackArgs )
 {
-    if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrack == m_currentTrack )
+    // remove this ptr compare and think of another way.
+    if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrackIndex == m_currentTrackIndex )
     {
         return;
     }
@@ -16,6 +17,12 @@ void TrackRadio::Play( RadioArgs inTrackArgs )
     bool isAsync = true;
 
     m_currentTrack = inTrackArgs.CurrentTrack;
+    m_currentTrackIndex = inTrackArgs.CurrentTrackIndex;
+    m_previewPercent = 0.f;
+    if( inTrackArgs.UsePreviewMarker )
+    {
+        m_previewPercent = m_currentTrack->m_previewPercent;
+    }
     m_audioPack = AudioPack( *m_currentTrack );
 
     // Audio streams are pretty quick, why even have a preview audio file?
@@ -65,7 +72,7 @@ void TrackRadio::Update( float dt )
             m_audioPack.SetVolume( GameSettings::GetInstance().RadioVolume );
             if( m_radioArgs.UsePreviewMarker )
             {
-                m_audioPack.Seek( m_currentTrack->m_previewPercent );
+                m_audioPack.Seek( m_previewPercent );
                 m_delayTimer = 1;
                 m_radioState = RadioState::Seeking;
             }

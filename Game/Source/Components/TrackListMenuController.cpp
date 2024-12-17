@@ -117,6 +117,7 @@ void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& this
     }
     RadioArgs radioArgs;
     radioArgs.CurrentTrack = &trackList[str];
+    radioArgs.CurrentTrackIndex = str;
     radioArgs.UsePreviewMarker = true;
     TrackRadio::GetInstance().Play( radioArgs );
 }

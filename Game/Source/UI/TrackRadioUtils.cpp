@@ -47,32 +47,51 @@ void TrackRadioUtils::PlayNextRandomTrack()
             randomIndex = m_random( 0, trackCount - 1 );
         } while( trackCount > 1 && randomIndex == lastIndex );
 
-        lastIndex = randomIndex; // Update the last played index
+        lastIndex = randomIndex;
         randomElement = &trackExample[randomIndex];
 
         RadioArgs radioArgs;
         radioArgs.CurrentTrack = randomElement;
         radioArgs.UsePreviewMarker = false;
+        radioArgs.CurrentTrackIndex = randomIndex;
         TrackRadio::GetInstance().Play( radioArgs );
     }
 
     if( randomElement )
     {
-        Path dlcTest = Path( randomElement->m_albumArtPath );
-        std::string songImage = dlcTest.GetLocalPathString();
-        json trackData;
-        trackData["TrackName"] = randomElement->m_trackName;
-        trackData["ArtistName"] = randomElement->m_artistName;
-        trackData["AlbumArt"] = songImage;
-        trackData["TrackSource"] = randomElement->m_trackSourcePath;
-        trackData["NoteCount"] = randomElement->m_noteData.size();
-        m_owner.ExecuteScript( "window.DisplayTrack(" + trackData.dump() + "); " );
+        UpdateTrackDisplay( randomElement );
     }
 }
+
 
 void TrackRadioUtils::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     TrackRadio::GetInstance().Stop();
     PlayNextRandomTrack();
-    //m_drums->hitPad( PadId::Snare, 1.f );
+}
+
+
+void TrackRadioUtils::PlayLatestTrack()
+{
+    RadioArgs radioArgs;
+    radioArgs.CurrentTrack = &TrackDatabase::GetInstance().m_trackList.m_tracks.back();
+    radioArgs.UsePreviewMarker = false;
+    radioArgs.CurrentTrackIndex = TrackDatabase::GetInstance().m_trackList.m_tracks.size()-1;
+    TrackRadio::GetInstance().Play( radioArgs );
+
+    UpdateTrackDisplay( radioArgs.CurrentTrack );
+}
+
+
+void TrackRadioUtils::UpdateTrackDisplay( TrackData* inTrackData )
+{
+    Path dlcTest = Path( inTrackData->m_albumArtPath );
+    std::string songImage = dlcTest.GetLocalPathString();
+    json trackData;
+    trackData["TrackName"] = inTrackData->m_trackName;
+    trackData["ArtistName"] = inTrackData->m_artistName;
+    trackData["AlbumArt"] = songImage;
+    trackData["TrackSource"] = inTrackData->m_trackSourcePath;
+    trackData["NoteCount"] = inTrackData->m_noteData.size();
+    m_owner.ExecuteScript( "window.DisplayTrack(" + trackData.dump() + "); " );
 }

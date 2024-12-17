@@ -3,6 +3,8 @@
 #include "Math\Random.h"
 #include "UI\JSHelpers.h"
 
+class TrackData;
+
 class TrackRadioUtils
 {
 public:
@@ -13,7 +15,9 @@ public:
     void OnUpdate( float dt );
     void PlayNextRandomTrack();
     void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void PlayLatestTrack();
 private:
+    void UpdateTrackDisplay( TrackData* inTrackData );
     BasicUIView& m_owner;
     Random64 m_random;
 };
