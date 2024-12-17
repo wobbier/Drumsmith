@@ -46,6 +46,15 @@
       .content-fade {
         opacity: 0;
       }
+      body {
+        margin: 0; /* Remove default margin */
+        padding: 0; /* Remove default padding */
+        height: 100vh; /* Set body to fill the viewport height */
+      }
+
+      html {
+        height: 100%; /* Ensure the html element also fills the viewport */
+      }
     </style>
     <link rel="stylesheet" href="css/Core.css"/>
     <link rel="stylesheet" href="css/MainMenu2.css"/>
@@ -58,7 +67,13 @@
         properly without JavaScript enabled. Please enable it to
         continue.</strong>
     </noscript>
-    <div id="main-menu-app"></div>
+    <div id="main-menu-app" style="height: 100%;
+        width: 100%;
+        position: fixed;
+        min-height: 100%;
+        background-color: rgba(0, 0, 0, 0.52);
+        top: 0;
+        z-index: -1;"></div>
 
     <!-- built files will be auto injected -->
     <script src="js/Common.js"></script>

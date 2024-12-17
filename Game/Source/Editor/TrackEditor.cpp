@@ -10,6 +10,8 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "RtMidi.h"
 #include "Utils\HavanaUtils.h"
+#include "CoreGame\Drumset.h"
+#include "Cores\AudioCore.h"
 
 #if USING(ME_EDITOR)
 
@@ -33,10 +35,15 @@ void TrackEditor::Init()
         //track.LoadNoteData();
     }
     hitNotes.resize( (int)PadId::COUNT );
+
+    m_drums = new Drumset( GetEngine().AudioThread->GetSystem() );
+    m_drums->loadSound( PadId::Bass, "Assets/Drums/Basic/Bass.wav" );
+    m_drums->loadSound( PadId::Snare, "Assets/Drums/Basic/Snare.wav" );
 }
 
 void TrackEditor::Destroy()
 {
+    delete m_drums;
 }
 
 void TrackEditor::Update()
@@ -359,7 +366,6 @@ void TrackEditor::Render()
         drawList->AddLine( { scrubberX, canvas_pos.y }, { scrubberX, canvas_pos.y + timelineHeight }, 0xFFFFFFFF );
     }
 
-    if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
     {
         PadMappingStorage& storage = PadMappingStorage::GetInstance();
         for( auto msg : m_messages )
@@ -368,12 +374,16 @@ void TrackEditor::Render()
             {
                 if( pad.midiBinding == msg.m_data1 && msg.IsOnType() )
                 {
-                    NoteData newNote;
-                    newNote.m_editorLane = (PadId)pad.padId;
-                    newNote.m_noteName = PadUtils::GetPadId( pad.padId );
-                    newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
-                    newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
-                    trackData.m_noteData.push_back( newNote );
+                    m_drums->hitPad( (PadId)pad.padId, 1.f );
+                    if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
+                    {
+                        NoteData newNote;
+                        newNote.m_editorLane = (PadId)pad.padId;
+                        newNote.m_noteName = PadUtils::GetPadId( pad.padId );
+                        newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
+                        newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
+                        trackData.m_noteData.push_back( newNote );
+                    }
                 }
             }
         }
@@ -383,12 +393,16 @@ void TrackEditor::Render()
         {
             if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) )
             {
-                NoteData newNote;
-                newNote.m_editorLane = (PadId)pad.padId;
-                newNote.m_noteName = PadUtils::GetPadId( pad.padId );
-                newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
-                newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
-                trackData.m_noteData.push_back( newNote );
+                m_drums->hitPad( (PadId)pad.padId, 1.f );
+                if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
+                {
+                    NoteData newNote;
+                    newNote.m_editorLane = (PadId)pad.padId;
+                    newNote.m_noteName = PadUtils::GetPadId( pad.padId );
+                    newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
+                    newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
+                    trackData.m_noteData.push_back( newNote );
+                }
             }
         }
     }

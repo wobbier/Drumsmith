@@ -2,7 +2,7 @@
   <div id="header" class="header">
     <!--a href="#" onclick="fillDivs()">Fill Divs</a-->
     <button class="filter-button" onclick="LoadScene('Assets/MainMenu.lvl')">
-      <img src="file:///Assets/UI/Textures/Esc_Key_Light.png" alt="Icon" />
+      <img src="img/Esc_Key_Light.png" alt="Icon" />
       <span>Main Menu</span>
     </button>
     <button class="filter-button" onclick="ToggleTrackListVisibility()">
@@ -76,7 +76,7 @@
 
   <div class="footer">
     <button class="openButton filter-button" onclick="openFlyout('filterMenu')">
-      <img class="openButton" src="file:///Assets/UI/Textures/Tab_Key_Light.png" alt="Icon" />
+      <img class="openButton" src="img/Tab_Key_Light.png" alt="Icon" />
       <span class="openButton">Sorting (Ascending)</span>
     </button>
   </div>
@@ -166,7 +166,7 @@ export default {
   methods: {
     async fetchDlcIndex() {
       try {
-        const response = await fetch('https://test.domain.com/dlc_index.json'); // Adjust the path
+        const response = await fetch('https://' + this.TryGetDLCURL() + '/dlc_index.json'); // Adjust the path
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

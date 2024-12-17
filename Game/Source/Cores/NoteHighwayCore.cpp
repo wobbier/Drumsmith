@@ -13,13 +13,13 @@
 #include "Mathf.h"
 #include "Cores/SceneCore.h"
 #include "Components/Graphics/Mesh.h"
+#include "Config/GameSettings.h"
+#include "ECS/Core.h"
+#include "Components/MainMenuController.h"
 
 NoteHighwayCore::NoteHighwayCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
 {
-#if USING(ME_PLATFORM_WIN64)
-    m_midi.OpenAllDevices();
-#endif
 }
 
 NoteHighwayCore::~NoteHighwayCore()
@@ -38,11 +38,13 @@ void NoteHighwayCore::OnAddedToWorld()
     InGameResumeCurrentTrack::GetEventId()
     };
     EventManager::GetInstance().RegisterReceiver( this, events );
+    MidiDevice::GetInstance().OpenMidiDevice( GameSettings::GetInstance().PreferredMidiDevice );
 }
 
 void NoteHighwayCore::OnRemovedFromWorld()
 {
     EventManager::GetInstance().DeRegisterReciever( this );
+    //MidiDevice::GetInstance().CloseMidiDevice();
 }
 
 void NoteHighwayCore::OnStop()
@@ -94,7 +96,6 @@ void NoteHighwayCore::Update( const UpdateContext& context )
             {
                 if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && pad.padId == note.EditorLane )
                 {
-                    m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume + .5f );
                     it->MarkForDelete();
                     handled = true;
                 }
@@ -103,19 +104,22 @@ void NoteHighwayCore::Update( const UpdateContext& context )
             m_currentTrackPack.SetDrumVolume( Mathf::Clamp( 0.f, 1.f, m_drumVolume ) );
             //it->MarkForDelete();
 #if USING(ME_PLATFORM_WIN64)
-            while( m_midi.HasMessages() && !handled )
+            if( !handled )
             {
-                MidiMessage msg = m_midi.GetNextMessage();
-
-                if( msg.Encode() > 0 )
+                auto& midiMessages = MidiDevice::GetInstance().PumpMessages();
+                for( auto& msg : midiMessages )
                 {
-                    BRUH_FMT( "Midid %s", msg.ToString().c_str() );
-                    for( auto& pad : storage.mappedPads )
+                    if( msg.IsOnType() )
                     {
-                        if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                        for( auto& pad : storage.mappedPads )
                         {
-                            it->MarkForDelete();
-                            handled = true;
+                            if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                            {
+                                //BRUH_FMT( "Midid %s", msg.ToString().c_str() );
+                                it->MarkForDelete();
+                                handled = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -126,6 +130,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         // This is correct, right?
         if( handled )
         {
+            m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume + .5f );
             break;
         }
     }

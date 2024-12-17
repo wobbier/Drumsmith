@@ -42,9 +42,11 @@ public:
     RtMidiIn* m_midiIn = nullptr;
 
     MidiDeviceInfo& OpenMidiDevice( unsigned int inIndex );
+    MidiDeviceInfo& OpenMidiDevice( const std::string& inName );
     void CloseMidiDevice();
 
     void RefreshDevices();
+    const std::vector<MidiDeviceInfo>& GetDevices() const;
 
     std::vector<MidiMessageNew> PumpMessages();
 

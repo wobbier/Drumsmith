@@ -44,6 +44,7 @@ void MainMenuController::OnJSReady( ultralight::JSObject& GlobalWindow, ultralig
     BasicUIView::OnJSReady( GlobalWindow, Caller );
 
     GlobalWindow["GetDLCURL_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetDLCURL );
+    GlobalWindow["GetMIDIDevices_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetMIDIDevices_Internal );
 }
 
 
@@ -59,7 +60,7 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
     GlobalWindow["SetDLCURL_Internal"] = BindJSCallback( &MainMenuController::SetDLCURL );
     GlobalWindow["SaveSettings"] = BindJSCallback( &MainMenuController::SaveSettings );
     GlobalWindow["ConvertCustomDLC"] = BindJSCallback( &MainMenuController::ConvertCustomDLC );
-
+    GlobalWindow["SetPreferredMidiDevice_Internal"] = BindJSCallback( &MainMenuController::SetPreferredMidiDevice_Internal );
 }
 
 void MainMenuController::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -76,9 +77,27 @@ void MainMenuController::SetRadioVolume( const ultralight::JSObject& thisObject,
     GameSettings::GetInstance().RadioVolume = volume;
 }
 
+
 ultralight::JSValue MainMenuController::GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     return ultralight::JSValue( GameSettings::GetInstance().DLCURL.c_str() );
+}
+
+
+ultralight::JSValue MainMenuController::GetMIDIDevices_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    auto& devices = MidiDevice::GetInstance().GetDevices();
+    json deviceList;
+    for( auto& device : devices )
+    {
+        json deviceEntry;
+        deviceEntry["Port"] = device.Port;
+        deviceEntry["Name"] = device.Name;
+        deviceList.push_back( deviceEntry );
+    }
+    auto ogDum = deviceList.dump();
+    const char* dumped = ogDum.c_str();
+    return ultralight::JSValue( dumped );
 }
 
 
@@ -93,15 +112,27 @@ void MainMenuController::SetDLCURL( const ultralight::JSObject& thisObject, cons
     }
 }
 
+
 void MainMenuController::SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     GameSettings::GetInstance().Save();
 }
 
+
 void MainMenuController::ConvertCustomDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     TrackDatabase::GetInstance().ExportMidiTrackMetaData();
 }
+
+
+void MainMenuController::SetPreferredMidiDevice_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    ultralight::String arg = args[0].ToString();
+    std::string argConv( arg.utf8().data() );
+
+    GameSettings::GetInstance().PreferredMidiDevice = argConv;
+}
+
 
 #endif
 

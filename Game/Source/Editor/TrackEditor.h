@@ -11,6 +11,7 @@
 #include "Midi/MidiDevice.h"
 
 class AudioSource;
+class Drumset;
 
 #if USING(ME_EDITOR)
 
@@ -79,6 +80,7 @@ private:
     // Maybe store this in the midi file?
     std::vector<MidiMessageNew> m_messages;
     bool m_recordingActive = false;
+    Drumset* m_drums = nullptr;
 };
 
 ME_REGISTER_EDITOR_WIDGET( TrackEditor );

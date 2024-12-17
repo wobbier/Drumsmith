@@ -17,9 +17,11 @@ public:
     void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     ultralight::JSValue GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    ultralight::JSValue GetMIDIDevices_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void ConvertCustomDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SetPreferredMidiDevice_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
 #endif
 
 	void PlayNextRandomTrack();

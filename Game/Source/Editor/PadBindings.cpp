@@ -279,7 +279,7 @@ PadMappingStorage::PadMappingStorage()
             padData.padId = id;
             padData.keyboardBinding = pad["KB"];
             padData.midiBinding = pad["MIDI"];
-            padData.padName = pad["NAME"];
+            padData.padName = PadUtils::GetPadName(id);
         }
     }
 }

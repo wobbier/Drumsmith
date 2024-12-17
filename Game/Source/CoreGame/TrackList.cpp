@@ -517,7 +517,7 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["Year"] = m_year;
     outJson["Icon"] = m_icon;
     outJson["AlbumArtPath"] = m_albumArtPath;
-    outJson["AlbumArtFileName"] = m_albumArtFilename;
+    outJson["AlbumArtFileName"] = Path(m_albumArtPath).GetFileNameString();
     outJson["DLCSource"] = m_dlcSource;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";

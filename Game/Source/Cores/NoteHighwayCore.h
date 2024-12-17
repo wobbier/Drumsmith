@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <MidiDeviceManager.h>
 #include "CoreGame/AudioPack.h"
+#include "Midi/MidiDevice.h"
 
 class NoteHighwayCore final
 	: public Core<NoteHighwayCore>
@@ -52,9 +53,6 @@ private:
 #endif
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
 
-#if USING(ME_PLATFORM_WIN64)
-	MidiDeviceManager m_midi;
-#endif
 	AudioPack m_currentTrackPack;
 	bool m_hasStartedTrackYet = false;
 	float m_drumVolume = 1.f;

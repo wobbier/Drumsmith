@@ -18,6 +18,7 @@ void NoteTrigger::OnDeserialize( const json& inJson )
 
 void NoteTrigger::OnEditorInspect()
 {
+    ImGui::Text( PadUtils::GetPadName( EditorLane ) );
 }
 
 #endif
