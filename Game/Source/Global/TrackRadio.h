@@ -48,7 +48,7 @@ public:
 private:
 
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
-    int m_currentTrackIndex = 0;
+    int m_currentTrackIndex = -1;
     float m_delayTimer = 0.f;
     float m_previewPercent = 0.f;
 };

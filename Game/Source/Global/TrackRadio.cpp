@@ -7,7 +7,6 @@
 
 void TrackRadio::Play( RadioArgs inTrackArgs )
 {
-    // remove this ptr compare and think of another way.
     if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrackIndex == m_currentTrackIndex )
     {
         return;

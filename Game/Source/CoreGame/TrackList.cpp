@@ -225,6 +225,7 @@ bool TrackDatabase::RegisterNewTrack( const std::string& inDirectory )
     {
         YIKES_FMT( "Song does not exist in directory: %s", m_trackList.m_tracks.back().m_trackFileName.c_str() );
     }
+    m_needsSort = true;
     return true;
 }
 
