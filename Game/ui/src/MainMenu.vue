@@ -18,11 +18,11 @@
   <div id="settingsMenu" class="options-menu menu" style="height: 1000px;">
     <MenuItem text="Back" :onClick="closeSettings" />
     <br />
-    <br />
+    <!--br />
     <p class="menu-text">Enable Radio</p>
     <input type="checkbox" name="EnableRadio" id="radio-enabled" />
     <br />
-    <p class="menu-text" id="menu-volume-text">Radio Volume</p>
+    <p class="menu-text" id="menu-volume-text">Radio Volume</p-->
     <br />
     <input type="range" name="RadioVolume" id="radio-volume" min="0" max="100" step="1" value="50" class="slider" />
     <p class="menu-text" id="menu-volume-text">DLC Server</p>
@@ -45,17 +45,20 @@
       <p>Selected Device: {{ selectedDeviceName }}</p>
     </div>
     <MenuItem text="Save Settings" colorClass="green" :onClick="saveSettings" />
+    <VisualLatencyTest />
   </div>
   <TrackRadio />
 </template>
 <script>
 import MenuItem from './components/MainMenuOption.vue';
 import TrackRadio from './components/TrackRadio.vue';
+import VisualLatencyTest from './components/Settings/VisualLatencyTest.vue';
 
 export default {
   components: {
     MenuItem,
     TrackRadio,
+    VisualLatencyTest
   },
   data() {
     return {
