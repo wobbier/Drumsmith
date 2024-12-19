@@ -9,24 +9,6 @@ TrackListMenuController::TrackListMenuController()
     : BasicUIView( "TrackListMenuController" )
 {
     FilePath = Path( "Assets/UI/SongList.html" );
-    m_playAudioCallback = [this]( SharedPtr<AudioSource> playedAudioSource )
-        {
-            if( m_currentTrack != playedAudioSource )
-            {
-                if( m_currentTrack )
-                {
-                    m_currentTrack->Stop( true );
-                }
-                m_currentTrack = playedAudioSource;
-            }
-            else
-            {
-                if( m_currentTrack && m_currentTrack->IsPlaying() )
-                {
-                    m_currentTrack->Stop( true );
-                }
-            }
-        };
 }
 
 #if USING( ME_UI )
