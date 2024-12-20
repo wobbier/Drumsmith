@@ -147,6 +147,7 @@
                 },
                 {
                     "FilePath": "Assets/UI/InGameMenu.html",
+					"UIURL": "http://localhost:8080/InGameMenu.html",
                     "Type": "InGameMenuController"
                 }
             ],

@@ -18,11 +18,16 @@
   <div id="settingsMenu" class="options-menu menu" style="height: 1000px;">
     <MenuItem text="Back" :onClick="closeSettings" />
     <br />
-    <!--br />
-    <p class="menu-text">Enable Radio</p>
-    <input type="checkbox" name="EnableRadio" id="radio-enabled" />
     <br />
-    <p class="menu-text" id="menu-volume-text">Radio Volume</p-->
+
+    <label class="container" name="EnableRadio" id="radio-enabled">
+      <p class="menu-text">Enable Radio</p>
+      <input type="checkbox">
+      <span class="checkmark"></span>
+    </label>
+    <input type="checkbox" />
+    <br />
+    <p class="menu-text" id="menu-volume-text">Radio Volume</p>
     <br />
     <input type="range" name="RadioVolume" id="radio-volume" min="0" max="100" step="1" value="50" class="slider" />
     <p class="menu-text" id="menu-volume-text">DLC Server</p>

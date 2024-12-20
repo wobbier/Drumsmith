@@ -252,6 +252,7 @@ void TrackDatabase::ExportMidiTrackMetaData()
                 if( CustomTrackDefineTest::GetInstance().ParseMidi( midiPath, newTrack, legacyTrack ) )
                 {
                     m_trackList.m_tracks.push_back( newTrack );
+                    m_trackList.m_tracks.back().Save();
                 }
                 //LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( midiPath.FullPath + "/song.ini" );
                 //
@@ -499,7 +500,7 @@ std::string TrackDatabase::GetFilterName( TrackListFilter inFilter )
 
 TrackData::TrackData( const Path& inPath )
 {
-    if( inPath.IsFile )
+    if( inPath.IsFile || !inPath.Exists )
     {
         m_directory = inPath.GetDirectoryString();
     }

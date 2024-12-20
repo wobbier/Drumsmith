@@ -23,6 +23,7 @@
                 },
                 {
                     "FilePath": "Assets/UI/DLC_NEW.html",
+					"UIURL": "http://localhost:8080/DLC_NEW.html",
                     "Type": "DLCMenuController"
                 }
             ],

@@ -106,7 +106,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
 #if USING(ME_PLATFORM_WIN64)
             if( !handled )
             {
-                auto& midiMessages = MidiDevice::GetInstance().PumpMessages();
+                auto midiMessages = MidiDevice::GetInstance().PumpMessages();
                 for( auto& msg : midiMessages )
                 {
                     if( msg.IsOnType() )
