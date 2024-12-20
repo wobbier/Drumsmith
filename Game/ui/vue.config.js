@@ -8,22 +8,24 @@ module.exports = defineConfig({
   outputDir: "../../Assets/UI",
   pages: {
     index: {
-      // entry for the main page
       entry: "src/main.js",
       template: "public/index.html",
       filename: "index.html",
     },
     MainMenu: {
-      // entry for the first additional page
       entry: "src/MainMenu.js",
       template: "public/MainMenu.html",
       filename: "MainMenu.html",
     },
     DLC: {
-      // entry for the first additional page
       entry: "src/DLC.js",
       template: "public/DLC_NEW.html",
       filename: "DLC_NEW.html",
+    },
+    InGameMenu: {
+      entry: "src/InGameMenu.js",
+      template: "public/InGameMenu.html",
+      filename: "InGameMenu.html",
     },
   },
   configureWebpack: (config) => {

@@ -10,45 +10,13 @@
     </style>
   </head>
   <body>
-    <div id="PauseMenu" class="visible">
-      <img src="file:///Assets/Textures/2x/Asset 2@2x.png" />
-      <br />
-      <p class="hover-underline-animation green" onclick="TogglePauseMenu()">
-        RESUME
-      </p>
-      <br />
-      <p class="hover-underline-animation orange">OPTIONS</p>
-      <br />
-      <p
-        class="hover-underline-animation red"
-        onclick="LoadScene('Assets/TrackList.lvl')"
+    <noscript>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
       >
-        EXIT
-      </p>
-    </div>
-    <script>
-      function Resume() {
-        TogglePauseMenu();
-      }
-      function Pause() {
-        TogglePauseMenu();
-      }
-
-      function TogglePauseMenu() {
-        if (
-          document.getElementById("PauseMenu").classList.contains("visible")
-        ) {
-          Internal_Pause();
-        } else {
-          Internal_Resume();
-        }
-        document.getElementById("PauseMenu").classList.toggle("visible");
-      }
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" || event.keyCode === 13) {
-          TogglePauseMenu();
-        }
-      });
-    </script>
+    </noscript>
+    <div id="app"></div>
   </body>
 </html>
