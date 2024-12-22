@@ -14,7 +14,9 @@
     <div v-if="optionsMenuVisible" id="OptionsMenu">
         <MenuItem text="Back" colorClass="green" :onClick="() => ToggleOptionsMenu()" />
         <br />
-        <p class="menu-text">Options Menu Content Here</p>
+        <p class="menu-text">
+            Todo - Add options here
+        </p>
     </div>
     <div v-if="!pauseMenuVisible && !optionsMenuVisible" id="GameUI">
         Notes Hit: 1/X
@@ -38,6 +40,9 @@ export default {
             window.LoadScene(scene);
         },
         TogglePauseMenu() {
+            if (this.optionsMenuVisible) {
+                this.optionsMenuVisible = false;
+            }
             if (this.pauseMenuVisible) {
                 if (typeof Internal_Resume === 'function') {
                     // eslint-disable-next-line
@@ -80,6 +85,7 @@ export default {
     transform: translateX(-50%);
     text-align: center;
     z-index: 100;
+    color: white;
 }
 
 #GameUI {

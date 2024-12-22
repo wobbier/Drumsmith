@@ -32,7 +32,14 @@
     <input type="range" name="RadioVolume" id="radio-volume" min="0" max="100" step="1" value="50" class="slider" />
     <p class="menu-text" id="menu-volume-text">DLC Server</p>
     <br />
-    <input type="text" v-model="inputText" @keydown.enter="SetDLCURL">
+    <div class="url-input-container">
+      <span class="prefix">http://</span>
+      <input class="myinput-link" v-model="inputText" :placeholder="inputText" @keydown.enter="SetDLCURL" />
+      <span class="link-icon">
+        🔗
+      </span>
+    </div>
+
     <br />
     <p class="hover-underline-animation pink" onclick="ConvertCustomDLC()">
       Convert Custom DLC
@@ -196,5 +203,58 @@ export default {
 .main-menu {
   margin-left: 50px;
   margin-top: 50px;
+}
+
+.url-input-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 270px;
+  height: 40px;
+  border-radius: 2px;
+  position: relative;
+  border: 1px solid #2f2f2f;
+}
+
+.url-input-container .prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 15px;
+  height: 100%;
+  width: 70px;
+  font-weight: 600;
+  padding: 0 10px;
+  background-color: #f0f0f0;
+  border-radius: 2px 0px 0px 2px;
+}
+
+.myinput-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  font-weight: 500;
+  border: none;
+  padding: 0px 10px;
+  height: 100%;
+  width: 160px;
+  background-color: #fff;
+  font-size: 15px;
+}
+
+.link-icon {
+  font-size: 16px;
+  background-color: #fff;
+  height: 100%;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 10px;
+  border-radius: 0px 2px 2px 0px;
+  cursor: pointer;
+  position: relative;
 }
 </style>
