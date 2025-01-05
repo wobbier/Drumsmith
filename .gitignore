@@ -46,7 +46,6 @@ artifacts/
 *_p.c
 *_i.h
 *.ilk
-*.meta
 *.obj
 *.pch
 *.pdb
@@ -211,3 +210,5 @@ imgui.ini
 !ThirdParty/Lib/**/*.*
 !ThirdParty/Bin/**/*.*
 default
+Assets/UI/**/*.meta
+*.assbin

@@ -23,6 +23,8 @@ public class SharpGameProject : BaseGameProject
         conf.LibraryFiles.Add("rtmidi");
         conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
+        conf.LibraryFiles.Add("winhttp.lib");
+        //conf.Defines.Add("CPPHTTPLIB_OPENSSL_SUPPORT");
 
         {
             var copyDirBuildStep = new Configuration.BuildStepCopy(

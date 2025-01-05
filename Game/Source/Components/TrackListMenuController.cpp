@@ -9,24 +9,6 @@ TrackListMenuController::TrackListMenuController()
     : BasicUIView( "TrackListMenuController" )
 {
     FilePath = Path( "Assets/UI/SongList.html" );
-    m_playAudioCallback = [this]( SharedPtr<AudioSource> playedAudioSource )
-    {
-        if( m_currentTrack != playedAudioSource )
-        {
-            if( m_currentTrack )
-            {
-                m_currentTrack->Stop( true );
-            }
-            m_currentTrack = playedAudioSource;
-        }
-        else
-        {
-            if( m_currentTrack && m_currentTrack->IsPlaying() )
-            {
-                m_currentTrack->Stop( true );
-            }
-        }
-    };
 }
 
 #if USING( ME_UI )
@@ -43,7 +25,7 @@ void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultr
     GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &TrackListMenuController::RequestDetailsPanelUpdate );
     // Move to a base Drumsmith UI class
     GlobalWindow["EditTrack"] = BindJSCallback( &TrackListMenuController::EditTrack );
-    
+
     RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, TrackDatabase::GetInstance().m_currentFilter );
 }
 
@@ -63,7 +45,7 @@ void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thi
         evt.TrackID = std::string( path.utf8().data() );
         evt.TrackIndex = index;
         evt.Fire();
-    };
+        };
 }
 
 
@@ -117,6 +99,7 @@ void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& this
     }
     RadioArgs radioArgs;
     radioArgs.CurrentTrack = &trackList[str];
+    radioArgs.CurrentTrackIndex = str;
     radioArgs.UsePreviewMarker = true;
     TrackRadio::GetInstance().Play( radioArgs );
 }
@@ -132,7 +115,7 @@ void TrackListMenuController::FilterTracks( const ultralight::JSObject& thisObje
 {
     int trackIndex = args[0].ToInteger();
     TrackListFilter filterType = (TrackListFilter)trackIndex;
-    RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, filterType);
+    RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, filterType );
 }
 
 void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -145,6 +128,11 @@ void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObj
 void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
 {
     auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( trackList.empty() )
+    {
+        return;
+    }
+
     //for( int i = 0; i < trackList.size(); ++i )
     {
         auto& trackData = trackList[trackIndex];
@@ -231,12 +219,12 @@ void TrackListMenuController::RefreshTrackList( TrackListSort inSortType, TrackL
     noneEntry["FilterID"] = 0;
     noneEntry["Count"] = TrackDatabase::GetInstance().m_trackList.m_tracks.size();
     filterData.push_back( noneEntry );
-    for (int i = 0; i < TrackDatabase::GetInstance().m_filterMatches.size(); ++i)
+    for( int i = 0; i < TrackDatabase::GetInstance().m_filterMatches.size(); ++i )
     {
         if( TrackDatabase::GetInstance().m_filterMatches[i] > 0 )
         {
             json filterEntry;
-            filterEntry["FilterName"] = TrackDatabase::GetInstance().GetFilterName((TrackListFilter)i);
+            filterEntry["FilterName"] = TrackDatabase::GetInstance().GetFilterName( (TrackListFilter)i );
             filterEntry["FilterID"] = i;
             filterEntry["Count"] = TrackDatabase::GetInstance().m_filterMatches[i];
             filterData.push_back( filterEntry );
@@ -246,9 +234,9 @@ void TrackListMenuController::RefreshTrackList( TrackListSort inSortType, TrackL
     RequestDetailsPanelUpdate_Internal( 0 );
 }
 
-void TrackListMenuController::OnUpdate()
+void TrackListMenuController::OnUpdate( float dt )
 {
-    TrackRadio::GetInstance().Update();
+    TrackRadio::GetInstance().Update( dt );
 }
 
 #endif

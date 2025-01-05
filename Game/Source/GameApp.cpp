@@ -24,6 +24,11 @@ void GameApp::OnEnd()
 {
 }
 
+void GameApp::PreRender()
+{
+
+}
+
 void GameApp::OnInitialize()
 {
 	GetEngine().LoadScene("Assets/MainMenu.lvl");

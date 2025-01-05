@@ -6,6 +6,8 @@
 #include "Components/Audio/AudioSource.h"
 #include <unordered_map>
 #include <MidiDeviceManager.h>
+#include "CoreGame/AudioPack.h"
+#include "Midi/MidiDevice.h"
 
 class NoteHighwayCore final
 	: public Core<NoteHighwayCore>
@@ -36,7 +38,6 @@ public:
 
 	std::map<std::string, EntityHandle> m_lanes;
 	std::map<PadId, std::string> m_notePrefabs;
-	SharedPtr<AudioSource> m_currentTrack;
     void OnStart() override;
 
 	EntityHandle TrackMover;
@@ -52,10 +53,9 @@ private:
 #endif
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
 
-#if USING(ME_PLATFORM_WIN64)
-	MidiDeviceManager m_midi;
-#endif
-    std::vector<SharedPtr<AudioSource>> m_currentStems;
+	AudioPack m_currentTrackPack;
+	bool m_hasStartedTrackYet = false;
+	float m_drumVolume = 1.f;
 };
 
 ME_REGISTER_CORE(NoteHighwayCore)

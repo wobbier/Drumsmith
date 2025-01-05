@@ -13,13 +13,13 @@
 #include "Mathf.h"
 #include "Cores/SceneCore.h"
 #include "Components/Graphics/Mesh.h"
+#include "Config/GameSettings.h"
+#include "ECS/Core.h"
+#include "Components/MainMenuController.h"
 
 NoteHighwayCore::NoteHighwayCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
 {
-#if USING(ME_PLATFORM_WIN64)
-    m_midi.OpenAllDevices();
-#endif
 }
 
 NoteHighwayCore::~NoteHighwayCore()
@@ -38,19 +38,18 @@ void NoteHighwayCore::OnAddedToWorld()
     InGameResumeCurrentTrack::GetEventId()
     };
     EventManager::GetInstance().RegisterReceiver( this, events );
+    MidiDevice::GetInstance().OpenMidiDevice( GameSettings::GetInstance().PreferredMidiDevice );
 }
 
 void NoteHighwayCore::OnRemovedFromWorld()
 {
     EventManager::GetInstance().DeRegisterReciever( this );
+    //MidiDevice::GetInstance().CloseMidiDevice();
 }
 
 void NoteHighwayCore::OnStop()
 {
-    if( m_currentTrack )
-    {
-        m_currentTrack->Stop();
-    }
+    m_currentTrackPack.Stop();
 }
 
 void NoteHighwayCore::OnEntityAdded( Entity& NewEntity )
@@ -63,10 +62,16 @@ void NoteHighwayCore::OnEntityRemoved( Entity& InEntity )
 
 void NoteHighwayCore::Update( const UpdateContext& context )
 {
-    if( !m_currentTrack )
+    if( !m_currentTrackPack.IsReady() )
     {
         return;
     }
+    if( !m_hasStartedTrackYet )
+    {
+        m_currentTrackPack.Play();
+        m_hasStartedTrackYet = true;
+    }
+
     Input& gameInput = GetEngine().GetInput();
     PadMappingStorage& storage = PadMappingStorage::GetInstance();
 
@@ -75,15 +80,16 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     std::vector<Entity>::iterator noteItr = entities.begin();
 
     // I need to keep track of where we are in a track to avoid itr on entities
+    // this whole shit is fucked
     bool handled = false;
+    const unsigned int noteTime = m_currentTrackPack.GetPositionMs();
     for( auto it = noteItr; it != entities.end(); ++it )
     {
         NoteTrigger& note = it->GetComponent<NoteTrigger>();
-        // I should unify the time
-        const unsigned int triggerTime = (unsigned int)( note.TriggerTime * 1000.f );
-        const unsigned int noteTime = m_currentTrack->GetPositionMs();
 
-        if( Mathf::Abs( (float)( noteTime - triggerTime ) ) < 200 )
+        const unsigned int triggerTime = note.TriggerTimeMS;
+        float hitWindow = Mathf::Abs( (float)( (float)noteTime - (float)triggerTime ) );
+        if( hitWindow < 50.f )
         {
             // drunk me fucked this up
             for( auto& pad : storage.mappedPads )
@@ -94,21 +100,26 @@ void NoteHighwayCore::Update( const UpdateContext& context )
                     handled = true;
                 }
             }
-
+            m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume - context.GetDeltaTime() );
+            m_currentTrackPack.SetDrumVolume( Mathf::Clamp( 0.f, 1.f, m_drumVolume ) );
+            //it->MarkForDelete();
 #if USING(ME_PLATFORM_WIN64)
-            while( m_midi.HasMessages() && !handled )
+            if( !handled )
             {
-                MidiMessage msg = m_midi.GetNextMessage();
-
-                if( msg.Encode() > 0 )
+                auto midiMessages = MidiDevice::GetInstance().PumpMessages();
+                for( auto& msg : midiMessages )
                 {
-                    BRUH_FMT( "Midid %s", msg.ToString().c_str() );
-                    for( auto& pad : storage.mappedPads )
+                    if( msg.IsOnType() )
                     {
-                        if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                        for( auto& pad : storage.mappedPads )
                         {
-                            it->MarkForDelete();
-                            handled = true;
+                            if( pad.midiBinding == msg.m_data1 && pad.padId == note.EditorLane )
+                            {
+                                //BRUH_FMT( "Midid %s", msg.ToString().c_str() );
+                                it->MarkForDelete();
+                                handled = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -119,15 +130,15 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         // This is correct, right?
         if( handled )
         {
+            m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume + .5f );
             break;
         }
     }
 
-    if( m_currentTrack )
     {
         //auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
         Transform& camTransform = TrackMover->GetComponent<Transform>();
-        camTransform.SetPosition( { 0,0,( (float)m_currentTrack->GetPositionMs() / 1000.f ) * m_trackData->m_noteSpeed } );
+        camTransform.SetPosition( { 0,0,( (float)m_currentTrackPack.GetPositionMs() / 1000.f ) * m_trackData->m_noteSpeed } );
     }
 
 
@@ -204,23 +215,6 @@ void NoteHighwayCore::OnStart()
     }
 }
 
-bool NoteHighwayCore::PlayStem( const char* inFileName, bool inUsePreviewMarker )
-{
-    Path drumsPath = Path( Path( m_trackData->m_trackSourcePath ).GetDirectoryString() + inFileName );
-    if( drumsPath.Exists )
-    {
-        SharedPtr<AudioSource> source;
-        PlayAudioEvent evt;
-        evt.SourceName = drumsPath.FullPath;
-        evt.Volume = 1.f;// GameSettings::GetInstance().RadioVolume;
-
-        evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop();  m_currentStems.push_back( loadedAudio ); };
-        evt.Fire();
-        return true;
-    }
-    return false;
-}
-
 
 bool NoteHighwayCore::OnEvent( const BaseEvent& evt )
 {
@@ -276,49 +270,13 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData )
         }
         auto& noteComp = note->AddComponent<NoteTrigger>();
         noteComp.TriggerTime = it.m_triggerTime;
+        noteComp.TriggerTimeMS = it.m_triggerTimeMS;
         noteComp.NoteName = it.m_noteName;
         noteComp.EditorLane = it.m_editorLane;
         noteComp.EditorLaneName = PadUtils::GetPadName( it.m_editorLane );
     }
 
-    bool inUsePreviewMarker = false;
-    PlayStem( "crowd.ogg", inUsePreviewMarker );
-    PlayStem( "drums.ogg", inUsePreviewMarker );
-    PlayStem( "drums_1.ogg", inUsePreviewMarker );
-    PlayStem( "drums_2.ogg", inUsePreviewMarker );
-    PlayStem( "drums_3.ogg", inUsePreviewMarker );
-    PlayStem( "drums_4.ogg", inUsePreviewMarker );
-    PlayStem( "guitar.ogg", inUsePreviewMarker );
-    PlayStem( "vocals.ogg", inUsePreviewMarker );
-    PlayStem( "rhythm.ogg", inUsePreviewMarker );
-    PlayStem( "keys.ogg", inUsePreviewMarker );
-
-    PlayAudioEvent evt( inTrackData.m_trackSourcePath );
-    evt.Callback = [this]( SharedPtr<AudioSource> inSource )
-        {
-            if( m_currentTrack != inSource )
-            {
-                if( m_currentTrack )
-                {
-                    m_currentTrack->Stop( true );
-                }
-                m_currentTrack = inSource;
-                m_currentTrack->Stop( true );
-            }
-        };
-    evt.Fire();
-
-    for( auto ptr : m_currentStems )
-    {
-        if( ptr )
-        {
-            ptr->Play( false );
-        }
-    }
-    if( m_currentTrack )
-    {
-        m_currentTrack->Play( false );
-    }
+    m_currentTrackPack = AudioPack( inTrackData );
 }
 
 
@@ -330,48 +288,17 @@ void NoteHighwayCore::ShutdownTrack()
         ent.MarkForDelete();
     }
 
-    if( m_currentTrack )
-    {
-        m_currentTrack->Stop();
-    }
-    for( auto ptr : m_currentStems )
-    {
-        if( ptr )
-        {
-            ptr->Stop( true );
-        }
-    }
-    m_currentStems.clear();
+    m_currentTrackPack.Stop();
 }
 
 void NoteHighwayCore::Pause()
 {
-    if( m_currentTrack )
-    {
-        m_currentTrack->Pause();
-    }
-    for( auto ptr : m_currentStems )
-    {
-        if( ptr )
-        {
-            ptr->Pause();
-        }
-    }
+    m_currentTrackPack.Pause();
 }
 
 void NoteHighwayCore::Resume()
 {
-    if( m_currentTrack )
-    {
-        m_currentTrack->Resume();
-    }
-    for( auto ptr : m_currentStems )
-    {
-        if( ptr )
-        {
-            ptr->Resume();
-        }
-    }
+    m_currentTrackPack.Resume();
 }
 
 int32_t NoteHighwayCore::LegacyConvertLane( const std::string& lane )

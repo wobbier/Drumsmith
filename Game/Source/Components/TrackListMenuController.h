@@ -24,7 +24,7 @@ public:
     void DumpTrackData( json& outJson, TrackData inTrackData, int inIndex );
 
     void RefreshTrackList( TrackListSort inSortType, TrackListFilter inFilterType );
-    void OnUpdate() override;
+    void OnUpdate( float dt ) override;
 #endif
 
 	SharedPtr<AudioSource> m_currentTrack;

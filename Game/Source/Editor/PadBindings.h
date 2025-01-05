@@ -10,21 +10,6 @@
 #include "Core/Assert.h"
 #include "Midi/MidiDevice.h"
 
-enum class  OldPadId
-{
-    Invalid = -1,
-    Bass = 0,
-    Snare,
-    HighTom,
-    MidTom,
-    FloorTom,
-    OpenHiHat,
-    ClosedHiHat,
-    Crash,
-    Ride,
-    COUNT
-};
-
 enum PadId
 {
     Invalid = -1,
@@ -146,7 +131,7 @@ namespace PadUtils
             return PadId::Crash2;
         if( inPadId == "ride1" )
             return PadId::Ride;
-        ME_ASSERT_MSG( false, "Unhandles note name" );
+        ME_ASSERT_MSG( false, "Unhandled note name" );
         return PadId::COUNT;
     }
 

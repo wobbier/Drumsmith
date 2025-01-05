@@ -1,8 +1,7 @@
 #pragma once
 #include <Components/UI/BasicUIView.h>
-#include "CoreGame/TrackList.h"
-#include "Components/Audio/AudioSource.h"
-#include "Math/Random.h"
+
+class TrackRadioUtils;
 
 class MainMenuController final
 	: public BasicUIView
@@ -12,19 +11,21 @@ public:
     virtual ~MainMenuController();
 
 #if USING( ME_UI )
-	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
-    void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
+    void OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
     void SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    ultralight::JSValue GetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    ultralight::JSValue GetMIDIDevices_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SetDLCURL( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void SaveSettings( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void ConvertCustomDLC( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SetPreferredMidiDevice_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
 #endif
 
-	void PlayNextRandomTrack();
+    void OnUpdate( float dt ) override;
 
-    void OnUpdate() override;
-
-    SharedPtr<AudioSource> m_currentTrack;
-	Random64 m_random;
+    // should be a ref?
+    TrackRadioUtils* m_radioUtils = nullptr;
 };
 
 ME_REGISTER_COMPONENT( MainMenuController );

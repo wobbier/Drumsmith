@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:400,300,700"
+      rel="stylesheet"
+      type="text/css"
+    />
     <style>
       .scroll-container {
         /* Adjust as needed */
@@ -45,6 +50,15 @@
       .content-fade {
         opacity: 0;
       }
+      body {
+        margin: 0; /* Remove default margin */
+        padding: 0; /* Remove default padding */
+        height: 100vh; /* Set body to fill the viewport height */
+      }
+
+      html {
+        height: 100%; /* Ensure the html element also fills the viewport */
+      }
     </style>
     <link rel="stylesheet" href="<%= BASE_URL %>css/Core.css" />
     <link rel="stylesheet" href="<%= BASE_URL %>css/MainMenu2.css" />
@@ -59,69 +73,22 @@
         continue.</strong
       >
     </noscript>
-    <div id="main-menu-app"></div>
+    <div
+      id="main-menu-app"
+      style="
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        min-height: 100%;
+        background-color: rgba(0, 0, 0, 0.52);
+        top: 0;
+        z-index: -1;
+      "
+    ></div>
 
     <!-- built files will be auto injected -->
     <script src="<%= BASE_URL %>js/Common.js"></script>
     <script>
-      const titleTrackScrolling = setupScrollingText(
-        "track-title",
-        "track-title-scroll"
-      );
-      applyScrollFadeAnimation("scrollingText1");
-      applyScrollFadeAnimation("scrollingText2", 2000, 7000, 3000); // With different timing parameters
-
-      var timer;
-      function ShowTrackRadio() {
-        clearTimeout(timer);
-        if (
-          !document.getElementById("track-radio").classList.contains("visible")
-        ) {
-          document.getElementById("track-radio").classList.toggle("visible");
-        }
-        timer = setTimeout(function () {
-          if (
-            document.getElementById("track-radio").classList.contains("visible")
-          ) {
-            document.getElementById("track-radio").classList.toggle("visible");
-          }
-        }, 15000);
-      }
-
-      function DisplayTrack(track) {
-        // Fetch the container div
-        const containerDiv = document.getElementById("track-radio");
-
-        var imageContainer = document.getElementById("track-art");
-        imageContainer.src = `file:///${track.AlbumArt}`;
-
-        //var trackTitle = document.getElementById("track-title");
-        //trackTitle.textContent = `${track.TrackName}`;
-        titleTrackScrolling.updateText(`${track.TrackName}`);
-
-        var trackArtist = document.getElementById("track-artist");
-        trackArtist.textContent = `${track.ArtistName}`;
-        ShowTrackRadio();
-        /*
-      document.getElementById('track-radio').addEventListener('click', function() {
-          document.getElementById('track-radio').classList.toggle('visible');
-      });
-
-      
-      dynamicDiv.innerHTML = `
-          <div class="dynamic-div" onclick="SelectTrackToPlay('${track.TrackName}'); ToggleTrackListVisibility();" onmousehover="PlaySound('${track.TrackSource}')">
-          <div class="album-art" style="background-image: url('file:///${track.AlbumArt}');">
-          </div>
-          <div class="album-title">
-              <h1>${track.TrackName}</h1>
-              <h2>${track.ArtistName}</h2>
-          </div>
-          <div class="note-count">Note Count: ${track.NoteCount}</div>
-          <div class="clearfix"></div>
-      </div>`;
-      containerDiv.appendChild(dynamicDiv);*/
-      }
-
       function setRadioInitialValue(value) {
         document.getElementById("radio-volume").value = value;
         document.getElementById(

@@ -3,12 +3,14 @@
 #include "Components/Audio/AudioSource.h"
 #include "CoreGame/TrackList.h"
 #include "Pointers.h"
+#include "CoreGame/AudioPack.h"
 
 class TrackData;
 
 struct RadioArgs
 {
     TrackData* CurrentTrack = nullptr;
+    int CurrentTrackIndex = 0;
     bool UsePreviewMarker = false;
 };
 
@@ -16,6 +18,7 @@ enum class RadioState
 {
     None = 0,
     Loading,
+    Seeking,
     Playing,
     Paused
 };
@@ -31,8 +34,7 @@ public:
     void Stop();
     void SetVolume( float inVolume );
 
-    void TryPlayNextTrack();
-    void Update();
+    void Update( float dt );
     bool CanPlayNextTrack() const;
 
     TrackData* m_currentTrack = nullptr;
@@ -42,8 +44,11 @@ public:
     std::vector<SharedPtr<AudioSource>> m_currentStems;
     RadioState m_radioState = RadioState::None;
     RadioArgs m_radioArgs;
+    AudioPack m_audioPack;
 private:
 
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
-
+    int m_currentTrackIndex = -1;
+    float m_delayTimer = 0.f;
+    float m_previewPercent = 0.f;
 };

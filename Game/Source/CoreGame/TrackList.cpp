@@ -29,9 +29,12 @@ void TrackList::OnLoadConfig( const json& outJson )
 
 namespace fs = std::filesystem;
 
-bool fileExistsInDirectory( const fs::path& dirPath, const std::string& fileName ) {
-    for( const auto& entry : fs::directory_iterator( dirPath ) ) {
-        if( entry.is_regular_file() && entry.path().filename() == fileName ) {
+bool fileExistsInDirectory( const fs::path& dirPath, const std::string& fileName )
+{
+    for( const auto& entry : fs::directory_iterator( dirPath ) )
+    {
+        if( entry.is_regular_file() && entry.path().filename() == fileName )
+        {
             return true;
         }
     }
@@ -107,25 +110,34 @@ LegacySongMetaData ConvertFromLegacy( const std::string& inTrackDirectory, Track
 
 TrackDatabase::TrackDatabase()
 {
+    Reload();
+}
+
+
+void TrackDatabase::Reload()
+{
+    m_trackList.Clear();
+    m_trackList.m_tracks.clear();
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;  // Replace with your directory path
     std::vector<Path> m_drumlessSongs;
-    try {
+    try
+    {
         for( const auto& entry : fs::directory_iterator( rootPath ) )
         {
             if( entry.is_directory() )
             {
                 // #TODO: Support CHART DLC files
-                bool chartFormat = fileExistsInDirectory( entry.path(), "notes.chart" );
-                if( chartFormat )
-                {
-                    //Path midiPath = Path( std::string( entry.path().u8string() ) );
-                    //    
-                    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
-                    //{
-                    //    m_drumlessSongs.push_back( midiPath );
-                    //}
-                    continue;
-                }
+                //bool chartFormat = fileExistsInDirectory( entry.path(), "notes.chart" );
+                //if( chartFormat )
+                //{
+                //    //Path midiPath = Path( std::string( entry.path().u8string() ) );
+                //    //    
+                //    //if( !CustomTrackDefineTest::GetInstance().ParseMidi( midiPath ) )
+                //    //{
+                //    //    m_drumlessSongs.push_back( midiPath );
+                //    //}
+                //    continue;
+                //}
 
                 // #TODO: Do we even support OPUS? I would need to convert it for fmod...
                 //bool opusFormat = fileExistsInDirectory( entry.path(), "song.opus" );
@@ -173,7 +185,8 @@ TrackDatabase::TrackDatabase()
             }
         }
     }
-    catch( fs::filesystem_error& e ) {
+    catch( fs::filesystem_error& e )
+    {
         std::cout << e.what() << std::endl;
     }
 
@@ -181,12 +194,46 @@ TrackDatabase::TrackDatabase()
     {
         YIKES( path.FullPath.c_str() );
     }
+
+    //for (auto& path : m_trackList.m_tracks)
+    //{
+    //    path.LoadNoteData();
+    //    path.Save();
+    //}
+}
+
+
+bool TrackDatabase::RegisterNewTrack( const std::string& inDirectory )
+{
+    auto it = std::find_if( m_trackList.m_tracks.begin(), m_trackList.m_tracks.end(),
+        [&]( const TrackData& track )
+        {
+            return track.m_trackSourcePath.rfind( inDirectory ) != std::string::npos;
+        } );
+
+    if( it != m_trackList.m_tracks.end() )
+    {
+        YIKES_FMT( "Track already registered for directory: %s", inDirectory.c_str() );
+        return false;
+    }
+
+    m_trackList.m_tracks.emplace_back( TrackData( Path( "Assets/DLC/" + inDirectory + "/TrackData.txt" ) ) );
+    m_trackList.m_tracks.back().Load();
+
+    Path trackPath( m_trackList.m_tracks.back().m_trackSourcePath );
+    if( !trackPath.Exists )
+    {
+        YIKES_FMT( "Song does not exist in directory: %s", m_trackList.m_tracks.back().m_trackFileName.c_str() );
+    }
+    m_needsSort = true;
+    return true;
 }
 
 void TrackDatabase::ExportMidiTrackMetaData()
 {
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;
-    try {
+    try
+    {
         for( const auto& entry : fs::directory_iterator( rootPath ) )
         {
             if( !entry.is_directory() )
@@ -205,6 +252,7 @@ void TrackDatabase::ExportMidiTrackMetaData()
                 if( CustomTrackDefineTest::GetInstance().ParseMidi( midiPath, newTrack, legacyTrack ) )
                 {
                     m_trackList.m_tracks.push_back( newTrack );
+                    m_trackList.m_tracks.back().Save();
                 }
                 //LegacySongMetaData metadata = CustomTrackDefineTest::GetInstance().readSongMetaData( midiPath.FullPath + "/song.ini" );
                 //
@@ -218,7 +266,8 @@ void TrackDatabase::ExportMidiTrackMetaData()
             }
         }
     }
-    catch( fs::filesystem_error& e ) {
+    catch( fs::filesystem_error& e )
+    {
         std::cout << e.what() << std::endl;
     }
 }
@@ -299,18 +348,21 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy, Tr
     switch( inSortBy )
     {
     case TrackListSort::Title:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_trackName < trackList[second].m_trackName;
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+            {
+                return trackList[first].m_trackName < trackList[second].m_trackName;
             } );
         break;
     case TrackListSort::Artist:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_artistName < trackList[second].m_artistName;
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+            {
+                return trackList[first].m_artistName < trackList[second].m_artistName;
             } );
         break;
     case TrackListSort::Year:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second ) {
-            return trackList[first].m_year < trackList[second].m_year;
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+            {
+                return trackList[first].m_year < trackList[second].m_year;
             } );
         break;
     default:
@@ -448,7 +500,7 @@ std::string TrackDatabase::GetFilterName( TrackListFilter inFilter )
 
 TrackData::TrackData( const Path& inPath )
 {
-    if( inPath.IsFile )
+    if( inPath.IsFile || !inPath.Exists )
     {
         m_directory = inPath.GetDirectoryString();
     }
@@ -496,14 +548,14 @@ void TrackData::Load()
 
 void TrackData::OnSaveTrackData( json& outJson )
 {
-    outJson["SongName"] = m_trackName;
-    outJson["SongArtist"] = m_artistName;
-    outJson["AlbumName"] = m_albumName;
+    outJson["Title"] = m_trackName;
+    outJson["Artist"] = m_artistName;
+    outJson["Album"] = m_albumName;
     outJson["Genre"] = m_genre;
     outJson["Year"] = m_year;
     outJson["Icon"] = m_icon;
     outJson["AlbumArtPath"] = m_albumArtPath;
-    outJson["AlbumArtFileName"] = m_albumArtFilename;
+    outJson["AlbumArtFileName"] = Path( m_albumArtPath ).GetFileNameString();
     outJson["DLCSource"] = m_dlcSource;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
     //m_trackSourcePath = m_configFile.FilePath.GetDirectoryString() + "/Track.mp3";
@@ -519,14 +571,20 @@ void TrackData::OnSaveNoteData( json& outJson )
 {
     std::sort( m_noteData.begin(), m_noteData.end(), []( NoteData& first, NoteData& second )
         {
-            if( first.m_triggerTime != second.m_triggerTime )
+            if( first.m_triggerTimeMS != second.m_triggerTimeMS )
             {
-                return first.m_triggerTime < second.m_triggerTime;
+                return first.m_triggerTimeMS < second.m_triggerTimeMS;
             }
             return first.m_editorLane < second.m_editorLane;
         } );
-    m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
-
+    //m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end() ), m_noteData.end() );
+    m_noteData.erase( std::unique( m_noteData.begin(), m_noteData.end(),
+        []( const NoteData& first, const NoteData& second )
+        {
+            return first.m_triggerTimeMS == second.m_triggerTimeMS &&
+                first.m_editorLane == second.m_editorLane;
+        } ),
+        m_noteData.end() );
     json& noteData = outJson["Notes"];
     for( NoteData& note : m_noteData )
     {
@@ -546,13 +604,26 @@ void TrackData::OnLoadTrackData( const json& inJson )
     {
         m_trackName = StringUtils::TrimLeadingSpaces( inJson["SongName"] );
     }
+    if( inJson.contains( "Title" ) )
+    {
+        m_trackName = StringUtils::TrimLeadingSpaces( inJson["Title"] );
+    }
     if( inJson.contains( "SongArtist" ) )
     {
         m_artistName = StringUtils::TrimLeadingSpaces( inJson["SongArtist"] );
     }
+    if( inJson.contains( "Artist" ) )
+    {
+        m_artistName = StringUtils::TrimLeadingSpaces( inJson["Artist"] );
+    }
     if( inJson.contains( "AlbumName" ) )
     {
         m_albumName = StringUtils::TrimLeadingSpaces( inJson["AlbumName"] );
+    }
+
+    if( inJson.contains( "Album" ) )
+    {
+        m_albumName = StringUtils::TrimLeadingSpaces( inJson["Album"] );
     }
     if( inJson.contains( "Genre" ) )
     {

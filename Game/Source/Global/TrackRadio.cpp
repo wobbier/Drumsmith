@@ -7,7 +7,7 @@
 
 void TrackRadio::Play( RadioArgs inTrackArgs )
 {
-    if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrack == m_currentTrack )
+    if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrackIndex == m_currentTrackIndex )
     {
         return;
     }
@@ -15,216 +15,102 @@ void TrackRadio::Play( RadioArgs inTrackArgs )
     m_radioArgs = inTrackArgs;
     bool isAsync = true;
 
-    //if( m_currentlyPlayingPtr && !m_currentlyPlayingPtr->IsLoaded() )
-    //{
-    //    return;
-    //}
     m_currentTrack = inTrackArgs.CurrentTrack;
-    Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );
-
+    m_currentTrackIndex = inTrackArgs.CurrentTrackIndex;
+    m_previewPercent = 0.f;
+    if( inTrackArgs.UsePreviewMarker )
     {
-
-        m_currentlyPlaying = AudioSource( m_currentTrack->m_trackSourcePath );
-        SharedPtr<AudioSource> source;
-        PlayAudioEvent evt;
-        evt.Immediate = true;
-        if( previewPath.Exists )
-        {
-            evt.SourceName = previewPath.FullPath;
-        }
-        else
-        {
-            evt.SourceName = m_currentlyPlaying.FilePath.FullPath;
-        }
-        if( inTrackArgs.UsePreviewMarker )
-        {
-            evt.StartPercent = m_currentTrack->m_previewPercent;
-        }
-        evt.Volume = GameSettings::GetInstance().RadioVolume;
-
-        evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop(); m_currentlyPlayingPtr = loadedAudio; };
-        evt.Fire();
+        m_previewPercent = m_currentTrack->m_previewPercent;
     }
+    m_audioPack = AudioPack( *m_currentTrack );
 
-    if( !previewPath.Exists )
-    {
-        PlayStem( "crowd.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "drums.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "drums_1.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "drums_2.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "drums_3.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "drums_4.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "guitar.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "vocals.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "rhythm.ogg", inTrackArgs.UsePreviewMarker );
-        PlayStem( "keys.ogg", inTrackArgs.UsePreviewMarker );
+    // Audio streams are pretty quick, why even have a preview audio file?
+    //Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );
+    //
+    //if( !previewPath.Exists )
+    //{
+    //}
 
-        for( auto ptr : m_currentStems )
-        {
-            if( ptr )
-            {
-                if( inTrackArgs.UsePreviewMarker )
-                {
-                    ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
-                }
-                ptr->Play( true );
-                ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
-                if( inTrackArgs.UsePreviewMarker )
-                {
-                    ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
-                }
-            }
-        }
-    }
-    if( m_currentlyPlayingPtr )
-    {
-        if( inTrackArgs.UsePreviewMarker )
-        {
-            m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
-        }
-        m_currentlyPlayingPtr->Play();
-        m_currentlyPlayingPtr->SetVolume( GameSettings::GetInstance().RadioVolume );
-        if( inTrackArgs.UsePreviewMarker )
-        {
-            m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
-        }
-    }
     m_radioState = RadioState::Loading;
 }
 
 
 bool TrackRadio::IsPlaying() const
 {
-    if( m_currentlyPlayingPtr )
-    {
-        return m_currentlyPlayingPtr->IsPlaying();
-    }
-    return false;
+    return m_audioPack.IsPlaying();
 }
 
-
-bool TrackRadio::PlayStem( const char* inFileName, bool inUsePreviewMarker )
-{
-    Path drumsPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + inFileName );
-    if( drumsPath.Exists )
-    {
-        SharedPtr<AudioSource> source;
-        PlayAudioEvent evt;
-        evt.SourceName = drumsPath.FullPath;
-        evt.Immediate = true;
-        if( inUsePreviewMarker )
-        {
-            evt.StartPercent = m_currentTrack->m_previewPercent;
-        }
-        evt.Volume = GameSettings::GetInstance().RadioVolume;
-
-        evt.Callback = [&source, this]( SharedPtr<AudioSource> loadedAudio ) { loadedAudio->Stop();  m_currentStems.push_back( loadedAudio ); };
-        evt.Fire();
-        return true;
-    }
-    return false;
-}
 
 void TrackRadio::Stop()
 {
-    if( m_currentlyPlayingPtr )
-    {
-        m_currentlyPlayingPtr->Stop();
-        StopAudioEvent evt;
-        evt.SourceName = m_currentTrack->m_trackSourcePath;
-        evt.Fire();
-    }
-    for( auto ptr : m_currentStems )
-    {
-        if( ptr )
-        {
-            ptr->Stop( true );
-            ptr.reset();
-        }
-    }
-    m_currentStems.clear();
+    m_audioPack.Stop();
     m_radioState = RadioState::None;
 }
+
 
 void TrackRadio::SetVolume( float inVolume )
 {
     float volumeClamped = Mathf::Clamp( 0.f, 1.f, inVolume );
-    if( m_currentlyPlayingPtr && m_currentlyPlayingPtr->IsPlaying() )
-    {
-        m_currentlyPlayingPtr->SetVolume( volumeClamped );
-    }
-
-    for( auto ptr : m_currentStems )
-    {
-        if( ptr && ptr->IsPlaying() )
-        {
-            ptr->SetVolume( volumeClamped );
-        }
-    }
+    m_audioPack.SetVolume( volumeClamped );
 }
 
-void TrackRadio::TryPlayNextTrack()
-{
-    if( !m_currentlyPlayingPtr )
-    {
-        return;
-    }
-    else
-    {
-        bool loaded = m_currentlyPlayingPtr->IsLoaded();
 
-        for( auto ptr : m_currentStems )
-        {
-            if( ptr )
-            {
-                loaded = loaded && ptr->IsLoaded();
-            }
-        }
-
-        if (loaded)
-        {
-            m_currentlyPlayingPtr->Play();
-            m_currentlyPlayingPtr->SetVolume( GameSettings::GetInstance().RadioVolume );
-            if( m_radioArgs.UsePreviewMarker )
-            {
-                m_currentlyPlayingPtr->SetPositionPercent( m_currentTrack->m_previewPercent );
-            }
-
-            for( auto ptr : m_currentStems )
-            {
-                if( ptr )
-                {
-                    ptr->Play();
-                    ptr->SetVolume( GameSettings::GetInstance().RadioVolume );
-                    if( m_radioArgs.UsePreviewMarker )
-                    {
-                        ptr->SetPositionPercent( m_currentTrack->m_previewPercent );
-                    }
-                }
-            }
-            m_radioState = RadioState::Playing;
-        }
-    }
-}
-
-void TrackRadio::Update()
+void TrackRadio::Update( float dt )
 {
     if( m_radioState == RadioState::Loading )
     {
-        if( m_currentlyPlayingPtr && !m_currentlyPlayingPtr->IsPlaying() )
+        if( !m_audioPack.IsReady() )
         {
-            TryPlayNextTrack();
+            // this feels weird, but okay??
+            m_audioPack.Play();
+            return;
         }
+        else
+        {
+            m_audioPack.Play();
+            m_audioPack.SetVolume( GameSettings::GetInstance().RadioVolume );
+            if( m_radioArgs.UsePreviewMarker )
+            {
+                m_audioPack.Seek( m_previewPercent );
+                m_delayTimer = 1;
+                m_radioState = RadioState::Seeking;
+            }
+            else
+            {
+                m_radioState = RadioState::Playing;
+            }
+            return;
+        }
+    }
+
+    if( m_radioState == RadioState::Seeking )
+    {
+        if( !m_audioPack.IsReady() )
+        {
+            return;
+        }
+        else
+        {
+            //if( m_delayTimer >= 0 )
+            //{
+            //    m_delayTimer -= dt;
+            //    return;
+            //}
+            m_audioPack.Resume();
+            m_radioState = RadioState::Playing;
+        }
+        return;
     }
 
     if( m_radioState == RadioState::Playing )
     {
-        if( m_currentlyPlayingPtr && !m_currentlyPlayingPtr->IsPlaying() )
+        if( !m_audioPack.IsPlaying() )
         {
             m_radioState = RadioState::None;
         }
     }
 }
+
 
 bool TrackRadio::CanPlayNextTrack() const
 {

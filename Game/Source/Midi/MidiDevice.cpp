@@ -5,10 +5,14 @@
 
 MidiDevice::MidiDevice()
 {
-    try {
+    try
+    {
         m_midiIn = new RtMidiIn();
     }
-    catch( RtMidiError& error ) {
+    catch( RtMidiError& error )
+    {
+        delete m_midiIn;
+        m_midiIn = nullptr;
         error.printMessage();
         return;
     }
@@ -16,6 +20,7 @@ MidiDevice::MidiDevice()
     // Don't ignore sysex, timing, or active sensing messages.
     m_midiIn->ignoreTypes( false, false, false );
 }
+
 
 MidiDeviceInfo& MidiDevice::OpenMidiDevice( unsigned int inIndex )
 {
@@ -29,19 +34,36 @@ MidiDeviceInfo& MidiDevice::OpenMidiDevice( unsigned int inIndex )
     return m_devices[inIndex];
 }
 
+
+MidiDeviceInfo& MidiDevice::OpenMidiDevice( const std::string& inName )
+{
+    for (auto& device : m_devices)
+    {
+        if (device.Name != inName)
+        {
+            continue;
+        }
+        return OpenMidiDevice( device.Port );
+    }
+    ME_ASSERT_MSG( false, "Failed to open device by name." );
+    return OpenMidiDevice( 0 );
+}
+
+
 void MidiDevice::CloseMidiDevice()
 {
     m_midiIn->closePort();
 }
+
 
 void MidiDevice::RefreshDevices()
 {
     m_devices.clear();
     // Check available ports.
     unsigned int nPorts = m_midiIn->getPortCount();
-    if( nPorts == 0 ) {
+    if( nPorts == 0 )
+    {
         BRUH( "No MIDI input ports available!" );
-        delete m_midiIn;
         return;
     }
 
@@ -54,22 +76,37 @@ void MidiDevice::RefreshDevices()
     }
 }
 
+
+const std::vector<MidiDeviceInfo>& MidiDevice::GetDevices() const
+{
+    return m_devices;
+}
+
+
 std::vector<MidiMessageNew> MidiDevice::PumpMessages()
 {
+    if( !m_midiIn )
+    {
+        return {};
+    }
+
     std::vector<MidiMessageNew> messages;
     // Infinite loop to keep reading incoming MIDI messages.
-    while( !IsPaused ) {
+    while( !IsPaused )
+    {
         std::vector<unsigned char> message;
         int nBytes, i;
         double stamp = m_midiIn->getMessage( &message );
         nBytes = message.size();
-        for( i = 0; i < nBytes; i++ ) {
+        for( i = 0; i < nBytes; i++ )
+        {
             std::cout << "Byte " << i << " = " << (int)message[i] << ", ";
         }
-        if( nBytes > 0 ) {
+        if( nBytes > 0 )
+        {
             std::cout << "stamp = " << stamp << std::endl;
         }
-        if (message.empty())
+        if( message.empty() || message.size() < 3 )
         {
             break;
         }

@@ -12,6 +12,8 @@ public:
     void Save();
 
     float RadioVolume = .5f;
+    std::string DLCURL;
+    std::string PreferredMidiDevice;
 
 private:
     json RootJson;
