@@ -539,6 +539,24 @@ void TrackData::Load()
             OnLoadTrackData( metaData );
         }
     }
+    if( m_albumArtFilename.empty() )
+    {
+        Path possibleAlbumArt = Path( m_directory + "album.png" );
+        if( possibleAlbumArt.Exists )
+        {
+            m_albumArtFilename = possibleAlbumArt.GetFileNameString();
+            m_albumArtPath = m_directory + m_albumArtFilename;
+        }
+        else
+        {
+            possibleAlbumArt = Path( m_directory + "album.jpg" );
+            if( possibleAlbumArt.Exists )
+            {
+                m_albumArtFilename = possibleAlbumArt.GetFileNameString();
+                m_albumArtPath = m_directory + m_albumArtFilename;
+            }
+        }
+    }
     //{
     //    File metaFile( Path( m_directory + "/NoteData.txt" ) );
     //    json metaData = json::parse( metaFile.Read() );
@@ -554,7 +572,6 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["Genre"] = m_genre;
     outJson["Year"] = m_year;
     outJson["Icon"] = m_icon;
-    outJson["AlbumArtPath"] = m_albumArtPath;
     outJson["AlbumArtFileName"] = Path( m_albumArtPath ).GetFileNameString();
     outJson["DLCSource"] = m_dlcSource;
     //m_albumArtPath = m_configFile.FilePath.GetDirectoryString() + "/Album.png";
@@ -646,15 +663,11 @@ void TrackData::OnLoadTrackData( const json& inJson )
     {
         m_dlcSource = inJson["DLCSource"];
     }
-    m_albumArtPath = m_directory + "/Album.png";
-    if( inJson.contains( "AlbumArtPath" ) )
+    if( inJson.contains( "AlbumArtFileName" ) )
     {
-        m_albumArtPath = inJson["AlbumArtPath"];
+        m_albumArtFilename = inJson["AlbumArtFileName"];
     }
-    if( inJson.contains( "AlbumArtFilename" ) )
-    {
-        m_albumArtFilename = inJson["AlbumArtFilename"];
-    }
+    m_albumArtPath = m_directory + m_albumArtFilename;
     if( inJson.contains( "TrackFileName" ) )
     {
         m_trackFileName = inJson["TrackFileName"];

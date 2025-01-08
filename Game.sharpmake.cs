@@ -61,6 +61,7 @@ public class SharpGameSolution : BaseGameSolution
         //Globals.FMOD_Win64_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/";
        // Globals.FMOD_UWP_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Universal Windows Platform/";
         Globals.MONO_Win64_Dir = string.Empty;
+        Globals.IsPhysicsEnabled3D = false;
         //Globals.ExeName = "Drumsmith";
     }
 }
