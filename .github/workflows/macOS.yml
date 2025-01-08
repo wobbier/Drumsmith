@@ -1,0 +1,90 @@
+name: macOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform:
+          - macOS
+        xcode:
+          - ^15
+        configuration:
+          - Debug
+          - Release
+        type:
+          - Editor
+          - Game_macOS
+    runs-on: macos-13
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "5.0.100"
+
+      - name: Download FMOD from Private URL
+        run: curl -L -o file.zip ${{ secrets.FMOD_MACOS }}
+        
+      - name: Create target directory
+        run: mkdir -p Engine/ThirdParty/FMOD
+
+      - name: Unzip FMOD to ThirdParty folder
+        run: unzip file.zip -d Engine/ThirdParty/FMOD
+        
+      - name: Generate a new project
+        shell: bash
+        run: cd Engine/ThirdParty && sh GenerateSolutions.command && cd ../../ && ls
+        
+      - name: Generate a new project
+        shell: bash
+        run: cd Project && sh GenerateSolution.command && cd ../ && ls
+
+      - name: Build Editor
+        if: ${{ matrix.type == 'Editor' }}
+        uses: mxcl/xcodebuild@v2
+        with:
+          xcode: ${{ matrix.xcode }}
+          platform: ${{ matrix.platform }}
+          action: build # default = `test`
+          code-coverage: true # default = `false`
+          warnings-as-errors: false # default = `false`
+          workspace: Drumsmith.xcworkspace
+          configuration: ${{ matrix.type }}_${{ matrix.configuration }} # no default, ie. `xcodebuild` decides itself
+          scheme: Havana_mac
+
+      - name: Build Game
+        if: ${{ matrix.type == 'Game_macOS' }}
+        uses: mxcl/xcodebuild@v2
+        with:
+          xcode: ${{ matrix.xcode }}
+          platform: ${{ matrix.platform }}
+          action: build # default = `test`
+          code-coverage: true # default = `false`
+          warnings-as-errors: false # default = `false`
+          workspace: Drumsmith.xcworkspace
+          configuration: ${{ matrix.type }}_${{ matrix.configuration }} # no default, ie. `xcodebuild` decides itself
+          scheme: Game_EntryPoint_mac
+
+      - name: Copy Assets (Not Implemented)
+        shell: bash
+        run: echo todo
+
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Drumsmith - ${{matrix.type}} - ${{matrix.buildconfig}}
+          path: |
+            Build/${{matrix.buildconfig}}

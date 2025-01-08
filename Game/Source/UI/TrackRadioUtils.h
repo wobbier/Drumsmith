@@ -1,7 +1,7 @@
 #pragma once
-#include "Components\UI\BasicUIView.h"
-#include "Math\Random.h"
-#include "UI\JSHelpers.h"
+#include "Components/UI/BasicUIView.h"
+#include "Math/Random.h"
+#include "UI/JSHelpers.h"
 
 class TrackData;
 

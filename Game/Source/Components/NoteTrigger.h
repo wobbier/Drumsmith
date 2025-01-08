@@ -1,7 +1,7 @@
 #pragma once
-#include "ECS\Component.h"
-#include "ECS\ComponentDetail.h"
-#include "Editor\PadBindings.h"
+#include "ECS/Component.h"
+#include "ECS/ComponentDetail.h"
+#include "Editor/PadBindings.h"
 
 class NoteTrigger
     : public Component<NoteTrigger>

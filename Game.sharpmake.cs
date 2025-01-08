@@ -48,6 +48,12 @@ public class SharpGameProject : BaseGameProject
         conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
     }
+
+    public override void ConfigureMac(Configuration conf, CommonTarget target)
+    {
+        base.ConfigureMac(conf, target);
+        conf.LibraryFiles.Add("libcurl");
+    }
 }
 
 [Generate]
