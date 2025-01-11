@@ -1,7 +1,7 @@
 #include <unordered_map>
 #include <string>
 #include <fmod.hpp>
-#include "Editor\PadBindings.h"
+#include "Editor/PadBindings.h"
 #include "Path.h"
 
 class Drumset

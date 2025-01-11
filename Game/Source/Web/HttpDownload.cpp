@@ -1,11 +1,18 @@
 #include "HttpDownload.h"
 #include "Dementia.h"
 
+#if USING( ME_PLATFORM_WINDOWS )
 #include <windows.h>
 #include <winhttp.h>
+#endif
+
+#if USING( ME_PLATFORM_MACOS )
+#include <curl/curl.h>
+#endif
+
 #include <iostream>
 #include <fstream>
-#include "Utils\StringUtils.h"
+#include "Utils/StringUtils.h"
 
 namespace Web
 {

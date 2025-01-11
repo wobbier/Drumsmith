@@ -42,42 +42,6 @@ bool KeybindButton( int inImGUIID, int* outKey, bool* waitingforkey, std::string
     return false;
 }
 
-bool MidiBindButton( int inImGUIID, MidiDeviceManager& inDeviceManager, int* outKey, bool* waitingforkey, std::string inLabel = "", const ImVec2& size_arg = ImVec2( 0, 0 ) )
-{
-    ImGui::PushID( inImGUIID );
-
-    Input& editorInput = GetEngine().GetEditorInput();
-    if( !( *waitingforkey ) )
-    {
-        if( ImGui::Button( ( (KeyCode)( *outKey ) == KeyCode::Unknown ) ? std::string( inLabel + "Not Bound" ).c_str() : std::string( inLabel + std::to_string( *outKey ) ).c_str(), size_arg ) )
-        {
-            *(int*)waitingforkey = true;
-
-            inDeviceManager.ClearAllPendingMessages();
-        }
-    }
-    else
-    {
-        ImGui::Button( "...", size_arg );
-        if( editorInput.WasKeyPressed( KeyCode::Escape ) )
-        {
-            *(int*)waitingforkey = false;
-            ImGui::PopID();
-            return false;
-        }
-
-        MidiMessage message = inDeviceManager.GetNextMessage();
-        if( message.Encode() > 0 )
-        {
-            *(int*)outKey = (int)message.m_data1;
-            *(int*)waitingforkey = false;
-            ImGui::PopID();
-            return true;
-        }
-    }
-    ImGui::PopID();
-    return false;
-}
 
 bool MidiBindButtonNew( int inImGUIID, MidiDevice& inDeviceManager, int* outKey, bool* waitingforkey, std::string inLabel = "", const ImVec2& size_arg = ImVec2( 0, 0 ) )
 {
@@ -153,21 +117,7 @@ void PadBindingWidget::Render()
 {
     OPTICK_CATEGORY( "PadBindingWidget", Optick::Category::UI );
     ImGui::Begin( "Pad Bindings", &IsOpen );
-    {
-        HavanaUtils::Label( "Midi Device" );
-        if( ImGui::BeginCombo( "##Device", m_selectedMidiDeviceName.empty() ? "Select a device" : m_selectedMidiDeviceName.c_str() ) )
-        {
-            for (int i = 0; i < m_midiDeviceManager.GetNumActiveDevices(); ++i)
-            {
-                if( ImGui::Selectable( m_midiDeviceManager.GetDeviceName(i).c_str() ) )
-                {
-                    m_selectedMidiDeviceName = m_midiDeviceManager.GetDeviceName( i );
-                }
-            }
-            
-            ImGui::EndCombo();
-        }
-    }
+
     auto& m_midiDevice = MidiDevice::GetInstance();
     {
         //m_midiDevice.IsPaused = !ImGui::IsWindowFocused();

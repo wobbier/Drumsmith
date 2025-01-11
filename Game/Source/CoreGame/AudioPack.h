@@ -1,6 +1,6 @@
 #pragma once
 #include "TrackList.h"
-#include "Components\Audio\AudioSource.h"
+#include "Components/Audio/AudioSource.h"
 
 namespace FMOD { class ChannelGroup; }
 

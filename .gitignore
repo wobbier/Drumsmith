@@ -212,3 +212,7 @@ imgui.ini
 default
 Assets/UI/**/*.meta
 *.assbin
+
+# macOS MitchEngine
+.DS_Store
+*.xcworkspace

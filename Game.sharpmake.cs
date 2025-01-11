@@ -11,15 +11,22 @@ public class SharpGameProject : BaseGameProject
     {
         Name = "Drumsmith";
     }
+    
+    public override void ConfigureAll(Project.Configuration conf, CommonTarget target)
+    {
+        base.ConfigureAll(conf, target);
+                
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/midifile/include"));
+        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
+    }
 
 
     public override void ConfigureWin64(Project.Configuration conf, CommonTarget target)
     {
         base.ConfigureWin64(conf, target);
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/midifile/include"));
-        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
+        
         conf.LibraryFiles.Add("rtmidi");
         conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
@@ -40,10 +47,7 @@ public class SharpGameProject : BaseGameProject
     public override void ConfigureUWP(Configuration conf, CommonTarget target)
     {
         base.ConfigureUWP(conf, target);
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/rtmidi"));
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/midifile/include"));
-        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
-        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
+        
         conf.LibraryFiles.Add("rtmidi");
         conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("winmm.lib");
@@ -52,7 +56,12 @@ public class SharpGameProject : BaseGameProject
     public override void ConfigureMac(Configuration conf, CommonTarget target)
     {
         base.ConfigureMac(conf, target);
-        conf.LibraryFiles.Add("libcurl");
+        conf.IncludePaths.Add("/usr/local/include");
+        conf.LibraryPaths.Add("/usr/local/lib");
+        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/Lib/macOS/Release"));
+        conf.LibraryFiles.Add("curl");
+        conf.LibraryFiles.Add("midifile");
+        conf.LibraryFiles.Add("rtmidi");
     }
 }
 
@@ -64,11 +73,13 @@ public class SharpGameSolution : BaseGameSolution
     {
         Name = "Drumsmith";
 
-        //Globals.FMOD_Win64_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/";
-       // Globals.FMOD_UWP_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Universal Windows Platform/";
+        Globals.FMOD_Win64_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/";
+        Globals.FMOD_UWP_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Universal Windows Platform/";
+        Globals.FMOD_macOS_Dir = Util.GetCurrentSharpmakeFileInfo() + "/../ThirdParty/FMOD Programmers API/";
         Globals.MONO_Win64_Dir = string.Empty;
-        Globals.IsPhysicsEnabled3D = false;
+        Globals.IsPhysicsEnabled3D = true;
         //Globals.ExeName = "Drumsmith";
+        System.Console.WriteLine(Globals.FMOD_macOS_Dir);
     }
 }
 

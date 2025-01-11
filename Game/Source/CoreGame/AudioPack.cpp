@@ -1,8 +1,8 @@
 #include "AudioPack.h"
-#include "Cores\AudioCore.h"
-#include "Engine\Engine.h"
-#include "Resources\SoundResource.h"
-#include "Resource\ResourceCache.h"
+#include "Cores/AudioCore.h"
+#include "Engine/Engine.h"
+#include "Resources/SoundResource.h"
+#include "Resource/ResourceCache.h"
 #include <fmod.hpp>
 #include "Pointers.h"
 

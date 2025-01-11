@@ -7,7 +7,6 @@
 #include "Path.h"
 #include "Pointers.h"
 #include "CoreGame/TrackList.h"
-#include <MidiDeviceManager.h>
 #include "Midi/MidiDevice.h"
 
 class AudioSource;

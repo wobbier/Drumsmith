@@ -201,7 +201,6 @@ public:
 
 #include <Editor/WidgetRegistry.h>
 #include "HavanaWidget.h"
-#include <MidiDeviceManager.h>
 
 class PadBindingWidget
     : public HavanaWidget
@@ -217,7 +216,6 @@ public:
     void Render() override;
     bool keyCatchState[PadId::COUNT];
     bool midiCatchState[PadId::COUNT];
-    MidiDeviceManager m_midiDeviceManager;
     std::string m_selectedMidiDeviceName;
 };
 

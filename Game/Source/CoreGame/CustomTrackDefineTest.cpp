@@ -2,8 +2,8 @@
 #include "Dementia.h"
 //#include "MidiFile.h"
 //#include "Options.h"
-#include "Core\Assert.h"
-#include "Editor\PadBindings.h"
+#include "Core/Assert.h"
+#include "Editor/PadBindings.h"
 #include "MidiFile.h"
 DISABLE_OPTIMIZATION;
 

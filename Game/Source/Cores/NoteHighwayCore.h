@@ -5,7 +5,6 @@
 #include "CoreGame/TrackList.h"
 #include "Components/Audio/AudioSource.h"
 #include <unordered_map>
-#include <MidiDeviceManager.h>
 #include "CoreGame/AudioPack.h"
 #include "Midi/MidiDevice.h"
 

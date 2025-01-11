@@ -1,6 +1,6 @@
 #include "MidiDevice.h"
 #include "RtMidi.h"
-#include "Core\Assert.h"
+#include "Core/Assert.h"
 #include "CLog.h"
 
 MidiDevice::MidiDevice()

@@ -1,17 +1,17 @@
 #include "TrackEditor.h"
-#include "CoreGame\TrackList.h"
-#include "Events\HavanaEvents.h"
-#include "Components\Audio\AudioSource.h"
-#include "Events\GameEvents.h"
-#include "Events\AudioEvents.h"
+#include "CoreGame/TrackList.h"
+#include "Events/HavanaEvents.h"
+#include "Components/Audio/AudioSource.h"
+#include "Events/GameEvents.h"
+#include "Events/AudioEvents.h"
 #include "Mathf.h"
-#include "Engine\Engine.h"
+#include "Engine/Engine.h"
 #include "optick.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "RtMidi.h"
-#include "Utils\HavanaUtils.h"
-#include "CoreGame\Drumset.h"
-#include "Cores\AudioCore.h"
+#include "Utils/HavanaUtils.h"
+#include "CoreGame/Drumset.h"
+#include "Cores/AudioCore.h"
 
 #if USING(ME_EDITOR)
 
@@ -590,7 +590,7 @@ void TrackEditor::DrawMenuBar()
 
                         if( !SelectedTrackLocation.Exists )
                         {
-                            YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath );
+                            YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath.c_str() );
                         }
                         ResetTrack();
                     };
