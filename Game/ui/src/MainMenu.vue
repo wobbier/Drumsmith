@@ -25,8 +25,6 @@
       <input type="checkbox">
       <span class="checkmark"></span>
     </label>
-    <input type="checkbox" />
-    <br />
     <p class="menu-text" id="menu-volume-text">Radio Volume</p>
     <br />
     <input type="range" name="RadioVolume" id="radio-volume" min="0" max="100" step="1" value="50" class="slider" />
