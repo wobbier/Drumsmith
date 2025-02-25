@@ -26,6 +26,8 @@ public:
 
     void OnStop() override;
 
+	void UpdateCameraPosition( float deltaTime );
+
     virtual void Update( const UpdateContext& context ) final;
     bool OnEvent( const BaseEvent& evt ) override;
 

@@ -55,6 +55,24 @@ void TrackRadio::SetVolume( float inVolume )
 }
 
 
+float TrackRadio::GetTotalLength() const
+{
+    return m_audioPack.GetLength();
+}
+
+
+float TrackRadio::GetPositionMS() const
+{
+    return m_audioPack.GetPositionMs();
+}
+
+
+void TrackRadio::Seek( float inPercent )
+{
+    m_audioPack.Seek( inPercent );
+}
+
+
 void TrackRadio::Update( float dt )
 {
     if( m_radioState == RadioState::Loading )
@@ -115,4 +133,10 @@ void TrackRadio::Update( float dt )
 bool TrackRadio::CanPlayNextTrack() const
 {
     return m_radioState == RadioState::None;
+}
+
+
+void TrackRadio::Resume()
+{
+    m_audioPack.Resume();
 }

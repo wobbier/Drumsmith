@@ -1,0 +1,104 @@
+{
+    "Cores": [
+        {
+            "Type": "VocalsTestCore"
+        }
+    ],
+    "Scene": [
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ClearColor": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "ClearType": "Color",
+                    "Far": 2000.0,
+                    "IsCurrent": true,
+                    "Near": 0.10000000149011612,
+                    "Type": "Camera",
+                    "Zoom": 45.0
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Main Camera"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        3.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Material": {
+                        "BlendMode": 0,
+                        "DiffuseColor": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "FaceMode": 0,
+                        "RenderMode": 0,
+                        "Textures": {
+                            "Diffuse": {
+                                "Path": "Assets/default.png",
+                                "RenderMode": "Opaque"
+                            }
+                        },
+                        "Tiling": [
+                            1.0,
+                            1.0
+                        ],
+                        "Type": "DiffuseMaterial"
+                    },
+                    "MeshType": "Model",
+                    "Type": "Mesh"
+                },
+                {
+                    "FilePath": "Assets/UI/DLC_NEW.html",
+                    "Type": "VocalsTestComponent",
+                    "UIURL": ""
+                },
+                {
+                    "ModelPath": "Assets/cube.obj",
+                    "Type": "Model"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "New Entity"
+        }
+    ]
+}

@@ -12,6 +12,7 @@
 #include "Utils/HavanaUtils.h"
 #include "CoreGame/Drumset.h"
 #include "Cores/AudioCore.h"
+#include "Events/EditorEvents.h"
 
 #if USING(ME_EDITOR)
 
@@ -37,8 +38,8 @@ void TrackEditor::Init()
     hitNotes.resize( (int)PadId::COUNT );
 
     m_drums = new Drumset( GetEngine().AudioThread->GetSystem() );
-    m_drums->loadSound( PadId::Bass, "Assets/Drums/Basic/Bass.wav" );
-    m_drums->loadSound( PadId::Snare, "Assets/Drums/Basic/Snare.wav" );
+    //m_drums->loadSound( PadId::Bass, "Assets/Drums/Basic/Bass.wav" );
+    //m_drums->loadSound( PadId::Snare, "Assets/Drums/Basic/Snare.wav" );
 }
 
 void TrackEditor::Destroy()
@@ -685,7 +686,7 @@ void TrackEditor::DrawPadPreview()
             for( int i = 0; i < (int)PadId::COUNT; ++i )
             {
                 const float kPadHeight = 50.f;
-                float padWidth = ( (windowSize.x-5.f) / (int)PadId::COUNT );
+                float padWidth = ( ( windowSize.x - 5.f ) / (int)PadId::COUNT );
                 ImVec2 padPos = { canvas_pos.x + ( padWidth * i ), canvas_pos.y };
                 ImVec2 padSize = { padPos.x + padWidth - xSpacing, padPos.y + kPadHeight };
                 if( hitNotes[i] )
@@ -732,7 +733,7 @@ bool TrackEditor::OnEvent( const BaseEvent& evt )
             }
         }
     }
-    
+
     return false;
 }
 

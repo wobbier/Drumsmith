@@ -3,11 +3,8 @@
 #include "Events/GameEvents.h"
 #include "CoreGame/TrackList.h"
 #include "Engine/World.h"
-#include "Components/Graphics/Model.h"
 #include "Components/NoteTrigger.h"
 #include "Core/Assert.h"
-#include "Components/Camera.h"
-#include "Events/AudioEvents.h"
 #include "Engine/Engine.h"
 #include "Editor/PadBindings.h"
 #include "Mathf.h"
@@ -15,7 +12,6 @@
 #include "Components/Graphics/Mesh.h"
 #include "Config/GameSettings.h"
 #include "ECS/Core.h"
-#include "Components/MainMenuController.h"
 
 NoteHighwayCore::NoteHighwayCore()
     : Base( ComponentFilter().Requires<Transform>().Requires<NoteTrigger>() )
@@ -44,7 +40,6 @@ void NoteHighwayCore::OnAddedToWorld()
 void NoteHighwayCore::OnRemovedFromWorld()
 {
     EventManager::GetInstance().DeRegisterReciever( this );
-    //MidiDevice::GetInstance().CloseMidiDevice();
 }
 
 void NoteHighwayCore::OnStop()
@@ -58,6 +53,20 @@ void NoteHighwayCore::OnEntityAdded( Entity& NewEntity )
 
 void NoteHighwayCore::OnEntityRemoved( Entity& InEntity )
 {
+}
+
+void NoteHighwayCore::UpdateCameraPosition( float deltaTime )
+{
+    Transform& camTransform = TrackMover->GetComponent<Transform>();
+    float songTimeSec = static_cast<float>( m_currentTrackPack.GetPositionMs() ) / 1000.f;
+    float targetZ = songTimeSec * m_trackData->m_noteSpeed;
+
+    Vector3 currentPos = camTransform.GetPosition();
+
+    const float smoothFactor = 10.0f;
+    float newZ = currentPos.z + ( targetZ - currentPos.z ) * ( smoothFactor * deltaTime );
+
+    camTransform.SetPosition( { currentPos.x, currentPos.y, newZ } );
 }
 
 void NoteHighwayCore::Update( const UpdateContext& context )
@@ -88,20 +97,34 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         NoteTrigger& note = it->GetComponent<NoteTrigger>();
 
         const unsigned int triggerTime = note.TriggerTimeMS;
-        float hitWindow = Mathf::Abs( (float)( (float)noteTime - (float)triggerTime ) );
-        if( hitWindow < 50.f )
+        float baseHitWindowMs = 50.0f;
+        float actualHitWindow = baseHitWindowMs / m_trackData->m_noteSpeed;
+
+        actualHitWindow = std::max( actualHitWindow, baseHitWindowMs );
+        int globalOffsetMs = -30;
+        float difference = (float)noteTime + globalOffsetMs - (float)triggerTime;
+        float hitWindow = std::fabs( difference );
+
+        if( hitWindow < actualHitWindow )
         {
             // drunk me fucked this up
             for( auto& pad : storage.mappedPads )
             {
+                if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) )
+                {
+                    BRUH_FMT( "Pressed: difference = %f ms (negative=early, positive=late)", difference );
+                }
                 if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) && pad.padId == note.EditorLane )
                 {
                     it->MarkForDelete();
                     handled = true;
                 }
             }
-            m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume - context.GetDeltaTime() );
-            m_currentTrackPack.SetDrumVolume( Mathf::Clamp( 0.f, 1.f, m_drumVolume ) );
+            //if( note.EditorLane != PadId::Bass )
+            //{
+            //    m_drumVolume = Mathf::Clamp( 0.f, 1.f, m_drumVolume - context.GetDeltaTime() );
+            //    m_currentTrackPack.SetDrumVolume( Mathf::Clamp( 0.f, 1.f, m_drumVolume ) );
+            //}
             //it->MarkForDelete();
 #if USING(ME_PLATFORM_WIN64)
             if( !handled )
@@ -137,8 +160,9 @@ void NoteHighwayCore::Update( const UpdateContext& context )
 
     {
         //auto& camTransform = Camera::CurrentCamera->Parent->GetComponent<Transform>();
-        Transform& camTransform = TrackMover->GetComponent<Transform>();
-        camTransform.SetPosition( { 0,0,( (float)m_currentTrackPack.GetPositionMs() / 1000.f ) * m_trackData->m_noteSpeed } );
+        //Transform& camTransform = TrackMover->GetComponent<Transform>();
+        //camTransform.SetPosition( { 0,0,( (float)m_currentTrackPack.GetPositionMs() / 1000.f ) * m_trackData->m_noteSpeed } );
+        UpdateCameraPosition( context.GetDeltaTime() );
     }
 
 

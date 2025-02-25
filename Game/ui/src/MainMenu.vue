@@ -10,6 +10,8 @@
       <br />
       <MenuItem text="DLC" colorClass="pink" :onClick="() => LoadDLCScene('Assets/DLC.lvl')" />
       <br />
+      <MenuItem text="Vocal Test" colorClass="pink" :onClick="() => LoadDLCScene('Assets/Vocals.lvl')" />
+      <br />
       <MenuItem text="SETTINGS" colorClass="orange" :onClick="toggleMenu" />
       <br />
       <MenuItem text="EXIT" colorClass="red" :onClick="quit" />
@@ -32,7 +34,7 @@
     <br />
     <div class="url-input-container">
       <span class="prefix">http://</span>
-      <input class="myinput-link" v-model="inputText" :placeholder="inputText" @keydown.enter="SetDLCURL" />
+      <input class="myinput-link" @keydown.enter="SetDLCURL" />
       <span class="link-icon">
         🔗
       </span>

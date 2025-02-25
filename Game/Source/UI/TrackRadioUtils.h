@@ -15,6 +15,9 @@ public:
     void OnUpdate( float dt );
     void PlayNextRandomTrack();
     void SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    ultralight::JSValue GetCurrentTrackDuration( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    ultralight::JSValue GetCurrentTrackPosition( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
+    void SeekToPosition( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
     void PlayLatestTrack();
 private:
     void UpdateTrackDisplay( TrackData* inTrackData );

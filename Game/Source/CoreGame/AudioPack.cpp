@@ -132,9 +132,15 @@ void AudioPack::Seek( float inSeekPercent )
 }
 
 
-float AudioPack::GetPositionMs()
+unsigned int AudioPack::GetPositionMs() const
 {
     return m_sounds[0].GetPositionMs();
+}
+
+
+unsigned int AudioPack::GetLength() const
+{
+    return m_sounds[0].GetLength();
 }
 
 

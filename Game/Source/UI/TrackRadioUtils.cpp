@@ -5,7 +5,7 @@
 
 
 TrackRadioUtils::TrackRadioUtils( BasicUIView& inOwningView )
-    : m_owner(inOwningView)
+    : m_owner( inOwningView )
 {
 
 }
@@ -14,6 +14,9 @@ TrackRadioUtils::TrackRadioUtils( BasicUIView& inOwningView )
 void TrackRadioUtils::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
 {
     GlobalWindow["SkipTrack"] = BindJSCallback( &TrackRadioUtils::SkipTrack );
+    GlobalWindow["SeekToPosition"] = BindJSCallback( &TrackRadioUtils::SeekToPosition );
+    GlobalWindow["GetCurrentTrackDuration"] = BindJSCallbackWithRetval( &TrackRadioUtils::GetCurrentTrackDuration );
+    GlobalWindow["GetCurrentTrackPosition"] = BindJSCallbackWithRetval( &TrackRadioUtils::GetCurrentTrackPosition );
 }
 
 void TrackRadioUtils::OnUpdate( float dt )
@@ -64,6 +67,28 @@ void TrackRadioUtils::PlayNextRandomTrack()
 }
 
 
+ultralight::JSValue TrackRadioUtils::GetCurrentTrackDuration( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    return ultralight::JSValue( TrackRadio::GetInstance().GetTotalLength() );
+}
+
+
+ultralight::JSValue TrackRadioUtils::GetCurrentTrackPosition( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    return ultralight::JSValue( TrackRadio::GetInstance().GetPositionMS() );
+}
+
+
+void TrackRadioUtils::SeekToPosition( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    ME_ASSERT_MSG( args[0].IsNumber(), "Seek Position is not a number ;-;" );
+    double seekPos = args[0].ToNumber();
+    ME_ASSERT_MSG( seekPos >= 0 && seekPos <= 1.0, "Seek Position is not a percent ;-;" );
+    TrackRadio::GetInstance().Seek( (float)seekPos );
+    TrackRadio::GetInstance().Resume();
+}
+
+
 void TrackRadioUtils::SkipTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     TrackRadio::GetInstance().Stop();
@@ -76,7 +101,7 @@ void TrackRadioUtils::PlayLatestTrack()
     RadioArgs radioArgs;
     radioArgs.CurrentTrack = &TrackDatabase::GetInstance().m_trackList.m_tracks.back();
     radioArgs.UsePreviewMarker = false;
-    radioArgs.CurrentTrackIndex = TrackDatabase::GetInstance().m_trackList.m_tracks.size()-1;
+    radioArgs.CurrentTrackIndex = TrackDatabase::GetInstance().m_trackList.m_tracks.size() - 1;
     TrackRadio::GetInstance().Play( radioArgs );
 
     UpdateTrackDisplay( radioArgs.CurrentTrack );

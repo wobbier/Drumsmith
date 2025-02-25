@@ -87,6 +87,7 @@ table {
   
   .slider {
     height: 15px;
+    width: 400px;
     background: #d3d3d3;
     outline: none;
   }
@@ -98,14 +99,14 @@ table {
   .slider::-webkit-slider-thumb {
     width: 25px;
     height: 25px;
-    background: #04AA6D;
+    background: #fafafa;
     cursor: pointer;
   }
   
   .slider::-moz-range-thumb {
     width: 25px;
     height: 25px;
-    background: #04AA6D;
+    background: #fafafa;
     cursor: pointer;
   }
 

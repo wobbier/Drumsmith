@@ -20,7 +20,8 @@ public:
     void SetDrumVolume( float inVolumePercent );
     float GetVolume();
     void Seek( float inSeekPercent );
-    float GetPositionMs();
+    unsigned int GetPositionMs() const;
+    unsigned int GetLength() const;
 
     bool IsReady() const;
     bool IsPlaying() const;

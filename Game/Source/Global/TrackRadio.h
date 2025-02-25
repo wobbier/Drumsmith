@@ -33,9 +33,12 @@ public:
     bool IsPlaying() const;
     void Stop();
     void SetVolume( float inVolume );
-
+    float GetTotalLength() const;
+    float GetPositionMS() const;
+    void Seek( float inPercent );
     void Update( float dt );
     bool CanPlayNextTrack() const;
+    void Resume();
 
     TrackData* m_currentTrack = nullptr;
 
