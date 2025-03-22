@@ -26,8 +26,11 @@ void MainMenuController::OnJSReady( ultralight::JSObject& GlobalWindow, ultralig
 {
     BasicUIView::OnJSReady( GlobalWindow, Caller );
 
+    GlobalWindow["GetRadioVolume_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetRadioVolume_Internal );
     GlobalWindow["GetDLCURL_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetDLCURL );
     GlobalWindow["GetMIDIDevices_Internal"] = BindJSCallbackWithRetval( &MainMenuController::GetMIDIDevices_Internal );
+
+    m_radioUtils->PlayNextRandomTrack();
 }
 
 
@@ -36,14 +39,15 @@ void MainMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultraligh
     BasicUIView::OnUILoad( GlobalWindow, Caller );
 
     m_radioUtils->OnUILoad( GlobalWindow, Caller );
-    m_radioUtils->PlayNextRandomTrack();
-    ExecuteScript( "setRadioInitialValue(" + std::to_string( GameSettings::GetInstance().RadioVolume * 100 ) + ")" );
+    //ExecuteScript( "setRadioInitialValue(" + std::to_string( GameSettings::GetInstance().RadioVolume * 100 ) + ")" );
 
     GlobalWindow["SetRadioVolume"] = BindJSCallback( &MainMenuController::SetRadioVolume );
     GlobalWindow["SetDLCURL_Internal"] = BindJSCallback( &MainMenuController::SetDLCURL );
     GlobalWindow["SaveSettings"] = BindJSCallback( &MainMenuController::SaveSettings );
     GlobalWindow["ConvertCustomDLC"] = BindJSCallback( &MainMenuController::ConvertCustomDLC );
     GlobalWindow["SetPreferredMidiDevice_Internal"] = BindJSCallback( &MainMenuController::SetPreferredMidiDevice_Internal );
+    GlobalWindow["SetAudioLatency_Internal"] = BindJSCallback( &MainMenuController::SetAudioLatency_Internal );
+    GlobalWindow["SetVideoLatency_Internal"] = BindJSCallback( &MainMenuController::SetVideoLatency_Internal );
 }
 
 void MainMenuController::SetRadioVolume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
@@ -52,6 +56,12 @@ void MainMenuController::SetRadioVolume( const ultralight::JSObject& thisObject,
     volume = volume / 100.f;
     TrackRadio::GetInstance().SetVolume( volume );
     GameSettings::GetInstance().RadioVolume = volume;
+}
+
+
+ultralight::JSValue MainMenuController::GetRadioVolume_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    return ultralight::JSValue( GameSettings::GetInstance().RadioVolume );
 }
 
 
@@ -108,6 +118,20 @@ void MainMenuController::SetPreferredMidiDevice_Internal( const ultralight::JSOb
     std::string argConv( arg.utf8().data() );
 
     GameSettings::GetInstance().PreferredMidiDevice = argConv;
+}
+
+
+void MainMenuController::SetAudioLatency_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    int arg = args[0].ToInteger();
+    GameSettings::GetInstance().AudioLatency = arg;
+}
+
+
+void MainMenuController::SetVideoLatency_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+{
+    int arg = args[0].ToInteger();
+    GameSettings::GetInstance().VideoLatency = arg;
 }
 
 

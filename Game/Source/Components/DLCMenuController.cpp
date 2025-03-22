@@ -47,6 +47,8 @@ void DLCMenuController::OnJSReady( ultralight::JSObject& GlobalWindow, ultraligh
     BasicUIView::OnJSReady( GlobalWindow, Caller );
 
     GlobalWindow["GetDLCURL"] = BindJSCallbackWithRetval( &DLCMenuController::GetDLCURL );
+
+    m_radioUtils->PlayNextRandomTrack();
 }
 
 
@@ -55,7 +57,6 @@ void DLCMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight
     BasicUIView::OnUILoad( GlobalWindow, Caller );
 
     m_radioUtils->OnUILoad( GlobalWindow, Caller );
-    m_radioUtils->PlayNextRandomTrack();
 
     GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &DLCMenuController::SelectTrackToPlay );
     GlobalWindow["PlayTrackPreview"] = BindJSCallback( &DLCMenuController::PlayTrackPreview );

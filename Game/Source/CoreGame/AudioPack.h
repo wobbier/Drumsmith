@@ -33,5 +33,7 @@ private:
     TrackData* m_trackData = nullptr;
     std::vector<AudioSource> m_sounds;
     std::vector<int> m_drumTracks;
-    FMOD::ChannelGroup* syncGroup = nullptr;
+
+    // Add a channel group
+    FMOD::ChannelGroup* m_syncGroup = nullptr;
 };

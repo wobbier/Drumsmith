@@ -9,6 +9,11 @@
 AudioPack::AudioPack( TrackData& inTrackData )
 {
     m_trackData = &inTrackData;
+    // Create the channel group for these stems:
+    GetEngine().AudioThread->GetSystem()->createChannelGroup(
+        m_trackData->m_trackName.c_str(),
+        &m_syncGroup
+    );
     // I should track all the needed files in the track data
     LoadStem( m_trackData->m_trackFileName.c_str() );
     LoadStem( "crowd.ogg" );
@@ -38,17 +43,43 @@ AudioPack::~AudioPack()
 
 void AudioPack::Play()
 {
-    //ME_ASSERT_MSG( IsReady(), "AudioPack isn't loaded yet.");
-    //if (!IsReady())
-    //{
-    //    return;
-    //}
+    if( !IsReady() || !m_syncGroup )
+        return;
 
+    // 1. Get the current DSP clock from the channel group
+    unsigned long long dspClockHi = 0;
+    unsigned long long dspClockLo = 0;
+    m_syncGroup->getDSPClock( &dspClockHi, &dspClockLo );
+
+    unsigned long long currentClock = ( static_cast<unsigned long long>( dspClockHi ) << 32 ) | dspClockLo;
+    // Add a small buffer so the playback isn't “in the past” when we set the delay
+    unsigned long long startDelay = currentClock + 2048; // 1024 or 2048 can be used
+
+    // 2. Play each sound in paused mode, assign to channel group, and schedule
     for( auto& sound : m_sounds )
     {
-        sound.Play();
+        // Let AudioSource::Play() create an FMOD::Channel if it's not created yet
+        // Make sure your AudioSource::Play() calls:
+        //   system->playSound(soundResource, nullptr, true, &ChannelHandle);
+        // (i.e., "paused = true" in the call)
+
+        sound.Play(false, true );  // This should set sound.ChannelHandle internally
+
+        if( sound.ChannelHandle )
+        {
+            // Assign to our channel group
+            sound.ChannelHandle->setChannelGroup( m_syncGroup );
+
+            // Schedule the exact start time
+            // First param = DSP clock to start, second param = DSP clock to stop (0 = no stop)
+            sound.ChannelHandle->setDelay( 0, startDelay, false );
+
+            // Finally unpause it so it’s ready to go at that DSP time
+            sound.ChannelHandle->setPaused( false );
+        }
     }
 }
+
 
 
 void AudioPack::Pause()

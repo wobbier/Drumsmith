@@ -30,8 +30,16 @@
     <p class="menu-text" id="menu-volume-text">Radio Volume</p>
     <br />
     <input type="range" name="RadioVolume" id="radio-volume" min="0" max="100" step="1" value="50" class="slider" />
-    <p class="menu-text" id="menu-volume-text">DLC Server</p>
+    <p class="menu-text" id="menu-volume-text">Audio Delay ({{ audioLatency }}ms)</p>
     <br />
+    <input type="range" name="AudioDelay" id="audio-delay" min="0" max="100" step="1" value="50" class="slider"
+      v-model="audioLatency" @change="updateAudioLatency" />
+    <br />
+    <p class="menu-text" id="menu-volume-text">Visual Delay ({{ videoLatency }}ms)</p>
+    <input type="range" name="VideoDelay" id="video-delay" min="0" max="100" step="1" value="50" class="slider"
+      v-model="videoLatency" @change="updateVideoLatency" />
+    <br />
+    <p class="menu-text" id="menu-volume-text">DLC Server</p>
     <div class="url-input-container">
       <span class="prefix">http://</span>
       <input class="myinput-link" @keydown.enter="SetDLCURL" />
@@ -78,6 +86,10 @@ export default {
         Name: "Test", Port: 0
       }], // List of MIDI devices
       selectedDevice: null, // Selected MIDI device index
+      audioLatency: 0, // Audio latency in milliseconds
+      videoLatency: 0, // Video latency in milliseconds
+      radioEnabled: false, // Radio enabled flag
+      radioVolume: 50, // Radio volume
     };
   },
   computed: {
@@ -108,6 +120,10 @@ export default {
       // eslint-disable-next-line
       this.midiDevices = JSON.parse(GetMIDIDevices_Internal());
     }
+    if (typeof GetRadioVolume_Internal === 'function') {
+      // eslint-disable-next-line
+      this.radioVolume = GetRadioVolume_Internal();
+    }
   },
   methods: {
     loadScene(scene) {
@@ -134,11 +150,29 @@ export default {
       console.log('Starting practice mode');
       // Add logic for practice mode
     },
+    setRadioVolume() {
+      if (typeof SetRadioVolume_Internal === 'function') {
+        // eslint-disable-next-line
+        SetRadioVolume_Internal(this.radioVolume);
+      }
+    },
     updatePreferredDevice() {
       console.log("Selected MIDI Device Index:", this.selectedDevice);
       if (typeof SetPreferredMidiDevice_Internal === 'function') {
         // eslint-disable-next-line
         SetPreferredMidiDevice_Internal(this.selectedDeviceName);
+      }
+    },
+    updateAudioLatency() {
+      if (typeof SetAudioLatency_Internal === 'function') {
+        // eslint-disable-next-line
+        SetAudioLatency_Internal(this.audioLatency);
+      }
+    },
+    updateVideoLatency() {
+      if (typeof SetVideoLatency_Internal === 'function') {
+        // eslint-disable-next-line
+        SetVideoLatency_Internal(this.videoLatency);
       }
     },
     toggleMenu() {
