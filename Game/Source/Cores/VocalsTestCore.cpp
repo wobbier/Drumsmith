@@ -86,7 +86,7 @@ void VocalsTestCore::OnStart()
     audioSystem->playSound( testVocals->Handle, 0, false, &channel );
     // AttachFFT
     audioSystem->createDSPByType( FMOD_DSP_TYPE_FFT, &fftDsp );
-    fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING );
+    fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOW, FMOD_DSP_FFT_WINDOW_HAMMING );
     fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWSIZE, 1024 );  // Resolution of FFT
     channel->addDSP( 0, fftDsp );
 }
