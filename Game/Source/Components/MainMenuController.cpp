@@ -74,7 +74,7 @@ ultralight::JSValue MainMenuController::GetDLCURL( const ultralight::JSObject& t
 ultralight::JSValue MainMenuController::GetMIDIDevices_Internal( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
 {
     auto& devices = MidiDevice::GetInstance().GetDevices();
-    json deviceList;
+    json deviceList = json::array();
     for( auto& device : devices )
     {
         json deviceEntry;

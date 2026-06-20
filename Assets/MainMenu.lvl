@@ -36,8 +36,8 @@
                 },
                 {
                     "FilePath": "Assets/UI/MainMenu.html",
-					"UIURL": "http://localhost:8080/MainMenu.html",
-                    "Type": "MainMenuController"
+                    "Type": "MainMenuController",
+                    "UIURL": "http://localhost:8080/MainMenu.html"
                 }
             ],
             "DestroyOnLoad": true,
@@ -65,14 +65,17 @@
                 },
                 {
                     "Material": {
+                        "BlendMode": 0,
                         "DiffuseColor": [
                             1.0,
                             1.0,
                             1.0
                         ],
+                        "FaceMode": 0,
+                        "RenderMode": 0,
                         "Textures": {
                             "Diffuse": {
-                                "Path": "Engine/Assets/default.png",
+                                "Path": "Assets/default.png",
                                 "RenderMode": "Opaque"
                             }
                         },
@@ -86,7 +89,7 @@
                     "Type": "Mesh"
                 },
                 {
-                    "ModelPath": "Engine/Assets/cube.obj",
+                    "ModelPath": "Assets/cube.obj",
                     "Type": "Model"
                 }
             ],

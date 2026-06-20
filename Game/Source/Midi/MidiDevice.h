@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <cstdint>
 #include "Singleton.h"
 
 class RtMidiIn;
@@ -15,11 +16,11 @@ struct MidiDeviceInfo
 
 struct MidiMessageNew
 {
-    std::uint8_t m_status = 0;
-    std::uint8_t m_data1 = 0;
-    std::uint8_t m_data2 = 0;
+    uint8_t m_status = 0;
+    uint8_t m_data1 = 0;
+    uint8_t m_data2 = 0;
 
-    std::uint8_t GetMessageType() const
+    uint8_t GetMessageType() const
     {
         return ( m_status & 0xF0 ) >> 4; // 0x9 -> Note On
     }

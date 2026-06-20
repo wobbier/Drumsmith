@@ -63,6 +63,16 @@ public class SharpGameProject : BaseGameProject
         conf.LibraryFiles.Add("midifile");
         conf.LibraryFiles.Add("rtmidi");
     }
+
+    public override void ConfigureLinux(Configuration conf, CommonTarget target)
+    {
+        base.ConfigureLinux(conf, target);
+        conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/Lib/linux"));
+        conf.LibraryFiles.Add("rtmidi");
+        conf.LibraryFiles.Add("midifile");
+        conf.LibraryFiles.Add( "libasound.so" );
+        conf.LibraryFiles.Add( "libcurl.so" );
+    }
 }
 
 [Generate]
@@ -77,7 +87,9 @@ public class SharpGameSolution : BaseGameSolution
         Globals.FMOD_UWP_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Universal Windows Platform/";
         Globals.FMOD_macOS_Dir = Util.GetCurrentSharpmakeFileInfo() + "/../ThirdParty/FMOD Programmers API/";
         //Globals.MONO_Win64_Dir = string.Empty;
+        Globals.DOTNET_Win64_Dir = "C:\\Program Files\\dotnet\\packs\\Microsoft.NETCore.App.Host.win-x64\\8.0.27\\runtimes\\win-x64\\native";
         Globals.IsPhysicsEnabled3D = true;
+        Globals.IsUltralightEnabled = true;
         //Globals.ExeName = "Drumsmith";
         System.Console.WriteLine(Globals.FMOD_macOS_Dir);
     }

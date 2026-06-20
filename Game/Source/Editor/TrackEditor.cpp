@@ -13,6 +13,7 @@
 #include "CoreGame/Drumset.h"
 #include "Cores/AudioCore.h"
 #include "Events/EditorEvents.h"
+#include <cmath>
 
 #if USING(ME_EDITOR)
 
@@ -59,7 +60,7 @@ float TrackEditor::GetNoteWidth( float timelineSizeScale )
 
 float TrackEditor::CalculateZoom()
 {
-    return std::powf( kBaseZoomFactor, ScrollDelta );
+    return std::pow( kBaseZoomFactor, ScrollDelta );
 }
 
 float TrackEditor::ScaleValue( float inValue )

@@ -167,7 +167,7 @@ void TrackDatabase::Reload()
                     bool exists = fileExistsInDirectory( entry.path(), "TrackData.txt" );
                     if( exists )
                     {
-                        m_trackList.m_tracks.emplace_back( TrackData( Path( entry.path().u8string() + "/TrackData.txt" ) ) );
+                        m_trackList.m_tracks.emplace_back( TrackData( Path( entry.path().generic_string() + "/TrackData.txt" ) ) );
                         m_trackList.m_tracks.back().Load();
 
                         Path trackPath( m_trackList.m_tracks.back().m_trackSourcePath );
@@ -245,7 +245,7 @@ void TrackDatabase::ExportMidiTrackMetaData()
             bool midiFormat = fileExistsInDirectory( entry.path(), "notes.mid" );
             if( midiFormat )
             {
-                Path midiPath = Path( std::string( entry.path().u8string() ) );
+                Path midiPath = Path( std::string( entry.path().generic_string() ) );
 
                 TrackData newTrack = TrackData( Path( midiPath.FullPath + "/NoteData.txt" ) );
                 LegacySongMetaData legacyTrack = ConvertFromLegacy( midiPath.FullPath, newTrack );

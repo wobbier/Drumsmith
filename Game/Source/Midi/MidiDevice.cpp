@@ -1,5 +1,5 @@
 #include "MidiDevice.h"
-#include "RtMidi.h"
+#include <RtMidi.h>
 #include "Core/Assert.h"
 #include "CLog.h"
 
@@ -91,31 +91,16 @@ std::vector<MidiMessageNew> MidiDevice::PumpMessages()
     }
 
     std::vector<MidiMessageNew> messages;
-    // Infinite loop to keep reading incoming MIDI messages.
-    while( !IsPaused )
+    std::vector<unsigned char> message;
+    m_midiIn->getMessage( &message );
+    while( message.size() >= 3 )
     {
-        std::vector<unsigned char> message;
-        int nBytes, i;
-        double stamp = m_midiIn->getMessage( &message );
-        nBytes = message.size();
-        for( i = 0; i < nBytes; i++ )
-        {
-            std::cout << "Byte " << i << " = " << (int)message[i] << ", ";
-        }
-        if( nBytes > 0 )
-        {
-            std::cout << "stamp = " << stamp << std::endl;
-        }
-        if( message.empty() || message.size() < 3 )
-        {
-            break;
-        }
         MidiMessageNew msg;
         msg.m_status = message[0];
-        msg.m_data1 = message[1];
-        msg.m_data2 = message[2];
-        std::cout << "Status " << 0 << " = " << (int)msg.GetMessageType() << std::endl;
+        msg.m_data1  = message[1];
+        msg.m_data2  = message[2];
         messages.push_back( msg );
+        m_midiIn->getMessage( &message );
     }
     return messages;
 }

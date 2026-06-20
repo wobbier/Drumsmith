@@ -1,19 +1,31 @@
 #include "AudioPack.h"
+
+#if USING( ME_FMOD )
+
 #include "Cores/AudioCore.h"
 #include "Engine/Engine.h"
 #include "Resources/SoundResource.h"
 #include "Resource/ResourceCache.h"
 #include <fmod.hpp>
 #include "Pointers.h"
+#include <utility>
 
 AudioPack::AudioPack( TrackData& inTrackData )
 {
     m_trackData = &inTrackData;
     // Create the channel group for these stems:
-    GetEngine().AudioThread->GetSystem()->createChannelGroup(
+    FMOD::System* system = GetEngine().AudioThread->GetSystem();
+    system->createChannelGroup(
         m_trackData->m_trackName.c_str(),
         &m_syncGroup
     );
+
+    FMOD::ChannelGroup* masterGroup = nullptr;
+    if( m_syncGroup && system->getMasterChannelGroup( &masterGroup ) == FMOD_OK && masterGroup )
+    {
+        masterGroup->addGroup( m_syncGroup );
+    }
+
     // I should track all the needed files in the track data
     LoadStem( m_trackData->m_trackFileName.c_str() );
     LoadStem( "crowd.ogg" );
@@ -37,7 +49,50 @@ AudioPack::AudioPack( TrackData& inTrackData )
 
 AudioPack::~AudioPack()
 {
+    Reset();
+}
+
+
+AudioPack::AudioPack( AudioPack&& other ) noexcept
+{
+    *this = std::move( other );
+}
+
+
+AudioPack& AudioPack::operator=( AudioPack&& other ) noexcept
+{
+    if( this == &other )
+    {
+        return *this;
+    }
+
+    Reset();
+
+    m_trackData = other.m_trackData;
+    m_sounds = std::move( other.m_sounds );
+    m_drumTracks = std::move( other.m_drumTracks );
+    m_syncGroup = other.m_syncGroup;
+
+    other.m_trackData = nullptr;
+    other.m_syncGroup = nullptr;
+
+    return *this;
+}
+
+
+void AudioPack::Reset()
+{
+    Stop();
     m_sounds.clear();
+    m_drumTracks.clear();
+
+    if( m_syncGroup )
+    {
+        m_syncGroup->release();
+        m_syncGroup = nullptr;
+    }
+
+    m_trackData = nullptr;
 }
 
 
@@ -46,14 +101,12 @@ void AudioPack::Play()
     if( !IsReady() || !m_syncGroup )
         return;
 
-    // 1. Get the current DSP clock from the channel group
-    unsigned long long dspClockHi = 0;
-    unsigned long long dspClockLo = 0;
-    m_syncGroup->getDSPClock( &dspClockHi, &dspClockLo );
+    unsigned long long groupClock = 0;
+    unsigned long long parentClock = 0;
+    m_syncGroup->getDSPClock( &groupClock, &parentClock );
 
-    unsigned long long currentClock = ( static_cast<unsigned long long>( dspClockHi ) << 32 ) | dspClockLo;
-    // Add a small buffer so the playback isn't “in the past” when we set the delay
-    unsigned long long startDelay = currentClock + 2048; // 1024 or 2048 can be used
+    // Add a small buffer so playback is not in the past when we set the delay.
+    unsigned long long startDelay = parentClock + 2048;
 
     // 2. Play each sound in paused mode, assign to channel group, and schedule
     for( auto& sound : m_sounds )
@@ -72,9 +125,9 @@ void AudioPack::Play()
 
             // Schedule the exact start time
             // First param = DSP clock to start, second param = DSP clock to stop (0 = no stop)
-            sound.ChannelHandle->setDelay( 0, startDelay, false );
+            sound.ChannelHandle->setDelay( startDelay, 0, false );
 
-            // Finally unpause it so it’s ready to go at that DSP time
+            // Finally unpause it so it is ready to go at that DSP time.
             sound.ChannelHandle->setPaused( false );
         }
     }
@@ -187,30 +240,47 @@ bool AudioPack::IsPlaying() const
 
 bool AudioPack::LoadStem( const char* inFileName, bool isDrumTrack )
 {
-    Path drumsPath = Path( Path( m_trackData->m_trackSourcePath ).GetDirectoryString() + inFileName );
-    
-    if( drumsPath.Exists )
-    {
-        AudioSource audioSource( inFileName );
-        SharedPtr<Sound> soundResource = ResourceCache::GetInstance().Get<Sound>( drumsPath, GetEngine().AudioThread->GetSystem(), SoundFlags::NonBlocking | SoundFlags::CreateStream );
-        if( !soundResource )
-        {
-            YIKES_FMT( "Failed to load sound: %s", audioSource.FilePath.GetLocalPathString().c_str() );
-            audioSource.IsInitialized = true;
-        }
-        audioSource.SoundInstance = soundResource;
+    Path drumsPath(
+        Path( m_trackData->m_trackSourcePath ).GetDirectoryString() +
+        inFileName
+    );
 
-        m_sounds.push_back( audioSource );
-        if( isDrumTrack )
-        {
-            m_drumTracks.push_back( m_sounds.size() - 1 );
-        }
-        return true;
+    if( !drumsPath.Exists )
+    {
+        return false;
     }
 
-    return false;
-}
+    SharedPtr<Sound> soundResource =
+        ResourceCache::GetInstance().Get<Sound>(
+            drumsPath,
+            GetEngine().AudioThread->GetSystem(),
+            SoundFlags::NonBlocking |
+            SoundFlags::CreateStream
+        );
 
+    const size_t soundIndex = m_sounds.size();
+
+    AudioSource& audioSource = m_sounds.emplace_back( drumsPath.FullPath );
+
+    audioSource.SoundInstance = soundResource;
+
+    if( !soundResource )
+    {
+        YIKES_FMT(
+            "Failed to load sound: %s",
+            audioSource.FilePath.GetLocalPathString().c_str()
+        );
+
+        audioSource.IsInitialized = true;
+    }
+
+    if( isDrumTrack )
+    {
+        m_drumTracks.push_back( soundIndex );
+    }
+
+    return true;
+}
 
 bool AudioPack::LoadURL( const char* inURL, bool isDrumTrack /*= false */ )
 {
@@ -248,3 +318,5 @@ bool AudioPack::IsReady() const
     }
     return true;
 }
+
+#endif
