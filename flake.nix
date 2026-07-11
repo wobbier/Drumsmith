@@ -2,7 +2,11 @@
   description = "MitchEngine dev environment";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    # Must track the host's nixpkgs channel: graphics is impure (apps load the
+    # driver from the host's /run/opengl-driver). A skew here means the dev-shell
+    # glibc/wayland can't load the host Mesa ICDs -> "Vulkan doesn't implement
+    # VK_KHR_surface". The dankbook/danktank systems are on nixos-unstable.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -48,18 +52,18 @@
             dotnet
 
             # Vue HTML/JS UI
-            nodejs_20
+            nodejs_26
             python3
 
             # X11 dev headers (needed by SDL_syswm.h and XWayland support)
-            xorg.libX11
-            xorg.libXcursor
-            xorg.libXext
-            xorg.libXrandr
-            xorg.libXinerama
-            xorg.libXxf86vm
-            xorg.libXfixes
-            xorg.libxcb
+            libX11
+            libXcursor
+            libXext
+            libXrandr
+            libXinerama
+            libXxf86vm
+            libXfixes
+            libxcb
 
             bzip2  # For decompressing .tar.bz2 files from bgfx releases
             alsa-lib
@@ -90,6 +94,22 @@
             pkgs.SDL2
             pkgs.vulkan-loader
 
+            # X11/XCB runtime libs. These are in buildInputs for compiling, but
+            # makeLibraryPath is non-transitive and SDL2 needs libX11 at load
+            # time, so they must be listed here too.
+            pkgs.xorg.libX11
+            pkgs.xorg.libXcursor
+            pkgs.xorg.libXext
+            pkgs.xorg.libXrandr
+            pkgs.xorg.libXinerama
+            pkgs.xorg.libXxf86vm
+            pkgs.xorg.libXfixes
+            pkgs.xorg.libxcb
+
+            # Wayland EGL backend (libwayland-egl.so.1) — in buildInputs for
+            # compiling, but needed at load time too now that the binary links it.
+            pkgs.wayland
+
             # Ultralight (latest) GTK3 runtime deps
             pkgs.gtk3
             pkgs.glib
@@ -98,6 +118,7 @@
             pkgs.atk
             pkgs.gdk-pixbuf
             pkgs.harfbuzz
+            pkgs.fontconfig  # libfontconfig.so.1 (Ultralight font rendering)
             pkgs.bzip2  # libbz2.so.1.0
 
             pkgs.alsa-lib
