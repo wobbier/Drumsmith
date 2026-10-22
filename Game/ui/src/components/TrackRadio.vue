@@ -9,19 +9,22 @@
       <div class="clearfix"></div>
       <ScrollingText baseId="track-artist" textStyle="Regular Small" :text="trackArtist" />
       <div class="clearfix"></div>
-      <div class="skip-track" onclick="SkipTrack()">
-        <a href="#">Skip</a>
-      </div>
-    </div>
 
-    <!-- Custom Audio Progress Bar -->
-    <div class="track-progress">
-      <!-- Range slider that we bind to currentTime -->
-      <input type="range" min="0" :max="duration" step="1" v-model="currentTime" @change="seekAudio" />
-      <div class="progress-labels">
-        <span>{{ formatTime(currentTime) }}</span>
-        <span>/</span>
-        <span>{{ formatTime(duration) }}</span>
+      <div class="track-bottom-row">
+        <!-- Custom Audio Progress Bar -->
+        <div class="track-progress">
+          <!-- Range slider that we bind to currentTime -->
+          <input type="range" min="0" :max="duration" step="1" v-model="currentTime" @change="seekAudio" />
+          <div class="progress-labels">
+            <span>{{ formatTime(currentTime) }}</span>
+            <span></span>
+            <span>{{ formatTime(duration) }}</span>
+          </div>
+        </div>
+
+        <div class="skip-track" onclick="SkipTrack()">
+          <a href="#">Skip</a>
+        </div>
       </div>
     </div>
   </div>
@@ -133,12 +136,21 @@ export default {
 </script>
 
 <style scoped>
+.track-bottom-row {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .track-progress {
-  margin-top: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
 .track-progress input[type="range"] {
   width: 100%;
+  display: block;
 }
 
 .progress-labels {
@@ -159,13 +171,16 @@ export default {
 
 .track-art {
   display: flex;
+  flex-shrink: 0;
 }
 
 .track-details {
-  margin-left: 15px;
   margin: 15px;
-  position: relative;
-  width: inherit;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 #track-radio img {
@@ -188,9 +203,8 @@ export default {
 }
 
 #track-radio .skip-track {
-  position: absolute;
-  right: 0;
-  bottom: 0;
+  position: static;
+  flex-shrink: 0;
   padding: 15px;
   background-color: rgba(255, 255, 255, 0.164);
 }

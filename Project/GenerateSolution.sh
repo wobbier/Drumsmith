@@ -6,5 +6,5 @@ dotnet "../Engine/Tools/Sharpmake/Sharpmake.Application.dll" "/sources('../Game.
 
 echo ""
 echo "Generating compile_commands.json for CLion / clangd..."
-bear -- make -f ../Drumsmith.make Havana config=editor_debug -j$(nproc)
+bear --output ../compile_commands.json -- make -C .. -f Drumsmith.make Havana config=editor_debug -j$(nproc)
 echo "Done. Open the project folder in CLion."
