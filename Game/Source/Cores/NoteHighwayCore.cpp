@@ -28,18 +28,24 @@ void NoteHighwayCore::Init()
 
 void NoteHighwayCore::OnAddedToWorld()
 {
-    std::vector<TypeId> events = {
-    LaunchPlayTrackEvent::GetEventId(),
-    InGamePauseCurrentTrack::GetEventId(),
-    InGameResumeCurrentTrack::GetEventId()
-    };
-    EventManager::GetInstance().RegisterReceiver( this, events );
+    m_launchTrackSubscription = EventSubscription::Create<LaunchPlayTrackEvent>( [this]( const LaunchPlayTrackEvent& event ) {
+        SetupTrack( TrackDatabase::GetInstance().m_trackList.m_tracks[event.TrackIndex] );
+        return true;
+    } );
+    m_pauseTrackSubscription = EventSubscription::Create<InGamePauseCurrentTrack>( [this]( const InGamePauseCurrentTrack& ) {
+        Pause();
+    } );
+    m_resumeTrackSubscription = EventSubscription::Create<InGameResumeCurrentTrack>( [this]( const InGameResumeCurrentTrack& ) {
+        Resume();
+    } );
     MidiDevice::GetInstance().OpenMidiDevice( GameSettings::GetInstance().PreferredMidiDevice );
 }
 
 void NoteHighwayCore::OnRemovedFromWorld()
 {
-    EventManager::GetInstance().DeRegisterReciever( this );
+    m_launchTrackSubscription.reset();
+    m_pauseTrackSubscription.reset();
+    m_resumeTrackSubscription.reset();
 }
 
 void NoteHighwayCore::OnStop()
@@ -237,27 +243,6 @@ void NoteHighwayCore::OnStart()
         Transform* lane = scene->GetRootTransform()->GetChildByName( "TrackMover" );
         TrackMover = lane->Parent;
     }
-}
-
-
-bool NoteHighwayCore::OnEvent( const BaseEvent& evt )
-{
-    if( evt.GetEventId() == LaunchPlayTrackEvent::GetEventId() )
-    {
-        const LaunchPlayTrackEvent& event = static_cast<const LaunchPlayTrackEvent&>( evt );
-        SetupTrack( TrackDatabase::GetInstance().m_trackList.m_tracks[event.TrackIndex] );
-        return true;
-    }
-    if( evt.GetEventId() == InGameResumeCurrentTrack::GetEventId() )
-    {
-        Resume();
-    }
-    if( evt.GetEventId() == InGamePauseCurrentTrack::GetEventId() )
-    {
-        Pause();
-    }
-
-    return false;
 }
 
 

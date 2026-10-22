@@ -1,5 +1,7 @@
 #pragma once
+#include "Events/Event.h"
 #include <functional>
+#include <string>
 
 class AudioSource;
 

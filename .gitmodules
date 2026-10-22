@@ -1,7 +1,7 @@
 [submodule "Engine"]
 	path = Engine
 	url = https://github.com/wobbier/MitchEngine
-	branch = master
+	branch = overhaul
 [submodule "ThirdParty/USB-MIDI"]
 	path = ThirdParty/USB-MIDI
 	url = https://github.com/wobbier/USB-MIDI/

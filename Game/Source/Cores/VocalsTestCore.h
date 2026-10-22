@@ -1,6 +1,5 @@
 #pragma once
 #include <ECS/Core.h>
-#include "Events/EventReceiver.h"
 #include "Components/Audio/AudioSource.h"
 
 class AudioCore;
@@ -11,7 +10,6 @@ namespace FMOD { class System; }
 
 class VocalsTestCore final
 	: public Core<VocalsTestCore>
-	, public EventReceiver
 {
 public:
 	VocalsTestCore();
@@ -28,7 +26,6 @@ public:
     void OnStop() override;
 
     virtual void Update( const UpdateContext& context ) final;
-    bool OnEvent( const BaseEvent& evt ) override;
 
     void OnStart() override;
     void ProcessFFT();

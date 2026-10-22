@@ -36,16 +36,16 @@ void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thi
     int index = args[1].ToInteger();
 
     TrackRadio::GetInstance().Stop();
-    SharedPtr<LoadSceneEvent> loadSceneEvent = MakeShared<LoadSceneEvent>();
-    loadSceneEvent->Level = "Assets/Example.lvl";
-    EventManager::GetInstance().QueueEvent( loadSceneEvent );
+    LoadSceneEvent loadSceneEvent;
+    loadSceneEvent.Level = "Assets/Example.lvl";
 
-    loadSceneEvent->Callback = [path, index]() {
+    loadSceneEvent.Callback = [path, index]() {
         LaunchPlayTrackEvent evt;
         evt.TrackID = std::string( path.utf8().data() );
         evt.TrackIndex = index;
         evt.Fire();
         };
+    loadSceneEvent.Queue();
 }
 
 
@@ -54,16 +54,9 @@ void TrackListMenuController::ViewTrackStats( const ultralight::JSObject& thisOb
     //ultralight::String path = args[0].ToString();
     //int index = args[1].ToInteger();
 
-    SharedPtr<LoadSceneEvent> loadSceneEvent = MakeShared<LoadSceneEvent>();
-    loadSceneEvent->Level = "Assets/TrackStats.lvl";
-    EventManager::GetInstance().QueueEvent( loadSceneEvent );
-
-    //loadSceneEvent->Callback = [path, index]() {
-    //    LaunchPlayTrackEvent evt;
-    //    evt.TrackID = std::string( path.utf8().data() );
-    //    evt.TrackIndex = index;
-    //    evt.Fire();
-    //    };
+    LoadSceneEvent loadSceneEvent;
+    loadSceneEvent.Level = "Assets/TrackStats.lvl";
+    loadSceneEvent.Queue();
 }
 
 

@@ -11,7 +11,7 @@
       "cwd": "${workspaceFolder}",
       "externalConsole": false,
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -29,7 +29,8 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "build-havana-editor-debug"
+      "preLaunchTask": "build-havana-editor-debug",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\""
     },
     {
       "name": "Havana (Debug, Linux)",
@@ -41,7 +42,7 @@
       "cwd": "${workspaceFolder}",
       "externalConsole": false,
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -59,7 +60,8 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "build-havana-game-debug"
+      "preLaunchTask": "build-havana-game-debug",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\""
     }
   ]
 }

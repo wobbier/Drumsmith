@@ -30,7 +30,6 @@ void VocalsTestCore::OnAddedToWorld()
 
 void VocalsTestCore::OnRemovedFromWorld()
 {
-    //EventManager::GetInstance().DeRegisterReciever( this );
     //MidiDevice::GetInstance().CloseMidiDevice();
 }
 
@@ -91,11 +90,6 @@ void VocalsTestCore::OnStart()
     channel->addDSP( 0, fftDsp );
 }
 
-
-bool VocalsTestCore::OnEvent( const BaseEvent& evt )
-{
-    return false;
-}
 
 void VocalsTestCore::ProcessFFT()
 {

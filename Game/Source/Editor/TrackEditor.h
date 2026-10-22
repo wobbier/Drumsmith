@@ -47,8 +47,6 @@ public:
 
     float TimelineSize = 2000.f;
 
-    bool OnEvent( const BaseEvent& evt ) override;
-
     float ScrollDelta = 0.f;
     bool IsWindowHovered = false;
 

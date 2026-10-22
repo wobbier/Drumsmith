@@ -7,10 +7,10 @@
 #include <unordered_map>
 #include "CoreGame/AudioPack.h"
 #include "Midi/MidiDevice.h"
+#include <memory>
 
 class NoteHighwayCore final
 	: public Core<NoteHighwayCore>
-	, public EventReceiver
 {
 public:
 	NoteHighwayCore();
@@ -29,7 +29,6 @@ public:
 	void UpdateCameraPosition( float deltaTime );
 
     virtual void Update( const UpdateContext& context ) final;
-    bool OnEvent( const BaseEvent& evt ) override;
 
 	void SetupTrack( TrackData& inTrackData );
 	void ShutdownTrack();
@@ -57,6 +56,9 @@ private:
 	AudioPack m_currentTrackPack;
 	bool m_hasStartedTrackYet = false;
 	float m_drumVolume = 1.f;
+    std::unique_ptr<EventSubscription> m_launchTrackSubscription;
+    std::unique_ptr<EventSubscription> m_pauseTrackSubscription;
+    std::unique_ptr<EventSubscription> m_resumeTrackSubscription;
 };
 
 ME_REGISTER_CORE(NoteHighwayCore)

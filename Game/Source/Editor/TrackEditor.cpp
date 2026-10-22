@@ -20,7 +20,22 @@
 TrackEditor::TrackEditor()
     : HavanaWidget( "Track Editor" )
 {
-    EventManager::GetInstance().RegisterReceiver( this, { MouseScrollEvent::GetEventId(), EditTrackEvent::GetEventId() } );
+    Listen<MouseScrollEvent>( [this]( const MouseScrollEvent& event ) {
+        if( IsWindowHovered )
+        {
+            ScrollDelta += event.Scroll.y;
+        }
+    } );
+    Listen<EditTrackEvent>( [this]( const EditTrackEvent& event ) {
+        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+        {
+            if( track.m_trackName == event.FileName )
+            {
+                SelectedTrackLocation = Path( track.m_trackSourcePath );
+                ResetTrack();
+            }
+        }
+    } );
 }
 
 
@@ -709,33 +724,6 @@ void TrackEditor::DrawPadPreview()
 
         ImGui::EndChildFrame();
     }
-}
-
-bool TrackEditor::OnEvent( const BaseEvent& evt )
-{
-    //if( evt.GetEventId() == RequestAssetSelectionEvent::GetEventId() )
-    //{
-    //    RequestAssetSelectionEvent& event = static_cast<RequestAssetSelectionEvent>( evt );
-    //}
-    if( IsWindowHovered && evt.GetEventId() == MouseScrollEvent::GetEventId() )
-    {
-        const MouseScrollEvent& event = static_cast<const MouseScrollEvent&>( evt );
-        ScrollDelta += event.Scroll.y;
-    }
-    if( evt.GetEventId() == EditTrackEvent::GetEventId() )
-    {
-        const EditTrackEvent& event = static_cast<const EditTrackEvent&>( evt );
-        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
-        {
-            if( track.m_trackName == event.FileName )
-            {
-                SelectedTrackLocation = Path( track.m_trackSourcePath );
-                ResetTrack();
-            }
-        }
-    }
-
-    return false;
 }
 
 #endif
