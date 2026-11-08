@@ -1,0 +1,49 @@
+/* The menu radio widget (TrackRadioUtils): slides in from the right for a new track or a hover,
+   hides itself after a while. MainMenu.rml and DLC.rml carry the same markup. */
+#track-radio-hover { position: absolute; right: 0; bottom: 0; width: 300dp; height: 200dp; z-index: 5; }
+#track-radio {
+    position: absolute;
+    right: -620dp;
+    bottom: 12dp;
+    display: flex;
+    align-items: stretch;
+    width: 600dp;
+    max-width: 44vw;
+    height: 180dp;
+    background-color: #242424c0;
+    transition: right 0.5s cubic-out;
+    z-index: 6;
+}
+#track-radio.visible { right: 12dp; }
+.radio-art { width: 180dp; height: 180dp; flex-shrink: 0; }
+.radio-details { flex: 1; min-width: 0; padding: 14dp; }
+.radio-caption { font-size: 11dp; letter-spacing: 2dp; color: #b8b8b8; margin-bottom: 9dp; }
+#radio-title { white-space: nowrap; overflow: hidden; font-size: 26dp; font-weight: bold; margin-bottom: 6dp; }
+#radio-artist { white-space: nowrap; overflow: hidden; color: #dddddd; font-size: 20dp; }
+.radio-controls { display: flex; align-items: center; gap: 12dp; margin-top: 13dp; }
+.radio-progress { flex: 1; min-width: 0; }
+.radio-progress input[type=range] { display: block; width: 100%; height: 24dp; tab-index: auto; nav: auto; }
+.radio-progress input[type=range] slidertrack { height: 5dp; margin: 10dp 0; background-color: #ffffff60; }
+.radio-progress input[type=range] sliderbar { width: 14dp; height: 24dp; margin-top: -10dp; background-color: #eeeeee; }
+.radio-progress input[type=range]:focus sliderbar, .radio-progress input[type=range] sliderbar:hover { background-color: #ff9933; }
+.radio-progress input[type=range] sliderarrowdec, .radio-progress input[type=range] sliderarrowinc { display: none; }
+.radio-times { display: flex; justify-content: space-between; font-size: 13dp; color: #cccccc; }
+#radio-skip { width: auto; margin: 0; padding: 10dp 12dp; font-size: 16dp; background-color: #ffffff25; }
+@media (max-height: 800px) {
+    #track-radio { height: 150dp; width: 520dp; }
+    .radio-art { width: 150dp; height: 150dp; }
+    .radio-details { padding: 10dp; }
+    #radio-title { font-size: 22dp; }
+    #radio-artist { font-size: 17dp; }
+    .radio-caption { margin-bottom: 5dp; }
+    .radio-controls { margin-top: 8dp; }
+}
+@media (max-width: 1000px) {
+    #track-radio { max-width: 42vw; height: 116dp; }
+    .radio-art { width: 116dp; height: 116dp; }
+    .radio-caption { display: none; }
+    #radio-title { font-size: 18dp; }
+    #radio-artist { font-size: 14dp; }
+    .radio-controls { gap: 6dp; margin-top: 4dp; }
+    #radio-skip { padding: 6dp; font-size: 14dp; }
+}

@@ -17,7 +17,7 @@ void GameApp::OnStart()
 
 void GameApp::OnUpdate(const UpdateContext& inUpdateContext)
 {
-
+	// The menu controllers tick from MenuCore, declared in each menu scene (Docs/UI-and-Menus.md).
 }
 
 void GameApp::OnEnd()

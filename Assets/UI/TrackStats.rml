@@ -1,0 +1,15 @@
+<rml>
+<head>
+    <title>Drumsmith — Track Stats</title>
+    <link type="text/rcss" href="Drumsmith.rcss"/>
+</head>
+<body class="menu-page">
+    <div class="menu-shade"></div>
+    <div class="menu-column">
+        <button id="stats-back" class="menu-link blue" autofocus onclick="load-scene:Assets/TrackList.lvl">&lt; Back<span class="underline"></span></button>
+        <h1>TRACK STATS</h1>
+        <p>No play statistics are recorded yet.</p>
+        <p class="muted">Scores and accuracy for each song will show up here once the game keeps them.</p>
+    </div>
+</body>
+</rml>

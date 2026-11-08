@@ -1,235 +1,187 @@
-#include <Components/TrackListMenuController.h>
-
+#include "Components/TrackListMenuController.h"
+#include <Cores/UI/RmlUiCore.h>
+#include <Engine/Engine.h>
+#include <Engine/Input.h>
 #include <Events/SceneEvents.h>
 #include "CoreGame/TrackList.h"
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
+#include "UI/TrackRadioUtils.h"
+#include <cctype>
 
-TrackListMenuController::TrackListMenuController()
-    : BasicUIView( "TrackListMenuController" )
+namespace
 {
-    FilePath = Path( "Assets/UI/SongList.html" );
-}
-
-#if USING( ME_UI )
-
-void TrackListMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
-{
-    BasicUIView::OnUILoad( GlobalWindow, Caller );
-
-    GlobalWindow["SelectTrackToPlay"] = BindJSCallback( &TrackListMenuController::SelectTrackToPlay );
-    GlobalWindow["PlayTrackPreview"] = BindJSCallback( &TrackListMenuController::PlayTrackPreview );
-    GlobalWindow["FilterSortTracks"] = BindJSCallback( &TrackListMenuController::SortTracks );
-    GlobalWindow["FilterTracks"] = BindJSCallback( &TrackListMenuController::FilterTracks );
-    GlobalWindow["ViewTrackStats"] = BindJSCallback( &TrackListMenuController::ViewTrackStats );
-    GlobalWindow["RequestDetailsPanelUpdate"] = BindJSCallback( &TrackListMenuController::RequestDetailsPanelUpdate );
-    // Move to a base Drumsmith UI class
-    GlobalWindow["EditTrack"] = BindJSCallback( &TrackListMenuController::EditTrack );
-
-    RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, TrackDatabase::GetInstance().m_currentFilter );
+    std::string Category( const TrackData& track, TrackListSort sort )
+    {
+        if( sort == TrackListSort::Year ) return std::to_string( track.m_year );
+        const std::string& name = sort == TrackListSort::Artist ? track.m_artistName : track.m_trackName;
+        if( sort == TrackListSort::None || name.empty() ) return "";
+        return std::string( 1, static_cast<char>( std::toupper( static_cast<unsigned char>( name.front() ) ) ) );
+    }
 }
 
 
-void TrackListMenuController::SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    ultralight::String path = args[0].ToString();
-    int index = args[1].ToInteger();
+TrackListMenuController::TrackListMenuController() : Component( "TrackListMenuController" ) {}
 
+
+void TrackListMenuController::PopulateModel()
+{
+    RmlUiCore* ui = GetEngine().RmlUi;
+    if( !ui ) return;
+    auto& database = TrackDatabase::GetInstance();
+    auto& tracks = database.m_trackList.m_tracks;
+    const auto& indices = database.SortTracks( database.m_currentSort, database.m_currentFilter );
+    ui->ModelEnsure( "song_library" );
+    for( const char* event : { "play", "preview", "select", "sort", "filter", "toggle_filters", "back", "stats" } )
+        ui->ModelRegisterEvent( "song_library", event );
+    if( !m_modelReady )
+    {
+        ui->ModelSetNumber( "song_library", "filters_open", 0 );
+        ui->ModelSetNumber( "song_library", "selected", -1 );
+        // Every value the document binds exists before it loads, so it never reloads for one.
+        for( const char* key : { "detail_title", "detail_artist", "detail_album", "detail_genre", "detail_art" } )
+        {
+            ui->ModelSetString( "song_library", key, "" );
+        }
+        ui->ModelSetNumber( "song_library", "detail_year", 0 );
+        ui->ModelSetNumber( "song_library", "detail_notes", 0 );
+    }
+    ui->ModelSetNumber( "song_library", "sort", static_cast<int>( database.m_currentSort ) );
+    ui->ModelSetNumber( "song_library", "filter", static_cast<int>( database.m_currentFilter ) );
+    const char* sortNames[] = { "Default", "Title", "Artist", "Year" };
+    ui->ModelSetString( "song_library", "sort_name", sortNames[static_cast<int>( database.m_currentSort )] );
+    ui->ModelSetString( "song_library", "filter_name", database.m_currentFilter == TrackListFilter::None ? "All songs" : database.GetFilterName( database.m_currentFilter ) );
+    const int count = static_cast<int>( std::min<size_t>( indices.size(), 4096 ) );
+    ui->ModelSetNumber( "song_library", "track_count", count );
+    ui->ModelSetListCount( "song_library", "tracks", count );
+    std::string previousCategory;
+    for( int row = 0; row < count; ++row )
+    {
+        const int index = static_cast<int>( indices[row] );
+        const TrackData& track = tracks[index];
+        const std::string category = Category( track, database.m_currentSort );
+        ui->ModelSetItemString( "song_library", "tracks", row, "category", category != previousCategory ? category : "" );
+        previousCategory = category;
+        ui->ModelSetItemNumber( "song_library", "tracks", row, "index", index );
+        ui->ModelSetItemString( "song_library", "tracks", row, "title", track.m_trackName );
+        ui->ModelSetItemString( "song_library", "tracks", row, "artist", track.m_artistName );
+        ui->ModelSetItemString( "song_library", "tracks", row, "art", TrackRadioUtils::ArtSource( track ) );
+        ui->ModelSetItemNumber( "song_library", "tracks", row, "year", track.m_year );
+        ui->ModelSetItemNumber( "song_library", "tracks", row, "notes", track.m_noteCount );
+    }
+    int filterRow = 0;
+    ui->ModelSetListCount( "song_library", "filters", 0 );
+    for( int i = 0; i < static_cast<int>( TrackListFilter::Count ); ++i )
+    {
+        const unsigned int matches = i == 0 ? static_cast<unsigned int>( tracks.size() ) : database.m_filterMatches[i];
+        if( i != 0 && matches == 0 ) continue;
+        ui->ModelSetItemNumber( "song_library", "filters", filterRow, "index", i );
+        ui->ModelSetItemString( "song_library", "filters", filterRow, "name", i == 0 ? "All songs" : database.GetFilterName( static_cast<TrackListFilter>( i ) ) );
+        ui->ModelSetItemNumber( "song_library", "filters", filterRow++, "count", matches );
+    }
+    if( count == 0 )
+    {
+        m_selectedTrack = -1;
+        m_previewTrack = -1;
+        ui->ModelSetNumber( "song_library", "selected", -1 );
+    }
+    else if( std::find( indices.begin(), indices.end(), m_selectedTrack ) == indices.end() )
+    {
+        SelectTrack( static_cast<int>( indices.front() ) );
+        m_previewTrack = -1;
+    }
+    m_modelReady = true;
+}
+
+
+void TrackListMenuController::SelectTrack( int inTrackIndex )
+{
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) || inTrackIndex == m_selectedTrack ) return;
+    m_selectedTrack = inTrackIndex;
+    m_previewTrack = inTrackIndex;
+    m_previewDelay = 0.25f;
+    const TrackData& track = tracks[inTrackIndex];
+    RmlUiCore* ui = GetEngine().RmlUi;
+    ui->ModelSetNumber( "song_library", "selected", inTrackIndex );
+    ui->ModelSetString( "song_library", "detail_title", track.m_trackName );
+    ui->ModelSetString( "song_library", "detail_artist", track.m_artistName );
+    ui->ModelSetString( "song_library", "detail_album", track.m_albumName );
+    ui->ModelSetString( "song_library", "detail_genre", track.m_genre );
+    ui->ModelSetString( "song_library", "detail_art", TrackRadioUtils::ArtSource( track ) );
+    ui->ModelSetNumber( "song_library", "detail_year", track.m_year );
+    ui->ModelSetNumber( "song_library", "detail_notes", track.m_noteCount );
+}
+
+
+void TrackListMenuController::PreviewTrack( int inTrackIndex )
+{
+    auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) ) return;
+    RadioArgs args;
+    args.CurrentTrack = &tracks[inTrackIndex];
+    args.CurrentTrackIndex = inTrackIndex;
+    args.UsePreviewMarker = true;
+    TrackRadio::GetInstance().Play( args );
+}
+
+
+void TrackListMenuController::PlayTrack( int inTrackIndex )
+{
+    auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) ) return;
+    const std::string trackId = tracks[inTrackIndex].m_trackSourcePath;
     TrackRadio::GetInstance().Stop();
-    LoadSceneEvent loadSceneEvent;
-    loadSceneEvent.Level = "Assets/Example.lvl";
-
-    loadSceneEvent.Callback = [path, index]() {
-        LaunchPlayTrackEvent evt;
-        evt.TrackID = std::string( path.utf8().data() );
-        evt.TrackIndex = index;
-        evt.Fire();
-        };
-    loadSceneEvent.Queue();
+    LoadSceneEvent event;
+    event.Level = "Assets/Example.lvl";
+    event.Callback = [trackId, inTrackIndex]() {
+        LaunchPlayTrackEvent play;
+        play.TrackID = trackId;
+        play.TrackIndex = inTrackIndex;
+        play.Fire();
+    };
+    event.Queue();
 }
 
 
-void TrackListMenuController::ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
+void TrackListMenuController::Update( float inDeltaTime )
 {
-    //ultralight::String path = args[0].ToString();
-    //int index = args[1].ToInteger();
-
-    LoadSceneEvent loadSceneEvent;
-    loadSceneEvent.Level = "Assets/TrackStats.lvl";
-    loadSceneEvent.Queue();
-}
-
-
-void TrackListMenuController::EditTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    if( args.empty() || !args[0].IsString() )
+    TrackRadio::GetInstance().Update( inDeltaTime );
+    if( !m_modelReady ) PopulateModel();
+    RmlUiCore* ui = GetEngine().RmlUi;
+    if( !ui ) return;
+    if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
     {
-        BRUH( "EditTrack(string) argument mismatch." );
-        return;
+        if( ui->ModelGetNumber( "song_library", "filters_open" ) != 0 ) ui->ModelSetNumber( "song_library", "filters_open", 0 );
+        else { LoadSceneEvent event; event.Level = "Assets/MainMenu.lvl"; event.Queue(); }
     }
-    ultralight::String str = args[0].ToString();
-    std::string str2( str.utf8().data() );
-    EditTrackEvent evt;
-    evt.FileName = str2;
-    evt.Fire();
-}
-
-
-void TrackListMenuController::PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    if( args.empty() || !args[0].IsString() )
+    for( std::string event; !( event = ui->ModelPollEvent( "song_library" ) ).empty(); )
     {
-        BRUH( "PlaySound(string) argument mismatch." );
-        return;
-    }
-
-    int str = args[0].ToInteger();
-
-    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    if( str >= trackList.size() )
-    {
-        return;
-    }
-    RadioArgs radioArgs;
-    radioArgs.CurrentTrack = &trackList[str];
-    radioArgs.CurrentTrackIndex = str;
-    radioArgs.UsePreviewMarker = true;
-    TrackRadio::GetInstance().Play( radioArgs );
-}
-
-void TrackListMenuController::SortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    int trackIndex = args[0].ToInteger();
-    TrackListSort sortType = (TrackListSort)trackIndex;
-    RefreshTrackList( sortType, TrackDatabase::GetInstance().m_currentFilter );
-}
-
-void TrackListMenuController::FilterTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    int trackIndex = args[0].ToInteger();
-    TrackListFilter filterType = (TrackListFilter)trackIndex;
-    RefreshTrackList( TrackDatabase::GetInstance().m_currentSort, filterType );
-}
-
-void TrackListMenuController::RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args )
-{
-    int trackIndex = args[0].ToInteger();
-
-    RequestDetailsPanelUpdate_Internal( trackIndex );
-}
-
-void TrackListMenuController::RequestDetailsPanelUpdate_Internal( int trackIndex )
-{
-    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    if( trackList.empty() )
-    {
-        return;
-    }
-
-    //for( int i = 0; i < trackList.size(); ++i )
-    {
-        auto& trackData = trackList[trackIndex];
-        json uiTrackData;
-        DumpTrackData( uiTrackData, trackData, trackIndex );
-        ExecuteScript( "UpdateDetailsPanel(" + uiTrackData.dump() + "); " );
-    }
-}
-
-void TrackListMenuController::DumpTrackData( json& outJson, TrackData inTrackData, int inIndex )
-{
-    Path dlcTest = Path( inTrackData.m_albumArtPath );
-    std::string songImage = dlcTest.GetLocalPathString();
-    outJson["TrackName"] = inTrackData.m_trackName;
-    outJson["ArtistName"] = inTrackData.m_artistName;
-    outJson["AlbumName"] = inTrackData.m_albumName;
-    outJson["Genre"] = inTrackData.m_genre;
-    outJson["Year"] = inTrackData.m_year;
-    outJson["Icon"] = inTrackData.m_icon;
-    outJson["AlbumArt"] = songImage;
-    outJson["TrackSource"] = inTrackData.m_trackSourcePath;
-    outJson["NoteCount"] = inTrackData.m_noteData.size();
-    outJson["TrackIndex"] = inIndex;
-}
-
-void TrackListMenuController::RefreshTrackList( TrackListSort inSortType, TrackListFilter inFilterType )
-{
-    ExecuteScript( "ClearTrackList();" );
-
-    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    auto& sortedTracks = TrackDatabase::GetInstance().m_sortedIndices;
-    TrackDatabase::GetInstance().SortTracks( inSortType, inFilterType );
-
-    int cachedYear = -1;
-    std::string cachedChar;
-    std::string headerName;
-    for( int i = 0; i < sortedTracks.size(); ++i )
-    {
-        auto& trackData = trackList[sortedTracks[i]];
-
-        bool needsHeader = false;
-        switch( inSortType )
+        const json arguments = json::parse( ui->ModelLastEventArgs( "song_library" ), nullptr, false );
+        const int index = arguments.is_array() && !arguments.empty() && arguments[0].is_number() ? arguments[0].get<int>() : -1;
+        if( event == "play" ) { PlayTrack( index ); return; }
+        else if( event == "select" ) SelectTrack( index );
+        else if( event == "preview" ) { m_previewTrack = -1; PreviewTrack( index ); }
+        else if( event == "toggle_filters" ) ui->ModelSetNumber( "song_library", "filters_open", !ui->ModelGetNumber( "song_library", "filters_open" ) );
+        else if( event == "sort" && index >= 0 && index <= 3 )
         {
-        case TrackListSort::Title:
-            if( cachedChar.empty() || cachedChar[0] != trackData.m_trackName[0] )
-            {
-                cachedChar = trackData.m_trackName[0];
-                headerName = cachedChar;
-                needsHeader = true;
-            }
-            break;
-        case TrackListSort::Artist:
-            if( cachedChar.empty() || cachedChar[0] != trackData.m_artistName[0] )
-            {
-                cachedChar = trackData.m_artistName[0];
-                headerName = cachedChar;
-                needsHeader = true;
-            }
-            break;
-        case TrackListSort::Year:
-            if( cachedYear != trackData.m_year )
-            {
-                cachedYear = trackData.m_year;
-                headerName = std::to_string( trackData.m_year );
-                needsHeader = true;
-            }
-            break;
-        case TrackListSort::None:
-        default:
-            break;
+            auto& database = TrackDatabase::GetInstance();
+            database.SortTracks( static_cast<TrackListSort>( index ), database.m_currentFilter );
+            PopulateModel();
+            ui->ModelSetNumber( "song_library", "filters_open", 0 );
         }
-
-        json uiTrackData;
-        DumpTrackData( uiTrackData, trackData, sortedTracks[i] );
-        if( needsHeader )
+        else if( event == "filter" && index >= 0 && index < static_cast<int>( TrackListFilter::Count ) )
         {
-            ExecuteScript( "AddCategory('" + headerName + "'); " );
+            auto& database = TrackDatabase::GetInstance();
+            database.SortTracks( database.m_currentSort, static_cast<TrackListFilter>( index ) );
+            PopulateModel();
+            ui->ModelSetNumber( "song_library", "filters_open", 0 );
         }
-        ExecuteScript( "AddTrack(" + uiTrackData.dump() + "); " );
+        else if( event == "stats" ) { LoadSceneEvent scene; scene.Level = "Assets/TrackStats.lvl"; scene.Queue(); return; }
     }
-    json filterData;
-    json noneEntry;
-    noneEntry["FilterName"] = TrackDatabase::GetInstance().GetFilterName( TrackListFilter::None );
-    noneEntry["FilterID"] = 0;
-    noneEntry["Count"] = TrackDatabase::GetInstance().m_trackList.m_tracks.size();
-    filterData.push_back( noneEntry );
-    for( int i = 0; i < TrackDatabase::GetInstance().m_filterMatches.size(); ++i )
+    if( m_previewTrack >= 0 && ( m_previewDelay -= inDeltaTime ) <= 0.f )
     {
-        if( TrackDatabase::GetInstance().m_filterMatches[i] > 0 )
-        {
-            json filterEntry;
-            filterEntry["FilterName"] = TrackDatabase::GetInstance().GetFilterName( (TrackListFilter)i );
-            filterEntry["FilterID"] = i;
-            filterEntry["Count"] = TrackDatabase::GetInstance().m_filterMatches[i];
-            filterData.push_back( filterEntry );
-        }
+        PreviewTrack( m_previewTrack );
+        m_previewTrack = -1;
     }
-    ExecuteScript( "SetFilters(" + filterData.dump() + "); " );
-    RequestDetailsPanelUpdate_Internal( 0 );
 }
-
-void TrackListMenuController::OnUpdate( float dt )
-{
-    TrackRadio::GetInstance().Update( dt );
-}
-
-#endif

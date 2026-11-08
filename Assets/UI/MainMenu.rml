@@ -1,0 +1,80 @@
+<rml>
+<head>
+    <title>Drumsmith</title>
+    <link type="text/rcss" href="Drumsmith.rcss"/>
+    <link type="text/rcss" href="Radio.rcss"/>
+    <link type="text/rcss" href="MainMenu.rcss"/>
+</head>
+<body class="main-menu-page" data-model="main_menu">
+    <div class="menu-shade"></div>
+    <div id="main-menu" data-if="!settings_open">
+        <img class="brand-logo" src="img/2x/Asset 2@2x.png"/>
+        <img class="brand-underline" src="img/Underline.png"/>
+        <div class="main-menu-items">
+            <button id="play" class="menu-link blue" autofocus onclick="load-scene:Assets/TrackList.lvl">PLAY<span class="underline"></span></button>
+            <button id="practice" class="menu-link green disabled">PRACTICE<span class="underline"></span></button>
+            <button id="dlc" class="menu-link pink" onclick="load-scene:Assets/DLC.lvl">DLC<span class="underline"></span></button>
+            <button id="vocals" class="menu-link pink" onclick="load-scene:Assets/Vocals.lvl">Vocal Test<span class="underline"></span></button>
+            <button id="settings" class="menu-link orange" data-event-click="open_settings">SETTINGS<span class="underline"></span></button>
+            <button id="exit" class="menu-link red" onclick="quit">EXIT<span class="underline"></span></button>
+        </div>
+    </div>
+    <div id="settings-menu" data-if="settings_open">
+        <button id="settings-back" class="menu-link blue" data-event-click="close_settings">&lt; Back<span class="underline"></span></button>
+        <h1>SETTINGS</h1>
+        <div class="setting-row">
+            <label>Radio Volume <span>{{radio_volume}}%</span></label>
+            <input id="radio-volume" type="range" min="0" max="100" step="1" data-value="radio_volume"/>
+        </div>
+        <div class="setting-row">
+            <label>Audio Delay <span>{{audio_delay}} ms</span></label>
+            <input id="audio-delay" type="range" min="0" max="100" step="1" data-value="audio_delay"/>
+        </div>
+        <div class="setting-row">
+            <label>Visual Delay <span>{{video_delay}} ms</span></label>
+            <input id="video-delay" type="range" min="0" max="100" step="1" data-value="video_delay"/>
+        </div>
+        <div class="setting-row">
+            <label>DLC Server <span>host name, without http://</span></label>
+            <input id="dlc-server" type="text" data-value="dlc_url"/>
+        </div>
+        <div class="setting-row">
+            <label>Select a MIDI Device</label>
+            <button class="device-choice" data-for="device : devices" data-class-selected="midi_device == device.name" data-event-click="select_device(device.name)">{{device.name}}</button>
+            <p data-if="devices.size == 0">No devices available</p>
+            <p class="selected-device">Selected device: {{midi_device == '' ? 'None' : midi_device}}</p>
+            <button class="small-action" data-event-click="refresh_devices">Refresh devices</button>
+        </div>
+        <div class="setting-row">
+            <label>Visual Latency Test</label>
+            <p>Start the test, then hit any letter key as the line crosses the centre. Positive means you were late.</p>
+            <div id="latency-box" data-class-active="latency_active">
+                <div class="latency-target"></div>
+                <div class="latency-marker" data-style-left="latency_marker"></div>
+            </div>
+            <p id="latency-results">Last: {{latency_last}} &#183; Average: {{latency_average}} ({{latency_samples}} of 10 samples)</p>
+            <button id="latency-toggle" class="small-action" data-event-click="latency_toggle">{{latency_active ? 'Stop test' : 'Start test'}}</button>
+            <button id="latency-apply" class="small-action" data-if="latency_samples > 0" data-event-click="latency_apply">Use the average as the visual delay</button>
+        </div>
+        <button id="convert-dlc" class="small-action pink" data-event-click="convert_dlc">Convert Custom DLC</button>
+        <button id="save-settings" class="menu-link green" data-event-click="save_settings">Save Settings<span class="underline"></span></button>
+        <p id="settings-status">{{settings_status}}</p>
+    </div>
+    <div id="track-radio-hover" data-event-mouseover="radio_show"></div>
+    <div id="track-radio" data-if="radio_available" data-class-visible="radio_visible" data-event-mouseover="radio_show">
+        <img class="radio-art" data-attr-src="radio_art"/>
+        <div class="radio-details">
+            <div class="radio-caption">NOW PLAYING</div>
+            <div id="radio-title">{{radio_title}}</div>
+            <div id="radio-artist">{{radio_artist}}</div>
+            <div class="radio-controls">
+                <div class="radio-progress">
+                    <input id="radio-seek" type="range" min="0" max="1000" step="1" data-attr-value="radio_progress" data-event-change="seek(ev.value)"/>
+                    <div class="radio-times"><span>{{radio_position}}</span><span>{{radio_duration}}</span></div>
+                </div>
+                <button id="radio-skip" data-event-click="skip">Skip</button>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>

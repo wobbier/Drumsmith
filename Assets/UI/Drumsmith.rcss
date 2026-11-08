@@ -1,0 +1,45 @@
+/* Shared native UI controls. Page layouts live in their own stylesheets. */
+body { width: 100%; height: 100%; margin: 0; font-family: Inter; font-size: 20dp; color: #ffffff; background-color: transparent; }
+div, h1, h2, h3, p { display: block; margin: 0; }
+h1 { font-size: 40dp; font-weight: bold; }
+h2 { font-size: 28dp; font-weight: bold; }
+h3 { font-size: 20dp; }
+button { display: inline-block; padding: 8dp 12dp; color: #ffffff; background-color: transparent; border-bottom: 3dp transparent; font-size: 20dp; cursor: pointer; tab-index: auto; nav: auto; }
+button:hover, button:focus { border-bottom-color: #3366ff; }
+button.disabled { color: #ffffff60; cursor: default; pointer-events: none; }
+.green:hover, .green:focus { border-bottom-color: #66ff66; }
+.pink:hover, .pink:focus { border-bottom-color: #ff66cc; }
+.orange:hover, .orange:focus { border-bottom-color: #ff9933; }
+.red:hover, .red:focus { border-bottom-color: #ff3333; }
+/* Menu links: the old pages' hover-underline-animation. A bar under the text grows from the left
+   on hover or focus and shrinks away to the right on leave. RmlUi has no ::after, so each link
+   carries a <span class="underline"> for the bar. */
+.menu-link { position: relative; display: inline-block; margin-top: 20dp; padding: 0 0 5dp; font-size: 48dp; font-weight: bold; border-bottom-width: 0; }
+.menu-link .underline { position: absolute; left: 0; bottom: 0; width: 100%; height: 4dp; background-color: #3366ff; pointer-events: none; transform: scaleX(0); transform-origin: right bottom; transition: transform 0.25s quadratic-out; }
+.menu-link:hover .underline, .menu-link:focus .underline { transform: scaleX(1); transform-origin: left bottom; }
+.menu-link.green .underline { background-color: #66ff66; }
+.menu-link.pink .underline { background-color: #ff66cc; }
+.menu-link.orange .underline { background-color: #ff9933; }
+.menu-link.red .underline { background-color: #ff3333; }
+.menu-link.disabled .underline { display: none; }
+.muted { color: #bcbcbc; }
+input { color: #ffffff; font-family: Inter; font-size: 20dp; tab-index: auto; }
+input.text { padding: 10dp; background-color: #242424; border-bottom: 2dp #ffffff80; }
+input.text:focus { border-bottom-color: #ff9933; }
+input.range { height: 24dp; cursor: pointer; }
+input.range slidertrack { height: 5dp; margin-top: 10dp; background-color: #ffffff60; }
+input.range sliderbar { width: 16dp; height: 24dp; background-color: #ffffff; }
+input.range:hover sliderbar, input.range:focus sliderbar { background-color: #ff9933; }
+input.range sliderarrowdec, input.range sliderarrowinc { display: none; }
+scrollbarvertical { width: 8dp; margin-left: 4dp; }
+scrollbarvertical slidertrack { background-color: #ffffff15; }
+scrollbarvertical sliderbar { background-color: #ffffff70; min-height: 30dp; }
+scrollbarvertical sliderbar:hover { background-color: #ffffffbb; }
+scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc { display: none; }
+/* The plain "menu" pages (track stats, vocals): the drums backdrop, a shade and a left column. */
+body.menu-page { decorator: image(img/drums-bg.png cover); overflow: hidden; }
+.menu-shade { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-color: #00000085; }
+.menu-column { position: absolute; left: 4vw; top: 5vh; width: 602dp; max-width: 70vw; }
+.menu-column h1 { margin: 24dp 0 12dp; }
+.menu-column p { margin: 8dp 0; font-size: 22dp; color: #dddddd; }
+.menu-column .menu-link { font-size: 32dp; }

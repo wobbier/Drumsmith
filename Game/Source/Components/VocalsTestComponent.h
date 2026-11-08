@@ -1,20 +1,14 @@
 #pragma once
-#include <Components/UI/BasicUIView.h>
+#include <ECS/Component.h>
+#include <ECS/ComponentDetail.h>
 
+// Tags the entity VocalsTestCore moves with the detected pitch (Assets/Vocals.lvl). The core also
+// fills the "vocals" view model that Assets/UI/Vocals.rml shows.
 class VocalsTestComponent final
-	: public BasicUIView
+    : public Component<VocalsTestComponent>
 {
 public:
     VocalsTestComponent();
-    ~VocalsTestComponent();
-
-#if USING( ME_UI )
-    void OnJSReady( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
-    void OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller ) final;
-
-    void OnUpdate( float dt ) override;
-
-#endif
 };
 
-ME_REGISTER_COMPONENT( VocalsTestComponent );
+ME_REGISTER_COMPONENT( VocalsTestComponent )

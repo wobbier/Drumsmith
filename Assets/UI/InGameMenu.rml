@@ -1,0 +1,29 @@
+<rml>
+<head>
+    <title>Drumsmith</title>
+    <link type="text/rcss" href="Drumsmith.rcss"/>
+    <link type="text/rcss" href="InGameMenu.rcss"/>
+</head>
+<body data-model="in_game">
+    <div id="pause-hint" data-if="!paused">Esc &#8212; Pause</div>
+    <div id="pause-overlay" data-if="paused">
+        <div id="pause-menu" data-if="!options">
+            <img class="pause-logo" src="img/2x/Asset 2@2x.png"/>
+            <img class="pause-underline" src="img/Underline.png"/>
+            <div><button id="resume" class="menu-link green" data-event-click="resume">RESUME<span class="underline"></span></button></div>
+            <div><button id="options" class="menu-link orange" data-event-click="options">OPTIONS<span class="underline"></span></button></div>
+            <div><button class="menu-link red" data-event-click="exit">EXIT<span class="underline"></span></button></div>
+        </div>
+        <div id="pause-options" data-if="options">
+            <button id="options-back" class="menu-link green" data-event-click="back">Back<span class="underline"></span></button>
+            <h2>OPTIONS</h2>
+            <label for="pause-audio-delay">Audio Delay ({{audio_delay}} ms)</label>
+            <input id="pause-audio-delay" class="range" type="range" min="0" max="100" step="1" data-value="audio_delay" data-event-change="audio_delay(ev.value)"/>
+            <label for="pause-video-delay">Visual Delay ({{video_delay}} ms)</label>
+            <input id="pause-video-delay" class="range" type="range" min="0" max="100" step="1" data-value="video_delay" data-event-change="video_delay(ev.value)"/>
+            <button class="menu-link green" data-event-click="save">Save Settings<span class="underline"></span></button>
+            <p class="muted">{{status}}</p>
+        </div>
+    </div>
+</body>
+</rml>

@@ -2,6 +2,9 @@
     "Cores": [
         {
             "Type": "NoteHighwayCore"
+        },
+        {
+            "Type": "MenuCore"
         }
     ],
     "Scene": [
@@ -146,9 +149,11 @@
                     "Type": "Transform"
                 },
                 {
-                    "FilePath": "Assets/UI/InGameMenu.html",
-					"UIURL": "http://localhost:8080/InGameMenu.html",
                     "Type": "InGameMenuController"
+                },
+                {
+                    "FilePath": "Assets/UI/InGameMenu.rml",
+                    "Type": "UIDocument"
                 }
             ],
             "DestroyOnLoad": true,

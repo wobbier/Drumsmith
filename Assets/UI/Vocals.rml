@@ -1,0 +1,20 @@
+<rml>
+<head>
+    <title>Drumsmith — Vocal Test</title>
+    <link type="text/rcss" href="Drumsmith.rcss"/>
+    <link type="text/rcss" href="Vocals.rcss"/>
+</head>
+<body class="menu-page" data-model="vocals">
+    <div class="menu-shade"></div>
+    <div class="menu-column">
+        <button id="vocals-back" class="menu-link blue" autofocus onclick="load-scene:Assets/MainMenu.lvl">&lt; Back<span class="underline"></span></button>
+        <h1>VOCAL TEST</h1>
+        <p>Pitch of the loudest frequency in the test vocals, snapped to the nearest note.</p>
+        <p class="muted" data-if="!listening">Nothing is being analysed: the test vocals didn't load.</p>
+        <div id="pitch-meter">
+            <div id="pitch-fill" data-style-height="meter"></div>
+        </div>
+        <p id="pitch-value">{{pitch}} / 100</p>
+    </div>
+</body>
+</rml>

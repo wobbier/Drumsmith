@@ -1,0 +1,62 @@
+body.main-menu-page {
+    decorator: image(img/drums-bg.png cover);
+    overflow: hidden;
+}
+#main-menu {
+    position: absolute;
+    left: 4vw;
+    top: 5vh;
+    width: 602dp;
+    max-width: 65vw;
+    height: 90vh;
+    overflow-y: auto;
+}
+.brand-logo { display: block; width: 602dp; max-width: 100%; }
+.brand-underline { display: block; width: 602dp; max-width: 100%; height: 10dp; margin-top: 15dp; margin-bottom: 16dp; }
+/* A column of links each as wide as its text, so the underline matches the word like the old page. */
+.main-menu-items { display: flex; flex-direction: column; align-items: flex-start; }
+.main-menu-items .menu-link { display: block; width: auto; margin: 12dp 0 0; padding: 0 0 4dp; font-size: 48dp; text-align: left; }
+#settings-menu {
+    position: absolute;
+    left: 4vw;
+    top: 4vh;
+    bottom: 4vh;
+    width: 560dp;
+    max-width: 62vw;
+    padding: 24dp;
+    overflow-y: auto;
+    background-color: #101010e8;
+}
+#settings-menu h1 { font-size: 24dp; color: #cccccc; margin: 18dp 0 20dp; }
+#settings-menu .menu-link { width: auto; margin: 10dp 0; padding: 0 0 4dp; font-size: 32dp; text-align: left; }
+.setting-row { margin-bottom: 22dp; }
+.setting-row label { display: block; margin-bottom: 12dp; font-size: 26dp; }
+.setting-row label span { color: #c5c5c5; font-size: 20dp; }
+.setting-row p { margin: 8dp 0; font-size: 17dp; color: #d8d8d8; }
+.setting-row input[type=text] { box-sizing: border-box; width: 100%; height: 42dp; padding: 9dp 12dp; color: #ffffff; font-size: 18dp; background-color: #ffffff18; border: 1dp #888888; tab-index: auto; }
+.setting-row input[type=text]:focus { border-color: #ff9933; }
+#settings-menu .device-choice { display: block; width: 100%; margin: 4dp 0; padding: 9dp 12dp; text-align: left; font-size: 18dp; border: 1dp #ffffff30; background-color: #ffffff08; }
+#settings-menu .device-choice.selected { border-color: #66ff66; background-color: #66ff6618; }
+#settings-menu .small-action { display: inline-block; width: auto; margin: 4dp 8dp 4dp 0; padding: 4dp 0; font-size: 18dp; }
+#settings-status { min-height: 24dp; margin: 8dp 0; color: #66ff66; font-size: 16dp; }
+.main-menu-page input[type=range] { display: block; width: 100%; height: 24dp; tab-index: auto; nav: auto; }
+.main-menu-page input[type=range] slidertrack { height: 5dp; margin: 10dp 0; background-color: #ffffff60; }
+.main-menu-page input[type=range] sliderbar { width: 14dp; height: 24dp; margin-top: -10dp; background-color: #eeeeee; }
+.main-menu-page input[type=range]:focus sliderbar, .main-menu-page input[type=range] sliderbar:hover { background-color: #ff9933; }
+.main-menu-page input[type=range] sliderarrowdec, .main-menu-page input[type=range] sliderarrowinc { display: none; }
+/* The visual latency test: a marker sweeps the box, the centre line is "on time". */
+#latency-box { position: relative; width: 100%; height: 90dp; margin: 6dp 0 10dp; background-color: #ffffff10; border: 1dp #ffffff30; overflow: hidden; }
+#latency-box.active { border-color: #ff9933; }
+.latency-target { position: absolute; left: 50%; top: 0; width: 2dp; height: 100%; margin-left: -1dp; background-color: #66ff66; }
+.latency-marker { position: absolute; left: 0; top: 0; width: 4dp; height: 100%; margin-left: -2dp; background-color: #ffffff30; }
+#latency-box.active .latency-marker { background-color: #ffffff; }
+#latency-results { color: #ffffff; }
+@media (max-height: 800px) {
+    .main-menu-items .menu-link { font-size: 38dp; margin: 8dp 0 0; }
+    .brand-logo { width: 500dp; }
+    .brand-underline { width: 500dp; margin-bottom: 12dp; }
+}
+@media (max-width: 1000px) {
+    #main-menu { max-width: 80vw; }
+    #settings-menu { max-width: 75vw; }
+}

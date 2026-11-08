@@ -1,5 +1,9 @@
 {
-    "Cores": null,
+    "Cores": [
+        {
+            "Type": "MenuCore"
+        }
+    ],
     "Scene": [
         {
             "Components": [
@@ -35,9 +39,11 @@
                     "Zoom": 45.0
                 },
                 {
-                    "FilePath": "Assets/UI/MainMenu.html",
-                    "Type": "MainMenuController",
-                    "UIURL": "http://localhost:8080/MainMenu.html"
+                    "Type": "MainMenuController"
+                },
+                {
+                    "FilePath": "Assets/UI/MainMenu.rml",
+                    "Type": "UIDocument"
                 }
             ],
             "DestroyOnLoad": true,

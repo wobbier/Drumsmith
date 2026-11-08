@@ -1,22 +1,22 @@
-#include <Components/TrackStatsMenuController.h>
+#include "Components/TrackStatsMenuController.h"
 
+#include <Engine/Engine.h>
+#include <Engine/Input.h>
 #include <Events/SceneEvents.h>
-#include "CoreGame/TrackList.h"
-#include "Events/GameEvents.h"
-#include "Global/TrackRadio.h"
+
 
 TrackStatsMenuController::TrackStatsMenuController()
-    : BasicUIView( "TrackStatsMenuController" )
+    : Component( "TrackStatsMenuController" )
 {
-    FilePath = Path( "Assets/UI/TrackStats.html" );
 }
 
-#if USING( ME_UI )
 
-void TrackStatsMenuController::OnUILoad( ultralight::JSObject& GlobalWindow, ultralight::View* Caller )
+void TrackStatsMenuController::Update( float inDeltaTime )
 {
-    BasicUIView::OnUILoad( GlobalWindow, Caller );
-
+    if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
+    {
+        LoadSceneEvent event;
+        event.Level = "Assets/TrackList.lvl";
+        event.Queue();
+    }
 }
-
-#endif

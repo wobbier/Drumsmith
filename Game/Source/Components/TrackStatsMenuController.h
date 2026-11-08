@@ -1,17 +1,16 @@
 #pragma once
-#include <Components/UI/BasicUIView.h>
-#include "CoreGame/TrackList.h"
-#include "Components/Audio/AudioSource.h"
+#include <ECS/Component.h>
+#include <ECS/ComponentDetail.h>
 
+// Drives Assets/UI/TrackStats.rml. Nothing records play statistics yet, so the page only shows
+// the track the library came from and a way back (Escape or the Back button).
 class TrackStatsMenuController final
-	: public BasicUIView
+    : public Component<TrackStatsMenuController>
 {
 public:
     TrackStatsMenuController();
 
-#if USING( ME_UI )
-	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
-#endif
+    void Update( float inDeltaTime );
 };
 
-ME_REGISTER_COMPONENT( TrackStatsMenuController );
+ME_REGISTER_COMPONENT( TrackStatsMenuController )

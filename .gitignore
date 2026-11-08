@@ -216,3 +216,7 @@ Assets/UI/**/*.meta
 # macOS MitchEngine
 .DS_Store
 *.xcworkspace
+
+# The DLC page: downloaded catalogue index and its album-art cache
+Assets/DLC/.catalogue/
+Assets/DLC/dlc_index.download

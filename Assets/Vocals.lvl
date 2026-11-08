@@ -88,9 +88,11 @@
                     "Type": "Mesh"
                 },
                 {
-                    "FilePath": "Assets/UI/DLC_NEW.html",
-                    "Type": "VocalsTestComponent",
-                    "UIURL": ""
+                    "Type": "VocalsTestComponent"
+                },
+                {
+                    "FilePath": "Assets/UI/Vocals.rml",
+                    "Type": "UIDocument"
                 },
                 {
                     "ModelPath": "Assets/cube.obj",

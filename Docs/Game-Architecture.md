@@ -8,8 +8,8 @@ How Drumsmith hangs off MitchEngine: the entry point, what gets registered, how 
 
 Drumsmith is almost entirely data plus cores/components driven by the engine loop. The `GameApp` subclass is deliberately empty except for loading the first scene; all real behavior lives in:
 
-- **Scene-loaded cores** (`NoteHighwayCore`, `VocalsTestCore`) declared in `.lvl` files, ticked only while the world runs.
-- **UI controller components** (`BasicUIView` subclasses) that bridge Ultralight HTML pages to game logic.
+- **Scene-loaded cores** (`NoteHighwayCore`, `VocalsTestCore`, `MenuCore`) declared in `.lvl` files, ticked only while the world runs.
+- **UI controller components** (plain components ticked by `MenuCore`) that drive the RmlUi menu pages through view models (`Docs/UI-and-Menus.md`).
 - **Global singletons** for settings, track data, MIDI, and menu music.
 
 Navigation between menus and gameplay is done by loading whole scenes; the handoff of "which track to play" rides on a queued `LoadSceneEvent` callback.
@@ -36,26 +36,26 @@ Registered game types:
 
 | Type | Macro | Registered as |
 |------|-------|---------------|
-| `MainMenuController`, `DLCMenuController`, `TrackListMenuController`, `TrackStatsMenuController`, `InGameMenuController`, `VocalsTestComponent` | `ME_REGISTER_COMPONENT` | UI controller components (`BasicUIView` subclasses) |
+| `MainMenuController`, `DLCMenuController`, `TrackListMenuController`, `TrackStatsMenuController`, `InGameMenuController`, `VocalsTestComponent` | `ME_REGISTER_COMPONENT` | UI controller components (each scene pairs one with the engine's `UIDocument`) |
 | `NoteTrigger` | `ME_REGISTER_COMPONENT_FOLDER(NoteTrigger, "Game")` | Per-note timing data component |
-| `NoteHighwayCore`, `VocalsTestCore` | `ME_REGISTER_CORE` | Scene-loaded gameplay cores |
+| `NoteHighwayCore`, `VocalsTestCore`, `MenuCore` | `ME_REGISTER_CORE` | Scene-loaded cores (`MenuCore` ticks the menu controllers; every menu scene declares it) |
 | `TrackEditor`, `PadBindingWidget` | `ME_REGISTER_EDITOR_WIDGET` | Havana editor widgets (`ME_EDITOR` builds only) |
 
 ### Scenes and game flow
 
-Scenes in `Assets/`: `MainMenu.lvl`, `DLC.lvl`, `TrackList.lvl`, `Example.lvl` (the gameplay scene — note highway lanes + `NoteHighwayCore`), `TrackStats.lvl`, `Vocals.lvl`. UI pages navigate by calling the engine-provided `LoadScene` JS binding (`BasicUIView::LoadScene` in `Engine/Source/Components/UI/BasicUIView.cpp` queues a `LoadSceneEvent`); the engine also injects `PlaySound` and `Quit` into every page.
+Scenes in `Assets/`: `MainMenu.lvl`, `DLC.lvl`, `TrackList.lvl`, `Example.lvl` (the gameplay scene — note highway lanes + `NoteHighwayCore`), `TrackStats.lvl`, `Vocals.lvl`. UI pages navigate with the engine's inline actions (`onclick="load-scene:Assets/TrackList.lvl"`, `quit`), which queue a `LoadSceneEvent`, or the controllers queue one themselves.
 
-Starting a song is a two-step handoff in `DLCMenuController::SelectTrackToPlay` (and the same pattern in `TrackListMenuController`):
+Starting a song is a two-step handoff in `TrackListMenuController::PlayTrack` (and `DLCMenuController::PlayInstalled` for an installed catalogue song):
 
 1. Configure a `LoadSceneEvent` for `Assets/Example.lvl`, including its `Callback`, then call `Queue()`. Queuing copies the fully configured event for next-frame delivery.
 2. When the scene has loaded, the callback fires `LaunchPlayTrackEvent` (synchronously, main thread), which the freshly created `NoteHighwayCore` — registered as a receiver in `OnAddedToWorld` — handles by calling `SetupTrack`.
 
 ```mermaid
 flowchart LR
-    MM[MainMenu.lvl] -->|LoadScene JS| DLC[DLC.lvl / TrackList.lvl]
+    MM[MainMenu.lvl] -->|load-scene action| DLC[DLC.lvl / TrackList.lvl]
     DLC -->|Queue LoadSceneEvent + Callback| GP[Example.lvl]
     GP -->|Callback fires LaunchPlayTrackEvent| NHC[NoteHighwayCore SetupTrack]
-    DLC -->|LoadScene| TS[TrackStats.lvl]
+    DLC -->|stats event| TS[TrackStats.lvl]
     GP -->|InGameMenu Pause and Resume events| NHC
     DLC -->|EditTrackEvent| TE[TrackEditor widget]
 ```
@@ -66,10 +66,10 @@ All four game events (`Game/Source/Events/GameEvents.h`) dispatch synchronously 
 
 | Event | Payload | Fired by | Received by |
 |-------|---------|----------|-------------|
-| `LaunchPlayTrackEvent` | `TrackID`, `TrackIndex`, `Callback` | `DLCMenuController::SelectTrackToPlay`, `TrackListMenuController` (via `LoadSceneEvent` callback) | `NoteHighwayCore` launch subscription → `SetupTrack` |
-| `InGamePauseCurrentTrack` | — | `InGameMenuController::Internal_Pause` (JS) | `NoteHighwayCore` → `AudioPack::Pause` |
-| `InGameResumeCurrentTrack` | — | `InGameMenuController::Internal_Resume` (JS) | `NoteHighwayCore` → `AudioPack::Resume` |
-| `EditTrackEvent` | `FileName` | `DLCMenuController::EditTrack`, `TrackListMenuController::EditTrack` (JS) | `TrackEditor` typed listener (`ME_EDITOR` only) |
+| `LaunchPlayTrackEvent` | `TrackID`, `TrackIndex`, `Callback` | `TrackListMenuController::PlayTrack`, `DLCMenuController::PlayInstalled` (via `LoadSceneEvent` callback) | `NoteHighwayCore` launch subscription → `SetupTrack` |
+| `InGamePauseCurrentTrack` | — | `InGameMenuController::SetPaused` (Escape or the Resume button) | `NoteHighwayCore` → `AudioPack::Pause`, stops ticking |
+| `InGameResumeCurrentTrack` | — | `InGameMenuController::SetPaused` | `NoteHighwayCore` → `AudioPack::Resume` |
+| `EditTrackEvent` | `FileName` (the track title) | `DLCMenuController` (`edit` event, editor builds) | `TrackEditor` typed listener (`ME_EDITOR` only) |
 
 Only the `TrackIndex` field of `LaunchPlayTrackEvent` is consumed (the launch subscription indexes `TrackDatabase::m_trackList.m_tracks` with it); `TrackID` and `Callback` are set by senders but unused by the receiver.
 
@@ -92,13 +92,13 @@ All are `ME_SINGLETON_DEFINITION`, lazily constructed on first `GetInstance()`, 
 
 | Field | JSON key | Written by | Read by |
 |-------|----------|------------|---------|
-| `RadioVolume` | `RadioVolume` | `MainMenuController::SetRadioVolume` (JS slider) | `TrackRadio` (applied to the radio `AudioPack` when a track starts playing) |
-| `DLCURL` | `DLCURL` | `MainMenuController::SetDLCURL` (only if downloading `dlc_index.json` from the new URL succeeds) | `DLCMenuController::DownloadDLC` |
-| `PreferredMidiDevice` | `Device` | `MainMenuController::SetPreferredMidiDevice_Internal` | `NoteHighwayCore::OnAddedToWorld` → `MidiDevice::OpenMidiDevice` |
-| `AudioLatency` | `AudioLatency` | `MainMenuController::SetAudioLatency_Internal` | **nothing** — persisted but never consumed |
-| `VideoLatency` | `VideoLatency` | `MainMenuController::SetVideoLatency_Internal` | **nothing** — persisted but never consumed |
+| `RadioVolume` | `RadioVolume` | `MainMenuController::ApplySettings` (slider, applied live) | `TrackRadio` (applied to the radio `AudioPack` when a track starts playing) |
+| `DLCURL` | `DLCURL` | `MainMenuController::ApplySettings` on save (trimmed, no validation) | `DLCMenuController` (index, art and song downloads) |
+| `PreferredMidiDevice` | `Device` | `MainMenuController::ApplySettings` (device choice buttons) | `NoteHighwayCore::OnAddedToWorld` → `MidiDevice::OpenMidiDevice` |
+| `AudioLatency` | `AudioLatency` | `MainMenuController::ApplySettings`, `InGameMenuController` (pause options) | **nothing** — persisted but never consumed |
+| `VideoLatency` | `VideoLatency` | `MainMenuController::ApplySettings` (slider or the latency test's average), `InGameMenuController` | **nothing** — persisted but never consumed |
 
-Persistence is explicit: nothing auto-saves; the JS `SaveSettings` binding calls `GameSettings::Save()`. Hit-detection timing uses a hardcoded offset instead of these fields — see `Docs/Latency-and-Responsiveness.md`.
+Persistence is explicit: nothing auto-saves; Save Settings, Back and Escape on the settings panel (and Back in the pause options) call `GameSettings::Save()`. Hit-detection timing uses a hardcoded offset instead of these fields — see `Docs/Latency-and-Responsiveness.md`.
 
 ### Build wiring (game side)
 
@@ -106,9 +106,9 @@ Persistence is explicit: nothing auto-saves; the JS `SaveSettings` binding calls
 
 - Include paths: `ThirdParty/rtmidi`, `ThirdParty/midifile/include`, `ThirdParty/USB-MIDI/include`.
 - **All four platforms link `rtmidi` and `midifile`** (Win64/UWP add `winmm.lib`; Win64 adds `winhttp.lib`; macOS adds `curl`; Linux adds `libasound.so` + `libcurl.so`). The Win64-only MIDI *gameplay* gate is a source-level `#if`, not a build limitation — see `Docs/MIDI-and-Pads.md`.
-- `SharpGameSolution` sets machine-specific `Globals.FMOD_*_Dir` / `Globals.DOTNET_Win64_Dir` paths and enables `IsPhysicsEnabled3D` + `IsUltralightEnabled`.
+- `SharpGameSolution` sets machine-specific `Globals.FMOD_*_Dir` / `Globals.DOTNET_Win64_Dir` paths and enables `IsPhysicsEnabled3D`.
 
-The Vue UI in `Game/ui/` builds separately (`npm run build`) into `Assets/UI` — see `Docs/UI-and-Menus.md`. The full project graph lives in `Docs/SharpmakeDependencies.md`; engine-side flags and generators in `Engine/Docs/Build-System.md`.
+The menu pages are plain `.rml`/`.rcss` files under `Assets/UI/` with no build step — see `Docs/UI-and-Menus.md` (the retired Vue project in `Game/ui/` is no longer used). The full project graph lives in `Docs/SharpmakeDependencies.md`; engine-side flags and generators in `Engine/Docs/Build-System.md`.
 
 ## Caveats & Fragility
 

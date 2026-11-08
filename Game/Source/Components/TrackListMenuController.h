@@ -1,33 +1,22 @@
 #pragma once
-#include <Components/UI/BasicUIView.h>
-#include "CoreGame/TrackList.h"
-#include "Components/Audio/AudioSource.h"
+#include <ECS/Component.h>
+#include <ECS/ComponentDetail.h>
 
-class TrackListMenuController final
-	: public BasicUIView
+class TrackListMenuController final : public Component<TrackListMenuController>
 {
 public:
-	TrackListMenuController();
+    TrackListMenuController();
+    void Update( float inDeltaTime );
 
-#if USING( ME_UI )
-	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
-
-    void SelectTrackToPlay( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void ViewTrackStats( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void PlayTrackPreview( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void SortTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void FilterTracks( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void EditTrack( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void RequestDetailsPanelUpdate( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void RequestDetailsPanelUpdate_Internal( int trackIndex );
-
-    void DumpTrackData( json& outJson, TrackData inTrackData, int inIndex );
-
-    void RefreshTrackList( TrackListSort inSortType, TrackListFilter inFilterType );
-    void OnUpdate( float dt ) override;
-#endif
-
-	SharedPtr<AudioSource> m_currentTrack;
+private:
+    void PopulateModel();
+    void SelectTrack( int inTrackIndex );
+    void PreviewTrack( int inTrackIndex );
+    void PlayTrack( int inTrackIndex );
+    bool m_modelReady = false;
+    int m_selectedTrack = -1;
+    int m_previewTrack = -1;
+    float m_previewDelay = 0.f;
 };
 
-ME_REGISTER_COMPONENT(TrackListMenuController);
+ME_REGISTER_COMPONENT( TrackListMenuController )

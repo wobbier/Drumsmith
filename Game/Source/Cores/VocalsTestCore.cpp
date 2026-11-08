@@ -8,6 +8,7 @@
 #include "Resources/SoundResource.h"
 #include <fmod.hpp>
 #include "Components/VocalsTestComponent.h"
+#include <Cores/UI/RmlUiCore.h>
 #include <deque>
 
 
@@ -73,6 +74,15 @@ void VocalsTestCore::Update( const UpdateContext& context )
         //smoothedValue = SMOOTHING_FACTOR * mappedValue + ( 1 - SMOOTHING_FACTOR ) * smoothedValue;
         transform.SetPosition( { 0, (float)mappedValue, 0 } );
     }
+
+    // The "vocals" view model behind Assets/UI/Vocals.rml: the detected pitch as a 0..100 meter.
+    if( RmlUiCore* ui = GetEngine().RmlUi )
+    {
+        ui->ModelEnsure( "vocals" );
+        ui->ModelSetNumber( "vocals", "pitch", mappedValue );
+        ui->ModelSetString( "vocals", "meter", std::to_string( std::clamp( mappedValue, 0, 100 ) ) + "%" );
+        ui->ModelSetNumber( "vocals", "listening", fftDsp != nullptr );
+    }
 }
 
 void VocalsTestCore::OnStart()
@@ -83,6 +93,11 @@ void VocalsTestCore::OnStart()
 
 
     audioSystem->playSound( testVocals->Handle, 0, false, &channel );
+    if( !channel )
+    {
+        YIKES( "VocalsTestCore: the test vocals didn't play, so there is nothing to analyse" );
+        return;
+    }
     // AttachFFT
     audioSystem->createDSPByType( FMOD_DSP_TYPE_FFT, &fftDsp );
     fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING );
@@ -93,6 +108,10 @@ void VocalsTestCore::OnStart()
 
 void VocalsTestCore::ProcessFFT()
 {
+    if( !fftDsp )
+    {
+        return;
+    }
     FMOD_DSP_PARAMETER_FFT* fftData = nullptr;
     unsigned int length;
 

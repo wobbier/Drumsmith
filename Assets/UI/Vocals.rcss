@@ -1,0 +1,3 @@
+#pitch-meter { position: relative; width: 60dp; height: 300dp; margin: 16dp 0; background-color: #ffffff14; border: 1dp #ffffff40; }
+#pitch-fill { position: absolute; left: 0; bottom: 0; width: 100%; height: 0%; background-color: #e363c3; }
+#pitch-value { font-size: 28dp; color: #ffffff; }

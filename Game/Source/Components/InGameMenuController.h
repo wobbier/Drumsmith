@@ -1,24 +1,17 @@
 #pragma once
-#include <Components/UI/BasicUIView.h>
-#include "CoreGame/TrackList.h"
-#include "Components/Audio/AudioSource.h"
-#include "Math/Random.h"
-
-class InGameMenuController final
-	: public BasicUIView
+#include <ECS/Component.h>
+#include <ECS/ComponentDetail.h>
+class InGameMenuController final : public Component<InGameMenuController>
 {
 public:
     InGameMenuController();
-    virtual ~InGameMenuController();
+    void Update( float inDeltaTime );
 
-#if USING( ME_UI )
-	void OnUILoad(ultralight::JSObject& GlobalWindow, ultralight::View* Caller) final;
-    void Internal_Pause( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-    void Internal_Resume( const ultralight::JSObject& thisObject, const ultralight::JSArgs& args );
-#endif
-
-	SharedPtr<AudioSource> m_currentTrack;
-	Random64 m_random;
+private:
+    void SetPaused( bool inPaused );
+    bool m_modelReady = false;
+    bool m_paused = false;
+    bool m_options = false;
+    const char* m_focusTarget = nullptr;
 };
-
-ME_REGISTER_COMPONENT( InGameMenuController );
+ME_REGISTER_COMPONENT( InGameMenuController )

@@ -55,6 +55,7 @@ private:
 
 	AudioPack m_currentTrackPack;
 	bool m_hasStartedTrackYet = false;
+	bool m_isPaused = false;
 	float m_drumVolume = 1.f;
     std::unique_ptr<EventSubscription> m_launchTrackSubscription;
     std::unique_ptr<EventSubscription> m_pauseTrackSubscription;

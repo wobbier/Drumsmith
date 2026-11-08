@@ -7,6 +7,7 @@
 #include "Components/InGameMenuController.h"
 #include "Components/VocalsTestComponent.h"
 #include "Components/NoteTrigger.h"
+#include "Cores/MenuCore.h"
 #include "Cores/NoteHighwayCore.h"
 #include "Cores/VocalsTestCore.h"
 #include "Editor/TrackEditor.h"

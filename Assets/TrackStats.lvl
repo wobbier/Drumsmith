@@ -1,5 +1,9 @@
 {
-    "Cores": null,
+    "Cores": [
+        {
+            "Type": "MenuCore"
+        }
+    ],
     "Scene": [
         {
             "Components": [
@@ -35,8 +39,11 @@
                     "Zoom": 45.0
                 },
                 {
-                    "FilePath": "Assets/UI/TrackStats.html",
                     "Type": "TrackStatsMenuController"
+                },
+                {
+                    "FilePath": "Assets/UI/TrackStats.rml",
+                    "Type": "UIDocument"
                 }
             ],
             "DestroyOnLoad": true,

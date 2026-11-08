@@ -77,7 +77,7 @@ void NoteHighwayCore::UpdateCameraPosition( float deltaTime )
 
 void NoteHighwayCore::Update( const UpdateContext& context )
 {
-    if( !m_currentTrackPack.IsReady() )
+    if( m_isPaused || !m_currentTrackPack.IsReady() )
     {
         return;
     }
@@ -302,11 +302,13 @@ void NoteHighwayCore::ShutdownTrack()
 
 void NoteHighwayCore::Pause()
 {
+    m_isPaused = true;
     m_currentTrackPack.Pause();
 }
 
 void NoteHighwayCore::Resume()
 {
+    m_isPaused = false;
     m_currentTrackPack.Resume();
 }
 

@@ -177,8 +177,9 @@ void TrackDatabase::Reload()
                             continue;
                         }
                     }
-                    else
+                    else if( entry.path().filename().generic_string().rfind( '.', 0 ) != 0 )
                     {
+                        // Dot-folders (the DLC page's .catalogue art cache) aren't songs.
                         YIKES_FMT( "TrackData.txt doesn't exist for: %s", entry.path().u8string().c_str() );
                     }
                 }

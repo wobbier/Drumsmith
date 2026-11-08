@@ -1,0 +1,14 @@
+#pause-hint { position: absolute; top: 12dp; right: 18dp; font-size: 16dp; color: #ffffffb0; }
+#pause-overlay { position: absolute; width: 100%; height: 100%; background-color: #000000b3; }
+#pause-menu, #pause-options { position: absolute; top: 10%; left: 50%; width: 602dp; max-width: 88vw; transform: translateX(-50%); max-height: 85vh; overflow-y: auto; text-align: center; }
+.pause-logo { display: block; width: 100%; height: auto; }
+.pause-underline { display: block; width: 100%; height: 10dp; margin: 12dp 0 28dp; }
+#pause-options h2 { margin-top: 22dp; }
+#pause-options label { display: block; margin: 28dp 0 12dp; font-size: 26dp; }
+#pause-options input.range { display: block; width: 80%; margin: 0 auto; }
+#pause-options p { margin-top: 15dp; font-size: 17dp; }
+@media (max-height: 650px) {
+    #pause-menu .menu-link, #pause-options .menu-link { font-size: 34dp; margin-top: 12dp; }
+    .pause-logo { width: 75%; margin: 0 auto; }
+    .pause-underline { margin-bottom: 12dp; }
+}

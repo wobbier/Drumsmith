@@ -1,0 +1,59 @@
+<rml>
+<head>
+    <title>Drumsmith — Song Library</title>
+    <link type="text/rcss" href="Drumsmith.rcss"/>
+    <link type="text/rcss" href="Library.rcss"/>
+</head>
+<body class="library-page" data-model="song_library">
+    <div class="library-backdrop"></div>
+    <div class="library-header">
+        <button id="library-back" class="library-link" onclick="load-scene:Assets/MainMenu.lvl"><img src="img/Esc_Key_Light.png"/><span>Main Menu</span></button>
+        <span class="library-heading">SONG LIBRARY</span>
+        <button id="library-dlc" class="library-link" onclick="load-scene:Assets/DLC.lvl"><span>Download songs</span></button>
+    </div>
+    <div id="song-list" class="library-list">
+        <p class="empty-library" data-if="track_count == 0">No songs match this filter. Choose All songs or download more DLC.</p>
+        <div data-for="track : tracks">
+            <h2 class="track-category" data-if="track.category != ''">{{track.category}}</h2>
+            <div class="song-row" data-class-selected="selected == track.index" data-event-mouseover="select(track.index)">
+                <button class="art-button" data-event-click="play(track.index)" data-event-focus="select(track.index)"><img class="song-art" data-attr-src="track.art"/></button>
+                <button class="song-description" data-event-click="select(track.index)" data-event-focus="select(track.index)">
+                    <span class="song-title">{{track.title}}</span>
+                    <span class="song-artist">{{track.artist}}</span>
+                    <span class="song-year">{{track.year}}</span>
+                </button>
+                <span class="song-notes">Note Count: {{track.notes}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="library-details" data-if="selected >= 0">
+        <img class="detail-art" data-attr-src="detail_art"/>
+        <div class="detail-copy">
+            <h1>{{detail_title}}</h1>
+            <h2>{{detail_artist}}</h2>
+            <p>{{detail_album}}</p>
+            <p>{{detail_genre}}</p>
+            <p>{{detail_year}}</p>
+            <p class="detail-notes">Note Count: {{detail_notes}}</p>
+            <button id="play-selected" class="detail-action green" data-event-click="play(selected)">PLAY</button>
+            <button class="detail-action" data-event-click="preview(selected)">Preview</button>
+            <button class="detail-action" data-event-click="stats">View Stats</button>
+        </div>
+    </div>
+    <div class="library-footer">
+        <button id="library-filters" class="library-link" data-event-click="toggle_filters"><span>Sorting: {{sort_name}} (Ascending) / Filter: {{filter_name}}</span></button>
+        <span>{{track_count}} songs</span>
+    </div>
+    <div class="filter-scrim" data-if="filters_open" data-event-click="toggle_filters"></div>
+    <div class="library-flyout" data-if="filters_open">
+        <button class="detail-action" data-event-click="toggle_filters">&lt; Back</button>
+        <h1>Sort</h1>
+        <button id="sort-default" data-class-active="sort == 0" data-event-click="sort(0)">Default</button>
+        <button id="sort-title" data-class-active="sort == 1" data-event-click="sort(1)">Title</button>
+        <button id="sort-artist" data-class-active="sort == 2" data-event-click="sort(2)">Artist</button>
+        <button id="sort-year" data-class-active="sort == 3" data-event-click="sort(3)">Year</button>
+        <h1>Filter</h1>
+        <button data-for="option : filters" data-class-active="filter == option.index" data-event-click="filter(option.index)">{{option.name}} ({{option.count}})</button>
+    </div>
+</body>
+</rml>
