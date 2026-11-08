@@ -25,6 +25,7 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 | Settings (`GameSettings`) | **Usable** | Latency fields now consumed; save-on-button only | [Game-Architecture.md](Game-Architecture.md) |
 | Latency compensation | **Usable** | Audio and video offsets applied; visual test feeds the video offset; no audio calibration test, positive offsets only | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) |
 | Vocals mode | **Experimental** | FFT spike printing to stdout; not gameplay | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
+| Venue, band and crowd | **Experimental** | Built 2026-11-08 and only judged from headless software-rendered captures: every chart venue event is used, three rooms with a live swap, but all primitives, no real-GPU or frame-pacing check yet | [Venue-and-Band.md](Venue-and-Band.md) |
 
 ## 2. Platform Matrix
 
@@ -126,6 +127,16 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 | `AudioPack::LoadURL` streaming | Lightly used | Decide with DLC hardening |
 | Legacy HTML pages (`SongList.html`, `TrackStats.html`, `Old/`) and the Vue project | Unused since the RmlUi port | Delete |
 | `TrackDatabase.json` config wiring | Vestigial | Delete |
+| Venue follow-ups (meant for the MitchEngine Linear board; logged here) | See below | Pick off in order |
+
+**Venue follow-ups**, most valuable first:
+
+1. **Play it on real hardware.** Everything was judged from lavapipe captures. Check frame pacing with the venue on (three camera chains, volumetric haze, ~3,000 entities posed per frame) and whether the haze and beam intensities read the same on a real GPU.
+2. **Real models.** Swap the primitive puppets for skinned band and crowd models through the engine's animator (`Engine/Docs/Animation.md`); `Puppet`'s joint positions can drive bones. The crowd would want instanced skinning or vertex-animation textures.
+3. **Overlay layers by render group.** Venue and highway are separated by distance (`VenueLayout::kVenueOrigin`); a per-mesh render layer that the overlay and main cameras filter on would remove the trick, and let directional lights stay per layer.
+4. **Check the RB2 camera note meanings** (61-64, 70-73) and the spotlight slot order against a known-good chart; the guesses are in `ReadMidiVenue`.
+5. **Not yet imported:** PART KEYS_ANIM_LH/RH (keyboard hand notes), vocal phrase markers and lyrics (the singer could mouth them), RB3 `[coop_*]` camera notes in charts that use note-based RB3 cuts, `[mix x drums...]` (drum fills / mixes), and the `[map ...]` hand-map events.
+6. **Confetti and smoke.** The engine has particles (`Engine/Docs/Rendering-Pipeline.md`); pyro is a capsule and a point light today.
 
 ## 5. Responsiveness Roadmap
 
