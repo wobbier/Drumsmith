@@ -114,7 +114,7 @@ Two render-texture cameras feed the screens, each every other frame:
 - **The venue and highway share a world.** Separation is by distance only: anything placed near `VenueLayout::kVenueOrigin` shows in the venue, and directional lights (the rig's dim key light) light both.
 - **The highway's coverage is its depth.** Transparent highway pieces that don't write depth add over the venue rather than covering it.
 - **RB2 camera note meanings** (61-64, 70-73) and the spotlight slot order (37 keys, 38 vocals, 39 guitar, 40 drums, 41 bass) follow community documentation, not an official spec; a wrong guess frames the wrong member, nothing worse.
-- **Cost.** Five entities per crowd member (4,000 for the festival's), posed on the main thread: the front rows every frame, the middle every second frame and the back every third, in turns. Instancing keeps the draws to a few dozen batches. The primitives are dense (spheres and capsules), which a software rasterizer feels. `--crowd-size` or Venue: Band only trims it.
+- **Cost.** Five entities per crowd member (4,000 for the festival's), posed on the main thread: the front rows every frame, the middle every second frame and the back every third, in turns. Instancing keeps the draws to a few dozen batches. The engine's spheres and capsules are about 2,300 triangles each, so crowd arms are boxes and only the first rows get round heads (`Puppet::Look::Blocky`): a typical frame is 150-200k triangles across the three cameras, about 1.3M at the peak. `--crowd-size` or Venue: Band only trims it.
 - The feed camera can't show its own screen: in its shot the LED wall is black (`Engine/Docs/Rendering-Pipeline.md` → Render textures).
 
 ## Related Docs

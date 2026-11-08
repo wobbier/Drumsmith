@@ -85,11 +85,12 @@ void Puppet::Build( VenueKit& inKit, Transform* inParent, const Vector3& inFeet,
     using Shape = Moonlight::MeshType;
     const Vector3 zero( 0.f, 0.f, 0.f );
     m_torso = inKit.Piece( Shape::Cube, zero, Vector3( 0.4f, 0.56f, 0.22f ), inLook.Shirt, &root );
-    m_head = inKit.Piece( Shape::Sphere, zero, Vector3( 0.23f, 0.27f, 0.25f ), inLook.Skin, &root );
+    m_head = inKit.Piece( inLook.Blocky ? Shape::Cube : Shape::Sphere, zero, inLook.Blocky ? Vector3( 0.2f, 0.24f, 0.22f ) : Vector3( 0.23f, 0.27f, 0.25f ), inLook.Skin, &root );
     m_hair = inKit.Piece( Shape::Cube, zero, inLook.LongHair ? Vector3( 0.24f, 0.4f, 0.07f ) : Vector3( 0.25f, 0.1f, 0.25f ), inLook.Hair, &root );
     for( int side = 0; side < 2; ++side )
     {
-        m_upperArms[side] = inKit.Piece( Shape::Capsule, zero, inDetailed ? Vector3( 0.1f, kUpperArm + 0.06f, 0.1f ) : Vector3( 0.1f, kUpperArm + kForearm + 0.04f, 0.1f ), inDetailed ? inLook.Shirt : inLook.Skin, &root );
+        // The crowd's one-piece arms are always boxes: capsules cost thousands of triangles each.
+        m_upperArms[side] = inKit.Piece( inDetailed ? Shape::Capsule : Shape::Cube, zero, inDetailed ? Vector3( 0.1f, kUpperArm + 0.06f, 0.1f ) : Vector3( 0.085f, kUpperArm + kForearm + 0.04f, 0.085f ), inDetailed ? inLook.Shirt : inLook.Skin, &root );
     }
     if( !inDetailed )
     {

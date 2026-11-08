@@ -27,6 +27,9 @@ public:
         float Height = 1.f;        // a scale on the whole figure
         float Build = 1.f;         // a scale on its width
         bool LongHair = false;
+        // A box for the head instead of a sphere: a dozen triangles instead of thousands, for
+        // figures far from the camera.
+        bool Blocky = false;
     };
 
     struct Arm

@@ -86,6 +86,8 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
             look.LongHair = VenueTiming::Noise( seed, 9u ) < 0.3f;
             look.Height = 0.9f + VenueTiming::Noise( seed, 10u ) * 0.2f;
             look.Build = 0.9f + VenueTiming::Noise( seed, 11u ) * 0.25f;
+            // Rounded heads and arms for the front rows only: the rest are small on screen.
+            look.Blocky = depth > 4.5f;
             person.Body.Build( inKit, inFloor, feet, yaw, look, false );
             person.Phase = VenueTiming::Noise( seed, 12u );
             // Keener toward the front.
