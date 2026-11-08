@@ -2,6 +2,7 @@
 #include <RtMidi.h>
 #include "Core/Assert.h"
 #include "CLog.h"
+#include <algorithm>
 
 MidiDevice::MidiDevice()
 {
@@ -17,42 +18,78 @@ MidiDevice::MidiDevice()
         return;
     }
     RefreshDevices();
-    // Don't ignore sysex, timing, or active sensing messages.
-    m_midiIn->ignoreTypes( false, false, false );
+    // Drums only send notes and controllers: skip sysex, timing clock and active sensing.
+    m_midiIn->ignoreTypes( true, true, true );
+    m_midiIn->setCallback( &MidiDevice::OnMessage, this );
 }
 
 
-MidiDeviceInfo& MidiDevice::OpenMidiDevice( unsigned int inIndex )
+void MidiDevice::OnMessage( double inDeltaTime, std::vector<unsigned char>* inMessage, void* inUserData )
 {
-    ME_ASSERT_MSG( inIndex < m_devices.size(), "Trying to open a Midi device at an invalid index." );
+    // RtMidi's thread: only stamp and queue. Never touch the world, events or resources here.
+    if( !inMessage || inMessage->size() < 3 )
+    {
+        return;
+    }
+    MidiMessageNew msg;
+    msg.m_status = ( *inMessage )[0];
+    msg.m_data1 = ( *inMessage )[1];
+    msg.m_data2 = ( *inMessage )[2];
+    msg.m_arrival = std::chrono::steady_clock::now();
+    MidiDevice* device = static_cast<MidiDevice*>( inUserData );
+    std::lock_guard<std::mutex> lock( device->m_queueLock );
+    // A game that stops pumping must not grow the queue forever.
+    if( device->m_queue.size() < 4096 )
+    {
+        device->m_queue.push_back( msg );
+    }
+}
+
+
+bool MidiDevice::OpenMidiDevice( unsigned int inIndex )
+{
+    if( !m_midiIn || inIndex >= m_devices.size() )
+    {
+        return false;
+    }
     if( !m_devices[inIndex].IsOpen )
     {
         CloseMidiDevice();
         m_midiIn->openPort( inIndex );
         m_devices[inIndex].IsOpen = true;
     }
-    return m_devices[inIndex];
+    return true;
 }
 
 
-MidiDeviceInfo& MidiDevice::OpenMidiDevice( const std::string& inName )
+bool MidiDevice::OpenMidiDevice( const std::string& inName )
 {
-    for (auto& device : m_devices)
+    for( auto& device : m_devices )
     {
-        if (device.Name != inName)
+        if( device.Name == inName )
         {
-            continue;
+            return OpenMidiDevice( device.Port );
         }
-        return OpenMidiDevice( device.Port );
     }
-    ME_ASSERT_MSG( false, "Failed to open device by name." );
-    return OpenMidiDevice( 0 );
+    if( !m_devices.empty() )
+    {
+        BRUH( "MIDI: no device named '" + inName + "'; opening " + m_devices.front().Name );
+    }
+    return OpenMidiDevice( 0u );
 }
 
 
 void MidiDevice::CloseMidiDevice()
 {
+    if( !m_midiIn )
+    {
+        return;
+    }
     m_midiIn->closePort();
+    for( auto& device : m_devices )
+    {
+        device.IsOpen = false;
+    }
 }
 
 
@@ -85,23 +122,13 @@ const std::vector<MidiDeviceInfo>& MidiDevice::GetDevices() const
 
 std::vector<MidiMessageNew> MidiDevice::PumpMessages()
 {
-    if( !m_midiIn )
-    {
-        return {};
-    }
-
     std::vector<MidiMessageNew> messages;
-    std::vector<unsigned char> message;
-    m_midiIn->getMessage( &message );
-    while( message.size() >= 3 )
     {
-        MidiMessageNew msg;
-        msg.m_status = message[0];
-        msg.m_data1  = message[1];
-        msg.m_data2  = message[2];
-        messages.push_back( msg );
-        m_midiIn->getMessage( &message );
+        std::lock_guard<std::mutex> lock( m_queueLock );
+        messages.swap( m_queue );
     }
+    // A reader that wasn't pumping (an unfocused editor window) shouldn't get a burst of old hits.
+    const auto oldest = std::chrono::steady_clock::now() - std::chrono::seconds( 1 );
+    messages.erase( std::remove_if( messages.begin(), messages.end(), [oldest]( const MidiMessageNew& m ) { return m.m_arrival < oldest; } ), messages.end() );
     return messages;
 }
-

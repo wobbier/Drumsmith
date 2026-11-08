@@ -10,20 +10,20 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 
 | System | Rating | Why (one line) | Doc |
 |--------|--------|----------------|-----|
-| Note highway (spawn/scroll) | **Usable** | Prefab spawning and scroll work; O(all-notes) update, unchecked lane lookups | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
-| Hit detection | **Fragile** | Author-annotated as broken; per-note MIDI drain, one hit/frame, neutralized window scaling | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
-| Scoring, combo, miss handling | **Missing** | `difference` computed and discarded; nothing else exists | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
+| Note highway (spawn/scroll) | **Usable** | Rewritten 2026-11-08: unsmoothed scroll on an audio-locked clock, per-chart lane layout, lead-in; every note still a live entity | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
+| Hit detection | **Usable** | Per-lane cursors, chords, timestamped MIDI on every platform, graded windows; keyboard still frame-quantized | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
+| Scoring, combo, miss handling | **Usable** | Score, multiplier, combo, accuracy, misses mute the drums, results screen; nothing is saved | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 | Hit sounds (`Drumset`) | **Experimental** | Right design (`FMOD_CREATESAMPLE` one-shots), zero callers with loaded sounds — silent even in the editor | [Audio.md](Audio.md) |
 | Stem playback (`AudioPack`) | **Usable** | Sample-accurate start is genuinely good; pause/seek desync stems, judge clock conflates errors with 0 | [Audio.md](Audio.md) |
 | Menu radio (`TrackRadio`) | **Usable** | Works; odd load-loop; only ticks while a menu page is alive | [Audio.md](Audio.md) |
-| MIDI input (`MidiDevice`) | **Fragile** | Polled, timestamps destroyed, drain stops on real-time bytes, device-0 fallback, never closed | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
+| MIDI input (`MidiDevice`) | **Usable** | Callback with arrival stamps; one queue shared by gameplay and editor widgets; no hot-plug | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
 | Pad bindings | **Usable** | Clean data model; rebinding UI is editor-only, so game builds can't remap | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
 | Chart parsing / conversion | **Fragile** | Works for RB-style `notes.mid`; hardcoded BPM/speed, ms ×100 landmine, `DISABLE_OPTIMIZATION`, stdout spam | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Track database / DLC | **Usable** | Scan + download + register work; partial filter coverage, unvalidated downloads | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Track editor | **Usable** | The most complete tool in the project — windowed note iteration gameplay should copy | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Menus / UI | **Usable** | Ported to RmlUi (2026-11-08): sliders read back and apply, DLC catalogue with background downloads, ms latency test; `VideoLatency` still consumed by nothing | [UI-and-Menus.md](UI-and-Menus.md) |
-| Settings (`GameSettings`) | **Fragile** | Latency fields write-only; save-on-button only; silent field drift between UI and storage | [Game-Architecture.md](Game-Architecture.md) |
-| Latency compensation | **Missing** | One hardcoded `-30`; everything else is scaffolding that isn't wired | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) |
+| Settings (`GameSettings`) | **Usable** | Latency fields now consumed; save-on-button only | [Game-Architecture.md](Game-Architecture.md) |
+| Latency compensation | **Usable** | Audio and video offsets applied; visual test feeds the video offset; no audio calibration test, positive offsets only | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) |
 | Vocals mode | **Experimental** | FFT spike printing to stdout; not gameplay | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 
 ## 2. Platform Matrix
@@ -32,11 +32,11 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 |------------|-------|-------|-------|-----|
 | Build + link (incl. rtmidi/midifile) | ✅ | ✅ | ✅ | ✅ |
 | Gameplay keyboard input | ✅ | ✅ | ✅ | ✅ |
-| Gameplay MIDI input | ✅ | ❌ source-gated | ❌ source-gated | ❌ source-gated |
+| Gameplay MIDI input | ✅ | ✅ | ✅ | ✅ (untested) |
 | Editor MIDI (TrackEditor, PadBindingWidget) | ✅ | ✅ (ALSA) | ✅ (CoreMIDI) | n/a |
 | DLC download | ✅ (winhttp) | ✅ (curl) | ✅ (curl) | untested |
 
-The gameplay MIDI gate (`#if USING(ME_PLATFORM_WIN64)` in `NoteHighwayCore::Update`) is the only thing standing between Linux/macOS and full parity — the libraries link and the editor paths already pump MIDI everywhere.
+Gameplay MIDI is no longer platform-gated (2026-11-08); it has been exercised only through autoplay, not with a kit, on Linux.
 
 ## 3. Gotchas Catalog
 
@@ -46,18 +46,18 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 
 | # | Gotcha | Where | Consequence | Verdict |
 |---|--------|-------|-------------|---------|
-| 1 | 🎯 MIDI queue drained *inside the per-note loop* | `NoteHighwayCore::Update` | Simultaneous kick+snare can never both register; messages checked against one note are discarded for the rest | Fix via roadmap item 2 |
-| 2 | 🎯 Queue never drained when no note is in window | same | Stale hits from seconds ago "hit" the next note entering its window; input feel is bimodal | Fix via item 2 |
-| 3 | 🎯 `handled` + `break` = one hit per frame, total | same | Fast fills drop notes even on keyboard | Fix via item 2/6 |
-| 4 | 🎯 RtMidi timestamps discarded; `MidiMessageNew` has no time field | `MidiDevice::PumpMessages` | Sub-frame accuracy is unrecoverable downstream; all compensation capped at frame granularity | Fix via item 2 |
-| 5 | 🎯 Drain loop exits on any <3-byte message while timing/active-sensing are *enabled* | `MidiDevice` ctor + `PumpMessages` | Drum modules emitting MIDI clock/active-sensing strand note-ons in the queue | Fix via item 2 (or `ignoreTypes(true,true,true)` today) |
-| 6 | 🎯 Gameplay MIDI is Win64-only by `#if`, not by capability | `NoteHighwayCore::Update` | Linux/macOS players get keyboard only, for no technical reason | Fix via item 5 |
-| 7 | 🎯 Hit window `max(50/noteSpeed, 50)` — scaling then re-clamped | same | `noteSpeed` can only widen the window (<1); the intended difficulty scaling never happens | Fix via item 7 |
-| 8 | 🎯 `globalOffsetMs = -30` hardcoded; `AudioLatency`/`VideoLatency` persisted but never read | same + `GameSettings` | Calibration tuned to one dev machine; user settings are placebo | Fix via item 3 |
-| 9 | 🎯 Judge clock read once per frame from `Channel::getPosition(MS)`; errors return 0 | `AudioPack::GetPositionMs` | Judgment quantized to frame + mixer granularity; a channel hiccup reads as "song at 0:00" | Fix via item 4 |
-| 10 | O(all notes) iteration with two component lookups each, every frame | `NoteHighwayCore::Update` | 4,872 entities scanned per frame for the bundled Everlong chart; author comment says it best | Fix via item 6 (`TrackEditor::m_closestNoteIndex` is the in-repo pattern) |
+| 1 | 🎯 MIDI queue drained *inside the per-note loop* | `NoteHighwayCore::Update` | Simultaneous kick+snare can never both register; messages checked against one note are discarded for the rest | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 2 | 🎯 Queue never drained when no note is in window | same | Stale hits from seconds ago "hit" the next note entering its window; input feel is bimodal | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 3 | 🎯 `handled` + `break` = one hit per frame, total | same | Fast fills drop notes even on keyboard | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 4 | 🎯 RtMidi timestamps discarded; `MidiMessageNew` has no time field | `MidiDevice::PumpMessages` | Sub-frame accuracy is unrecoverable downstream; all compensation capped at frame granularity | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 5 | 🎯 Drain loop exits on any <3-byte message while timing/active-sensing are *enabled* | `MidiDevice` ctor + `PumpMessages` | Drum modules emitting MIDI clock/active-sensing strand note-ons in the queue | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 6 | 🎯 Gameplay MIDI is Win64-only by `#if`, not by capability | `NoteHighwayCore::Update` | Linux/macOS players get keyboard only, for no technical reason | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 7 | 🎯 Hit window `max(50/noteSpeed, 50)` — scaling then re-clamped | same | `noteSpeed` can only widen the window (<1); the intended difficulty scaling never happens | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 8 | 🎯 `globalOffsetMs = -30` hardcoded; `AudioLatency`/`VideoLatency` persisted but never read | same + `GameSettings` | Calibration tuned to one dev machine; user settings are placebo | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 9 | 🎯 Judge clock read once per frame from `Channel::getPosition(MS)`; errors return 0 | `AudioPack::GetPositionMs` | Judgment quantized to frame + mixer granularity; a channel hiccup reads as "song at 0:00" | **Partly fixed** 2026-11-08: the clock interpolates between FMOD updates; a channel error still reads as 0 |
+| 10 | O(all notes) iteration with two component lookups each, every frame | `NoteHighwayCore::Update` | 4,872 entities scanned per frame for the bundled Everlong chart; author comment says it best | **Fixed** in the 2026-11-08 gameplay rewrite |
 | 11 | Velocity parsed from MIDI and dropped — at conversion *and* at input | `ParseMidi`, `PumpMessages` consumers | Dynamics unavailable for hit sounds, scoring, or charts | Carry velocity in item 2's message type + store in `NoteData` |
-| 12 | MIDI device opened by name with assert-then-port-0 fallback; empty device list = UB index | `MidiDevice::OpenMidiDevice` | Wrong device silently opens in release; crash potential with no devices | Fix with item 2's device-lifecycle pass |
+| 12 | MIDI device opened by name with assert-then-port-0 fallback; empty device list = UB index | `MidiDevice::OpenMidiDevice` | Wrong device silently opens in release; crash potential with no devices | **Fixed** in the 2026-11-08 gameplay rewrite |
 | 13 | Device never closed; `IsOpen` never cleared; no hot-plug rescan | `MidiDevice`, `NoteHighwayCore` | Reconnect/replug requires restart | Same pass as #12 |
 | 14 | No in-game pad rebinding (widget is `ME_EDITOR`) | `PadBindingWidget` | Shipped builds depend on a checked-in `PadMappings.json` matching the player's kit | Needs a game-side binding screen eventually |
 
@@ -65,11 +65,11 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 
 | # | Gotcha | Where | Consequence | Verdict |
 |---|--------|-------|-------------|---------|
-| 15 | 🎯 **No hit sound exists anywhere** — `Drumset` instantiated only in editor, its `loadSound` calls commented out | `TrackEditor::Init`, `Drumset` | The single most important feedback channel in a drum game is absent; even the editor auditions silently | **Roadmap item 1 — do this first** |
-| 16 | 🎯 Visual hit feedback = entity deletion, deferred one frame by `World::Simulate` | `NoteHighwayCore` + engine | Hit note visibly lingers a frame; no flash/pop/animation to anchor timing perception | Item 6 (state machine → immediate visual state change) |
-| 17 | 🎯 No miss detection — expired notes just scroll on | `NoteHighwayCore::Update` | No miss sound/visual, no accuracy data, no fail state | Item 6 |
-| 18 | `m_drumVolume` bumped on hit but `SetDrumVolume` call is commented out | same | The drum-stem ducking mechanic (mute drums until you hit) is half-present and inert | Decide in item 6: finish or delete |
-| 19 | Judgment `difference` logged via `BRUH_FMT` and thrown away | same | Free per-hit accuracy data (the seed of scoring *and* auto-calibration) evaporates | Feed item 3 and item 6 |
+| 15 | 🎯 **No hit sound exists anywhere** — `Drumset` instantiated only in editor, its `loadSound` calls commented out | `TrackEditor::Init`, `Drumset` | The single most important feedback channel in a drum game is absent; even the editor auditions silently | Still open: the drum stems now drop out on a miss, but there is no hit sound |
+| 16 | 🎯 Visual hit feedback = entity deletion, deferred one frame by `World::Simulate` | `NoteHighwayCore` + engine | Hit note visibly lingers a frame; no flash/pop/animation to anchor timing perception | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 17 | 🎯 No miss detection — expired notes just scroll on | `NoteHighwayCore::Update` | No miss sound/visual, no accuracy data, no fail state | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 18 | `m_drumVolume` bumped on hit but `SetDrumVolume` call is commented out | same | The drum-stem ducking mechanic (mute drums until you hit) is half-present and inert | **Fixed** in the 2026-11-08 gameplay rewrite |
+| 19 | Judgment `difference` logged via `BRUH_FMT` and thrown away | same | Free per-hit accuracy data (the seed of scoring *and* auto-calibration) evaporates | **Fixed** in the 2026-11-08 gameplay rewrite |
 
 ### Audio
 

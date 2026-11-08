@@ -6,15 +6,15 @@ The end-to-end timing story: every stage between a stick hitting a pad and the g
 
 ## Overview
 
-Drumsmith's hit judgment runs entirely inside `NoteHighwayCore::Update`, once per rendered frame, comparing MIDI/keyboard input polled *at that moment* against an FMOD stream position read *at that moment*. Nothing in the chain carries a timestamp: input arrival times are discarded at the RtMidi boundary, and the judge clock is sampled once per frame. The engine loop is variable-timestep with vsync permanently on, so every stage is quantized to display refresh. There is currently **no audio feedback for a hit** and visual feedback lands 1–2 frames after judgment.
+Drumsmith judges hits once per rendered frame in `NoteHighwayCore::Update`, against its own song clock: frame time steered toward FMOD's stream position. MIDI hits carry their arrival time (stamped on RtMidi's thread), so they are judged at the moment they arrived; keyboard hits are judged at the frame that saw them. `AudioLatency` and `VideoLatency` from the settings shift the judge and the highway. A hit note disappears the frame it is judged; a miss mutes the drum stems. There is still no hit sound. The engine loop is variable-timestep with vsync permanently on.
 
 ## Key Files
 
 | Path | Role |
 |------|------|
-| `Game/Source/Cores/NoteHighwayCore.cpp` | Poll + judge + feedback, all in `Update` |
-| `Game/Source/Midi/MidiDevice.cpp` | `PumpMessages` — where timestamps are lost |
-| `Game/Source/CoreGame/AudioPack.cpp` | `GetPositionMs` (judge clock), DSP-clock start scheduling |
+| `Game/Source/Cores/NoteHighwayCore.cpp` | Song clock, latency offsets, judging, feedback |
+| `Game/Source/Midi/MidiDevice.cpp` | The RtMidi callback that stamps arrival times |
+| `Game/Source/CoreGame/AudioPack.cpp` | `GetPositionMs` (what the clock steers toward), DSP-clock start scheduling |
 | `Engine/Source/Engine/Engine.cpp` | `Engine::Run` — the frame phase order below |
 | `Engine/Modules/Moonlight/Source/Renderer.cpp` | `BGFX_RESET_VSYNC` (unconditional) |
 | `Engine/Source/Cores/AudioCore.cpp` | FMOD init (default mixer settings) + per-frame `System::update` |
@@ -34,27 +34,26 @@ sequenceDiagram
     participant U as NoteHighwayCore Update
     participant F as FMOD mixer
     participant D as Display
-    P->>Q: note-on lands in queue (arrival time recorded then discarded)
-    Note over Q: waits until a note is inside its hit window and the frame polls
-    U->>Q: PumpMessages (0 to 1+ frames later)
-    U->>F: GetPositionMs (one read per frame)
-    U->>U: judge with hardcoded minus 30 ms offset
-    U->>U: MarkForDelete on hit
-    Note over U,D: entity destroyed next frame in World Simulate
-    D->>D: note visibly disappears 1 to 2 frames plus scanout after the hit
-    Note over F: no hit sound exists so no audio confirmation at all
+    P->>Q: callback stamps arrival time and queues the note-on
+    U->>F: GetPositionMs steers the song clock
+    U->>Q: PumpMessages every frame
+    U->>U: judge at arrival time minus AudioLatency
+    U->>U: hit note scaled to zero this frame
+    D->>D: note visibly disappears next present plus scanout
+    Note over F: a miss mutes the drum stems; no hit sound
 ```
 
 | Stage | Added latency | Notes |
 |-------|---------------|-------|
 | Pad sensor → USB → OS MIDI driver | ~1–5 ms (typical, external) | Module-dependent; e-drum modules add their own scan time |
-| Driver → RtMidi internal queue | <1 ms | RtMidi's backend thread stamps arrival — the stamp is then discarded by `PumpMessages` |
-| Queue → game code | **0 ms to unbounded** | Pumped only inside the per-note loop, only when a note is already in its window and keyboard didn't hit; otherwise messages sit (see `Docs/Gameplay-Note-Highway.md`). Best case within a window: 0–1 frame (0–16.7 ms at 60 Hz) |
-| Judge clock staleness | 0–1 frame + FMOD granularity | `GetPositionMs` read once at update start; FMOD stream position resolution depends on mixer settings (defaults — verify via `System::getDSPBufferSize`) |
-| Visual feedback | 1–2 frames + display | `MarkForDelete` (frame N) → `World::Simulate` destroys (frame N+1) → present (vsync) → scanout |
-| Audio feedback | **∞** | No gameplay hit sound; `Drumset` is dormant even in the editor (`Docs/Audio.md`) |
+| Driver → `MidiDevice` queue | <1 ms | The callback stamps arrival with `steady_clock` |
+| Queue → judge | 0–1 frame to read, **0 ms of judging error** | The hit is judged at its arrival time; the frame only delays the response |
+| Keyboard | 0–1 frame of judging error | SDL key state, no timestamp |
+| Song clock | about 10 ms of FMOD tracking error (headless measurement) | Frame-time clock steered toward FMOD's position at each mixer update |
+| Visual feedback | 1 frame + display | Hit note scaled to zero in the judging frame → present (vsync) → scanout |
+| Audio feedback | On a miss only | The drum stems mute on a miss and return on the next hit; there is no hit sound (`Docs/Audio.md`) |
 
-Order-of-magnitude totals at 60 Hz: a perfectly timed hit is *judged* ~5–25 ms after the physical strike and *visibly confirmed* ~40–60 ms after it, with no audio confirmation. At 144 Hz the poll and visual terms shrink proportionally. These are derivations from the mechanics above, not measurements — see "How to measure".
+These are derivations from the mechanics above, not measurements — see "How to measure".
 
 ### Clock inventory
 
@@ -68,10 +67,10 @@ Order-of-magnitude totals at 60 Hz: a perfectly timed hit is *judged* ~5–25 ms
 
 ### Compensation state today
 
-- `int globalOffsetMs = -30` hardcoded in `NoteHighwayCore::Update` — shifts the judge clock earlier by 30 ms, presumably tuned on one machine.
-- `GameSettings::AudioLatency` / `VideoLatency`: settable from the settings UI (which now reads them back), persisted in `Settings.json`, **read by nothing** (`Docs/Game-Architecture.md`).
-- The main menu's visual latency test measures keyboard-vs-marker offsets in **milliseconds** and can copy its average into `VideoLatency`, which nothing consumes (`Docs/UI-and-Menus.md`).
-- Hit window: effectively fixed ±50 ms for all real content (the `noteSpeed` scaling is self-neutralizing — `Docs/Gameplay-Note-Highway.md`).
+- Judge time = song clock − `AudioLatency`; the highway is drawn at judge time + `VideoLatency` (`NoteHighwayCore::JudgeTimeMs` / `VisualTimeMs`). Both settings are 0-100 ms. The old hardcoded −30 ms offset is gone.
+- `GameSettings::AudioLatency` / `VideoLatency`: set from the settings page and the pause options, persisted in `Settings.json`, read by `NoteHighwayCore` every frame.
+- The main menu's visual latency test measures keyboard-vs-marker offsets in **milliseconds** and can copy its average into `VideoLatency` (`Docs/UI-and-Menus.md`). There is no audio calibration test.
+- Hit windows: Perfect ±30, Great ±60, Good ±90 ms, the same for every chart (`Docs/Gameplay-Note-Highway.md`).
 - Chart-side: notes recorded in the `TrackEditor` inherit the full input→UI-frame latency at authoring time, silently baking the charter's setup latency into `NoteData.txt` (`Docs/Songs-and-DLC.md`).
 
 ### Engine constraints on any fix
@@ -89,15 +88,15 @@ Each constraint links the doc that states it:
 ### How to measure (re-stamp numbers before relying on them)
 
 - `System::getDSPBufferSize` / `getSoftwareFormat` at runtime for the actual mixer block/count and sample rate.
-- The existing `BRUH_FMT("Pressed: difference = %f ms ...")` log in `NoteHighwayCore::Update` prints per-hit judgment offsets — a real-hardware histogram source as-is.
+- `--highway-log` prints the song clock against FMOD's position once a second; the HUD shows each hit's offset in ms.
 - Optick captures (F9; parsing recipe in `CLAUDE.md`) for frame-time distribution and update-phase costs.
 - Ground truth requires a physical loopback: record pad strike audio and game audio output on one device and measure the gap (the standard rhythm-game calibration method).
 
 ## Caveats & Fragility
 
 - Every number in the budget table above is a *derivation* from code structure, except the mechanics themselves; hardware terms are typical figures. Do not quote totals as measurements.
-- The stale-queue behavior means the *effective* input latency distribution is bimodal: near-frame-latency when notes are dense, and arbitrarily wrong (stale hits consumed late) after gaps — a histogram from the `BRUH_FMT` log will look better than the experience feels.
-- The judge clock and the scroll position are the same FMOD read, but the highway applies exponential smoothing (`smoothFactor = 10`) — what the player *sees* is intentionally behind what the judge *uses*, by roughly `1/smoothFactor` seconds of convergence lag after any tempo/seek discontinuity.
+- The ~10 ms clock tracking figure is from headless runs on FMOD's silent output; real devices have larger mixer blocks, which the clock smooths over but which add output latency only `AudioLatency` can account for.
+- The settings only allow positive offsets (0-100 ms); a setup that needs the highway drawn *later* than the audio can't be calibrated.
 
 ## Related Docs
 

@@ -5,7 +5,37 @@
     <link type="text/rcss" href="InGameMenu.rcss"/>
 </head>
 <body data-model="in_game">
-    <div id="pause-hint" data-if="!paused">Esc &#8212; Pause</div>
+    <div id="pause-hint" data-if="!paused && !finished">Esc &#8212; Pause</div>
+    <div id="hud" data-if="playing && !finished">
+        <div id="hud-score">{{score}}</div>
+        <div id="hud-multiplier" data-class-hot="multiplier > 1">x{{multiplier}}</div>
+        <div id="hud-combo" data-if="combo >= 5">{{combo}} combo</div>
+        <div id="hud-accuracy">{{accuracy}}</div>
+    </div>
+    <div id="hud-judgement" data-if="playing && !finished && judgement != ''" data-style-opacity="judgement_opacity">
+        <div id="judgement-text" data-class-miss="judgement == 'MISS'" data-class-perfect="judgement == 'PERFECT'">{{judgement}}</div>
+        <div id="judgement-timing">{{timing}}</div>
+    </div>
+    <div id="hud-countdown" data-if="playing && countdown > 0">
+        <div id="countdown-title">{{track_title}}</div>
+        <div id="countdown-artist">{{track_artist}}</div>
+        <div id="countdown-number">{{countdown}}</div>
+    </div>
+    <div id="results" data-if="finished">
+        <h2>{{track_title}}</h2>
+        <p class="results-artist">{{track_artist}}</p>
+        <div id="results-score">{{score}}</div>
+        <div class="results-grid">
+            <div class="results-row"><span>Accuracy</span><span>{{accuracy}}</span></div>
+            <div class="results-row"><span>Perfect</span><span>{{hits_perfect}}</span></div>
+            <div class="results-row"><span>Great</span><span>{{hits_great}}</span></div>
+            <div class="results-row"><span>Good</span><span>{{hits_good}}</span></div>
+            <div class="results-row"><span>Missed</span><span>{{hits_missed}}</span></div>
+            <div class="results-row"><span>Best combo</span><span>{{max_combo}} / {{total_notes}}</span></div>
+        </div>
+        <div><button id="results-retry" class="menu-link orange" data-event-click="retry">RETRY<span class="underline"></span></button></div>
+        <div><button id="results-continue" class="menu-link green" onclick="load-scene:Assets/TrackList.lvl">CONTINUE<span class="underline"></span></button></div>
+    </div>
     <div id="pause-overlay" data-if="paused">
         <div id="pause-menu" data-if="!options">
             <img class="pause-logo" src="img/2x/Asset 2@2x.png"/>
@@ -21,6 +51,8 @@
             <input id="pause-audio-delay" class="range" type="range" min="0" max="100" step="1" data-value="audio_delay" data-event-change="audio_delay(ev.value)"/>
             <label for="pause-video-delay">Visual Delay ({{video_delay}} ms)</label>
             <input id="pause-video-delay" class="range" type="range" min="0" max="100" step="1" data-value="video_delay" data-event-change="video_delay(ev.value)"/>
+            <label for="pause-highway-speed">Highway Speed ({{highway_speed}}%)</label>
+            <input id="pause-highway-speed" class="range" type="range" min="50" max="200" step="5" data-value="highway_speed" data-event-change="highway_speed(ev.value)"/>
             <button class="menu-link green" data-event-click="save">Save Settings<span class="underline"></span></button>
             <p class="muted">{{status}}</p>
         </div>

@@ -56,6 +56,7 @@ void MainMenuController::PopulateModel()
     ui->ModelSetNumber( kModel, "radio_volume", std::round( settings.RadioVolume * 100.f ) );
     ui->ModelSetNumber( kModel, "audio_delay", settings.AudioLatency );
     ui->ModelSetNumber( kModel, "video_delay", settings.VideoLatency );
+    ui->ModelSetNumber( kModel, "highway_speed", std::round( settings.HighwaySpeed * 100.f ) );
     ui->ModelSetString( kModel, "dlc_url", settings.DLCURL );
     ui->ModelSetString( kModel, "midi_device", settings.PreferredMidiDevice );
     ui->ModelSetString( kModel, "settings_status", "" );
@@ -107,6 +108,7 @@ void MainMenuController::ApplySettings( bool inSave )
     }
     settings.AudioLatency = static_cast<int>( std::clamp( ui->ModelGetNumber( kModel, "audio_delay" ), 0.0, 100.0 ) );
     settings.VideoLatency = static_cast<int>( std::clamp( ui->ModelGetNumber( kModel, "video_delay" ), 0.0, 100.0 ) );
+    settings.HighwaySpeed = static_cast<float>( std::clamp( ui->ModelGetNumber( kModel, "highway_speed" ), 50.0, 200.0 ) / 100.0 );
     settings.PreferredMidiDevice = ui->ModelGetString( kModel, "midi_device" );
     if( inSave )
     {

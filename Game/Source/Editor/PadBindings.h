@@ -151,8 +151,11 @@ namespace PadUtils
             return 0xFFC38839;
         case PadId::MidTom:
         case PadId::Crash1:
+        case PadId::Crash2:
         case PadId::FloorTom:
             return 0xFFA0C263;
+        case PadId::Ride:
+            return 0xFFE0B040;
         }
         return 0xFFFFFFFF;
     }

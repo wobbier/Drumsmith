@@ -12,3 +12,26 @@
     .pause-logo { width: 75%; margin: 0 auto; }
     .pause-underline { margin-bottom: 12dp; }
 }
+/* Gameplay HUD (NoteHighwayCore fills it): score column, judgement, lead-in, results. */
+#hud { position: absolute; top: 40dp; left: 24dp; width: 260dp; }
+#hud-score { font-size: 44dp; font-weight: bold; }
+#hud-multiplier { font-size: 30dp; color: #ffffffa0; }
+#hud-multiplier.hot { color: #ff9933; }
+#hud-combo { font-size: 22dp; color: #66ff66; margin-top: 6dp; }
+#hud-accuracy { font-size: 18dp; color: #ffffffb0; margin-top: 6dp; }
+#hud-judgement { position: absolute; top: 30%; left: 0; width: 100%; text-align: center; }
+#judgement-text { font-size: 52dp; font-weight: bold; color: #ffffff; font-effect: outline( 2dp #000000c0 ); }
+#judgement-text.perfect { color: #66ffff; }
+#judgement-text.miss { color: #ff3333; }
+#judgement-timing { font-size: 20dp; color: #ffffffc0; font-effect: outline( 1dp #000000c0 ); }
+#hud-countdown { position: absolute; top: 22%; left: 0; width: 100%; text-align: center; font-effect: outline( 2dp #000000c0 ); }
+#countdown-title { font-size: 44dp; font-weight: bold; }
+#countdown-artist { font-size: 26dp; color: #ffffffc0; margin-bottom: 16dp; }
+#countdown-number { font-size: 96dp; font-weight: bold; color: #ff9933; }
+#results { position: absolute; width: 100%; height: 100%; padding-top: 8vh; text-align: center; background-color: #000000c8; }
+#results h2 { font-size: 40dp; }
+#results .results-artist { font-size: 24dp; color: #ffffffb0; margin: 6dp 0 18dp; }
+#results-score { font-size: 72dp; font-weight: bold; color: #ff9933; margin-bottom: 18dp; }
+.results-grid { width: 360dp; margin: 0 auto 10dp; }
+.results-row { display: flex; justify-content: space-between; font-size: 22dp; padding: 4dp 0; border-bottom: 1dp #ffffff20; }
+#results .menu-link { font-size: 36dp; margin-top: 14dp; }

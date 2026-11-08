@@ -35,6 +35,10 @@
             <input id="video-delay" type="range" min="0" max="100" step="1" data-value="video_delay"/>
         </div>
         <div class="setting-row">
+            <label>Highway Speed <span>{{highway_speed}}%</span></label>
+            <input id="highway-speed" type="range" min="50" max="200" step="5" data-value="highway_speed"/>
+        </div>
+        <div class="setting-row">
             <label>DLC Server <span>host name, without http://</span></label>
             <input id="dlc-server" type="text" data-value="dlc_url"/>
         </div>

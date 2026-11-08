@@ -8,6 +8,7 @@
 #include <RmlUi/Core.h>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 
 InGameMenuController::InGameMenuController()
     : Component( "InGameMenuController" )
@@ -41,7 +42,7 @@ void InGameMenuController::Update( float inDeltaTime )
     if( !m_modelReady )
     {
         ui->ModelEnsure( "in_game" );
-        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay" } )
+        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry" } )
             ui->ModelRegisterEvent( "in_game", event );
         ui->ModelSetString( "in_game", "status", "" );
         m_modelReady = true;
@@ -61,7 +62,15 @@ void InGameMenuController::Update( float inDeltaTime )
             }
         }
     }
-    if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
+    // On the results screen Escape leaves for the library instead of pausing.
+    const bool finished = ui->ModelGetNumber( "in_game", "finished" ) != 0;
+    if( finished && GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
+    {
+        LoadSceneEvent load;
+        load.Level = "Assets/TrackList.lvl";
+        load.Queue();
+    }
+    else if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
     {
         if( m_options )
         {
@@ -90,11 +99,33 @@ void InGameMenuController::Update( float inDeltaTime )
             settings.Save();
             ui->ModelSetString( "in_game", "status", "Settings saved" );
         }
+        else if( event == "retry" )
+        {
+            const int trackIndex = static_cast<int>( ui->ModelGetNumber( "in_game", "track_index" ) );
+            LoadSceneEvent load;
+            load.Level = "Assets/Example.lvl";
+            load.Callback = [trackIndex]()
+            {
+                LaunchPlayTrackEvent play;
+                play.TrackIndex = trackIndex;
+                play.Fire();
+            };
+            load.Queue();
+        }
         else if( event == "exit" )
         {
             LoadSceneEvent load;
             load.Level = "Assets/TrackList.lvl";
             load.Queue();
+        }
+        else if( event == "highway_speed" )
+        {
+            const json args = json::parse( ui->ModelLastEventArgs( "in_game" ), nullptr, false );
+            if( args.is_array() && !args.empty() )
+            {
+                const double percent = args[0].is_number() ? args[0].get<double>() : std::atof( args[0].is_string() ? args[0].get<std::string>().c_str() : "100" );
+                settings.HighwaySpeed = static_cast<float>( std::clamp( percent, 50.0, 200.0 ) / 100.0 );
+            }
         }
         else if( event == "audio_delay" || event == "video_delay" )
         {
@@ -111,4 +142,5 @@ void InGameMenuController::Update( float inDeltaTime )
     ui->ModelSetNumber( "in_game", "options", m_options );
     ui->ModelSetNumber( "in_game", "audio_delay", settings.AudioLatency );
     ui->ModelSetNumber( "in_game", "video_delay", settings.VideoLatency );
+    ui->ModelSetNumber( "in_game", "highway_speed", std::round( settings.HighwaySpeed * 100.f ) );
 }

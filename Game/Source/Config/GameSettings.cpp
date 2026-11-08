@@ -1,6 +1,7 @@
 #include "GameSettings.h"
 #include "CLog.h"
 #include "File.h"
+#include <algorithm>
 
 GameSettings::GameSettings()
 {
@@ -25,6 +26,7 @@ void GameSettings::Save()
     RootJson["Device"] = PreferredMidiDevice;
     RootJson["AudioLatency"] = AudioLatency;
     RootJson["VideoLatency"] = VideoLatency;
+    RootJson["HighwaySpeed"] = HighwaySpeed;
 
     Path settingsFilePath( "Settings.json" );
     File settingsFile( settingsFilePath );
@@ -62,6 +64,11 @@ void GameSettings::Load()
     if( RootJson.contains( "VideoLatency" ) )
     {
         VideoLatency = RootJson["VideoLatency"];
+    }
+
+    if( RootJson.contains( "HighwaySpeed" ) && RootJson["HighwaySpeed"].is_number() )
+    {
+        HighwaySpeed = std::clamp( RootJson["HighwaySpeed"].get<float>(), 0.5f, 2.f );
     }
 }
 
