@@ -27,6 +27,9 @@ public:
 
     void OnMiss();
     void OnCheer( float inAmount );
+    // A crowd surfer passes overhead toward the stage while this is on (the chart's crowd-surf and
+    // stage-dive shots, or now and then when it's intense); the people under them hold them up.
+    void SetSurfing( bool inSurfing ) { m_surfRequested = inSurfing; }
 
     // 0 .. 1: how hyped the crowd is now (the lights and band use it).
     float Energy() const { return m_energy; }
@@ -60,4 +63,12 @@ private:
     float m_missDip = 0.f;
     float m_cheer = 0.f;
     uint32_t m_frame = 0;
+
+    // The crowd surfer: a figure carried over the heads from the back toward the barricade.
+    Puppet m_surfer;
+    bool m_surfRequested = false;
+    float m_surfProgress = -1.f;   // < 0: nobody up
+    float m_surfX = 0.f;
+    Vector3 m_surfPosition;
+    int m_surfCount = 0;
 };

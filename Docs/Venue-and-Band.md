@@ -75,7 +75,7 @@ The room around it is a `VenueShow::Style`:
 
 ### The crowd
 
-`Crowd` fills the floor with the room's crowd of five-piece figures (`--crowd-size N`), keener toward the front, each with its own lag behind the beat, enthusiasm and habit (jumper, pumper, swayer, clapper). The mood comes from `[crowd_x]` (or the sections): standing about, bobbing and fist pumps (`normal`), jumping with their hands up (`intense`), swaying with lighters and phones up (`mellow`). `[crowd_clap]` has them clap on the beat. `realtime` follows the player: the core's streak (`NoteHighwayCore` → `VenueShow::SetPerformance`) gets them going; misses take the wind out of them; every fifty in a row and the chart's pyro get a cheer. Their energy also drives the light rig's crowd blinders.
+`Crowd` fills the floor with the room's crowd of five-piece figures (`--crowd-size N`), keener toward the front, each with its own lag behind the beat, enthusiasm and habit (jumper, pumper, swayer, clapper). The mood comes from `[crowd_x]` (or the sections): standing about, bobbing and fist pumps (`normal`), jumping with their hands up (`intense`), swaying with lighters and phones up (`mellow`). `[crowd_clap]` has them clap on the beat. `realtime` follows the player: the core's streak (`NoteHighwayCore` → `VenueShow::SetPerformance`) gets them going; misses take the wind out of them; every fifty in a row and the chart's pyro get a cheer. Their energy also drives the light rig's crowd blinders. Phone-holders film the intense parts with their phones up, now and then flashing a photo. On the chart's `crowdsurf` / `stagedive` shots (and every so often when it's intense) a crowd surfer is carried over their heads to the barricade by the hands under them.
 
 ### The cameras
 
@@ -85,6 +85,8 @@ The room around it is a `VenueShow::Style`:
 - `directed_<who>[_<style>]`: `cls` a hand close-up, `kd` the kick drum, `np` / `pnt` a head close-up, `lt` from behind, `cam` handheld; `all`, `crowd`, `stagedive`, `crowdsurf`, `bre` / `brej` (the big rock ending, from high up), `duo_x`.
 - RB2's `auto` cuts: a shot that fits the constraints, chosen repeatably from the cut's index; focused members are its subjects.
 - No cuts: one every two measures (`Director::BuildFallbackCuts`), wide at each new section, else on the busiest member (`Band::Activity`).
+
+The follow spots track their member's chest every frame, so a soloist stepping out front stays lit.
 
 Shots track the members' live positions, drift (a slow orbit and push-in) while held, and shake when handheld. Post-processing looks map to the camera's grading (`Director::GradeFor`): saturation, contrast, temperature and tint, bloom, vignette, and the engine's era colour depth and dither for the TV and photocopy looks; they ease in over a few frames.
 

@@ -14,6 +14,7 @@
 #include "Dementia.h"
 #include "CLog.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 
 namespace
@@ -446,6 +447,7 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     {
         return;
     }
+    const auto started = std::chrono::steady_clock::now();
     // --venue-time <seconds> shows the venue that far into the song (to frame a moment without
     // playing up to it).
     static const double kPreviewOffset = CommandLine::GetFloat( "--venue-time", 0.f );
@@ -459,6 +461,10 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
             m_crowd.OnCheer( 1.f );
         }
     }
+    // A crowd surfer on the chart's crowd-surf / stage-dive shots, and now and then when it's intense.
+    const std::string& shot = m_director.CurrentShot();
+    const bool surfShot = shot.find( "crowdsurf" ) != std::string::npos || shot.find( "stagedive" ) != std::string::npos;
+    m_crowd.SetSurfing( surfShot || ( m_crowd.Mood( seconds ) == "intense" && std::fmod( seconds, 53.0 ) < 1.0 ) );
     m_crowd.Update( seconds, inDeltaTime, m_performance );
     m_band.Update( seconds, inDeltaTime, m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
     m_director.Update( seconds, inDeltaTime );
@@ -471,9 +477,27 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
         const int member = spotMembers[slot];
         const bool solo = m_band.StateOf( member, seconds ) == "play_solo";
         m_lights.SetSpotlightFloor( slot, !m_band.HasMember( member ) ? 0.f : solo ? 0.85f : kFrontFill );
+        if( m_band.HasMember( member ) )
+        {
+            m_lights.SetSpotlightTarget( slot, m_band.ChestOf( member ) );
+        }
     }
     m_lights.Update( inSongTimeMs, inDeltaTime );
     UpdateSet( seconds, inDeltaTime );
+
+    // --highway-log: what the venue costs on the main thread, every five seconds.
+    static const bool kLog = CommandLine::Has( "--highway-log" );
+    if( kLog )
+    {
+        m_updateMs += std::chrono::duration<double, std::milli>( std::chrono::steady_clock::now() - started ).count();
+        if( ++m_updateFrames >= 300 )
+        {
+            BRUH_FMT( "Venue: update %.2f ms a frame (%s, crowd %d, shot %s, look %s)", m_updateMs / m_updateFrames, StyleName( m_style ), static_cast<int>( m_crowd.Size() ),
+                m_director.CurrentShot().c_str(), m_director.CurrentLook().empty() ? "-" : m_director.CurrentLook().c_str() );
+            m_updateMs = 0.0;
+            m_updateFrames = 0;
+        }
+    }
 }
 
 

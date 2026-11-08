@@ -301,6 +301,7 @@ void StageLights::Clear()
     m_kickPulse = m_snarePulse = m_crashFlash = m_missDip = 0.f;
     m_tomPulse = { 0.f, 0.f };
     m_spotFloor = {};
+    m_spotTracked = {};
     m_hazeScale = 1.f;
 }
 
@@ -653,6 +654,12 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
                 // Front rows throw back over the band, back rows out over the crowd.
                 const float away = fixture.Row >= 2 ? -1.f : 1.f;
                 transform.LookDirection( Vector3( std::sin( yaw ) * std::cos( pitch ), std::sin( pitch ), away * std::cos( yaw ) * std::cos( pitch ) ) );
+            }
+            else if( fixture.Kind == Group::Spot && m_spotTracked[std::clamp( fixture.Index, 0, 4 )] )
+            {
+                // A follow spot follows: onto the member wherever they've wandered.
+                const Vector3 aim = m_spotTargets[std::clamp( fixture.Index, 0, 4 )] - transform.GetPosition();
+                if( aim.Length() > 0.1f ) transform.LookDirection( aim.Normalized() );
             }
             Light& light = fixture.Light->GetComponent<Light>();
             light.Color = color;

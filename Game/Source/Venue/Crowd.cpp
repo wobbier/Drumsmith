@@ -35,6 +35,10 @@ void Crowd::Clear()
     m_energy = 0.5f;
     m_missDip = 0.f;
     m_cheer = 0.f;
+    m_surfer = Puppet();
+    m_surfRequested = false;
+    m_surfProgress = -1.f;
+    m_surfCount = 0;
 }
 
 
@@ -98,6 +102,13 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
             }
             m_people.push_back( std::move( person ) );
         }
+    }
+    if( !m_people.empty() )
+    {
+        Puppet::Look look;
+        look.Shirt = Vector3( 0.7f, 0.65f, 0.1f );
+        look.LongHair = true;
+        m_surfer.Build( inKit, inFloor, Vector3( 0.f, -10.f, 0.f ), 0.f, look, false );
     }
 }
 
@@ -182,6 +193,38 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
     VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
     const float t = static_cast<float>( inSeconds );
     ++m_frame;
+
+    // The crowd surfer: up at the back, carried to the barricade over six seconds or so.
+    if( m_surfProgress < 0.f && m_surfRequested && m_surfer.Root() )
+    {
+        m_surfProgress = 0.f;
+        m_surfX = ( VenueTiming::Noise( static_cast<uint32_t>( ++m_surfCount ), 99u ) - 0.5f ) * 8.f;
+    }
+    if( m_surfProgress >= 0.f && m_surfer.Root() )
+    {
+        m_surfProgress += inDeltaTime / 6.5f;
+        Transform& surfer = *m_surfer.Root();
+        if( m_surfProgress >= 1.f )
+        {
+            m_surfProgress = -1.f;
+            surfer.SetPosition( Vector3( 0.f, -10.f, 0.f ) );
+        }
+        else
+        {
+            const float z = -12.f + ( VenueLayout::kBarricadeZ - 0.6f + 12.f ) * m_surfProgress;
+            const float bob = 0.12f * std::sin( t * 5.f ) + 0.06f * std::sin( t * 8.3f );
+            m_surfPosition = Vector3( m_surfX + 0.6f * std::sin( t * 0.9f ), 2.4f + bob, z );
+            // Face down, head toward the stage.
+            surfer.SetPosition( m_surfPosition + Vector3( 0.f, 0.f, -0.8f ) );
+            surfer.SetRotation( Vector3( 90.f + 8.f * std::sin( t * 3.f ), 0.f, 10.f * std::sin( t * 2.f ) ) );
+            Puppet::Pose pose;
+            pose.Arms[0].Raise = 150.f + 25.f * std::sin( t * 6.f );
+            pose.Arms[1].Raise = 150.f + 25.f * std::sin( t * 6.f + 1.5f );
+            pose.Arms[0].Spread = pose.Arms[1].Spread = 30.f;
+            pose.Nod = -20.f;
+            m_surfer.Apply( pose );
+        }
+    }
     for( size_t index = 0; index < m_people.size(); ++index )
     {
         Person& person = m_people[index];
@@ -191,6 +234,15 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
         if( ( m_frame + static_cast<uint32_t>( index ) ) % stride != 0 )
         {
             continue;
+        }
+        // Under the crowd surfer: hands up holding them.
+        bool carrying = false;
+        if( m_surfProgress >= 0.f && person.Body.Root() )
+        {
+            const Vector3 feet = person.Body.Root()->GetPosition();
+            const float dx = feet.x - m_surfPosition.x;
+            const float dz = feet.z - m_surfPosition.z;
+            carrying = dx * dx + dz * dz < 1.3f;
         }
         Puppet::Pose& pose = person.Pose;
         pose = Puppet::Pose();
@@ -206,11 +258,26 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
         auto& right = pose.Arms[1];
         left.Raise = right.Raise = 6.f;
         left.Spread = right.Spread = 8.f;
-        if( m_missDip > 0.4f && energy < 0.8f )
+        if( carrying )
+        {
+            left.Raise = right.Raise = 172.f;
+            left.Spread = right.Spread = 12.f;
+            left.Elbow = right.Elbow = 15.f + 10.f * wobble;
+            pose.Nod = -25.f;
+        }
+        else if( m_missDip > 0.4f && energy < 0.8f )
         {
             // Disappointed: arms down, leaning back.
             pose.Lean = -6.f * m_missDip;
             pose.Nod = 8.f * m_missDip;
+        }
+        else if( !lightersUp && person.Item == 2 && energy > 0.7f && person.Enthusiasm > 0.5f )
+        {
+            // Filming it on their phone.
+            right.Raise = 125.f;
+            right.Spread = 6.f;
+            right.Elbow = 35.f;
+            pose.Nod = -4.f;
         }
         else if( lightersUp && person.Item != 0 )
         {
@@ -280,13 +347,17 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
         if( person.ItemPiece )
         {
             Transform& item = person.ItemPiece->GetComponent<Transform>();
-            if( lightersUp && energy <= 1.f )
+            const bool filming = !lightersUp && person.Item == 2 && energy > 0.7f && person.Enthusiasm > 0.5f && !carrying;
+            if( ( lightersUp && energy <= 1.f ) || filming )
             {
                 // At the raised hand (root space; the root carries the figure's scale).
                 const glm::vec3 hand = person.Body.Hand( 1 ) / person.Body.Scale();
                 item.SetPosition( Vector3( hand + glm::vec3( 0.f, 0.08f, 0.f ) ) );
                 const float flicker = person.Item == 1 ? 0.8f + 0.2f * std::sin( t * 23.f + person.Phase * 50.f ) : 1.f;
-                VenueKit::SetColor( person.ItemPiece, Vector3( 0.f, 0.f, 0.f ), person.Item == 1 ? Vector3( 4.f, 1.6f, 0.3f ) * flicker : Vector3( 1.6f, 2.f, 3.f ) );
+                // Now and then a photo: a flash for a frame or two.
+                const bool flash = filming && VenueTiming::Noise( static_cast<uint32_t>( t * 8.f ), static_cast<uint32_t>( index ) ) < 0.012f;
+                const Vector3 glow = person.Item == 1 ? Vector3( 4.f, 1.6f, 0.3f ) * flicker : flash ? Vector3( 40.f, 40.f, 40.f ) : Vector3( 1.6f, 2.f, 3.f );
+                VenueKit::SetColor( person.ItemPiece, Vector3( 0.f, 0.f, 0.f ), glow );
             }
             else
             {

@@ -37,6 +37,8 @@ public:
     // Holds a follow spot (0 keys, 1 vocals, 2 guitar, 3 drums, 4 bass) at least this bright, for
     // a solo or a big moment the chart's spotlight notes don't cover.
     void SetSpotlightFloor( int inSlot, float inLevel ) { if( inSlot >= 0 && inSlot < 5 ) m_spotFloor[inSlot] = inLevel; }
+    // Aims a follow spot at a point (the rig's space) from now on.
+    void SetSpotlightTarget( int inSlot, const Vector3& inTarget ) { if( inSlot >= 0 && inSlot < 5 ) { m_spotTargets[inSlot] = inTarget; m_spotTracked[inSlot] = true; } }
     // The washes' colour and level now, for set pieces that glow along with them.
     Vector3 WashGlow() const;
     // Scales the haze (an open-air venue holds less of it).
@@ -107,6 +109,8 @@ private:
     float m_crowdEnergy = 0.5f;
     float m_hazeScale = 1.f;
     std::array<float, 5> m_spotFloor{};
+    std::array<Vector3, 5> m_spotTargets{};
+    std::array<bool, 5> m_spotTracked{};
 
     // The camera's fog before the show changed it, restored by Clear.
     bool m_savedFog = false;

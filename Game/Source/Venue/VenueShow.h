@@ -63,6 +63,8 @@ private:
     std::vector<BeatData> m_beats;
     float m_bpm = 120.f;
     float m_performance = 0.5f;
+    double m_updateMs = 0.0;
+    int m_updateFrames = 0;
 
     // Set pieces that move: the LED strip along the stage's edge, pyro.
     std::vector<EntityHandle> m_edgeStrip;
