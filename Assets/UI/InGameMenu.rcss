@@ -24,6 +24,7 @@
 #judgement-text.perfect { color: #66ffff; }
 #judgement-text.miss { color: #ff3333; }
 #judgement-timing { font-size: 20dp; color: #ffffffc0; font-effect: outline( 1dp #000000c0 ); }
+#judgement-hint { font-size: 26dp; font-weight: bold; color: #ff9933; margin-top: 4dp; font-effect: outline( 1dp #000000c0 ); }
 #hud-countdown { position: absolute; top: 22%; left: 0; width: 100%; text-align: center; font-effect: outline( 2dp #000000c0 ); }
 #countdown-title { font-size: 44dp; font-weight: bold; }
 #countdown-artist { font-size: 26dp; color: #ffffffc0; margin-bottom: 16dp; }

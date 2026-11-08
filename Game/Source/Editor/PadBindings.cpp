@@ -146,7 +146,16 @@ void PadBindingWidget::Render()
         KeybindButton( id, &thing.keyboardBinding, &keyCatchState[id], "Keyboard: ", { remainingSpace / 2.f, 0 } );
         ImGui::SameLine();
         MidiBindButtonNew( id + PadId::COUNT, m_midiDevice, &thing.midiBinding, &midiCatchState[id], "Midi Pad: ", { -1.f, 0 } );
-
+        if( !thing.extraMidi.empty() )
+        {
+            std::string extras = "Also: ";
+            for( const MidiNoteBinding& extra : thing.extraMidi )
+            {
+                extras += std::to_string( extra.note ) + ( extra.articulation == Articulation::Normal ? "" : std::string( " " ) + PadUtils::GetArticulationName( extra.articulation ) ) + "  ";
+            }
+            HavanaUtils::SkipLabel();
+            ImGui::TextDisabled( "%s", extras.c_str() );
+        }
     }
 
     float remainingSpace = ImGui::GetContentRegionAvail().x;
@@ -166,9 +175,15 @@ void PadBindingWidget::Render()
         for( auto& pad : mappings.mappedPads )
         {
             pad.midiBinding = 0;
+            pad.extraMidi.clear();
         }
     }
     ImGui::PopStyleColor( 2 );
+    ImGui::SameLine();
+    if( ImGui::Button( "Standard e-kit MIDI", { remainingSpace / 4.f, 0.f } ) )
+    {
+        mappings.ApplyStandardKitMidi();
+    }
 
     ImGui::SameLine();
 
@@ -177,21 +192,7 @@ void PadBindingWidget::Render()
     ImGui::PushStyleColor( ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV( 2.f / 7.0f, 0.8f, 0.8f ) );
     if( ImGui::Button( "Save Pad Mappings", { -1.f, 0 } ) )
     {
-        mappings.saveData.clear();
-
-        for( auto pad : mappings.mappedPads )
-        {
-            json& padData = mappings.saveData["PadMap"];
-            json entry;
-            entry["ID"] = pad.padId;
-            entry["NAME"] = pad.padName;
-            entry["KB"] = pad.keyboardBinding;
-            entry["MIDI"] = pad.midiBinding;
-            padData.push_back( entry );
-        }
-
-        File outFile( Path("Assets/Config/PadMappings.json"));
-        outFile.Write( mappings.saveData.dump(1) );
+        mappings.Save();
     }
     ImGui::PopStyleColor( 3 );
 
@@ -215,21 +216,138 @@ PadMappingStorage::PadMappingStorage()
         mappedPads[id].padName = PadUtils::GetPadName( id );
     }
 
+    std::vector<bool> loaded( PadId::COUNT, false );
+    bool hasExtras = false;
     Path mappingConfig( "Assets/Config/PadMappings.json" );
     if( mappingConfig.Exists )
     {
         File outFile( mappingConfig );
-        saveData = json::parse(outFile.Read());
-
-        json& padMap = saveData["PadMap"];
-        for (auto& pad : padMap)
+        saveData = json::parse( outFile.Read(), nullptr, false );
+        if( saveData.is_object() && saveData.contains( "PadMap" ) )
         {
-            int16_t id = pad["ID"];
-            auto& padData = mappedPads[id];
-            padData.padId = id;
-            padData.keyboardBinding = pad["KB"];
-            padData.midiBinding = pad["MIDI"];
-            padData.padName = PadUtils::GetPadName(id);
+            for( auto& pad : saveData["PadMap"] )
+            {
+                const int16_t id = pad.value( "ID", static_cast<int16_t>( -1 ) );
+                if( id < 0 || id >= PadId::COUNT )
+                {
+                    continue;
+                }
+                auto& padData = mappedPads[id];
+                padData.padId = id;
+                padData.keyboardBinding = pad.value( "KB", 0 );
+                padData.midiBinding = pad.value( "MIDI", 0 );
+                padData.padName = PadUtils::GetPadName( id );
+                if( pad.contains( "MIDIExtra" ) && pad["MIDIExtra"].is_array() )
+                {
+                    hasExtras = true;
+                    for( const json& extra : pad["MIDIExtra"] )
+                    {
+                        MidiNoteBinding binding;
+                        binding.note = extra.value( "Note", 0 );
+                        binding.articulation = PadUtils::GetArticulation( extra.value( "Articulation", std::string( "Normal" ) ) );
+                        if( binding.note > 0 )
+                        {
+                            padData.extraMidi.push_back( binding );
+                        }
+                    }
+                }
+                loaded[id] = true;
+            }
         }
     }
+
+    // Pads the file predates (the pedal, splash, china), and a file from before extra notes
+    // existed, get the standard kit's notes; the player's own main notes are kept.
+    for( int16_t id = PadId::Invalid + 1; id < PadId::COUNT; ++id )
+    {
+        int32_t main = 0;
+        std::vector<MidiNoteBinding> extra;
+        StandardKitNotes( static_cast<PadId>( id ), main, extra );
+        if( !loaded[id] )
+        {
+            mappedPads[id].midiBinding = main;
+        }
+        if( !hasExtras )
+        {
+            mappedPads[id].extraMidi = extra;
+        }
+    }
+}
+
+
+void PadMappingStorage::StandardKitNotes( PadId inPad, int32_t& outMain, std::vector<MidiNoteBinding>& outExtra )
+{
+    outExtra.clear();
+    switch( inPad )
+    {
+    case PadId::Bass: outMain = 36; outExtra = { { 35, Articulation::Normal } }; break;
+    case PadId::Snare: outMain = 38; outExtra = { { 40, Articulation::Rim }, { 37, Articulation::CrossStick } }; break;
+    case PadId::ClosedHiHat: outMain = 42; outExtra = { { 22, Articulation::Normal } }; break;
+    case PadId::OpenHiHat: outMain = 46; outExtra = { { 26, Articulation::Normal } }; break;
+    case PadId::HiHatPedal: outMain = 44; break;
+    case PadId::Crash1: outMain = 49; outExtra = { { 55, Articulation::Normal } }; break;
+    case PadId::Crash2: outMain = 57; outExtra = { { 52, Articulation::Normal } }; break;
+    case PadId::Ride: outMain = 51; outExtra = { { 53, Articulation::Bell }, { 59, Articulation::Normal } }; break;
+    case PadId::HighTom: outMain = 48; outExtra = { { 50, Articulation::Rim } }; break;
+    case PadId::MidTom: outMain = 45; outExtra = { { 47, Articulation::Rim } }; break;
+    case PadId::FloorTom: outMain = 43; outExtra = { { 58, Articulation::Rim } }; break;
+    default: outMain = 0; break;
+    }
+}
+
+
+void PadMappingStorage::ApplyStandardKitMidi()
+{
+    for( int16_t id = PadId::Invalid + 1; id < PadId::COUNT; ++id )
+    {
+        StandardKitNotes( static_cast<PadId>( id ), mappedPads[id].midiBinding, mappedPads[id].extraMidi );
+    }
+}
+
+
+void PadMappingStorage::Resolve( int inNote, std::vector<Resolved>& outResolved ) const
+{
+    outResolved.clear();
+    for( const PadDefinition& pad : mappedPads )
+    {
+        if( pad.padId < 0 )
+        {
+            continue;
+        }
+        if( pad.midiBinding > 0 && pad.midiBinding == inNote )
+        {
+            outResolved.push_back( { static_cast<PadId>( pad.padId ), Articulation::Normal } );
+        }
+        for( const MidiNoteBinding& extra : pad.extraMidi )
+        {
+            if( extra.note == inNote )
+            {
+                outResolved.push_back( { static_cast<PadId>( pad.padId ), extra.articulation } );
+            }
+        }
+    }
+}
+
+
+void PadMappingStorage::Save()
+{
+    saveData = json::object();
+    json& padData = saveData["PadMap"];
+    for( const PadDefinition& pad : mappedPads )
+    {
+        json entry;
+        entry["ID"] = pad.padId;
+        entry["NAME"] = pad.padName;
+        entry["KB"] = pad.keyboardBinding;
+        entry["MIDI"] = pad.midiBinding;
+        json& extras = entry["MIDIExtra"];
+        extras = json::array();
+        for( const MidiNoteBinding& extra : pad.extraMidi )
+        {
+            extras.push_back( { { "Note", extra.note }, { "Articulation", PadUtils::GetArticulationName( extra.articulation ) } } );
+        }
+        padData.push_back( entry );
+    }
+    File outFile( Path( "Assets/Config/PadMappings.json" ) );
+    outFile.Write( saveData.dump( 1 ) );
 }

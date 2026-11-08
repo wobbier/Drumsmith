@@ -41,6 +41,21 @@ The callback (`MidiDevice::OnMessage`) keeps 3-byte messages as `MidiMessageNew{
 
 ### Rebinding (editor only)
 
+Pads: kick, snare, open and closed hi-hat, hi-hat pedal, two crashes, splash, china, ride, high/mid/floor tom (`PadId`; the pedal, splash and china were appended, so saved IDs are stable). Strokes (`Articulation`): normal, rim (a cymbal's edge), cross-stick, bell.
+
+Each pad has a main MIDI note (a plain stroke) and any number of extra notes, each tagged with a stroke (`PadDefinition::extraMidi`, saved as `MIDIExtra` in `Assets/Config/PadMappings.json`). `PadMappingStorage::Resolve(note)` returns every pad and stroke a note is bound to. **Standard e-kit MIDI** (`ApplyStandardKitMidi`, a button in the widget) sets Roland-style notes most modules share:
+
+| Pad | Main | Extra |
+|-----|------|-------|
+| Kick | 36 | 35 |
+| Snare | 38 | 40 rim, 37 cross-stick |
+| Closed / open hi-hat, pedal | 42 / 46 / 44 | 22 / 26 (edge) |
+| Crash 1 / Crash 2 | 49 / 57 | 55 / 52 (edge) |
+| Ride | 51 | 53 bell, 59 edge |
+| High / mid / floor tom | 48 / 45 / 43 | 50 / 47 / 58 rim |
+
+Splash and china have no standard notes (theirs clash with crash edges) and need binding by hand. Loading a mapping file without `MIDIExtra` keeps its main notes and adds the standard extras; pads missing from it get standard main notes.
+
 `PadBindingWidget` (Havana widget, `ME_EDITOR` builds) lists all pads with a keyboard-capture button (binds `Input::GetLastKeyPressed` from the editor input context) and a MIDI-capture button (pumps messages while focused and binds the first note-on's note number; it pre-pumps once when capture starts to discard stale queued hits). "Save Pad Mappings" serializes to `Assets/Config/PadMappings.json`. **There is no in-game rebinding UI** — game builds can only consume a shipped/previously saved mapping file.
 
 ### Consumption points

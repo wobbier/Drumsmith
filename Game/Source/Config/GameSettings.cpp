@@ -27,6 +27,8 @@ void GameSettings::Save()
     RootJson["AudioLatency"] = AudioLatency;
     RootJson["VideoLatency"] = VideoLatency;
     RootJson["HighwaySpeed"] = HighwaySpeed;
+    RootJson["TechniqueStrictness"] = TechniqueStrictness;
+    RootJson["StageLighting"] = StageLighting;
 
     Path settingsFilePath( "Settings.json" );
     File settingsFile( settingsFilePath );
@@ -64,6 +66,16 @@ void GameSettings::Load()
     if( RootJson.contains( "VideoLatency" ) )
     {
         VideoLatency = RootJson["VideoLatency"];
+    }
+
+    if( RootJson.contains( "TechniqueStrictness" ) && RootJson["TechniqueStrictness"].is_number() )
+    {
+        TechniqueStrictness = std::clamp( RootJson["TechniqueStrictness"].get<int>(), 0, 2 );
+    }
+
+    if( RootJson.contains( "StageLighting" ) && RootJson["StageLighting"].is_number() )
+    {
+        StageLighting = std::clamp( RootJson["StageLighting"].get<int>(), 0, 2 );
     }
 
     if( RootJson.contains( "HighwaySpeed" ) && RootJson["HighwaySpeed"].is_number() )

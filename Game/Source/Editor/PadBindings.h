@@ -23,7 +23,22 @@ enum PadId
     FloorTom,
     Ride,
     Crash2,
+    // Appended so saved pad IDs keep their meaning.
+    HiHatPedal,
+    Splash,
+    China,
     COUNT
+};
+
+// How a pad is played, beyond which pad it is (Docs/MIDI-and-Pads.md). Open and closed hi-hat are
+// separate pads; these are the strokes a pad can take.
+enum class Articulation : uint8_t
+{
+    Normal = 0,
+    Rim,          // Rimshot on a snare or tom; the edge of a cymbal
+    CrossStick,   // Snare side-stick
+    Bell,         // Ride or crash bell
+    Count
 };
 
 namespace PadUtils
@@ -54,6 +69,12 @@ namespace PadUtils
             return "Ride";
         case Crash2:
             return "Crash2";
+        case HiHatPedal:
+            return "HiHatPedal";
+        case Splash:
+            return "Splash";
+        case China:
+            return "China";
         case COUNT:
         default:
             break;
@@ -94,6 +115,12 @@ namespace PadUtils
             return "ride1";
         case Crash2:
             return "crash2";
+        case HiHatPedal:
+            return "hh_pedal";
+        case Splash:
+            return "splash1";
+        case China:
+            return "china1";
         case COUNT:
         default:
             break;
@@ -131,6 +158,12 @@ namespace PadUtils
             return PadId::Crash2;
         if( inPadId == "ride1" )
             return PadId::Ride;
+        if( inPadId == "hh_pedal" )
+            return PadId::HiHatPedal;
+        if( inPadId == "splash1" )
+            return PadId::Splash;
+        if( inPadId == "china1" )
+            return PadId::China;
         ME_ASSERT_MSG( false, "Unhandled note name" );
         return PadId::COUNT;
     }
@@ -156,6 +189,12 @@ namespace PadUtils
             return 0xFFA0C263;
         case PadId::Ride:
             return 0xFFE0B040;
+        case PadId::HiHatPedal:
+            return 0xFF73EDF3;
+        case PadId::Splash:
+            return 0xFFE07AD8;
+        case PadId::China:
+            return 0xFF3A8CF0;
         }
         return 0xFFFFFFFF;
     }
@@ -179,14 +218,62 @@ namespace PadUtils
         return HexToVector4( GetNoteColorABGR( inId ) );
     }
 
+
+    inline static const char* GetArticulationName( Articulation inArticulation )
+    {
+        switch( inArticulation )
+        {
+        case Articulation::Rim: return "Rim";
+        case Articulation::CrossStick: return "CrossStick";
+        case Articulation::Bell: return "Bell";
+        default: return "Normal";
+        }
+    }
+
+
+    inline static Articulation GetArticulation( const std::string& inName )
+    {
+        if( inName == "Rim" ) return Articulation::Rim;
+        if( inName == "CrossStick" ) return Articulation::CrossStick;
+        if( inName == "Bell" ) return Articulation::Bell;
+        return Articulation::Normal;
+    }
+
+
+    inline static bool IsCymbal( PadId inId )
+    {
+        switch( inId )
+        {
+        case PadId::OpenHiHat:
+        case PadId::ClosedHiHat:
+        case PadId::Crash1:
+        case PadId::Crash2:
+        case PadId::Ride:
+        case PadId::Splash:
+        case PadId::China:
+            return true;
+        default:
+            return false;
+        }
+    }
+
 }
+
+// A further MIDI note a pad sends, and the stroke it means (a snare's rim, a ride's bell).
+struct MidiNoteBinding
+{
+    int32_t note = 0;
+    Articulation articulation = Articulation::Normal;
+};
 
 struct PadDefinition
 {
     int16_t padId = PadId::Invalid;
     std::string padName;
-    int32_t keyboardBinding;
-    int32_t midiBinding;
+    int32_t keyboardBinding = 0;
+    // The pad's main note (a plain stroke), plus any others it sends.
+    int32_t midiBinding = 0;
+    std::vector<MidiNoteBinding> extraMidi;
 };
 
 class PadMappingStorage
@@ -195,8 +282,26 @@ class PadMappingStorage
 
 public:
     PadMappingStorage();
+
+    // A MIDI note's meanings: every pad (and stroke) bound to it. Usually one; a kit that sends
+    // one note for two pads (open and closed hi-hat on 46) gives both.
+    struct Resolved
+    {
+        PadId pad = PadId::Invalid;
+        Articulation articulation = Articulation::Normal;
+    };
+    void Resolve( int inNote, std::vector<Resolved>& outResolved ) const;
+
+    // Roland-style e-kit notes (most modules use them): every pad's main note and its rim, edge,
+    // bell and pedal notes. Splash and china are left unbound (their notes clash with crash edges).
+    void ApplyStandardKitMidi();
+    void Save();
+
     std::vector<PadDefinition> mappedPads;
     json saveData;
+
+private:
+    static void StandardKitNotes( PadId inPad, int32_t& outMain, std::vector<MidiNoteBinding>& outExtra );
 };
 
 

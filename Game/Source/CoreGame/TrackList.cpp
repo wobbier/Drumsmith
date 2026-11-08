@@ -1,5 +1,6 @@
 ﻿#include "TrackList.h"
 #include <filesystem>
+#include <algorithm>
 #include "Core/Assert.h"
 #include "CustomTrackDefineTest.h"
 #include "JSON.h"
@@ -247,6 +248,27 @@ void TrackDatabase::ExportMidiTrackMetaData()
             if( midiFormat )
             {
                 Path midiPath = Path( std::string( entry.path().generic_string() ) );
+
+                // Already converted: re-chart the notes (and beats) only, keeping the metadata a
+                // player may have edited (preview marker, art, ...).
+                if( fileExistsInDirectory( entry.path(), "TrackData.txt" ) )
+                {
+                    TrackData existing( Path( midiPath.FullPath + "/TrackData.txt" ) );
+                    existing.Load();
+                    LegacySongMetaData legacy;
+                    const Path ini( midiPath.FullPath + "/song.ini" );
+                    if( ini.Exists )
+                    {
+                        legacy = CustomTrackDefineTest::GetInstance().readSongMetaData( ini.FullPath );
+                    }
+                    if( CustomTrackDefineTest::GetInstance().ParseMidi( midiPath, existing, legacy ) )
+                    {
+                        existing.SaveNoteData();
+                        // A loaded copy picks the new chart up on its next LoadNoteData.
+                        BRUH_FMT( "Re-charted %s: %d notes, %d beats", entry.path().filename().string().c_str(), static_cast<int>( existing.m_noteData.size() ), static_cast<int>( existing.m_beats.size() ) );
+                    }
+                    continue;
+                }
 
                 TrackData newTrack = TrackData( Path( midiPath.FullPath + "/NoteData.txt" ) );
                 LegacySongMetaData legacyTrack = ConvertFromLegacy( midiPath.FullPath, newTrack );
@@ -529,6 +551,19 @@ void TrackData::Save()
     }
 }
 
+void TrackData::SaveNoteData()
+{
+    if( m_noteData.empty() )
+    {
+        return;
+    }
+    json noteData;
+    OnSaveNoteData( noteData );
+    File noteFile( Path( m_directory + "/NoteData.txt" ) );
+    noteFile.Write( noteData.dump( 1 ) );
+}
+
+
 void TrackData::Load()
 {
     {
@@ -611,8 +646,28 @@ void TrackData::OnSaveNoteData( json& outJson )
         noteEntry["NoteName"] = note.m_noteName;
         noteEntry["TriggerTime"] = note.m_triggerTime;
         noteEntry["TriggerTimeMS"] = (uint32_t)( note.m_triggerTime * 1000.f );
+        if( note.m_articulation != Articulation::Normal )
+        {
+            noteEntry["Articulation"] = PadUtils::GetArticulationName( note.m_articulation );
+        }
+        if( note.m_velocity != 100 )
+        {
+            noteEntry["Velocity"] = note.m_velocity;
+        }
 
         noteData.push_back( noteEntry );
+    }
+    if( !m_beats.empty() )
+    {
+        json& beats = outJson["Beats"];
+        for( const BeatData& beat : m_beats )
+        {
+            beats.push_back( json::array( { beat.m_time, beat.m_measure ? 1 : 0 } ) );
+        }
+    }
+    if( !m_venue.IsEmpty() )
+    {
+        m_venue.Save( outJson["Venue"] );
     }
 }
 
@@ -714,8 +769,146 @@ void TrackData::OnLoadNoteData( const json& inJson )
             noteEntry.m_triggerTime = note["TriggerTime"];
             if( note.contains( "TriggerTimeMS" ) )
                 noteEntry.m_triggerTimeMS = note["TriggerTimeMS"];
+            if( note.contains( "Articulation" ) && note["Articulation"].is_string() )
+                noteEntry.m_articulation = PadUtils::GetArticulation( note["Articulation"].get<std::string>() );
+            if( note.contains( "Velocity" ) && note["Velocity"].is_number() )
+                noteEntry.m_velocity = static_cast<uint8_t>( std::clamp( note["Velocity"].get<int>(), 0, 127 ) );
 
             m_noteData.push_back( noteEntry );
+        }
+    }
+    m_beats.clear();
+    if( inJson.contains( "Beats" ) && inJson["Beats"].is_array() )
+    {
+        for( const json& beat : inJson["Beats"] )
+        {
+            if( beat.is_array() && beat.size() >= 2 && beat[0].is_number() )
+            {
+                m_beats.push_back( BeatData{ beat[0].get<float>(), beat[1].get<int>() != 0 } );
+            }
+        }
+    }
+    m_venue.Clear();
+    if( inJson.contains( "Venue" ) && inJson["Venue"].is_object() )
+    {
+        m_venue.Load( inJson["Venue"] );
+    }
+}
+
+
+namespace
+{
+    void SaveCues( const std::vector<TimedCueData>& inCues, json& outJson )
+    {
+        outJson = json::array();
+        for( const TimedCueData& cue : inCues )
+        {
+            outJson.push_back( json::array( { cue.m_time, cue.m_name } ) );
+        }
+    }
+
+
+    void LoadCues( const json& inJson, const char* inKey, std::vector<TimedCueData>& outCues )
+    {
+        if( !inJson.contains( inKey ) || !inJson[inKey].is_array() )
+        {
+            return;
+        }
+        for( const json& cue : inJson[inKey] )
+        {
+            if( cue.is_array() && cue.size() >= 2 && cue[0].is_number() && cue[1].is_string() )
+            {
+                outCues.push_back( TimedCueData{ cue[0].get<float>(), cue[1].get<std::string>() } );
+            }
+        }
+    }
+}
+
+
+void VenueData::Save( json& outJson ) const
+{
+    // Compact rows: [time, value] per event, so a chart's few hundred cues stay readable.
+    outJson = json::object();
+    if( !m_lighting.empty() ) SaveCues( m_lighting, outJson["Lighting"] );
+    if( !m_sections.empty() ) SaveCues( m_sections, outJson["Sections"] );
+    if( !m_crowd.empty() ) SaveCues( m_crowd, outJson["Crowd"] );
+    if( !m_keyframes.empty() )
+    {
+        json& keyframes = outJson["Keyframes"];
+        for( const KeyframeData& keyframe : m_keyframes )
+        {
+            keyframes.push_back( json::array( { keyframe.m_time, static_cast<int>( keyframe.m_step ) } ) );
+        }
+    }
+    if( !m_fog.empty() )
+    {
+        json& fog = outJson["Fog"];
+        for( const FogData& change : m_fog )
+        {
+            fog.push_back( json::array( { change.m_time, change.m_on ? 1 : 0 } ) );
+        }
+    }
+    if( !m_bonusFx.empty() )
+    {
+        outJson["BonusFx"] = m_bonusFx;
+    }
+    if( !m_spotlights.empty() )
+    {
+        json& spotlights = outJson["Spotlights"];
+        for( const SpotlightData& spot : m_spotlights )
+        {
+            spotlights.push_back( json::array( { spot.m_start, spot.m_end, spot.m_slot } ) );
+        }
+    }
+}
+
+
+void VenueData::Load( const json& inJson )
+{
+    LoadCues( inJson, "Lighting", m_lighting );
+    LoadCues( inJson, "Sections", m_sections );
+    LoadCues( inJson, "Crowd", m_crowd );
+    const auto rows = [&inJson]( const char* inKey ) -> const json* {
+        return inJson.contains( inKey ) && inJson[inKey].is_array() ? &inJson[inKey] : nullptr;
+    };
+    if( const json* keyframes = rows( "Keyframes" ) )
+    {
+        for( const json& row : *keyframes )
+        {
+            if( row.is_array() && row.size() >= 2 && row[0].is_number() && row[1].is_number() )
+            {
+                m_keyframes.push_back( KeyframeData{ row[0].get<float>(), static_cast<Keyframe>( std::clamp( row[1].get<int>(), 0, 2 ) ) } );
+            }
+        }
+    }
+    if( const json* fog = rows( "Fog" ) )
+    {
+        for( const json& row : *fog )
+        {
+            if( row.is_array() && row.size() >= 2 && row[0].is_number() && row[1].is_number() )
+            {
+                m_fog.push_back( FogData{ row[0].get<float>(), row[1].get<int>() != 0 } );
+            }
+        }
+    }
+    if( const json* bonus = rows( "BonusFx" ) )
+    {
+        for( const json& time : *bonus )
+        {
+            if( time.is_number() )
+            {
+                m_bonusFx.push_back( time.get<float>() );
+            }
+        }
+    }
+    if( const json* spotlights = rows( "Spotlights" ) )
+    {
+        for( const json& row : *spotlights )
+        {
+            if( row.is_array() && row.size() >= 3 && row[0].is_number() && row[1].is_number() && row[2].is_number() )
+            {
+                m_spotlights.push_back( SpotlightData{ row[0].get<float>(), row[1].get<float>(), std::clamp( row[2].get<int>(), 0, 4 ) } );
+            }
         }
     }
 }

@@ -28,15 +28,32 @@
 `SetupTrack( track, index )` (from `LaunchPlayTrackEvent`, or `--play-track <index>` on the command line):
 
 1. `ShutdownTrack()` deletes the previous notes and stops audio.
-2. `TrackData::LoadNoteData()` reads `NoteData.txt`; notes are sorted into one time-ordered list per lane (`m_laneNotes`). Open and closed hi-hat share a list, so either pad hits either.
-3. `LayoutLanes()` places only the columns this chart uses, left to right as a kit sits: crash, hi-hat, snare, high/mid/floor tom, ride, second crash. Spacing is up to 1.8 units, shrunk so the highway is at most 8 units wide; the kick stays at the centre as a bar across all columns, and the strike `Bar` is scaled to the same width.
-4. Each note is spawned from its prefab, scaled to 90% of the lane spacing, taller and deeper than the prefab (`kGemHeight`, `kGemDepth`), parented to its lane entity and placed at `Z = time × speed`. The kick is a bar the highway's width.
+2. `TrackData::LoadNoteData()` reads `NoteData.txt` (pad, stroke, velocity per note, and the beat grid); notes are sorted into one time-ordered list per lane (`m_laneNotes`). Open and closed hi-hat share a lane (the stroke tells them apart, below); the hi-hat pedal has its own.
+3. `LayoutLanes()` places only the columns this chart uses, left to right: crash, hi-hat, splash, snare, high/mid/floor tom, ride, second crash, china. The pedal draws in the hi-hat's column. Spacing is up to 1.8 units, shrunk so the highway is at most 8 units wide; the kick stays at the centre as a bar across all columns, and the strike `Bar` is scaled to the same width.
+4. `SpawnNote` builds each note in its lane at `Z = time × speed`, shaped by pad and stroke (the table below).
 5. `BuildHighway` and `BuildBeatLines` add the highway pieces (below).
 6. The `AudioPack` starts loading the stems; the clock is set to `-kLeadInMs` (2 s).
 
 Speed is the chart's `NoteSpeed` times the player's **Highway Speed** (`GameSettings::HighwaySpeed`, 50-200%, on the settings page and in the pause options). Changing it mid-song moves every note and beat line to its new place (`ApplySpeed`).
 
 Colours come from `PadUtils::GetNoteColor`; gems also glow in their colour (`EmissiveColor`), since the scene has no lights. Every colour goes through `Tint`, which applies it once the mesh's model has bound: binding (`Mesh::BindModelMesh`) rebuilds the material from the prefab's saved one, which would undo an earlier colour.
+
+### Note shapes
+
+| Note | Shape |
+|------|-------|
+| Kick | An orange bar across the highway |
+| Snare, toms | A chunky gem (`NewNote.obj`) in the lane colour |
+| Hi-hat, crashes, ride, splash, china | A thin plate raised above the lane |
+| Open hi-hat | The plate with a dark centre (a ring) |
+| Hi-hat pedal | A small low bar in the hi-hat column, with its own small target pad |
+| Rimshot (cymbal: edge) | White strip along the near edge |
+| Cross-stick | White bar down the left side |
+| Bell | White dot in the middle |
+| Ghost (velocity ≤ 40) | 70% size, dim |
+| Accent (velocity ≥ 120) | Taller, glows brighter |
+
+Markings are separate entities in the note's lane (`NoteState::Decorations`), hidden, greyed and moved with their note.
 
 ### The highway
 
@@ -81,7 +98,17 @@ Each frame, `GatherHits` collects every hit as `(pad, song time)`:
 - **MIDI:** every note-on queued since the last frame (`MidiDevice::PumpMessages`). Messages are stamped on RtMidi's thread when they arrive, so each is judged at judge time minus its age (capped at 250 ms). MIDI works on every platform.
 - **Autoplay:** `--highway-autoplay [offset ms]` adds a hit for every note at its time plus the offset.
 
-Hits are judged in time order. `JudgeHit` takes the closest unjudged note in that pad's lane within the widest window; hits in different lanes never interfere, so chords (kick + cymbal) register in full. A hit with no note in reach scores nothing. `JudgeMisses` then walks each lane from its cursor and marks every note whose window has passed as missed. Both only look at notes near the cursor, so the per-frame cost no longer grows with the chart.
+Each input is resolved to the pads and strokes it's bound to (`PadMappingStorage::Resolve`; `Docs/MIDI-and-Pads.md`) and becomes one hit per lane (`AddHits`). A hit knows its pad when the input means only one pad of the lane, and its stroke when the input says (MIDI does, a key doesn't).
+
+Hits are judged in time order. `JudgeHit` takes the closest unjudged note in that pad's lane within the widest window; hits in different lanes never interfere, so chords (kick + cymbal) register in full. A hit with no note in reach scores nothing. Then the **technique** check: a known pad that differs (closed hi-hat for an open note) or a known stroke that differs (head for a rimshot) is a wrong technique, judged by **Technique** (`GameSettings::TechniqueStrictness`, on the settings page):
+
+| Setting | Wrong technique |
+|---------|-----------------|
+| Off | A normal hit |
+| Lenient (default) | One grade lower (Perfect → Great → Good), combo kept |
+| Strict | A miss |
+
+The HUD names the wanted technique ("OPEN HI-HAT!", "RIMSHOT!", "BELL!"), and the results count wrong techniques. Velocity (ghosts, accents) is drawn but not judged. `JudgeMisses` then walks each lane from its cursor and marks every note whose window has passed as missed. Both only look at notes near the cursor, so the per-frame cost no longer grows with the chart.
 
 | Judgement | Window (either side) | Points |
 |-----------|----------------------|--------|
@@ -107,7 +134,7 @@ The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the
 
 - `--play-track <index>`: start a track when `Example.lvl` is opened directly. The index is the library's scan order.
 - `--highway-log`: the lane layout, the track, a line a second comparing the clock with FMOD's position and the judged/missed counts, drum mute changes, and the final result.
-- `--highway-autoplay [offset ms]`: hits every note at that offset. With `--frames N --screenshot` under `Engine/Tools/Headless.sh` this checks judging, the HUD and the results without a kit.
+- `--highway-autoplay [offset ms]`: hits every note at that offset, with its pad and stroke. Add `--highway-autoplay-plain` to hit as a kit with plain strokes and one hi-hat note would (exercises technique judging). With `--frames N --screenshot` under `Engine/Tools/Headless.sh` this checks judging, the HUD and the results without a kit.
 
 ### Appendix: the vocals experiment
 

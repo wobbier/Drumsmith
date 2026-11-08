@@ -7,6 +7,8 @@
 #include "Path.h"
 #include "TrackList.h"
 
+namespace smf { class MidiFile; }
+
 struct SyncTrack
 {
     int time;
@@ -56,4 +58,12 @@ public:
     LegacySongMetaData readSongMetaData( const std::string& filePath );
     Song readSongFile( const std::string& filePath );
     bool ParseMidi( Path& inFilePath, TrackData& outTrackData, LegacySongMetaData& inLegacyData );
+    // Reads a MIDI file (tolerating running status after meta events) and time-analyses it.
+    static bool ReadMidi( smf::MidiFile& outMidi, const std::string& inPath );
+    // The beat grid of a MIDI file's tempo map, up to inEndSeconds.
+    static std::vector<BeatData> ReadMidiBeats( smf::MidiFile& inMidi, double inEndSeconds );
+    static std::vector<BeatData> ReadMidiBeats( const std::string& inPath, double inEndSeconds );
+    // The light show of a Rock Band chart: VENUE lighting cues, keyframes, fog, pyro and
+    // spotlights, plus the EVENTS track's sections and crowd states.
+    static VenueData ReadMidiVenue( smf::MidiFile& inMidi );
 };

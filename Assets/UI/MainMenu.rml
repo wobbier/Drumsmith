@@ -39,6 +39,18 @@
             <input id="highway-speed" type="range" min="50" max="200" step="5" data-value="highway_speed"/>
         </div>
         <div class="setting-row">
+            <label>Technique <span>open/closed hi-hat, rimshots, bells</span></label>
+            <button id="technique-off" class="device-choice" data-class-selected="technique == 0" data-event-click="technique(0)">Off: any stroke on the right drum counts</button>
+            <button id="technique-lenient" class="device-choice" data-class-selected="technique == 1" data-event-click="technique(1)">Lenient: wrong stroke is one grade lower</button>
+            <button id="technique-strict" class="device-choice" data-class-selected="technique == 2" data-event-click="technique(2)">Strict: wrong stroke is a miss</button>
+        </div>
+        <div class="setting-row">
+            <label>Stage Lights <span>the light show from the chart</span></label>
+            <button id="lighting-full" class="device-choice" data-class-selected="stage_lighting == 2" data-event-click="stage_lighting(2)">Full show</button>
+            <button id="lighting-gentle" class="device-choice" data-class-selected="stage_lighting == 1" data-event-click="stage_lighting(1)">No strobes or flashes</button>
+            <button id="lighting-off" class="device-choice" data-class-selected="stage_lighting == 0" data-event-click="stage_lighting(0)">Off</button>
+        </div>
+        <div class="setting-row">
             <label>DLC Server <span>host name, without http://</span></label>
             <input id="dlc-server" type="text" data-value="dlc_url"/>
         </div>

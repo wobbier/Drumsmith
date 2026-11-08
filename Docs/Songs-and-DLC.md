@@ -39,7 +39,7 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 
 `TrackData::OnLoadTrackData` also accepts legacy keys (`SongName`, `SongArtist`, `AlbumName`), trims leading spaces off every string (the ini parser leaves them in — see Caveats), falls back to `Track.mp3` when `TrackFileName` is missing, and copies `Icon` into `m_dlcSource` when no explicit `DLCSource` exists.
 
-**`NoteData.txt` schema** (written by `TrackData::OnSaveNoteData`): `{ "Notes": [ { "EditorLane": <int PadId>, "NoteName": "snare1", "TriggerTime": <seconds float>, "TriggerTimeMS": <uint> } ] }`. On save, notes are sorted by time then lane and deduplicated, and `TriggerTimeMS` is recomputed as `TriggerTime * 1000`. On load (`OnLoadNoteData`), **`NoteName` is authoritative**: the lane is derived via `PadUtils::GetNewPadId(NoteName)` and the JSON `EditorLane` value is ignored.
+**`NoteData.txt` schema** (written by `TrackData::OnSaveNoteData`): `{ "Notes": [ { "EditorLane": <int PadId>, "NoteName": "snare1", "TriggerTime": <seconds float>, "TriggerTimeMS": <uint>, "Articulation": "Rim", "Velocity": 30 } ], "Beats": [ [ <seconds>, <1 measure / 0 beat> ] ] }`. `Articulation` (Rim, CrossStick, Bell) is omitted when plain and `Velocity` when 100; `Beats` is omitted without a tempo map. On save, notes are sorted by time then lane and deduplicated, and `TriggerTimeMS` is recomputed as `TriggerTime * 1000`. On load (`OnLoadNoteData`), **`NoteName` is authoritative**: the lane is derived via `PadUtils::GetNewPadId(NoteName)` and the JSON `EditorLane` value is ignored.
 
 ### The track database
 
@@ -51,20 +51,22 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 
 ### Chart conversion (`CustomTrackDefineTest`)
 
-Triggered by the settings-menu "Convert Custom DLC" button → `MainMenuController::ConvertCustomDLC` → `TrackDatabase::ExportMidiTrackMetaData`, which walks `Assets/DLC/` for folders containing `notes.mid` and runs, per folder:
+Triggered by the settings-menu "Convert Custom DLC" button (or `--convert-dlc` at startup) → `TrackDatabase::ExportMidiTrackMetaData`, which walks `Assets/DLC/` for folders containing `notes.mid`. A folder that already has a `TrackData.txt` is **re-charted**: only `NoteData.txt` is rewritten from `notes.mid` (`TrackData::SaveNoteData`), keeping the metadata. A new folder runs:
 
 1. `ConvertFromLegacy` — parses `song.ini` via `CustomTrackDefineTest::readSongMetaData` (handles UTF-8 BOM; reads `name`, `artist`, `album`, `genre`, `year`, `icon`, `pro_drums`, `song_length` (ms), `preview_start_time`), requires `album.png`/`album.jpg` (`ME_ASSERT`), requires `song.ogg` (Opus is explicitly unsupported — commented out pending FMOD transcoding), and **hardcodes** `m_bpm = 180` and `m_noteSpeed = 10` (the sync-track derivation is commented out). Saves `TrackData.txt`.
 2. `CustomTrackDefineTest::ParseMidi` — reads `notes.mid` with `smf::MidiFile` (`doTimeAnalysis` gives absolute seconds per event), finds the track whose name meta-event is exactly `PART DRUMS`, and converts every note-on with pitch 96–100 into a `NoteData`:
 
 | MIDI pitch | `PadId` (via `GetNoteIdFromLegacy`) |
 |------------|-------------------------------------|
-| 96 | `Bass` |
+| 95, 96 | `Bass` (95 is the 2x-kick note) |
 | 97 | `Snare` |
-| 98 | `ClosedHiHat` |
-| 99 | `HighTom` |
-| 100 (and any other in-range value) | `Crash2` |
+| 98 | `ClosedHiHat`, or `HighTom` under a 110 tom marker |
+| 99 | `Ride`, or `MidTom` under a 111 tom marker |
+| 100 | `Crash1`, or `FloorTom` under a 112 tom marker |
 
-   That five-lane collapse is the standard Rock Band expert drum layout; the pro-drums cymbal remap (`inLegacyData.m_proDrums`) is entirely commented out, so pro charts flatten to the same five lanes. Returns `false` (folder skipped) when no `PART DRUMS` track exists.
+   Rock Band pro drums make yellow, blue and green cymbals unless a tom marker covers the note; a chart with no markers and no `pro_drums` in `song.ini` is read as all toms. With an `[ENABLE_CHART_DYNAMICS]` text event, velocity 1 is a ghost note and 127 an accent. The tempo map becomes the stored beat grid (`ReadMidiBeats`), and the first tempo event the BPM. Rock Band data has no hi-hat open/closed/pedal, rimshots, splash or china; those come from charting in the Track Editor. Returns `false` (folder skipped) when no `PART DRUMS` track exists.
+
+   Files are read through `CustomTrackDefineTest::ReadMidi`, which rewrites running status that continues after a meta event (common in Rock Band exports, rejected by `smf::MidiFile`: it dropped all but two notes of one bundled chart) before parsing.
 
 The `.chart` text-format reader (`readSongFile`) exists but its call sites in `TrackDatabase::Reload` are commented out (`#TODO: Support CHART DLC files`), so `.chart`-only songs are invisible.
 
@@ -96,11 +98,8 @@ MIDI input in the editor is pumped from the shared `MidiDevice` singleton, only 
 ## Caveats & Fragility
 
 - **`DISABLE_OPTIMIZATION` at file scope** in both `Game/Source/CoreGame/TrackList.cpp` and `Game/Source/CoreGame/CustomTrackDefineTest.cpp` — the entire database scan, JSON load/save, sorting, and MIDI parsing compile without optimization **in every build config**, including release.
-- **`ParseMidi` writes a wrong `TriggerTimeMS`**: `m_triggerTimeMS = m_triggerTime * 100.f` (×100, not ×1000). It's masked because `OnSaveNoteData` recomputes MS from seconds on save — but any code consuming `m_noteData` between parse and save sees 10×-too-small millisecond values.
-- **Hardcoded musical metadata**: `ConvertFromLegacy` sets `m_bpm = 180`, `m_noteSpeed = 10`; `ParseMidi` overwrites `m_bpm = 158` for every song. BPM in `TrackData.txt` is decorative today, but anything that starts trusting it will be wrong.
+- **Hardcoded musical metadata on new conversions**: `ConvertFromLegacy` sets `m_noteSpeed = 10` for every song (BPM now comes from the MIDI tempo map).
 - **`song.ini` values keep their leading space** (`artist = Foo Fighters` parses as `" Foo Fighters"`). Only keys are whitespace-stripped; loads compensate with `StringUtils::TrimLeadingSpaces`, and `pro_drums` is compared against the literal `" True"`. Shipping `TrackData.txt` files contain the padded strings.
-- **`ParseMidi` logs every note to stdout** (tick, seconds, velocity, raw bytes) — converting a library of songs produces megabytes of console spam and slows conversion drastically (compounded by `DISABLE_OPTIMIZATION`).
-- **Velocity is parsed but dropped**: `drumTrack[event].getVelocity()` is printed, never stored in `NoteData` — dynamics are lost at the format level, which caps what hit-sound/scoring feedback can do later.
 - **Sort lambdas copy the track list**: the `std::sort` comparators in `TrackDatabase::SortTracks` capture `trackList` **by value** — each sort copies every `TrackData` (with its strings and any loaded `m_noteData`) into the closure.
 - **Filter coverage is partial**: `GatherFilterCounts` and `SortTracks` handle different tag sets (`"gh"` and `"rb3dlc"` count but can't be selected; `GuitarHero2/3/4` and `Other` exist in the enum but match nothing) and every unrecognized `DLCSource` logs `YIKES` per track per call.
 - **`TrackListFilter`/`DLCSource` matching is exact-string** on tags inherited from `song.ini` `icon` values — one unpadded/odd tag and a track silently lands in no filter bucket.

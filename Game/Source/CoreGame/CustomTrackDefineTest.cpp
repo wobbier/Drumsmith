@@ -1,6 +1,12 @@
 #include "CustomTrackDefineTest.h"
 #include "Dementia.h"
 //#include "MidiFile.h"
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <fstream>
+#include <map>
+#include <sstream>
 //#include "Options.h"
 #include "Core/Assert.h"
 #include "Editor/PadBindings.h"
@@ -186,11 +192,149 @@ PadId GetNoteIdFromLegacy(int inNoteName)
 }
 
 
+
+namespace
+{
+    // Rock Band exports often continue running status after a meta event, which smf::MidiFile
+    // rejects ("running status not permitted with meta and sysex"), dropping the rest of the
+    // track. Rewrite every channel event with an explicit status byte before parsing.
+    bool ReadVarLen( const std::vector<uint8_t>& inBytes, size_t& ioPos, size_t inEnd, uint32_t& outValue )
+    {
+        outValue = 0;
+        for( int i = 0; i < 4 && ioPos < inEnd; ++i )
+        {
+            const uint8_t byte = inBytes[ioPos++];
+            outValue = ( outValue << 7 ) | ( byte & 0x7F );
+            if( !( byte & 0x80 ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    void WriteVarLen( std::string& ioOut, uint32_t inValue )
+    {
+        uint8_t buffer[5];
+        int count = 0;
+        do
+        {
+            buffer[count++] = inValue & 0x7F;
+            inValue >>= 7;
+        } while( inValue && count < 5 );
+        for( int i = count - 1; i >= 0; --i )
+        {
+            ioOut.push_back( static_cast<char>( buffer[i] | ( i ? 0x80 : 0 ) ) );
+        }
+    }
+
+
+    bool NormalizeRunningStatus( const std::vector<uint8_t>& inBytes, std::string& outBytes )
+    {
+        if( inBytes.size() < 14 || std::memcmp( inBytes.data(), "MThd", 4 ) != 0 )
+        {
+            return false;
+        }
+        const uint32_t headerLength = ( inBytes[4] << 24 ) | ( inBytes[5] << 16 ) | ( inBytes[6] << 8 ) | inBytes[7];
+        size_t pos = 8 + headerLength;
+        outBytes.assign( reinterpret_cast<const char*>( inBytes.data() ), std::min( pos, inBytes.size() ) );
+        while( pos + 8 <= inBytes.size() )
+        {
+            const uint32_t length = ( inBytes[pos + 4] << 24 ) | ( inBytes[pos + 5] << 16 ) | ( inBytes[pos + 6] << 8 ) | inBytes[pos + 7];
+            const size_t start = pos + 8;
+            const size_t end = std::min( inBytes.size(), start + length );
+            if( std::memcmp( &inBytes[pos], "MTrk", 4 ) != 0 )
+            {
+                outBytes.append( reinterpret_cast<const char*>( &inBytes[pos] ), end - pos );
+                pos = end;
+                continue;
+            }
+            std::string track;
+            uint8_t running = 0;
+            size_t i = start;
+            while( i < end )
+            {
+                uint32_t delta = 0;
+                if( !ReadVarLen( inBytes, i, end, delta ) || i >= end )
+                {
+                    break;
+                }
+                WriteVarLen( track, delta );
+                uint8_t status = inBytes[i];
+                if( status == 0xFF || status == 0xF0 || status == 0xF7 )
+                {
+                    const size_t eventStart = i;
+                    i += status == 0xFF ? 2 : 1;
+                    uint32_t dataLength = 0;
+                    if( !ReadVarLen( inBytes, i, end, dataLength ) )
+                    {
+                        break;
+                    }
+                    i = std::min<size_t>( end, i + dataLength );
+                    track.append( reinterpret_cast<const char*>( &inBytes[eventStart] ), i - eventStart );
+                    continue;
+                }
+                if( status & 0x80 )
+                {
+                    running = status;
+                    ++i;
+                }
+                else if( !running )
+                {
+                    break;
+                }
+                const uint8_t type = running & 0xF0;
+                const size_t dataBytes = type == 0xC0 || type == 0xD0 ? 1 : 2;
+                if( i + dataBytes > end )
+                {
+                    break;
+                }
+                track.push_back( static_cast<char>( running ) );
+                track.append( reinterpret_cast<const char*>( &inBytes[i] ), dataBytes );
+                i += dataBytes;
+            }
+            outBytes.append( "MTrk", 4 );
+            const uint32_t newLength = static_cast<uint32_t>( track.size() );
+            const char lengthBytes[4] = { static_cast<char>( newLength >> 24 ), static_cast<char>( newLength >> 16 ), static_cast<char>( newLength >> 8 ), static_cast<char>( newLength ) };
+            outBytes.append( lengthBytes, 4 );
+            outBytes += track;
+            pos = start + length;
+        }
+        return true;
+    }
+}
+
+
+bool CustomTrackDefineTest::ReadMidi( smf::MidiFile& outMidi, const std::string& inPath )
+{
+    std::ifstream file( inPath, std::ios::binary );
+    if( !file )
+    {
+        return false;
+    }
+    const std::vector<uint8_t> bytes( ( std::istreambuf_iterator<char>( file ) ), std::istreambuf_iterator<char>() );
+    std::string normalized;
+    if( !NormalizeRunningStatus( bytes, normalized ) )
+    {
+        return false;
+    }
+    std::istringstream stream( normalized );
+    if( !outMidi.read( stream ) )
+    {
+        return false;
+    }
+    outMidi.doTimeAnalysis();
+    return true;
+}
+
 bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData, LegacySongMetaData& inLegacyData )
 {
     smf::MidiFile midifile;
-    midifile.read( Path( inFilePath.FullPath + "/notes.mid" ).FullPath );
-    midifile.doTimeAnalysis();
+    if( !ReadMidi( midifile, Path( inFilePath.FullPath + "/notes.mid" ).FullPath ) )
+    {
+        return false;
+    }
     //midifile.linkNotePairs();
     //midifile.splitTracks();
 
@@ -219,120 +363,307 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
     }
 
     outTrackData.m_noteData.clear();
+    outTrackData.m_beats.clear();
+    outTrackData.m_noteCount = 0;
 
-    int tracks = midifile.getTrackCount();
-
-    bool hasDrums = false;
-    int drumTrackIndex = 0;
+    const int tracks = midifile.getTrackCount();
+    int drumTrackIndex = -1;
+    for( int track = 0; track < tracks && drumTrackIndex < 0; ++track )
     {
-        bool foundTrackName = false;
-        for( int track = 0; track < tracks; track++ ) {
-            if( hasDrums )
+        for( int event = 0; event < midifile[track].size(); ++event )
+        {
+            if( midifile[track][event].isTrackName() && midifile[track][event].getMetaContent() == "PART DRUMS" )
             {
+                drumTrackIndex = track;
                 break;
-            }
-
-            for( int event = 0; event < midifile[track].size(); event++ ) {
-                if( midifile[track][event].isTrackName() )
-                {
-                    std::cout << midifile[track][event].getMetaContent().c_str() << std::endl;
-                    if( midifile[track][event].getMetaContent() == "PART DRUMS" )
-                    {
-                        hasDrums = true;
-                        drumTrackIndex = track;
-                        break;
-                    }
-                    foundTrackName = true;
-                }
-                else
-                {
-                    //break;
-                }
             }
         }
     }
-    if( !hasDrums )
+    if( drumTrackIndex < 0 )
+    {
+        return false;
+    }
+    auto& drumTrack = midifile[drumTrackIndex];
+
+    // Rock Band pro drums: yellow, blue and green gems are cymbals unless a tom marker (110, 111,
+    // 112) covers them. Collect those spans, and whether the chart marks dynamics (velocity 1 is a
+    // ghost note, 127 an accent, after an "[ENABLE_CHART_DYNAMICS]" text event).
+    struct Span { int Start; int End; };
+    std::map<int, std::vector<Span>> tomMarkers;
+    std::map<int, int> openMarker;
+    bool dynamics = false;
+    for( int event = 0; event < drumTrack.size(); ++event )
+    {
+        const smf::MidiEvent& message = drumTrack[event];
+        if( message.isMetaMessage() && message.getMetaContent().find( "ENABLE_CHART_DYNAMICS" ) != std::string::npos )
+        {
+            dynamics = true;
+        }
+        const int key = message.isNoteOn() || message.isNoteOff() ? message.getKeyNumber() : -1;
+        if( key < 110 || key > 112 )
+        {
+            continue;
+        }
+        if( message.isNoteOn() )
+        {
+            openMarker[key] = message.tick;
+        }
+        else if( openMarker.count( key ) )
+        {
+            tomMarkers[key].push_back( { openMarker[key], message.tick } );
+            openMarker.erase( key );
+        }
+    }
+    const bool pro = inLegacyData.m_proDrums || !tomMarkers.empty();
+    const auto underTomMarker = [&tomMarkers]( int inMarker, int inTick ) {
+        for( const Span& span : tomMarkers[inMarker] )
+        {
+            if( inTick >= span.Start && inTick < span.End )
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Expert notes: 95 double-kick, 96 kick, 97 snare, 98 yellow, 99 blue, 100 green.
+    for( int event = 0; event < drumTrack.size(); ++event )
+    {
+        const smf::MidiEvent& message = drumTrack[event];
+        if( !message.isNoteOn() )
+        {
+            continue;
+        }
+        const int key = message.getKeyNumber();
+        PadId pad = PadId::Invalid;
+        switch( key )
+        {
+        case 95:
+        case 96: pad = PadId::Bass; break;
+        case 97: pad = PadId::Snare; break;
+        case 98: pad = !pro || underTomMarker( 110, message.tick ) ? PadId::HighTom : PadId::ClosedHiHat; break;
+        case 99: pad = !pro || underTomMarker( 111, message.tick ) ? PadId::MidTom : PadId::Ride; break;
+        case 100: pad = !pro || underTomMarker( 112, message.tick ) ? PadId::FloorTom : PadId::Crash1; break;
+        default: break;
+        }
+        if( pad == PadId::Invalid )
+        {
+            continue;
+        }
+        NoteData note;
+        note.m_triggerTime = static_cast<float>( message.seconds );
+        note.m_triggerTimeMS = static_cast<uint32_t>( std::lround( message.seconds * 1000.0 ) );
+        note.m_editorLane = pad;
+        note.m_noteName = PadUtils::GetPadId( pad );
+        const int velocity = message.getVelocity();
+        note.m_velocity = !dynamics ? 100 : velocity <= 1 ? 30 : velocity >= 127 ? 127 : 100;
+        outTrackData.m_noteData.push_back( note );
+        ++outTrackData.m_noteCount;
+    }
+    if( outTrackData.m_noteData.empty() )
     {
         return false;
     }
 
-    auto& drumTrack = midifile[drumTrackIndex];
-    std::cout << "TPQ: " << midifile.getTicksPerQuarterNote() << std::endl;
-    if( tracks > 1 ) std::cout << "\nTrack " << drumTrackIndex << std::endl;
-    std::cout << "Tick\tSeconds\tDur\tMessage" << std::endl;
-    outTrackData.m_noteCount = 0;
-
-    for( int event = 0; event < drumTrack.size(); event++ )
+    // Tempo: the first tempo event, and the beat grid for the highway.
+    for( int event = 0; event < midifile[0].size(); ++event )
     {
-        // TODO: Map pro drums to proper lanes.
-        //if( inLegacyData.m_proDrums )
-        //{
-        //    //std::cout << std::dec << drumTrack[event].tick;
-        //    //std::cout << '\t' << std::dec << drumTrack[event].seconds;
-        //    //std::cout << '\t';
-        //    if( drumTrack[event].isNoteOn() )
-        //        std::cout << drumTrack[event].getDurationInSeconds();
-        //    std::cout << '\t' << std::hex;
-        //    //for( int i = 0; i < drumTrack[event].size(); i++ )
-        //    //    std::cout << (int)drumTrack[event][i] << ' ';
-        //    //std::cout << std::endl;
-        //    std::cout << std::dec << drumTrack[event].getP0() << std::endl;
-        //    
-        //    
-        //    int drumNote = drumTrack[event].getP1();
-        //    if( drumNote <= 100 && drumNote >= 96 )
-        //    {
-        //        std::cout << std::dec << drumNote << std::endl;
-        //        std::cout << "P2" << drumTrack[event].getP2() << std::endl;
-        //        std::cout << "P3" << drumTrack[event].getP3() << std::endl;
-        //    }
-        //    //ME_ASSERT( drumNote >= 60 && drumNote <= 100);
-        //}
-        //else
+        if( midifile[0][event].isTempo() )
         {
-            int drumNote = drumTrack[event].getP1();
-            if( drumNote >= 96 && drumNote <= 100 )
+            outTrackData.m_bpm = static_cast<int>( std::lround( midifile[0][event].getTempoBPM() ) );
+            break;
+        }
+    }
+    double lastNote = 0.0;
+    for( const NoteData& note : outTrackData.m_noteData )
+    {
+        lastNote = std::max( lastNote, static_cast<double>( note.m_triggerTime ) );
+    }
+    outTrackData.m_beats = ReadMidiBeats( midifile, lastNote + 4.0 );
+    outTrackData.m_venue = ReadMidiVenue( midifile );
+    return true;
+}
+
+
+VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
+{
+    // Rock Band venue authoring: the VENUE track holds lighting cues as text events and steps them
+    // with notes; EVENTS holds the song's sections and crowd states (Docs/Stage-Lighting.md).
+    // "MV VENUE" (music video camera cuts) and the camera / post-processing events are skipped.
+    VenueData venue;
+    const auto strip = []( std::string inText ) {
+        if( !inText.empty() && inText.front() == '[' ) inText.erase( 0, 1 );
+        if( !inText.empty() && inText.back() == ']' ) inText.pop_back();
+        return inText;
+    };
+    const auto startsWith = []( const std::string& inText, const char* inPrefix ) {
+        return inText.rfind( inPrefix, 0 ) == 0;
+    };
+    for( int track = 0; track < inMidi.getTrackCount(); ++track )
+    {
+        std::string name;
+        for( int i = 0; i < inMidi[track].size() && name.empty(); ++i )
+        {
+            if( inMidi[track][i].isTrackName() )
             {
-                outTrackData.m_bpm = 158;// drumTrack[event].getTempoBPM();
-                if( drumTrack[event].isNoteOn() )
+                name = inMidi[track][i].getMetaContent();
+            }
+        }
+        const bool isVenue = name == "VENUE";
+        const bool isEvents = name == "EVENTS";
+        if( !isVenue && !isEvents )
+        {
+            continue;
+        }
+        std::map<int, float> heldSpotlights;
+        for( int i = 0; i < inMidi[track].size(); ++i )
+        {
+            const smf::MidiEvent& event = inMidi[track][i];
+            const float time = static_cast<float>( event.seconds );
+            if( event.isMetaMessage() )
+            {
+                const int type = event.getMetaType();
+                if( type != 0x01 && type != 0x05 && type != 0x06 && type != 0x07 )
                 {
-                    NoteData newNote;
-                    newNote.m_triggerTime = (float)drumTrack[event].seconds;
-                    newNote.m_triggerTimeMS = newNote.m_triggerTime * 100.f;
-                    newNote.m_editorLane = GetNoteIdFromLegacy( drumNote );
-
-                    outTrackData.m_noteCount++;
-                    std::cout << "Note: ";
-                    std::cout << std::dec << drumTrack[event].getP1() << std::endl;
-                    std::cout << PadUtils::GetPadName( (int)newNote.m_editorLane ) << std::endl;
-
-                    std::cout << "Tick: " << std::dec << drumTrack[event].tick;
-                    std::cout << '\t' << std::dec << drumTrack[event].seconds;
-                    std::cout << '\t';
-                    std::cout << std::endl;
-
-                    std::cout << drumTrack[event].getDurationInSeconds() << std::endl;
-
-                    int velocity = drumTrack[event].getVelocity();
-                    std::cout << "Velocity: " << velocity << std::endl;
-                //std::cout << '\t' << std::hex;
-                    for( int i = 0; i < drumTrack[event].size(); i++ )
-                    {
-                        std::cout << (int)drumTrack[event][i] << ' ';
-                    }
-                    std::cout << std::endl;
-                    //std::cout << std::dec << drumTrack[event].getP0() << std::endl;
-                    //std::cout << drumNote << std::endl;
-                    //std::cout << drumTrack[event].getP2() << std::endl;
-                    //std::cout << drumTrack[event].getP3() << std::endl;
-                    //ME_ASSERT( drumNote >= 60 && drumNote <= 100);
-                    newNote.m_noteName = PadUtils::GetPadId( newNote.m_editorLane );
-                    outTrackData.m_noteData.push_back( newNote );
+                    continue;
+                }
+                const std::string text = strip( event.getMetaContent() );
+                if( isEvents )
+                {
+                    if( startsWith( text, "section " ) ) venue.m_sections.push_back( { time, text.substr( 8 ) } );
+                    else if( startsWith( text, "prc_" ) ) venue.m_sections.push_back( { time, text.substr( 4 ) } );
+                    else if( startsWith( text, "crowd_" ) ) venue.m_crowd.push_back( { time, text.substr( 6 ) } );
+                    continue;
+                }
+                if( startsWith( text, "lighting (" ) && text.back() == ')' )
+                {
+                    venue.m_lighting.push_back( { time, text.substr( 10, text.size() - 11 ) } );
+                }
+                else if( text == "verse" || text == "chorus" )
+                {
+                    venue.m_lighting.push_back( { time, text } );
+                }
+                else if( text == "FogOn" || text == "FogOff" )
+                {
+                    venue.m_fog.push_back( { time, text == "FogOn" } );
+                }
+                else if( startsWith( text, "bonusfx" ) )
+                {
+                    venue.m_bonusFx.push_back( time );
+                }
+                else if( text == "next" || text == "prev" || text == "first" )
+                {
+                    venue.m_keyframes.push_back( { time, text == "next" ? VenueData::Keyframe::Next : text == "prev" ? VenueData::Keyframe::Previous : VenueData::Keyframe::First } );
+                }
+                continue;
+            }
+            if( !isVenue || !( event.isNoteOn() || event.isNoteOff() ) )
+            {
+                continue;
+            }
+            const int key = event.getKeyNumber();
+            if( key >= 37 && key <= 41 )
+            {
+                if( event.isNoteOn() )
+                {
+                    heldSpotlights[key] = time;
+                }
+                else if( heldSpotlights.count( key ) )
+                {
+                    venue.m_spotlights.push_back( { heldSpotlights[key], time, key - 37 } );
+                    heldSpotlights.erase( key );
+                }
+            }
+            else if( event.isNoteOn() )
+            {
+                switch( key )
+                {
+                case 48: venue.m_keyframes.push_back( { time, VenueData::Keyframe::Next } ); break;
+                case 49: venue.m_keyframes.push_back( { time, VenueData::Keyframe::Previous } ); break;
+                case 50: venue.m_keyframes.push_back( { time, VenueData::Keyframe::First } ); break;
+                case 96:
+                case 97: venue.m_bonusFx.push_back( time ); break;
+                default: break;
                 }
             }
         }
     }
+    const auto byTime = []( const auto& a, const auto& b ) { return a.m_time < b.m_time; };
+    std::stable_sort( venue.m_lighting.begin(), venue.m_lighting.end(), byTime );
+    std::stable_sort( venue.m_sections.begin(), venue.m_sections.end(), byTime );
+    std::stable_sort( venue.m_crowd.begin(), venue.m_crowd.end(), byTime );
+    std::stable_sort( venue.m_keyframes.begin(), venue.m_keyframes.end(), byTime );
+    std::stable_sort( venue.m_fog.begin(), venue.m_fog.end(), byTime );
+    std::sort( venue.m_bonusFx.begin(), venue.m_bonusFx.end() );
+    venue.m_bonusFx.erase( std::unique( venue.m_bonusFx.begin(), venue.m_bonusFx.end(), []( float a, float b ) { return b - a < 0.05f; } ), venue.m_bonusFx.end() );
+    std::sort( venue.m_spotlights.begin(), venue.m_spotlights.end(), []( const auto& a, const auto& b ) { return a.m_start < b.m_start; } );
+    return venue;
+}
 
-    return true;
+
+std::vector<BeatData> CustomTrackDefineTest::ReadMidiBeats( smf::MidiFile& inMidi, double inEndSeconds )
+{
+    std::vector<BeatData> beats;
+    const int ticksPerQuarter = inMidi.getTicksPerQuarterNote();
+    if( ticksPerQuarter <= 0 )
+    {
+        return beats;
+    }
+    // Time signature changes (tick, beats per measure, beat length in ticks); 4/4 until the first.
+    struct Signature { int Tick; int Beats; int BeatTicks; };
+    std::vector<Signature> signatures{ { 0, 4, ticksPerQuarter } };
+    for( int track = 0; track < inMidi.getTrackCount(); ++track )
+    {
+        for( int i = 0; i < inMidi[track].size(); ++i )
+        {
+            const smf::MidiEvent& event = inMidi[track][i];
+            if( event.isTimeSignature() && event.size() >= 5 )
+            {
+                const int count = std::max( 1, static_cast<int>( event[3] ) );
+                const int beatTicks = std::max( 1, ticksPerQuarter * 4 / ( 1 << std::min( 6, static_cast<int>( event[4] ) ) ) );
+                if( event.tick == 0 )
+                {
+                    signatures[0] = { 0, count, beatTicks };
+                }
+                else
+                {
+                    signatures.push_back( { event.tick, count, beatTicks } );
+                }
+            }
+        }
+    }
+    std::sort( signatures.begin(), signatures.end(), []( const Signature& a, const Signature& b ) { return a.Tick < b.Tick; } );
+
+    size_t signature = 0;
+    int beatInMeasure = 0;
+    for( int tick = 0; tick >= 0 && beats.size() < 4000; tick += signatures[signature].BeatTicks )
+    {
+        while( signature + 1 < signatures.size() && tick >= signatures[signature + 1].Tick )
+        {
+            ++signature;
+            tick = signatures[signature].Tick;
+            beatInMeasure = 0;
+        }
+        // The library answers -1 past the file's last event (it doesn't extrapolate the tempo).
+        const double seconds = inMidi.getTimeInSeconds( tick );
+        if( ( tick > 0 && seconds < 0.0 ) || seconds > inEndSeconds )
+        {
+            break;
+        }
+        beats.push_back( BeatData{ static_cast<float>( seconds ), beatInMeasure == 0 } );
+        beatInMeasure = ( beatInMeasure + 1 ) % signatures[signature].Beats;
+    }
+    return beats;
+}
+
+
+std::vector<BeatData> CustomTrackDefineTest::ReadMidiBeats( const std::string& inPath, double inEndSeconds )
+{
+    smf::MidiFile midi;
+    if( !ReadMidi( midi, inPath ) )
+    {
+        return {};
+    }
+    return ReadMidiBeats( midi, inEndSeconds );
 }
 

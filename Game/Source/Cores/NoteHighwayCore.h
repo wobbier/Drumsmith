@@ -7,6 +7,7 @@
 #include "CoreGame/AudioPack.h"
 #include "Editor/PadBindings.h"
 #include "Midi/MidiDevice.h"
+#include "CoreGame/StageLights.h"
 #include <array>
 #include <chrono>
 #include <map>
@@ -61,11 +62,22 @@ private:
 
 	enum class Judgement { None, Perfect, Great, Good, Miss };
 
+	// A piece drawn on a gem to show its technique (the rim strip, the open hi-hat's hole, the
+	// bell dot), placed relative to the gem in its lane.
+	struct Decoration
+	{
+		EntityHandle Piece;
+		Vector3 Offset;
+	};
+
 	struct NoteState
 	{
 		double TimeMs = 0.0;
 		EntityHandle Note;
 		bool Judged = false;
+		PadId Pad = PadId::Invalid;
+		Articulation Technique = Articulation::Normal;
+		std::vector<Decoration> Decorations;
 	};
 
 	// A colour for a spawned mesh. Applied once its model has bound: binding rebuilds the material
@@ -102,10 +114,22 @@ private:
 	struct Hit
 	{
 		PadId Pad = PadId::Invalid;
+		Articulation Technique = Articulation::Normal;
 		double TimeMs = 0.0;   // Song time the player was hearing when they hit
+		// Whether the input says which pad of a shared lane (open vs closed hi-hat) and which
+		// stroke it was. A keyboard key knows no stroke; a MIDI note bound to two pads knows
+		// neither. Unknown parts are never judged wrong.
+		bool PadKnown = true;
+		bool TechniqueKnown = true;
 	};
 
 	void ApplyPendingTints();
+	void SpawnNote( const NoteData& inNote, NoteState& outState );
+	void AddDecoration( NoteState& ioState, Transform* inLane, const Vector3& inGemPosition, const Vector3& inOffset, const Vector3& inScale, const Vector3& inColor );
+	void HideNote( NoteState& ioNote );
+	// One hit per lane among an input's meanings (a MIDI note or key can mean several pads).
+	void AddHits( const std::vector<std::pair<PadId, Articulation>>& inMeanings, double inTimeMs, bool inInputKnowsTechnique, std::vector<Hit>& outHits );
+	static std::string TechniqueName( PadId inPad, Articulation inTechnique );
 	void Tint( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive );
 	EntityHandle SpawnBox( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent );
 	void BuildHighway();
@@ -154,6 +178,8 @@ private:
 	float m_kickFlash = 0.f;
 	// The highway speed the notes were last placed for (chart NoteSpeed x the player's setting).
 	float m_appliedSpeed = 0.f;
+	// The light show beside the highway (Docs/Stage-Lighting.md).
+	StageLights m_stageLights;
 
 	// Score
 	int m_score = 0;
@@ -163,9 +189,11 @@ private:
 	int m_great = 0;
 	int m_good = 0;
 	int m_missed = 0;
+	int m_wrongTechnique = 0;
 	int m_totalNotes = 0;
 	std::string m_lastJudgement;
 	std::string m_lastTiming;
+	std::string m_lastHint;
 	float m_judgementAge = 10.f;
 
 	std::unique_ptr<EventSubscription> m_launchTrackSubscription;

@@ -18,7 +18,7 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 | Menu radio (`TrackRadio`) | **Usable** | Works; odd load-loop; only ticks while a menu page is alive | [Audio.md](Audio.md) |
 | MIDI input (`MidiDevice`) | **Usable** | Callback with arrival stamps; one queue shared by gameplay and editor widgets; no hot-plug | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
 | Pad bindings | **Usable** | Clean data model; rebinding UI is editor-only, so game builds can't remap | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
-| Chart parsing / conversion | **Fragile** | Works for RB-style `notes.mid`; hardcoded BPM/speed, ms ×100 landmine, `DISABLE_OPTIMIZATION`, stdout spam | [Songs-and-DLC.md](Songs-and-DLC.md) |
+| Chart parsing / conversion | **Usable** | Pro drums (8 voices), dynamics, tempo map, tolerant MIDI reading; `DISABLE_OPTIMIZATION` remains; RB data can't express hi-hat open/pedal or rims | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Track database / DLC | **Usable** | Scan + download + register work; partial filter coverage, unvalidated downloads | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Track editor | **Usable** | The most complete tool in the project — windowed note iteration gameplay should copy | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Menus / UI | **Usable** | Ported to RmlUi (2026-11-08): sliders read back and apply, DLC catalogue with background downloads, ms latency test; `VideoLatency` still consumed by nothing | [UI-and-Menus.md](UI-and-Menus.md) |
@@ -56,7 +56,7 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 | 8 | 🎯 `globalOffsetMs = -30` hardcoded; `AudioLatency`/`VideoLatency` persisted but never read | same + `GameSettings` | Calibration tuned to one dev machine; user settings are placebo | **Fixed** in the 2026-11-08 gameplay rewrite |
 | 9 | 🎯 Judge clock read once per frame from `Channel::getPosition(MS)`; errors return 0 | `AudioPack::GetPositionMs` | Judgment quantized to frame + mixer granularity; a channel hiccup reads as "song at 0:00" | **Partly fixed** 2026-11-08: the clock interpolates between FMOD updates; a channel error still reads as 0 |
 | 10 | O(all notes) iteration with two component lookups each, every frame | `NoteHighwayCore::Update` | 4,872 entities scanned per frame for the bundled Everlong chart; author comment says it best | **Fixed** in the 2026-11-08 gameplay rewrite |
-| 11 | Velocity parsed from MIDI and dropped — at conversion *and* at input | `ParseMidi`, `PumpMessages` consumers | Dynamics unavailable for hit sounds, scoring, or charts | Carry velocity in item 2's message type + store in `NoteData` |
+| 11 | Velocity parsed from MIDI and dropped — at conversion *and* at input | `ParseMidi`, `PumpMessages` consumers | Dynamics unavailable for hit sounds, scoring, or charts | **Fixed** 2026-11-08: velocity is stored per note (charts and Track Editor recordings); not judged |
 | 12 | MIDI device opened by name with assert-then-port-0 fallback; empty device list = UB index | `MidiDevice::OpenMidiDevice` | Wrong device silently opens in release; crash potential with no devices | **Fixed** in the 2026-11-08 gameplay rewrite |
 | 13 | Device never closed; `IsOpen` never cleared; no hot-plug rescan | `MidiDevice`, `NoteHighwayCore` | Reconnect/replug requires restart | Same pass as #12 |
 | 14 | No in-game pad rebinding (widget is `ME_EDITOR`) | `PadBindingWidget` | Shipped builds depend on a checked-in `PadMappings.json` matching the player's kit | Needs a game-side binding screen eventually |
@@ -85,10 +85,10 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 | # | Gotcha | Where | Consequence | Verdict |
 |---|--------|-------|-------------|---------|
 | 24 | **`DISABLE_OPTIMIZATION` at file scope, shipped** | `TrackList.cpp`, `CustomTrackDefineTest.cpp` | Database scan, JSON, sorting, and MIDI parsing run unoptimized in release | Delete both lines |
-| 25 | `ParseMidi` writes `TriggerTimeMS = seconds × 100` | `CustomTrackDefineTest::ParseMidi` | 10×-wrong ms values live until `Save()` recomputes them; any new pre-save consumer inherits the bug | Fix the constant now |
-| 26 | Hardcoded `bpm = 180/158`, `noteSpeed = 10` at conversion | `ConvertFromLegacy`, `ParseMidi` | BPM is decorative; the moment something trusts it, every chart is wrong | Item 7 / parser pass |
-| 27 | Per-note stdout logging in conversion | `ParseMidi` | Converting a library takes minutes and floods the console | Delete with #24 |
-| 28 | Pro-drums remap commented out; 100→`Crash2` catch-all | `GetNoteIdFromLegacy` | Pro charts flatten; cymbal/tom distinction lost | Parser pass, after the loop is fixed |
+| 25 | `ParseMidi` writes `TriggerTimeMS = seconds × 100` | `CustomTrackDefineTest::ParseMidi` | 10×-wrong ms values live until `Save()` recomputes them; any new pre-save consumer inherits the bug | **Fixed** 2026-11-08 |
+| 26 | Hardcoded `bpm = 180/158`, `noteSpeed = 10` at conversion | `ConvertFromLegacy`, `ParseMidi` | BPM is decorative; the moment something trusts it, every chart is wrong | **Partly fixed** 2026-11-08: BPM from the tempo map; `noteSpeed` still hardcoded |
+| 27 | Per-note stdout logging in conversion | `ParseMidi` | Converting a library takes minutes and floods the console | **Fixed** 2026-11-08 |
+| 28 | Pro-drums remap commented out; 100→`Crash2` catch-all | `GetNoteIdFromLegacy` | Pro charts flatten; cymbal/tom distinction lost | **Fixed** 2026-11-08: tom markers map yellow/blue/green to hi-hat/ride/crash or high/mid/floor tom |
 | 29 | `.chart` reader exists but is unreachable; OPUS unsupported | `TrackDatabase::Reload` | Clone Hero-only content silently invisible | Finish or delete |
 | 30 | `song.ini` values keep leading spaces; `pro_drums == " True"` | `readSongMetaData` | Shipped `TrackData.txt` files contain padded strings; exact-match filters are one odd tag from missing | Parser pass |
 | 31 | Sort comparators capture the track vector **by value** | `TrackDatabase::SortTracks` | Every sort copies all `TrackData` (strings + any note data) into the lambda | One-character fix (`&`) |

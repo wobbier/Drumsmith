@@ -343,7 +343,23 @@ void TrackEditor::Render()
                         break;
                     }
                 }
-                drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, (ImU32)PadUtils::GetNoteColorABGR( note->m_editorLane ) );
+                // Ghost notes are drawn faint; accents outlined; a stroke other than plain gets
+                // its initial (R rim/edge, X cross-stick, B bell).
+                ImU32 color = (ImU32)PadUtils::GetNoteColorABGR( note->m_editorLane );
+                if( note->m_velocity <= 40 )
+                {
+                    color = ( color & 0x00FFFFFF ) | 0x60000000;
+                }
+                drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, color );
+                if( note->m_velocity >= 120 )
+                {
+                    drawList->AddRect( timelinePos, rect, 0xFFFFFFFF, 0.f, 0, 2.f );
+                }
+                if( note->m_articulation != Articulation::Normal )
+                {
+                    const char* mark = note->m_articulation == Articulation::Rim ? "R" : note->m_articulation == Articulation::CrossStick ? "X" : "B";
+                    drawList->AddText( { timelinePos.x + 2.f, timelinePos.y }, 0xFF000000, mark );
+                }
             }
         }
     }
@@ -385,22 +401,29 @@ void TrackEditor::Render()
 
     {
         PadMappingStorage& storage = PadMappingStorage::GetInstance();
+        std::vector<PadMappingStorage::Resolved> resolved;
         for( auto msg : m_messages )
         {
-            for( PadDefinition& pad : storage.mappedPads )
+            if( !msg.IsOnType() )
             {
-                if( pad.midiBinding == msg.m_data1 && msg.IsOnType() )
+                continue;
+            }
+            // Every pad and stroke the note is bound to (a rim note records a rimshot), with the
+            // hit's velocity, so charts keep the drummer's dynamics.
+            storage.Resolve( msg.m_data1, resolved );
+            for( const PadMappingStorage::Resolved& meaning : resolved )
+            {
+                m_drums->hitPad( meaning.pad, msg.m_data2 / 127.f );
+                if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
                 {
-                    m_drums->hitPad( (PadId)pad.padId, 1.f );
-                    if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
-                    {
-                        NoteData newNote;
-                        newNote.m_editorLane = (PadId)pad.padId;
-                        newNote.m_noteName = PadUtils::GetPadId( pad.padId );
-                        newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
-                        newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
-                        trackData.m_noteData.push_back( newNote );
-                    }
+                    NoteData newNote;
+                    newNote.m_editorLane = meaning.pad;
+                    newNote.m_noteName = PadUtils::GetPadId( meaning.pad );
+                    newNote.m_articulation = meaning.articulation;
+                    newNote.m_velocity = msg.m_data2;
+                    newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
+                    newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
+                    trackData.m_noteData.push_back( newNote );
                 }
             }
         }

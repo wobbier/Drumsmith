@@ -8,6 +8,7 @@ Technical documentation for the game side of Drumsmith — a drum rhythm game fo
 |-----|----------------|
 | [Game-Architecture.md](Game-Architecture.md) | `GameApp` lifecycle, component/core registration, game events, singletons, settings, game-side build wiring |
 | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) | `NoteHighwayCore` end to end: track setup, note spawning, hit detection, note lifecycle, pause/resume; the vocals experiment |
+| [Stage-Lighting.md](Stage-Lighting.md) | The light show: VENUE cues imported from Rock Band charts, the spot-light rig in volumetric haze, cue looks, the fallback show, hit pulses |
 | [Songs-and-DLC.md](Songs-and-DLC.md) | On-disk song format, chart parsing (`notes.mid` / `song.ini` / `.chart`), `TrackDatabase`, the DLC index/download flow, the in-editor track editor |
 | [Audio.md](Audio.md) | `AudioPack` stem playback and sync, `TrackRadio` menu music, `Drumset` hit sounds, FMOD threading facts |
 | [MIDI-and-Pads.md](MIDI-and-Pads.md) | `MidiDevice` (RtMidi) input path, pad bindings and mapping storage, platform gates |

@@ -1,5 +1,7 @@
 #include <GameApp.h>
 #include <Engine/Engine.h>
+#include "Core/CommandLine.h"
+#include "CoreGame/TrackList.h"
 
 GameApp::GameApp(int argc, char** argv)
 	: Game(argc, argv)
@@ -31,6 +33,11 @@ void GameApp::PreRender()
 
 void GameApp::OnInitialize()
 {
+	// --convert-dlc: what Settings > Convert Custom DLC does, at startup (headless re-charting).
+	if( CommandLine::Has( "--convert-dlc" ) )
+	{
+		TrackDatabase::GetInstance().ExportMidiTrackMetaData();
+	}
 	GetEngine().LoadScene("Assets/MainMenu.lvl");
 }
 

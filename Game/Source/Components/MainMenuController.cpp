@@ -47,7 +47,7 @@ void MainMenuController::PopulateModel()
     }
     const GameSettings& settings = GameSettings::GetInstance();
     ui->ModelEnsure( kModel );
-    for( const char* event : { "open_settings", "close_settings", "save_settings", "select_device", "refresh_devices", "convert_dlc", "latency_toggle", "latency_apply" } )
+    for( const char* event : { "open_settings", "close_settings", "save_settings", "select_device", "refresh_devices", "convert_dlc", "latency_toggle", "latency_apply", "technique", "stage_lighting" } )
     {
         ui->ModelRegisterEvent( kModel, event );
     }
@@ -57,6 +57,8 @@ void MainMenuController::PopulateModel()
     ui->ModelSetNumber( kModel, "audio_delay", settings.AudioLatency );
     ui->ModelSetNumber( kModel, "video_delay", settings.VideoLatency );
     ui->ModelSetNumber( kModel, "highway_speed", std::round( settings.HighwaySpeed * 100.f ) );
+    ui->ModelSetNumber( kModel, "technique", settings.TechniqueStrictness );
+    ui->ModelSetNumber( kModel, "stage_lighting", settings.StageLighting );
     ui->ModelSetString( kModel, "dlc_url", settings.DLCURL );
     ui->ModelSetString( kModel, "midi_device", settings.PreferredMidiDevice );
     ui->ModelSetString( kModel, "settings_status", "" );
@@ -242,6 +244,20 @@ void MainMenuController::Update( float dt )
         else if( event == "save_settings" )
         {
             ApplySettings( true );
+        }
+        else if( event == "technique" )
+        {
+            const int strictness = std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 1.0 ) ), 0, 2 );
+            GameSettings::GetInstance().TechniqueStrictness = strictness;
+            ui->ModelSetNumber( kModel, "technique", strictness );
+            ui->ModelSetString( kModel, "settings_status", "" );
+        }
+        else if( event == "stage_lighting" )
+        {
+            const int lighting = std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 2.0 ) ), 0, 2 );
+            GameSettings::GetInstance().StageLighting = lighting;
+            ui->ModelSetNumber( kModel, "stage_lighting", lighting );
+            ui->ModelSetString( kModel, "settings_status", "" );
         }
         else if( event == "refresh_devices" )
         {
