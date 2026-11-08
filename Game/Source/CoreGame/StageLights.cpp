@@ -5,36 +5,46 @@
 #include "Config/GameSettings.h"
 #include "Engine/World.h"
 #include "Core/CommandLine.h"
+#include "Venue/VenueLayout.h"
 #include <algorithm>
 #include <cmath>
 
 namespace
 {
-    // The rig, in the camera rig's space (the strike bar at z 0, the highway along +z, 7.2 wide).
-    // Light settings follow MitchGame's ConcertTest study: narrow, very bright cones in haze.
+    // The rig, in venue space (Venue/VenueLayout.h: the stage's front edge at z 0, the crowd at
+    // -z). Light settings follow MitchGame's ConcertTest study: narrow, very bright cones in haze.
+    // Beams: floor cans, rows 0-1 along the stage's front edge throwing up and back over the band,
+    // rows 2-3 along the back throwing up and out over the crowd (the silhouette lights).
     constexpr int kBeamRows = 4;
-    constexpr float kBeamRowZ[kBeamRows] = { 4.f, 16.f, 28.f, 40.f };
-    constexpr float kBeamX = 6.6f;
+    constexpr float kBeamRowX[kBeamRows] = { 2.4f, 6.8f, 3.6f, 7.8f };
+    constexpr float kBeamRowZ[kBeamRows] = { 0.45f, 0.45f, 9.7f, 9.7f };
     constexpr float kBeamIntensity = 30000.f;
     constexpr float kBeamInner = 4.f;
     constexpr float kBeamOuter = 8.f;
-    constexpr float kBeamRange = 60.f;
+    constexpr float kBeamRange = 40.f;
 
+    // Washes: on the truss over the stage, pooling colour on the band.
     constexpr int kWashRows = 3;
-    constexpr float kWashRowZ[kWashRows] = { 8.f, 24.f, 40.f };
-    constexpr float kWashX = 13.5f;
-    constexpr float kWashHeight = 13.f;
-    constexpr float kWashIntensity = 3000.f;
+    constexpr float kWashRowZ[kWashRows] = { 1.6f, 4.6f, 7.6f };
+    constexpr float kWashX = 4.6f;
+    constexpr float kWashHeight = VenueLayout::kTrussHeight - 0.3f;
+    constexpr float kWashIntensity = 2600.f;
 
-    // Spotlights (VENUE notes 37-41): pools of white on the floor beside the highway.
+    // Spotlights (VENUE notes 37-41: keys, vocals, guitar, drums, bass): narrow white follow spots
+    // from the front-of-house truss onto each member.
     constexpr int kSpotCount = 5;
-    const Vector3 kSpotTargets[kSpotCount] = { Vector3( -10.f, 0.f, 12.f ), Vector3( 10.f, 0.f, 12.f ), Vector3( -16.f, 0.f, 28.f ), Vector3( 16.f, 0.f, 28.f ), Vector3( 20.f, 0.f, 44.f ) };
-    constexpr float kSpotIntensity = 6000.f;
+    constexpr int kSpotMember[kSpotCount] = { VenueData::Keys, VenueData::Vocals, VenueData::Guitar, VenueData::Drums, VenueData::Bass };
+    constexpr float kSpotIntensity = 9000.f;
 
-    // Haze while the show runs (the camera's own fog comes back after): denser on "[FogOn]".
-    constexpr float kHazeDensity = 0.009f;
-    constexpr float kHazeDensityFogOn = 0.016f;
-    constexpr float kHazeStart = 8.f;
+    // Crowd blinders: on the front truss, aimed out over the audience.
+    constexpr int kCrowdLights = 4;
+    constexpr float kCrowdX[kCrowdLights] = { -8.f, -3.f, 3.f, 8.f };
+    constexpr float kCrowdIntensity = 2400.f;
+
+    // Haze while the show runs: denser on "[FogOn]".
+    constexpr float kHazeDensity = 0.016f;
+    constexpr float kHazeDensityFogOn = 0.03f;
+    constexpr float kHazeStart = 1.f;
     constexpr float kHazeScatter = 0.6f;
 
     constexpr float kKeyIntensity = 2.f;
@@ -94,19 +104,17 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
         BuildFallbackShow( inTrack );
     }
 
-    // A dark stage floor for the washes and spots to land on, under the highway.
-    m_props.push_back( inSpawnBox( Vector3( 0.f, -0.16f, 45.f ), Vector3( 90.f, 0.04f, 140.f ), Vector3( 0.05f, 0.05f, 0.06f ), Vector3( 0.f, 0.f, 0.f ), inParent ) );
-
+    const float deck = VenueLayout::kStageHeight;
     int index = 0;
     for( int row = 0; row < kBeamRows; ++row )
     {
         for( int side : { -1, 1 } )
         {
-            const Vector3 base( static_cast<float>( side ) * kBeamX, 0.f, kBeamRowZ[row] );
-            // The fixture's can on the floor; its lens is tinted with the beam each frame.
-            m_props.push_back( inSpawnBox( base + Vector3( 0.f, 0.2f, 0.f ), Vector3( 0.7f, 0.4f, 0.7f ), Vector3( 0.04f, 0.04f, 0.05f ), Vector3( 0.f, 0.f, 0.f ), inParent ) );
-            const EntityHandle lens = inSpawnBox( base + Vector3( 0.f, 0.42f, 0.f ), Vector3( 0.5f, 0.06f, 0.5f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 0.f, 0.f, 0.f ), inParent );
-            SpawnFixture( Group::Beam, side, row, index++, base + Vector3( 0.f, 0.5f, 0.f ), Vector3( 0.f, 1.f, 0.4f ), kBeamInner, kBeamOuter, kBeamRange, kBeamIntensity, inParent, lens );
+            const Vector3 base( static_cast<float>( side ) * kBeamRowX[row], deck, kBeamRowZ[row] );
+            // The fixture's can on the deck; its lens is tinted with the beam each frame.
+            m_props.push_back( inSpawnBox( base + Vector3( 0.f, 0.2f, 0.f ), Vector3( 0.5f, 0.4f, 0.5f ), Vector3( 0.04f, 0.04f, 0.05f ), Vector3( 0.f, 0.f, 0.f ), inParent ) );
+            const EntityHandle lens = inSpawnBox( base + Vector3( 0.f, 0.42f, 0.f ), Vector3( 0.38f, 0.05f, 0.38f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 0.f, 0.f, 0.f ), inParent );
+            SpawnFixture( Group::Beam, side, row, index++, base + Vector3( 0.f, 0.5f, 0.f ), Vector3( 0.f, 1.f, row >= 2 ? -0.4f : 0.4f ), kBeamInner, kBeamOuter, kBeamRange, kBeamIntensity, inParent, lens );
         }
     }
     index = 0;
@@ -115,24 +123,35 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
         for( int side : { -1, 1 } )
         {
             const Vector3 position( static_cast<float>( side ) * kWashX, kWashHeight, kWashRowZ[row] );
-            const Vector3 target( static_cast<float>( side ) * ( kWashX - 1.f ), 0.f, kWashRowZ[row] + 3.f );
-            SpawnFixture( Group::Wash, side, row, index++, position, target - position, 22.f, 34.f, 30.f, kWashIntensity, inParent, {} );
+            const Vector3 target( static_cast<float>( side ) * ( kWashX - 2.f ), deck, kWashRowZ[row] + 0.4f );
+            m_props.push_back( inSpawnBox( position + Vector3( 0.f, 0.2f, 0.f ), Vector3( 0.45f, 0.45f, 0.45f ), Vector3( 0.04f, 0.04f, 0.05f ), Vector3( 0.f, 0.f, 0.f ), inParent ) );
+            const EntityHandle lens = inSpawnBox( position + Vector3( 0.f, -0.04f, 0.f ), Vector3( 0.36f, 0.04f, 0.36f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 0.f, 0.f, 0.f ), inParent );
+            SpawnFixture( Group::Wash, side, row, index++, position, target - position, 24.f, 40.f, 16.f, kWashIntensity, inParent, lens );
         }
     }
     for( int slot = 0; slot < kSpotCount; ++slot )
     {
-        const Vector3 position = kSpotTargets[slot] + Vector3( 0.f, 16.f, -4.f );
-        SpawnFixture( Group::Spot, kSpotTargets[slot].x < 0.f ? -1 : 1, 0, slot, position, kSpotTargets[slot] - position, 6.f, 9.f, 30.f, kSpotIntensity, inParent, {} );
+        const Vector3 target = VenueLayout::kMemberSpots[kSpotMember[slot]] + Vector3( 0.f, 1.f, 0.f );
+        const Vector3 position( target.x * 0.4f, 11.f, -9.f );
+        SpawnFixture( Group::Spot, target.x < 0.f ? -1 : 1, 0, slot, position, target - position, 3.5f, 6.f, 32.f, kSpotIntensity, inParent, {} );
+    }
+    for( int light = 0; light < kCrowdLights; ++light )
+    {
+        const Vector3 position( kCrowdX[light], VenueLayout::kTrussHeight - 0.4f, 0.2f );
+        const Vector3 target( kCrowdX[light] * 1.3f, 0.f, -11.f );
+        m_props.push_back( inSpawnBox( position + Vector3( 0.f, 0.f, 0.15f ), Vector3( 0.5f, 0.35f, 0.3f ), Vector3( 0.04f, 0.04f, 0.05f ), Vector3( 0.f, 0.f, 0.f ), inParent ) );
+        const EntityHandle lens = inSpawnBox( position + Vector3( 0.f, 0.f, -0.02f ), Vector3( 0.4f, 0.26f, 0.04f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 0.f, 0.f, 0.f ), inParent );
+        SpawnFixture( Group::Crowd, kCrowdX[light] < 0.f ? -1 : 1, 0, light, position, target - position, 30.f, 50.f, 30.f, kCrowdIntensity, inParent, lens );
     }
 
     // With no directional light the renderer supplies a daylight sun, which the haze would scatter
-    // into a grey veil. A dim key light from behind the camera takes its place: enough to keep the
-    // notes lit, too little to fog the highway.
+    // into a grey veil. A dim key light takes its place: enough to keep the highway's notes lit
+    // (it lights every camera), too little to grey the venue.
     if( EntityHandle key = m_world->CreateEntity( "StageKeyLight" ) )
     {
         Transform& transform = key->AddComponent<Transform>( "StageKeyLight" );
         transform.SetParent( *inParent );
-        transform.LookDirection( Vector3( 0.f, -0.8f, 0.6f ).Normalized() );
+        transform.LookDirection( Vector3( 0.15f, -0.8f, 0.6f ).Normalized() );
         Light& light = key->AddComponent<Light>();
         light.LightType = Moonlight::LightType::Directional;
         light.DirectionalSource = Moonlight::DirectionalSource::Manual;
@@ -155,7 +174,7 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
         post.Fog = true;
         post.VolumetricFog = true;
         post.VolumetricSteps = std::max( post.VolumetricSteps, 64 );
-        post.VolumetricDistance = std::max( post.VolumetricDistance, 90.f );
+        post.VolumetricDistance = std::max( post.VolumetricDistance, 60.f );
         post.FogStartDistance = std::min( post.FogStartDistance, kHazeStart );
         post.FogSunIntensity = kHazeScatter;
         post.FogLocalAnisotropy = 0.2f;
@@ -281,6 +300,7 @@ void StageLights::Clear()
     m_beats.clear();
     m_kickPulse = m_snarePulse = m_crashFlash = m_missDip = 0.f;
     m_tomPulse = { 0.f, 0.f };
+    m_spotFloor = {};
 }
 
 
@@ -366,6 +386,17 @@ StageLights::Look StageLights::LookFor( const Fixture& inFixture, const CueState
     {
         look.Color = kWhite;
         look.Level = 0.f;
+        return look;
+    }
+    if( inFixture.Kind == Group::Crowd )
+    {
+        // Blinders: a low warm glow on the crowd that swells with them, white flashes on flares
+        // and strobes, dark in a blackout.
+        look.Color = Mix( kWarm[0], kWhite, 0.5f );
+        look.Level = 0.06f + 0.22f * m_crowdEnergy;
+        if( StartsWith( cue, "blackout" ) ) look.Level = 0.f;
+        else if( StartsWith( cue, "flare" ) && !m_gentle ) look.Level += std::exp( -static_cast<float>( inSeconds - inCue.Start ) / ( cue == "flare_fast" ? 0.3f : 0.9f ) );
+        else if( StartsWith( cue, "strobe" ) && !m_gentle ) look.Level = ( inBeat * 2.0 - std::floor( inBeat * 2.0 ) ) < 0.2 ? 0.9f : 0.05f;
         return look;
     }
 
@@ -574,6 +605,9 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
                     look.Level = 1.f;
                 }
             }
+            // The front-light floor (VenueShow), mostly gone in a blackout.
+            const float floor = m_spotFloor[std::clamp( fixture.Index, 0, 4 )];
+            look.Level = std::max( look.Level, StartsWith( cue.Name, "blackout" ) ? floor * 0.15f : floor );
             if( cue.Name == "silhouettes_spot" || cue.Name == "blackout_spot" )
             {
                 look.Level = std::max( look.Level, fixture.Index < 2 ? 1.f : 0.f );
@@ -594,6 +628,10 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
             color = Mix( color, Vector3( 1.f, 0.45f, 0.1f ), bonus );
             level += bonus;
         }
+        else if( fixture.Kind == Group::Crowd )
+        {
+            level += 0.6f * bonus;
+        }
         else if( fixture.Kind == Group::Beam )
         {
             level += 0.35f * m_snarePulse + 0.5f * m_tomPulse[fixture.Side > 0 ? 1 : 0];
@@ -611,7 +649,9 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
             {
                 const float yaw = fixture.Yaw * 3.14159265f / 180.f;
                 const float pitch = fixture.Pitch * 3.14159265f / 180.f;
-                transform.LookDirection( Vector3( std::sin( yaw ) * std::cos( pitch ), std::sin( pitch ), std::cos( yaw ) * std::cos( pitch ) ) );
+                // Front rows throw back over the band, back rows out over the crowd.
+                const float away = fixture.Row >= 2 ? -1.f : 1.f;
+                transform.LookDirection( Vector3( std::sin( yaw ) * std::cos( pitch ), std::sin( pitch ), away * std::cos( yaw ) * std::cos( pitch ) ) );
             }
             Light& light = fixture.Light->GetComponent<Light>();
             light.Color = color;
@@ -646,4 +686,20 @@ void StageLights::OnHit( PadId inPad )
 void StageLights::OnMiss()
 {
     m_missDip = 1.f;
+}
+
+
+Vector3 StageLights::WashGlow() const
+{
+    Vector3 sum( 0.f, 0.f, 0.f );
+    int count = 0;
+    for( const Fixture& fixture : m_fixtures )
+    {
+        if( fixture.Kind == Group::Wash || fixture.Kind == Group::Beam )
+        {
+            sum = sum + fixture.Color * fixture.Level;
+            ++count;
+        }
+    }
+    return count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : sum;
 }

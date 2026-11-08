@@ -7,7 +7,7 @@
 #include "CoreGame/AudioPack.h"
 #include "Editor/PadBindings.h"
 #include "Midi/MidiDevice.h"
-#include "CoreGame/StageLights.h"
+#include "Venue/VenueShow.h"
 #include <array>
 #include <chrono>
 #include <map>
@@ -178,8 +178,8 @@ private:
 	float m_kickFlash = 0.f;
 	// The highway speed the notes were last placed for (chart NoteSpeed x the player's setting).
 	float m_appliedSpeed = 0.f;
-	// The light show beside the highway (Docs/Stage-Lighting.md).
-	StageLights m_stageLights;
+	// The venue under the highway: stage, band, crowd, lights and cameras (Docs/Venue-and-Band.md).
+	VenueShow m_venueShow;
 
 	// Score
 	int m_score = 0;

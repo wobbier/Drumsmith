@@ -860,6 +860,52 @@ void VenueData::Save( json& outJson ) const
             spotlights.push_back( json::array( { spot.m_start, spot.m_end, spot.m_slot } ) );
         }
     }
+    if( !m_cameras.empty() ) SaveCues( m_cameras, outJson["Cameras"] );
+    if( !m_mvCameras.empty() ) SaveCues( m_mvCameras, outJson["MvCameras"] );
+    if( !m_postFx.empty() ) SaveCues( m_postFx, outJson["PostFx"] );
+    if( !m_mvPostFx.empty() ) SaveCues( m_mvPostFx, outJson["MvPostFx"] );
+    const auto saveSpans = []( const std::vector<SpanData>& inSpans, json& outRows, bool inMember ) {
+        outRows = json::array();
+        for( const SpanData& span : inSpans )
+        {
+            outRows.push_back( inMember ? json::array( { span.m_start, span.m_end, span.m_member } ) : json::array( { span.m_start, span.m_end } ) );
+        }
+    };
+    if( !m_singalong.empty() ) saveSpans( m_singalong, outJson["Singalong"], true );
+    if( !m_vocalNotes.empty() ) saveSpans( m_vocalNotes, outJson["VocalNotes"], false );
+    for( int member = 0; member < MemberCount; ++member )
+    {
+        if( !m_bandStates[member].empty() )
+        {
+            SaveCues( m_bandStates[member], outJson["Band"][MemberName( member )] );
+        }
+    }
+    if( !m_drumHits.empty() )
+    {
+        // [time, limb, piece, soft]
+        json& hits = outJson["DrumHits"];
+        for( const DrumHitData& hit : m_drumHits )
+        {
+            hits.push_back( json::array( { hit.m_time, static_cast<int>( hit.m_limb ), static_cast<int>( hit.m_piece ), hit.m_soft ? 1 : 0 } ) );
+        }
+    }
+    if( !m_guitarStrums.empty() ) outJson["GuitarStrums"] = m_guitarStrums;
+    if( !m_bassStrums.empty() ) outJson["BassStrums"] = m_bassStrums;
+    if( !m_keysStrums.empty() ) outJson["KeysStrums"] = m_keysStrums;
+}
+
+
+const char* VenueData::MemberName( int inMember )
+{
+    switch( inMember )
+    {
+    case Drums: return "drums";
+    case Guitar: return "guitar";
+    case Bass: return "bass";
+    case Vocals: return "vocals";
+    case Keys: return "keys";
+    default: return "";
+    }
 }
 
 
@@ -911,6 +957,59 @@ void VenueData::Load( const json& inJson )
             }
         }
     }
+    LoadCues( inJson, "Cameras", m_cameras );
+    LoadCues( inJson, "MvCameras", m_mvCameras );
+    LoadCues( inJson, "PostFx", m_postFx );
+    LoadCues( inJson, "MvPostFx", m_mvPostFx );
+    const auto loadSpans = [&rows]( const char* inKey, std::vector<SpanData>& outSpans ) {
+        if( const json* spans = rows( inKey ) )
+        {
+            for( const json& row : *spans )
+            {
+                if( row.is_array() && row.size() >= 2 && row[0].is_number() && row[1].is_number() )
+                {
+                    const int member = row.size() >= 3 && row[2].is_number() ? std::clamp( row[2].get<int>(), 0, MemberCount - 1 ) : 0;
+                    outSpans.push_back( SpanData{ row[0].get<float>(), row[1].get<float>(), member } );
+                }
+            }
+        }
+    };
+    loadSpans( "Singalong", m_singalong );
+    loadSpans( "VocalNotes", m_vocalNotes );
+    if( inJson.contains( "Band" ) && inJson["Band"].is_object() )
+    {
+        for( int member = 0; member < MemberCount; ++member )
+        {
+            LoadCues( inJson["Band"], MemberName( member ), m_bandStates[member] );
+        }
+    }
+    if( const json* hits = rows( "DrumHits" ) )
+    {
+        for( const json& row : *hits )
+        {
+            if( row.is_array() && row.size() >= 3 && row[0].is_number() && row[1].is_number() && row[2].is_number() )
+            {
+                DrumHitData hit;
+                hit.m_time = row[0].get<float>();
+                hit.m_limb = static_cast<Limb>( std::clamp( row[1].get<int>(), 0, 3 ) );
+                hit.m_piece = static_cast<DrumPiece>( std::clamp( row[2].get<int>(), 0, static_cast<int>( DrumPiece::HiHatPedal ) ) );
+                hit.m_soft = row.size() >= 4 && row[3].is_number() && row[3].get<int>() != 0;
+                m_drumHits.push_back( hit );
+            }
+        }
+    }
+    const auto loadTimes = [&rows]( const char* inKey, std::vector<float>& outTimes ) {
+        if( const json* times = rows( inKey ) )
+        {
+            for( const json& time : *times )
+            {
+                if( time.is_number() ) outTimes.push_back( time.get<float>() );
+            }
+        }
+    };
+    loadTimes( "GuitarStrums", m_guitarStrums );
+    loadTimes( "BassStrums", m_bassStrums );
+    loadTimes( "KeysStrums", m_keysStrums );
 }
 
 void TrackData::LoadNoteData()

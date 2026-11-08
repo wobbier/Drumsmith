@@ -51,6 +51,17 @@
             <button id="lighting-off" class="device-choice" data-class-selected="stage_lighting == 0" data-event-click="stage_lighting(0)">Off</button>
         </div>
         <div class="setting-row">
+            <label>Venue <span>the stage, band and crowd under the highway</span></label>
+            <button id="venue-full" class="device-choice" data-class-selected="venue == 2" data-event-click="venue(2)">Band and crowd</button>
+            <button id="venue-band" class="device-choice" data-class-selected="venue == 1" data-event-click="venue(1)">Band only</button>
+            <button id="venue-off" class="device-choice" data-class-selected="venue == 0" data-event-click="venue(0)">Off</button>
+        </div>
+        <div class="setting-row">
+            <label>Venue Camera <span>whose camera cuts to follow</span></label>
+            <button id="venue-camera-live" class="device-choice" data-class-selected="venue_camera == 0" data-event-click="venue_camera(0)">Live show</button>
+            <button id="venue-camera-mv" class="device-choice" data-class-selected="venue_camera == 1" data-event-click="venue_camera(1)">Music video</button>
+        </div>
+        <div class="setting-row">
             <label>DLC Server <span>host name, without http://</span></label>
             <input id="dlc-server" type="text" data-value="dlc_url"/>
         </div>

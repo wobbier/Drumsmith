@@ -257,9 +257,7 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     {
         Transform& mover = TrackMover->GetComponent<Transform>();
         Transform* camera = mover.GetChildByName( "Main Camera" );
-        m_stageLights.Build( GetWorld(), &mover, camera ? camera->Parent : EntityHandle(), inTrackData,
-            [this]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return SpawnBox( inPosition, inScale, inColor, inEmissive, inParent ); },
-            [this]( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive ) { Tint( inTarget, inColor, inEmissive ); } );
+        m_venueShow.Build( GetWorld(), inTrackData, camera ? camera->Parent : EntityHandle() );
     }
 
     m_currentTrackPack = AudioPack( inTrackData );
@@ -527,7 +525,7 @@ void NoteHighwayCore::ShutdownTrack()
             line.Line->MarkForDelete();
         }
     }
-    m_stageLights.Clear();
+    m_venueShow.Clear();
     m_highwayParts.clear();
     m_targetPads.clear();
     m_beatLines.clear();
@@ -1014,7 +1012,7 @@ void NoteHighwayCore::JudgeHit( const Hit& inHit )
 
     best->Judged = true;
     FlashLane( LaneOf( inHit.Pad ) );
-    m_stageLights.OnHit( inHit.PadKnown ? inHit.Pad : best->Pad );
+    m_venueShow.OnHit( inHit.PadKnown ? inHit.Pad : best->Pad );
     if( wrongTechnique && strictness >= 2 )
     {
         ++m_wrongTechnique;
@@ -1075,7 +1073,7 @@ void NoteHighwayCore::ApplyJudgement( Judgement inJudgement, double inOffsetMs )
     m_judgementAge = 0.f;
     if( inJudgement == Judgement::Miss )
     {
-        m_stageLights.OnMiss();
+        m_venueShow.OnMiss();
         ++m_missed;
         m_combo = 0;
         m_lastJudgement = "MISS";
@@ -1086,6 +1084,7 @@ void NoteHighwayCore::ApplyJudgement( Judgement inJudgement, double inOffsetMs )
 
     ++m_combo;
     m_maxCombo = std::max( m_maxCombo, m_combo );
+    m_venueShow.OnStreak( m_combo );
     int points = 0;
     switch( inJudgement )
     {
@@ -1206,7 +1205,9 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     }
 
     UpdateTargetPads( context.GetDeltaTime() );
-    m_stageLights.Update( VisualTimeMs(), context.GetDeltaTime() );
+    // The crowd reads the player's streak: a long one gets them going.
+    m_venueShow.SetPerformance( 0.25f + 0.75f * std::min( 1.f, static_cast<float>( m_combo ) / 80.f ) );
+    m_venueShow.Update( VisualTimeMs(), context.GetDeltaTime() );
 
     // Done once every note has passed and the audio has stopped (or ran out long ago).
     if( m_songState == SongState::Playing && judgeTime > m_lastNoteMs + kGoodWindowMs )
