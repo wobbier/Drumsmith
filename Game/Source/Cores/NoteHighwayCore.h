@@ -180,6 +180,7 @@ private:
 	float m_appliedSpeed = 0.f;
 	// The venue under the highway: stage, band, crowd, lights and cameras (Docs/Venue-and-Band.md).
 	VenueShow m_venueShow;
+	float m_venueSwapTimer = 0.f;
 
 	// Score
 	int m_score = 0;

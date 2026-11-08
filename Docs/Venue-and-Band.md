@@ -100,7 +100,7 @@ Two render-texture cameras feed the screens, each every other frame:
 - **Venue** (`Venue` in `Settings.json`): Band and crowd (2) / Band only (1) / Off (0: the highway on black, no light show — the rig lives in the venue).
 - **Room** (`VenueStyle`): Arena (0) / Club (1) / Festival (2) / Random (3). F7 swaps it mid-song.
 - **Venue Camera** (`VenueCamera`): Live show (0) / Music video (1).
-- `--no-venue` skips the venue; `--venue-only` fades the highway out entirely to frame the venue; `--venue-shot <name>` holds one shot (any cut name, or `debug_wall`); `--venue-look <name>` holds one post look; `--venue-time <seconds>` shows the venue that far into the song; `--venue-style N`; `--crowd-size N`; `--band-debug` logs the drummer's stick tips and hands twice a second. The engine's `--screenshot-every N` saves a numbered frame every N frames, to check motion headless.
+- `--no-venue` skips the venue; `--venue-only` fades the highway out entirely to frame the venue; `--venue-shot <name>` holds one shot (any cut name, or `debug_wall`); `--venue-look <name>` holds one post look; `--venue-time <seconds>` shows the venue that far into the song; `--venue-style N`; `--venue-swap-every <seconds>` swaps the room on a timer like F7; `--crowd-size N`; `--band-debug` logs the drummer's stick tips and hands twice a second. The engine's `--screenshot-every N` saves a numbered frame every N frames, to check motion headless.
 
 ```bash
 # Frame a shot of Boston (track 2) a minute in, without the highway.

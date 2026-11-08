@@ -1205,9 +1205,13 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     }
 
     UpdateTargetPads( context.GetDeltaTime() );
-    // F7 swaps the room under the highway mid-song.
-    if( GetEngine().GetInput().WasKeyPressed( KeyCode::F7 ) )
+    // F7 swaps the room under the highway mid-song (--venue-swap-every <seconds> does it on a
+    // timer, for headless captures).
+    static const float kSwapEvery = CommandLine::GetFloat( "--venue-swap-every", 0.f );
+    m_venueSwapTimer += context.GetDeltaTime();
+    if( GetEngine().GetInput().WasKeyPressed( KeyCode::F7 ) || ( kSwapEvery > 0.f && m_venueSwapTimer >= kSwapEvery ) )
     {
+        m_venueSwapTimer = 0.f;
         m_venueShow.NextStyle();
     }
     // The crowd reads the player's streak: a long one gets them going.
