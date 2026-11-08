@@ -580,6 +580,7 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
                     if( startsWith( text, "section " ) ) venue.m_sections.push_back( { time, text.substr( 8 ) } );
                     else if( startsWith( text, "prc_" ) ) venue.m_sections.push_back( { time, text.substr( 4 ) } );
                     else if( startsWith( text, "crowd_" ) ) venue.m_crowd.push_back( { time, text.substr( 6 ) } );
+                    else if( text == "music_start" || text == "music_end" || text == "end" || text == "coda" ) venue.m_songEvents.push_back( { time, text } );
                     continue;
                 }
                 if( isCameraCut( text ) )
@@ -662,6 +663,10 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
                     {
                         venue.m_drumHits.push_back( { time, stroke->second.L, stroke->second.P, stroke->second.Soft } );
                     }
+                }
+                else if( key >= 40 && key <= 59 && ( member == VenueData::Guitar || member == VenueData::Bass ) )
+                {
+                    ( member == VenueData::Guitar ? venue.m_guitarFrets : venue.m_bassFrets ).push_back( { time, time, key - 40 } );
                 }
                 else if( key >= 96 && key <= 100 && time - lastStrum > 0.01f )
                 {
@@ -747,6 +752,9 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
     std::sort( venue.m_spotlights.begin(), venue.m_spotlights.end(), byStart );
     std::sort( venue.m_singalong.begin(), venue.m_singalong.end(), byStart );
     std::sort( venue.m_vocalNotes.begin(), venue.m_vocalNotes.end(), byStart );
+    std::stable_sort( venue.m_guitarFrets.begin(), venue.m_guitarFrets.end(), byStart );
+    std::stable_sort( venue.m_bassFrets.begin(), venue.m_bassFrets.end(), byStart );
+    std::stable_sort( venue.m_songEvents.begin(), venue.m_songEvents.end(), byTime );
     return venue;
 }
 

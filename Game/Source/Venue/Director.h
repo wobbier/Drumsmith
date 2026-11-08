@@ -12,8 +12,9 @@ class World;
 // chart's camera cuts: Rock Band 3's "[coop_x]" and "[directed_x]" shots, RB2's note cuts with
 // their constraints, or, for charts without any, cuts every couple of measures to whoever is
 // busiest. Each shot drifts while it's held; handheld ones shake. The chart's post-processing
-// looks grade the image. A second camera films the band for the LED wall behind the stage: a
-// close-up of whoever the main shot is on, else whoever's carrying the song.
+// looks grade the image. The LED wall behind the stage shows the program feed, the main camera's
+// shot as it's being filmed; the side screens a close-up of whoever the main shot is on, else
+// whoever's carrying the song.
 class Director
 {
 public:
@@ -23,13 +24,18 @@ public:
     void Update( double inSeconds, float inDeltaTime );
 
     const EntityHandle& MainCamera() const { return m_main; }
+    // The back of the room (venue z): wide shots stay in front of it.
+    void SetRoomBack( float inZ ) { m_roomBack = inZ; }
     const EntityHandle& FeedCamera() const { return m_feed; }
+    const EntityHandle& ProgramCamera() const { return m_program; }
     // The shot the main camera holds now ("coop_g_near"), for logs and tests.
     const std::string& CurrentShot() const { return m_shotName; }
     const std::string& CurrentLook() const { return m_lookName; }
     size_t CutCount() const { return m_cuts.size(); }
 
+    // The side screens' close-ups, and the LED wall's program feed (what the main camera shows).
     static constexpr const char* kFeedTexture = "Assets/Textures/Venue/StageFeed.rendertexture";
+    static constexpr const char* kProgramTexture = "Assets/Textures/Venue/StageProgram.rendertexture";
 
 private:
     enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall };
@@ -77,10 +83,12 @@ private:
     const Band* m_band = nullptr;
     EntityHandle m_main;
     EntityHandle m_feed;
+    EntityHandle m_program;
     std::vector<Cut> m_cuts;
     std::vector<TimedCueData> m_looks;
     std::vector<BeatData> m_beats;
     float m_bpm = 120.f;
+    float m_roomBack = -1000.f;
     std::string m_shotName;
     std::string m_lookName;
     Grade m_grade;

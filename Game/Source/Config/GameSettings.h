@@ -30,6 +30,8 @@ public:
     // Whose camera cuts the venue plays: 0 the live show's (VENUE), 1 the music video's (MV VENUE)
     // where the chart has one.
     int VenueCamera = 0;
+    // Which room (VenueShow::Style): 0 arena, 1 club, 2 festival, 3 a random one per song.
+    int VenueStyle = 0;
 private:
     json RootJson;
     void Load();

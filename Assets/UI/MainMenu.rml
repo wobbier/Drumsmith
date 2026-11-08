@@ -57,6 +57,13 @@
             <button id="venue-off" class="device-choice" data-class-selected="venue == 0" data-event-click="venue(0)">Off</button>
         </div>
         <div class="setting-row">
+            <label>Room <span>where the band plays (F7 swaps it mid-song)</span></label>
+            <button id="venue-style-arena" class="device-choice" data-class-selected="venue_style == 0" data-event-click="venue_style(0)">Arena</button>
+            <button id="venue-style-club" class="device-choice" data-class-selected="venue_style == 1" data-event-click="venue_style(1)">Club</button>
+            <button id="venue-style-festival" class="device-choice" data-class-selected="venue_style == 2" data-event-click="venue_style(2)">Festival</button>
+            <button id="venue-style-random" class="device-choice" data-class-selected="venue_style == 3" data-event-click="venue_style(3)">Random</button>
+        </div>
+        <div class="setting-row">
             <label>Venue Camera <span>whose camera cuts to follow</span></label>
             <button id="venue-camera-live" class="device-choice" data-class-selected="venue_camera == 0" data-event-click="venue_camera(0)">Live show</button>
             <button id="venue-camera-mv" class="device-choice" data-class-selected="venue_camera == 1" data-event-click="venue_camera(1)">Music video</button>

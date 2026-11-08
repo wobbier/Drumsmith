@@ -59,6 +59,7 @@ private:
         Puppet::Pose Pose;
         std::vector<TimedCueData> States;
         std::vector<float> Strums;
+        std::vector<VenueData::SpanData> Frets;   // the fretting hand's position (m_member 0-19)
         EntityHandle Instrument;   // guitar or bass (a group), the mic for the singer
         std::array<EntityHandle, 2> Sticks;
         EntityHandle MicStand;
@@ -98,4 +99,6 @@ private:
     std::vector<float> m_drumTimes;                     // every drum note, for activity
     float m_bpm = 120.f;
     double m_lastSeconds = -1000.0;
+    // After the song's [music_end] / [end]: everyone takes the applause.
+    float m_endTime = 1e9f;
 };

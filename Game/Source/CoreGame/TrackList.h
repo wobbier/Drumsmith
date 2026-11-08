@@ -90,6 +90,12 @@ struct VenueData
     std::vector<float> m_bassStrums;
     std::vector<float> m_keysStrums;
     std::vector<SpanData> m_vocalNotes;       // PART VOCALS sung notes (36-84)
+    // The fretting hand's place on the neck from PART GUITAR / BASS notes 40-59 (0 at the nut, 19
+    // high up the neck): [time, position] in m_time / m_member.
+    std::vector<SpanData> m_guitarFrets;
+    std::vector<SpanData> m_bassFrets;
+    // EVENTS markers: "music_start", "music_end", "end", "coda".
+    std::vector<TimedCueData> m_songEvents;
 
     bool HasLighting() const { return !m_lighting.empty(); }
     bool IsEmpty() const
@@ -98,7 +104,8 @@ struct VenueData
         for( const auto& states : m_bandStates ) bandEmpty = bandEmpty && states.empty();
         return m_lighting.empty() && m_keyframes.empty() && m_fog.empty() && m_bonusFx.empty() && m_spotlights.empty() && m_sections.empty() && m_crowd.empty()
             && m_cameras.empty() && m_mvCameras.empty() && m_postFx.empty() && m_mvPostFx.empty() && m_singalong.empty() && bandEmpty && m_drumHits.empty()
-            && m_guitarStrums.empty() && m_bassStrums.empty() && m_keysStrums.empty() && m_vocalNotes.empty();
+            && m_guitarStrums.empty() && m_bassStrums.empty() && m_keysStrums.empty() && m_vocalNotes.empty()
+            && m_guitarFrets.empty() && m_bassFrets.empty() && m_songEvents.empty();
     }
     static const char* MemberName( int inMember );
     void Clear() { *this = VenueData(); }

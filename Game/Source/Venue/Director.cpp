@@ -75,8 +75,10 @@ void Director::Clear()
 {
     if( m_main ) m_main->MarkForDelete();
     if( m_feed ) m_feed->MarkForDelete();
+    if( m_program ) m_program->MarkForDelete();
     m_main = {};
     m_feed = {};
+    m_program = {};
     m_cuts.clear();
     m_looks.clear();
     m_beats.clear();
@@ -138,20 +140,22 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
         post.FogStartDistance = 2.f;
         post.FogMaxOpacity = 0.9f;
     }
-    // The feed for the LED wall.
-    m_feed = inWorld.CreateEntity( "Venue Feed Camera" );
-    if( m_feed )
-    {
-        m_feed->AddComponent<Transform>( "Venue Feed Camera" );
-        Camera& camera = m_feed->AddComponent<Camera>();
-        camera.TargetTexture = Path( kFeedTexture );
+    // The screens' feeds: render textures at 30 frames a second, plenty for screens across a
+    // hazy room, without the sun's shadows, ambient occlusion or volumetric haze.
+    const auto makeFeed = [&inWorld]( const char* inName, const char* inTexture ) {
+        EntityHandle entity = inWorld.CreateEntity( inName );
+        if( !entity ) return entity;
+        entity->AddComponent<Transform>( inName );
+        Camera& camera = entity->AddComponent<Camera>();
+        camera.TargetTexture = Path( inTexture );
+        camera.UpdateInterval = 2;
         camera.Near = 0.1f;
         camera.Far = 120.f;
         camera.ClearColor = Vector3( 0.f, 0.f, 0.f );
         camera.SunShadows = false;
         camera.AmbientOcclusion = false;
         camera.VolumetricFog = false;
-        PostProcess& post = m_feed->AddComponent<PostProcess>();
+        PostProcess& post = entity->AddComponent<PostProcess>();
         post.AmbientOcclusion = false;
         post.Bloom = true;
         post.BloomIntensity = 0.1f;
@@ -159,7 +163,10 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
         post.Fog = false;
         post.Saturation = 1.1f;
         post.Contrast = 1.1f;
-    }
+        return entity;
+    };
+    m_feed = makeFeed( "Venue Feed Camera", kFeedTexture );
+    m_program = makeFeed( "Venue Program Camera", kProgramTexture );
 }
 
 
@@ -524,11 +531,23 @@ void Director::Frame( const Plan& inPlan, float inHeld, double inSeconds, Vector
         drift = 0.f;
         dolly = 0.f;
     }
+    // Low cameras stay out of the audience: in the photo pit between the barricade and the stage,
+    // or up over their heads. All stay inside the room.
+    const float roomBack = m_roomBack + 1.5f;
+    const auto keepClear = [roomBack]( Vector3& ioEye ) {
+        if( ioEye.y < 4.6f && ioEye.z < VenueLayout::kBarricadeZ + 0.3f )
+        {
+            ioEye.z = VenueLayout::kBarricadeZ + 0.3f;
+        }
+        ioEye.z = std::max( ioEye.z, roomBack );
+    };
+    keepClear( outEye );
     // Drift: an orbit and a push in, easing over about eight seconds.
     const float progress = 1.f - std::exp( -inHeld / 6.f );
     outEye = Orbit( outEye, outTarget, drift * progress );
     const Vector3 toward = ( outTarget - outEye ).Normalized();
     outEye = outEye + toward * ( dolly * progress );
+    keepClear( outEye );
     if( inPlan.Handheld )
     {
         const float t = static_cast<float>( inSeconds );
@@ -706,4 +725,20 @@ void Director::Update( double inSeconds, float inDeltaTime )
     }
     ApplyGrade( inDeltaTime );
     UpdateFeed( inSeconds, index );
+    if( m_program )
+    {
+        // The program feed films what the main camera shows, graded the same: in its own shot the
+        // wall is black (a camera never samples its own image), so a wide shot puts the show on
+        // the wall one level deep.
+        Transform& program = m_program->GetComponent<Transform>();
+        program.SetPosition( transform.GetPosition() );
+        program.SetRotation( transform.GetRotation() );
+        m_program->GetComponent<Camera>().SetFOV( fov );
+        PostProcess& post = m_program->GetComponent<PostProcess>();
+        post.Saturation = m_grade.Saturation;
+        post.Contrast = m_grade.Contrast * 1.05f;
+        post.Temperature = m_grade.Temperature;
+        post.Tint = m_grade.Tint;
+        post.EraColorBits = m_grade.ColorBits;
+    }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreGame/TrackList.h"
 #include "Venue/Puppet.h"
+#include "Venue/VenueLayout.h"
 #include "ECS/EntityHandle.h"
 #include <string>
 #include <vector>
@@ -17,7 +18,9 @@ class VenueKit;
 class Crowd
 {
 public:
-    void Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount );
+    // inBackZ / inHalfWidth: how far back and wide the floor fills (VenueLayout's by default).
+    void Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount,
+        float inBackZ = VenueLayout::kCrowdBackZ, float inHalfWidth = VenueLayout::kCrowdHalfWidth );
     void Clear();
     // inPerformance: 0 (the player's struggling) .. 1 (on a long streak).
     void Update( double inSeconds, float inDeltaTime, float inPerformance );
@@ -56,4 +59,5 @@ private:
     float m_energy = 0.5f;
     float m_missDip = 0.f;
     float m_cheer = 0.f;
+    uint32_t m_frame = 0;
 };

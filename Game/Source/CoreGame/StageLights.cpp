@@ -301,6 +301,7 @@ void StageLights::Clear()
     m_kickPulse = m_snarePulse = m_crashFlash = m_missDip = 0.f;
     m_tomPulse = { 0.f, 0.f };
     m_spotFloor = {};
+    m_hazeScale = 1.f;
 }
 
 
@@ -545,7 +546,7 @@ void StageLights::SetFog( double inSeconds, float inDeltaTime )
     }
     const float target = fogOn ? 1.f : 0.f;
     m_hazeLevel += ( target - m_hazeLevel ) * std::min( 1.f, inDeltaTime * 0.8f );
-    m_camera->GetComponent<PostProcess>().FogDensity = kHazeDensity + ( kHazeDensityFogOn - kHazeDensity ) * m_hazeLevel;
+    m_camera->GetComponent<PostProcess>().FogDensity = ( kHazeDensity + ( kHazeDensityFogOn - kHazeDensity ) * m_hazeLevel ) * m_hazeScale;
 }
 
 

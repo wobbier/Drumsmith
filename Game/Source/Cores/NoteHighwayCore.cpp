@@ -1205,6 +1205,11 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     }
 
     UpdateTargetPads( context.GetDeltaTime() );
+    // F7 swaps the room under the highway mid-song.
+    if( GetEngine().GetInput().WasKeyPressed( KeyCode::F7 ) )
+    {
+        m_venueShow.NextStyle();
+    }
     // The crowd reads the player's streak: a long one gets them going.
     m_venueShow.SetPerformance( 0.25f + 0.75f * std::min( 1.f, static_cast<float>( m_combo ) / 80.f ) );
     m_venueShow.Update( VisualTimeMs(), context.GetDeltaTime() );

@@ -4,6 +4,8 @@
 #include "Venue/VenueTiming.h"
 #include "Components/Transform.h"
 #include "Materials/StandardMaterial.h"
+#include "Core/CommandLine.h"
+#include "CLog.h"
 #include <algorithm>
 #include <cmath>
 
@@ -12,6 +14,8 @@ namespace
     constexpr float kPi = 3.14159265f;
     constexpr float kDeg = kPi / 180.f;
     constexpr float kStickLength = 0.4f;
+    // The grip: the hand holds the stick this far from its tip (a quarter up from the butt).
+    constexpr float kStickReach = 0.3f;
 
     glm::quat Axis( float inDegrees, const glm::vec3& inAxis )
     {
@@ -31,16 +35,16 @@ namespace
 
     // Where each piece is struck, in the drummer's space (the throne at the origin, the kit at +z).
     const glm::vec3 kStrike[10] = {
-        glm::vec3( 0.12f, 0.06f, 0.5f ),     // Kick (the pedal)
-        glm::vec3( -0.42f, 0.99f, 0.42f ),   // HiHat
-        glm::vec3( -0.17f, 0.76f, 0.44f ),   // Snare
-        glm::vec3( -0.14f, 0.96f, 0.66f ),   // Tom1
-        glm::vec3( 0.17f, 0.96f, 0.66f ),    // Tom2
-        glm::vec3( 0.47f, 0.68f, 0.42f ),    // FloorTom
-        glm::vec3( -0.56f, 1.3f, 0.66f ),    // Crash1
-        glm::vec3( 0.52f, 1.34f, 0.72f ),    // Crash2
-        glm::vec3( 0.66f, 1.08f, 0.52f ),    // Ride
-        glm::vec3( -0.26f, 0.05f, 0.42f ),   // HiHatPedal
+        glm::vec3( 0.12f, 0.06f, 0.52f ),    // Kick (the pedal)
+        glm::vec3( -0.44f, 0.98f, 0.56f ),   // HiHat
+        glm::vec3( -0.16f, 0.74f, 0.6f ),    // Snare
+        glm::vec3( -0.15f, 0.95f, 0.82f ),   // Tom1
+        glm::vec3( 0.18f, 0.95f, 0.82f ),    // Tom2
+        glm::vec3( 0.52f, 0.68f, 0.52f ),    // FloorTom
+        glm::vec3( -0.6f, 1.28f, 0.86f ),    // Crash1
+        glm::vec3( 0.55f, 1.32f, 0.92f ),    // Crash2
+        glm::vec3( 0.72f, 1.06f, 0.66f ),    // Ride
+        glm::vec3( -0.26f, 0.05f, 0.44f ),   // HiHatPedal
     };
 
     // Shirt colours, one per member.
@@ -91,6 +95,7 @@ void Band::Clear()
     m_drumTimes.clear();
     m_stage = nullptr;
     m_lastSeconds = -1000.0;
+    m_endTime = 1e9f;
 }
 
 
@@ -119,6 +124,15 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
     m_members[VenueData::Guitar].Strums = inVenue.m_guitarStrums;
     m_members[VenueData::Bass].Strums = inVenue.m_bassStrums;
     m_members[VenueData::Keys].Strums = inVenue.m_keysStrums;
+    m_members[VenueData::Guitar].Frets = inVenue.m_guitarFrets;
+    m_members[VenueData::Bass].Frets = inVenue.m_bassFrets;
+    for( const TimedCueData& event : inVenue.m_songEvents )
+    {
+        if( event.m_name == "music_end" || event.m_name == "end" )
+        {
+            m_endTime = std::min( m_endTime, event.m_time );
+        }
+    }
     const bool keys = !inVenue.m_keysStrums.empty() || !inVenue.m_bandStates[VenueData::Keys].empty();
 
     // Strokes: the chart's drum animation notes, else worked out from its gems.
@@ -390,8 +404,8 @@ void Band::BuildDrums( VenueKit& inKit, Member& ioMember )
     // A rug, the throne, the kick with the band's logo on its front head.
     inKit.Box( Vector3( 0.05f, 0.005f, 0.45f ), Vector3( 2.2f, 0.01f, 2.f ), Vector3( 0.25f, 0.04f, 0.04f ), &group );
     inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.29f, -0.04f ), Vector3( 0.38f, 0.58f, 0.38f ), Vector3( 0.05f, 0.05f, 0.05f ), &group );
-    drum( Piece::Kick, glm::vec3( 0.f, 0.3f, 0.84f ), 0.6f, 0.44f, Vector3( 90.f, 0.f, 0.f ) );
-    inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.3f, 1.065f ), Vector3( 0.36f, 0.01f, 0.36f ), Vector3( 0.9f, 0.5f, 0.1f ), &group, Vector3( 0.9f, 0.45f, 0.08f ) )
+    drum( Piece::Kick, glm::vec3( 0.f, 0.3f, 0.9f ), 0.6f, 0.44f, Vector3( 90.f, 0.f, 0.f ) );
+    inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.3f, 1.125f ), Vector3( 0.36f, 0.01f, 0.36f ), Vector3( 0.9f, 0.5f, 0.1f ), &group, Vector3( 0.9f, 0.45f, 0.08f ) )
         ->GetComponent<Transform>().SetRotation( Vector3( 90.f, 0.f, 0.f ) );
     drum( Piece::Snare, kStrike[static_cast<int>( Piece::Snare )] - glm::vec3( 0.f, 0.07f, 0.f ), 0.36f, 0.13f, Vector3( -8.f, 0.f, 4.f ) );
     drum( Piece::Tom1, kStrike[static_cast<int>( Piece::Tom1 )] - glm::vec3( 0.f, 0.1f, -0.02f ), 0.28f, 0.2f, Vector3( -22.f, 0.f, 8.f ) );
@@ -641,13 +655,13 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
         glm::vec3 toward = tips[side] - chest;
         toward.y = 0.f;
         toward = glm::dot( toward, toward ) > 1e-6f ? glm::normalize( toward ) : kZ;
-        const float angle = ( 22.f - 110.f * lift[side] ) * kDeg;   // tip down at the stroke, up as it lifts
+        const float angle = ( 24.f - 100.f * lift[side] ) * kDeg;   // tip down at the stroke, up as it lifts
         const glm::vec3 stick = glm::normalize( toward * std::cos( angle ) - kY * std::sin( angle ) );
-        const glm::vec3 hand = tips[side] - stick * kStickLength;
+        const glm::vec3 hand = tips[side] - stick * kStickReach;
         Puppet::Arm& arm = pose.Arms[side];
         arm.Reach = true;
         arm.Target = hand;
-        arm.Pole = glm::vec3( side == 0 ? -0.9f : 0.9f, -1.f, -0.5f );
+        arm.Pole = glm::vec3( side == 0 ? -0.6f : 0.6f, -1.f, -0.3f );
     }
     // Feet: the kick and hi-hat pedal.
     const auto footFor = [&]( Limb inLimb, float inHold ) {
@@ -671,12 +685,24 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
     pose.Legs[0].Toe = footFor( Limb::LeftFoot, m_strokes[static_cast<int>( Limb::LeftFoot )].empty() ? 14.f : 4.f );
     pose.Legs[0].Spread = 14.f;
     ioMember.Body.Apply( pose );
+    static const bool kDebug = CommandLine::Has( "--band-debug" );
+    if( kDebug && static_cast<int>( inSeconds * 2.0 ) != static_cast<int>( m_lastSeconds * 2.0 ) )
+    {
+        for( int side = 0; side < 2; ++side )
+        {
+            const glm::vec3 h = ioMember.Body.Hand( side );
+            const glm::vec3 s = ioMember.Body.Shoulder( side );
+            BRUH_FMT( "Drummer %d t=%.2f tip(%.2f %.2f %.2f) target(%.2f %.2f %.2f) hand(%.2f %.2f %.2f) shoulder(%.2f %.2f %.2f) lift %.2f", side, inSeconds,
+                tips[side].x, tips[side].y, tips[side].z, pose.Arms[side].Target.x, pose.Arms[side].Target.y, pose.Arms[side].Target.z, h.x, h.y, h.z, s.x, s.y, s.z, lift[side] );
+        }
+    }
     for( int side = 0; side < 2; ++side )
     {
         if( ioMember.Sticks[side] )
         {
             const glm::vec3 hand = ioMember.Body.Hand( side );
-            Puppet::PlaceBone( ioMember.Sticks[side], hand, hand + glm::normalize( tips[side] - hand ) * kStickLength );
+            const glm::vec3 along = glm::normalize( tips[side] - hand );
+            Puppet::PlaceBone( ioMember.Sticks[side], hand - along * ( kStickLength - kStickReach ), hand + along * kStickReach );
         }
     }
 
@@ -786,7 +812,16 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     }
     int count = 0;
     const float strum = idle ? 0.f : StrumPhase( ioMember, inSeconds, count );
-    const float fret = VenueTiming::Noise( static_cast<uint32_t>( count / 6 ), static_cast<uint32_t>( inIndex ) );
+    // The chart's hand positions (notes 40-59) when it has them, else a new spot every few strums.
+    float fret = VenueTiming::Noise( static_cast<uint32_t>( count / 6 ), static_cast<uint32_t>( inIndex ) );
+    if( !ioMember.Frets.empty() )
+    {
+        auto it = std::upper_bound( ioMember.Frets.begin(), ioMember.Frets.end(), static_cast<float>( inSeconds ), []( float t, const VenueData::SpanData& s ) { return t < s.m_start; } );
+        if( it != ioMember.Frets.begin() )
+        {
+            fret = static_cast<float>( ( it - 1 )->m_member ) / 19.f;
+        }
+    }
     const float neck = inIndex == VenueData::Bass ? 0.86f : 0.62f;
     Puppet::Arm& strumArm = pose.Arms[1];
     strumArm.Reach = true;
@@ -907,6 +942,24 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
         Member& member = m_members[index];
         if( !member.Present )
         {
+            continue;
+        }
+        if( inSeconds > m_endTime && index != VenueData::Drums )
+        {
+            // The song's over: arms up to the crowd, a bounce on the spot.
+            Puppet::Pose& pose = member.Pose;
+            pose = Puppet::Pose();
+            const float since = static_cast<float>( inSeconds ) - m_endTime;
+            pose.Offset.y = 0.12f * std::fabs( std::sin( since * 4.f + member.Phase ) ) * std::exp( -since * 0.3f );
+            pose.Arms[0].Raise = pose.Arms[1].Raise = 160.f;
+            pose.Arms[0].Spread = pose.Arms[1].Spread = 25.f + 10.f * std::sin( since * 3.f );
+            pose.Nod = -10.f;
+            member.Body.Apply( pose );
+            if( member.Instrument && index != VenueData::Vocals )
+            {
+                const glm::quat spine = member.Body.SpineRotation();
+                Puppet::PlacePiece( member.Instrument, member.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.15f, 0.17f ), spine * Axis( -10.f, kZ ) );
+            }
             continue;
         }
         switch( index )

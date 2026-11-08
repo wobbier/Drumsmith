@@ -39,6 +39,8 @@ public:
     void SetSpotlightFloor( int inSlot, float inLevel ) { if( inSlot >= 0 && inSlot < 5 ) m_spotFloor[inSlot] = inLevel; }
     // The washes' colour and level now, for set pieces that glow along with them.
     Vector3 WashGlow() const;
+    // Scales the haze (an open-air venue holds less of it).
+    void SetHazeScale( float inScale ) { m_hazeScale = inScale; }
 
 private:
     enum class Group { Beam, Wash, Spot, Crowd };
@@ -103,6 +105,7 @@ private:
     std::array<float, 2> m_tomPulse{ 0.f, 0.f };
     float m_missDip = 0.f;
     float m_crowdEnergy = 0.5f;
+    float m_hazeScale = 1.f;
     std::array<float, 5> m_spotFloor{};
 
     // The camera's fog before the show changed it, restored by Clear.

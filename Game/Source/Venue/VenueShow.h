@@ -18,9 +18,18 @@ class World;
 class VenueShow
 {
 public:
-    // inHighwayCamera: the highway's camera entity, made an overlay while the show runs.
-    void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera );
+    // The room around the stage. The stage, band and rig are the same in each.
+    enum class Style : int { Arena = 0, Club, Festival, Count };
+    static const char* StyleName( Style inStyle );
+
+    // inHighwayCamera: the highway's camera entity, made an overlay while the show runs. The style
+    // comes from the VenueStyle setting (or --venue-style) unless one is given.
+    void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, int inStyle = -1 );
     void Clear();
+    // Tears the venue down and builds the next style in its place, mid-song: the highway on top
+    // carries on regardless.
+    void NextStyle();
+    Style GetStyle() const { return m_style; }
     void Update( double inSongTimeMs, float inDeltaTime );
 
     void OnHit( PadId inPad );
@@ -34,7 +43,10 @@ public:
 
 private:
     void BuildStage( Transform& inRoot );
-    void BuildScreen( Transform& inRoot, const Vector3& inCentre, const Vector3& inSize, float inYaw );
+    void BuildArena( Transform& inRoot );
+    void BuildClub( Transform& inRoot );
+    void BuildFestival( Transform& inRoot );
+    void BuildScreen( Transform& inRoot, const Vector3& inCentre, const Vector3& inSize, float inYaw, const char* inTexture );
     void UpdateSet( double inSeconds, float inDeltaTime );
 
     VenueKit m_kit;
@@ -44,6 +56,9 @@ private:
     StageLights m_lights;
     EntityHandle m_root;
     EntityHandle m_highwayCamera;
+    World* m_world = nullptr;
+    const TrackData* m_track = nullptr;
+    Style m_style = Style::Arena;
     VenueData m_venue;
     std::vector<BeatData> m_beats;
     float m_bpm = 120.f;

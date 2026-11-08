@@ -38,7 +38,7 @@ void Crowd::Clear()
 }
 
 
-void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount )
+void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount, float inBackZ, float inHalfWidth )
 {
     Clear();
     m_beats = inBeats;
@@ -57,11 +57,12 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
 
     // Rows from the barricade back, widening toward the back of the room and thinning out.
     uint32_t seed = 1;
-    for( float z = VenueLayout::kCrowdFrontZ; z > VenueLayout::kCrowdBackZ && static_cast<int>( m_people.size() ) < inCount; z -= 0.64f )
+    const float span = VenueLayout::kCrowdFrontZ - inBackZ;
+    for( float z = VenueLayout::kCrowdFrontZ; z > inBackZ && static_cast<int>( m_people.size() ) < inCount; z -= 0.64f )
     {
         const float depth = VenueLayout::kCrowdFrontZ - z;
-        const float halfWidth = std::min( VenueLayout::kCrowdHalfWidth, 7.5f + depth * 0.35f );
-        const float density = depth < 8.f ? 0.95f : depth < 16.f ? 0.75f : 0.5f;
+        const float halfWidth = std::min( inHalfWidth, 7.5f + depth * 0.35f );
+        const float density = depth < span * 0.3f ? 0.95f : depth < span * 0.65f ? 0.75f : 0.5f;
         for( float x = -halfWidth; x <= halfWidth && static_cast<int>( m_people.size() ) < inCount; x += 0.58f )
         {
             ++seed;
@@ -180,8 +181,17 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
     int measureBeat = 0;
     VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
     const float t = static_cast<float>( inSeconds );
-    for( Person& person : m_people )
+    ++m_frame;
+    for( size_t index = 0; index < m_people.size(); ++index )
     {
+        Person& person = m_people[index];
+        // The rows further back are posed every second or third frame (in turns), the front every
+        // frame: far figures are small, and posing is most of the crowd's cost.
+        const uint32_t stride = person.Depth > 16.f ? 3u : person.Depth > 8.f ? 2u : 1u;
+        if( ( m_frame + static_cast<uint32_t>( index ) ) % stride != 0 )
+        {
+            continue;
+        }
         Puppet::Pose& pose = person.Pose;
         pose = Puppet::Pose();
         // Everyone's a little behind the beat, by their own amount.

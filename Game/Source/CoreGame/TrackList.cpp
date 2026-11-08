@@ -892,6 +892,9 @@ void VenueData::Save( json& outJson ) const
     if( !m_guitarStrums.empty() ) outJson["GuitarStrums"] = m_guitarStrums;
     if( !m_bassStrums.empty() ) outJson["BassStrums"] = m_bassStrums;
     if( !m_keysStrums.empty() ) outJson["KeysStrums"] = m_keysStrums;
+    if( !m_guitarFrets.empty() ) saveSpans( m_guitarFrets, outJson["GuitarFrets"], true );
+    if( !m_bassFrets.empty() ) saveSpans( m_bassFrets, outJson["BassFrets"], true );
+    if( !m_songEvents.empty() ) SaveCues( m_songEvents, outJson["SongEvents"] );
 }
 
 
@@ -1010,6 +1013,22 @@ void VenueData::Load( const json& inJson )
     loadTimes( "GuitarStrums", m_guitarStrums );
     loadTimes( "BassStrums", m_bassStrums );
     loadTimes( "KeysStrums", m_keysStrums );
+    // Fret rows are [time, time, position]: a span of no length, the position as its member.
+    const auto loadFrets = [&rows]( const char* inKey, std::vector<SpanData>& outFrets ) {
+        if( const json* frets = rows( inKey ) )
+        {
+            for( const json& row : *frets )
+            {
+                if( row.is_array() && row.size() >= 3 && row[0].is_number() && row[2].is_number() )
+                {
+                    outFrets.push_back( SpanData{ row[0].get<float>(), row[0].get<float>(), std::clamp( row[2].get<int>(), 0, 19 ) } );
+                }
+            }
+        }
+    };
+    loadFrets( "GuitarFrets", m_guitarFrets );
+    loadFrets( "BassFrets", m_bassFrets );
+    LoadCues( inJson, "SongEvents", m_songEvents );
 }
 
 void TrackData::LoadNoteData()
