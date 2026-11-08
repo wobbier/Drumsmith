@@ -148,6 +148,20 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     m_lights.Build( inWorld, &root, m_director.MainCamera(), inTrack,
         [kit]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return kit->Box( inPosition, inScale, inColor, inParent, inEmissive ); },
         []( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive ) { VenueKit::SetColor( inTarget, inColor, inEmissive ); } );
+    if( !m_lights.IsActive() )
+    {
+        // Stage Lights off: no rig, but a soft house light so the band still reads. Without any
+        // directional the renderer would light the room with a daylight sun.
+        if( EntityHandle key = m_kit.Group( "VenueKeyLight", &root ) )
+        {
+            key->GetComponent<Transform>().LookDirection( Vector3( 0.15f, -0.8f, 0.6f ).Normalized() );
+            Light& light = key->AddComponent<Light>();
+            light.LightType = Moonlight::LightType::Directional;
+            light.DirectionalSource = Moonlight::DirectionalSource::Manual;
+            light.Color = Vector3( 1.f, 0.92f, 0.8f );
+            light.Intensity = 7.f;
+        }
+    }
     m_director.SetRoomBack( m_style == Style::Club ? -17.f : m_style == Style::Arena ? -34.f : -1000.f );
     if( m_style == Style::Festival )
     {

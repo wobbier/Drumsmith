@@ -87,7 +87,8 @@ namespace
 void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle& inCamera, const TrackData& inTrack, const SpawnBoxFn& inSpawnBox, const TintFn& inTint )
 {
     Clear();
-    const int setting = GameSettings::GetInstance().StageLighting;
+    // --stage-lights N overrides the setting (0 off, 1 gentle, 2 full) for a run.
+    const int setting = CommandLine::GetInt( "--stage-lights", GameSettings::GetInstance().StageLighting );
     if( setting <= 0 || !inParent )
     {
         return;

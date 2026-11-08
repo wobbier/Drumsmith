@@ -69,6 +69,7 @@ a moment. Crowd state scales the overall level.
   flashes (strobes hold steady, flares and pyro soften) / Off (no rig). The rig lives in the venue,
   so **Venue: Off** turns it off too.
 - `--stage-cue <name>` holds one look for a whole song, to tune it (`default` for the empty cue).
+- `--stage-lights N` overrides the setting for a run (0 off, 1 no strobes or flashes, 2 full).
 
 ## Gotchas
 
