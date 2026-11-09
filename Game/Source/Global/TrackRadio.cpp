@@ -75,6 +75,7 @@ void TrackRadio::Seek( float inPercent )
 
 void TrackRadio::Update( float dt )
 {
+    m_audioPack.Update();
     if( m_radioState == RadioState::Loading )
     {
         if( !m_audioPack.IsReady() )

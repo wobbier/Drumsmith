@@ -76,7 +76,7 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 
 | # | Gotcha | Where | Consequence | Verdict |
 |---|--------|-------|-------------|---------|
-| 20 | Pause/Resume/Seek never re-sync stems (only initial `Play` is DSP-scheduled; `Seek`'s re-sync is commented out) | `AudioPack` | Stems audibly drift after pause or scrub; judge clock moves relative to the mix | Item 7 |
+| 20 | Pause/Resume/Seek never re-sync stems (only initial `Play` is DSP-scheduled; `Seek`'s re-sync is commented out) | `AudioPack` | Stems audibly drift after pause or scrub; judge clock moves relative to the mix | **Fixed** 2026-11-08: group pause, and seeks restart every stem on one DSP tick once all have seeked (`Docs/Audio.md`) |
 | 21 | `AudioPack` holds a raw `TrackData*` into the database vector | `AudioPack::m_trackData` | `TrackDatabase::Reload` (e.g. after a DLC download) dangles any live pack | Fix when touched; radio + download coexist today |
 | 22 | Radio `Update` spams `Play()` every frame while loading | `TrackRadio::Update` | Converges, but masks the readiness model; "this feels weird, but okay??" | Cleanup batch |
 | 23 | FMOD runs on default mixer settings, never queried | `AudioCore` (engine) | Nobody knows the actual output latency on any machine | Measure in item 3's calibration work |

@@ -31,12 +31,13 @@ Constructed from a `TrackData`, an `AudioPack`:
 2. Calls `LoadStem` for the main track file plus a **hardcoded stem list**: `crowd.ogg`, `drums.ogg`, `drums_1.ogg`–`drums_4.ogg`, `guitar.ogg`, `vocals.ogg`, `rhythm.ogg`, `keys.ogg`. Missing files are skipped silently (`Path::Exists` check); drum stems are remembered by index in `m_drumTracks`.
 3. Each stem loads through `ResourceCache::Get<Sound>` with `SoundFlags::NonBlocking | SoundFlags::CreateStream` — loading is asynchronous, and `IsReady()` polls until every `AudioSource::IsLoaded()` is true.
 
-**Playback start is sample-accurate**: `AudioPack::Play` reads the group's DSP clock (`getDSPClock`), starts every stem paused, assigns it to the group, schedules `setDelay(parentClock + 2048, 0)` on each channel, then unpauses — all stems begin together 2048 samples (~43 ms at 48 kHz) in the future.
+**Playback start is sample-accurate**: `AudioPack::Play` reads the group's DSP clock (`getDSPClock`), starts every stem paused, assigns it to the group, schedules `setDelay(groupClock + 2048, 0)` on each channel (a channel's delay counts on its parent's clock: the group's), then unpauses — all stems begin together 2048 samples (~43 ms at 48 kHz) in the future.
 
-**Nothing after start is re-synchronized**:
+**Pause and seek keep the stems together**:
 
-- `Pause`/`Resume` loop over stems calling `Channel::setPaused` individually (the commented-out `syncGroup->setPaused` would have been atomic).
-- `Seek` pauses, then calls `AudioSource::SetPositionMs` per stem — the DSP-clock re-sync block below it is commented out, and playback resumes wherever each stream lands.
+- `Pause`/`Resume` pause and unpause the group (`ChannelGroup::setPaused`), so every stem stops and starts on the same mixer tick.
+- `Seek` pauses each stem's channel and `setPosition`s it. The stems are non-blocking streams, so each seek completes on FMOD's loader thread in its own time (the sound's open state reads `FMOD_OPENSTATE_SETPOSITION` until then); unpausing them straight away, as the old `Seek` did, started each stem whenever its seek landed. `AudioPack::Update` (called every frame by `NoteHighwayCore` and `TrackRadio`) waits until every stem has finished seeking (or 500 ms have passed), then schedules all of them on one `setDelay(groupClock + 2048)` and unpauses them, as `Play` does. `IsSeeking()` stays true until that tick; meanwhile `GetPositionMs` reports the seek target and the song clock holds.
+- `StemSpreadMs` measures how far apart the playing stems are; `--highway-log` prints it with the clock. Seeking Foreplay / Long Time (eight stems) to 4:10 headless reads 0 ms apart.
 
 `GetPositionMs`/`GetLength`/`GetVolume` delegate to `m_sounds[0]` — the main track stem — via `AudioSource::GetPositionMs`, which is `FMOD::Channel::getPosition(FMOD_TIMEUNIT_MS)` and returns 0 on error or missing channel.
 
@@ -66,7 +67,7 @@ A singleton state machine (`None → Loading → Seeking → Playing`) that owns
 
 ## Caveats & Fragility
 
-- **Pause/Resume and Seek desynchronize stems.** Only the initial `Play` is DSP-clock-scheduled; per-channel `setPaused(false)` calls resume stems a mixer block apart at worst, and `Seek` has no re-sync at all (the fix is present but commented out in `AudioPack::Seek`). Multi-stem songs can drift audibly after any pause or scrub. This also moves the judge clock (`m_sounds[0]` position) relative to the other stems.
+- **A seek waits for every stem.** A stem whose seek never completes holds the restart for up to 500 ms, then everything starts anyway, possibly that stem out of step.
 - **`TrackRadio::Update` calls `Play()` every frame while loading.** Each call walks all stems calling `AudioSource::Play` again; it converges once loaded, but it papers over the `AudioPack` readiness model rather than waiting for it.
 - **`GetPositionMs` conflates errors with position 0** (`AudioSource::GetPositionMs` returns 0 when the channel is missing or `getPosition` fails, in a variable misnamed `isPlaying`). During gameplay, a transient channel error reads as "song at 0:00" to hit detection.
 - **`m_sounds[0]` is assumed to be the main track.** `LoadStem` order guarantees it today (main file loads first), but nothing enforces it; `GetVolume`/`GetPositionMs`/`GetLength` index it unchecked (safe only behind `IsReady()`/`IsPlaying()` empty-checks).

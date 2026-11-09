@@ -8,6 +8,7 @@
 #include "Resource/ResourceCache.h"
 #include <fmod.hpp>
 #include "Pointers.h"
+#include <algorithm>
 #include <utility>
 
 AudioPack::AudioPack( TrackData& inTrackData )
@@ -101,12 +102,12 @@ void AudioPack::Play()
     if( !IsReady() || !m_syncGroup )
         return;
 
+    // The stems' delays count on their parent's clock: this group's.
     unsigned long long groupClock = 0;
-    unsigned long long parentClock = 0;
-    m_syncGroup->getDSPClock( &groupClock, &parentClock );
+    m_syncGroup->getDSPClock( &groupClock, nullptr );
 
     // Add a small buffer so playback is not in the past when we set the delay.
-    unsigned long long startDelay = parentClock + 2048;
+    unsigned long long startDelay = groupClock + 2048;
 
     // 2. Play each sound in paused mode, assign to channel group, and schedule
     for( auto& sound : m_sounds )
@@ -137,7 +138,12 @@ void AudioPack::Play()
 
 void AudioPack::Pause()
 {
-    //syncGroup->setPaused( true );
+    // The whole group stops on one mixer tick; pausing stem by stem could split them a block.
+    if( m_syncGroup )
+    {
+        m_syncGroup->setPaused( true );
+        return;
+    }
     for( auto& sound : m_sounds )
     {
         sound.Pause();
@@ -147,7 +153,11 @@ void AudioPack::Pause()
 
 void AudioPack::Resume()
 {
-    //syncGroup->setPaused( false );
+    if( m_syncGroup )
+    {
+        m_syncGroup->setPaused( false );
+        return;
+    }
     for( auto& sound : m_sounds )
     {
         sound.Resume();
@@ -190,34 +200,134 @@ float AudioPack::GetVolume()
 
 void AudioPack::Seek( float inSeekPercent )
 {
-    Pause();
-
-    float timestamp = m_sounds[0].GetLength() * inSeekPercent;
-
+    if( m_sounds.empty() )
+    {
+        return;
+    }
+    // Hold every stem, move each to the new position, and start none until all have got there
+    // (Update): a stream's seek finishes on FMOD's loader thread, each stem in its own time, and
+    // unpausing them straight away started each one whenever its seek landed, out of step.
+    const unsigned int target = static_cast<unsigned int>( static_cast<float>( m_sounds[0].GetLength() ) * std::clamp( inSeekPercent, 0.f, 1.f ) );
     for( auto& sound : m_sounds )
     {
-        sound.SetPositionMs( timestamp );
-
+        if( sound.ChannelHandle )
+        {
+            sound.ChannelHandle->setPaused( true );
+            sound.ChannelHandle->setPosition( std::min( target, sound.GetLength() ), FMOD_TIMEUNIT_MS );
+        }
     }
-    //while( !IsReady() )
-    //{
-    //}
-    //unsigned long long dspClock1;
-    //m_sounds[0].ChannelHandle->getDSPClock( nullptr, &dspClock1 );
-    //unsigned long long bufferLength = 16384; // Adjust this based on your audio system
-    //unsigned long long startTime = dspClock1 + bufferLength;
-    //
-    //
-    //for( auto& sound : m_sounds )
-    //{
-    //    sound.ChannelHandle->setDelay( startTime, 0, false );
-    //}
-    //Resume();
+    m_seekTargetMs = target;
+    m_seekPending = true;
+    m_seekStartClock = 0;
+    m_seekStarted = std::chrono::steady_clock::now();
+    Update();
+}
+
+
+bool AudioPack::StemsSeeked() const
+{
+    for( const auto& sound : m_sounds )
+    {
+        if( !sound.SoundInstance || !sound.SoundInstance->Handle || !sound.ChannelHandle )
+        {
+            continue;
+        }
+        FMOD_OPENSTATE state = FMOD_OPENSTATE_READY;
+        if( sound.SoundInstance->Handle->getOpenState( &state, nullptr, nullptr, nullptr ) != FMOD_OK )
+        {
+            continue;
+        }
+        if( state == FMOD_OPENSTATE_SETPOSITION || state == FMOD_OPENSTATE_SEEKING || state == FMOD_OPENSTATE_BUFFERING || state == FMOD_OPENSTATE_LOADING )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+void AudioPack::Update()
+{
+    if( !m_seekPending )
+    {
+        return;
+    }
+    // Half a second is far longer than a seek takes; past it, start anyway rather than hang.
+    const bool timedOut = std::chrono::steady_clock::now() - m_seekStarted > std::chrono::milliseconds( 500 );
+    if( !StemsSeeked() && !timedOut )
+    {
+        return;
+    }
+    m_seekPending = false;
+    // One start for all, a little ahead so none is already past it when it's set. The group's
+    // clock stands still while the game has it paused, so this also holds through a pause.
+    unsigned long long groupClock = 0;
+    if( m_syncGroup )
+    {
+        m_syncGroup->getDSPClock( &groupClock, nullptr );
+    }
+    const unsigned long long start = groupClock + 2048;
+    m_seekStartClock = m_syncGroup ? start : 0;
+    for( auto& sound : m_sounds )
+    {
+        if( sound.ChannelHandle )
+        {
+            if( m_syncGroup )
+            {
+                sound.ChannelHandle->setDelay( start, 0, false );
+            }
+            sound.ChannelHandle->setPaused( false );
+        }
+    }
+}
+
+
+unsigned int AudioPack::StemSpreadMs() const
+{
+    unsigned int lowest = ~0u;
+    unsigned int highest = 0;
+    for( const auto& sound : m_sounds )
+    {
+        if( !sound.ChannelHandle )
+        {
+            continue;
+        }
+        unsigned int position = 0;
+        bool playing = false;
+        // Stems that ran out (a shorter crowd track) don't count.
+        if( sound.ChannelHandle->isPlaying( &playing ) != FMOD_OK || !playing || sound.ChannelHandle->getPosition( &position, FMOD_TIMEUNIT_MS ) != FMOD_OK )
+        {
+            continue;
+        }
+        lowest = std::min( lowest, position );
+        highest = std::max( highest, position );
+    }
+    return highest >= lowest ? highest - lowest : 0u;
+}
+
+
+bool AudioPack::IsSeeking() const
+{
+    if( m_seekPending )
+    {
+        return true;
+    }
+    if( m_seekStartClock == 0 || !m_syncGroup )
+    {
+        return false;
+    }
+    unsigned long long groupClock = 0;
+    m_syncGroup->getDSPClock( &groupClock, nullptr );
+    return groupClock < m_seekStartClock;
 }
 
 
 unsigned int AudioPack::GetPositionMs() const
 {
+    if( IsSeeking() )
+    {
+        return m_seekTargetMs;
+    }
     return m_sounds[0].GetPositionMs();
 }
 
