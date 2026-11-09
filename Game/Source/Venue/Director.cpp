@@ -86,6 +86,8 @@ void Director::Clear()
     m_band = nullptr;
     m_shotName.clear();
     m_lookName.clear();
+    m_rateCue = -2;
+    m_rate = 0.f;
     m_feedSince = -100.0;
     m_framedCut = -2;
     m_framedShot.clear();
@@ -115,6 +117,11 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
     }
     AddNeckShots( inVenue );
     m_looks = mv && !inVenue.m_mvPostFx.empty() ? inVenue.m_mvPostFx : inVenue.m_postFx;
+    if( m_looks.empty() )
+    {
+        BuildFallbackLooks( inVenue );
+    }
+    m_rateCue = -2;
 
     // The main camera: the screen's camera from now on (the highway draws over it).
     m_main = inWorld.CreateEntity( "Venue Camera" );
@@ -142,6 +149,9 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
         post.FogHeightFalloff = 0.02f;
         post.FogStartDistance = 2.f;
         post.FogMaxOpacity = 0.9f;
+        // The concert look's toning, faded in by its grade (off for every other look).
+        post.Lut = Path( kConcertLut );
+        post.LutContribution = 0.f;
     }
     // The screens' feeds: render textures at 30 frames a second, plenty for screens across a
     // hazy room, without the sun's shadows, ambient occlusion or volumetric haze.
@@ -166,6 +176,8 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
         post.Fog = false;
         post.Saturation = 1.1f;
         post.Contrast = 1.1f;
+        post.Lut = Path( kConcertLut );
+        post.LutContribution = 0.f;
         return entity;
     };
     m_feed = makeFeed( "Venue Feed Camera", kFeedTexture );
@@ -672,9 +684,21 @@ Director::Grade Director::GradeFor( const std::string& inLook )
     if( has( "psychedelic" ) ) { grade.Saturation = 1.7f; grade.Tint = 0.4f; grade.Bloom = 2.5f; return grade; }
     if( has( "mirror" ) ) { grade.Contrast = 1.15f; grade.Saturation = 1.2f; return grade; }
     if( has( "sepia" ) ) { grade.Saturation = 0.f; grade.Temperature = 0.75f; grade.Contrast = 1.1f; grade.Vignette = 0.55f; return grade; }
-    if( has( "silvertone" ) ) { grade.Saturation = 0.08f; grade.Contrast = 1.35f; grade.Temperature = -0.2f; return grade; }
-    if( has( "b+w" ) || has( "_bw" ) || inLook == "video_bw" ) { grade.Saturation = 0.f; grade.Contrast = has( "video" ) ? 1.4f : 1.22f; grade.Vignette = 0.5f; return grade; }
-    if( has( "photocopy" ) ) { grade.Saturation = 0.f; grade.Contrast = 1.9f; grade.ColorBits = 3; return grade; }
+    // The concert look: a live feed on an arena screen (black and white toned rose and cream by
+    // the LUT, washed out and glowing, grainy, stepping at 12 frames a second). Rock Band's black
+    // and white looks all play as this.
+    if( has( "concert" ) || has( "silvertone" ) || has( "b+w" ) || has( "_bw" ) || has( "photocopy" ) )
+    {
+        grade.Saturation = 0.f;
+        grade.Contrast = 1.15f;
+        grade.Exposure = 0.35f;
+        grade.Bloom = 3.f;
+        grade.Vignette = 0.55f;
+        grade.Lut = 1.f;
+        grade.Grain = 0.11f;
+        grade.FrameRate = 12.f;
+        return grade;
+    }
     if( has( "photo_negative" ) ) { grade.Saturation = 0.f; grade.Contrast = 1.6f; grade.Tint = -0.3f; return grade; }
     if( has( "posterize" ) ) { grade.ColorBits = 3; grade.Saturation = 1.3f; return grade; }
     if( has( "shitty_tv" ) ) { grade.Saturation = 0.55f; grade.Contrast = 1.3f; grade.ColorBits = 4; grade.Dither = 0.6f; grade.Vignette = 0.7f; return grade; }
@@ -711,7 +735,10 @@ void Director::ApplyGrade( float inDeltaTime )
     toward( m_grade.Vignette, m_gradeTarget.Vignette );
     toward( m_grade.Exposure, m_gradeTarget.Exposure );
     toward( m_grade.Dither, m_gradeTarget.Dither );
+    toward( m_grade.Lut, m_gradeTarget.Lut );
+    toward( m_grade.Grain, m_gradeTarget.Grain );
     m_grade.ColorBits = m_gradeTarget.ColorBits;
+    m_grade.FrameRate = m_gradeTarget.FrameRate;
     PostProcess& post = m_main->GetComponent<PostProcess>();
     post.Saturation = m_grade.Saturation;
     post.Contrast = m_grade.Contrast;
@@ -722,6 +749,54 @@ void Director::ApplyGrade( float inDeltaTime )
     post.ExposureCompensation = m_grade.Exposure;
     post.EraColorBits = m_grade.ColorBits;
     post.EraDither = m_grade.Dither;
+    post.LutContribution = m_grade.Lut;
+    post.FilmGrain = m_grade.Grain;
+}
+
+
+float Director::FrameRateAt( double inSeconds ) const
+{
+    static const std::string forcedLook = CommandLine::GetString( "--venue-look", "" );
+    size_t index = 0;
+    const TimedCueData* look = forcedLook.empty() ? VenueTiming::CueAt( m_looks, inSeconds, &index ) : nullptr;
+    const int cue = !forcedLook.empty() ? -3 : look ? static_cast<int>( index ) : -1;
+    if( cue != m_rateCue )
+    {
+        m_rateCue = cue;
+        m_rate = GradeFor( !forcedLook.empty() ? forcedLook : look ? look->m_name : std::string() ).FrameRate;
+    }
+    return m_rate;
+}
+
+
+void Director::SetGrainFrame( int inFrame )
+{
+    for( EntityHandle* camera : { &m_main, &m_program } )
+    {
+        if( *camera && ( *camera )->HasComponent<PostProcess>() )
+        {
+            ( *camera )->GetComponent<PostProcess>().FilmGrainFrame = inFrame;
+        }
+    }
+}
+
+
+void Director::BuildFallbackLooks( const VenueData& inVenue )
+{
+    // The concert look through each quiet stretch, back to the default grade after it.
+    bool inLook = false;
+    for( const TimedCueData& section : inVenue.m_sections )
+    {
+        std::string name = section.m_name;
+        std::transform( name.begin(), name.end(), name.begin(), []( unsigned char c ) { return static_cast<char>( std::tolower( c ) ); } );
+        const bool quiet = VenueTiming::Contains( name, "intro" ) || VenueTiming::Contains( name, "bridge" ) || VenueTiming::Contains( name, "breakdown" )
+            || VenueTiming::Contains( name, "quiet" ) || VenueTiming::Contains( name, "spacey" );
+        if( quiet != inLook )
+        {
+            m_looks.push_back( { section.m_time, quiet ? std::string( kConcertLook ) : std::string() } );
+            inLook = quiet;
+        }
+    }
 }
 
 
@@ -890,5 +965,8 @@ void Director::Update( double inSeconds, float inDeltaTime )
         post.Temperature = m_grade.Temperature;
         post.Tint = m_grade.Tint;
         post.EraColorBits = m_grade.ColorBits;
+        post.ExposureCompensation = m_grade.Exposure;
+        post.LutContribution = m_grade.Lut;
+        post.FilmGrain = m_grade.Grain;
     }
 }

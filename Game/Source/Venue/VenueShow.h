@@ -7,6 +7,8 @@
 #include "Venue/LyricBoard.h"
 #include "Venue/VenueKit.h"
 #include "ECS/EntityHandle.h"
+#include <chrono>
+#include <cstdint>
 #include <vector>
 
 class World;
@@ -48,6 +50,8 @@ private:
     void BuildClub( Transform& inRoot );
     void BuildFestival( Transform& inRoot );
     void FillHouse( Transform& inRoot, float inScale );
+    // --highway-log: the venue's main-thread cost, every five seconds.
+    void LogUpdateCost( std::chrono::steady_clock::time_point inStarted );
     void BuildScreen( Transform& inRoot, const Vector3& inCentre, const Vector3& inSize, float inYaw, const char* inTexture );
     void UpdateSet( double inSeconds, float inDeltaTime );
 
@@ -71,6 +75,11 @@ private:
     Vector3 m_spotAims[5] = { Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ) };
     double m_updateMs = 0.0;
     int m_updateFrames = 0;
+    // Looks with a frame rate (the concert look) step the venue: it's updated once a step, on the
+    // step's time, and held in between, like a camera feed at a low frame rate. The highway, an
+    // overlay camera, stays smooth.
+    int64_t m_lastStep = INT64_MIN;
+    float m_stepDelta = 0.f;
 
     // Set pieces that move: the LED strip along the stage's edge, pyro.
     std::vector<EntityHandle> m_edgeStrip;

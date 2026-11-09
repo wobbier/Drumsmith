@@ -69,6 +69,8 @@ void VenueShow::Clear()
     m_pyro.clear();
     m_venue.Clear();
     m_beats.clear();
+    m_lastStep = INT64_MIN;
+    m_stepDelta = 0.f;
 }
 
 
@@ -591,7 +593,33 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     // playing up to it).
     static const double kPreviewOffset = CommandLine::GetFloat( "--venue-time", 0.f );
     inSongTimeMs += kPreviewOffset * 1000.0;
-    const double seconds = inSongTimeMs / 1000.0;
+    double seconds = inSongTimeMs / 1000.0;
+    // A look with a frame rate steps the venue: update it on each step's time with the time since
+    // the last step, and hold it (skip the update) in between.
+    const float stepRate = m_director.FrameRateAt( seconds );
+    if( stepRate > 0.f )
+    {
+        m_stepDelta += inDeltaTime;
+        const int64_t step = static_cast<int64_t>( std::floor( seconds * stepRate ) );
+        if( step == m_lastStep )
+        {
+            LogUpdateCost( started );
+            return;
+        }
+        m_lastStep = step;
+        seconds = static_cast<double>( step ) / stepRate;
+        inSongTimeMs = seconds * 1000.0;
+        // (Capped: a pause piles up time without stepping.)
+        inDeltaTime = std::min( m_stepDelta, 0.25f );
+        m_stepDelta = 0.f;
+        m_director.SetGrainFrame( static_cast<int>( ( step % 100000 + 100000 ) % 100000 ) );
+    }
+    else if( m_lastStep != INT64_MIN )
+    {
+        m_lastStep = INT64_MIN;
+        m_stepDelta = 0.f;
+        m_director.SetGrainFrame( -1 );
+    }
     // A roar when the song ends.
     for( const TimedCueData& event : m_venue.m_songEvents )
     {
@@ -629,12 +657,17 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     }
     m_lights.Update( inSongTimeMs, inDeltaTime );
     UpdateSet( seconds, inDeltaTime );
+    LogUpdateCost( started );
+}
 
+
+void VenueShow::LogUpdateCost( std::chrono::steady_clock::time_point inStarted )
+{
     // --highway-log: what the venue costs on the main thread, every five seconds.
     static const bool kLog = CommandLine::Has( "--highway-log" );
     if( kLog )
     {
-        m_updateMs += std::chrono::duration<double, std::milli>( std::chrono::steady_clock::now() - started ).count();
+        m_updateMs += std::chrono::duration<double, std::milli>( std::chrono::steady_clock::now() - inStarted ).count();
         if( ++m_updateFrames >= 300 )
         {
             BRUH_FMT( "Venue: update %.2f ms a frame (%s, crowd %d, shot %s, look %s)", m_updateMs / m_updateFrames, StyleName( m_style ), static_cast<int>( m_crowd.Size() ),

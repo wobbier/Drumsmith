@@ -12,7 +12,7 @@ class World;
 // chart's camera cuts: Rock Band 3's "[coop_x]" and "[directed_x]" shots, RB2's note cuts with
 // their constraints, or, for charts without any, cuts every couple of measures to whoever is
 // busiest. Each shot drifts while it's held; handheld ones shake. The chart's post-processing
-// looks grade the image. The LED wall behind the stage shows the program feed, the main camera's
+// looks grade the image (charts without any get the concert look in their quiet sections). The LED wall behind the stage shows the program feed, the main camera's
 // shot as it's being filmed; the side screens a close-up of whoever the main shot is on, else
 // whoever's carrying the song.
 class Director
@@ -31,11 +31,20 @@ public:
     // The shot the main camera holds now ("coop_g_near"), for logs and tests.
     const std::string& CurrentShot() const { return m_shotName; }
     const std::string& CurrentLook() const { return m_lookName; }
+    // The frame rate the look live at inSeconds steps the venue at (0: smooth). VenueShow holds
+    // the venue between steps, like a camera feed running at a low frame rate.
+    float FrameRateAt( double inSeconds ) const;
+    // The venue's step while stepping (-1 when not): the film grain holds still between steps.
+    void SetGrainFrame( int inFrame );
     size_t CutCount() const { return m_cuts.size(); }
 
     // The side screens' close-ups, and the LED wall's program feed (what the main camera shows).
     static constexpr const char* kFeedTexture = "Assets/Textures/Venue/StageFeed.rendertexture";
     static constexpr const char* kProgramTexture = "Assets/Textures/Venue/StageProgram.rendertexture";
+    // The concert look's toning: black and white split to rose mids and cream highlights.
+    static constexpr const char* kConcertLut = "Assets/Textures/LUTs/ConcertScreen.cube";
+    // The look charts' black-and-white looks map to, and quiet sections get when a chart has none.
+    static constexpr const char* kConcertLook = "concert_bw";
 
 private:
     // Neck: mounted on the subject's headstock, looking down the frets (guitar solos).
@@ -69,11 +78,16 @@ private:
         float Exposure = 0.f;
         int ColorBits = 0;
         float Dither = 0.f;
+        float Lut = 0.f;          // the concert LUT's contribution
+        float Grain = 0.f;        // film grain
+        float FrameRate = 0.f;    // venue steps a second (0: smooth); not eased
     };
 
     Plan PlanFor( const std::string& inName, int inIndex ) const;
     Plan PlanAuto( const std::string& inConstraints, int inIndex, float inTime ) const;
     void BuildFallbackCuts( const VenueData& inVenue, float inSongLength );
+    // Charts without looks: the concert look through intros, bridges, breakdowns and quiet parts.
+    void BuildFallbackLooks( const VenueData& inVenue );
     void AddNeckShots( const VenueData& inVenue );
     // outUp is world up, except for the neck camera, which rolls with the guitar.
     void Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3& outTarget, float& outFov, Vector3* outUp = nullptr ) const;
@@ -96,6 +110,9 @@ private:
     std::string m_lookName;
     Grade m_grade;
     Grade m_gradeTarget;
+    // FrameRateAt's last answer, by look cue (it's asked every frame).
+    mutable int m_rateCue = -2;
+    mutable float m_rate = 0.f;
     // The feed's own shot, changed every couple of bars.
     int m_feedSubject = 3;
     int m_feedVariant = 0;

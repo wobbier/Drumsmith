@@ -137,6 +137,8 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 4. **Check the RB2 camera note meanings** (61-64, 70-73) and the spotlight slot order against a known-good chart; the guesses are in `ReadMidiVenue`.
 5. **Not yet imported:** PART KEYS_ANIM_LH/RH (keyboard hand notes), vocal phrase markers and lyrics (the singer could mouth them), RB3 `[coop_*]` camera notes in charts that use note-based RB3 cuts, `[mix x drums...]` (drum fills / mixes), and the `[map ...]` hand-map events.
 6. **Confetti and smoke.** The engine has particles (`Engine/Docs/Rendering-Pipeline.md`); pyro is a capsule and a point light today.
+7. **The `sepia` look renders plain grey.** The tonemapper's white balance runs before saturation, so `Director::GradeFor`'s saturation-0 + temperature looks lose their tint. The fix is a toning LUT like the concert look's (`Assets/Textures/LUTs/ConcertScreen.cube`).
+8. **Concert look follow-ups.** The foliage double exposure the real screens had is ME-356. The concert look auto-fills whole quiet sections, so a long bridge (The Kill's is 51 s) stays at 12 fps throughout; cap it if that drags.
 
 ## 5. Responsiveness Roadmap
 

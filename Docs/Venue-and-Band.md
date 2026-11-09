@@ -1,6 +1,6 @@
 # Venue and Band
 
-> Verified against game commit 5973499 plus the venue change, 2026-11-08. Engine submodule at 0c32daef.
+> Verified against game commit 5973499 plus the venue change, 2026-11-08; the concert look against 35a9edd plus the concert look change, 2026-11-09. Engine submodule at 0c32daef.
 
 The concert under the note highway: a stage with a band playing the song, a crowd reacting to it, the light show (`Docs/Stage-Lighting.md`) and a camera crew cutting between shots, all driven by the chart's Rock Band venue data and played on the song clock. The highway is drawn over it by an overlay camera, so the venue underneath can change without touching gameplay.
 
@@ -110,7 +110,15 @@ The posed crowd stops after its few hundred figures, well short of the back of m
 
 The follow spots track their member's chest every frame, so a soloist stepping out front stays lit.
 
-Shots track the members' live positions, eased like an operator following them (`Director::Update`; snapped on a cut) so a headbang or a strum doesn't shake the whole picture, drift (a slow orbit and push-in) while held, and sway on top of the easing when handheld. The follow spots ease onto their member the same way (`VenueShow::Update`). Post-processing looks map to the camera's grading (`Director::GradeFor`): saturation, contrast, temperature and tint, bloom, vignette, and the engine's era colour depth and dither for the TV and photocopy looks; they ease in over a few frames.
+Shots track the members' live positions, eased like an operator following them (`Director::Update`; snapped on a cut) so a headbang or a strum doesn't shake the whole picture, drift (a slow orbit and push-in) while held, and sway on top of the easing when handheld. The follow spots ease onto their member the same way (`VenueShow::Update`). Post-processing looks map to the camera's grading (`Director::GradeFor`): saturation, contrast, temperature and tint, bloom, vignette, and the engine's era colour depth and dither for the TV looks; they ease in over a few frames.
+
+**The concert look** (`concert_bw`) is modelled on an arena show's screens filmed on a phone (2026-11-09): a live camera feed in black and white, washed out, glowing and grainy, and running at a lower frame rate than the show.
+- **Where it comes from.** Rock Band's black-and-white looks all play as it: `photocopy` (Everlong's opening), `film_b+w`, `video_bw` and `film_silvertone`. Charts with no looks at all get it through their intros, bridges, breakdowns and quiet / spacey sections (`Director::BuildFallbackLooks`), back to the default grade at the next section. Charts with authored looks keep only their own.
+- **Tone.** Saturation 0, then the toning LUT `Assets/Textures/LUTs/ConcertScreen.cube`, faded in by the grade's `Lut`: the luma mapped to a split tone with lifted, grey-brown blacks, rose mids and cream highlights, sampled off the phone clip. White balance runs before saturation in the tonemapper, so a saturation-0 look can't be tinted any other way. The main and program cameras carry the LUT at contribution 0 for every other look.
+- **Grain.** The engine's `PostProcess::FilmGrain`.
+- **Frame rate.** The grade's `FrameRate` (12) steps the venue. `VenueShow::Update` updates the whole venue (crowd, band, lyric board, director, lights, pyro) once a step, on the step's time with the time since the last step, and skips the update in between. The grain's pattern (`FilmGrainFrame`) changes with the step. The highway, an overlay camera, stays smooth, and held frames cost the venue nothing on the main thread.
+
+`--venue-look concert_bw` holds it.
 
 Two render-texture cameras feed the screens, each every other frame:
 
