@@ -3,6 +3,7 @@
 #include "Venue/Puppet.h"
 #include "Venue/VenueLayout.h"
 #include "ECS/EntityHandle.h"
+#include <array>
 #include <string>
 #include <vector>
 
@@ -37,6 +38,15 @@ public:
     bool Clapping( double inSeconds ) const;
     size_t Size() const { return m_people.size(); }
 
+    // The back of the house: cheap figures (a body, a head, sometimes arms and a light, all boxes
+    // that move together) filling a floor area or a tier wherever the posed crowd doesn't stand.
+    // They bob, jump and put their hands or lights up with the crowd's mood. inFloorY: the
+    // height they stand at (a tier); inSpacing: metres between them; inMax: at most this many.
+    void AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1, float inZ0, float inZ1, float inFloorY, float inSpacing, float inDensity, int inMax );
+    // Floor the mob leaves empty (a mixing desk, an aisle).
+    void KeepClear( float inX0, float inX1, float inZ0, float inZ1 ) { m_keepClear.push_back( { inX0, inX1, inZ0, inZ1 } ); }
+    size_t MobSize() const { return m_mob.size(); }
+
 private:
     struct Person
     {
@@ -50,7 +60,31 @@ private:
         float Depth = 0.f;         // metres back from the barricade
     };
 
+    struct MobFigure
+    {
+        EntityHandle Root;
+        EntityHandle Arms;         // over the head when they're up, hidden under the floor else
+        EntityHandle Light;        // a lighter or phone, the same
+        Vector3 Base;
+        float Phase = 0.f;
+        float Enthusiasm = 0.5f;
+        float Height = 1.f;
+        float Build = 1.f;
+        bool Jumper = false;
+        bool ArmsUp = false;
+        bool LightUp = false;
+    };
+
     void BuildFallbackMoods();
+    bool Occupied( float inX, float inZ ) const;
+    void UpdateMob( double inBeat, float inSeconds, float inEnergy, bool inLightsUp, bool inClapping );
+
+    std::vector<MobFigure> m_mob;
+    std::vector<std::array<float, 4>> m_keepClear;
+    // Where the posed crowd stands: rows from the front back to m_builtBackZ, each as wide as
+    // RowHalfWidth.
+    float m_builtBackZ = 0.f;
+    float m_builtHalfWidth = 0.f;
 
     std::vector<Person> m_people;
     std::vector<TimedCueData> m_moods;
@@ -63,6 +97,7 @@ private:
     float m_missDip = 0.f;
     float m_cheer = 0.f;
     uint32_t m_frame = 0;
+    float m_frameTime = 1.f / 60.f;   // smoothed, for how often the back rows are posed
 
     // The crowd surfer: a figure carried over the heads from the back toward the barricade.
     Puppet m_surfer;

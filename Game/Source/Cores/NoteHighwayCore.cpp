@@ -35,9 +35,10 @@ namespace
     constexpr float kNoteMeshWidth = 2.f;
     constexpr float kKickMeshWidth = 1.f;
     constexpr float kBarMeshWidth = 1.f;
-    // Steering the song clock toward FMOD's position: the share of the error closed per mixer
-    // update, and the error past which the clock jumps (a hitch, a seek).
-    constexpr double kClockCorrection = 0.2;
+    // Steering the song clock toward FMOD's position: how long the clock takes to close the gap
+    // (a time constant, spread over the frames between mixer updates rather than stepped at
+    // each one), and the error past which the clock jumps (a hitch, a seek).
+    constexpr double kClockCorrectionSeconds = 0.1;
     constexpr double kClockSnapMs = 120.0;
     // MIDI hits older than this when read are judged as if they arrived this long ago.
     constexpr double kMaxInputAgeMs = 250.0;
@@ -99,6 +100,9 @@ void NoteHighwayCore::OnAddedToWorld()
     m_resumeTrackSubscription = EventSubscription::Create<InGameResumeCurrentTrack>( [this]( const InGameResumeCurrentTrack& ) {
         Resume();
     } );
+    m_seekTrackSubscription = EventSubscription::Create<InGameSeekTrack>( [this]( const InGameSeekTrack& inEvent ) {
+        SeekTo( static_cast<double>( inEvent.Fraction ) * SongLengthMs() );
+    } );
     MidiDevice::GetInstance().OpenMidiDevice( GameSettings::GetInstance().PreferredMidiDevice );
     // Every HUD value exists before the document loads, so it never reloads for one.
     ResetScore();
@@ -110,6 +114,7 @@ void NoteHighwayCore::OnRemovedFromWorld()
     m_launchTrackSubscription.reset();
     m_pauseTrackSubscription.reset();
     m_resumeTrackSubscription.reset();
+    m_seekTrackSubscription.reset();
 }
 
 
@@ -244,6 +249,7 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
         size_t& next = nextInLane[LaneOf( it->m_editorLane )];
         if( next < laneNotes.Notes.size() )
         {
+            laneNotes.Notes[next].Source = it;
             SpawnNote( *it, laneNotes.Notes[next++] );
         }
         m_lastNoteMs = std::max( m_lastNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
@@ -272,6 +278,14 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
         ui->ModelSetNumber( kModel, "track_index", inTrackIndex );
         ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
     }
+    m_lyrics.Clear();
+    if( GameSettings::GetInstance().LyricsOnHud() )
+    {
+        m_lyrics.Build( inTrackData.m_venue.m_lyrics, inTrackData.m_venue.m_vocalPhrases, inTrackData.m_venue.m_vocalNotes );
+    }
+    m_lyricSung.clear();
+    m_lyricRest.clear();
+    m_lyricNext.clear();
 }
 
 
@@ -824,7 +838,13 @@ void NoteHighwayCore::UpdateSongClock( float inDeltaTime )
 {
     m_songClockStamp = std::chrono::steady_clock::now();
     // A long hitch (a load) shouldn't fling the clock; the correction below catches it up.
-    const double stepMs = std::min( static_cast<double>( inDeltaTime ), 0.1 ) * 1000.0;
+    const double rawStepMs = std::min( static_cast<double>( inDeltaTime ), 0.1 ) * 1000.0;
+    // With vsync on, frames reach the screen a refresh apart, but the measured frame time wobbles
+    // around it by a millisecond or two; advancing by it makes everything that rides the clock
+    // (the highway, the venue) judder. Steady frames advance by the running average instead; a
+    // dropped or late frame by what it took. FMOD's position keeps the sum honest.
+    m_frameStepMs = m_frameStepMs <= 0.0 ? rawStepMs : m_frameStepMs + ( rawStepMs - m_frameStepMs ) * 0.05;
+    const double stepMs = std::fabs( rawStepMs - m_frameStepMs ) < m_frameStepMs * 0.25 ? m_frameStepMs : rawStepMs;
 
     switch( m_songState )
     {
@@ -840,14 +860,24 @@ void NoteHighwayCore::UpdateSongClock( float inDeltaTime )
         {
             m_currentTrackPack.Play();
             m_lastAudioPositionMs = 0;
+            m_clockErrorMs = 0.0;
             m_songState = SongState::Playing;
         }
         break;
     case SongState::Playing:
     {
+        // A seek holds the clock until every stem has got there and they start together.
+        m_currentTrackPack.Update();
+        if( m_currentTrackPack.IsSeeking() )
+        {
+            m_lastAudioPositionMs = m_currentTrackPack.GetPositionMs();
+            m_clockErrorMs = 0.0;
+            break;
+        }
         m_songTimeMs += stepMs;
         // FMOD's position moves once per mixer block; between moves the clock runs on frame
-        // time, and each move steers it so it never drifts or jumps backwards visibly.
+        // time. Each move measures the gap, and the frames after it close the gap a little at a
+        // time, so the clock never steps (a few ms at once is a visible hitch on the highway).
         const unsigned int audioMs = m_currentTrackPack.GetPositionMs();
         if( audioMs != m_lastAudioPositionMs )
         {
@@ -856,12 +886,16 @@ void NoteHighwayCore::UpdateSongClock( float inDeltaTime )
             if( std::fabs( error ) > kClockSnapMs )
             {
                 m_songTimeMs = static_cast<double>( audioMs );
+                m_clockErrorMs = 0.0;
             }
             else
             {
-                m_songTimeMs += error * kClockCorrection;
+                m_clockErrorMs = error;
             }
         }
+        const double correction = m_clockErrorMs * std::min( 1.0, stepMs / ( kClockCorrectionSeconds * 1000.0 ) );
+        m_songTimeMs += correction;
+        m_clockErrorMs -= correction;
         break;
     }
     default:
@@ -944,26 +978,50 @@ void NoteHighwayCore::GatherHits( std::vector<Hit>& outHits )
         AddHits( meanings, judgeTime - ageMs, true, outHits );
     }
 
-    // --highway-autoplay [offset ms]: hits every note, with its pad and stroke, at its time plus
-    // the offset (a demo, and a way to check judging and scoring without a kit).
-    static const bool autoplay = CommandLine::Has( "--highway-autoplay" );
-    if( autoplay )
+    // Autoplay (the F8 panel's toggle, or --highway-autoplay [offset ms]): hits every note, with
+    // its pad and stroke, at its time plus the offset: a demo, and a way to check judging and
+    // scoring without a kit. Sloppy plays like a person: each note early or late by up to 75 ms
+    // (mostly within the great window) and about one in twenty-five missed, the same every run.
+    // Plain hits as a kit that only sends plain strokes and one hi-hat note would.
+    if( m_autoplay > 0 )
     {
         static const double offsetMs = CommandLine::GetFloat( "--highway-autoplay", 0.f );
+        constexpr double kSloppyMs = 75.0;
+        const bool sloppy = m_autoplay == 2;
+        const double reach = sloppy ? kSloppyMs : 0.0;
         for( int lane = 0; lane < PadId::COUNT; ++lane )
         {
             const LaneNotes& notes = m_laneNotes[lane];
-            for( size_t i = notes.Cursor; i < notes.Notes.size() && notes.Notes[i].TimeMs + offsetMs <= judgeTime; ++i )
+            for( size_t i = notes.Cursor; i < notes.Notes.size() && notes.Notes[i].TimeMs + offsetMs - reach <= judgeTime; ++i )
             {
                 const NoteState& note = notes.Notes[i];
-                if( !note.Judged )
+                if( note.Judged )
                 {
-                    // --highway-autoplay-plain: as a kit that only sends plain strokes and one
-                    // hi-hat note would (checks technique judging).
-                    static const bool plain = CommandLine::Has( "--highway-autoplay-plain" );
-                    const PadId pad = plain && note.Pad == PadId::OpenHiHat ? PadId::ClosedHiHat : note.Pad;
-                    outHits.push_back( Hit{ pad, plain ? Articulation::Normal : note.Technique, note.TimeMs + offsetMs, true, true } );
+                    continue;
                 }
+                double jitter = 0.0;
+                if( sloppy )
+                {
+                    // From the note itself, so a seek or a retry plays it the same way.
+                    uint32_t h = static_cast<uint32_t>( static_cast<int64_t>( note.TimeMs * 10.0 ) ) * 0x9E3779B1u ^ static_cast<uint32_t>( lane + 1 ) * 0x85EBCA77u;
+                    h ^= h >> 15;
+                    h *= 0x2C1B3C6Du;
+                    h ^= h >> 12;
+                    if( h % 1000u < 40u )
+                    {
+                        continue;   // never hit: JudgeMisses counts it
+                    }
+                    // Two uniforms summed: a triangle around on time.
+                    const double u = static_cast<double>( ( h >> 10 ) & 1023u ) / 1023.0 + static_cast<double>( ( h >> 20 ) & 1023u ) / 1023.0 - 1.0;
+                    jitter = u * kSloppyMs;
+                }
+                const double hitTime = note.TimeMs + offsetMs + jitter;
+                if( hitTime > judgeTime )
+                {
+                    continue;
+                }
+                const PadId pad = m_autoplayPlain && note.Pad == PadId::OpenHiHat ? PadId::ClosedHiHat : note.Pad;
+                outHits.push_back( Hit{ pad, m_autoplayPlain ? Articulation::Normal : note.Technique, hitTime, true, true } );
             }
         }
     }
@@ -1071,6 +1129,14 @@ void NoteHighwayCore::JudgeMisses( double inJudgeTimeMs )
 void NoteHighwayCore::ApplyJudgement( Judgement inJudgement, double inOffsetMs )
 {
     m_judgementAge = 0.f;
+    if( inJudgement == Judgement::Miss && m_noFail )
+    {
+        // No fail: counted, but the streak, the drums and the crowd carry on.
+        ++m_missed;
+        m_lastJudgement = "MISS";
+        m_lastTiming.clear();
+        return;
+    }
     if( inJudgement == Judgement::Miss )
     {
         m_venueShow.OnMiss();
@@ -1114,6 +1180,79 @@ void NoteHighwayCore::SetDrumsAudible( bool inAudible )
 }
 
 
+double NoteHighwayCore::SongLengthMs() const
+{
+    // The audio's length once it has loaded (AudioPack has no sounds before then).
+    const bool loaded = m_songState == SongState::LeadIn || m_songState == SongState::Playing || m_songState == SongState::Finished;
+    return loaded && m_trackData ? static_cast<double>( m_currentTrackPack.GetLength() ) : 0.0;
+}
+
+
+void NoteHighwayCore::SeekTo( double inTimeMs )
+{
+    const double lengthMs = SongLengthMs();
+    if( !m_trackData || lengthMs <= 0.0 || m_songState == SongState::Idle || m_songState == SongState::Loading || m_songState == SongState::Finished )
+    {
+        return;
+    }
+    const double target = std::clamp( inTimeMs, 0.0, std::max( 0.0, lengthMs - 500.0 ) );
+    if( m_songState == SongState::LeadIn )
+    {
+        m_currentTrackPack.Play();
+        m_songState = SongState::Playing;
+    }
+    // AudioPack::Seek leaves the stems paused at the new position.
+    m_currentTrackPack.Seek( static_cast<float>( target / lengthMs ) );
+    if( !m_isPaused )
+    {
+        m_currentTrackPack.Resume();
+    }
+    m_songTimeMs = target;
+    m_clockErrorMs = 0.0;
+    m_lastAudioPositionMs = m_currentTrackPack.GetPositionMs();
+    m_songClockStamp = std::chrono::steady_clock::now();
+
+    // Notes already past the judge are cleared without counting; the rest are spawned fresh
+    // (hit ones were deleted, missed ones greyed).
+    const double judgeTime = JudgeTimeMs();
+    for( LaneNotes& lane : m_laneNotes )
+    {
+        lane.Cursor = lane.Notes.size();
+        for( size_t i = 0; i < lane.Notes.size(); ++i )
+        {
+            NoteState& note = lane.Notes[i];
+            if( note.TimeMs + kGoodWindowMs < judgeTime )
+            {
+                note.Judged = true;
+                HideNote( note );
+                continue;
+            }
+            if( ( note.Judged || !note.Note ) && note.Source )
+            {
+                HideNote( note );
+                SpawnNote( *note.Source, note );
+            }
+            note.Judged = false;
+            lane.Cursor = std::min( lane.Cursor, i );
+        }
+    }
+    if( TrackMover )
+    {
+        Transform& mover = TrackMover->GetComponent<Transform>();
+        Vector3 position = mover.GetPosition();
+        position.z = static_cast<float>( VisualTimeMs() / 1000.0 ) * m_appliedSpeed;
+        mover.SetPosition( position );
+    }
+    SetDrumsAudible( true );
+    m_lastJudgement.clear();
+    m_lastHint.clear();
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Highway: seek to %.0f ms", target );
+    }
+}
+
+
 void NoteHighwayCore::ResetScore()
 {
     m_score = m_combo = m_maxCombo = m_perfect = m_great = m_good = m_missed = m_wrongTechnique = 0;
@@ -1129,12 +1268,52 @@ void NoteHighwayCore::ResetScore()
         ui->ModelSetNumber( kModel, "countdown", 0 );
         ui->ModelSetNumber( kModel, "track_index", m_trackIndex );
         ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
-        for( const char* key : { "track_title", "track_artist", "judgement", "timing", "hint", "accuracy", "judgement_opacity" } )
+        ui->ModelSetNumber( kModel, "song_progress", 0 );
+        for( const char* key : { "track_title", "track_artist", "judgement", "timing", "hint", "accuracy", "judgement_opacity", "song_clock" } )
         {
             ui->ModelSetString( kModel, key, "" );
         }
     }
     UpdateHud( 0.f );
+}
+
+
+void NoteHighwayCore::UpdateLyrics( RmlUiCore& inUi )
+{
+    // The karaoke line: what's been sung of it, the rest, and the next line under it. Set only
+    // when they change.
+    std::string sung;
+    std::string rest;
+    std::string next;
+    if( !m_lyrics.Empty() && m_songState != SongState::Idle && m_songState != SongState::Finished )
+    {
+        const Lyrics::View view = m_lyrics.At( VisualTimeMs() / 1000.0 );
+        const auto& lines = m_lyrics.Lines();
+        if( view.Current >= 0 )
+        {
+            sung = lines[view.Current].Text.substr( 0, view.Sung );
+            rest = lines[view.Current].Text.substr( view.Sung );
+        }
+        if( view.Next >= 0 )
+        {
+            next = lines[view.Next].Text;
+        }
+        // The text goes into the document: keep markup characters out of it.
+        for( std::string* text : { &sung, &rest, &next } )
+        {
+            text->erase( std::remove_if( text->begin(), text->end(), []( char c ) { return c == '<' || c == '>' || c == '&'; } ), text->end() );
+        }
+    }
+    if( sung != m_lyricSung || rest != m_lyricRest || next != m_lyricNext )
+    {
+        m_lyricSung = sung;
+        m_lyricRest = rest;
+        m_lyricNext = next;
+        inUi.ModelSetString( kModel, "lyric_sung", sung );
+        inUi.ModelSetString( kModel, "lyric_rest", rest );
+        inUi.ModelSetString( kModel, "lyric_next", next );
+        inUi.ModelSetNumber( kModel, "lyrics_shown", !sung.empty() || !rest.empty() || !next.empty() );
+    }
 }
 
 
@@ -1154,7 +1333,21 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
     const float opacity = std::clamp( 1.f - ( m_judgementAge - 0.35f ) / 0.3f, 0.f, 1.f );
 
     ui->ModelSetNumber( kModel, "playing", m_songState != SongState::Idle );
+    // The debug panel's scrubber and clock.
+    {
+        const double lengthMs = SongLengthMs();
+        const double nowMs = std::max( 0.0, m_songTimeMs );
+        ui->ModelSetNumber( kModel, "song_progress", lengthMs > 0.0 ? std::round( std::min( 1.0, nowMs / lengthMs ) * 1000.0 ) : 0.0 );
+        const auto clock = []( double inMs ) {
+            const int seconds = static_cast<int>( inMs / 1000.0 );
+            char text[16];
+            std::snprintf( text, sizeof( text ), "%d:%02d", seconds / 60, seconds % 60 );
+            return std::string( text );
+        };
+        ui->ModelSetString( kModel, "song_clock", clock( nowMs ) + " / " + clock( lengthMs ) );
+    }
     ui->ModelSetNumber( kModel, "finished", m_songState == SongState::Finished );
+    UpdateLyrics( *ui );
     ui->ModelSetNumber( kModel, "countdown", m_songState == SongState::LeadIn || m_songState == SongState::Loading ? std::ceil( -m_songTimeMs / 1000.0 ) : 0.0 );
     ui->ModelSetNumber( kModel, "score", m_score );
     ui->ModelSetNumber( kModel, "combo", m_combo );
@@ -1184,9 +1377,30 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         return;
     }
 
+    // No fail and autoplay are the debug panel's toggles (InGameMenuController; --no-fail and
+    // --highway-autoplay start them on).
+    if( RmlUiCore* ui = GetEngine().RmlUi )
+    {
+        m_noFail = ui->ModelGetNumber( kModel, "debug_nofail" ) != 0;
+        m_autoplay = static_cast<int>( ui->ModelGetNumber( kModel, "debug_autoplay" ) );
+        m_autoplayPlain = ui->ModelGetNumber( kModel, "debug_plain" ) != 0;
+    }
+    else
+    {
+        static const int kAutoplay = CommandLine::Has( "--highway-autoplay" ) ? ( CommandLine::Has( "--highway-autoplay-sloppy" ) ? 2 : 1 ) : 0;
+        m_autoplay = kAutoplay;
+        m_autoplayPlain = CommandLine::Has( "--highway-autoplay-plain" );
+    }
     ApplyPendingTints();
     ApplySpeed();
     UpdateSongClock( context.GetDeltaTime() );
+    // --seek <seconds>: jump there once the song starts (the debug scrubber, from the command line).
+    static const float kSeekTo = CommandLine::GetFloat( "--seek", -1.f );
+    if( kSeekTo >= 0.f && !m_seekedFromCommandLine && m_songState == SongState::Playing )
+    {
+        m_seekedFromCommandLine = true;
+        SeekTo( kSeekTo * 1000.0 );
+    }
     GatherHits( hits );
     for( const Hit& hit : hits )
     {
@@ -1239,8 +1453,8 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     if( logClock && m_songTimeMs >= nextLogMs )
     {
         nextLogMs = std::floor( m_songTimeMs / 1000.0 ) * 1000.0 + 1000.0;
-        BRUH_FMT( "Highway: song %.1f ms, audio %u ms, judged %d (missed %d) of %d, first note %.0f ms",
-            m_songTimeMs, m_currentTrackPack.GetPositionMs(), m_perfect + m_great + m_good + m_missed, m_missed, m_totalNotes, m_firstNoteMs );
+        BRUH_FMT( "Highway: song %.1f ms, audio %u ms (stems %u ms apart), judged %d (missed %d) of %d, first note %.0f ms",
+            m_songTimeMs, m_currentTrackPack.GetPositionMs(), m_currentTrackPack.StemSpreadMs(), m_perfect + m_great + m_good + m_missed, m_missed, m_totalNotes, m_firstNoteMs );
     }
 }
 

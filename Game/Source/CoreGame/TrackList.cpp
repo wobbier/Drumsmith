@@ -894,6 +894,19 @@ void VenueData::Save( json& outJson ) const
     if( !m_keysStrums.empty() ) outJson["KeysStrums"] = m_keysStrums;
     if( !m_guitarFrets.empty() ) saveSpans( m_guitarFrets, outJson["GuitarFrets"], true );
     if( !m_bassFrets.empty() ) saveSpans( m_bassFrets, outJson["BassFrets"], true );
+    if( !m_guitarSolos.empty() ) saveSpans( m_guitarSolos, outJson["GuitarSolos"], false );
+    if( !m_lyrics.empty() ) SaveCues( m_lyrics, outJson["Lyrics"] );
+    if( !m_vocalPhrases.empty() ) saveSpans( m_vocalPhrases, outJson["VocalPhrases"], false );
+    if( !m_vocalPercussion.empty() ) outJson["VocalPercussion"] = m_vocalPercussion;
+    if( !m_vocalCues.empty() ) SaveCues( m_vocalCues, outJson["VocalCues"] );
+    for( int part = 0; part < kHarmonyParts; ++part )
+    {
+        const std::string name = "Harmony" + std::to_string( part + 1 );
+        if( !m_harmonyNotes[part].empty() ) saveSpans( m_harmonyNotes[part], outJson[name + "Notes"], false );
+        if( !m_harmonyLyrics[part].empty() ) SaveCues( m_harmonyLyrics[part], outJson[name + "Lyrics"] );
+    }
+    if( !m_guitarMaps.empty() ) SaveCues( m_guitarMaps, outJson["GuitarMaps"] );
+    if( !m_bassMaps.empty() ) SaveCues( m_bassMaps, outJson["BassMaps"] );
     if( !m_songEvents.empty() ) SaveCues( m_songEvents, outJson["SongEvents"] );
 }
 
@@ -979,6 +992,7 @@ void VenueData::Load( const json& inJson )
     };
     loadSpans( "Singalong", m_singalong );
     loadSpans( "VocalNotes", m_vocalNotes );
+    loadSpans( "GuitarSolos", m_guitarSolos );
     if( inJson.contains( "Band" ) && inJson["Band"].is_object() )
     {
         for( int member = 0; member < MemberCount; ++member )
@@ -1029,6 +1043,18 @@ void VenueData::Load( const json& inJson )
     loadFrets( "GuitarFrets", m_guitarFrets );
     loadFrets( "BassFrets", m_bassFrets );
     LoadCues( inJson, "SongEvents", m_songEvents );
+    LoadCues( inJson, "Lyrics", m_lyrics );
+    loadSpans( "VocalPhrases", m_vocalPhrases );
+    loadTimes( "VocalPercussion", m_vocalPercussion );
+    LoadCues( inJson, "VocalCues", m_vocalCues );
+    for( int part = 0; part < kHarmonyParts; ++part )
+    {
+        const std::string name = "Harmony" + std::to_string( part + 1 );
+        loadSpans( ( name + "Notes" ).c_str(), m_harmonyNotes[part] );
+        LoadCues( inJson, ( name + "Lyrics" ).c_str(), m_harmonyLyrics[part] );
+    }
+    LoadCues( inJson, "GuitarMaps", m_guitarMaps );
+    LoadCues( inJson, "BassMaps", m_bassMaps );
 }
 
 void TrackData::LoadNoteData()

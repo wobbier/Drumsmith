@@ -8,12 +8,15 @@
 #include "Editor/PadBindings.h"
 #include "Midi/MidiDevice.h"
 #include "Venue/VenueShow.h"
+#include "CoreGame/Lyrics.h"
 #include <array>
 #include <chrono>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+class RmlUiCore;
 
 // Plays a chart: spawns its notes on the highway, runs the song clock, judges keyboard and MIDI
 // hits per lane, mutes the drum stems on a miss, and keeps score in the "in_game" view model
@@ -78,6 +81,8 @@ private:
 		PadId Pad = PadId::Invalid;
 		Articulation Technique = Articulation::Normal;
 		std::vector<Decoration> Decorations;
+		// The chart note it was spawned from, to spawn it again when the song is scrubbed back.
+		const NoteData* Source = nullptr;
 	};
 
 	// A colour for a spawned mesh. Applied once its model has bound: binding rebuilds the material
@@ -124,6 +129,7 @@ private:
 	};
 
 	void ApplyPendingTints();
+	void UpdateLyrics( RmlUiCore& inUi );
 	void SpawnNote( const NoteData& inNote, NoteState& outState );
 	void AddDecoration( NoteState& ioState, Transform* inLane, const Vector3& inGemPosition, const Vector3& inOffset, const Vector3& inScale, const Vector3& inColor );
 	void HideNote( NoteState& ioNote );
@@ -147,6 +153,10 @@ private:
 	void ResetScore();
 	void UpdateHud( float inDeltaTime );
 	void SetDrumsAudible( bool inAudible );
+	// The debug scrubber: the song, the clock and the notes to inTimeMs (notes before it are
+	// cleared without counting, notes after it are armed again).
+	void SeekTo( double inTimeMs );
+	double SongLengthMs() const;
 	double JudgeTimeMs() const;
 	double VisualTimeMs() const;
 	static int LaneOf( PadId inPad );
@@ -161,6 +171,9 @@ private:
 	SongState m_songState = SongState::Idle;
 	double m_songTimeMs = 0.0;
 	unsigned int m_lastAudioPositionMs = 0;
+	// The gap to FMOD's position still to close, and the smoothed frame step (UpdateSongClock).
+	double m_clockErrorMs = 0.0;
+	double m_frameStepMs = 0.0;
 	std::chrono::steady_clock::time_point m_songClockStamp{};
 	double m_lastNoteMs = 0.0;
 	double m_firstNoteMs = 0.0;
@@ -180,6 +193,11 @@ private:
 	float m_appliedSpeed = 0.f;
 	// The venue under the highway: stage, band, crowd, lights and cameras (Docs/Venue-and-Band.md).
 	VenueShow m_venueShow;
+	// The chart's lyrics for the HUD's karaoke line (Settings > Lyrics), and what it shows now.
+	Lyrics m_lyrics;
+	std::string m_lyricSung;
+	std::string m_lyricRest;
+	std::string m_lyricNext;
 	float m_venueSwapTimer = 0.f;
 
 	// Score
@@ -200,6 +218,14 @@ private:
 	std::unique_ptr<EventSubscription> m_launchTrackSubscription;
 	std::unique_ptr<EventSubscription> m_pauseTrackSubscription;
 	std::unique_ptr<EventSubscription> m_resumeTrackSubscription;
+	std::unique_ptr<EventSubscription> m_seekTrackSubscription;
+	// Debug no-fail (the F8 panel, or --no-fail): misses count but cost nothing.
+	bool m_noFail = false;
+	// Debug autoplay (the F8 panel, or --highway-autoplay): 0 off, 1 perfect, 2 sloppy. Plain:
+	// as a kit that only sends plain strokes and one hi-hat note would.
+	int m_autoplay = 0;
+	bool m_autoplayPlain = false;
+	bool m_seekedFromCommandLine = false;
 };
 
 ME_REGISTER_CORE( NoteHighwayCore )

@@ -19,6 +19,12 @@
 #hud-multiplier.hot { color: #ff9933; }
 #hud-combo { font-size: 22dp; color: #66ff66; margin-top: 6dp; }
 #hud-accuracy { font-size: 18dp; color: #ffffffb0; margin-top: 6dp; }
+#hud-lyrics { position: absolute; top: 24dp; left: 50%; width: 1000dp; max-width: 64vw; transform: translateX(-50%); text-align: center; }
+#hud-lyrics .lyric-line { font-size: 32dp; white-space: pre; font-effect: outline( 2dp #000000d0 ); }
+#hud-lyrics .lyric-sung { color: #ffc840; }
+#hud-lyrics .lyric-rest { color: #ffffff; }
+#hud-lyrics .lyric-next { font-size: 22dp; margin-top: 4dp; white-space: pre; color: #ffffff80; font-effect: outline( 2dp #000000b0 ); }
+#hud-autoplay { font-size: 16dp; color: #ff9933; margin-top: 6dp; }
 #hud-judgement { position: absolute; top: 30%; left: 0; width: 100%; text-align: center; }
 #judgement-text { font-size: 52dp; font-weight: bold; color: #ffffff; font-effect: outline( 2dp #000000c0 ); }
 #judgement-text.perfect { color: #66ffff; }
@@ -32,7 +38,17 @@
 #results { position: absolute; width: 100%; height: 100%; padding-top: 8vh; text-align: center; background-color: #000000c8; }
 #results h2 { font-size: 40dp; }
 #results .results-artist { font-size: 24dp; color: #ffffffb0; margin: 6dp 0 18dp; }
+#results .results-autoplay { font-size: 20dp; color: #ff9933; margin: -10dp 0 14dp; }
 #results-score { font-size: 72dp; font-weight: bold; color: #ff9933; margin-bottom: 18dp; }
 .results-grid { width: 360dp; margin: 0 auto 10dp; }
 .results-row { display: flex; justify-content: space-between; font-size: 22dp; padding: 4dp 0; border-bottom: 1dp #ffffff20; }
 #results .menu-link { font-size: 36dp; margin-top: 14dp; }
+/* Debug panel (F8): no fail and the song scrubber. */
+#debug-panel { position: absolute; bottom: 16dp; left: 50%; width: 720dp; max-width: 92vw; transform: translateX(-50%); padding: 10dp 16dp 14dp; background-color: #000000b0; border: 1dp #ffffff30; border-radius: 6dp; }
+.debug-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8dp; font-size: 18dp; }
+.debug-title { color: #ff9933; font-weight: bold; }
+.debug-clock { color: #ffffffc0; }
+.debug-toggle { padding: 4dp 12dp; border: 1dp #ffffff50; border-radius: 4dp; color: #ffffffc0; }
+.debug-toggle:hover { background-color: #ffffff20; }
+.debug-toggle.on { color: #000000; background-color: #66ff66; border-color: #66ff66; }
+#debug-seek { display: block; width: 100%; }

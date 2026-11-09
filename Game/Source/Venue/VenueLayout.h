@@ -8,7 +8,11 @@
 // never see the highway.
 namespace VenueLayout
 {
-    const Vector3 kVenueOrigin( 4000.f, 0.f, 0.f );
+    // Far enough that neither world is in the other's view (the venue cameras see 400 m, the
+    // highway's 160 m), near enough to keep float precision: 4 km out a world position only
+    // resolves to half a millimetre, which close-ups show as vertices crawling as the camera
+    // moves. Under 512 m it's 30 microns.
+    const Vector3 kVenueOrigin( -500.f, 0.f, 0.f );
 
     // The stage: a deck kStageHeight high from the front edge (z 0) to the back wall.
     constexpr float kStageHeight = 1.2f;

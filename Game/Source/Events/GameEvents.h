@@ -38,6 +38,18 @@ public:
     }
 };
 
+// The debug panel's scrubber (F8 in a song): jump the song to a point, 0..1 of its length.
+class InGameSeekTrack
+    : public Event<InGameSeekTrack>
+{
+public:
+    InGameSeekTrack()
+        : Event()
+    {
+    }
+    float Fraction = 0.f;
+};
+
 
 class EditTrackEvent
     : public Event<EditTrackEvent>

@@ -78,7 +78,7 @@ Beat and measure lines come from the chart's own tempo map: `notes.mid` next to 
 |-------|-------|
 | Loading | Held at −2000 ms until every stem is loaded |
 | LeadIn | Advances by frame time; at 0 the stems start (`AudioPack::Play`, DSP-scheduled) |
-| Playing | Advances by frame time; whenever FMOD's position moves (once per mixer block), the clock closes 20% of the gap to it, or jumps if they are more than 120 ms apart |
+| Playing | Advances by frame time (the running average while frames are steady, so vsync's measured-time wobble doesn't judder the highway and venue; the real time on a late frame); whenever FMOD's position moves (once per mixer block) it measures the gap, and the following frames close it with a 100 ms time constant instead of stepping; jumps if they are more than 120 ms apart |
 | Finished | Stops |
 
 So the clock is smooth frame to frame, never runs backwards visibly, and stays locked to the audio (the `--highway-log` flag shows them within about 10 ms headless). Frame time is clamped to 100 ms per step so a hitch can't fling it.
@@ -123,7 +123,7 @@ Points are multiplied by the combo multiplier: ×1, rising by one every 10 notes
 
 - **Drum stems:** a miss mutes the drum stems (`drums.ogg`, `drums_1..4.ogg`, via `AudioPack::SetDrumVolume`), and the next hit brings them back, so the player hears their part drop out. A song without separate drum stems can't do this.
 - **Notes:** a hit note is scaled to zero the same frame (its entity is deleted the next); a missed note turns grey and scrolls past.
-- **HUD (`in_game` model):** score, multiplier (orange above ×1), combo from 5, accuracy; the judgement word with early/late and the offset in ms, fading after about half a second; title, artist and a countdown during the lead-in.
+- **HUD (`in_game` model):** score, multiplier (orange above ×1), combo from 5, accuracy; the judgement word with early/late and the offset in ms, fading after about half a second; title, artist and a countdown during the lead-in. The chart's lyrics, karaoke-style, top centre (`NoteHighwayCore::UpdateLyrics`, Settings > Lyrics; `Docs/Venue-and-Band.md` → Lyrics).
 - **End:** once every note is judged and the audio has stopped, the results screen shows score, accuracy, each judgement's count and the best combo, with Retry (reloads the scene with the same track) and Continue (the library). Escape on the results screen also returns to the library.
 
 ### Pause
@@ -134,11 +134,22 @@ The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the
 
 - `--play-track <index>`: start a track when `Example.lvl` is opened directly. The index is the library's scan order.
 - `--highway-log`: the lane layout, the track, a line a second comparing the clock with FMOD's position and the judged/missed counts, drum mute changes, and the final result.
-- `--highway-autoplay [offset ms]`: hits every note at that offset, with its pad and stroke. Add `--highway-autoplay-plain` to hit as a kit with plain strokes and one hi-hat note would (exercises technique judging). With `--frames N --screenshot` under `Engine/Tools/Headless.sh` this checks judging, the HUD and the results without a kit.
+- `--highway-autoplay [offset ms]`: hits every note at that offset, with its pad and stroke (the debug panel's Autoplay, started on PERFECT). Add `--highway-autoplay-sloppy` to start it on SLOPPY, and `--highway-autoplay-plain` to hit as a kit with plain strokes and one hi-hat note would (exercises technique judging). With `--frames N --screenshot` under `Engine/Tools/Headless.sh` this checks judging, the HUD and the results without a kit.
 
 ### Appendix: the vocals experiment
 
 `VocalsTestCore` (+ `VocalsTestComponent`, `Assets/Vocals.lvl`) attaches an FMOD FFT DSP to a test vocal stem, finds the dominant frequency bin each update, converts it to a MIDI note number (`12 * log2(f/440) + 69`), and writes the result to the `vocals` view model, which `Assets/UI/Vocals.rml` shows as a meter. It is a spike, not a feature.
+
+### Debug panel
+
+**F8** during a song shows a panel over the bottom of the highway (`Assets/UI/InGameMenu.rml`, `#debug-panel`; `InGameMenuController` owns the `debug`, `debug_nofail`, `debug_autoplay` (+ `debug_autoplay_label`) and `debug_plain` model keys, `NoteHighwayCore` fills `song_progress` and `song_clock`):
+
+- **No fail.** Misses still count in the results, but don't break the combo, mute the drum stems or deflate the crowd and lights (`ApplyJudgement`). There is no fail state yet; this is what a miss costs today. `--no-fail` starts it on.
+- **Autoplay** (OFF / PERFECT / SLOPPY, `NoteHighwayCore::GatherHits`). PERFECT hits every note on time with its chart pad and stroke. SLOPPY plays like a person: each note early or late by up to 75 ms (a triangle around on time: about 64% perfect, 32% great, 4% good) and about one note in twenty-five never hit. The jitter comes from a hash of the note's time and lane, so a run, a retry or a seek plays the same way. Hits go through the normal judging, so scoring, combo, drum muting, the crowd and the lights all react. The HUD shows `AUTOPLAY <mode>` and the results say *Autoplayed*, so a demo score isn't mistaken for a real one.
+- **Strokes** (CHART / PLAIN). With autoplay on, PLAIN hits as a kit that only sends plain strokes and one hi-hat note would: open hi-hats come in closed, rims and flams as plain hits. That exercises technique judging (`TechniqueStrictness`).
+- **Scrubber.** Dragging it fires `InGameSeekTrack`; `NoteHighwayCore::SeekTo` seeks every stem (`AudioPack::Seek`), resets the song clock, clears the notes already past the judge without counting them, and respawns any hit or missed note still ahead (each `NoteState` keeps its chart note in `Source`). During the lead-in it starts the song first. `--seek <seconds>` does the same once the song starts; `--debug-panel` opens the panel at load.
+
+The song clock holds while the stems seek, and every stem restarts on the same DSP tick once all have got there (`AudioPack::Seek` / `Update`, `Docs/Audio.md`).
 
 ## Caveats & Fragility
 

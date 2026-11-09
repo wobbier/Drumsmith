@@ -533,7 +533,14 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
         else if( name == "PART BASS" ) member = VenueData::Bass;
         else if( name == "PART VOCALS" ) member = VenueData::Vocals;
         else if( name == "PART KEYS" ) member = VenueData::Keys;
-        if( !isVenue && !isEvents && member < 0 )
+        // Harmony parts: HARM1-3 (RB3) or PART HARM1-3 (some customs).
+        int harmony = -1;
+        for( int part = 0; part < VenueData::kHarmonyParts; ++part )
+        {
+            const std::string harm = "HARM" + std::to_string( part + 1 );
+            if( name == harm || name == "PART " + harm ) harmony = part;
+        }
+        if( !isVenue && !isEvents && member < 0 && harmony < 0 )
         {
             continue;
         }
@@ -566,7 +573,34 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
                 {
                     continue;
                 }
-                const std::string text = strip( event.getMetaContent() );
+                const std::string raw = event.getMetaContent();
+                const std::string text = strip( raw );
+                // On the vocal tracks, unbracketed text and lyric events are the lyrics, one per
+                // syllable at its note; bracketed text is a cue.
+                const bool vocalTrack = member == VenueData::Vocals || harmony >= 0;
+                const bool bracketed = !raw.empty() && raw.front() == '[';
+                if( vocalTrack && !bracketed && ( type == 0x01 || type == 0x05 ) )
+                {
+                    if( !text.empty() )
+                    {
+                        ( harmony >= 0 ? venue.m_harmonyLyrics[harmony] : venue.m_lyrics ).push_back( { time, text } );
+                    }
+                    continue;
+                }
+                if( harmony >= 0 )
+                {
+                    continue;
+                }
+                if( member == VenueData::Vocals && ( text.find( "tambourine" ) != std::string::npos || text.find( "cowbell" ) != std::string::npos || text.find( "clap" ) != std::string::npos ) )
+                {
+                    venue.m_vocalCues.push_back( { time, text } );
+                    continue;
+                }
+                if( ( member == VenueData::Guitar || member == VenueData::Bass ) && startsWith( text, "map " ) )
+                {
+                    ( member == VenueData::Guitar ? venue.m_guitarMaps : venue.m_bassMaps ).push_back( { time, text.substr( 4 ) } );
+                    continue;
+                }
                 if( member >= 0 )
                 {
                     if( text == "idle" || text == "play" || text == "mellow" || text == "intense" || startsWith( text, "idle_" ) || startsWith( text, "play_" ) )
@@ -622,6 +656,20 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
                 continue;
             }
             const int key = event.getKeyNumber();
+            if( harmony >= 0 )
+            {
+                // A harmony part's sung notes; its phrases are HARM1's, the same as PART VOCALS'.
+                if( key >= 36 && key <= 84 )
+                {
+                    if( event.isNoteOn() ) held[key] = time;
+                    else if( held.count( key ) )
+                    {
+                        venue.m_harmonyNotes[harmony].push_back( { held[key], time, VenueData::Vocals } );
+                        held.erase( key );
+                    }
+                }
+                continue;
+            }
             if( member >= 0 )
             {
                 if( !event.isNoteOn() )
@@ -631,11 +679,28 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
                         venue.m_vocalNotes.push_back( { held[key], time, VenueData::Vocals } );
                         held.erase( key );
                     }
+                    else if( member == VenueData::Vocals && ( key == 105 || key == 106 ) && held.count( key ) )
+                    {
+                        venue.m_vocalPhrases.push_back( { held[key], time, VenueData::Vocals } );
+                        held.erase( key );
+                    }
+                    else if( member == VenueData::Guitar && key == 103 && held.count( key ) )
+                    {
+                        venue.m_guitarSolos.push_back( { held[key], time, VenueData::Guitar } );
+                        held.erase( key );
+                    }
+                    continue;
+                }
+                if( member == VenueData::Guitar && key == 103 )
+                {
+                    // A solo section, held until its note-off.
+                    held[key] = time;
                     continue;
                 }
                 if( member == VenueData::Vocals )
                 {
-                    if( key >= 36 && key <= 84 ) held[key] = time;
+                    if( ( key >= 36 && key <= 84 ) || key == 105 || key == 106 ) held[key] = time;
+                    else if( key == 96 || key == 97 ) venue.m_vocalPercussion.push_back( time );
                 }
                 else if( member == VenueData::Drums )
                 {
@@ -754,6 +819,22 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
     std::sort( venue.m_vocalNotes.begin(), venue.m_vocalNotes.end(), byStart );
     std::stable_sort( venue.m_guitarFrets.begin(), venue.m_guitarFrets.end(), byStart );
     std::stable_sort( venue.m_bassFrets.begin(), venue.m_bassFrets.end(), byStart );
+    std::sort( venue.m_guitarSolos.begin(), venue.m_guitarSolos.end(), byStart );
+    std::stable_sort( venue.m_lyrics.begin(), venue.m_lyrics.end(), byTime );
+    // Phrases: 105 and 106 (RB1's second player) often mark the same lines; keep one of each.
+    std::sort( venue.m_vocalPhrases.begin(), venue.m_vocalPhrases.end(), byStart );
+    venue.m_vocalPhrases.erase( std::unique( venue.m_vocalPhrases.begin(), venue.m_vocalPhrases.end(), []( const VenueData::SpanData& a, const VenueData::SpanData& b ) {
+        return std::fabs( a.m_start - b.m_start ) < 0.01f && std::fabs( a.m_end - b.m_end ) < 0.01f;
+    } ), venue.m_vocalPhrases.end() );
+    std::sort( venue.m_vocalPercussion.begin(), venue.m_vocalPercussion.end() );
+    std::stable_sort( venue.m_vocalCues.begin(), venue.m_vocalCues.end(), byTime );
+    for( int part = 0; part < VenueData::kHarmonyParts; ++part )
+    {
+        std::sort( venue.m_harmonyNotes[part].begin(), venue.m_harmonyNotes[part].end(), byStart );
+        std::stable_sort( venue.m_harmonyLyrics[part].begin(), venue.m_harmonyLyrics[part].end(), byTime );
+    }
+    std::stable_sort( venue.m_guitarMaps.begin(), venue.m_guitarMaps.end(), byTime );
+    std::stable_sort( venue.m_bassMaps.begin(), venue.m_bassMaps.end(), byTime );
     std::stable_sort( venue.m_songEvents.begin(), venue.m_songEvents.end(), byTime );
     return venue;
 }

@@ -4,6 +4,7 @@
 #include "Venue/Band.h"
 #include "Venue/Crowd.h"
 #include "Venue/Director.h"
+#include "Venue/LyricBoard.h"
 #include "Venue/VenueKit.h"
 #include "ECS/EntityHandle.h"
 #include <vector>
@@ -46,6 +47,7 @@ private:
     void BuildArena( Transform& inRoot );
     void BuildClub( Transform& inRoot );
     void BuildFestival( Transform& inRoot );
+    void FillHouse( Transform& inRoot, float inScale );
     void BuildScreen( Transform& inRoot, const Vector3& inCentre, const Vector3& inSize, float inYaw, const char* inTexture );
     void UpdateSet( double inSeconds, float inDeltaTime );
 
@@ -60,9 +62,13 @@ private:
     const TrackData* m_track = nullptr;
     Style m_style = Style::Arena;
     VenueData m_venue;
+    Lyrics m_lyrics;
+    LyricBoard m_lyricBoard;
     std::vector<BeatData> m_beats;
     float m_bpm = 120.f;
     float m_performance = 0.5f;
+    // Where the follow spots aim, eased toward the members (VenueShow::Update).
+    Vector3 m_spotAims[5] = { Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ), Vector3( 1e4f, 0.f, 0.f ) };
     double m_updateMs = 0.0;
     int m_updateFrames = 0;
 

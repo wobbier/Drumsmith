@@ -26,14 +26,28 @@ public:
     Vector3 ChestOf( int inMember ) const;
     Vector3 HandsOf( int inMember ) const;
     Vector3 FeetOf( int inMember ) const;
+    // A guitarist's or bassist's instrument in venue space, for the neck camera: the headstock,
+    // the middle of the body, the fretboard's facing and the neck's upper edge (toward the
+    // player's head). False for anyone without one.
+    bool NeckOf( int inMember, Vector3& outHeadstock, Vector3& outBody, Vector3& outFace, Vector3& outEdge ) const;
     bool HasMember( int inMember ) const { return inMember >= 0 && inMember < VenueData::MemberCount && m_members[inMember].Present; }
     // How busy a member is around a time (0 resting, 1 flat out), for the director's choices.
     float Activity( int inMember, double inSeconds ) const;
     std::string StateOf( int inMember, double inSeconds ) const;
+    // 0 to 1 a guitarist or bassist leaning into their mic for a singalong, eased around it.
+    float AtSingalong( int inMember, double inSeconds ) const;
 
 private:
     using Limb = VenueData::Limb;
     using Piece = VenueData::DrumPiece;
+    // The singer's percussion: tambourine, cowbell or clap sections (m_percussion) and their hits.
+    enum class Percussion : int { Tambourine = 0, Cowbell, Clap };
+    struct PercussionSpan
+    {
+        float Start = 0.f;
+        float End = 0.f;
+        Percussion Kind = Percussion::Tambourine;
+    };
 
     struct Stroke
     {
@@ -60,11 +74,16 @@ private:
         std::vector<TimedCueData> States;
         std::vector<float> Strums;
         std::vector<VenueData::SpanData> Frets;   // the fretting hand's position (m_member 0-19)
+        std::vector<TimedCueData> Maps;           // "[map ...]": hand and strum maps
+        EntityHandle Tambourine;   // the singer's percussion, shown only while playing it
+        EntityHandle Cowbell;
         EntityHandle Instrument;   // guitar or bass (a group), the mic for the singer
+        float NeckLength = 0.f;    // guitar or bass, for the neck camera
         std::array<EntityHandle, 2> Sticks;
         EntityHandle MicStand;
         float Phase = 0.f;         // a per-member offset for idle motion
         float Energy = 0.f;        // eased
+        float Solo = 0.f;          // 0 to 1 out front for a play_solo, eased
         Vector3 Spot;
     };
 
@@ -75,6 +94,10 @@ private:
     void BuildMicStand( VenueKit& inKit, Member& ioMember, const Vector3& inPosition, float inHeight );
     void DeriveStrokes( const std::vector<NoteData>& inNotes );
     void DeriveFallbacks( const std::vector<NoteData>& inNotes );
+    void DerivePercussion( const VenueData& inVenue );
+    void DeriveHarmonies( const VenueData& inVenue );
+    const PercussionSpan* PercussionAt( double inSeconds ) const;
+    float PercussionStrike( double inSeconds, double inBeat ) const;
 
     void UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float inEnergy, float inDeltaTime );
     void UpdateStringed( Member& ioMember, int inIndex, double inSeconds, double inBeat, float inEnergy );
@@ -85,6 +108,8 @@ private:
     glm::vec3 StrikePoint( Piece inPiece ) const;
     glm::vec3 StickTip( int inLimb, double inSeconds, float& outLift ) const;
     bool Singing( int inMember, double inSeconds, float* outOpen = nullptr ) const;
+    // How far the singer is from the mic (0 at it, 1 out working the stage); outBreak numbers the break.
+    float AwayFromMic( double inSeconds, uint32_t* outBreak = nullptr ) const;
     float StrumPhase( const Member& inMember, double inSeconds, int& outCount ) const;
 
     Transform* m_stage = nullptr;
@@ -94,7 +119,10 @@ private:
     std::array<KitPiece, 10> m_kit;                     // by DrumPiece
     std::vector<TimedCueData> m_sections;
     std::vector<VenueData::SpanData> m_vocalNotes;
+    std::vector<VenueData::SpanData> m_vocalPhrases;    // the chart's lyric lines (notes 105/106)
     std::vector<VenueData::SpanData> m_singalong;
+    std::vector<PercussionSpan> m_percussion;
+    std::vector<float> m_percussionHits;
     std::vector<BeatData> m_beats;
     std::vector<float> m_drumTimes;                     // every drum note, for activity
     float m_bpm = 120.f;

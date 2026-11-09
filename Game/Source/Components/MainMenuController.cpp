@@ -47,7 +47,7 @@ void MainMenuController::PopulateModel()
     }
     const GameSettings& settings = GameSettings::GetInstance();
     ui->ModelEnsure( kModel );
-    for( const char* event : { "open_settings", "close_settings", "save_settings", "select_device", "refresh_devices", "convert_dlc", "latency_toggle", "latency_apply", "technique", "stage_lighting", "venue", "venue_camera", "venue_style" } )
+    for( const char* event : { "open_settings", "close_settings", "save_settings", "select_device", "refresh_devices", "convert_dlc", "latency_toggle", "latency_apply", "technique", "stage_lighting", "venue", "venue_camera", "venue_style", "lyrics" } )
     {
         ui->ModelRegisterEvent( kModel, event );
     }
@@ -62,6 +62,7 @@ void MainMenuController::PopulateModel()
     ui->ModelSetNumber( kModel, "venue", settings.Venue );
     ui->ModelSetNumber( kModel, "venue_camera", settings.VenueCamera );
     ui->ModelSetNumber( kModel, "venue_style", settings.VenueStyle );
+    ui->ModelSetNumber( kModel, "lyrics", settings.Lyrics );
     ui->ModelSetString( kModel, "dlc_url", settings.DLCURL );
     ui->ModelSetString( kModel, "midi_device", settings.PreferredMidiDevice );
     ui->ModelSetString( kModel, "settings_status", "" );
@@ -274,6 +275,13 @@ void MainMenuController::Update( float dt )
             const int style = std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 0.0 ) ), 0, 3 );
             GameSettings::GetInstance().VenueStyle = style;
             ui->ModelSetNumber( kModel, "venue_style", style );
+            ui->ModelSetString( kModel, "settings_status", "" );
+        }
+        else if( event == "lyrics" )
+        {
+            const int lyrics = std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 0.0 ) ), 0, 3 );
+            GameSettings::GetInstance().Lyrics = lyrics;
+            ui->ModelSetNumber( kModel, "lyrics", lyrics );
             ui->ModelSetString( kModel, "settings_status", "" );
         }
         else if( event == "venue_camera" )

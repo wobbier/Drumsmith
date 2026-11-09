@@ -27,6 +27,17 @@ namespace
     constexpr float kHighwayBoardOpacity = 0.6f;
     // The follow spots' floor: a front light on the band in every look.
     constexpr float kFrontFill = 0.18f;
+    // The arena's floor plan behind the crowd (venue z): the mixing desk, where the back stands
+    // start, their steps, and the back wall behind the top step; the side stands start at
+    // kArenaSideStandsX either side.
+    constexpr float kArenaDeskZ = -22.f;
+    constexpr float kArenaStandsZ = -32.f;
+    constexpr int kArenaTiers = 7;
+    constexpr int kArenaSideTiers = 3;
+    constexpr float kArenaTierDepth = 2.f;
+    constexpr float kArenaTierRise = 0.8f;
+    constexpr float kArenaBackWallZ = kArenaStandsZ - kArenaTierDepth * kArenaTiers;
+    constexpr float kArenaSideStandsX = 15.5f;
 }
 
 
@@ -50,6 +61,8 @@ void VenueShow::Clear()
     m_director.Clear();
     m_crowd.Clear();
     m_band.Clear();
+    m_lyricBoard.Clear();
+    m_lyrics.Clear();
     m_kit.Clear();
     m_root = {};
     m_edgeStrip.clear();
@@ -119,6 +132,12 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     }
     Transform& root = m_root->GetComponent<Transform>();
     BuildStage( root );
+    // Karaoke on the LED wall's lower part, above the drummer's head (the wall spans 3.9-9.9 m).
+    m_lyrics.Build( m_venue.m_lyrics, m_venue.m_vocalPhrases, m_venue.m_vocalNotes );
+    if( GameSettings::GetInstance().LyricsInVenue() )
+    {
+        m_lyricBoard.Build( m_kit, root, Vector3( 0.f, 4.75f, VenueLayout::kBackWallZ - 0.12f ), 11.f, m_lyrics );
+    }
 
     float lastNote = 0.f;
     for( const NoteData& note : inTrack.m_noteData ) lastNote = std::max( lastNote, note.m_triggerTime );
@@ -141,7 +160,10 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
             back = -42.f;
             halfWidth = 24.f;
         }
-        m_crowd.Build( m_kit, &root, m_venue, m_beats, m_bpm, CommandLine::GetInt( "--crowd-size", count ), back, halfWidth );
+        const int posed = CommandLine::GetInt( "--crowd-size", count );
+        m_crowd.Build( m_kit, &root, m_venue, m_beats, m_bpm, posed, back, halfWidth );
+        // --crowd-size trims the back of the house in proportion.
+        FillHouse( root, count > 0 ? std::clamp( static_cast<float>( posed ) / static_cast<float>( count ), 0.f, 4.f ) : 1.f );
     }
     m_director.Build( inWorld, m_venue, m_beats, m_bpm, std::max( lastNote + 4.f, inTrack.m_duration ), GameSettings::GetInstance().VenueCamera == 1, &m_band );
     VenueKit* kit = &m_kit;
@@ -162,7 +184,7 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
             light.Intensity = 7.f;
         }
     }
-    m_director.SetRoomBack( m_style == Style::Club ? -17.f : m_style == Style::Arena ? -34.f : -1000.f );
+    m_director.SetRoomBack( m_style == Style::Club ? -17.f : m_style == Style::Arena ? kArenaBackWallZ : -1000.f );
     if( m_style == Style::Festival )
     {
         // Out of doors: a night sky, and less haze for it to hang in.
@@ -313,19 +335,122 @@ void VenueShow::BuildStage( Transform& inRoot )
 
 void VenueShow::BuildArena( Transform& inRoot )
 {
-    // A big dark room: a wide floor, walls far off in the haze, screens either side of the stage.
+    // A big dark hall: the floor full to the mixing desk and beyond, stands rising at the back
+    // and along the sides, a roof with the rigging grid, PA hangs either side of the stage.
     const Vector3 black( 0.015f, 0.015f, 0.018f );
     const Vector3 metal( 0.18f, 0.18f, 0.2f );
-    m_kit.Box( Vector3( 0.f, -0.05f, -8.f ), Vector3( 70.f, 0.1f, 60.f ), Vector3( 0.03f, 0.03f, 0.035f ), &inRoot );
-    m_kit.Box( Vector3( 0.f, 7.f, VenueLayout::kBackWallZ + 0.6f ), Vector3( 70.f, 14.f, 0.4f ), black, &inRoot );
-    m_kit.Box( Vector3( 0.f, 7.f, -34.f ), Vector3( 70.f, 14.f, 0.4f ), black, &inRoot );
+    const Vector3 seating( 0.035f, 0.03f, 0.04f );
+    const Vector3 aisleGlow( 0.5f, 0.28f, 0.08f );
+    const float back = kArenaBackWallZ;
+    const float length = VenueLayout::kBackWallZ + 1.f - back;
+    const float middle = ( VenueLayout::kBackWallZ + 1.f + back ) * 0.5f;
+    m_kit.Box( Vector3( 0.f, -0.05f, middle ), Vector3( 70.f, 0.1f, length + 4.f ), Vector3( 0.03f, 0.03f, 0.035f ), &inRoot );
+    m_kit.Box( Vector3( 0.f, 11.f, VenueLayout::kBackWallZ + 0.6f ), Vector3( 70.f, 22.f, 0.4f ), black, &inRoot );
+    m_kit.Box( Vector3( 0.f, 11.f, back - 0.2f ), Vector3( 70.f, 22.f, 0.4f ), black, &inRoot );
+    // The roof, and the grid the house rig hangs from.
+    m_kit.Box( Vector3( 0.f, 22.f, middle ), Vector3( 46.f, 0.4f, length ), Vector3( 0.012f, 0.012f, 0.014f ), &inRoot );
+    for( float z = -2.f; z > back + 2.f; z -= 9.f )
+    {
+        m_kit.Box( Vector3( 0.f, 19.5f, z ), Vector3( 40.f, 0.35f, 0.35f ), metal * 0.6f, &inRoot );
+    }
+    for( float x : { -12.f, 0.f, 12.f } )
+    {
+        m_kit.Box( Vector3( x, 19.5f, middle - 4.f ), Vector3( 0.35f, 0.35f, length - 14.f ), metal * 0.6f, &inRoot );
+    }
+    // The back stands: tiers rising to the back wall, an aisle light along each step.
+    for( int tier = 0; tier < kArenaTiers; ++tier )
+    {
+        const float top = kArenaTierRise * static_cast<float>( tier + 1 );
+        const float z = kArenaStandsZ - kArenaTierDepth * ( static_cast<float>( tier ) + 0.5f );
+        m_kit.Box( Vector3( 0.f, top * 0.5f, z ), Vector3( 43.f, top, kArenaTierDepth ), seating, &inRoot );
+        m_kit.Box( Vector3( 0.f, top + 0.01f, z + kArenaTierDepth * 0.5f - 0.05f ), Vector3( 43.f, 0.03f, 0.05f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, aisleGlow );
+    }
+    m_kit.Box( Vector3( 0.f, kArenaTierRise * kArenaTiers + 0.55f, back + 0.5f ), Vector3( 43.f, 1.1f, 0.2f ), metal * 0.4f, &inRoot );
     for( float side : { -1.f, 1.f } )
     {
-        m_kit.Box( Vector3( side * 22.f, 7.f, -8.f ), Vector3( 0.5f, 14.f, 60.f ), black, &inRoot );
+        m_kit.Box( Vector3( side * 22.f, 11.f, middle ), Vector3( 0.5f, 22.f, length + 4.f ), black, &inRoot );
         BuildScreen( inRoot, Vector3( side * 14.f, 7.2f, 2.f ), Vector3( 6.f, 3.4f, 0.f ), side * 16.f, Director::kFeedTexture );
         m_kit.Box( Vector3( side * 14.f, 4.2f, 2.3f ), Vector3( 0.2f, 2.8f, 0.2f ), metal, &inRoot );
-        // Exit signs.
-        m_kit.Box( Vector3( side * 21.7f, 3.f, -20.f ), Vector3( 0.05f, 0.3f, 0.8f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 0.1f, 2.f, 0.3f ) );
+        // The side stands, from beside the stage back to the back stands.
+        for( int tier = 0; tier < kArenaSideTiers; ++tier )
+        {
+            const float top = kArenaTierRise * static_cast<float>( tier + 1 );
+            const float x = side * ( kArenaSideStandsX + kArenaTierDepth * ( static_cast<float>( tier ) + 0.5f ) );
+            const float z0 = kArenaStandsZ;
+            const float z1 = -3.f;
+            m_kit.Box( Vector3( x, top * 0.5f, ( z0 + z1 ) * 0.5f ), Vector3( kArenaTierDepth, top, z1 - z0 ), seating, &inRoot );
+            m_kit.Box( Vector3( x - side * ( kArenaTierDepth * 0.5f - 0.05f ), top + 0.01f, ( z0 + z1 ) * 0.5f ), Vector3( 0.05f, 0.03f, z1 - z0 ), Vector3( 0.f, 0.f, 0.f ), &inRoot, aisleGlow );
+        }
+        // PA hangs either side of the stage.
+        m_kit.Box( Vector3( side * 11.5f, 11.f, -0.4f ), Vector3( 1.2f, 4.6f, 1.1f ), black, &inRoot );
+        m_kit.Box( Vector3( side * 11.5f, 16.f, -0.4f ), Vector3( 0.06f, 5.4f, 0.06f ), metal, &inRoot );
+        // Exit signs over the side stands.
+        m_kit.Box( Vector3( side * 21.7f, 4.6f, -20.f ), Vector3( 0.05f, 0.3f, 0.8f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 0.1f, 2.f, 0.3f ) );
+        m_kit.Box( Vector3( side * 9.f, kArenaTierRise * kArenaTiers + 2.f, back + 0.05f ), Vector3( 0.8f, 0.3f, 0.05f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 0.1f, 2.f, 0.3f ) );
+    }
+    // Front of house: the mixing desk on its riser in the middle of the floor.
+    m_kit.Box( Vector3( 0.f, 0.45f, kArenaDeskZ ), Vector3( 6.f, 0.9f, 4.f ), Vector3( 0.05f, 0.05f, 0.055f ), &inRoot );
+    m_kit.Box( Vector3( 0.f, 1.35f, kArenaDeskZ + 0.6f ), Vector3( 4.2f, 0.9f, 1.f ), Vector3( 0.06f, 0.06f, 0.065f ), &inRoot );
+    m_kit.Box( Vector3( 0.f, 1.81f, kArenaDeskZ + 0.6f ), Vector3( 4.f, 0.02f, 0.9f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 0.15f, 0.35f, 0.5f ) );
+    for( float x : { -1.2f, 1.2f } )
+    {
+        m_kit.Box( Vector3( x, 2.2f, kArenaDeskZ + 1.f ), Vector3( 0.9f, 0.55f, 0.04f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 0.3f, 0.6f, 1.f ) );
+    }
+}
+
+
+void VenueShow::FillHouse( Transform& inRoot, float inScale )
+{
+    // The back of the house: cheap figures everywhere the posed crowd doesn't reach, so no shot
+    // finds an empty floor behind the front rows.
+    const auto cap = [inScale]( int inCount ) { return static_cast<int>( static_cast<float>( inCount ) * inScale ); };
+    switch( m_style )
+    {
+    case Style::Arena:
+    {
+        m_crowd.KeepClear( -3.6f, 3.6f, kArenaDeskZ - 2.6f, kArenaDeskZ + 2.6f );
+        m_crowd.AddMob( m_kit, &inRoot, -14.8f, 14.8f, VenueLayout::kCrowdFrontZ, kArenaStandsZ + 0.6f, 0.f, 0.62f, 0.8f, cap( 900 ) );
+        // Aisles up the stands.
+        for( float x : { -14.f, -5.f, 5.f, 14.f } )
+        {
+            m_crowd.KeepClear( x - 0.5f, x + 0.5f, kArenaBackWallZ, kArenaStandsZ );
+        }
+        for( int tier = 0; tier < kArenaTiers; ++tier )
+        {
+            const float z0 = kArenaStandsZ - kArenaTierDepth * static_cast<float>( tier );
+            m_crowd.AddMob( m_kit, &inRoot, -20.8f, 20.8f, z0 - 0.35f, z0 - kArenaTierDepth + 0.3f, kArenaTierRise * static_cast<float>( tier + 1 ), 0.66f, 0.72f - 0.06f * tier, cap( 140 ) );
+        }
+        for( float side : { -1.f, 1.f } )
+        {
+            for( int tier = 0; tier < kArenaSideTiers; ++tier )
+            {
+                const float inner = kArenaSideStandsX + kArenaTierDepth * static_cast<float>( tier ) + 0.35f;
+                const float outer = inner + kArenaTierDepth - 0.65f;
+                m_crowd.AddMob( m_kit, &inRoot, side < 0.f ? -outer : inner, side < 0.f ? -inner : outer, -3.5f, kArenaStandsZ + 0.3f, kArenaTierRise * static_cast<float>( tier + 1 ), 0.66f, 0.6f, cap( 80 ) );
+            }
+        }
+        break;
+    }
+    case Style::Club:
+        // Packed to the bar.
+        m_crowd.AddMob( m_kit, &inRoot, -12.1f, 12.1f, VenueLayout::kCrowdFrontZ, -14.7f, 0.f, 0.56f, 0.85f, cap( 420 ) );
+        break;
+    case Style::Festival:
+        // A field full to the delay towers, thinning out past them into the dark.
+        m_crowd.KeepClear( -3.8f, 3.8f, -26.8f, -21.2f );
+        for( float side : { -1.f, 1.f } )
+        {
+            for( float z : { -26.f, -40.f } )
+            {
+                m_crowd.KeepClear( side * 14.f - 0.7f, side * 14.f + 0.7f, z - 0.7f, z + 0.7f );
+            }
+        }
+        m_crowd.AddMob( m_kit, &inRoot, -25.f, 25.f, VenueLayout::kCrowdFrontZ, -34.f, 0.f, 0.66f, 0.8f, cap( 900 ) );
+        m_crowd.AddMob( m_kit, &inRoot, -28.f, 28.f, -34.f, -50.f, 0.f, 0.74f, 0.55f, cap( 450 ) );
+        m_crowd.AddMob( m_kit, &inRoot, -30.f, 30.f, -50.f, -66.f, 0.f, 0.85f, 0.32f, cap( 250 ) );
+        break;
+    default:
+        break;
     }
 }
 
@@ -481,6 +606,7 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     m_crowd.SetSurfing( surfShot || ( m_crowd.Mood( seconds ) == "intense" && std::fmod( seconds, 53.0 ) < 1.0 ) );
     m_crowd.Update( seconds, inDeltaTime, m_performance );
     m_band.Update( seconds, inDeltaTime, m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
+    m_lyricBoard.Update( seconds );
     m_director.Update( seconds, inDeltaTime );
     m_lights.SetCrowdEnergy( m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
     // The follow spots keep a little front light on the band so they read in any look, and come
@@ -493,7 +619,12 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
         m_lights.SetSpotlightFloor( slot, !m_band.HasMember( member ) ? 0.f : solo ? 0.85f : kFrontFill );
         if( m_band.HasMember( member ) )
         {
-            m_lights.SetSpotlightTarget( slot, m_band.ChestOf( member ) );
+            // An operator keeps the spot on them, not on every bob: eased, snapped when far off
+            // (the first frame, a room swap).
+            const Vector3 chest = m_band.ChestOf( member );
+            Vector3& aim = m_spotAims[slot];
+            aim = ( aim - chest ).Length() > 3.f ? chest : aim + ( chest - aim ) * ( 1.f - std::exp( -std::clamp( inDeltaTime, 0.f, 0.1f ) * 5.f ) );
+            m_lights.SetSpotlightTarget( slot, aim );
         }
     }
     m_lights.Update( inSongTimeMs, inDeltaTime );

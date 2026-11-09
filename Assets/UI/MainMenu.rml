@@ -69,6 +69,13 @@
             <button id="venue-camera-mv" class="device-choice" data-class-selected="venue_camera == 1" data-event-click="venue_camera(1)">Music video</button>
         </div>
         <div class="setting-row">
+            <label>Lyrics <span>karaoke lines, where the chart has them</span></label>
+            <button id="lyrics-both" class="device-choice" data-class-selected="lyrics == 3" data-event-click="lyrics(3)">Both</button>
+            <button id="lyrics-hud" class="device-choice" data-class-selected="lyrics == 1" data-event-click="lyrics(1)">HUD</button>
+            <button id="lyrics-venue" class="device-choice" data-class-selected="lyrics == 2" data-event-click="lyrics(2)">Venue</button>
+            <button id="lyrics-off" class="device-choice" data-class-selected="lyrics == 0" data-event-click="lyrics(0)">Off</button>
+        </div>
+        <div class="setting-row">
             <label>DLC Server <span>host name, without http://</span></label>
             <input id="dlc-server" type="text" data-value="dlc_url"/>
         </div>

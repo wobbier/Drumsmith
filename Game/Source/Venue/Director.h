@@ -38,7 +38,8 @@ public:
     static constexpr const char* kProgramTexture = "Assets/Textures/Venue/StageProgram.rendertexture";
 
 private:
-    enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall };
+    // Neck: mounted on the subject's headstock, looking down the frets (guitar solos).
+    enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck };
 
     struct Plan
     {
@@ -73,11 +74,13 @@ private:
     Plan PlanFor( const std::string& inName, int inIndex ) const;
     Plan PlanAuto( const std::string& inConstraints, int inIndex, float inTime ) const;
     void BuildFallbackCuts( const VenueData& inVenue, float inSongLength );
-    void Frame( const Plan& inPlan, float inHeld, double inSeconds, Vector3& outEye, Vector3& outTarget, float& outFov ) const;
+    void AddNeckShots( const VenueData& inVenue );
+    // outUp is world up, except for the neck camera, which rolls with the guitar.
+    void Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3& outTarget, float& outFov, Vector3* outUp = nullptr ) const;
     Vector3 SubjectPoint( const Plan& inPlan, bool inHead ) const;
     static Grade GradeFor( const std::string& inLook );
     void ApplyGrade( float inDeltaTime );
-    void UpdateFeed( double inSeconds, int inCutIndex );
+    void UpdateFeed( double inSeconds, float inDeltaTime, int inCutIndex );
 
     World* m_world = nullptr;
     const Band* m_band = nullptr;
@@ -99,4 +102,12 @@ private:
     double m_feedSince = -100.0;
     Vector3 m_feedEye;
     Vector3 m_feedTarget;
+    // The main camera as framed, eased toward each frame's framing so it follows the members
+    // like an operator would, rather than every bob and headbang; snapped on a cut.
+    Vector3 m_eye;
+    Vector3 m_target;
+    Vector3 m_up = Vector3::Up;     // rolled only by the neck camera
+    float m_fov = 45.f;
+    int m_framedCut = -2;
+    std::string m_framedShot;
 };

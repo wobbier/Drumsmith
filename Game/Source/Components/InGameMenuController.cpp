@@ -1,6 +1,8 @@
 #include "Components/InGameMenuController.h"
 #include "Config/GameSettings.h"
 #include "Events/GameEvents.h"
+#include "UI/UIModelUtils.h"
+#include "Core/CommandLine.h"
 #include <Cores/UI/RmlUiCore.h>
 #include <Engine/Engine.h>
 #include <Engine/Input.h>
@@ -9,6 +11,12 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+
+namespace
+{
+    // The debug panel's autoplay modes, by debug_autoplay (NoteHighwayCore::GatherHits).
+    constexpr const char* kAutoplayLabels[3] = { "OFF", "PERFECT", "SLOPPY" };
+}
 
 InGameMenuController::InGameMenuController()
     : Component( "InGameMenuController" )
@@ -42,9 +50,24 @@ void InGameMenuController::Update( float inDeltaTime )
     if( !m_modelReady )
     {
         ui->ModelEnsure( "in_game" );
-        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry" } )
+        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek" } )
             ui->ModelRegisterEvent( "in_game", event );
         ui->ModelSetString( "in_game", "status", "" );
+        // The debug panel (F8): no fail, and a scrubber over the song.
+        ui->ModelSetNumber( "in_game", "debug", CommandLine::Has( "--debug-panel" ) ? 1 : 0 );
+        ui->ModelSetNumber( "in_game", "debug_nofail", CommandLine::Has( "--no-fail" ) ? 1 : 0 );
+        // Autoplay: off, perfect, sloppy (--highway-autoplay, --highway-autoplay-sloppy), and
+        // plain strokes (--highway-autoplay-plain).
+        const int autoplay = CommandLine::Has( "--highway-autoplay" ) ? ( CommandLine::Has( "--highway-autoplay-sloppy" ) ? 2 : 1 ) : 0;
+        ui->ModelSetNumber( "in_game", "debug_autoplay", autoplay );
+        ui->ModelSetString( "in_game", "debug_autoplay_label", kAutoplayLabels[autoplay] );
+        ui->ModelSetNumber( "in_game", "debug_plain", CommandLine::Has( "--highway-autoplay-plain" ) ? 1 : 0 );
+        // The karaoke line (NoteHighwayCore::UpdateLyrics), registered up front so setting it
+        // later doesn't reload the document.
+        ui->ModelSetNumber( "in_game", "lyrics_shown", 0 );
+        ui->ModelSetString( "in_game", "lyric_sung", "" );
+        ui->ModelSetString( "in_game", "lyric_rest", "" );
+        ui->ModelSetString( "in_game", "lyric_next", "" );
         m_modelReady = true;
     }
 
@@ -69,6 +92,10 @@ void InGameMenuController::Update( float inDeltaTime )
         LoadSceneEvent load;
         load.Level = "Assets/TrackList.lvl";
         load.Queue();
+    }
+    else if( GetEngine().GetInput().WasKeyPressed( KeyCode::F8 ) )
+    {
+        ui->ModelSetNumber( "in_game", "debug", ui->ModelGetNumber( "in_game", "debug" ) == 0 );
     }
     else if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
     {
@@ -117,6 +144,31 @@ void InGameMenuController::Update( float inDeltaTime )
             LoadSceneEvent load;
             load.Level = "Assets/TrackList.lvl";
             load.Queue();
+        }
+        else if( event == "debug_nofail" )
+        {
+            ui->ModelSetNumber( "in_game", "debug_nofail", ui->ModelGetNumber( "in_game", "debug_nofail" ) == 0 );
+        }
+        else if( event == "debug_autoplay" )
+        {
+            const int autoplay = ( static_cast<int>( ui->ModelGetNumber( "in_game", "debug_autoplay" ) ) + 1 ) % 3;
+            ui->ModelSetNumber( "in_game", "debug_autoplay", autoplay );
+            ui->ModelSetString( "in_game", "debug_autoplay_label", kAutoplayLabels[autoplay] );
+        }
+        else if( event == "debug_plain" )
+        {
+            ui->ModelSetNumber( "in_game", "debug_plain", ui->ModelGetNumber( "in_game", "debug_plain" ) == 0 );
+        }
+        else if( event == "debug_seek" )
+        {
+            // The slider also reports the value the HUD moves it to; only a real drag seeks.
+            const double value = UIModel::ArgNumber( UIModel::LastEventArgs( *ui, "in_game" ), 0 );
+            if( value >= 0.0 && std::fabs( value - ui->ModelGetNumber( "in_game", "song_progress" ) ) > 2.0 )
+            {
+                InGameSeekTrack seek;
+                seek.Fraction = static_cast<float>( std::clamp( value, 0.0, 1000.0 ) / 1000.0 );
+                seek.Fire();
+            }
         }
         else if( event == "highway_speed" )
         {

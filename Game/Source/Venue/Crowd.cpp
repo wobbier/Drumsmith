@@ -39,6 +39,10 @@ void Crowd::Clear()
     m_surfRequested = false;
     m_surfProgress = -1.f;
     m_surfCount = 0;
+    m_mob.clear();
+    m_keepClear.clear();
+    m_builtBackZ = 0.f;
+    m_builtHalfWidth = 0.f;
 }
 
 
@@ -103,8 +107,10 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
                     Vector3( 0.f, 0.f, 0.f ), person.Body.Root(), lighter ? Vector3( 4.f, 1.6f, 0.3f ) : Vector3( 1.6f, 2.f, 3.f ) );
             }
             m_people.push_back( std::move( person ) );
+            m_builtBackZ = z;
         }
     }
+    m_builtHalfWidth = inHalfWidth;
     if( !m_people.empty() )
     {
         Puppet::Look look;
@@ -195,6 +201,7 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
     VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
     const float t = static_cast<float>( inSeconds );
     ++m_frame;
+    UpdateMob( beat, t, m_energy, lightersUp, clapping );
 
     // The crowd surfer: up at the back, carried to the barricade over six seconds or so.
     if( m_surfProgress < 0.f && m_surfRequested && m_surfer.Root() )
@@ -227,12 +234,16 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
             m_surfer.Apply( pose );
         }
     }
+    // The rows further back are posed every second or third frame (in turns) when the frame rate
+    // is high enough that they still move at 60 a second or better; at 60 fps everyone is posed
+    // every frame, or the back of the room visibly steps. Far figures are small, and posing is
+    // most of the crowd's cost.
+    m_frameTime += ( std::clamp( inDeltaTime, 0.001f, 0.1f ) - m_frameTime ) * 0.05f;
+    const uint32_t spare = static_cast<uint32_t>( std::clamp( ( 1.f / 60.f ) / m_frameTime + 0.15f, 1.f, 3.f ) );
     for( size_t index = 0; index < m_people.size(); ++index )
     {
         Person& person = m_people[index];
-        // The rows further back are posed every second or third frame (in turns), the front every
-        // frame: far figures are small, and posing is most of the crowd's cost.
-        const uint32_t stride = person.Depth > 16.f ? 3u : person.Depth > 8.f ? 2u : 1u;
+        const uint32_t stride = person.Depth > 16.f ? spare : person.Depth > 8.f ? std::min( spare, 2u ) : 1u;
         if( ( m_frame + static_cast<uint32_t>( index ) ) % stride != 0 )
         {
             continue;
@@ -365,6 +376,167 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
             {
                 item.SetPosition( Vector3( 0.f, -10.f, 0.f ) );
             }
+        }
+    }
+}
+
+
+bool Crowd::Occupied( float inX, float inZ ) const
+{
+    // The posed crowd's rows, widening toward the back as Build lays them out.
+    if( !m_people.empty() && inZ > m_builtBackZ - 0.4f && inZ < VenueLayout::kCrowdFrontZ + 0.4f )
+    {
+        const float depth = VenueLayout::kCrowdFrontZ - inZ;
+        if( std::fabs( inX ) < std::min( m_builtHalfWidth, 7.5f + depth * 0.35f ) + 0.4f )
+        {
+            return true;
+        }
+    }
+    for( const std::array<float, 4>& area : m_keepClear )
+    {
+        if( inX > area[0] && inX < area[1] && inZ > area[2] && inZ < area[3] )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1, float inZ0, float inZ1, float inFloorY, float inSpacing, float inDensity, int inMax )
+{
+    // Figures far enough back that a silhouette and a bob read as a crowd: four or five boxes
+    // each, moved as one, so filling a room costs a transform a figure a frame.
+    // Two passes over the same spots: count where they'd stand, then thin evenly to inMax, so a
+    // cap leaves the area sparser rather than empty at the back.
+    const uint32_t firstSeed = static_cast<uint32_t>( m_mob.size() ) * 7919u + static_cast<uint32_t>( std::fabs( inZ0 * 31.f + inFloorY * 7.f ) ) + 17u;
+    std::vector<std::pair<Vector3, uint32_t>> spots;
+    uint32_t seed = firstSeed;
+    for( float z = std::max( inZ0, inZ1 ); z > std::min( inZ0, inZ1 ); z -= inSpacing * 1.1f )
+    {
+        for( float x = inX0; x <= inX1; x += inSpacing )
+        {
+            ++seed;
+            const float fx = x + ( VenueTiming::Noise( seed, 22u ) - 0.5f ) * inSpacing * 0.6f;
+            const float fz = z + ( VenueTiming::Noise( seed, 23u ) - 0.5f ) * inSpacing * 0.5f;
+            if( VenueTiming::Noise( seed, 21u ) <= inDensity && !Occupied( fx, fz ) )
+            {
+                spots.push_back( { Vector3( fx, 0.f, fz ), seed } );
+            }
+        }
+    }
+    const float keep = spots.empty() ? 0.f : std::min( 1.f, static_cast<float>( std::max( inMax, 0 ) ) / static_cast<float>( spots.size() ) );
+    int added = 0;
+    for( const auto& [spot, spotSeed] : spots )
+    {
+        seed = spotSeed;
+        if( VenueTiming::Noise( seed, 20u ) >= keep || added >= inMax )
+        {
+            continue;
+        }
+        const float fx = spot.x;
+        const float fz = spot.z;
+        MobFigure figure;
+        figure.Base = Vector3( fx, inFloorY, fz );
+        figure.Phase = VenueTiming::Noise( seed, 24u );
+        figure.Enthusiasm = 0.2f + 0.7f * VenueTiming::Noise( seed, 25u );
+        figure.Jumper = VenueTiming::Noise( seed, 26u ) < 0.45f;
+        figure.Root = inKit.Group( "Mob", inFloor, figure.Base );
+        if( !figure.Root )
+        {
+            return;
+        }
+        Transform* root = &figure.Root->GetComponent<Transform>();
+        root->SetRotation( Vector3( 0.f, std::atan2( -fx, 4.f - fz ) * 180.f / kPi * 0.85f + ( VenueTiming::Noise( seed, 27u ) - 0.5f ) * 20.f, 0.f ) );
+        const float height = 0.9f + VenueTiming::Noise( seed, 28u ) * 0.2f;
+        const float build = 0.9f + VenueTiming::Noise( seed, 29u ) * 0.25f;
+        const Vector3 shirt = kShirts[static_cast<int>( VenueTiming::Noise( seed, 30u ) * 10.f ) % 10];
+        const Vector3 skin = kSkins[static_cast<int>( VenueTiming::Noise( seed, 31u ) * 5.f ) % 5];
+        const Vector3 pants = kPants[static_cast<int>( VenueTiming::Noise( seed, 32u ) * 3.f ) % 3];
+        inKit.Box( Vector3( 0.f, 0.42f * height, 0.f ), Vector3( 0.34f * build, 0.84f * height, 0.22f ), pants, root );
+        inKit.Box( Vector3( 0.f, 1.15f * height, 0.f ), Vector3( 0.44f * build, 0.62f * height, 0.26f ), shirt, root );
+        inKit.Box( Vector3( 0.f, 1.58f * height, 0.01f ), Vector3( 0.2f, 0.23f, 0.21f ) * height, skin, root );
+        // Arms up: both for the jumpers, the right for the rest (and a light in that hand for
+        // some of them). Parked under the floor until they go up.
+        figure.Arms = inKit.Group( "MobArms", root, Vector3( 0.f, -10.f, 0.f ) );
+        if( figure.Arms )
+        {
+            Transform* arms = &figure.Arms->GetComponent<Transform>();
+            for( int side = figure.Jumper ? -1 : 1; side <= 1; side += 2 )
+            {
+                EntityHandle arm = inKit.Box( Vector3( side * 0.27f * build, 1.74f * height, 0.f ), Vector3( 0.09f, 0.6f * height, 0.09f ), shirt, arms );
+                if( arm ) arm->GetComponent<Transform>().SetRotation( Vector3( 0.f, 0.f, side * -14.f ) );
+            }
+        }
+        const float item = VenueTiming::Noise( seed, 33u );
+        if( !figure.Jumper && item < 0.35f )
+        {
+            const bool lighter = item < 0.12f;
+            figure.Light = inKit.Box( Vector3( 0.f, -10.f, 0.f ), lighter ? Vector3( 0.05f, 0.08f, 0.05f ) : Vector3( 0.08f, 0.14f, 0.02f ), Vector3( 0.f, 0.f, 0.f ), root,
+                lighter ? Vector3( 4.f, 1.6f, 0.3f ) : Vector3( 1.6f, 2.f, 3.f ) );
+        }
+        figure.Height = height;
+        figure.Build = build;
+        m_mob.push_back( figure );
+        ++added;
+    }
+}
+
+
+void Crowd::UpdateMob( double inBeat, float inSeconds, float inEnergy, bool inLightsUp, bool inClapping )
+{
+    for( MobFigure& figure : m_mob )
+    {
+        const double myBeat = inBeat - figure.Phase * 0.15;
+        const float pulse = Pulse( myBeat );
+        const float energy = std::clamp( inEnergy * ( 0.5f + 0.7f * figure.Enthusiasm ), 0.f, 1.3f );
+        Vector3 offset( 0.f, 0.f, 0.f );
+        bool armsUp = false;
+        bool lightUp = false;
+        if( inLightsUp )
+        {
+            // Swaying to the half-time, the lights up.
+            offset.x = 0.07f * std::sin( static_cast<float>( myBeat ) * kPi * 0.5f + figure.Phase * 3.f );
+            lightUp = static_cast<bool>( figure.Light );
+            armsUp = lightUp;
+        }
+        else if( inClapping && figure.Enthusiasm > 0.5f )
+        {
+            armsUp = true;
+            offset.y = -0.03f * pulse;
+        }
+        else if( energy > 0.75f )
+        {
+            if( figure.Jumper )
+            {
+                const double hop = myBeat - std::floor( myBeat );
+                offset.y = 0.26f * figure.Enthusiasm * std::max( 0.f, static_cast<float>( std::sin( hop * kPi ) ) );
+            }
+            else
+            {
+                offset.y = -0.06f * pulse;
+            }
+            armsUp = true;
+        }
+        else if( energy > 0.4f )
+        {
+            offset.y = -0.05f * pulse * energy;
+            armsUp = !figure.Jumper && figure.Enthusiasm > 0.6f && pulse > 0.45f;
+        }
+        else
+        {
+            offset.x = 0.03f * std::sin( inSeconds * ( 0.6f + figure.Phase * 0.5f ) + figure.Phase * 20.f );
+        }
+        figure.Root->GetComponent<Transform>().SetPosition( figure.Base + offset );
+        if( armsUp != figure.ArmsUp && figure.Arms )
+        {
+            figure.ArmsUp = armsUp;
+            figure.Arms->GetComponent<Transform>().SetPosition( Vector3( 0.f, armsUp ? 0.f : -10.f, 0.f ) );
+        }
+        if( lightUp != figure.LightUp && figure.Light )
+        {
+            figure.LightUp = lightUp;
+            figure.Light->GetComponent<Transform>().SetPosition( lightUp ? Vector3( 0.34f * figure.Build, 2.06f * figure.Height, 0.04f ) : Vector3( 0.f, -10.f, 0.f ) );
         }
     }
 }

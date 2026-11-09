@@ -87,6 +87,8 @@ void Director::Clear()
     m_shotName.clear();
     m_lookName.clear();
     m_feedSince = -100.0;
+    m_framedCut = -2;
+    m_framedShot.clear();
 }
 
 
@@ -111,6 +113,7 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
     {
         BuildFallbackCuts( inVenue, inSongLength );
     }
+    AddNeckShots( inVenue );
     m_looks = mv && !inVenue.m_mvPostFx.empty() ? inVenue.m_mvPostFx : inVenue.m_postFx;
 
     // The main camera: the screen's camera from now on (the highway draws over it).
@@ -180,6 +183,13 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
     {
         // Diagnostics (--venue-shot debug_wall): straight at the LED wall from the front of the stage.
         plan.Frame = Framing::Wall;
+        return plan;
+    }
+    if( inName == "guitar_neck" || inName == "bass_neck" || StartsWith( inName, "solo_neck" ) )
+    {
+        // The neck camera (AddNeckShots; --venue-shot guitar_neck to frame it).
+        plan.Subjects = { inName == "bass_neck" ? VenueData::Bass : VenueData::Guitar };
+        plan.Frame = Framing::Neck;
         return plan;
     }
     if( StartsWith( inName, "auto" ) )
@@ -398,6 +408,87 @@ void Director::BuildFallbackCuts( const VenueData& inVenue, float inSongLength )
 }
 
 
+void Director::AddNeckShots( const VenueData& inVenue )
+{
+    // Through a guitar solo, every other shot of the guitarist alone is the camera on their
+    // headstock, looking down the frets. A solo (PART GUITAR note 103) the cuts never single the
+    // guitarist out in gets one anyway, for its middle third.
+    if( !m_band || !m_band->HasMember( VenueData::Guitar ) )
+    {
+        return;
+    }
+    const auto soloAt = [&]( float inTime ) -> int {
+        for( size_t i = 0; i < inVenue.m_guitarSolos.size(); ++i )
+        {
+            if( inTime >= inVenue.m_guitarSolos[i].m_start - 0.05f && inTime < inVenue.m_guitarSolos[i].m_end ) return static_cast<int>( i );
+        }
+        // Charts without solo markers: the guitarist's play_solo state (or a "solo" section).
+        if( inVenue.m_guitarSolos.empty() && m_band->StateOf( VenueData::Guitar, inTime ) == "play_solo" ) return 0;
+        return -1;
+    };
+    std::vector<bool> soloHasNeck( std::max<size_t>( 1, inVenue.m_guitarSolos.size() ), false );
+    int lastSolo = -1;
+    int count = 0;
+    for( Cut& cut : m_cuts )
+    {
+        const int solo = soloAt( cut.Time );
+        if( solo < 0 )
+        {
+            lastSolo = -1;
+            continue;
+        }
+        if( solo != lastSolo )
+        {
+            lastSolo = solo;
+            count = 0;
+        }
+        // Only close-ish shots of the guitarist alone; the chart's wide and no-close cuts stay so.
+        const bool wide = cut.Shot.Frame == Framing::Behind || cut.Shot.Frame == Framing::Far || VenueTiming::Contains( cut.Name, "no_close" ) || VenueTiming::Contains( cut.Name, "only_far" );
+        if( cut.Shot.Subjects.size() != 1 || cut.Shot.Subjects[0] != VenueData::Guitar || wide )
+        {
+            continue;
+        }
+        if( count++ % 2 == 1 )
+        {
+            cut.Shot.Frame = Framing::Neck;
+            cut.Shot.Handheld = false;
+            cut.Name += " neck";
+            soloHasNeck[solo] = true;
+        }
+    }
+    for( size_t i = 0; i < inVenue.m_guitarSolos.size(); ++i )
+    {
+        const VenueData::SpanData& solo = inVenue.m_guitarSolos[i];
+        const float length = solo.m_end - solo.m_start;
+        if( soloHasNeck[i] || length < 6.f )
+        {
+            continue;
+        }
+        // In for the middle third (five seconds at most), then back to the shot it interrupted.
+        const float in = solo.m_start + length / 3.f;
+        const float out = in + std::min( length / 3.f, 5.f );
+        auto at = std::upper_bound( m_cuts.begin(), m_cuts.end(), in, []( float t, const Cut& c ) { return t < c.Time; } );
+        Cut resume;
+        const bool interrupts = at != m_cuts.begin() && ( at == m_cuts.end() || at->Time > out );
+        if( interrupts )
+        {
+            resume = *( at - 1 );
+            resume.Time = out;
+        }
+        Cut neck;
+        neck.Time = in;
+        neck.Name = "solo_neck";
+        neck.Shot.Subjects = { VenueData::Guitar };
+        neck.Shot.Frame = Framing::Neck;
+        at = m_cuts.insert( at, neck );
+        if( interrupts )
+        {
+            m_cuts.insert( at + 1, resume );
+        }
+    }
+}
+
+
 Vector3 Director::SubjectPoint( const Plan& inPlan, bool inHead ) const
 {
     if( inPlan.Subjects.empty() || !m_band )
@@ -416,7 +507,7 @@ Vector3 Director::SubjectPoint( const Plan& inPlan, bool inHead ) const
 }
 
 
-void Director::Frame( const Plan& inPlan, float inHeld, double inSeconds, Vector3& outEye, Vector3& outTarget, float& outFov ) const
+void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3& outTarget, float& outFov, Vector3* outUp ) const
 {
     // A shot in venue space: where the camera sits and looks, then how it drifts while held.
     const float side = ( inPlan.Variant % 2 == 0 ) ? -1.f : 1.f;
@@ -425,6 +516,25 @@ void Director::Frame( const Plan& inPlan, float inHeld, double inSeconds, Vector
     const bool duo = inPlan.Subjects.size() >= 2;
     float drift = 0.f;    // degrees of orbit over the shot
     float dolly = 0.f;    // metres toward the target over the shot
+    if( outUp ) *outUp = Vector3::Up;
+    Vector3 headstock;
+    Vector3 body;
+    Vector3 face;
+    Vector3 edge;
+    if( inPlan.Frame == Framing::Neck && m_band && m_band->NeckOf( subject >= 0 ? subject : VenueData::Guitar, headstock, body, face, edge ) )
+    {
+        // Mounted out past the headstock and up off the fretboard, looking down the length of the
+        // neck at an angle to the body, the player beyond it. Rolled with the guitar, no drift;
+        // Update steadies it so the beat's bob doesn't shake it.
+        face = face.Normalized();
+        edge = edge.Normalized();
+        const Vector3 along = ( body - headstock ).Normalized();
+        outEye = headstock - along * 0.14f + face * 0.2f + edge * 0.02f;
+        outTarget = Lerp( headstock, body, 0.55f ) + edge * 0.05f;
+        outFov = 60.f;
+        if( outUp ) *outUp = ( edge * 0.7f + face * 0.3f ).Normalized();
+        return;
+    }
     switch( inPlan.Frame )
     {
     case Framing::Far:
@@ -489,6 +599,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, double inSeconds, Vector
         outFov = 32.f;
         drift = 7.f * side;
         break;
+    case Framing::Neck:    // no guitar to ride: a close-up of the hands instead
     case Framing::CloseHand:
         if( subject == VenueData::Drums )
         {
@@ -548,12 +659,6 @@ void Director::Frame( const Plan& inPlan, float inHeld, double inSeconds, Vector
     const Vector3 toward = ( outTarget - outEye ).Normalized();
     outEye = outEye + toward * ( dolly * progress );
     keepClear( outEye );
-    if( inPlan.Handheld )
-    {
-        const float t = static_cast<float>( inSeconds );
-        outEye = outEye + Vector3( 0.03f * std::sin( t * 2.1f ) + 0.015f * std::sin( t * 5.3f ), 0.025f * std::sin( t * 2.7f + 1.f ), 0.02f * std::sin( t * 1.7f ) );
-        outTarget = outTarget + Vector3( 0.05f * std::sin( t * 1.3f + 2.f ), 0.04f * std::sin( t * 1.9f ), 0.f );
-    }
 }
 
 
@@ -620,7 +725,7 @@ void Director::ApplyGrade( float inDeltaTime )
 }
 
 
-void Director::UpdateFeed( double inSeconds, int inCutIndex )
+void Director::UpdateFeed( double inSeconds, float inDeltaTime, int inCutIndex )
 {
     if( !m_feed || !m_band )
     {
@@ -661,8 +766,10 @@ void Director::UpdateFeed( double inSeconds, int inCutIndex )
     const Vector3 eye = target + Vector3( side * 1.1f, -0.5f, wide ? -3.2f : -1.8f );
     const float t = static_cast<float>( inSeconds );
     const Vector3 shake( 0.02f * std::sin( t * 1.9f ), 0.015f * std::sin( t * 2.6f ), 0.f );
-    m_feedEye = Lerp( m_feedEye, eye + shake, 0.15f );
-    m_feedTarget = Lerp( m_feedTarget, target, 0.2f );
+    // Eased per second, not per frame, so it tracks the same at any frame rate.
+    const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
+    m_feedEye = Lerp( m_feedEye, eye + shake, 1.f - std::exp( -dt * 6.f ) );
+    m_feedTarget = Lerp( m_feedTarget, target, 1.f - std::exp( -dt * 9.f ) );
     Transform& transform = m_feed->GetComponent<Transform>();
     transform.SetPosition( VenueLayout::kVenueOrigin + m_feedEye );
     transform.LookAt( VenueLayout::kVenueOrigin + m_feedTarget );
@@ -709,10 +816,53 @@ void Director::Update( double inSeconds, float inDeltaTime )
     Vector3 eye;
     Vector3 target;
     float fov = 45.f;
-    Frame( plan, held, inSeconds, eye, target, fov );
+    Vector3 up = Vector3::Up;
+    Frame( plan, held, eye, target, fov, &up );
+    // The framing tracks the members' live positions, which bob, headbang and strum: following
+    // them exactly shakes the whole picture. Ease toward it instead (the aim a little quicker
+    // than the dolly), and snap on a cut.
+    if( index != m_framedCut || m_shotName != m_framedShot )
+    {
+        m_framedCut = index;
+        m_framedShot = m_shotName;
+        m_eye = eye;
+        m_target = target;
+        m_up = up;
+        m_fov = fov;
+    }
+    else if( plan.Frame == Framing::Neck )
+    {
+        // The neck camera rides the guitar, which bobs with every beat: steadied like a
+        // stabilised mount, following its swing in about a fifth of a second without the shake.
+        const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
+        const float follow = 1.f - std::exp( -dt * 5.f );
+        m_eye = Lerp( m_eye, eye, follow );
+        m_target = Lerp( m_target, target, follow );
+        m_up = Lerp( m_up, up, follow ).Normalized();
+        m_fov = fov;
+    }
+    else
+    {
+        const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
+        m_eye = Lerp( m_eye, eye, 1.f - std::exp( -dt * 2.5f ) );
+        m_target = Lerp( m_target, target, 1.f - std::exp( -dt * 4.f ) );
+        m_up = up;
+        m_fov += ( fov - m_fov ) * ( 1.f - std::exp( -dt * 4.f ) );
+    }
+    eye = m_eye;
+    target = m_target;
+    up = m_up;
+    fov = m_fov;
+    // Handheld shots sway on top of the eased framing, so the easing doesn't damp the sway.
+    if( plan.Handheld )
+    {
+        const float t = static_cast<float>( inSeconds );
+        eye = eye + Vector3( 0.03f * std::sin( t * 2.1f ) + 0.015f * std::sin( t * 5.3f ), 0.025f * std::sin( t * 2.7f + 1.f ), 0.02f * std::sin( t * 1.7f ) );
+        target = target + Vector3( 0.05f * std::sin( t * 1.3f + 2.f ), 0.04f * std::sin( t * 1.9f ), 0.f );
+    }
     Transform& transform = m_main->GetComponent<Transform>();
     transform.SetPosition( VenueLayout::kVenueOrigin + eye );
-    transform.LookAt( VenueLayout::kVenueOrigin + target );
+    transform.LookAt( VenueLayout::kVenueOrigin + target, up );
     Camera& camera = m_main->GetComponent<Camera>();
     camera.SetFOV( fov );
 
@@ -724,7 +874,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
         m_gradeTarget = GradeFor( lookName );
     }
     ApplyGrade( inDeltaTime );
-    UpdateFeed( inSeconds, index );
+    UpdateFeed( inSeconds, inDeltaTime, index );
     if( m_program )
     {
         // The program feed films what the main camera shows, graded the same: in its own shot the

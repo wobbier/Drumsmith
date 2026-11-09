@@ -94,6 +94,24 @@ struct VenueData
     // high up the neck): [time, position] in m_time / m_member.
     std::vector<SpanData> m_guitarFrets;
     std::vector<SpanData> m_bassFrets;
+    // PART GUITAR note 103: the guitar solos, for the director's neck camera.
+    std::vector<SpanData> m_guitarSolos;
+    // PART VOCALS (Docs/Venue-and-Band.md → Lyrics): each syllable's lyric event as charted, Rock
+    // Band's markers and all ("Hel-", "+", "lo#"; CoreGame/Lyrics turns them into lines), the
+    // phrases (notes 105/106, a lyric line each), percussion hits (notes 96/97) and the
+    // percussion cues ("tambourine_start", "cowbell_end", ...).
+    std::vector<TimedCueData> m_lyrics;
+    std::vector<SpanData> m_vocalPhrases;
+    std::vector<float> m_vocalPercussion;
+    std::vector<TimedCueData> m_vocalCues;
+    // HARM1-3 (or PART HARM1-3): the harmony parts' sung notes and lyrics. HARM1 is the lead.
+    static constexpr int kHarmonyParts = 3;
+    std::array<std::vector<SpanData>, kHarmonyParts> m_harmonyNotes;
+    std::array<std::vector<TimedCueData>, kHarmonyParts> m_harmonyLyrics;
+    // PART GUITAR / BASS "[map ...]": hand maps ("HandMap_Chord", "HandMap_Solo", ...) and strum
+    // maps ("StrumMap_SlapBass", "StrumMap_Pick", ...), in one list per instrument.
+    std::vector<TimedCueData> m_guitarMaps;
+    std::vector<TimedCueData> m_bassMaps;
     // EVENTS markers: "music_start", "music_end", "end", "coda".
     std::vector<TimedCueData> m_songEvents;
 
@@ -105,7 +123,9 @@ struct VenueData
         return m_lighting.empty() && m_keyframes.empty() && m_fog.empty() && m_bonusFx.empty() && m_spotlights.empty() && m_sections.empty() && m_crowd.empty()
             && m_cameras.empty() && m_mvCameras.empty() && m_postFx.empty() && m_mvPostFx.empty() && m_singalong.empty() && bandEmpty && m_drumHits.empty()
             && m_guitarStrums.empty() && m_bassStrums.empty() && m_keysStrums.empty() && m_vocalNotes.empty()
-            && m_guitarFrets.empty() && m_bassFrets.empty() && m_songEvents.empty();
+            && m_guitarFrets.empty() && m_bassFrets.empty() && m_guitarSolos.empty() && m_songEvents.empty()
+            && m_lyrics.empty() && m_vocalPhrases.empty() && m_vocalPercussion.empty() && m_vocalCues.empty() && m_harmonyNotes[0].empty() && m_harmonyNotes[1].empty()
+            && m_harmonyNotes[2].empty() && m_guitarMaps.empty() && m_bassMaps.empty();
     }
     static const char* MemberName( int inMember );
     void Clear() { *this = VenueData(); }

@@ -32,6 +32,7 @@ void GameSettings::Save()
     RootJson["Venue"] = Venue;
     RootJson["VenueCamera"] = VenueCamera;
     RootJson["VenueStyle"] = VenueStyle;
+    RootJson["Lyrics"] = Lyrics;
 
     Path settingsFilePath( "Settings.json" );
     File settingsFile( settingsFilePath );
@@ -94,6 +95,11 @@ void GameSettings::Load()
     if( RootJson.contains( "VenueStyle" ) && RootJson["VenueStyle"].is_number() )
     {
         VenueStyle = std::clamp( RootJson["VenueStyle"].get<int>(), 0, 3 );
+    }
+
+    if( RootJson.contains( "Lyrics" ) && RootJson["Lyrics"].is_number() )
+    {
+        Lyrics = std::clamp( RootJson["Lyrics"].get<int>(), 0, 3 );
     }
 
     if( RootJson.contains( "HighwaySpeed" ) && RootJson["HighwaySpeed"].is_number() )

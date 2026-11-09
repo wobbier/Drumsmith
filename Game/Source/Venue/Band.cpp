@@ -8,6 +8,7 @@
 #include "CLog.h"
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 namespace
 {
@@ -31,6 +32,21 @@ namespace
     {
         const double fraction = inBeat - std::floor( inBeat );
         return static_cast<float>( std::pow( 1.0 - fraction, inPower ) );
+    }
+
+    // The same pulse rising over the first 15% of the beat instead of jumping: for the stringed
+    // players, whose guitar necks swing with it (and carry the neck camera).
+    float SoftPulse( double inBeat )
+    {
+        constexpr double kRise = 0.15;
+        const double fraction = inBeat - std::floor( inBeat );
+        if( fraction < kRise )
+        {
+            const double t = fraction / kRise;
+            return static_cast<float>( t * t * ( 3.0 - 2.0 * t ) );
+        }
+        const double fall = ( fraction - kRise ) / ( 1.0 - kRise );
+        return static_cast<float>( ( 1.0 - fall ) * ( 1.0 - fall ) );
     }
 
     // Where each piece is struck, in the drummer's space (the throne at the origin, the kit at +z).
@@ -90,7 +106,10 @@ void Band::Clear()
     for( KitPiece& piece : m_kit ) piece = KitPiece();
     m_sections.clear();
     m_vocalNotes.clear();
+    m_vocalPhrases.clear();
     m_singalong.clear();
+    m_percussion.clear();
+    m_percussionHits.clear();
     m_beats.clear();
     m_drumTimes.clear();
     m_stage = nullptr;
@@ -107,7 +126,9 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
     m_bpm = inBpm;
     m_sections = inVenue.m_sections;
     m_vocalNotes = inVenue.m_vocalNotes;
+    m_vocalPhrases = inVenue.m_vocalPhrases;
     m_singalong = inVenue.m_singalong;
+    DerivePercussion( inVenue );
     for( const NoteData& note : inNotes )
     {
         m_drumTimes.push_back( note.m_triggerTime );
@@ -126,6 +147,8 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
     m_members[VenueData::Keys].Strums = inVenue.m_keysStrums;
     m_members[VenueData::Guitar].Frets = inVenue.m_guitarFrets;
     m_members[VenueData::Bass].Frets = inVenue.m_bassFrets;
+    m_members[VenueData::Guitar].Maps = inVenue.m_guitarMaps;
+    m_members[VenueData::Bass].Maps = inVenue.m_bassMaps;
     for( const TimedCueData& event : inVenue.m_songEvents )
     {
         if( event.m_name == "music_end" || event.m_name == "end" )
@@ -198,6 +221,8 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
         default: break;
         }
     }
+    // Backing vocals from the harmony parts, once it's known who's on stage.
+    DeriveHarmonies( inVenue );
 }
 
 
@@ -443,8 +468,28 @@ void Band::BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass )
     inKit.Box( Vector3( 0.08f, -0.05f, 0.037f ), Vector3( 0.16f, 0.12f, 0.01f ), Vector3( 0.85f, 0.85f, 0.8f ), &guitar );
     inKit.Box( Vector3( 0.06f, 0.02f, 0.04f ), Vector3( 0.03f, 0.1f, 0.01f ), Vector3( 0.6f, 0.6f, 0.6f ), &guitar );
     const float neck = inBass ? 0.86f : 0.62f;
+    ioMember.NeckLength = neck;
     inKit.Box( Vector3( -0.18f - neck * 0.5f, 0.f, 0.02f ), Vector3( neck, 0.05f, 0.03f ), Vector3( 0.25f, 0.15f, 0.07f ), &guitar );
     inKit.Box( Vector3( -0.26f - neck, 0.f, 0.02f ), Vector3( 0.17f, 0.075f, 0.025f ), Vector3( 0.05f, 0.05f, 0.05f ), &guitar );
+    // Frets, a nut and strings, for the neck camera: the fretboard's face is at z 0.035, from the
+    // nut (x -0.18 - neck) to the body (x -0.18). Frets fall at the scale length's spacing, the
+    // sixteenth meeting the body.
+    const float nut = -0.18f - neck;
+    const float scale = neck / ( 1.f - std::pow( 2.f, -16.f / 12.f ) );
+    const Vector3 metal( 0.75f, 0.74f, 0.7f );
+    inKit.Box( Vector3( nut, 0.f, 0.037f ), Vector3( 0.006f, 0.05f, 0.006f ), Vector3( 0.95f, 0.93f, 0.85f ), &guitar );
+    for( int fret = 1; fret < 16; ++fret )
+    {
+        const float x = nut + scale * ( 1.f - std::pow( 2.f, -static_cast<float>( fret ) / 12.f ) );
+        inKit.Box( Vector3( x, 0.f, 0.036f ), Vector3( 0.003f, 0.05f, 0.004f ), metal, &guitar );
+    }
+    const int strings = inBass ? 4 : 6;
+    const float bridge = 0.16f;
+    for( int string = 0; string < strings; ++string )
+    {
+        const float y = -0.019f + 0.038f * static_cast<float>( string ) / static_cast<float>( strings - 1 );
+        inKit.Box( Vector3( ( nut + bridge ) * 0.5f, y, 0.041f ), Vector3( bridge - nut, inBass ? 0.0035f : 0.0025f, 0.0025f ), Vector3( 0.85f, 0.84f, 0.8f ), &guitar );
+    }
     // An amp behind them.
     const float side = inBass ? 1.f : -1.f;
     inKit.Box( Vector3( side * 0.4f, 0.55f, -1.5f ), Vector3( 0.9f, 1.1f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &group );
@@ -459,6 +504,33 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
     BuildMicStand( inKit, ioMember, Vector3( 0.f, 0.f, 0.42f ), 1.5f );
     // A pair of monitor wedges at the singer's feet.
     Transform& group = ioMember.Group->GetComponent<Transform>();
+    // Percussion for the vocal part's tambourine and cowbell sections, hidden until played. In
+    // its own space a tambourine's disc lies flat (y up), a cowbell's mouth points down -y.
+    if( !m_percussion.empty() )
+    {
+        using Shape = Moonlight::MeshType;
+        ioMember.Tambourine = inKit.Group( "Tambourine", &group );
+        if( ioMember.Tambourine )
+        {
+            Transform& tambourine = ioMember.Tambourine->GetComponent<Transform>();
+            inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.f, 0.f ), Vector3( 0.24f, 0.045f, 0.24f ), Vector3( 0.4f, 0.22f, 0.09f ), &tambourine );
+            inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.012f, 0.f ), Vector3( 0.21f, 0.025f, 0.21f ), Vector3( 0.85f, 0.82f, 0.7f ), &tambourine );
+            for( int jingle = 0; jingle < 5; ++jingle )
+            {
+                const float angle = 0.4f + 1.1f * static_cast<float>( jingle );
+                inKit.Piece( Shape::Cylinder, Vector3( 0.12f * std::cos( angle ), 0.f, 0.12f * std::sin( angle ) ), Vector3( 0.045f, 0.012f, 0.045f ), Vector3( 0.8f, 0.78f, 0.72f ), &tambourine );
+            }
+            tambourine.SetScale( Vector3( 0.001f, 0.001f, 0.001f ) );
+        }
+        ioMember.Cowbell = inKit.Group( "Cowbell", &group );
+        if( ioMember.Cowbell )
+        {
+            Transform& cowbell = ioMember.Cowbell->GetComponent<Transform>();
+            inKit.Box( Vector3( 0.f, -0.06f, 0.f ), Vector3( 0.09f, 0.14f, 0.06f ), Vector3( 0.32f, 0.32f, 0.34f ), &cowbell );
+            inKit.Box( Vector3( 0.f, 0.04f, 0.f ), Vector3( 0.03f, 0.08f, 0.03f ), Vector3( 0.1f, 0.1f, 0.1f ), &cowbell );
+            cowbell.SetScale( Vector3( 0.001f, 0.001f, 0.001f ) );
+        }
+    }
     for( float x : { -0.6f, 0.6f } )
     {
         EntityHandle wedge = inKit.Box( Vector3( x, 0.18f, 1.15f ), Vector3( 0.6f, 0.34f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &group );
@@ -492,6 +564,29 @@ std::string Band::StateOf( int inMember, double inSeconds ) const
     }
     const TimedCueData* state = VenueTiming::CueAt( m_members[inMember].States, inSeconds );
     return state ? state->m_name : std::string( "idle" );
+}
+
+
+float Band::AtSingalong( int inMember, double inSeconds ) const
+{
+    // 1 through a member's singalong span, easing from and back to 0 over the 0.4 s around it.
+    constexpr float kEase = 0.4f;
+    const float t = static_cast<float>( inSeconds );
+    auto it = std::upper_bound( m_singalong.begin(), m_singalong.end(), t + kEase, []( float time, const VenueData::SpanData& s ) { return time < s.m_start; } );
+    float nearest = kEase;
+    while( it != m_singalong.begin() )
+    {
+        --it;
+        if( t - it->m_start > 30.f )
+        {
+            break;
+        }
+        if( it->m_member == inMember )
+        {
+            nearest = std::min( nearest, std::max( { 0.f, it->m_start - t, t - it->m_end } ) );
+        }
+    }
+    return 1.f - VenueTiming::Smooth( nearest / kEase );
 }
 
 
@@ -769,9 +864,9 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     const bool intense = VenueTiming::Contains( state, "intense" );
     const bool mellow = state == "mellow";
     const bool idle = state == "idle" || state == "idle_realtime";
-    const bool solo = state == "play_solo";
+    const float soloing = ioMember.Solo;
     const float t = static_cast<float>( inSeconds );
-    const float pulse = Pulse( inBeat );
+    const float pulse = SoftPulse( inBeat );
     ioMember.Energy += ( ( intense ? 1.f : idle ? 0.1f : mellow ? 0.3f : 0.6f ) - ioMember.Energy ) * 0.05f;
     const float energy = ioMember.Energy;
     pose.Legs[0].Spread = 5.f + 9.f * energy;
@@ -782,28 +877,33 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     pose.Side = mellow ? 5.f * std::sin( static_cast<float>( inBeat ) * kPi * 0.5f ) : 0.f;
     pose.HeadTurn = idle ? 25.f * std::sin( t * 0.4f + ioMember.Phase ) : 6.f * std::sin( t * 0.9f + ioMember.Phase );
     pose.Turn = inIndex == VenueData::Guitar ? -8.f : 8.f;
-    if( solo )
+    if( soloing > 0.f )
     {
-        // Out front and leaning back into it.
-        pose.Lean = -8.f + 4.f * pulse;
-        pose.Offset = glm::vec3( inIndex == VenueData::Guitar ? -0.3f : 0.3f, 0.f, 1.1f );
-        pose.Nod = -12.f + 10.f * pulse;
+        // Out front and leaning back into it, walked into over a moment.
+        pose.Lean += ( -8.f + 4.f * pulse - pose.Lean ) * soloing;
+        pose.Offset = glm::vec3( inIndex == VenueData::Guitar ? -0.3f : 0.3f, 0.f, 1.1f ) * soloing;
+        pose.Nod += ( -12.f + 10.f * pulse - pose.Nod ) * soloing;
     }
     float open = 0.f;
-    const bool singing = Singing( inIndex, inSeconds, &open );
-    if( singing )
+    if( Singing( inIndex, inSeconds, &open ) )
     {
         pose.Mouth = open;
-        pose.Lean = 10.f;
-        pose.Nod = -6.f;
-        pose.Offset = glm::vec3( 0.f, 0.f, 0.12f );
-        pose.Turn = 0.f;
+    }
+    // Leaning into their mic for a singalong, eased in and out around it. Not mid-solo: the
+    // soloist is out front.
+    const float atMic = AtSingalong( inIndex, inSeconds ) * ( 1.f - soloing );
+    if( atMic > 0.f )
+    {
+        pose.Lean += ( 10.f - pose.Lean ) * atMic;
+        pose.Nod += ( -6.f - pose.Nod ) * atMic;
+        pose.Offset += ( glm::vec3( 0.f, 0.f, 0.12f ) - pose.Offset ) * atMic;
+        pose.Turn *= 1.f - atMic;
     }
     ioMember.Body.Apply( pose );
 
     // The guitar hangs off the torso, its neck up and to the player's left.
     const glm::quat spine = ioMember.Body.SpineRotation();
-    const float neckAngle = solo ? -48.f : ( -24.f - 10.f * energy * pulse );
+    const float neckAngle = -24.f - 10.f * energy * pulse * ( 1.f - soloing ) - 24.f * soloing;
     const glm::quat guitarRotation = spine * Axis( neckAngle, kZ ) * Axis( -8.f, kY );
     const glm::vec3 guitarPosition = ioMember.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.2f, 0.17f );
     if( ioMember.Instrument )
@@ -822,17 +922,200 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
             fret = static_cast<float>( ( it - 1 )->m_member ) / 19.f;
         }
     }
+    // The chart's hand and strum maps ("[map HandMap_Chord_A]", "[map StrumMap_SlapBass]"): a
+    // fixed chord shape near the nut, chords throughout, single notes, open strings, a solo's
+    // runs; slapping over the neck pickup.
+    const auto mapOf = [&ioMember, inSeconds]( const char* inPrefix ) -> std::string {
+        size_t index = 0;
+        if( !VenueTiming::CueAt( ioMember.Maps, inSeconds, &index ) ) return std::string();
+        for( size_t i = index + 1; i-- > 0; )
+        {
+            if( ioMember.Maps[i].m_name.rfind( inPrefix, 0 ) == 0 ) return ioMember.Maps[i].m_name.substr( std::strlen( inPrefix ) );
+        }
+        return std::string();
+    };
+    const std::string hand = mapOf( "HandMap_" );
+    const bool slap = mapOf( "StrumMap_" ) == "SlapBass";
+    float wrap = 0.f;     // a chord shape: the hand wraps further round the neck
+    float lift = 0.f;     // open strings: the hand comes off the fretboard as they're struck
+    if( hand.rfind( "Chord_", 0 ) == 0 && hand.size() > 6 )
+    {
+        // Open chord shapes sit in the first few frets.
+        const char root = hand[6];
+        fret = ( root == 'E' ? 1.f : root == 'C' || root == 'F' ? 2.f : 2.5f ) / 19.f;
+        wrap = 1.f;
+    }
+    else if( hand == "AllChords" )
+    {
+        wrap = 1.f;
+    }
+    else if( hand == "NoChords" )
+    {
+        fret = std::clamp( fret + 0.025f * static_cast<float>( count % 3 - 1 ), 0.f, 1.f );
+    }
+    else if( hand == "Solo" )
+    {
+        fret = std::clamp( fret + 0.05f * ( static_cast<float>( count % 4 ) - 1.5f ), 0.f, 1.f );
+    }
+    else if( hand.rfind( "DropD", 0 ) == 0 )
+    {
+        fret = std::min( fret, 0.15f );
+        lift = 0.035f * std::fabs( strum );
+    }
     const float neck = inIndex == VenueData::Bass ? 0.86f : 0.62f;
     Puppet::Arm& strumArm = pose.Arms[1];
     strumArm.Reach = true;
-    strumArm.Target = guitarPosition + guitarRotation * glm::vec3( 0.1f, 0.07f * strum, 0.09f );
+    strumArm.Target = guitarPosition + guitarRotation * ( slap ? glm::vec3( -0.06f, 0.1f * strum, 0.1f ) : glm::vec3( 0.1f, 0.07f * strum, 0.09f ) );
     strumArm.Pole = glm::vec3( 1.f, -0.4f, -1.f );
     Puppet::Arm& fretArm = pose.Arms[0];
     fretArm.Reach = true;
-    fretArm.Target = guitarPosition + guitarRotation * glm::vec3( -0.25f - neck * ( 0.15f + 0.7f * fret ), -0.03f, 0.05f );
+    fretArm.Target = guitarPosition + guitarRotation * glm::vec3( -0.25f - neck * ( 0.15f + 0.7f * fret ), -0.03f - 0.02f * wrap, 0.05f + 0.015f * wrap + lift );
     fretArm.Pole = glm::vec3( -0.3f, -1.f, -0.3f );
     ioMember.Body.Apply( pose );
     (void)inEnergy;
+}
+
+
+void Band::DerivePercussion( const VenueData& inVenue )
+{
+    // Sections from the vocal part's cues ("[tambourine_start]" ... "[tambourine_end]"), and the
+    // hits (notes 96/97). Hits outside any section get a tambourine section of their own.
+    m_percussionHits = inVenue.m_vocalPercussion;
+    const auto kindOf = []( const std::string& inName ) {
+        return inName.find( "cowbell" ) != std::string::npos ? Percussion::Cowbell : inName.find( "clap" ) != std::string::npos ? Percussion::Clap : Percussion::Tambourine;
+    };
+    for( size_t i = 0; i < inVenue.m_vocalCues.size(); ++i )
+    {
+        const TimedCueData& cue = inVenue.m_vocalCues[i];
+        if( cue.m_name.find( "_start" ) == std::string::npos ) continue;
+        PercussionSpan span;
+        span.Start = cue.m_time;
+        span.End = 1e9f;
+        span.Kind = kindOf( cue.m_name );
+        for( size_t j = i + 1; j < inVenue.m_vocalCues.size(); ++j )
+        {
+            if( inVenue.m_vocalCues[j].m_name.find( "_end" ) != std::string::npos && kindOf( inVenue.m_vocalCues[j].m_name ) == span.Kind )
+            {
+                span.End = inVenue.m_vocalCues[j].m_time;
+                break;
+            }
+        }
+        m_percussion.push_back( span );
+    }
+    const auto covered = [this]( float inTime ) {
+        for( const PercussionSpan& span : m_percussion )
+        {
+            if( inTime >= span.Start - 0.05f && inTime <= span.End + 0.05f ) return true;
+        }
+        return false;
+    };
+    std::vector<PercussionSpan> loose;
+    for( float hit : m_percussionHits )
+    {
+        if( covered( hit ) ) continue;
+        if( !loose.empty() && hit - loose.back().End < 2.f ) loose.back().End = hit + 0.4f;
+        else loose.push_back( { hit - 0.4f, hit + 0.4f, Percussion::Tambourine } );
+    }
+    m_percussion.insert( m_percussion.end(), loose.begin(), loose.end() );
+    std::sort( m_percussion.begin(), m_percussion.end(), []( const PercussionSpan& a, const PercussionSpan& b ) { return a.Start < b.Start; } );
+}
+
+
+void Band::DeriveHarmonies( const VenueData& inVenue )
+{
+    // Backing vocals from the harmony parts, for charts whose VENUE has no singalong notes:
+    // HARM2 to the guitarist, HARM3 to the bassist (or whoever else has a mic), each run of notes
+    // without a long rest one singalong.
+    if( !m_singalong.empty() )
+    {
+        return;
+    }
+    std::array<bool, VenueData::MemberCount> taken{};
+    const int preferences[2][4] = { { VenueData::Guitar, VenueData::Bass, VenueData::Keys, VenueData::Drums }, { VenueData::Bass, VenueData::Guitar, VenueData::Keys, VenueData::Drums } };
+    for( int part = 1; part < VenueData::kHarmonyParts; ++part )
+    {
+        const std::vector<VenueData::SpanData>& notes = inVenue.m_harmonyNotes[part];
+        if( notes.empty() ) continue;
+        int singer = -1;
+        for( int member : preferences[part - 1] )
+        {
+            if( HasMember( member ) && !taken[member] )
+            {
+                singer = member;
+                break;
+            }
+        }
+        if( singer < 0 ) continue;
+        taken[singer] = true;
+        for( const VenueData::SpanData& note : notes )
+        {
+            if( !m_singalong.empty() && m_singalong.back().m_member == singer && note.m_start - m_singalong.back().m_end < 0.6f )
+            {
+                m_singalong.back().m_end = std::max( m_singalong.back().m_end, note.m_end );
+            }
+            else
+            {
+                m_singalong.push_back( { note.m_start, note.m_end, singer } );
+            }
+        }
+    }
+    std::sort( m_singalong.begin(), m_singalong.end(), []( const VenueData::SpanData& a, const VenueData::SpanData& b ) { return a.m_start < b.m_start; } );
+}
+
+
+const Band::PercussionSpan* Band::PercussionAt( double inSeconds ) const
+{
+    for( const PercussionSpan& span : m_percussion )
+    {
+        if( inSeconds < span.Start ) break;
+        if( inSeconds <= span.End ) return &span;
+    }
+    return nullptr;
+}
+
+
+float Band::PercussionStrike( double inSeconds, double inBeat ) const
+{
+    // A sharp strike on each charted hit, fading over a tenth of a second; on the beat in a
+    // section with no hits.
+    auto it = std::upper_bound( m_percussionHits.begin(), m_percussionHits.end(), static_cast<float>( inSeconds ) );
+    if( it == m_percussionHits.begin() || inSeconds - *( it - 1 ) > 1.5 )
+    {
+        return m_percussionHits.empty() || it == m_percussionHits.begin() ? Pulse( inBeat, 4.0 ) : 0.f;
+    }
+    return std::exp( -static_cast<float>( inSeconds - *( it - 1 ) ) * 14.f );
+}
+
+
+float Band::AwayFromMic( double inSeconds, uint32_t* outBreak ) const
+{
+    // The singer holds the mic through a whole line, breaths and short rests included; only a
+    // real break between lines sends them off to work the stage, lingering a moment after the
+    // line and back at the mic before the next one. From the clock alone, so it's the same at
+    // any frame rate and after a seek.
+    constexpr float kLinger = 0.8f;   // at the mic after a line ends
+    constexpr float kReturn = 1.2f;   // back at the mic before the next line starts
+    constexpr float kWalk = 1.2f;     // to walk off, or back
+    constexpr float kShortest = kLinger + kReturn + 2.f * kWalk + 1.f;   // shorter gaps stay put
+    // The chart's lines (its phrases, notes 105/106) when it has them, else the sung notes.
+    const std::vector<VenueData::SpanData>& lines = m_vocalPhrases.empty() ? m_vocalNotes : m_vocalPhrases;
+    const float t = static_cast<float>( inSeconds );
+    auto next = std::upper_bound( lines.begin(), lines.end(), t, []( float time, const VenueData::SpanData& s ) { return time < s.m_start; } );
+    float lastEnd = -1e6f;
+    // Notes can overlap: the latest end of the last few closes the line so far.
+    for( auto it = next - std::min<std::ptrdiff_t>( 8, next - lines.begin() ); it != next; ++it )
+    {
+        lastEnd = std::max( lastEnd, it->m_end );
+    }
+    const float nextStart = next != lines.end() ? next->m_start : 1e6f;
+    if( outBreak ) *outBreak = static_cast<uint32_t>( next - lines.begin() );
+    if( t <= lastEnd || nextStart - lastEnd < kShortest )
+    {
+        return 0.f;
+    }
+    const float leaving = VenueTiming::Smooth( ( t - lastEnd - kLinger ) / kWalk );
+    const float returning = VenueTiming::Smooth( ( nextStart - kReturn - t ) / kWalk );
+    return std::min( leaving, returning );
 }
 
 
@@ -846,12 +1129,13 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     const float pulse = Pulse( inBeat );
     float open = 0.f;
     const bool singing = Singing( VenueData::Vocals, inSeconds, &open );
-    // Away from the mic between lines: wander, and work the crowd.
-    const float wander = singing ? 0.f : 1.f;
-    ioMember.Energy += ( wander - ioMember.Energy ) * 0.04f;
-    const float away = ioMember.Energy;
+    // At the mic through a line; out working the crowd between lines.
+    uint32_t gap = 0;
+    const float away = AwayFromMic( inSeconds, &gap );
+    const bool atMic = away < 0.2f;
+    const bool out = away > 0.85f;
     pose.Offset = glm::vec3( away * 1.3f * std::sin( t * 0.27f + ioMember.Phase ), 0.f, -away * 0.5f );
-    if( intense && !singing )
+    if( intense && out )
     {
         // Jumps on the downbeats.
         const double measure = inBeat / 2.0;
@@ -859,9 +1143,9 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
         pose.Offset.y = 0.35f * std::max( 0.f, std::sin( hop * kPi * 2.f ) ) * ( hop < 0.5f ? 1.f : 0.f );
     }
     pose.Mouth = open;
-    pose.Lean = singing ? 8.f : 2.f + 6.f * pulse;
-    pose.Nod = singing ? -6.f + 3.f * open : 10.f * pulse - 4.f;
-    pose.HeadTurn = singing ? 0.f : 30.f * std::sin( t * 0.5f + ioMember.Phase );
+    pose.Lean = atMic ? 8.f : 2.f + 6.f * pulse;
+    pose.Nod = singing ? -6.f + 3.f * open : atMic ? 4.f * pulse - 3.f : 10.f * pulse - 4.f;
+    pose.HeadTurn = away * 30.f * std::sin( t * 0.5f + ioMember.Phase );
     pose.Side = 4.f * std::sin( static_cast<float>( inBeat ) * kPi * 0.5f );
     pose.Legs[0].Spread = 6.f;
     pose.Legs[1].Spread = 6.f;
@@ -869,18 +1153,20 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
 
     Puppet::Arm& micArm = pose.Arms[1];
     Puppet::Arm& freeArm = pose.Arms[0];
-    if( singing )
+    // What they do with their hands on this break, the same every time it plays.
+    const float habit = VenueTiming::Noise( gap, 23u );
+    if( atMic )
     {
-        // A hand on the mic; the other one rides the melody.
+        // A hand on the mic; the other one rides the melody while singing, else hangs loose.
         micArm.Reach = true;
-        micArm.Target = glm::vec3( 0.02f, 1.5f, 0.32f ) - pose.Offset * 0.f;
+        micArm.Target = glm::vec3( 0.02f, 1.5f, 0.32f );
         micArm.Pole = glm::vec3( 1.f, -1.f, 0.f );
         const float phrase = VenueTiming::Noise( static_cast<uint32_t>( t * 0.5f ), 3u );
-        freeArm.Raise = 30.f + 60.f * phrase + 15.f * open;
-        freeArm.Spread = 25.f + 20.f * phrase;
-        freeArm.Elbow = 40.f;
+        freeArm.Raise = singing ? 30.f + 60.f * phrase + 15.f * open : 15.f + 5.f * pulse;
+        freeArm.Spread = singing ? 25.f + 20.f * phrase : 15.f;
+        freeArm.Elbow = singing ? 40.f : 25.f;
     }
-    else if( intense )
+    else if( out && intense )
     {
         // Fist pumps on the beat.
         micArm.Raise = 150.f + 25.f * pulse;
@@ -890,7 +1176,7 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
         freeArm.Spread = 20.f;
         freeArm.Elbow = 70.f;
     }
-    else
+    else if( out && habit < 0.4f )
     {
         // Clapping along over their head.
         const float clap = Pulse( inBeat, 4.0 );
@@ -898,7 +1184,70 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
         micArm.Spread = freeArm.Spread = 4.f + 22.f * ( 1.f - clap );
         micArm.Elbow = freeArm.Elbow = 25.f;
     }
+    else if( out && habit < 0.75f )
+    {
+        // An arm out to the crowd, swept slowly across them.
+        micArm.Raise = 95.f + 10.f * pulse;
+        micArm.Spread = 30.f + 25.f * std::sin( t * 0.6f + ioMember.Phase );
+        micArm.Elbow = 10.f;
+        freeArm.Raise = 15.f;
+        freeArm.Spread = 15.f;
+        freeArm.Elbow = 30.f;
+    }
+    else
+    {
+        // Walking: arms loose, swinging a little with the beat.
+        const float swing = std::sin( static_cast<float>( inBeat ) * kPi );
+        micArm.Raise = 12.f + 8.f * swing;
+        micArm.Spread = 12.f;
+        micArm.Elbow = 25.f;
+        freeArm.Raise = 12.f - 8.f * swing;
+        freeArm.Spread = 12.f;
+        freeArm.Elbow = 25.f;
+    }
+    // Percussion sections (the vocal part's tambourine, cowbell or clap), struck on the chart's
+    // hits. The free hand plays, and the mic hand helps when it isn't on the mic.
+    const PercussionSpan* percussion = singing ? nullptr : PercussionAt( inSeconds );
+    const float strike = percussion ? PercussionStrike( inSeconds, inBeat ) : 0.f;
+    if( percussion && percussion->Kind == Percussion::Clap )
+    {
+        micArm.Reach = freeArm.Reach = false;
+        micArm.Raise = freeArm.Raise = 100.f;
+        micArm.Spread = freeArm.Spread = 4.f + 26.f * ( 1.f - strike );
+        micArm.Elbow = freeArm.Elbow = 45.f;
+    }
+    else if( percussion && percussion->Kind == Percussion::Tambourine )
+    {
+        freeArm.Reach = false;
+        freeArm.Raise = 55.f + 45.f * strike;
+        freeArm.Spread = 30.f;
+        freeArm.Elbow = 75.f - 35.f * strike;
+    }
+    else if( percussion && percussion->Kind == Percussion::Cowbell )
+    {
+        freeArm.Reach = false;
+        freeArm.Raise = 50.f;
+        freeArm.Spread = 15.f;
+        freeArm.Elbow = 95.f;
+        if( !atMic )
+        {
+            micArm.Reach = false;
+            micArm.Raise = 35.f + 35.f * strike;
+            micArm.Spread = 8.f;
+            micArm.Elbow = 85.f - 30.f * strike;
+        }
+    }
     ioMember.Body.Apply( pose );
+    // The instrument in the playing hand; hidden (shrunk) the rest of the time.
+    const glm::quat spine = ioMember.Body.SpineRotation();
+    const auto hold = [&]( const EntityHandle& inProp, bool inShown, const glm::quat& inTurn ) {
+        if( !inProp ) return;
+        Transform& transform = inProp->GetComponent<Transform>();
+        transform.SetScale( inShown ? Vector3( 1.f, 1.f, 1.f ) : Vector3( 0.001f, 0.001f, 0.001f ) );
+        if( inShown ) Puppet::PlacePiece( inProp, ioMember.Body.Hand( 0 ), spine * inTurn );
+    };
+    hold( ioMember.Tambourine, percussion && percussion->Kind == Percussion::Tambourine, Axis( 75.f, kX ) * Axis( 25.f * strike, kZ ) );
+    hold( ioMember.Cowbell, percussion && percussion->Kind == Percussion::Cowbell, Axis( 20.f, kX ) );
 }
 
 
@@ -962,6 +1311,10 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
             }
             continue;
         }
+        // A soloist walks out front and back over a moment (snapped on a seek).
+        const float solo = StateOf( index, inSeconds ) == "play_solo" ? 1.f : 0.f;
+        const bool seeked = std::fabs( inSeconds - m_lastSeconds ) > 0.5;
+        member.Solo = seeked ? solo : member.Solo + ( solo - member.Solo ) * ( 1.f - std::exp( -std::clamp( inDeltaTime, 0.f, 0.1f ) * 3.f ) );
         switch( index )
         {
         case VenueData::Drums: UpdateDrums( member, inSeconds, beat, inCrowdEnergy, inDeltaTime ); break;
@@ -1018,4 +1371,24 @@ Vector3 Band::HandsOf( int inMember ) const
 Vector3 Band::FeetOf( int inMember ) const
 {
     return VenueLayout::kMemberSpots[std::clamp( inMember, 0, 4 )];
+}
+
+
+bool Band::NeckOf( int inMember, Vector3& outHeadstock, Vector3& outBody, Vector3& outFace, Vector3& outEdge ) const
+{
+    if( !HasMember( inMember ) || !m_members[inMember].Instrument || m_members[inMember].NeckLength <= 0.f )
+    {
+        return false;
+    }
+    // In the guitar's own space (BuildStringed) the neck runs along -x from the body, the face
+    // toward +z, the neck's upper edge toward +y; taken through its world matrix, so the camera
+    // sits exactly on what's drawn.
+    const Member& member = m_members[inMember];
+    const Matrix4& world = member.Instrument->GetComponent<Transform>().GetLocalToWorldMatrix();
+    const auto at = [&]( const glm::vec3& inLocal ) { return world.TransformPoint( Vector3( inLocal ) ) - VenueLayout::kVenueOrigin; };
+    outHeadstock = at( glm::vec3( -0.26f - member.NeckLength, 0.f, 0.02f ) );
+    outBody = at( glm::vec3( 0.05f, 0.f, 0.02f ) );
+    outFace = at( glm::vec3( 0.f, 0.f, 1.f ) ) - at( glm::vec3( 0.f ) );
+    outEdge = at( glm::vec3( 0.f, 1.f, 0.f ) ) - at( glm::vec3( 0.f ) );
+    return true;
 }
