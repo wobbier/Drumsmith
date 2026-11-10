@@ -22,6 +22,10 @@ public:
     void Build( World& inWorld, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, float inSongLength, bool inMusicVideo, const Band* inBand );
     void Clear();
     void Update( double inSeconds, float inDeltaTime );
+    // A crowd surfer going up cuts to them: a handheld camera in the photo pit follows them over
+    // the crowd's heads until they reach the barricade, then cuts back to the scheduled shot.
+    // Called each frame before Update (inPosition in venue space).
+    void FollowSurfer( bool inUp, const Vector3& inPosition );
 
     const EntityHandle& MainCamera() const { return m_main; }
     // The back of the room (venue z): wide shots stay in front of it.
@@ -48,7 +52,8 @@ public:
 
 private:
     // Neck: mounted on the subject's headstock, looking down the frets (guitar solos).
-    enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck };
+    // Surfer: from the photo pit, following the crowd surfer (FollowSurfer).
+    enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck, Surfer };
 
     struct Plan
     {
@@ -92,6 +97,10 @@ private:
     // outUp is world up, except for the neck camera, which rolls with the guitar.
     void Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3& outTarget, float& outFov, Vector3* outUp = nullptr ) const;
     Vector3 SubjectPoint( const Plan& inPlan, bool inHead ) const;
+    // Lead room: a one-member shot is turned so its subject stands off to one side, clear of the
+    // highway drawn up the middle of the screen, looking across the frame (0: the shot has none).
+    float LeadSideFor( const Plan& inPlan, const Vector3& inEye, const Vector3& inTarget ) const;
+    static Vector3 LeadRoom( const Vector3& inEye, const Vector3& inTarget, float inSide, float inFov, float inAspect );
     static Grade GradeFor( const std::string& inLook );
     void ApplyGrade( float inDeltaTime );
     void UpdateFeed( double inSeconds, float inDeltaTime, int inCutIndex );
@@ -127,4 +136,9 @@ private:
     float m_fov = 45.f;
     int m_framedCut = -2;
     std::string m_framedShot;
+    float m_leadSide = 0.f;    // this shot's lead room (LeadSideFor), chosen on the cut
+    // The crowd surfer being followed (FollowSurfer); the pit camera's side is chosen as they go up.
+    bool m_surferUp = false;
+    Vector3 m_surferPosition;
+    float m_surferSide = 1.f;
 };

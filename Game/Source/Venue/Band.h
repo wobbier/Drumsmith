@@ -23,6 +23,8 @@ public:
 
     // Venue-space points for the director and the lights: a member's head, chest and hands.
     Vector3 HeadOf( int inMember ) const;
+    // Which way the member's face looks (venue space, unit length).
+    Vector3 GazeOf( int inMember ) const;
     Vector3 ChestOf( int inMember ) const;
     Vector3 HandsOf( int inMember ) const;
     Vector3 FeetOf( int inMember ) const;
@@ -79,6 +81,15 @@ private:
         EntityHandle Cowbell;
         EntityHandle Instrument;   // guitar or bass (a group), the mic for the singer
         float NeckLength = 0.f;    // guitar or bass, for the neck camera
+        // The guitar's pose relative to the figure's step (pose.Offset), damped: it hangs on a
+        // strap and has weight, so it follows the torso's lean and bob without its jerks.
+        // Two cascaded eases (a critically damped follow), the second stage drawn.
+        // The guitar on its strap (SwingInstrument): springs on its place and its tilt.
+        glm::vec3 GuitarAt{};
+        glm::vec3 GuitarVelocity{};
+        glm::quat GuitarTilt{ 1.f, 0.f, 0.f, 0.f };
+        glm::vec3 GuitarSpin{};    // angular velocity, radians a second about each world axis
+        bool GuitarHung = false;   // false: snap on the next swing (first frame, a seek)
         std::array<EntityHandle, 2> Sticks;
         EntityHandle MicStand;
         float Phase = 0.f;         // a per-member offset for idle motion
@@ -100,7 +111,9 @@ private:
     float PercussionStrike( double inSeconds, double inBeat ) const;
 
     void UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float inEnergy, float inDeltaTime );
-    void UpdateStringed( Member& ioMember, int inIndex, double inSeconds, double inBeat, float inEnergy );
+    void UpdateStringed( Member& ioMember, int inIndex, double inSeconds, double inBeat, float inEnergy, float inDeltaTime );
+    // Eases a guitar or bass toward where the torso holds it and places it; returns where it is.
+    void SwingInstrument( Member& ioMember, const glm::vec3& inOffset, glm::vec3& ioPosition, glm::quat& ioRotation, float inDeltaTime );
     void UpdateVocals( Member& ioMember, double inSeconds, double inBeat, float inEnergy );
     void UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float inEnergy );
     void UpdateKit( float inDeltaTime );

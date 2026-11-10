@@ -80,6 +80,8 @@ public:
     glm::vec3 Shoulder( int inSide ) const { return m_shoulders[inSide]; }
     glm::vec3 Hand( int inSide ) const { return m_hands[inSide]; }
     glm::quat SpineRotation() const { return m_spine; }
+    // The head's rotation (puppet space); the face looks along its +z.
+    glm::quat HeadRotation() const { return m_headRotation; }
     glm::vec3 SpineBase() const { return m_spineBase; }
     float Scale() const { return m_look.Height; }
     float ArmLength() const { return ( kUpperArm + kForearm ) * m_look.Height; }
@@ -107,6 +109,7 @@ private:
     glm::vec3 m_chest{ 0.f };
     glm::vec3 m_headPos{ 0.f };
     glm::quat m_spine{ 1.f, 0.f, 0.f, 0.f };
+    glm::quat m_headRotation{ 1.f, 0.f, 0.f, 0.f };
     glm::vec3 m_spineBase{ 0.f };
     std::array<glm::vec3, 2> m_shoulders{};
     std::array<glm::vec3, 2> m_hands{};

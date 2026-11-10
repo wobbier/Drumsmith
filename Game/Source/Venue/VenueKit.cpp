@@ -1,5 +1,6 @@
 #include "Venue/VenueKit.h"
 #include "Components/Graphics/Mesh.h"
+#include "Components/Graphics/Model.h"
 #include "Components/Transform.h"
 #include "Engine/World.h"
 #include "Materials/DiffuseMaterial.h"
@@ -52,6 +53,20 @@ EntityHandle VenueKit::Group( const char* inName, Transform* inParent, const Vec
     }
     transform.SetPosition( inPosition );
     m_entities.push_back( entity );
+    return entity;
+}
+
+
+EntityHandle VenueKit::Prop( const char* inPath, const Vector3& inPosition, float inScale, float inYaw, Transform* inParent )
+{
+    EntityHandle entity = Group( "Venue prop", inParent, inPosition );
+    if( entity )
+    {
+        Transform& transform = entity->GetComponent<Transform>();
+        transform.SetScale( Vector3( inScale, inScale, inScale ) );
+        transform.SetRotation( Vector3( 0.f, inYaw, 0.f ) );
+        entity->AddComponent<Model>( std::string( inPath ) );
+    }
     return entity;
 }
 

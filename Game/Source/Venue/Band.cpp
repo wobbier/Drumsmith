@@ -856,7 +856,62 @@ void Band::UpdateKit( float inDeltaTime )
 }
 
 
-void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, double inBeat, float inEnergy )
+void Band::SwingInstrument( Member& ioMember, const glm::vec3& inOffset, glm::vec3& ioPosition, glm::quat& ioRotation, float inDeltaTime )
+{
+    // A guitar on a strap, floating: the neck camera is bolted to it, so every jerk it makes is
+    // the picture's. Held relative to the figure's step (a solo's walk out front, leaning into a
+    // mic), which is already eased, so it doesn't trail a walking player. The torso's lean, bob
+    // and crouch it follows on damped springs: the strap holds its place softly, and it tilts on
+    // a slower, looser spring that swings a little past and settles, so the beat's bob becomes a
+    // slow sway and a sudden move a float, never a snap.
+    // Measured on Journey's solo at 60 fps, at the neck camera: peak acceleration 0.7 m/s² against
+    // the torso's 75 (and 3.2 for the old two-lag filter). Softer than this and the guitar visibly
+    // lags the body.
+    constexpr float kHoldRate = 5.f;      // place: radians a second, critically damped
+    constexpr float kHoldDamping = 1.f;
+    constexpr float kSwayRate = 3.f;      // tilt: looser, swings a few percent past
+    constexpr float kSwayDamping = 0.7f;
+    const glm::vec3 at = ioPosition - inOffset;
+    if( !ioMember.GuitarHung )
+    {
+        ioMember.GuitarAt = at;
+        ioMember.GuitarVelocity = glm::vec3( 0.f );
+        ioMember.GuitarTilt = ioRotation;
+        ioMember.GuitarSpin = glm::vec3( 0.f );
+        ioMember.GuitarHung = true;
+    }
+    else
+    {
+        // Small fixed steps, so the springs behave the same at any frame rate (and through the
+        // venue's stepped clock).
+        const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
+        const int steps = std::max( 1, static_cast<int>( std::ceil( dt * 240.f ) ) );
+        const float h = dt / static_cast<float>( steps );
+        for( int i = 0; i < steps; ++i )
+        {
+            ioMember.GuitarVelocity += ( ( at - ioMember.GuitarAt ) * ( kHoldRate * kHoldRate ) - ioMember.GuitarVelocity * ( 2.f * kHoldDamping * kHoldRate ) ) * h;
+            ioMember.GuitarAt += ioMember.GuitarVelocity * h;
+            // The tilt still to go, as an axis times an angle (the short way round).
+            glm::quat error = ioRotation * glm::conjugate( ioMember.GuitarTilt );
+            if( error.w < 0.f ) error = -error;
+            const glm::vec3 axis( error.x, error.y, error.z );
+            const float sine = glm::length( axis );
+            const glm::vec3 togo = sine > 1e-6f ? axis * ( 2.f * std::atan2( sine, error.w ) / sine ) : axis * 2.f;
+            ioMember.GuitarSpin += ( togo * ( kSwayRate * kSwayRate ) - ioMember.GuitarSpin * ( 2.f * kSwayDamping * kSwayRate ) ) * h;
+            const float turn = glm::length( ioMember.GuitarSpin ) * h;
+            if( turn > 1e-7f )
+            {
+                ioMember.GuitarTilt = glm::normalize( glm::angleAxis( turn, ioMember.GuitarSpin / ( turn / h ) ) * ioMember.GuitarTilt );
+            }
+        }
+    }
+    ioPosition = ioMember.GuitarAt + inOffset;
+    ioRotation = ioMember.GuitarTilt;
+    Puppet::PlacePiece( ioMember.Instrument, ioPosition, ioRotation );
+}
+
+
+void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, double inBeat, float inEnergy, float inDeltaTime )
 {
     Puppet::Pose& pose = ioMember.Pose;
     pose = Puppet::Pose();
@@ -904,11 +959,13 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     // The guitar hangs off the torso, its neck up and to the player's left.
     const glm::quat spine = ioMember.Body.SpineRotation();
     const float neckAngle = -24.f - 10.f * energy * pulse * ( 1.f - soloing ) - 24.f * soloing;
-    const glm::quat guitarRotation = spine * Axis( neckAngle, kZ ) * Axis( -8.f, kY );
-    const glm::vec3 guitarPosition = ioMember.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.2f, 0.17f );
+    // Damped (SwingInstrument): the hands below reach for where the guitar is, not where the
+    // torso would hold it, so they stay on the strings and the neck camera rides it steadily.
+    glm::quat guitarRotation = spine * Axis( neckAngle, kZ ) * Axis( -8.f, kY );
+    glm::vec3 guitarPosition = ioMember.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.2f, 0.17f );
     if( ioMember.Instrument )
     {
-        Puppet::PlacePiece( ioMember.Instrument, guitarPosition, guitarRotation );
+        SwingInstrument( ioMember, pose.Offset, guitarPosition, guitarRotation, inDeltaTime );
     }
     int count = 0;
     const float strum = idle ? 0.f : StrumPhase( ioMember, inSeconds, count );
@@ -969,7 +1026,13 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     strumArm.Pole = glm::vec3( 1.f, -0.4f, -1.f );
     Puppet::Arm& fretArm = pose.Arms[0];
     fretArm.Reach = true;
-    fretArm.Target = guitarPosition + guitarRotation * glm::vec3( -0.25f - neck * ( 0.15f + 0.7f * fret ), -0.03f - 0.02f * wrap, 0.05f + 0.015f * wrap + lift );
+    // 0 is the nut, 1 up toward the body: between the frets BuildStringed lays out (the scale
+    // length's spacing, the sixteenth at the body), from just behind the first to the fourteenth.
+    const float nut = -0.18f - neck;
+    const float scale = neck / ( 1.f - std::pow( 2.f, -16.f / 12.f ) );
+    const float handFret = 0.5f + 13.5f * fret;
+    const float handX = nut + scale * ( 1.f - std::pow( 2.f, -handFret / 12.f ) );
+    fretArm.Target = guitarPosition + guitarRotation * glm::vec3( handX, -0.03f - 0.02f * wrap, 0.05f + 0.015f * wrap + lift );
     fretArm.Pole = glm::vec3( -0.3f, -1.f, -0.3f );
     ioMember.Body.Apply( pose );
     (void)inEnergy;
@@ -1307,19 +1370,32 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
             if( member.Instrument && index != VenueData::Vocals )
             {
                 const glm::quat spine = member.Body.SpineRotation();
-                Puppet::PlacePiece( member.Instrument, member.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.15f, 0.17f ), spine * Axis( -10.f, kZ ) );
+                glm::vec3 position = member.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.15f, 0.17f );
+                glm::quat rotation = spine * Axis( -10.f, kZ );
+                if( index == VenueData::Guitar || index == VenueData::Bass )
+                {
+                    SwingInstrument( member, pose.Offset, position, rotation, inDeltaTime );
+                }
+                else
+                {
+                    Puppet::PlacePiece( member.Instrument, position, rotation );
+                }
             }
             continue;
         }
         // A soloist walks out front and back over a moment (snapped on a seek).
         const float solo = StateOf( index, inSeconds ) == "play_solo" ? 1.f : 0.f;
         const bool seeked = std::fabs( inSeconds - m_lastSeconds ) > 0.5;
+        if( seeked )
+        {
+            member.GuitarHung = false;
+        }
         member.Solo = seeked ? solo : member.Solo + ( solo - member.Solo ) * ( 1.f - std::exp( -std::clamp( inDeltaTime, 0.f, 0.1f ) * 3.f ) );
         switch( index )
         {
         case VenueData::Drums: UpdateDrums( member, inSeconds, beat, inCrowdEnergy, inDeltaTime ); break;
         case VenueData::Guitar:
-        case VenueData::Bass: UpdateStringed( member, index, inSeconds, beat + ( index == VenueData::Bass ? 0.03 : 0.0 ), inCrowdEnergy ); break;
+        case VenueData::Bass: UpdateStringed( member, index, inSeconds, beat + ( index == VenueData::Bass ? 0.03 : 0.0 ), inCrowdEnergy, inDeltaTime ); break;
         case VenueData::Vocals: UpdateVocals( member, inSeconds, beat, inCrowdEnergy ); break;
         case VenueData::Keys: UpdateKeys( member, inSeconds, beat, inCrowdEnergy ); break;
         default: break;
@@ -1349,6 +1425,15 @@ Vector3 Band::HeadOf( int inMember ) const
     if( !HasMember( inMember ) ) return VenueLayout::kMemberSpots[std::clamp( inMember, 0, 4 )] + Vector3( 0.f, 1.6f, 0.f );
     const Member& member = m_members[inMember];
     return ToVenue( member.Group ? &member.Group->GetComponent<Transform>() : nullptr, member.Body.HeadCentre() );
+}
+
+
+Vector3 Band::GazeOf( int inMember ) const
+{
+    if( !HasMember( inMember ) ) return Vector3( 0.f, 0.f, -1.f );
+    const Member& member = m_members[inMember];
+    const glm::quat group = member.Group ? member.Group->GetComponent<Transform>().GetRotation().InternalQuat : glm::quat( 1.f, 0.f, 0.f, 0.f );
+    return Vector3( glm::normalize( group * member.Body.HeadRotation() * glm::vec3( 0.f, 0.f, 1.f ) ) );
 }
 
 

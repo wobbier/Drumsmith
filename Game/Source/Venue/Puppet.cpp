@@ -182,6 +182,7 @@ void Puppet::Apply( const Pose& inPose )
     const glm::vec3 neck = spineBase + m_spine * glm::vec3( 0.f, kSpine + 0.02f, 0.f );
     const glm::quat head = m_spine * Axis( inPose.HeadTurn, kY ) * Axis( inPose.Nod, kX ) * Axis( -inPose.HeadTilt, kZ );
     m_headPos = neck + head * glm::vec3( 0.f, 0.15f, 0.01f );
+    m_headRotation = head;
     PlacePiece( m_head, m_headPos, head );
     if( m_look.LongHair )
     {

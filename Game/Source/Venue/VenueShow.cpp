@@ -398,6 +398,114 @@ void VenueShow::BuildArena( Transform& inRoot )
     {
         m_kit.Box( Vector3( x, 2.2f, kArenaDeskZ + 1.f ), Vector3( 0.9f, 0.55f, 0.04f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 0.3f, 0.6f, 1.f ) );
     }
+    BuildArenaDetail( inRoot );
+}
+
+
+void VenueShow::BuildArenaDetail( Transform& inRoot )
+{
+    const Vector3 steel( 0.22f, 0.25f, 0.29f );
+    const Vector3 charcoal( 0.025f, 0.032f, 0.045f );
+    const Vector3 dark( 0.f, 0.f, 0.f );
+    const Vector3 cyan( 0.06f, 0.75f, 1.2f );
+    const Vector3 amber( 1.2f, 0.34f, 0.06f );
+    // Static accents stay modest: the chart-controlled washes remain the brightest elements.
+    const auto box = [&]( const Vector3& p, const Vector3& size, const Vector3& color ) {
+        return m_kit.Box( p, size, color, &inRoot );
+    };
+    const auto glow = [&]( const Vector3& p, const Vector3& size, const Vector3& color ) {
+        return m_kit.Box( p, size, dark, &inRoot, color );
+    };
+    const auto beam = [&]( const Vector3& a, const Vector3& b, float width ) {
+        const Vector3 delta = b - a;
+        EntityHandle piece = box( ( a + b ) * 0.5f, Vector3( width, width, delta.Length() ), steel );
+        if( piece ) piece->GetComponent<Transform>().LookDirection( delta.Normalized() );
+    };
+
+    // Twin portal frames and staggered LED fins give the stage a recognizable silhouette,
+    // leaving the video wall, lyrics and all performer positions clear.
+    for( float side : { -1.f, 1.f } )
+    {
+        for( int fin = 0; fin < 3; ++fin )
+        {
+            const float x = side * ( 6.8f + fin * 1.05f );
+            const float height = 8.f - fin * 1.2f;
+            box( Vector3( x, 1.2f + height * 0.5f, 10.05f ), Vector3( 0.65f, height, 0.38f ), charcoal );
+            for( int cell = 0; cell < 8; ++cell )
+            {
+                glow( Vector3( x, 1.4f + cell * ( height - 0.4f ) / 8.f, 9.84f ),
+                    Vector3( 0.48f, ( height - 0.4f ) / 8.f - 0.09f, 0.035f ), cell % 3 == 0 ? amber : cyan * 0.45f );
+            }
+        }
+        box( Vector3( side * 10.5f, 6.4f, 7.8f ), Vector3( 0.65f, 12.8f, 0.7f ), charcoal );
+        glow( Vector3( side * 10.5f, 6.4f, 7.42f ), Vector3( 0.08f, 12.4f, 0.04f ), cyan );
+        // Pleated wing curtains behind the side-screen towers.
+        for( int fold = 0; fold < 11; ++fold )
+            box( Vector3( side * ( 12.f + fold * 0.75f ), 5.4f, 8.8f + ( fold % 2 ) * 0.18f ),
+                Vector3( 0.72f, 10.8f, 0.35f ), fold % 2 ? Vector3( 0.055f, 0.025f, 0.035f ) : charcoal );
+        // Real speaker cones and cases make the wings read as a working touring stage.
+        for( int stack = 0; stack < 3; ++stack )
+            m_kit.Prop( "Assets/Models/Venue/Speaker.obj", Vector3( side * 8.2f, 1.2f + stack * 1.05f, 5.8f ), 1.f, 180.f, &inRoot );
+        for( int crate = 0; crate < 3; ++crate )
+            m_kit.Prop( "Assets/Models/Venue/RoadCase.obj", Vector3( side * ( 12.2f + crate * 1.4f ), 0.f, 5.2f + ( crate % 2 ) * 1.1f ), 1.f, side * 12.f, &inRoot );
+        // Stage access stairs, with warm tread markings.
+        for( int step = 0; step < 4; ++step )
+        {
+            const float height = ( step + 1 ) * 0.3f;
+            box( Vector3( side * 9.8f, height * 0.5f, 2.1f + step * 0.4f ), Vector3( 1.4f, height, 0.4f ), steel * 0.45f );
+            glow( Vector3( side * 9.8f, height + 0.01f, 1.92f + step * 0.4f ), Vector3( 1.25f, 0.025f, 0.035f ), amber * 0.4f );
+        }
+        // A concourse fascia and acoustic wall bays give the seating bowl a human scale.
+        box( Vector3( side * 21.45f, 7.2f, -18.f ), Vector3( 0.5f, 0.9f, 32.f ), charcoal );
+        glow( Vector3( side * 21.16f, 6.8f, -18.f ), Vector3( 0.04f, 0.06f, 32.f ), cyan * 0.55f );
+        for( int bay = 0; bay < 6; ++bay )
+        {
+            const float z = -5.f - bay * 6.6f;
+            box( Vector3( side * 21.55f, 13.4f, z ), Vector3( 0.45f, 10.f, 0.45f ), steel * 0.55f );
+            box( Vector3( side * 21.65f, 12.7f, z - 2.6f ), Vector3( 0.15f, 7.f, 4.2f ), Vector3( 0.065f, 0.075f, 0.1f ) );
+            glow( Vector3( side * 21.5f, 12.7f, z - 0.6f ), Vector3( 0.04f, 6.6f, 0.07f ), cyan * 0.35f );
+        }
+        // Segmented PA grilles, rigging cables and spreader bars on the existing hangs.
+        for( int cabinet = 0; cabinet < 8; ++cabinet )
+            box( Vector3( side * 11.5f, 8.85f + cabinet * 0.56f, -0.97f ), Vector3( 1.08f, 0.48f, 0.08f ), steel * 0.32f );
+        box( Vector3( side * 11.5f, 13.5f, -0.4f ), Vector3( 1.6f, 0.15f, 1.4f ), steel );
+    }
+    box( Vector3( 0.f, 12.8f, 7.8f ), Vector3( 21.65f, 0.65f, 0.7f ), charcoal );
+    glow( Vector3( 0.f, 12.8f, 7.42f ), Vector3( 21.f, 0.08f, 0.04f ), cyan );
+
+    // Open web roof trusses: depth and diagonal members instead of isolated solid bars.
+    for( float z : { -2.f, -11.f, -20.f, -29.f, -38.f } )
+    {
+        box( Vector3( 0.f, 18.1f, z ), Vector3( 42.f, 0.13f, 0.13f ), steel );
+        for( int bay = 0; bay < 14; ++bay )
+        {
+            const float x = -21.f + bay * 3.f;
+            beam( Vector3( x, 18.1f, z ), Vector3( x + 1.5f, 19.5f, z ), 0.1f );
+            beam( Vector3( x + 1.5f, 19.5f, z ), Vector3( x + 3.f, 18.1f, z ), 0.1f );
+        }
+    }
+    // Rear fascia, with vertical breaks echoing the stage's LED fins.
+    box( Vector3( 0.f, 8.f, kArenaBackWallZ + 0.3f ), Vector3( 43.f, 1.3f, 0.25f ), charcoal );
+    glow( Vector3( 0.f, 7.38f, kArenaBackWallZ + 0.45f ), Vector3( 43.f, 0.06f, 0.04f ), cyan * 0.55f );
+    for( float x : { -18.f, -12.f, -6.f, 0.f, 6.f, 12.f, 18.f } )
+    {
+        box( Vector3( x, 13.f, kArenaBackWallZ + 0.3f ), Vector3( 3.6f, 6.f, 0.25f ), charcoal );
+        glow( Vector3( x - 1.7f, 13.f, kArenaBackWallZ + 0.45f ), Vector3( 0.07f, 5.8f, 0.04f ), amber * 0.45f );
+    }
+    // FOH railings stay inside the crowd's existing KeepClear rectangle.
+    for( float side : { -1.f, 1.f } )
+    {
+        beam( Vector3( side * 2.9f, 1.9f, kArenaDeskZ - 1.8f ), Vector3( side * 2.9f, 1.9f, kArenaDeskZ + 1.8f ), 0.07f );
+        for( float z : { -1.8f, 0.f, 1.8f } )
+            box( Vector3( side * 2.9f, 1.4f, kArenaDeskZ + z ), Vector3( 0.07f, 1.f, 0.07f ), steel );
+        m_kit.Prop( "Assets/Models/Venue/RoadCase.obj", Vector3( side * 2.f, 0.9f, kArenaDeskZ - 1.f ), 0.8f, 0.f, &inRoot );
+    }
+    for( int channel = 0; channel < 16; ++channel )
+    {
+        const float x = -1.8f + channel * 0.24f;
+        box( Vector3( x, 1.83f, kArenaDeskZ + 0.55f ), Vector3( 0.025f, 0.02f, 0.55f ), charcoal );
+        glow( Vector3( x, 1.85f, kArenaDeskZ + 0.35f + ( channel % 4 ) * 0.1f ), Vector3( 0.09f, 0.025f, 0.045f ), channel % 3 == 0 ? amber : cyan );
+    }
 }
 
 
@@ -633,6 +741,9 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     const bool surfShot = shot.find( "crowdsurf" ) != std::string::npos || shot.find( "stagedive" ) != std::string::npos;
     m_crowd.SetSurfing( surfShot || ( m_crowd.Mood( seconds ) == "intense" && std::fmod( seconds, 53.0 ) < 1.0 ) );
     m_crowd.Update( seconds, inDeltaTime, m_performance );
+    Vector3 surfer;
+    const bool surferUp = m_crowd.SurferUp( surfer );
+    m_director.FollowSurfer( surferUp, surfer );
     m_band.Update( seconds, inDeltaTime, m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
     m_lyricBoard.Update( seconds );
     m_director.Update( seconds, inDeltaTime );

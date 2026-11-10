@@ -47,6 +47,7 @@ public:
 private:
     void BuildStage( Transform& inRoot );
     void BuildArena( Transform& inRoot );
+    void BuildArenaDetail( Transform& inRoot );
     void BuildClub( Transform& inRoot );
     void BuildFestival( Transform& inRoot );
     void FillHouse( Transform& inRoot, float inScale );

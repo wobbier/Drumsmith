@@ -91,6 +91,19 @@ void Director::Clear()
     m_feedSince = -100.0;
     m_framedCut = -2;
     m_framedShot.clear();
+    m_surferUp = false;
+}
+
+
+void Director::FollowSurfer( bool inUp, const Vector3& inPosition )
+{
+    if( inUp && !m_surferUp )
+    {
+        // Across the room from where they go up, so the shot looks over the crowd at them.
+        m_surferSide = inPosition.x > 0.f ? -1.f : 1.f;
+    }
+    m_surferUp = inUp;
+    m_surferPosition = inPosition;
 }
 
 
@@ -536,8 +549,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     if( inPlan.Frame == Framing::Neck && m_band && m_band->NeckOf( subject >= 0 ? subject : VenueData::Guitar, headstock, body, face, edge ) )
     {
         // Mounted out past the headstock and up off the fretboard, looking down the length of the
-        // neck at an angle to the body, the player beyond it. Rolled with the guitar, no drift;
-        // Update steadies it so the beat's bob doesn't shake it.
+        // neck at an angle to the body, the player beyond it. Rolled with the guitar, no drift, no
+        // easing: it's bolted on, and the guitar's float is what keeps it smooth.
         face = face.Normalized();
         edge = edge.Normalized();
         const Vector3 along = ( body - headstock ).Normalized();
@@ -648,6 +661,18 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         outFov = 60.f;
         drift = 10.f * side;
         break;
+    case Framing::Surfer:
+    {
+        // Up on a camera platform at the front of the pit, off to one side and looking down on
+        // them so they read against the crowd rather than among its raised arms, panning with them
+        // from the back of the room to the barricade: zoomed in while they're far off (about
+        // four metres of crowd across the frame), widening as they come.
+        outEye = Vector3( m_surferSide * 2.5f, 5.2f, VenueLayout::kBarricadeZ + 1.2f );
+        outTarget = m_surferPosition;
+        const float distance = std::max( ( outTarget - outEye ).Length(), 0.5f );
+        outFov = std::clamp( 2.f * std::atan( 2.f / distance ) * 180.f / kPi, 20.f, 65.f );
+        break;
+    }
     }
     if( inPlan.Static )
     {
@@ -671,6 +696,62 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     const Vector3 toward = ( outTarget - outEye ).Normalized();
     outEye = outEye + toward * ( dolly * progress );
     keepClear( outEye );
+}
+
+
+float Director::LeadSideFor( const Plan& inPlan, const Vector3& inEye, const Vector3& inTarget ) const
+{
+    // One member, framed on them: not wide group shots, the guitar's neck camera (bolted on),
+    // from behind, the kick drum or the crowd.
+    const bool framed = inPlan.Frame == Framing::Near || inPlan.Frame == Framing::CloseHead || inPlan.Frame == Framing::CloseHand || inPlan.Frame == Framing::Far;
+    if( !framed || inPlan.Subjects.size() != 1 || inPlan.Subjects[0] < 0 || !m_band || !m_band->HasMember( inPlan.Subjects[0] ) )
+    {
+        return 0.f;
+    }
+    // A sideways axis across the picture (either way: the side is relative to it, then turned
+    // back through it, so which way the screen's right is doesn't matter).
+    const Vector3 ahead = Vector3( inTarget.x - inEye.x, 0.f, inTarget.z - inEye.z );
+    if( ahead.Length() < 1e-3f )
+    {
+        return 0.f;
+    }
+    const Vector3 across = ahead.Normalized().Cross( Vector3::Up ).Normalized();
+    // Looking toward +across puts them on the -across side, looking into the frame over the
+    // highway. Looking down the lens: their side of the stage.
+    const int member = inPlan.Subjects[0];
+    const float looking = m_band->GazeOf( member ).Dot( across );
+    if( std::fabs( looking ) > 0.12f )
+    {
+        return looking > 0.f ? 1.f : -1.f;
+    }
+    const float standing = ( VenueLayout::kMemberSpots[member] - Vector3( 0.f, 0.f, 0.f ) ).Dot( across );
+    if( std::fabs( standing ) > 0.5f )
+    {
+        return standing > 0.f ? -1.f : 1.f;
+    }
+    return inPlan.Variant % 2 == 0 ? 1.f : -1.f;
+}
+
+
+Vector3 Director::LeadRoom( const Vector3& inEye, const Vector3& inTarget, float inSide, float inFov, float inAspect )
+{
+    // Turn the aim (about the vertical, through the eye) toward inSide * across, far enough that
+    // the subject, who was dead centre, sits 60% of the way out from the middle on the other side:
+    // past the highway's edge at head height, inside the frame.
+    constexpr float kOut = 0.6f;
+    const Vector3 toward = inTarget - inEye;
+    const Vector3 ahead( toward.x, 0.f, toward.z );
+    const float reach = ahead.Length();
+    if( reach < 1e-3f )
+    {
+        return inTarget;
+    }
+    const Vector3 forward = ahead * ( 1.f / reach );
+    const Vector3 across = forward.Cross( Vector3::Up ).Normalized();
+    const float halfWidth = std::tan( inFov * 0.5f * 3.14159265f / 180.f ) * std::max( inAspect, 0.1f );
+    const float angle = std::atan( kOut * halfWidth );
+    const Vector3 turned = ( forward * std::cos( angle ) + across * ( inSide * std::sin( angle ) ) ) * reach;
+    return inEye + Vector3( turned.x, toward.y, turned.z );
 }
 
 
@@ -887,16 +968,38 @@ void Director::Update( double inSeconds, float inDeltaTime )
             held = static_cast<float>( inSeconds ) - m_cuts[index].Time;
             m_shotName = m_cuts[index].Name;
         }
+        // A crowd surfer takes the shot until they reach the barricade.
+        if( m_surferUp )
+        {
+            plan = Plan();
+            plan.Frame = Framing::Surfer;
+            plan.Handheld = true;
+            index = -3;
+            held = 0.f;
+            m_shotName = "follow_surfer";
+        }
     }
     Vector3 eye;
     Vector3 target;
     float fov = 45.f;
     Vector3 up = Vector3::Up;
     Frame( plan, held, eye, target, fov, &up );
+    // The highway runs up the middle of the screen: a one-member shot puts its subject off to the
+    // side they're looking away from, so they look across the frame and aren't hidden under it.
+    // The side is chosen on the cut and held, so a turn of the head doesn't swing the shot.
+    const bool cut = index != m_framedCut || m_shotName != m_framedShot;
+    if( cut )
+    {
+        m_leadSide = LeadSideFor( plan, eye, target );
+    }
+    if( m_leadSide != 0.f )
+    {
+        target = LeadRoom( eye, target, m_leadSide, fov, m_main->GetComponent<Camera>().GetAspectRatio() );
+    }
     // The framing tracks the members' live positions, which bob, headbang and strum: following
     // them exactly shakes the whole picture. Ease toward it instead (the aim a little quicker
     // than the dolly), and snap on a cut.
-    if( index != m_framedCut || m_shotName != m_framedShot )
+    if( cut )
     {
         m_framedCut = index;
         m_framedShot = m_shotName;
@@ -907,13 +1010,12 @@ void Director::Update( double inSeconds, float inDeltaTime )
     }
     else if( plan.Frame == Framing::Neck )
     {
-        // The neck camera rides the guitar, which bobs with every beat: steadied like a
-        // stabilised mount, following its swing in about a fifth of a second without the shake.
-        const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
-        const float follow = 1.f - std::exp( -dt * 5.f );
-        m_eye = Lerp( m_eye, eye, follow );
-        m_target = Lerp( m_target, target, follow );
-        m_up = Lerp( m_up, up, follow ).Normalized();
+        // The neck camera is bolted to the guitar, like a GoPro on the headstock: no easing, it
+        // moves exactly as the guitar does. The guitar floats on its strap (Band::SwingInstrument),
+        // which is what keeps the picture from snapping.
+        m_eye = eye;
+        m_target = target;
+        m_up = up;
         m_fov = fov;
     }
     else

@@ -31,6 +31,12 @@ public:
     // A crowd surfer passes overhead toward the stage while this is on (the chart's crowd-surf and
     // stage-dive shots, or now and then when it's intense); the people under them hold them up.
     void SetSurfing( bool inSurfing ) { m_surfRequested = inSurfing; }
+    // Whether a crowd surfer is up, and where (venue space; the director follows them).
+    bool SurferUp( Vector3& outPosition ) const
+    {
+        outPosition = m_surfPosition;
+        return m_surfProgress >= 0.f && m_surfer.Root();
+    }
 
     // 0 .. 1: how hyped the crowd is now (the lights and band use it).
     float Energy() const { return m_energy; }
