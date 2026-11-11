@@ -2,6 +2,29 @@
 
 > Research pass for `BRIEF.md`, 2026-11-11, checked against the Drumsmith working tree of that date. Nothing is built. Sources are linked inline and listed in §10. A claim marked *(unverified)* came from a secondary source or a page that could not be read in full.
 
+## 0. Status (2026-11-11)
+
+Phase 1 is built and passes its bars. The code is in `~/Projects/Python/ChartGen` (local commits; it has no remote yet). `STATUS.md` there records each milestone's exit test and `BASELINE.md` the frozen numbers on the 20 test songs.
+
+| Bar (M8, test songs, real-kit view) | Result | Needed |
+|---|---|---|
+| Overall F1 within 50 ms | 0.814 | 0.70 |
+| Kick / snare | 0.944 / 0.898 | 0.80 / 0.75 |
+| Matched notes inside 30 ms | 97.1% | 80% |
+| Songs that convert and play to the results screen | 20 of 20 | all |
+
+What execution changed or settled in this plan:
+
+- **Section 4, the three decision rules** (dev): the mix alone scores 0.825, so MP3-only stands. True stems beat separated drums by 0.029, so stems stay optional. Separated drums beat the mix by 0.045, so separation stays on the critical path and the configuration without it is the fallback, not the default.
+- **Section 3.7 budgets.** With separation a five-minute song needs about a minute of model time on six threads of this machine (6 s without); peak memory is 2.6 to 2.9 GB, over the provisional 2 GB.
+- **Section 6, the references.** The gems depart from the kit more than stated: two-handed 16th hi-hats are charted as alternating snare and hi-hat gems (*Everlong*, *Crazy Train*) and a snare flam as snare plus yellow tom. The real-kit view is the animation strokes plus any gem they do not cover (second-pedal kicks).
+- **Section 3.5, lanes.** Ring time does not separate open from closed hi-hats, so Phase 1 writes every hi-hat closed. Tom pitch rank types only about half of tom hits as the animation track does; the animation's tom labels often disagree with pitch order. Ride versus crash by rule is right for 74% of matched hits.
+- **Section 2, stored BPM.** The lead-in before the first tracked beat rarely runs at the song's tempo, so the writer puts the song's tempo first at tick 0, followed by the real lead-in tempo at the same tick. The game stores the first and times by the second.
+- **Section 5, `--install`.** It converts the new folder in a sandbox copy of the project (an `Assets` of links with an empty `DLC`) and moves the finished folder in. The converter is never run over the real library.
+- **Converter findings**, filed: a fresh conversion of an original CRLF folder crashes on Linux (ME-357, reproduced); the album is never copied (ME-358); the stage drummer's table misreads notes 32, 40 and 41 and has no open hi-hat (ME-359).
+- **Not done:** the blind A/B needs a player (`out/ab/` holds the 20 pairs and a sheet), and the optional STRUM baseline of M3 was skipped.
+- **Phase 2 has started** with step 2, the typing model: on dev it types 81% of matched cymbal hits right (rules 74%) and 78% of hi-hats as open or closed. It is trained on the DLC and stays out of git (section 9, question 3).
+
 ## 1. Summary
 
 **Verdict: a plain MP3 is enough. Players never need to supply stems.** The best available drum transcriber is trained on full mixes, separate-then-detect pipelines have not clearly beaten it, and drums separated by Demucs transcribe almost as well as true stems. Separation stays in the pipeline as an internal step, because it gives the game a drum stem to mute on a miss and helps tell cymbals and toms apart (§4).
