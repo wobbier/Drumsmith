@@ -23,7 +23,12 @@ What execution changed or settled in this plan:
 - **Section 5, `--install`.** It converts the new folder in a sandbox copy of the project (an `Assets` of links with an empty `DLC`) and moves the finished folder in. The converter is never run over the real library.
 - **Converter findings**, filed: a fresh conversion of an original CRLF folder crashes on Linux (ME-357, reproduced); the album is never copied (ME-358); the stage drummer's table misreads notes 32, 40 and 41 and has no open hi-hat (ME-359).
 - **Not done:** the blind A/B needs a player (`out/ab/` holds the 20 pairs and a sheet), and the optional STRUM baseline of M3 was skipped.
-- **Phase 2 has started** with step 2, the typing model: on dev it types 81% of matched cymbal hits right (rules 74%) and 78% of hi-hats as open or closed. It is trained on the DLC and stays out of git (section 9, question 3).
+- **Phase 2 has started**, on dev only (the test songs are untouched since the baseline), with every Phase 2 model off by default:
+  - Step 1: ADTOF's network is now ChartGen's own code loading the converted ADTOF weights, so the unlicensed port is no longer a dependency. It matches the port to 4e-6.
+  - Step 2: the typing model types 81% of matched cymbal hits right (rules 74%) and 78% of hi-hats as open or closed (always closed: 62%). Toms did not improve.
+  - Step 4: learned reductions beat the rules for Hard (0.937 against 0.912) and Medium (0.887 against 0.866) and not for Easy, which stays with the rules.
+  - Into the game, step 1, for the transcriber: it exports to ONNX with the spectrogram in the graph and runs on ONNX Runtime and NumPy alone, 0.71 s for a 286 s song on six threads, 16.8 MB.
+  - The typing and reduction models are trained on the DLC and stay out of git (section 9, question 3). Step 3 (fine-tuning the transcriber to real-kit classes with velocity) needs the public datasets and the answers to section 9.
 
 ## 1. Summary
 
