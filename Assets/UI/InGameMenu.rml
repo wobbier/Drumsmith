@@ -5,7 +5,7 @@
     <link type="text/rcss" href="InGameMenu.rcss"/>
 </head>
 <body data-model="in_game">
-    <div id="pause-hint" data-if="!paused && !finished">Esc &#8212; Pause</div>
+    <div id="pause-hint" data-if="!paused && !finished">{{pause_hint}}</div>
     <div id="hud" data-if="playing && !finished">
         <div id="hud-score">{{score}}</div>
         <div id="hud-multiplier" data-class-hot="multiplier > 1">x{{multiplier}}</div>
@@ -65,6 +65,8 @@
         <div id="pause-options" data-if="options">
             <button id="options-back" class="menu-link green" data-event-click="back">Back<span class="underline"></span></button>
             <h2>OPTIONS</h2>
+            <label for="pause-master-volume">Master Volume ({{master_volume}}%)</label>
+            <input id="pause-master-volume" class="range" type="range" min="0" max="100" step="1" data-value="master_volume" data-event-change="master_volume(ev.value)"/>
             <label for="pause-audio-delay">Audio Delay ({{audio_delay}} ms)</label>
             <input id="pause-audio-delay" class="range" type="range" min="0" max="100" step="1" data-value="audio_delay" data-event-change="audio_delay(ev.value)"/>
             <label for="pause-video-delay">Visual Delay ({{video_delay}} ms)</label>

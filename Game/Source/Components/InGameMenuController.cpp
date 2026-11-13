@@ -6,6 +6,7 @@
 #include <Cores/UI/RmlUiCore.h>
 #include <Engine/Engine.h>
 #include <Engine/Input.h>
+#include <Engine/PlayerSettings.h>
 #include <Events/SceneEvents.h>
 #include <RmlUi/Core.h>
 #include <algorithm>
@@ -16,6 +17,26 @@ namespace
 {
     // The debug panel's autoplay modes, by debug_autoplay (NoteHighwayCore::GatherHits).
     constexpr const char* kAutoplayLabels[3] = { "OFF", "PERFECT", "SLOPPY" };
+
+
+    // The menu key. In the editor plain Escape belongs to Havana (it frees the mouse and hands
+    // input back to the editor while the song keeps playing), so the menu takes Shift+Escape there.
+    bool MenuKeyPressed( Input& inInput )
+    {
+        if( !inInput.WasKeyPressed( KeyCode::Escape ) ) return false;
+#if USING( ME_EDITOR )
+        return inInput.IsKeyDown( KeyCode::LeftShift ) || inInput.IsKeyDown( KeyCode::RightShift );
+#else
+        return true;
+#endif
+    }
+
+
+#if USING( ME_EDITOR )
+    constexpr const char* kPauseHint = "Shift+Esc \xE2\x80\x94 Pause";
+#else
+    constexpr const char* kPauseHint = "Esc \xE2\x80\x94 Pause";
+#endif
 }
 
 InGameMenuController::InGameMenuController()
@@ -50,9 +71,10 @@ void InGameMenuController::Update( float inDeltaTime )
     if( !m_modelReady )
     {
         ui->ModelEnsure( "in_game" );
-        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek" } )
+        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek", "master_volume" } )
             ui->ModelRegisterEvent( "in_game", event );
         ui->ModelSetString( "in_game", "status", "" );
+        ui->ModelSetString( "in_game", "pause_hint", kPauseHint );
         // The debug panel (F8): no fail, and a scrubber over the song.
         ui->ModelSetNumber( "in_game", "debug", CommandLine::Has( "--debug-panel" ) ? 1 : 0 );
         ui->ModelSetNumber( "in_game", "debug_nofail", CommandLine::Has( "--no-fail" ) ? 1 : 0 );
@@ -87,7 +109,8 @@ void InGameMenuController::Update( float inDeltaTime )
     }
     // On the results screen Escape leaves for the library instead of pausing.
     const bool finished = ui->ModelGetNumber( "in_game", "finished" ) != 0;
-    if( finished && GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
+    const bool menuKey = MenuKeyPressed( GetEngine().GetInput() );
+    if( finished && menuKey )
     {
         LoadSceneEvent load;
         load.Level = "Assets/TrackList.lvl";
@@ -97,7 +120,7 @@ void InGameMenuController::Update( float inDeltaTime )
     {
         ui->ModelSetNumber( "in_game", "debug", ui->ModelGetNumber( "in_game", "debug" ) == 0 );
     }
-    else if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
+    else if( menuKey )
     {
         if( m_options )
         {
@@ -170,6 +193,13 @@ void InGameMenuController::Update( float inDeltaTime )
                 seek.Fire();
             }
         }
+        else if( event == "master_volume" )
+        {
+            // The engine's player settings own it: applied to the master bus, saved once it settles.
+            const double percent = UIModel::ArgNumber( UIModel::LastEventArgs( *ui, "in_game" ), 0 );
+            if( percent >= 0.0 )
+                PlayerSettings::Get().SetValue( "Audio.Master", std::clamp( percent, 0.0, 100.0 ) / 100.0 );
+        }
         else if( event == "highway_speed" )
         {
             const json args = json::parse( ui->ModelLastEventArgs( "in_game" ), nullptr, false );
@@ -194,5 +224,7 @@ void InGameMenuController::Update( float inDeltaTime )
     ui->ModelSetNumber( "in_game", "options", m_options );
     ui->ModelSetNumber( "in_game", "audio_delay", settings.AudioLatency );
     ui->ModelSetNumber( "in_game", "video_delay", settings.VideoLatency );
+    const json master = PlayerSettings::Get().GetValue( "Audio.Master" );
+    ui->ModelSetNumber( "in_game", "master_volume", std::round( ( master.is_number() ? master.get<double>() : 1.0 ) * 100.0 ) );
     ui->ModelSetNumber( "in_game", "highway_speed", std::round( settings.HighwaySpeed * 100.f ) );
 }

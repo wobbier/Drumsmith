@@ -84,7 +84,7 @@ All network work runs on one worker thread, one `Transfer` at a time (`Web::Down
 
 ### Pause menu (`in_game`)
 
-Escape or Resume toggles the overlay and fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; `NoteHighwayCore` also stops ticking while paused. Options holds the two delay sliders (saved on Back) and Exit returns to the library. The controller focuses the right button after each panel change so a gamepad can drive it.
+Escape or Resume toggles the overlay (in editor builds **Shift+Escape**: plain Escape belongs to Havana, which frees the mouse and hands input to the editor while the song keeps playing; the `pause_hint` model value shows the right key, and the results screen's leave-for-library key follows the same rule) and fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; `NoteHighwayCore` also stops ticking while paused. Options holds the two delay sliders (saved on Back) and Exit returns to the library. The controller focuses the right button after each panel change so a gamepad can drive it.
 
 ### Track stats and vocal test
 
