@@ -11,6 +11,19 @@
 #include <algorithm>
 #include <utility>
 
+namespace
+{
+    // Long enough to smooth the step at a start or stop, short enough not to be heard as a fade.
+    constexpr float kFadeInSeconds = 0.02f;
+
+    unsigned long long MixerSamples( float inSeconds )
+    {
+        int rate = 48000;
+        GetEngine().AudioThread->GetSystem()->getSoftwareFormat( &rate, nullptr, nullptr );
+        return static_cast<unsigned long long>( static_cast<float>( rate ) * inSeconds );
+    }
+}
+
 AudioPack::AudioPack( TrackData& inTrackData )
 {
     m_trackData = &inTrackData;
@@ -108,6 +121,7 @@ void AudioPack::Play()
 
     // Add a small buffer so playback is not in the past when we set the delay.
     unsigned long long startDelay = groupClock + 2048;
+    FadeInAt( startDelay );
 
     // 2. Play each sound in paused mode, assign to channel group, and schedule
     for( auto& sound : m_sounds )
@@ -268,6 +282,7 @@ void AudioPack::Update()
     }
     const unsigned long long start = groupClock + 2048;
     m_seekStartClock = m_syncGroup ? start : 0;
+    FadeInAt( start );
     for( auto& sound : m_sounds )
     {
         if( sound.ChannelHandle )
@@ -279,6 +294,63 @@ void AudioPack::Update()
             sound.ChannelHandle->setPaused( false );
         }
     }
+}
+
+
+void AudioPack::FadeInAt( unsigned long long inGroupClock )
+{
+    if( !m_syncGroup )
+    {
+        return;
+    }
+    // Fade points run on the parent's clock; the stems' delays on this group's.
+    unsigned long long groupClock = 0;
+    unsigned long long parentClock = 0;
+    if( m_syncGroup->getDSPClock( &groupClock, &parentClock ) != FMOD_OK )
+    {
+        return;
+    }
+    const unsigned long long from = parentClock + ( inGroupClock > groupClock ? inGroupClock - groupClock : 0 );
+    m_syncGroup->removeFadePoints( parentClock, ~0ULL );
+    m_syncGroup->addFadePoint( parentClock, 0.f );
+    m_syncGroup->addFadePoint( from, 0.f );
+    m_syncGroup->addFadePoint( from + MixerSamples( kFadeInSeconds ), 1.f );
+}
+
+
+void AudioPack::FadeOut( float inSeconds )
+{
+    m_seekPending = false;
+    if( !m_syncGroup )
+    {
+        Stop();
+        return;
+    }
+    unsigned long long parentClock = 0;
+    if( m_syncGroup->getDSPClock( nullptr, &parentClock ) != FMOD_OK )
+    {
+        Stop();
+        return;
+    }
+    const unsigned long long end = parentClock + MixerSamples( inSeconds );
+    // Keep whatever level a fade-in had reached, rather than jumping back to full.
+    float level = 1.f;
+    unsigned int points = 0;
+    if( m_syncGroup->getFadePoints( &points, nullptr, nullptr ) == FMOD_OK && points > 0 )
+    {
+        std::vector<unsigned long long> clocks( points );
+        std::vector<float> volumes( points );
+        m_syncGroup->getFadePoints( &points, clocks.data(), volumes.data() );
+        level = 0.f;
+        for( unsigned int i = 0; i < points; ++i )
+        {
+            if( clocks[i] <= parentClock ) level = volumes[i];
+        }
+    }
+    m_syncGroup->removeFadePoints( parentClock, ~0ULL );
+    m_syncGroup->addFadePoint( parentClock, level );
+    m_syncGroup->addFadePoint( end, 0.f );
+    m_syncGroup->setDelay( 0, end, true );
 }
 
 

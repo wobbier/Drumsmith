@@ -41,12 +41,19 @@ public:
     // How far apart the stems still playing are, in ms (--highway-log; 0 when in step).
     unsigned int StemSpreadMs() const;
 
+    // Ramps the stems to silence over inSeconds, then stops them; for handing over to another
+    // pack without cutting the waveform mid-cycle (a click). Keep the pack alive until it's done.
+    void FadeOut( float inSeconds );
+
     bool IsReady() const;
     bool IsPlaying() const;
 
 private:
     void Reset();
     bool StemsSeeked() const;
+    // Ramps the group up from silence starting at inGroupClock (the stems' start tick), so a
+    // start mid-song doesn't step from zero to a full-scale sample.
+    void FadeInAt( unsigned long long inGroupClock );
 
     bool LoadStem( const char* inFileName, bool isDrumTrack = false );
     bool LoadURL( const char* inURL, bool isDrumTrack = false );

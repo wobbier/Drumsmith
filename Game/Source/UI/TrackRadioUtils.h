@@ -9,7 +9,8 @@ class TrackData;
 // The menu radio: plays random installed tracks between menus and drives the "track-radio"
 // widget of a page's view model (the markup MainMenu.rml and DLC.rml share, styled by Radio.rcss).
 // Model values: radio_available, radio_visible, radio_title, radio_artist, radio_art,
-// radio_position, radio_duration, radio_progress (0..1000). Events: skip, seek(value), radio_show.
+// radio_position, radio_duration, radio_progress (0..1000). Events: skip, seek(value), radio_show,
+// radio_play (loads the gameplay scene with the song on the radio).
 class TrackRadioUtils
 {
 public:
@@ -27,12 +28,16 @@ public:
     // inPosition is a fraction of the track (0..1).
     void SeekToPosition( float inPosition );
     void PlayLatestTrack();
+    // Starts the song the radio is playing in the gameplay scene; false when nothing is on.
+    bool PlayRadioTrack();
     // Slides the widget in; it hides itself again after a while, like the old page's hover widget.
     void Show();
 
     // An img src for a track's album art ("/Assets/DLC/..." so RmlUi resolves it through the VFS
     // instead of relative to the document), or the stock placeholder.
     static std::string ArtSource( const TrackData& inTrack );
+    // Stops the radio and loads the gameplay scene with TrackDatabase track inTrackIndex.
+    static bool LaunchTrack( int inTrackIndex );
 
 private:
     void UpdateModel();

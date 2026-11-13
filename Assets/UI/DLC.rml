@@ -79,6 +79,7 @@
                     <input id="radio-seek" type="range" min="0" max="1000" step="1" data-attr-value="radio_progress" data-event-change="seek(ev.value)"/>
                     <div class="radio-times"><span>{{radio_position}}</span><span>{{radio_duration}}</span></div>
                 </div>
+                <button id="radio-play" data-event-click="radio_play">Play</button>
                 <button id="radio-skip" data-event-click="skip">Skip</button>
             </div>
         </div>

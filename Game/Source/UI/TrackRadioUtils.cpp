@@ -2,6 +2,8 @@
 #include "Global/TrackRadio.h"
 #include "CoreGame/TrackList.h"
 #include "UI/UIModelUtils.h"
+#include "Events/GameEvents.h"
+#include <Events/SceneEvents.h>
 #include <Cores/UI/RmlUiCore.h>
 #include <Engine/Engine.h>
 #include "Path.h"
@@ -31,7 +33,7 @@ TrackRadioUtils::TrackRadioUtils( std::string inModel )
 void TrackRadioUtils::RegisterEvents( RmlUiCore& inUI )
 {
     inUI.ModelEnsure( m_model );
-    for( const char* event : { "skip", "seek", "radio_show" } )
+    for( const char* event : { "skip", "seek", "radio_show", "radio_play" } )
     {
         inUI.ModelRegisterEvent( m_model, event );
     }
@@ -78,6 +80,10 @@ bool TrackRadioUtils::HandleEvent( const std::string& inEvent, const json& inArg
     else if( inEvent == "radio_show" )
     {
         Show();
+    }
+    else if( inEvent == "radio_play" )
+    {
+        PlayRadioTrack();
     }
     else
     {
@@ -146,6 +152,41 @@ void TrackRadioUtils::PlayLatestTrack()
     radioArgs.CurrentTrackIndex = static_cast<int>( tracks.size() ) - 1;
     TrackRadio::GetInstance().Play( radioArgs );
     Show();
+}
+
+
+bool TrackRadioUtils::PlayRadioTrack()
+{
+    const TrackData* current = TrackRadio::GetInstance().m_currentTrack;
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( !current || tracks.empty() || current < tracks.data() || current >= tracks.data() + tracks.size() )
+    {
+        return false;
+    }
+    return LaunchTrack( static_cast<int>( current - tracks.data() ) );
+}
+
+
+bool TrackRadioUtils::LaunchTrack( int inTrackIndex )
+{
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) )
+    {
+        return false;
+    }
+    const std::string trackId = tracks[inTrackIndex].m_trackSourcePath;
+    TrackRadio::GetInstance().Stop();
+    LoadSceneEvent event;
+    event.Level = "Assets/Example.lvl";
+    event.Callback = [trackId, inTrackIndex]()
+    {
+        LaunchPlayTrackEvent play;
+        play.TrackID = trackId;
+        play.TrackIndex = inTrackIndex;
+        play.Fire();
+    };
+    event.Queue();
+    return true;
 }
 
 

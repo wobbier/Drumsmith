@@ -608,24 +608,7 @@ void DLCMenuController::PlayInstalled( int inTrack )
     {
         return;
     }
-    const int index = m_catalogue[inTrack].InstalledIndex;
-    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    if( index < 0 || index >= static_cast<int>( tracks.size() ) )
-    {
-        return;
-    }
-    const std::string trackId = tracks[index].m_trackSourcePath;
-    TrackRadio::GetInstance().Stop();
-    LoadSceneEvent event;
-    event.Level = "Assets/Example.lvl";
-    event.Callback = [trackId, index]()
-    {
-        LaunchPlayTrackEvent play;
-        play.TrackID = trackId;
-        play.TrackIndex = index;
-        play.Fire();
-    };
-    event.Queue();
+    TrackRadioUtils::LaunchTrack( m_catalogue[inTrack].InstalledIndex );
 }
 
 

@@ -54,4 +54,7 @@ private:
     int m_currentTrackIndex = -1;
     float m_delayTimer = 0.f;
     float m_previewPercent = 0.f;
+    // The previous track, fading out instead of being cut off (a click), and how long it has left.
+    AudioPack m_fadingPack;
+    float m_fadingTimer = 0.f;
 };

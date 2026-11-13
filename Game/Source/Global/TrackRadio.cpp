@@ -5,13 +5,22 @@
 #include "Mathf.h"
 #include "Config/GameSettings.h"
 
+namespace
+{
+    constexpr float kHandOverFadeSeconds = 0.03f;
+}
+
 void TrackRadio::Play( RadioArgs inTrackArgs )
 {
     if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrackIndex == m_currentTrackIndex )
     {
         return;
     }
-    Stop();
+    // Fade the old song out under the new one's load rather than cutting it off.
+    m_audioPack.FadeOut( kHandOverFadeSeconds );
+    m_fadingPack = std::move( m_audioPack );
+    m_fadingTimer = kHandOverFadeSeconds + 0.05f;
+    m_radioState = RadioState::None;
     m_radioArgs = inTrackArgs;
     bool isAsync = true;
 
@@ -75,6 +84,14 @@ void TrackRadio::Seek( float inPercent )
 
 void TrackRadio::Update( float dt )
 {
+    if( m_fadingTimer > 0.f )
+    {
+        m_fadingTimer -= dt;
+        if( m_fadingTimer <= 0.f )
+        {
+            m_fadingPack = AudioPack();
+        }
+    }
     m_audioPack.Update();
     if( m_radioState == RadioState::Loading )
     {

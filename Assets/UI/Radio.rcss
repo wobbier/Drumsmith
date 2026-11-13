@@ -28,7 +28,8 @@
 .radio-progress input[type=range]:focus sliderbar, .radio-progress input[type=range] sliderbar:hover { background-color: #ff9933; }
 .radio-progress input[type=range] sliderarrowdec, .radio-progress input[type=range] sliderarrowinc { display: none; }
 .radio-times { display: flex; justify-content: space-between; font-size: 13dp; color: #cccccc; }
-#radio-skip { width: auto; margin: 0; padding: 10dp 12dp; font-size: 16dp; background-color: #ffffff25; }
+#radio-skip, #radio-play { width: auto; margin: 0; padding: 10dp 12dp; font-size: 16dp; background-color: #ffffff25; }
+#radio-play { color: #77cc77; }
 @media (max-height: 800px) {
     #track-radio { height: 150dp; width: 520dp; }
     .radio-art { width: 150dp; height: 150dp; }
@@ -45,5 +46,5 @@
     #radio-title { font-size: 18dp; }
     #radio-artist { font-size: 14dp; }
     .radio-controls { gap: 6dp; margin-top: 4dp; }
-    #radio-skip { padding: 6dp; font-size: 14dp; }
+    #radio-skip, #radio-play { padding: 6dp; font-size: 14dp; }
 }
