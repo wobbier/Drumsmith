@@ -23,12 +23,23 @@ What execution changed or settled in this plan:
 - **Section 5, `--install`.** It converts the new folder in a sandbox copy of the project (an `Assets` of links with an empty `DLC`) and moves the finished folder in. The converter is never run over the real library.
 - **Converter findings**, filed: a fresh conversion of an original CRLF folder crashes on Linux (ME-357, reproduced); the album is never copied (ME-358); the stage drummer's table misreads notes 32, 40 and 41 and has no open hi-hat (ME-359).
 - **Not done:** the blind A/B needs a player (`out/ab/` holds the 20 pairs and a sheet), and the optional STRUM baseline of M3 was skipped.
-- **Phase 2 has started**, on dev only (the test songs are untouched since the baseline), with every Phase 2 model off by default:
+- **Phase 2 has started**, on dev only (the test songs are untouched since the baseline). The numbers below are from before the first play test, when every Phase 2 model was off by default:
   - Step 1: ADTOF's network is now ChartGen's own code loading the converted ADTOF weights, so the unlicensed port is no longer a dependency. It matches the port to 4e-6.
   - Step 2: the typing model types 81% of matched cymbal hits right (rules 74%) and 78% of hi-hats as open or closed (always closed: 62%). Toms did not improve.
   - Step 4: learned reductions beat the rules for Hard (0.937 against 0.912) and Medium (0.887 against 0.866) and not for Easy, which stays with the rules.
   - Into the game, step 1, for the transcriber: it exports to ONNX with the spectrogram in the graph and runs on ONNX Runtime and NumPy alone, 0.71 s for a 286 s song on six threads, 16.8 MB.
   - The typing and reduction models are trained on the DLC and stay out of git (section 9, question 3). Step 3 (fine-tuning the transcriber to real-kit classes with velocity) needs the public datasets and the answers to section 9.
+- **First play test** (Mitch, *Primetime* from the MP3 alone): "kinda accurate", but snare rolls lost hits and the crash flickered between lanes. Both were measured and fixed on train and dev:
+  - ADTOF's peak picker measures each stroke of a roll against the one before. A picker on the activation itself finds 83% of dev snare hits inside fast runs (65% before) and 69% of such tom hits (44%), at the same overall F1.
+  - Ride or crash is now kept steady along the stream of cymbal hits, and the typing model is the default where its file exists (`--rules` turns it off). Cymbal hits typed right on dev: 83.2%, with as many label changes as the drummers make (394 against 414; the rules alone made 1,170). Real-kit F1 on dev: 0.842 (baseline pipeline: 0.832).
+  - Accepting weaker peaks beside a roll or in a hole of a steady stream was tried and dropped: the hits it adds are right about half the time. Those need the transcriber fine-tune (step 3).
+  - `chartgen install` puts a song beside an existing chart of the same name as `<name> (ChartGen)` and never replaces a folder it did not make; `chartgen rechart` charts a generated folder again from its own stems.
+- **Phase 2 step 3, first part: the transcriber types the hits.** ADTOF's network has a second output, with recurrent layers of its own, that says which hi-hat, tom or cymbal a hit is. It trains on the 51 real-kit train songs in four minutes and is the default where its file exists.
+  - Found hits typed right on dev: ride or crash 93.7% (tree model 83.2%, rules 73.9%), open or closed hi-hat 89.3% (79.7%), toms 56.1% (pitch rule 48.8%). Both 85% typing targets are met on dev.
+  - Real-kit F1 on dev: 0.855 with separation (baseline pipeline 0.832) and 0.797 without (0.769).
+  - Fine-tuning the layers ADTOF finds hits with made it find fewer (five-class F1 0.878 to 0.852), so that part is left exactly as it was.
+  - The charts label toms twice, as gems and as the stage drummer's animation, and the two agree on only 55% of strokes. Three-way tom accuracy much above that is not available from this data.
+  - Still to do in step 3: velocity (needs E-GMD or STAR Drums), the fully free candidate, and the ONNX export of the new output.
 
 ## 1. Summary
 
