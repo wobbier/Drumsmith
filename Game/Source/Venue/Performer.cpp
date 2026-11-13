@@ -206,8 +206,8 @@ bool Performer::Bind( Model& inModel )
     for( Model::RenderPart& part : inModel.GetRenderParts() )
     {
         Mesh& mesh = *part.Renderer;
-        // Like the rest of the set (VenueKit): lit by the rig, casting nothing.
-        mesh.CastShadows = false;
+        // Animated performers cast into the same shadow maps as the stage and props.
+        mesh.CastShadows = true;
         if( !mesh.MeshMaterial )
         {
             continue;
@@ -352,7 +352,18 @@ void Performer::PoseArm( int inSide, const Arm& inArm, float inInvScale )
         // The palm's centre is ahead of the wrist and under it, so where the wrist goes depends
         // on how the hand turns: solve for a straight wrist, see how the hand turns, then solve
         // again for the wrist that puts the palm on its mark.
-        const glm::vec3 target = inArm.Target * inInvScale;
+        glm::vec3 target = inArm.Target * inInvScale;
+        // Instrument reaches can cross the chest (especially crossed hi-hat strokes). Keep
+        // the wrist in front of the torso rather than pulling the forearm through the ribs.
+        if( inArm.ClearTorso )
+        {
+            const glm::vec3 local = glm::conjugate( m_spine ) * ( target - shoulder );
+            if( s * local.x < 0.08f )
+            {
+                const float forward = std::max( local.z, 0.15f * inInvScale );
+                target = shoulder + m_spine * glm::vec3( local.x, local.y, forward );
+            }
+        }
         const glm::vec3 pole = shoulder + ( glm::dot( inArm.Pole, inArm.Pole ) > 1e-8f ? glm::normalize( inArm.Pole ) : -kY );
         const glm::vec3 reach = target - shoulder;
         const float distance = glm::length( reach );

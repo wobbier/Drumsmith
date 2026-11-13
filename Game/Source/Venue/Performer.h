@@ -43,6 +43,7 @@ public:
         // Reach: when set, the palm goes to Target (performer space) and the elbow bends toward
         // Pole (a direction).
         bool Reach = false;
+        bool ClearTorso = false; // keep reaching wrists/elbows ahead of or outside the chest
         glm::vec3 Target{ 0.f };
         glm::vec3 Pole{ 0.f, -1.f, 0.f };
         // The hand (performer space): which way the fingers point, and what the palm faces. Zero

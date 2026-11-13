@@ -31,7 +31,7 @@ public:
     EntityHandle Prop( const char* inPath, const Vector3& inPosition, float inScale, float inYaw, Transform* inParent );
     // A primitive whose full size is inSize (a box inSize across, a sphere inSize.x across, a
     // cylinder or capsule inSize.x wide and inSize.y tall), centred at inPosition.
-    EntityHandle Piece( Moonlight::MeshType inShape, const Vector3& inPosition, const Vector3& inSize, const Vector3& inColor, Transform* inParent, const Vector3& inEmissive = Vector3( 0.f, 0.f, 0.f ), bool inShadows = false, const char* inName = "Piece" );
+    EntityHandle Piece( Moonlight::MeshType inShape, const Vector3& inPosition, const Vector3& inSize, const Vector3& inColor, Transform* inParent, const Vector3& inEmissive = Vector3( 0.f, 0.f, 0.f ), bool inShadows = true, const char* inName = "Piece" );
     EntityHandle Box( const Vector3& inPosition, const Vector3& inSize, const Vector3& inColor, Transform* inParent, const Vector3& inEmissive = Vector3( 0.f, 0.f, 0.f ) )
     {
         return Piece( Moonlight::MeshType::Cube, inPosition, inSize, inColor, inParent, inEmissive );

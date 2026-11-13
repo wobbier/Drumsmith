@@ -24,8 +24,8 @@ namespace
     constexpr float kSeatHeight = 0.67f;
     // Where a guitar or bass hangs, from just above the hips: clear of the belly, the bass
     // further across so its longer neck stays in reach.
-    const glm::vec3 kGuitarHang( 0.04f, 0.115f, 0.25f );
-    const glm::vec3 kBassHang( 0.12f, 0.115f, 0.25f );
+    const glm::vec3 kGuitarHang( 0.04f, 0.115f, 0.30f );
+    const glm::vec3 kBassHang( 0.12f, 0.115f, 0.33f );
     // The singer's stand (the mic comes to their mouth), and where their hand holds it: under
     // the mic's clip.
     constexpr float kMicStandZ = 0.42f;
@@ -749,7 +749,8 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
         Performer::Arm& arm = pose.Arms[side];
         arm.Reach = true;
         arm.Target = hand;
-        arm.Pole = glm::vec3( side == 0 ? -0.6f : 0.6f, -1.f, -0.3f );
+        arm.Pole = ioMember.Body.SpineRotation() * glm::vec3( side == 0 ? -1.f : 1.f, -0.45f, 0.65f );
+        arm.ClearTorso = true;
         // Palm down, the stick running across it: the fingers point a little outside the stick.
         arm.Fingers = Axis( side == 0 ? -30.f : 30.f, kY ) * stick;
         arm.Palm = -kY;
@@ -834,19 +835,12 @@ void Band::UpdateKit( float inDeltaTime )
 
 void Band::SwingInstrument( Member& ioMember, const glm::vec3& inOffset, glm::vec3& ioPosition, glm::quat& ioRotation, float inDeltaTime )
 {
-    // A guitar on a strap, floating: the neck camera is bolted to it, so every jerk it makes is
-    // the picture's. Held relative to the figure's step (a solo's walk out front, leaning into a
-    // mic), which is already eased, so it doesn't trail a walking player. The torso's lean, bob
-    // and crouch it follows on damped springs: the strap holds its place softly, and it tilts on
-    // a slower, looser spring that swings a little past and settles, so the beat's bob becomes a
-    // slow sway and a sudden move a float, never a snap.
-    // Measured on Journey's solo at 60 fps, at the neck camera: peak acceleration 0.7 m/s² against
-    // the torso's 75 (and 3.2 for the old two-lag filter). Softer than this and the guitar visibly
-    // lags the body.
-    constexpr float kHoldRate = 5.f;      // place: radians a second, critically damped
-    constexpr float kHoldDamping = 1.f;
-    constexpr float kSwayRate = 3.f;      // tilt: looser, swings a few percent past
-    constexpr float kSwayDamping = 0.7f;
+    // Follow the torso promptly, with some strap swing rather than filtering out the beat.
+    // The neck camera rides this transform, so excessive lag makes its movement feel detached.
+    constexpr float kHoldRate = 14.f;
+    constexpr float kHoldDamping = 0.75f;
+    constexpr float kSwayRate = 10.f;
+    constexpr float kSwayDamping = 0.65f;
     const glm::vec3 at = ioPosition - inOffset;
     if( !ioMember.GuitarHung )
     {
@@ -937,7 +931,7 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     const float neckAngle = -24.f - 10.f * energy * pulse * ( 1.f - soloing ) - 24.f * soloing;
     // Damped (SwingInstrument): the hands below reach for where the guitar is, not where the
     // torso would hold it, so they stay on the strings and the neck camera rides it steadily.
-    glm::quat guitarRotation = spine * Axis( neckAngle, kZ ) * Axis( -8.f, kY );
+    glm::quat guitarRotation = spine * Axis( neckAngle, kZ ) * Axis( 14.f, kY ) * Axis( -12.f, kX );
     glm::vec3 guitarPosition = ioMember.Body.SpineBase() + spine * ( inIndex == VenueData::Bass ? kBassHang : kGuitarHang );
     if( ioMember.Instrument )
     {
@@ -999,7 +993,8 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     Performer::Arm& strumArm = pose.Arms[1];
     strumArm.Reach = true;
     strumArm.Target = guitarPosition + guitarRotation * ( slap ? glm::vec3( -0.06f, 0.1f * strum, 0.09f ) : glm::vec3( 0.1f, 0.07f * strum, 0.08f ) );
-    strumArm.Pole = glm::vec3( 1.f, -0.4f, -1.f );
+    strumArm.Pole = spine * glm::vec3( 1.f, -0.35f, 0.65f );
+    strumArm.ClearTorso = true;
     // The palm over the strings, the fingers hanging down across them (a pick in them).
     strumArm.Fingers = guitarRotation * glm::vec3( -0.6f, -0.8f, 0.f );
     strumArm.Palm = guitarRotation * glm::vec3( 0.f, 0.f, -1.f );
@@ -1016,7 +1011,8 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     // of it and curling back onto the fretboard: further round for a chord, off it as open
     // strings ring.
     fretArm.Target = guitarPosition + guitarRotation * glm::vec3( handX, -0.045f - lift, 0.01f + 0.012f * wrap );
-    fretArm.Pole = glm::vec3( -0.3f, -1.f, -0.3f );
+    fretArm.Pole = spine * glm::vec3( -0.8f, -0.6f, 0.6f );
+    fretArm.ClearTorso = true;
     fretArm.Fingers = guitarRotation * glm::vec3( 0.f, 0.35f, 1.f );
     fretArm.Palm = guitarRotation * glm::vec3( 0.f, 1.f, 0.f );
     fretArm.Grip = 0.6f + 0.2f * wrap - 6.f * lift;

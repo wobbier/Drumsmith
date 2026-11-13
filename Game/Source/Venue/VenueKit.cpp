@@ -178,7 +178,7 @@ EntityHandle VenueKit::Part( const char* inPath, Transform* inParent, const char
     if( entity && found->second )
     {
         Mesh& mesh = entity->AddComponent<Mesh>( found->second->GetAllMeshes()[0] );
-        mesh.CastShadows = false;
+        mesh.CastShadows = true;
         Moonlight::Material* material = mesh.MeshMaterial.get();
         // The packed atlas when the variant is in it (and the model's own uv transform is the
         // identity, which the tile's sits in place of): uv + (column, row) through a tiling of
