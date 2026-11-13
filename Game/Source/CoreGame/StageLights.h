@@ -43,9 +43,22 @@ public:
     Vector3 WashGlow() const;
     // Scales the haze (an open-air venue holds less of it).
     void SetHazeScale( float inScale ) { m_hazeScale = inScale; }
+    // A soloist (a follow-spot slot, -1 for nobody): the front truss's moving heads swing onto them.
+    void SetSoloist( int inSlot ) { m_soloist = inSlot; }
+    // The show's hype, 0 calm .. 1 peak: the rig runs hotter and faster, and the lasers come out.
+    void SetHype( float inHype ) { m_hype = inHype; }
+    // A hit on the whole rig for a big moment: the blinders and strobes flash and the moving heads
+    // jump to white, fading over half a second. inStrength 0 .. 1.
+    void Accent( float inStrength );
+    // The flame pots' burn, 0 .. 1 (Venue/StageFx.h): the rig goes hot orange with them.
+    void SetBurn( float inBurn ) { m_burn = inBurn; }
+    // A low ceiling (the club): the overhead rig hangs this far below the usual truss height.
+    void SetTrussDrop( float inDrop ) { m_trussDrop = inDrop; }
 
 private:
-    enum class Group { Beam, Wash, Spot, Crowd };
+    // Beam: moving heads on the deck. Wash: fixed cans over the band. Spot: follow spots. Crowd:
+    // audience blinders. Mover: moving heads under the trusses. Side: cross light from the wings.
+    enum class Group { Beam, Wash, Spot, Crowd, Mover, Side };
 
     struct Fixture
     {
@@ -53,8 +66,11 @@ private:
         int Side = 1;          // -1 left of the highway, 1 right
         int Row = 0;           // 0 nearest the strike bar
         int Index = 0;         // within its group
-        EntityHandle Light;
-        EntityHandle Lens;     // the visible lamp face, if the fixture is on screen
+        int Column = 0;        // movers: its place along its truss, from the crowd's left
+        float Spread = 0.f;    // movers: the same as -1 (far left) .. 1 (far right)
+        EntityHandle Light;    // the light; a moving head's tilting head too
+        EntityHandle Yoke;     // moving heads: the fork that pans under the head
+        std::vector<EntityHandle> Lenses;   // the visible lamp faces
         float MaxIntensity = 1.f;
         // Shown state, eased toward each frame's look.
         Vector3 Color{ 0.f, 0.f, 0.f };
@@ -80,7 +96,13 @@ private:
         int Keyframe = 0;
     };
 
-    void SpawnFixture( Group inKind, int inSide, int inRow, int inIndex, const Vector3& inPosition, const Vector3& inAim, float inInner, float inOuter, float inRange, float inIntensity, Transform* inParent, const EntityHandle& inLens );
+    Fixture* SpawnFixture( Group inKind, int inSide, int inRow, int inIndex, const Vector3& inPosition, const Vector3& inAim, float inInner, float inOuter, float inRange, float inIntensity, Transform* inParent, const EntityHandle& inLens );
+    // A moving head: a base on its mount (hung under a truss, or standing on the deck), a yoke
+    // that pans and a head that tilts with the light in it.
+    Fixture* SpawnMovingHead( Group inKind, int inSide, int inRow, int inIndex, const Vector3& inPivot, bool inHung, const Vector3& inAim, float inInner, float inOuter, float inRange, float inIntensity, Transform* inParent, const SpawnBoxFn& inSpawnBox );
+    Look MoverLook( const Fixture& inFixture, const CueState& inCue, double inSeconds, double inBeat ) const;
+    void UpdateLasers( const CueState& inCue, double inSeconds, double inBeat, float inDeltaTime );
+    static Vector3 AimOf( const Fixture& inFixture );
     void BuildFallbackShow( const TrackData& inTrack );
     CueState CueAt( double inSeconds, size_t inBefore ) const;
     void BeatAt( double inSeconds, double& outBeat, int& outMeasureBeat ) const;
@@ -93,6 +115,23 @@ private:
     std::vector<Fixture> m_fixtures;
     std::vector<EntityHandle> m_props;
     EntityHandle m_camera;
+    Transform* m_root = nullptr;
+    // Strobe bars on the trusses (lamp faces only), and the laser fans over the crowd: each a
+    // thin bright bar from its projector, hidden (scaled to nothing) while the lasers are off.
+    std::vector<EntityHandle> m_strobes;
+    struct Laser
+    {
+        EntityHandle Bar;
+        Vector3 Origin;
+        int Projector = 0;
+        int Ray = 0;
+    };
+    std::vector<Laser> m_lasers;
+    float m_laserLevel = 0.f;
+    // The song's colours (three cool, three warm, two clashing), picked by its title.
+    Vector3 m_cool[3];
+    Vector3 m_warm[3];
+    Vector3 m_clash[2];
 
     // The show: the chart's venue, or one built from its sections / tempo.
     VenueData m_venue;
@@ -108,6 +147,11 @@ private:
     float m_missDip = 0.f;
     float m_crowdEnergy = 0.5f;
     float m_hazeScale = 1.f;
+    int m_soloist = -1;
+    float m_hype = 0.f;
+    float m_accent = 0.f;
+    float m_burn = 0.f;
+    float m_trussDrop = 0.f;
     std::array<float, 5> m_spotFloor{};
     std::array<Vector3, 5> m_spotTargets{};
     std::array<bool, 5> m_spotTracked{};
@@ -120,5 +164,6 @@ private:
     float m_fogScatter = 0.f;
     int m_fogSteps = 0;
     float m_fogDistance = 0.f;
+    int m_fogLightSamples = 0;
     float m_hazeLevel = 0.f;
 };
