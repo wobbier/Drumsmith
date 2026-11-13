@@ -409,15 +409,14 @@ void Band::DeriveFallbacks( const std::vector<NoteData>& inNotes )
 void Band::BuildMicStand( VenueKit& inKit, Member& ioMember, const Vector3& inPosition, float inHeight )
 {
     Transform& group = ioMember.Group->GetComponent<Transform>();
-    const Vector3 metal( 0.08f, 0.08f, 0.09f );
     ioMember.MicStand = inKit.Group( "MicStand", &group, inPosition );
+    if( !ioMember.MicStand ) return;
     Transform& stand = ioMember.MicStand->GetComponent<Transform>();
-    inKit.Piece( Moonlight::MeshType::Cylinder, Vector3( 0.f, 0.01f, 0.f ), Vector3( 0.3f, 0.02f, 0.3f ), metal, &stand );
-    inKit.Piece( Moonlight::MeshType::Cylinder, Vector3( 0.f, inHeight * 0.5f, 0.f ), Vector3( 0.025f, inHeight, 0.025f ), metal, &stand );
-    // The mic, angled at the singer's mouth.
-    EntityHandle mic = inKit.Piece( Moonlight::MeshType::Capsule, Vector3( 0.f, inHeight + 0.03f, -0.07f ), Vector3( 0.045f, 0.18f, 0.045f ), Vector3( 0.1f, 0.1f, 0.1f ), &stand );
-    if( mic ) mic->GetComponent<Transform>().SetRotation( Vector3( -70.f, 0.f, 0.f ) );
-    inKit.Piece( Moonlight::MeshType::Sphere, Vector3( 0.f, inHeight + 0.06f, -0.15f ), Vector3( 0.06f, 0.06f, 0.06f ), Vector3( 0.45f, 0.45f, 0.48f ), &stand );
+    // Runtime OBJ compensates for the importer Z flip; the mic faces the performer (-Z).
+    // Keep the floor pivot and horizontal dimensions; only adapt its height for backing vocals.
+    EntityHandle model = inKit.Prop( "Assets/Models/Instruments/Runtime/MicStand.obj",
+        Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &stand );
+    if( model ) model->GetComponent<Transform>().SetScale( Vector3( 1.f, inHeight / kMicStandHeight, 1.f ) );
 }
 
 
@@ -425,54 +424,27 @@ void Band::BuildDrums( VenueKit& inKit, Member& ioMember )
 {
     using Shape = Moonlight::MeshType;
     Transform& group = ioMember.Group->GetComponent<Transform>();
-    const Vector3 shell( 0.55f, 0.05f, 0.07f );
-    const Vector3 head( 0.85f, 0.83f, 0.78f );
-    const Vector3 brass( 0.75f, 0.55f, 0.18f );
-    const Vector3 metal( 0.12f, 0.12f, 0.13f );
-    const auto drum = [&]( Piece inPiece, const glm::vec3& inCentre, float inDiameter, float inDepth, const Vector3& inTilt ) {
-        KitPiece& piece = m_kit[static_cast<int>( inPiece )];
-        piece.Entity = inKit.Group( "Drum", &group, Vector3( inCentre ) );
-        piece.Rest = inTilt;
-        piece.Scale = Vector3( 1.f, 1.f, 1.f );
-        if( !piece.Entity ) return;
-        Transform& transform = piece.Entity->GetComponent<Transform>();
-        transform.SetRotation( inTilt );
-        inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.f, 0.f ), Vector3( inDiameter, inDepth, inDiameter ), shell, &transform );
-        inKit.Piece( Shape::Cylinder, Vector3( 0.f, inDepth * 0.5f + 0.004f, 0.f ), Vector3( inDiameter * 0.96f, 0.01f, inDiameter * 0.96f ), head, &transform );
-    };
-    const auto cymbal = [&]( Piece inPiece, const glm::vec3& inCentre, float inDiameter, const Vector3& inTilt ) {
-        KitPiece& piece = m_kit[static_cast<int>( inPiece )];
-        piece.Cymbal = true;
-        piece.Rest = inTilt;
-        piece.Scale = Vector3( 1.f, 1.f, 1.f );
-        piece.Entity = inKit.Piece( Shape::Cylinder, Vector3( inCentre ), Vector3( inDiameter, 0.012f, inDiameter ), brass, &group, brass * 0.08f );
-        if( piece.Entity ) piece.Entity->GetComponent<Transform>().SetRotation( inTilt );
-        if( StandardMaterial* material = VenueKit::MaterialOf( piece.Entity ) )
-        {
-            material->Metallic = 0.9f;
-            material->Roughness = 0.3f;
-        }
-        // Its stand.
-        inKit.Piece( Shape::Cylinder, Vector3( inCentre.x, inCentre.y * 0.5f, inCentre.z + 0.02f ), Vector3( 0.022f, inCentre.y, 0.022f ), metal, &group );
-    };
-    // A rug, the throne, the kick with the band's logo on its front head.
     inKit.Box( Vector3( 0.05f, 0.005f, 0.45f ), Vector3( 2.2f, 0.01f, 2.f ), Vector3( 0.25f, 0.04f, 0.04f ), &group );
-    inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.29f, -0.04f ), Vector3( 0.38f, 0.58f, 0.38f ), Vector3( 0.05f, 0.05f, 0.05f ), &group );
-    drum( Piece::Kick, glm::vec3( 0.f, 0.3f, 0.9f ), 0.6f, 0.44f, Vector3( 90.f, 0.f, 0.f ) );
-    inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.3f, 1.125f ), Vector3( 0.36f, 0.01f, 0.36f ), Vector3( 0.9f, 0.5f, 0.1f ), &group, Vector3( 0.9f, 0.45f, 0.08f ) )
-        ->GetComponent<Transform>().SetRotation( Vector3( 90.f, 0.f, 0.f ) );
-    drum( Piece::Snare, kStrike[static_cast<int>( Piece::Snare )] - glm::vec3( 0.f, 0.07f, 0.f ), 0.36f, 0.13f, Vector3( -8.f, 0.f, 4.f ) );
-    drum( Piece::Tom1, kStrike[static_cast<int>( Piece::Tom1 )] - glm::vec3( 0.f, 0.1f, -0.02f ), 0.28f, 0.2f, Vector3( -22.f, 0.f, 8.f ) );
-    drum( Piece::Tom2, kStrike[static_cast<int>( Piece::Tom2 )] - glm::vec3( 0.f, 0.1f, -0.02f ), 0.3f, 0.22f, Vector3( -22.f, 0.f, -8.f ) );
-    drum( Piece::FloorTom, kStrike[static_cast<int>( Piece::FloorTom )] - glm::vec3( 0.f, 0.22f, 0.f ), 0.42f, 0.42f, Vector3( 0.f, 0.f, 0.f ) );
-    cymbal( Piece::HiHat, kStrike[static_cast<int>( Piece::HiHat )] - glm::vec3( 0.f, 0.01f, 0.f ), 0.36f, Vector3( -4.f, 0.f, 0.f ) );
-    inKit.Piece( Shape::Cylinder, Vector3( kStrike[1] - glm::vec3( 0.f, 0.035f, 0.f ) ), Vector3( 0.36f, 0.012f, 0.36f ), brass, &group, brass * 0.08f );
-    cymbal( Piece::Crash1, kStrike[static_cast<int>( Piece::Crash1 )] - glm::vec3( 0.f, 0.02f, -0.12f ), 0.46f, Vector3( -18.f, 0.f, 12.f ) );
-    cymbal( Piece::Crash2, kStrike[static_cast<int>( Piece::Crash2 )] - glm::vec3( 0.f, 0.02f, -0.12f ), 0.48f, Vector3( -18.f, 0.f, -12.f ) );
-    cymbal( Piece::Ride, kStrike[static_cast<int>( Piece::Ride )] - glm::vec3( 0.f, 0.02f, -0.1f ), 0.56f, Vector3( -12.f, 0.f, -10.f ) );
-    // Pedals.
-    inKit.Box( Vector3( kStrike[0] ), Vector3( 0.1f, 0.03f, 0.28f ), metal, &group );
-    inKit.Box( Vector3( kStrike[9] ), Vector3( 0.1f, 0.03f, 0.28f ), metal, &group );
+    inKit.Prop( "Assets/Models/Instruments/Runtime/DrumHardware.obj", Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &group );
+    // Each exported piece has a local origin for hit squash / cymbal wobble. The hardware
+    // stays stationary, and head centres remain on the same IK strike targets.
+    const auto piece = [&]( Piece inPiece, const char* inName, const glm::vec3& inCentre, bool inCymbal ) {
+        KitPiece& part = m_kit[static_cast<int>( inPiece )];
+        const std::string path = std::string( "Assets/Models/Instruments/Runtime/" ) + inName + ".obj";
+        part.Entity = inKit.Prop( path.c_str(), Vector3( inCentre ), 1.f, 0.f, &group );
+        part.Cymbal = inCymbal;
+        part.Rest = Vector3( 0.f, 0.f, 0.f );
+        part.Scale = Vector3( 1.f, 1.f, 1.f );
+    };
+    piece( Piece::Kick, "Kick", glm::vec3( 0.f, 0.31f, 0.9f ), false );
+    piece( Piece::Snare, "Snare", kStrike[2] - glm::vec3( 0.f, 0.069f, 0.f ), false );
+    piece( Piece::Tom1, "Tom1", kStrike[3] - glm::vec3( 0.f, 0.104f, 0.f ), false );
+    piece( Piece::Tom2, "Tom2", kStrike[4] - glm::vec3( 0.f, 0.114f, 0.f ), false );
+    piece( Piece::FloorTom, "FloorTom", kStrike[5] - glm::vec3( 0.f, 0.214f, 0.f ), false );
+    piece( Piece::HiHat, "HiHat", kStrike[1] - glm::vec3( 0.f, 0.01f, 0.f ), true );
+    piece( Piece::Crash1, "Crash1", kStrike[6] - glm::vec3( 0.f, 0.02f, -0.12f ), true );
+    piece( Piece::Crash2, "Crash2", kStrike[7] - glm::vec3( 0.f, 0.02f, -0.12f ), true );
+    piece( Piece::Ride, "Ride", kStrike[8] - glm::vec3( 0.f, 0.02f, -0.1f ), true );
     for( int side = 0; side < 2; ++side )
     {
         ioMember.Sticks[side] = inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.f, 0.f ), Vector3( 0.02f, kStickLength, 0.02f ), Vector3( 0.85f, 0.7f, 0.45f ), &group );
@@ -485,40 +457,14 @@ void Band::BuildDrums( VenueKit& inKit, Member& ioMember )
 
 void Band::BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass )
 {
-    using Shape = Moonlight::MeshType;
     Transform& group = ioMember.Group->GetComponent<Transform>();
     ioMember.Instrument = inKit.Group( inBass ? "Bass" : "Guitar", &group );
     if( !ioMember.Instrument ) return;
     Transform& guitar = ioMember.Instrument->GetComponent<Transform>();
-    // The guitar's own space: the neck along -x, the face toward +z.
-    const Vector3 finish = inBass ? Vector3( 0.05f, 0.12f, 0.3f ) : Vector3( 0.7f, 0.08f, 0.05f );
-    inKit.Piece( Shape::Sphere, Vector3( 0.11f, 0.f, 0.f ), Vector3( 0.36f, 0.34f, 0.07f ), finish, &guitar );
-    inKit.Piece( Shape::Sphere, Vector3( -0.08f, 0.f, 0.f ), Vector3( 0.27f, 0.26f, 0.07f ), finish, &guitar );
-    inKit.Box( Vector3( 0.08f, -0.05f, 0.037f ), Vector3( 0.16f, 0.12f, 0.01f ), Vector3( 0.85f, 0.85f, 0.8f ), &guitar );
-    inKit.Box( Vector3( 0.06f, 0.02f, 0.04f ), Vector3( 0.03f, 0.1f, 0.01f ), Vector3( 0.6f, 0.6f, 0.6f ), &guitar );
-    const float neck = inBass ? 0.86f : 0.62f;
-    ioMember.NeckLength = neck;
-    inKit.Box( Vector3( -0.18f - neck * 0.5f, 0.f, 0.02f ), Vector3( neck, 0.05f, 0.03f ), Vector3( 0.25f, 0.15f, 0.07f ), &guitar );
-    inKit.Box( Vector3( -0.26f - neck, 0.f, 0.02f ), Vector3( 0.17f, 0.075f, 0.025f ), Vector3( 0.05f, 0.05f, 0.05f ), &guitar );
-    // Frets, a nut and strings, for the neck camera: the fretboard's face is at z 0.035, from the
-    // nut (x -0.18 - neck) to the body (x -0.18). Frets fall at the scale length's spacing, the
-    // sixteenth meeting the body.
-    const float nut = -0.18f - neck;
-    const float scale = neck / ( 1.f - std::pow( 2.f, -16.f / 12.f ) );
-    const Vector3 metal( 0.75f, 0.74f, 0.7f );
-    inKit.Box( Vector3( nut, 0.f, 0.037f ), Vector3( 0.006f, 0.05f, 0.006f ), Vector3( 0.95f, 0.93f, 0.85f ), &guitar );
-    for( int fret = 1; fret < 16; ++fret )
-    {
-        const float x = nut + scale * ( 1.f - std::pow( 2.f, -static_cast<float>( fret ) / 12.f ) );
-        inKit.Box( Vector3( x, 0.f, 0.036f ), Vector3( 0.003f, 0.05f, 0.004f ), metal, &guitar );
-    }
-    const int strings = inBass ? 4 : 6;
-    const float bridge = 0.16f;
-    for( int string = 0; string < strings; ++string )
-    {
-        const float y = -0.019f + 0.038f * static_cast<float>( string ) / static_cast<float>( strings - 1 );
-        inKit.Box( Vector3( ( nut + bridge ) * 0.5f, y, 0.041f ), Vector3( bridge - nut, inBass ? 0.0035f : 0.0025f, 0.0025f ), Vector3( 0.85f, 0.84f, 0.8f ), &guitar );
-    }
+    // Authored to the same body origin, -X neck and +Z face as the hand/neck camera targets.
+    ioMember.NeckLength = inBass ? 0.86f : 0.62f;
+    inKit.Prop( inBass ? "Assets/Models/Instruments/Runtime/Bass.obj" : "Assets/Models/Instruments/Runtime/Guitar.obj",
+        Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &guitar );
     // An amp behind them.
     const float side = inBass ? 1.f : -1.f;
     inKit.Box( Vector3( side * 0.4f, 0.55f, -1.5f ), Vector3( 0.9f, 1.1f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &group );
@@ -571,17 +517,8 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
 void Band::BuildKeys( VenueKit& inKit, Member& ioMember )
 {
     Transform& group = ioMember.Group->GetComponent<Transform>();
-    const Vector3 metal( 0.1f, 0.1f, 0.11f );
-    inKit.Box( Vector3( 0.f, 0.92f, 0.42f ), Vector3( 1.2f, 0.08f, 0.34f ), Vector3( 0.06f, 0.06f, 0.07f ), &group );
-    inKit.Box( Vector3( 0.f, 0.965f, 0.36f ), Vector3( 1.1f, 0.012f, 0.16f ), Vector3( 0.9f, 0.9f, 0.88f ), &group );
-    inKit.Box( Vector3( 0.3f, 0.965f, 0.5f ), Vector3( 0.2f, 0.012f, 0.06f ), Vector3( 0.2f, 0.6f, 1.f ), &group, Vector3( 0.3f, 1.f, 2.f ) );
-    for( float x : { -0.4f, 0.4f } )
-    {
-        EntityHandle leg = inKit.Box( Vector3( x, 0.45f, 0.42f ), Vector3( 0.04f, 1.f, 0.04f ), metal, &group );
-        if( leg ) leg->GetComponent<Transform>().SetRotation( Vector3( 0.f, 0.f, x > 0.f ? 20.f : -20.f ) );
-        EntityHandle cross = inKit.Box( Vector3( x, 0.45f, 0.42f ), Vector3( 0.04f, 1.f, 0.04f ), metal, &group );
-        if( cross ) cross->GetComponent<Transform>().SetRotation( Vector3( 0.f, 0.f, x > 0.f ? -20.f : 20.f ) );
-    }
+    inKit.Prop( "Assets/Models/Instruments/Runtime/Keyboard.obj",
+        Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &group );
 }
 
 

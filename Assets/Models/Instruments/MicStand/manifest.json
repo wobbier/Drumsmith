@@ -1,0 +1,458 @@
+{
+  "name": "MicStand",
+  "units": "metres",
+  "coordinates": "Y up, +Z front; stringed neck along -X",
+  "objects": [
+    {
+      "name": "Weighted base",
+      "parent": null,
+      "position": [
+        0.0,
+        0.0215000007301569,
+        0.0
+      ]
+    },
+    {
+      "name": "Base edge",
+      "parent": null,
+      "position": [
+        0.0,
+        0.023000000044703484,
+        0.0
+      ]
+    },
+    {
+      "name": "Lower tube",
+      "parent": null,
+      "position": [
+        0.0,
+        0.4475000202655792,
+        0.0
+      ]
+    },
+    {
+      "name": "Telescoping tube",
+      "parent": null,
+      "position": [
+        0.0,
+        1.1349999904632568,
+        0.0
+      ]
+    },
+    {
+      "name": "Height clutch",
+      "parent": null,
+      "position": [
+        0.0,
+        0.8250000476837158,
+        0.0
+      ]
+    },
+    {
+      "name": "Clutch grip",
+      "parent": null,
+      "position": [
+        0.0,
+        0.800000011920929,
+        0.0
+      ]
+    },
+    {
+      "name": "Clutch grip.001",
+      "parent": null,
+      "position": [
+        0.0,
+        0.8149999976158142,
+        0.0
+      ]
+    },
+    {
+      "name": "Clutch grip.002",
+      "parent": null,
+      "position": [
+        0.0,
+        0.8299999833106995,
+        0.0
+      ]
+    },
+    {
+      "name": "Clutch grip.003",
+      "parent": null,
+      "position": [
+        0.0,
+        0.8450000286102295,
+        0.0
+      ]
+    },
+    {
+      "name": "Mic clip",
+      "parent": null,
+      "position": [
+        0.0,
+        1.4800000190734863,
+        -0.02500000037252903
+      ]
+    },
+    {
+      "name": "Microphone body",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5049999952316284,
+        -0.05249999836087227
+      ]
+    },
+    {
+      "name": "Grille",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5399999618530273,
+        -0.15000000596046448
+      ]
+    },
+    {
+      "name": "Grille woven ring",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5324105024337769,
+        -0.12723159790039062
+      ]
+    },
+    {
+      "name": "Grille woven ring.001",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5336754322052002,
+        -0.13102634251117706
+      ]
+    },
+    {
+      "name": "Grille woven ring.002",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5349403619766235,
+        -0.1348210722208023
+      ]
+    },
+    {
+      "name": "Grille woven ring.003",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5362051725387573,
+        -0.13861580193042755
+      ]
+    },
+    {
+      "name": "Grille woven ring.004",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5374701023101807,
+        -0.142410546541214
+      ]
+    },
+    {
+      "name": "Grille woven ring.005",
+      "parent": null,
+      "position": [
+        0.0,
+        1.538735032081604,
+        -0.14620527625083923
+      ]
+    },
+    {
+      "name": "Grille woven ring.006",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5399999618530273,
+        -0.15000000596046448
+      ]
+    },
+    {
+      "name": "Grille woven ring.007",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5412648916244507,
+        -0.15379473567008972
+      ]
+    },
+    {
+      "name": "Grille woven ring.008",
+      "parent": null,
+      "position": [
+        0.0,
+        1.542529821395874,
+        -0.15758946537971497
+      ]
+    },
+    {
+      "name": "Grille woven ring.009",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5437947511672974,
+        -0.1613842099905014
+      ]
+    },
+    {
+      "name": "Grille woven ring.010",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5450595617294312,
+        -0.16517893970012665
+      ]
+    },
+    {
+      "name": "Grille woven ring.011",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5463244915008545,
+        -0.1689736694097519
+      ]
+    },
+    {
+      "name": "Grille woven ring.012",
+      "parent": null,
+      "position": [
+        0.0,
+        1.5475894212722778,
+        -0.17276841402053833
+      ]
+    },
+    {
+      "name": "Grille woven rib",
+      "parent": null,
+      "position": [
+        0.027000000700354576,
+        1.5399999618530273,
+        -0.15000000596046448
+      ]
+    },
+    {
+      "name": "Grille woven rib.001",
+      "parent": null,
+      "position": [
+        0.026079997420310974,
+        1.5333704948425293,
+        -0.15220984816551208
+      ]
+    },
+    {
+      "name": "Grille woven rib.002",
+      "parent": null,
+      "position": [
+        0.02338268607854843,
+        1.5271927118301392,
+        -0.15426908433437347
+      ]
+    },
+    {
+      "name": "Grille woven rib.003",
+      "parent": null,
+      "position": [
+        0.019091883674263954,
+        1.5218877792358398,
+        -0.15603739023208618
+      ]
+    },
+    {
+      "name": "Grille woven rib.004",
+      "parent": null,
+      "position": [
+        0.013500000350177288,
+        1.5178171396255493,
+        -0.15739426016807556
+      ]
+    },
+    {
+      "name": "Grille woven rib.005",
+      "parent": null,
+      "position": [
+        0.006988114211708307,
+        1.5152583122253418,
+        -0.1582472324371338
+      ]
+    },
+    {
+      "name": "Grille woven rib.006",
+      "parent": null,
+      "position": [
+        1.653273275805395e-18,
+        1.514385461807251,
+        -0.15853816270828247
+      ]
+    },
+    {
+      "name": "Grille woven rib.007",
+      "parent": null,
+      "position": [
+        -0.006988114211708307,
+        1.5152583122253418,
+        -0.1582472324371338
+      ]
+    },
+    {
+      "name": "Grille woven rib.008",
+      "parent": null,
+      "position": [
+        -0.013500000350177288,
+        1.5178171396255493,
+        -0.15739426016807556
+      ]
+    },
+    {
+      "name": "Grille woven rib.009",
+      "parent": null,
+      "position": [
+        -0.019091883674263954,
+        1.5218877792358398,
+        -0.15603739023208618
+      ]
+    },
+    {
+      "name": "Grille woven rib.010",
+      "parent": null,
+      "position": [
+        -0.02338268607854843,
+        1.5271927118301392,
+        -0.15426908433437347
+      ]
+    },
+    {
+      "name": "Grille woven rib.011",
+      "parent": null,
+      "position": [
+        -0.026079997420310974,
+        1.5333704948425293,
+        -0.15220984816551208
+      ]
+    },
+    {
+      "name": "Grille woven rib.012",
+      "parent": null,
+      "position": [
+        -0.027000000700354576,
+        1.5399999618530273,
+        -0.15000000596046448
+      ]
+    },
+    {
+      "name": "Grille woven rib.013",
+      "parent": null,
+      "position": [
+        -0.026079997420310974,
+        1.5466294288635254,
+        -0.14779016375541687
+      ]
+    },
+    {
+      "name": "Grille woven rib.014",
+      "parent": null,
+      "position": [
+        -0.02338268607854843,
+        1.5528072118759155,
+        -0.14573092758655548
+      ]
+    },
+    {
+      "name": "Grille woven rib.015",
+      "parent": null,
+      "position": [
+        -0.019091883674263954,
+        1.5581121444702148,
+        -0.14396262168884277
+      ]
+    },
+    {
+      "name": "Grille woven rib.016",
+      "parent": null,
+      "position": [
+        -0.013500000350177288,
+        1.5621827840805054,
+        -0.1426057517528534
+      ]
+    },
+    {
+      "name": "Grille woven rib.017",
+      "parent": null,
+      "position": [
+        -0.006988114211708307,
+        1.564741611480713,
+        -0.14175277948379517
+      ]
+    },
+    {
+      "name": "Grille woven rib.018",
+      "parent": null,
+      "position": [
+        -4.959819620621032e-18,
+        1.5656144618988037,
+        -0.14146184921264648
+      ]
+    },
+    {
+      "name": "Grille woven rib.019",
+      "parent": null,
+      "position": [
+        0.006988114211708307,
+        1.564741611480713,
+        -0.14175277948379517
+      ]
+    },
+    {
+      "name": "Grille woven rib.020",
+      "parent": null,
+      "position": [
+        0.013500000350177288,
+        1.5621827840805054,
+        -0.1426057517528534
+      ]
+    },
+    {
+      "name": "Grille woven rib.021",
+      "parent": null,
+      "position": [
+        0.019091883674263954,
+        1.5581121444702148,
+        -0.14396262168884277
+      ]
+    },
+    {
+      "name": "Grille woven rib.022",
+      "parent": null,
+      "position": [
+        0.02338268607854843,
+        1.5528072118759155,
+        -0.14573092758655548
+      ]
+    },
+    {
+      "name": "Grille woven rib.023",
+      "parent": null,
+      "position": [
+        0.026079997420310974,
+        1.5466294288635254,
+        -0.14779016375541687
+      ]
+    },
+    {
+      "name": "Microphone cable",
+      "parent": null,
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "triangles": 13220
+}
