@@ -11,8 +11,13 @@
         <span class="library-heading">SONG LIBRARY</span>
         <button id="library-dlc" class="library-link" onclick="load-scene:Assets/DLC.lvl"><span>Download songs</span></button>
     </div>
-    <div id="song-list" class="library-list">
-        <p class="empty-library" data-if="track_count == 0">No songs match this filter. Choose All songs or download more DLC.</p>
+    <div class="library-search">
+        <input id="song-search" class="text" type="text" placeholder="Search title, artist, album..." data-value="search"/>
+        <button id="search-clear" class="library-link" data-if="search != ''" data-event-click="clear_search"><span>Clear</span></button>
+        <button id="favorites-only" class="library-link" data-class-active="favorites_only" data-event-click="favorites_only"><span>&#x2605; Favorites ({{favorite_count}})</span></button>
+    </div>
+    <div id="song-list" class="library-list with-search">
+        <p class="empty-library" data-if="track_count == 0">No songs match. Clear the search, choose All songs, turn off Favorites or download more DLC.</p>
         <div data-for="track : tracks">
             <h2 class="track-category" data-if="track.category != ''">{{track.category}}</h2>
             <div class="song-row" data-class-selected="selected == track.index" data-event-mouseover="select(track.index)">
@@ -23,6 +28,7 @@
                     <span class="song-year">{{track.year}}</span>
                 </button>
                 <span class="song-notes">Note Count: {{track.notes}}</span>
+                <button class="favorite-toggle" data-class-on="track.favorite" data-event-click="favorite(track.index)" data-event-focus="select(track.index)"><span data-if="track.favorite">&#x2605;</span><span data-if="!track.favorite">&#x2606;</span></button>
             </div>
         </div>
     </div>
@@ -37,11 +43,12 @@
             <p class="detail-notes">Note Count: {{detail_notes}}</p>
             <button id="play-selected" class="detail-action green" data-event-click="play(selected)">PLAY</button>
             <button class="detail-action" data-event-click="preview(selected)">Preview</button>
+            <button class="detail-action pink" data-event-click="favorite(selected)"><span data-if="detail_favorite">&#x2605; Unfavorite</span><span data-if="!detail_favorite">&#x2606; Favorite</span></button>
             <button class="detail-action" data-event-click="stats">View Stats</button>
         </div>
     </div>
     <div class="library-footer">
-        <button id="library-filters" class="library-link" data-event-click="toggle_filters"><span>Sorting: {{sort_name}} (Ascending) / Filter: {{filter_name}}</span></button>
+        <button id="library-filters" class="library-link" data-event-click="toggle_filters"><span>Sorting: {{sort_name}} (Ascending) / Filter: {{filter_name}}</span><span data-if="favorites_only"> / Favorites only</span></button>
         <span>{{track_count}} songs</span>
     </div>
     <div class="filter-scrim" data-if="filters_open" data-event-click="toggle_filters"></div>
@@ -53,6 +60,7 @@
         <button id="sort-artist" data-class-active="sort == 2" data-event-click="sort(2)">Artist</button>
         <button id="sort-year" data-class-active="sort == 3" data-event-click="sort(3)">Year</button>
         <h1>Filter</h1>
+        <button id="filter-favorites" data-class-active="favorites_only" data-event-click="favorites_only">&#x2605; Favorites only ({{favorite_count}})</button>
         <button data-for="option : filters" data-class-active="filter == option.index" data-event-click="filter(option.index)">{{option.name}} ({{option.count}})</button>
     </div>
 </body>

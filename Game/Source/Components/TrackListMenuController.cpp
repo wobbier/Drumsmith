@@ -8,6 +8,7 @@
 #include "Global/TrackRadio.h"
 #include "UI/TrackRadioUtils.h"
 #include <cctype>
+#include <sstream>
 
 namespace
 {
@@ -17,6 +18,24 @@ namespace
         const std::string& name = sort == TrackListSort::Artist ? track.m_artistName : track.m_trackName;
         if( sort == TrackListSort::None || name.empty() ) return "";
         return std::string( 1, static_cast<char>( std::toupper( static_cast<unsigned char>( name.front() ) ) ) );
+    }
+
+
+    std::string Lower( std::string inText )
+    {
+        for( char& c : inText ) c = static_cast<char>( std::tolower( static_cast<unsigned char>( c ) ) );
+        return inText;
+    }
+
+
+    // Every word of the search must appear in the title, artist, album or genre (any case).
+    bool MatchesSearch( const TrackData& track, const std::vector<std::string>& words )
+    {
+        if( words.empty() ) return true;
+        const std::string haystack = Lower( track.m_trackName + "\n" + track.m_artistName + "\n" + track.m_albumName + "\n" + track.m_genre );
+        for( const std::string& word : words )
+            if( haystack.find( word ) == std::string::npos ) return false;
+        return true;
     }
 }
 
@@ -30,9 +49,25 @@ void TrackListMenuController::PopulateModel()
     if( !ui ) return;
     auto& database = TrackDatabase::GetInstance();
     auto& tracks = database.m_trackList.m_tracks;
-    const auto& indices = database.SortTracks( database.m_currentSort, database.m_currentFilter );
+    const auto& sorted = database.SortTracks( database.m_currentSort, database.m_currentFilter );
+    // The search box and the favorites toggle narrow the sorted, filtered list further.
+    std::vector<std::string> words;
+    {
+        std::istringstream stream( Lower( m_search ) );
+        for( std::string word; stream >> word; ) words.push_back( word );
+    }
+    std::vector<unsigned int> indices;
+    indices.reserve( sorted.size() );
+    unsigned int favoriteCount = 0;
+    for( const TrackData& track : tracks ) favoriteCount += database.IsFavorite( track ) ? 1 : 0;
+    for( unsigned int index : sorted )
+    {
+        if( m_favoritesOnly && !database.IsFavorite( tracks[index] ) ) continue;
+        if( !MatchesSearch( tracks[index], words ) ) continue;
+        indices.push_back( index );
+    }
     ui->ModelEnsure( "song_library" );
-    for( const char* event : { "play", "preview", "select", "sort", "filter", "toggle_filters", "back", "stats" } )
+    for( const char* event : { "play", "preview", "select", "sort", "filter", "toggle_filters", "back", "stats", "favorite", "favorites_only", "clear_search" } )
         ui->ModelRegisterEvent( "song_library", event );
     if( !m_modelReady )
     {
@@ -45,7 +80,11 @@ void TrackListMenuController::PopulateModel()
         }
         ui->ModelSetNumber( "song_library", "detail_year", 0 );
         ui->ModelSetNumber( "song_library", "detail_notes", 0 );
+        ui->ModelSetNumber( "song_library", "detail_favorite", 0 );
+        ui->ModelSetString( "song_library", "search", m_search );
     }
+    ui->ModelSetNumber( "song_library", "favorites_only", m_favoritesOnly );
+    ui->ModelSetNumber( "song_library", "favorite_count", favoriteCount );
     ui->ModelSetNumber( "song_library", "sort", static_cast<int>( database.m_currentSort ) );
     ui->ModelSetNumber( "song_library", "filter", static_cast<int>( database.m_currentFilter ) );
     const char* sortNames[] = { "Default", "Title", "Artist", "Year" };
@@ -68,6 +107,7 @@ void TrackListMenuController::PopulateModel()
         ui->ModelSetItemString( "song_library", "tracks", row, "art", TrackRadioUtils::ArtSource( track ) );
         ui->ModelSetItemNumber( "song_library", "tracks", row, "year", track.m_year );
         ui->ModelSetItemNumber( "song_library", "tracks", row, "notes", track.m_noteCount );
+        ui->ModelSetItemNumber( "song_library", "tracks", row, "favorite", database.IsFavorite( track ) );
     }
     int filterRow = 0;
     ui->ModelSetListCount( "song_library", "filters", 0 );
@@ -90,6 +130,8 @@ void TrackListMenuController::PopulateModel()
         SelectTrack( static_cast<int>( indices.front() ) );
         m_previewTrack = -1;
     }
+    if( m_selectedTrack >= 0 && m_selectedTrack < static_cast<int>( tracks.size() ) )
+        ui->ModelSetNumber( "song_library", "detail_favorite", database.IsFavorite( tracks[m_selectedTrack] ) );
     m_modelReady = true;
 }
 
@@ -111,6 +153,7 @@ void TrackListMenuController::SelectTrack( int inTrackIndex )
     ui->ModelSetString( "song_library", "detail_art", TrackRadioUtils::ArtSource( track ) );
     ui->ModelSetNumber( "song_library", "detail_year", track.m_year );
     ui->ModelSetNumber( "song_library", "detail_notes", track.m_noteCount );
+    ui->ModelSetNumber( "song_library", "detail_favorite", TrackDatabase::GetInstance().IsFavorite( track ) );
 }
 
 
@@ -128,19 +171,17 @@ void TrackListMenuController::PreviewTrack( int inTrackIndex )
 
 void TrackListMenuController::PlayTrack( int inTrackIndex )
 {
-    auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    TrackRadioUtils::LaunchTrack( inTrackIndex );
+}
+
+
+void TrackListMenuController::ToggleFavorite( int inTrackIndex )
+{
+    auto& database = TrackDatabase::GetInstance();
+    const auto& tracks = database.m_trackList.m_tracks;
     if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) ) return;
-    const std::string trackId = tracks[inTrackIndex].m_trackSourcePath;
-    TrackRadio::GetInstance().Stop();
-    LoadSceneEvent event;
-    event.Level = "Assets/Example.lvl";
-    event.Callback = [trackId, inTrackIndex]() {
-        LaunchPlayTrackEvent play;
-        play.TrackID = trackId;
-        play.TrackIndex = inTrackIndex;
-        play.Fire();
-    };
-    event.Queue();
+    database.SetFavorite( tracks[inTrackIndex], !database.IsFavorite( tracks[inTrackIndex] ) );
+    PopulateModel();
 }
 
 
@@ -153,7 +194,14 @@ void TrackListMenuController::Update( float inDeltaTime )
     if( GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
     {
         if( ui->ModelGetNumber( "song_library", "filters_open" ) != 0 ) ui->ModelSetNumber( "song_library", "filters_open", 0 );
+        else if( !m_search.empty() ) { m_search.clear(); ui->ModelSetString( "song_library", "search", "" ); PopulateModel(); }
         else { LoadSceneEvent event; event.Level = "Assets/MainMenu.lvl"; event.Queue(); }
+    }
+    // The search box binds two-way and changes with every key; refilter when its text moves.
+    if( const std::string search = ui->ModelGetString( "song_library", "search" ); search != m_search )
+    {
+        m_search = search;
+        PopulateModel();
     }
     for( std::string event; !( event = ui->ModelPollEvent( "song_library" ) ).empty(); )
     {
@@ -176,6 +224,19 @@ void TrackListMenuController::Update( float inDeltaTime )
             database.SortTracks( database.m_currentSort, static_cast<TrackListFilter>( index ) );
             PopulateModel();
             ui->ModelSetNumber( "song_library", "filters_open", 0 );
+        }
+        else if( event == "favorite" ) ToggleFavorite( index );
+        else if( event == "favorites_only" )
+        {
+            m_favoritesOnly = !m_favoritesOnly;
+            PopulateModel();
+            ui->ModelSetNumber( "song_library", "filters_open", 0 );
+        }
+        else if( event == "clear_search" )
+        {
+            m_search.clear();
+            ui->ModelSetString( "song_library", "search", "" );
+            PopulateModel();
         }
         else if( event == "stats" ) { LoadSceneEvent scene; scene.Level = "Assets/TrackStats.lvl"; scene.Queue(); return; }
     }

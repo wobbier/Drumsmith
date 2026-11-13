@@ -13,6 +13,13 @@ body.library-page { background-color: #121212; font-family: Inter; }
 .library-link span { vertical-align: middle; }
 .library-list { position: absolute; top: 56dp; bottom: 52dp; left: 0; right: 31vw; padding: 20dp; overflow-y: auto; }
 .library-list.full { right: 0; }
+.library-list.with-search { top: 116dp; }
+.library-search { position: absolute; top: 56dp; left: 0; right: 31vw; height: 60dp; padding: 10dp 20dp 0; display: flex; align-items: center; gap: 10dp; }
+.library-search input.text { flex: 1; min-width: 0; padding: 8dp 12dp; font-size: 19dp; background-color: #000000a0; }
+.library-search input.text:placeholder-shown { color: #ffffff70; }
+.library-page .library-search .library-link.active { color: #ffcc33; background-color: #ffffff12; }
+.library-page .favorite-toggle { position: absolute; right: 8dp; top: 6dp; padding: 2dp 10dp; font-size: 30dp; color: #ffffff70; }
+.library-page .favorite-toggle.on { color: #ffcc33; }
 .library-status { margin: 0 0 16dp; font-size: 17dp; color: #ffffffb8; }
 .track-category { color: white; font-size: 38dp; margin: 14dp 0 16dp; }
 .song-row { display: flex; position: relative; min-height: 150dp; margin-bottom: 12dp; background-color: #00000012; border-left: 3dp #ffffff00; }
@@ -55,6 +62,7 @@ body.library-page { background-color: #121212; font-family: Inter; }
     .song-row { min-height: 112dp; }
     .library-page .art-button, .song-art { width: 112dp; height: 112dp; }
     .library-list { padding: 12dp; right: 34vw; }
+    .library-search { right: 34vw; padding: 10dp 12dp 0; }
     .library-list.full { right: 0; }
     .library-details { width: 34vw; }
     .detail-art { height: 30vw; }

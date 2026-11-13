@@ -33,6 +33,7 @@ void GameSettings::Save()
     RootJson["VenueCamera"] = VenueCamera;
     RootJson["VenueStyle"] = VenueStyle;
     RootJson["Lyrics"] = Lyrics;
+    RootJson["Favorites"] = FavoriteTracks;
 
     Path settingsFilePath( "Settings.json" );
     File settingsFile( settingsFilePath );
@@ -100,6 +101,18 @@ void GameSettings::Load()
     if( RootJson.contains( "Lyrics" ) && RootJson["Lyrics"].is_number() )
     {
         Lyrics = std::clamp( RootJson["Lyrics"].get<int>(), 0, 3 );
+    }
+
+    if( RootJson.contains( "Favorites" ) && RootJson["Favorites"].is_array() )
+    {
+        FavoriteTracks.clear();
+        for( const json& favorite : RootJson["Favorites"] )
+        {
+            if( favorite.is_string() )
+            {
+                FavoriteTracks.insert( favorite.get<std::string>() );
+            }
+        }
     }
 
     if( RootJson.contains( "HighwaySpeed" ) && RootJson["HighwaySpeed"].is_number() )

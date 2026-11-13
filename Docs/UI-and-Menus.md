@@ -69,6 +69,8 @@ Both pages that play menu music carry the same markup (`#track-radio`, styled by
 
 `TrackListMenuController::PopulateModel` turns `TrackDatabase::SortTracks( sort, filter )` into the `tracks` list (category headers when sorting by title, artist or year) and the `filters` list with counts. Hovering or focusing a row selects it (details panel, and a radio preview of the song after 0.25 s); clicking the art or PLAY loads the gameplay scene with that track; View Stats loads `Assets/TrackStats.lvl`. The footer button opens the sort/filter flyout; a scrim click or Escape closes it.
 
+**Search and favorites.** The search box (`search`, bound two-way) narrows the sorted, filtered list as you type: every word must appear in the title, artist, album or genre, any case. The controller compares the model's text with its own copy each frame and repopulates when it moves; Clear or Escape (with the flyout closed) empties it. Each row has a star (`favorite(track.index)`), the details panel a Favorite button, and the Favorites toggle beside the search box (also in the flyout's Filter section) lists only favorites (`favorites_only`, `favorite_count`). Favorites are saved at once in `Settings.json` (`GameSettings::FavoriteTracks`) under the song's folder name (`TrackDatabase::FavoriteKey`), so a rescan or reinstall keeps them; two DLC folders with the same name would share a star.
+
 ### DLC catalogue (`dlc_store`)
 
 `DLCMenuController` owns the whole flow the old page split between JavaScript and C++:

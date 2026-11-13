@@ -241,6 +241,11 @@ public:
 
     std::string GetFilterName( TrackListFilter inFilter );
 
+    // Favorites live in GameSettings, keyed by the song's folder name; SetFavorite saves them.
+    static std::string FavoriteKey( const TrackData& inTrack );
+    bool IsFavorite( const TrackData& inTrack ) const;
+    void SetFavorite( const TrackData& inTrack, bool inFavorite );
+
     TrackListSort m_currentSort = TrackListSort::None;
     TrackListFilter m_currentFilter = TrackListFilter::None;
     bool m_needsSort = true;

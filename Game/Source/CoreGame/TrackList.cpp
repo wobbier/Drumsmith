@@ -6,6 +6,7 @@
 #include "JSON.h"
 #include "Utils/StringUtils.h"
 #include "CLog.h"
+#include "Config/GameSettings.h"
 
 DISABLE_OPTIMIZATION;
 
@@ -283,7 +284,7 @@ void TrackDatabase::ExportMidiTrackMetaData()
                 //iniMetaData["TrackName"] = metadata.m_name;
                 //
                 //File iniOutput( Path( midiPath.FullPath + "/TrackData.txt" ) );
-                //iniOutput.Write( iniMetaData.dump( 1 ) );
+                //iniOutput.Write( iniMetaData.dump( 1, ' ', false, json::error_handler_t::replace ) );
 
                 continue;
             }
@@ -474,6 +475,49 @@ void TrackDatabase::GatherFilterCounts()
     }
 }
 
+std::string TrackDatabase::FavoriteKey( const TrackData& inTrack )
+{
+    // m_trackSourcePath is "<song folder>/<audio file>" (often with a doubled separator, as the
+    // folder keeps its trailing slash); the song folder's name is the key.
+    std::string folder = inTrack.m_trackSourcePath;
+    const size_t file = folder.find_last_of( "/\\" );
+    folder.resize( file == std::string::npos ? 0 : file );
+    while( !folder.empty() && ( folder.back() == '/' || folder.back() == '\\' ) )
+    {
+        folder.pop_back();
+    }
+    const size_t parent = folder.find_last_of( "/\\" );
+    folder = parent == std::string::npos ? folder : folder.substr( parent + 1 );
+    return folder.empty() ? inTrack.m_artistName + " - " + inTrack.m_trackName : folder;
+}
+
+
+bool TrackDatabase::IsFavorite( const TrackData& inTrack ) const
+{
+    return GameSettings::GetInstance().FavoriteTracks.count( FavoriteKey( inTrack ) ) != 0;
+}
+
+
+void TrackDatabase::SetFavorite( const TrackData& inTrack, bool inFavorite )
+{
+    GameSettings& settings = GameSettings::GetInstance();
+    const std::string key = FavoriteKey( inTrack );
+    if( inFavorite == ( settings.FavoriteTracks.count( key ) != 0 ) )
+    {
+        return;
+    }
+    if( inFavorite )
+    {
+        settings.FavoriteTracks.insert( key );
+    }
+    else
+    {
+        settings.FavoriteTracks.erase( key );
+    }
+    settings.Save();
+}
+
+
 std::string TrackDatabase::GetFilterName( TrackListFilter inFilter )
 {
     switch( inFilter )
@@ -539,7 +583,7 @@ void TrackData::Save()
         json metaData;
         OnSaveTrackData( metaData );
         File metaFile( Path( m_directory + "/TrackData.txt" ) );
-        metaFile.Write( metaData.dump( 1 ) );
+        metaFile.Write( metaData.dump( 1, ' ', false, json::error_handler_t::replace ) );
     }
 
     if( !m_noteData.empty() )
@@ -547,7 +591,7 @@ void TrackData::Save()
         json metaData;
         OnSaveNoteData( metaData );
         File metaFile( Path( m_directory + "/NoteData.txt" ) );
-        metaFile.Write( metaData.dump( 1 ) );
+        metaFile.Write( metaData.dump( 1, ' ', false, json::error_handler_t::replace ) );
     }
 }
 
@@ -560,7 +604,7 @@ void TrackData::SaveNoteData()
     json noteData;
     OnSaveNoteData( noteData );
     File noteFile( Path( m_directory + "/NoteData.txt" ) );
-    noteFile.Write( noteData.dump( 1 ) );
+    noteFile.Write( noteData.dump( 1, ' ', false, json::error_handler_t::replace ) );
 }
 
 

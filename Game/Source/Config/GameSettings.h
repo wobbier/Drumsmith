@@ -1,6 +1,8 @@
 #pragma once
 #include "Singleton.h"
 #include "JSON.h"
+#include <set>
+#include <string>
 
 class GameSettings
 {
@@ -35,6 +37,9 @@ public:
     // Where a chart's lyrics show (Docs/Venue-and-Band.md → Lyrics): 0 off, 1 the HUD, 2 the
     // venue's LED wall, 3 both.
     int Lyrics = 3;
+    // Favorite songs, by song folder name (TrackDatabase::FavoriteKey), so a rescan or a moved
+    // DLC folder keeps them.
+    std::set<std::string> FavoriteTracks;
     bool LyricsOnHud() const { return ( Lyrics & 1 ) != 0; }
     bool LyricsInVenue() const { return ( Lyrics & 2 ) != 0; }
 private:
