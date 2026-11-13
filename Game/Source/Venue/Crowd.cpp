@@ -1,4 +1,5 @@
 #include "Venue/Crowd.h"
+#include "Venue/People.generated.h"
 #include "Venue/VenueKit.h"
 #include "Venue/VenueLayout.h"
 #include "Venue/VenueTiming.h"
@@ -10,17 +11,30 @@ namespace
 {
     constexpr float kPi = 3.14159265f;
 
-    const Vector3 kShirts[] = { Vector3( 0.06f, 0.06f, 0.07f ), Vector3( 0.4f, 0.05f, 0.05f ), Vector3( 0.08f, 0.12f, 0.3f ), Vector3( 0.55f, 0.55f, 0.52f ),
-        Vector3( 0.1f, 0.25f, 0.12f ), Vector3( 0.35f, 0.2f, 0.06f ), Vector3( 0.25f, 0.08f, 0.3f ), Vector3( 0.12f, 0.12f, 0.12f ), Vector3( 0.05f, 0.2f, 0.25f ), Vector3( 0.5f, 0.3f, 0.32f ) };
-    const Vector3 kSkins[] = { Vector3( 0.88f, 0.7f, 0.58f ), Vector3( 0.75f, 0.55f, 0.42f ), Vector3( 0.55f, 0.38f, 0.26f ), Vector3( 0.38f, 0.25f, 0.17f ), Vector3( 0.95f, 0.8f, 0.68f ) };
-    const Vector3 kHair[] = { Vector3( 0.04f, 0.03f, 0.02f ), Vector3( 0.25f, 0.15f, 0.06f ), Vector3( 0.7f, 0.58f, 0.3f ), Vector3( 0.4f, 0.1f, 0.06f ), Vector3( 0.12f, 0.12f, 0.12f ) };
-    const Vector3 kPants[] = { Vector3( 0.06f, 0.08f, 0.14f ), Vector3( 0.05f, 0.05f, 0.05f ), Vector3( 0.2f, 0.17f, 0.12f ) };
-
     float Pulse( double inBeat, double inPower = 2.0 )
     {
         const double fraction = inBeat - std::floor( inBeat );
         return static_cast<float>( std::pow( 1.0 - fraction, inPower ) );
     }
+
+    // How a back-of-the-house figure's arm hangs, or goes up (a little out to the side).
+    glm::quat MobArm( int inSide, bool inUp )
+    {
+        const float s = inSide == 0 ? -1.f : 1.f;
+        const float spread = ( inUp ? 12.f : 8.f ) * s * kPi / 180.f;
+        const float raise = ( inUp ? 172.f : 5.f ) * kPi / 180.f;
+        return glm::angleAxis( -raise, glm::vec3( 1.f, 0.f, 0.f ) ) * glm::angleAxis( spread, glm::vec3( 0.f, 0.f, 1.f ) );
+    }
+}
+
+
+int Crowd::ModelFor( float inNoise ) const
+{
+    if( m_models.empty() )
+    {
+        return static_cast<int>( inNoise * People::kCount ) % People::kCount;
+    }
+    return m_models[static_cast<size_t>( inNoise * static_cast<float>( m_models.size() ) ) % m_models.size()];
 }
 
 
@@ -83,16 +97,13 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
             // Facing the stage, the singer's spot for those off to the side.
             const float yaw = std::atan2( -feet.x, 4.f - feet.z ) * 180.f / kPi * 0.8f + ( VenueTiming::Noise( seed, 4u ) - 0.5f ) * 16.f;
             Puppet::Look look;
-            look.Shirt = kShirts[static_cast<int>( VenueTiming::Noise( seed, 5u ) * 10.f ) % 10];
-            look.Skin = kSkins[static_cast<int>( VenueTiming::Noise( seed, 6u ) * 5.f ) % 5];
-            look.Hair = kHair[static_cast<int>( VenueTiming::Noise( seed, 7u ) * 5.f ) % 5];
-            look.Pants = kPants[static_cast<int>( VenueTiming::Noise( seed, 8u ) * 3.f ) % 3];
-            look.LongHair = VenueTiming::Noise( seed, 9u ) < 0.3f;
             look.Height = 0.9f + VenueTiming::Noise( seed, 10u ) * 0.2f;
             look.Build = 0.9f + VenueTiming::Noise( seed, 11u ) * 0.25f;
-            // Rounded heads and arms for the front rows only: the rest are small on screen.
-            look.Blocky = depth > 4.5f;
-            person.Body.Build( inKit, inFloor, feet, yaw, look, false );
+            // Full detail for the front rows only: the rest are small on screen.
+            look.Far = depth > 4.5f;
+            look.Skin = static_cast<uint32_t>( VenueTiming::Noise( seed, 5u ) * 1000.f );
+            look.Model = ModelFor( VenueTiming::Noise( seed, 6u ) );
+            person.Body.Build( inKit, inFloor, feet, yaw, look );
             person.Phase = VenueTiming::Noise( seed, 12u );
             // Keener toward the front.
             person.Enthusiasm = std::clamp( 0.25f + 0.75f * VenueTiming::Noise( seed, 13u ) + ( depth < 5.f ? 0.25f : 0.f ) - depth * 0.012f, 0.1f, 1.f );
@@ -114,9 +125,9 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
     if( !m_people.empty() )
     {
         Puppet::Look look;
-        look.Shirt = Vector3( 0.7f, 0.65f, 0.1f );
-        look.LongHair = true;
-        m_surfer.Build( inKit, inFloor, Vector3( 0.f, -10.f, 0.f ), 0.f, look, false );
+        look.Skin = static_cast<uint32_t>( m_people.size() );
+        look.Model = ModelFor( 0.5f );
+        m_surfer.Build( inKit, inFloor, Vector3( 0.f, -10.f, 0.f ), 0.f, look );
     }
 }
 
@@ -306,7 +317,7 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
             const float clap = Pulse( myBeat, 5.0 );
             const float raise = person.Enthusiasm > 0.6f ? 150.f : 85.f;
             left.Raise = right.Raise = raise;
-            left.Spread = right.Spread = 3.f + 24.f * ( 1.f - clap );
+            left.Spread = right.Spread = -14.f + 30.f * ( 1.f - clap );
             left.Elbow = right.Elbow = 30.f;
             pose.Crouch = 0.03f * pulse;
         }
@@ -450,22 +461,20 @@ void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1,
         root->SetRotation( Vector3( 0.f, std::atan2( -fx, 4.f - fz ) * 180.f / kPi * 0.85f + ( VenueTiming::Noise( seed, 27u ) - 0.5f ) * 20.f, 0.f ) );
         const float height = 0.9f + VenueTiming::Noise( seed, 28u ) * 0.2f;
         const float build = 0.9f + VenueTiming::Noise( seed, 29u ) * 0.25f;
-        const Vector3 shirt = kShirts[static_cast<int>( VenueTiming::Noise( seed, 30u ) * 10.f ) % 10];
-        const Vector3 skin = kSkins[static_cast<int>( VenueTiming::Noise( seed, 31u ) * 5.f ) % 5];
-        const Vector3 pants = kPants[static_cast<int>( VenueTiming::Noise( seed, 32u ) * 3.f ) % 3];
-        inKit.Box( Vector3( 0.f, 0.42f * height, 0.f ), Vector3( 0.34f * build, 0.84f * height, 0.22f ), pants, root );
-        inKit.Box( Vector3( 0.f, 1.15f * height, 0.f ), Vector3( 0.44f * build, 0.62f * height, 0.26f ), shirt, root );
-        inKit.Box( Vector3( 0.f, 1.58f * height, 0.01f ), Vector3( 0.2f, 0.23f, 0.21f ) * height, skin, root );
-        // Arms up: both for the jumpers, the right for the rest (and a light in that hand for
-        // some of them). Parked under the floor until they go up.
-        figure.Arms = inKit.Group( "MobArms", root, Vector3( 0.f, -10.f, 0.f ) );
-        if( figure.Arms )
+        root->SetScale( Vector3( height * build, height, height * build ) );
+        // The body in one piece; the arms hang, and go up as the mood has them (UpdateMob).
+        const std::string& skin = VenueKit::Skin( static_cast<uint32_t>( VenueTiming::Noise( seed, 30u ) * 1000.f ) );
+        figure.Model = ModelFor( VenueTiming::Noise( seed, 31u ) );
+        const People::Person& person = People::kPeople[figure.Model];
+        inKit.Part( person.Body, root, "Body", skin );
+        for( int side = 0; side < 2; ++side )
         {
-            Transform* arms = &figure.Arms->GetComponent<Transform>();
-            for( int side = figure.Jumper ? -1 : 1; side <= 1; side += 2 )
+            figure.Arms[side] = inKit.Part( person.Arms[side][1], root, "Arm", skin );
+            if( figure.Arms[side] )
             {
-                EntityHandle arm = inKit.Box( Vector3( side * 0.27f * build, 1.74f * height, 0.f ), Vector3( 0.09f, 0.6f * height, 0.09f ), shirt, arms );
-                if( arm ) arm->GetComponent<Transform>().SetRotation( Vector3( 0.f, 0.f, side * -14.f ) );
+                Transform& arm = figure.Arms[side]->GetComponent<Transform>();
+                arm.SetPosition( Vector3( person.Shoulders[side] ) );
+                arm.SetRotation( Quaternion( MobArm( side, false ) ) );
             }
         }
         const float item = VenueTiming::Noise( seed, 33u );
@@ -475,8 +484,6 @@ void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1,
             figure.Light = inKit.Box( Vector3( 0.f, -10.f, 0.f ), lighter ? Vector3( 0.05f, 0.08f, 0.05f ) : Vector3( 0.08f, 0.14f, 0.02f ), Vector3( 0.f, 0.f, 0.f ), root,
                 lighter ? Vector3( 4.f, 1.6f, 0.3f ) : Vector3( 1.6f, 2.f, 3.f ) );
         }
-        figure.Height = height;
-        figure.Build = build;
         m_mob.push_back( figure );
         ++added;
     }
@@ -528,15 +535,22 @@ void Crowd::UpdateMob( double inBeat, float inSeconds, float inEnergy, bool inLi
             offset.x = 0.03f * std::sin( inSeconds * ( 0.6f + figure.Phase * 0.5f ) + figure.Phase * 20.f );
         }
         figure.Root->GetComponent<Transform>().SetPosition( figure.Base + offset );
-        if( armsUp != figure.ArmsUp && figure.Arms )
+        if( armsUp != figure.ArmsUp )
         {
+            // Both arms for the jumpers, the right for the rest.
             figure.ArmsUp = armsUp;
-            figure.Arms->GetComponent<Transform>().SetPosition( Vector3( 0.f, armsUp ? 0.f : -10.f, 0.f ) );
+            for( int side = figure.Jumper ? 0 : 1; side < 2; ++side )
+            {
+                if( figure.Arms[side] ) figure.Arms[side]->GetComponent<Transform>().SetRotation( Quaternion( MobArm( side, armsUp ) ) );
+            }
         }
         if( lightUp != figure.LightUp && figure.Light )
         {
+            // In the raised right hand (the root's space, which carries the figure's scale).
             figure.LightUp = lightUp;
-            figure.Light->GetComponent<Transform>().SetPosition( lightUp ? Vector3( 0.34f * figure.Build, 2.06f * figure.Height, 0.04f ) : Vector3( 0.f, -10.f, 0.f ) );
+            const People::Person& person = People::kPeople[figure.Model];
+            const glm::vec3 hand = person.Shoulders[1] + MobArm( 1, true ) * glm::vec3( 0.f, -person.ArmLength - 0.08f, 0.f );
+            figure.Light->GetComponent<Transform>().SetPosition( lightUp ? Vector3( hand ) : Vector3( 0.f, -10.f, 0.f ) );
         }
     }
 }

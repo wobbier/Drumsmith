@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreGame/TrackList.h"
-#include "Venue/Puppet.h"
+#include "Venue/Performer.h"
 #include "ECS/EntityHandle.h"
 #include <array>
 #include <string>
@@ -19,6 +19,8 @@ class Band
 public:
     void Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue, const std::vector<NoteData>& inNotes, const std::vector<BeatData>& inBeats, float inBpm );
     void Clear();
+    // The characters (People::kPeople indices) no member on stage is: the crowd's.
+    std::vector<int> SpareModels() const;
     void Update( double inSeconds, float inDeltaTime, float inCrowdEnergy );
 
     // Venue-space points for the director and the lights: a member's head, chest and hands.
@@ -71,8 +73,9 @@ private:
     {
         bool Present = false;
         EntityHandle Group;    // at the member's spot, facing the crowd
-        Puppet Body;
-        Puppet::Pose Pose;
+        Performer Body;
+        int Model = -1;            // which character (People::kPeople)
+        Performer::Pose Pose;
         std::vector<TimedCueData> States;
         std::vector<float> Strums;
         std::vector<VenueData::SpanData> Frets;   // the fretting hand's position (m_member 0-19)

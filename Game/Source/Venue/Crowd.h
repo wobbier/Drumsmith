@@ -23,6 +23,9 @@ public:
     void Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount,
         float inBackZ = VenueLayout::kCrowdBackZ, float inHalfWidth = VenueLayout::kCrowdHalfWidth );
     void Clear();
+    // The characters the crowd is made of (People::kPeople indices): the ones the band isn't
+    // using. Set before Build; empty means all of them.
+    void SetModels( const std::vector<int>& inModels ) { m_models = inModels; }
     // inPerformance: 0 (the player's struggling) .. 1 (on a long streak).
     void Update( double inSeconds, float inDeltaTime, float inPerformance );
 
@@ -69,13 +72,12 @@ private:
     struct MobFigure
     {
         EntityHandle Root;
-        EntityHandle Arms;         // over the head when they're up, hidden under the floor else
-        EntityHandle Light;        // a lighter or phone, the same
+        std::array<EntityHandle, 2> Arms;   // hanging, or up over the head
+        EntityHandle Light;        // a lighter or phone: in the raised hand, hidden under the floor else
+        int Model = 0;
         Vector3 Base;
         float Phase = 0.f;
         float Enthusiasm = 0.5f;
-        float Height = 1.f;
-        float Build = 1.f;
         bool Jumper = false;
         bool ArmsUp = false;
         bool LightUp = false;
@@ -85,6 +87,9 @@ private:
     bool Occupied( float inX, float inZ ) const;
     void UpdateMob( double inBeat, float inSeconds, float inEnergy, bool inLightsUp, bool inClapping );
 
+    int ModelFor( float inNoise ) const;
+
+    std::vector<int> m_models;
     std::vector<MobFigure> m_mob;
     std::vector<std::array<float, 4>> m_keepClear;
     // Where the posed crowd stands: rows from the front back to m_builtBackZ, each as wide as

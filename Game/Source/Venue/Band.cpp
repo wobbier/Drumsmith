@@ -1,4 +1,6 @@
 #include "Venue/Band.h"
+#include "Venue/People.generated.h"
+#include "Venue/Puppet.h"
 #include "Venue/VenueKit.h"
 #include "Venue/VenueLayout.h"
 #include "Venue/VenueTiming.h"
@@ -9,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <numeric>
 
 namespace
 {
@@ -17,6 +20,17 @@ namespace
     constexpr float kStickLength = 0.4f;
     // The grip: the hand holds the stick this far from its tip (a quarter up from the butt).
     constexpr float kStickReach = 0.3f;
+    // The drummer's hip joints, seated: on the throne (its top is at 0.58), sunk in a little.
+    constexpr float kSeatHeight = 0.67f;
+    // Where a guitar or bass hangs, from just above the hips: clear of the belly, the bass
+    // further across so its longer neck stays in reach.
+    const glm::vec3 kGuitarHang( 0.04f, 0.115f, 0.25f );
+    const glm::vec3 kBassHang( 0.12f, 0.115f, 0.25f );
+    // The singer's stand (the mic comes to their mouth), and where their hand holds it: under
+    // the mic's clip.
+    constexpr float kMicStandZ = 0.42f;
+    constexpr float kMicStandHeight = 1.47f;
+    const glm::vec3 kMicGrip( 0.f, kMicStandHeight - 0.05f, kMicStandZ );
 
     glm::quat Axis( float inDegrees, const glm::vec3& inAxis )
     {
@@ -62,11 +76,6 @@ namespace
         glm::vec3( 0.72f, 1.06f, 0.66f ),    // Ride
         glm::vec3( -0.26f, 0.05f, 0.44f ),   // HiHatPedal
     };
-
-    // Shirt colours, one per member.
-    const Vector3 kShirts[VenueData::MemberCount] = { Vector3( 0.6f, 0.6f, 0.58f ), Vector3( 0.55f, 0.06f, 0.06f ), Vector3( 0.1f, 0.18f, 0.4f ), Vector3( 0.85f, 0.82f, 0.78f ), Vector3( 0.3f, 0.12f, 0.35f ) };
-    const Vector3 kHair[VenueData::MemberCount] = { Vector3( 0.05f, 0.04f, 0.03f ), Vector3( 0.35f, 0.2f, 0.08f ), Vector3( 0.03f, 0.03f, 0.03f ), Vector3( 0.75f, 0.6f, 0.3f ), Vector3( 0.5f, 0.1f, 0.1f ) };
-    const Vector3 kSkin[VenueData::MemberCount] = { Vector3( 0.78f, 0.58f, 0.45f ), Vector3( 0.9f, 0.72f, 0.6f ), Vector3( 0.45f, 0.3f, 0.2f ), Vector3( 0.85f, 0.65f, 0.52f ), Vector3( 0.62f, 0.45f, 0.32f ) };
 
     VenueData::DrumPiece PieceFor( PadId inPad )
     {
@@ -204,13 +213,21 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
         }
         Transform& group = member.Group->GetComponent<Transform>();
         group.SetRotation( Vector3( 0.f, index == VenueData::Keys ? 155.f : 180.f, 0.f ) );
-        Puppet::Look look;
-        look.Shirt = kShirts[index];
-        look.Hair = kHair[index];
-        look.Skin = kSkin[index];
-        look.LongHair = index == VenueData::Guitar || index == VenueData::Vocals || index == VenueData::Drums;
-        look.Pants = index == VenueData::Vocals ? Vector3( 0.04f, 0.04f, 0.05f ) : Vector3( 0.07f, 0.08f, 0.12f );
-        member.Body.Build( inKit, &group, Vector3( 0.f, 0.f, 0.f ), 0.f, look, true );
+        // Each a character of their own in an atlas of their own, a different cast every song
+        // (the same every time it's played): a step through each list that visits all of it
+        // before repeating.
+        Performer::Look look;
+        const uint32_t song = static_cast<uint32_t>( m_drumTimes.size() ) + static_cast<uint32_t>( m_bpm );
+        const auto pick = [song, index]( uint32_t inCount, uint32_t inSalt ) {
+            uint32_t step = 1 + ( song + inSalt ) % inCount;
+            while( std::gcd( step, inCount ) != 1 ) ++step;
+            return ( song + inSalt + static_cast<uint32_t>( index ) * step ) % inCount;
+        };
+        look.TexturePath = VenueKit::Skin( pick( VenueKit::SkinCount(), 0u ) );
+        member.Model = static_cast<int>( pick( static_cast<uint32_t>( People::kCount ), 7u ) );
+        look.ModelPath = People::kPeople[member.Model].Model;
+        look.Mouth = Vector3( People::kPeople[member.Model].Mouth );
+        member.Body.Build( inKit, &group, Vector3( 0.f, 0.f, 0.f ), 0.f, look );
         switch( index )
         {
         case VenueData::Drums: BuildDrums( inKit, member ); break;
@@ -223,6 +240,18 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
     }
     // Backing vocals from the harmony parts, once it's known who's on stage.
     DeriveHarmonies( inVenue );
+}
+
+
+std::vector<int> Band::SpareModels() const
+{
+    std::vector<int> spare;
+    for( int model = 0; model < People::kCount; ++model )
+    {
+        const bool taken = std::any_of( m_members.begin(), m_members.end(), [model]( const Member& inMember ) { return inMember.Present && inMember.Model == model; } );
+        if( !taken ) spare.push_back( model );
+    }
+    return spare;
 }
 
 
@@ -501,7 +530,7 @@ void Band::BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass )
 
 void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
 {
-    BuildMicStand( inKit, ioMember, Vector3( 0.f, 0.f, 0.42f ), 1.5f );
+    BuildMicStand( inKit, ioMember, Vector3( 0.f, 0.f, kMicStandZ ), kMicStandHeight );
     // A pair of monitor wedges at the singer's feet.
     Transform& group = ioMember.Group->GetComponent<Transform>();
     // Percussion for the vocal part's tambourine and cowbell sections, hidden until played. In
@@ -713,10 +742,10 @@ float Band::StrumPhase( const Member& inMember, double inSeconds, int& outCount 
 
 void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float inEnergy, float inDeltaTime )
 {
-    Puppet::Pose& pose = ioMember.Pose;
-    pose = Puppet::Pose();
+    Performer::Pose& pose = ioMember.Pose;
+    pose = Performer::Pose();
     pose.Seated = true;
-    pose.SeatHeight = 0.62f;
+    pose.SeatHeight = kSeatHeight;
     const std::string state = StateOf( VenueData::Drums, inSeconds );
     const bool intense = VenueTiming::Contains( state, "intense" );
     const bool idle = state == "idle" || state == "idle_realtime";
@@ -743,22 +772,14 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
     const float reach = ( tips[0].x + tips[1].x ) * 0.5f;
     pose.Turn = -reach * 40.f;
     pose.Side = reach * 10.f;
-    ioMember.Body.Apply( pose );
+    // Feet: on the kick and hi-hat pedals, the ball of the foot over each one's middle.
     for( int side = 0; side < 2; ++side )
     {
-        const glm::vec3 chest = ioMember.Body.Chest();
-        glm::vec3 toward = tips[side] - chest;
-        toward.y = 0.f;
-        toward = glm::dot( toward, toward ) > 1e-6f ? glm::normalize( toward ) : kZ;
-        const float angle = ( 24.f - 100.f * lift[side] ) * kDeg;   // tip down at the stroke, up as it lifts
-        const glm::vec3 stick = glm::normalize( toward * std::cos( angle ) - kY * std::sin( angle ) );
-        const glm::vec3 hand = tips[side] - stick * kStickReach;
-        Puppet::Arm& arm = pose.Arms[side];
-        arm.Reach = true;
-        arm.Target = hand;
-        arm.Pole = glm::vec3( side == 0 ? -0.6f : 0.6f, -1.f, -0.3f );
+        const glm::vec3 pedal = StrikePoint( side == 0 ? Piece::HiHatPedal : Piece::Kick );
+        pose.Legs[side].Reach = true;
+        pose.Legs[side].Target = pedal + glm::vec3( 0.f, 0.015f, -0.05f );
+        pose.Legs[side].Pole = glm::vec3( side == 0 ? -0.25f : 0.1f, 0.5f, 1.f );
     }
-    // Feet: the kick and hi-hat pedal.
     const auto footFor = [&]( Limb inLimb, float inHold ) {
         const auto& strokes = m_strokes[static_cast<int>( inLimb )];
         auto it = std::upper_bound( strokes.begin(), strokes.end(), static_cast<float>( inSeconds ), []( float t, const Stroke& s ) { return t < s.Time; } );
@@ -776,9 +797,27 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
         return toe;
     };
     pose.Legs[1].Toe = footFor( Limb::RightFoot, 0.f );
-    pose.Legs[1].Spread = 6.f;
     pose.Legs[0].Toe = footFor( Limb::LeftFoot, m_strokes[static_cast<int>( Limb::LeftFoot )].empty() ? 14.f : 4.f );
-    pose.Legs[0].Spread = 14.f;
+    // The body first: the arms reach from wherever it puts the chest.
+    ioMember.Body.Stand( pose );
+    for( int side = 0; side < 2; ++side )
+    {
+        const glm::vec3 chest = ioMember.Body.Chest();
+        glm::vec3 toward = tips[side] - chest;
+        toward.y = 0.f;
+        toward = glm::dot( toward, toward ) > 1e-6f ? glm::normalize( toward ) : kZ;
+        const float angle = ( 24.f - 100.f * lift[side] ) * kDeg;   // tip down at the stroke, up as it lifts
+        const glm::vec3 stick = glm::normalize( toward * std::cos( angle ) - kY * std::sin( angle ) );
+        const glm::vec3 hand = tips[side] - stick * kStickReach;
+        Performer::Arm& arm = pose.Arms[side];
+        arm.Reach = true;
+        arm.Target = hand;
+        arm.Pole = glm::vec3( side == 0 ? -0.6f : 0.6f, -1.f, -0.3f );
+        // Palm down, the stick running across it: the fingers point a little outside the stick.
+        arm.Fingers = Axis( side == 0 ? -30.f : 30.f, kY ) * stick;
+        arm.Palm = -kY;
+        arm.Grip = 0.85f;
+    }
     ioMember.Body.Apply( pose );
     static const bool kDebug = CommandLine::Has( "--band-debug" );
     if( kDebug && static_cast<int>( inSeconds * 2.0 ) != static_cast<int>( m_lastSeconds * 2.0 ) )
@@ -913,8 +952,8 @@ void Band::SwingInstrument( Member& ioMember, const glm::vec3& inOffset, glm::ve
 
 void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, double inBeat, float inEnergy, float inDeltaTime )
 {
-    Puppet::Pose& pose = ioMember.Pose;
-    pose = Puppet::Pose();
+    Performer::Pose& pose = ioMember.Pose;
+    pose = Performer::Pose();
     const std::string state = StateOf( inIndex, inSeconds );
     const bool intense = VenueTiming::Contains( state, "intense" );
     const bool mellow = state == "mellow";
@@ -954,7 +993,7 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
         pose.Offset += ( glm::vec3( 0.f, 0.f, 0.12f ) - pose.Offset ) * atMic;
         pose.Turn *= 1.f - atMic;
     }
-    ioMember.Body.Apply( pose );
+    ioMember.Body.Stand( pose );
 
     // The guitar hangs off the torso, its neck up and to the player's left.
     const glm::quat spine = ioMember.Body.SpineRotation();
@@ -962,7 +1001,7 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     // Damped (SwingInstrument): the hands below reach for where the guitar is, not where the
     // torso would hold it, so they stay on the strings and the neck camera rides it steadily.
     glm::quat guitarRotation = spine * Axis( neckAngle, kZ ) * Axis( -8.f, kY );
-    glm::vec3 guitarPosition = ioMember.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.2f, 0.17f );
+    glm::vec3 guitarPosition = ioMember.Body.SpineBase() + spine * ( inIndex == VenueData::Bass ? kBassHang : kGuitarHang );
     if( ioMember.Instrument )
     {
         SwingInstrument( ioMember, pose.Offset, guitarPosition, guitarRotation, inDeltaTime );
@@ -1020,11 +1059,15 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
         lift = 0.035f * std::fabs( strum );
     }
     const float neck = inIndex == VenueData::Bass ? 0.86f : 0.62f;
-    Puppet::Arm& strumArm = pose.Arms[1];
+    Performer::Arm& strumArm = pose.Arms[1];
     strumArm.Reach = true;
-    strumArm.Target = guitarPosition + guitarRotation * ( slap ? glm::vec3( -0.06f, 0.1f * strum, 0.1f ) : glm::vec3( 0.1f, 0.07f * strum, 0.09f ) );
+    strumArm.Target = guitarPosition + guitarRotation * ( slap ? glm::vec3( -0.06f, 0.1f * strum, 0.09f ) : glm::vec3( 0.1f, 0.07f * strum, 0.08f ) );
     strumArm.Pole = glm::vec3( 1.f, -0.4f, -1.f );
-    Puppet::Arm& fretArm = pose.Arms[0];
+    // The palm over the strings, the fingers hanging down across them (a pick in them).
+    strumArm.Fingers = guitarRotation * glm::vec3( -0.6f, -0.8f, 0.f );
+    strumArm.Palm = guitarRotation * glm::vec3( 0.f, 0.f, -1.f );
+    strumArm.Grip = slap ? 0.3f : 0.6f;
+    Performer::Arm& fretArm = pose.Arms[0];
     fretArm.Reach = true;
     // 0 is the nut, 1 up toward the body: between the frets BuildStringed lays out (the scale
     // length's spacing, the sixteenth at the body), from just behind the first to the fourteenth.
@@ -1032,8 +1075,14 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
     const float scale = neck / ( 1.f - std::pow( 2.f, -16.f / 12.f ) );
     const float handFret = 0.5f + 13.5f * fret;
     const float handX = nut + scale * ( 1.f - std::pow( 2.f, -handFret / 12.f ) );
-    fretArm.Target = guitarPosition + guitarRotation * glm::vec3( handX, -0.03f - 0.02f * wrap, 0.05f + 0.015f * wrap + lift );
+    // The palm cups the neck's lower edge from underneath, the fingers reaching round the front
+    // of it and curling back onto the fretboard: further round for a chord, off it as open
+    // strings ring.
+    fretArm.Target = guitarPosition + guitarRotation * glm::vec3( handX, -0.045f - lift, 0.01f + 0.012f * wrap );
     fretArm.Pole = glm::vec3( -0.3f, -1.f, -0.3f );
+    fretArm.Fingers = guitarRotation * glm::vec3( 0.f, 0.35f, 1.f );
+    fretArm.Palm = guitarRotation * glm::vec3( 0.f, 1.f, 0.f );
+    fretArm.Grip = 0.6f + 0.2f * wrap - 6.f * lift;
     ioMember.Body.Apply( pose );
     (void)inEnergy;
 }
@@ -1184,8 +1233,8 @@ float Band::AwayFromMic( double inSeconds, uint32_t* outBreak ) const
 
 void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, float inEnergy )
 {
-    Puppet::Pose& pose = ioMember.Pose;
-    pose = Puppet::Pose();
+    Performer::Pose& pose = ioMember.Pose;
+    pose = Performer::Pose();
     const std::string state = StateOf( VenueData::Vocals, inSeconds );
     const bool intense = VenueTiming::Contains( state, "intense" ) || inEnergy > 0.85f;
     const float t = static_cast<float>( inSeconds );
@@ -1212,18 +1261,21 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     pose.Side = 4.f * std::sin( static_cast<float>( inBeat ) * kPi * 0.5f );
     pose.Legs[0].Spread = 6.f;
     pose.Legs[1].Spread = 6.f;
-    ioMember.Body.Apply( pose );
 
-    Puppet::Arm& micArm = pose.Arms[1];
-    Puppet::Arm& freeArm = pose.Arms[0];
+    Performer::Arm& micArm = pose.Arms[1];
+    Performer::Arm& freeArm = pose.Arms[0];
     // What they do with their hands on this break, the same every time it plays.
     const float habit = VenueTiming::Noise( gap, 23u );
     if( atMic )
     {
         // A hand on the mic; the other one rides the melody while singing, else hangs loose.
         micArm.Reach = true;
-        micArm.Target = glm::vec3( 0.02f, 1.5f, 0.32f );
+        micArm.Target = kMicGrip;
         micArm.Pole = glm::vec3( 1.f, -1.f, 0.f );
+        // Round the stand from its right, under the mic.
+        micArm.Fingers = glm::vec3( 0.f, 0.2f, 1.f );
+        micArm.Palm = glm::vec3( -1.f, 0.f, 0.f );
+        micArm.Grip = 0.9f;
         const float phrase = VenueTiming::Noise( static_cast<uint32_t>( t * 0.5f ), 3u );
         freeArm.Raise = singing ? 30.f + 60.f * phrase + 15.f * open : 15.f + 5.f * pulse;
         freeArm.Spread = singing ? 25.f + 20.f * phrase : 15.f;
@@ -1244,8 +1296,10 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
         // Clapping along over their head.
         const float clap = Pulse( inBeat, 4.0 );
         micArm.Raise = freeArm.Raise = 145.f;
-        micArm.Spread = freeArm.Spread = 4.f + 22.f * ( 1.f - clap );
+        micArm.Spread = freeArm.Spread = -14.f + 30.f * ( 1.f - clap );
         micArm.Elbow = freeArm.Elbow = 25.f;
+        micArm.Palm = -kX;
+        freeArm.Palm = kX;
     }
     else if( out && habit < 0.75f )
     {
@@ -1274,50 +1328,58 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     const float strike = percussion ? PercussionStrike( inSeconds, inBeat ) : 0.f;
     if( percussion && percussion->Kind == Percussion::Clap )
     {
-        micArm.Reach = freeArm.Reach = false;
+        micArm = freeArm = Performer::Arm();
         micArm.Raise = freeArm.Raise = 100.f;
-        micArm.Spread = freeArm.Spread = 4.f + 26.f * ( 1.f - strike );
+        micArm.Spread = freeArm.Spread = -14.f + 30.f * ( 1.f - strike );
         micArm.Elbow = freeArm.Elbow = 45.f;
+        micArm.Palm = -kX;
+        freeArm.Palm = kX;
     }
     else if( percussion && percussion->Kind == Percussion::Tambourine )
     {
-        freeArm.Reach = false;
+        freeArm = Performer::Arm();
         freeArm.Raise = 55.f + 45.f * strike;
         freeArm.Spread = 30.f;
         freeArm.Elbow = 75.f - 35.f * strike;
+        freeArm.Grip = 0.8f;
     }
     else if( percussion && percussion->Kind == Percussion::Cowbell )
     {
-        freeArm.Reach = false;
+        freeArm = Performer::Arm();
         freeArm.Raise = 50.f;
         freeArm.Spread = 15.f;
         freeArm.Elbow = 95.f;
+        freeArm.Grip = 0.8f;
         if( !atMic )
         {
-            micArm.Reach = false;
+            micArm = Performer::Arm();
             micArm.Raise = 35.f + 35.f * strike;
             micArm.Spread = 8.f;
             micArm.Elbow = 85.f - 30.f * strike;
+            micArm.Grip = 0.8f;
         }
     }
     ioMember.Body.Apply( pose );
     // The instrument in the playing hand; hidden (shrunk) the rest of the time.
     const glm::quat spine = ioMember.Body.SpineRotation();
-    const auto hold = [&]( const EntityHandle& inProp, bool inShown, const glm::quat& inTurn ) {
+    // inGrip: the point of the prop (its own space) that sits in the palm.
+    const auto hold = [&]( const EntityHandle& inProp, bool inShown, const glm::quat& inTurn, const glm::vec3& inGrip ) {
         if( !inProp ) return;
         Transform& transform = inProp->GetComponent<Transform>();
         transform.SetScale( inShown ? Vector3( 1.f, 1.f, 1.f ) : Vector3( 0.001f, 0.001f, 0.001f ) );
-        if( inShown ) Puppet::PlacePiece( inProp, ioMember.Body.Hand( 0 ), spine * inTurn );
+        if( inShown ) Puppet::PlacePiece( inProp, ioMember.Body.Hand( 0 ) - spine * inTurn * inGrip, spine * inTurn );
     };
-    hold( ioMember.Tambourine, percussion && percussion->Kind == Percussion::Tambourine, Axis( 75.f, kX ) * Axis( 25.f * strike, kZ ) );
-    hold( ioMember.Cowbell, percussion && percussion->Kind == Percussion::Cowbell, Axis( 20.f, kX ) );
+    // The tambourine by its rim, its head up and toward the crowd, shaken about the grip; the
+    // cowbell by its handle.
+    hold( ioMember.Tambourine, percussion && percussion->Kind == Percussion::Tambourine, Axis( 75.f, kX ) * Axis( 25.f * strike, kZ ), glm::vec3( 0.f, 0.f, 0.11f ) );
+    hold( ioMember.Cowbell, percussion && percussion->Kind == Percussion::Cowbell, Axis( 20.f, kX ), glm::vec3( 0.f, 0.04f, 0.f ) );
 }
 
 
 void Band::UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float inEnergy )
 {
-    Puppet::Pose& pose = ioMember.Pose;
-    pose = Puppet::Pose();
+    Performer::Pose& pose = ioMember.Pose;
+    pose = Performer::Pose();
     const float pulse = Pulse( inBeat );
     const std::string state = StateOf( VenueData::Keys, inSeconds );
     const bool idle = state == "idle" || state == "idle_realtime";
@@ -1326,14 +1388,17 @@ void Band::UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float 
     pose.Crouch = 0.03f * pulse;
     int count = 0;
     const float press = idle ? 0.f : std::fabs( StrumPhase( ioMember, inSeconds, count ) );
-    ioMember.Body.Apply( pose );
     for( int side = 0; side < 2; ++side )
     {
-        Puppet::Arm& arm = pose.Arms[side];
+        Performer::Arm& arm = pose.Arms[side];
         arm.Reach = true;
         const float slide = 0.15f * std::sin( static_cast<float>( count ) * 0.7f + side * 2.f );
         arm.Target = glm::vec3( ( side == 0 ? -0.28f : 0.24f ) + slide, 1.0f - 0.025f * press, 0.36f );
         arm.Pole = glm::vec3( side == 0 ? -1.f : 1.f, -1.f, -0.4f );
+        // Palms over the keys, the fingers hanging onto them.
+        arm.Fingers = kZ;
+        arm.Palm = -kY;
+        arm.Grip = 0.3f;
     }
     ioMember.Body.Apply( pose );
     (void)inEnergy;
@@ -1359,8 +1424,8 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
         if( inSeconds > m_endTime && index != VenueData::Drums )
         {
             // The song's over: arms up to the crowd, a bounce on the spot.
-            Puppet::Pose& pose = member.Pose;
-            pose = Puppet::Pose();
+            Performer::Pose& pose = member.Pose;
+            pose = Performer::Pose();
             const float since = static_cast<float>( inSeconds ) - m_endTime;
             pose.Offset.y = 0.12f * std::fabs( std::sin( since * 4.f + member.Phase ) ) * std::exp( -since * 0.3f );
             pose.Arms[0].Raise = pose.Arms[1].Raise = 160.f;
@@ -1370,7 +1435,7 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
             if( member.Instrument && index != VenueData::Vocals )
             {
                 const glm::quat spine = member.Body.SpineRotation();
-                glm::vec3 position = member.Body.SpineBase() + spine * glm::vec3( 0.04f, 0.15f, 0.17f );
+                glm::vec3 position = member.Body.SpineBase() + spine * ( index == VenueData::Bass ? kBassHang : kGuitarHang );
                 glm::quat rotation = spine * Axis( -10.f, kZ );
                 if( index == VenueData::Guitar || index == VenueData::Bass )
                 {

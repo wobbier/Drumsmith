@@ -4,8 +4,11 @@
 #include "RenderCommands.h"
 #include "Pointers.h"
 #include <string>
+#include <unordered_map>
 #include <vector>
 
+class ModelResource;
+namespace Moonlight { class Texture; }
 class Transform;
 class World;
 class StandardMaterial;
@@ -34,6 +37,24 @@ public:
         return Piece( Moonlight::MeshType::Cube, inPosition, inSize, inColor, inParent, inEmissive );
     }
 
+    // A model's first mesh as a piece of its own, drawn with the model's material: pieces of the
+    // same model instance into one draw, where Prop's don't have to. The crowd's figures.
+    // inSkin: the character atlas it's drawn with (a path from Skin; empty: the model's own).
+    // A variant packed in the crowd's atlas (People::kSkinAtlas) is drawn from that atlas, its tile
+    // picked per instance (Mesh::InstanceData), so parts of one model batch together whatever
+    // they wear; any other skin draws its own texture and batches per model and skin.
+    EntityHandle Part( const char* inPath, Transform* inParent, const char* inName = "Part", const std::string& inSkin = std::string() );
+
+    // The character's atlas variants (Assets/Models/Venue/PolygonTown_NN_L.png, whichever exist):
+    // the band's and the crowd's figures each wear one. Any index picks one (it wraps).
+    static const std::string& Skin( uint32_t inIndex );
+    static uint32_t SkinCount();
+    // Loaded once, and held.
+    SharedPtr<Moonlight::Texture> SkinTexture( const std::string& inSkin );
+    // The packed atlas of every variant, when it's there and the GPU and the texture size cap
+    // (hardware profile) take it whole; null otherwise, and the crowd falls back to SkinTexture.
+    SharedPtr<Moonlight::Texture> SkinAtlas();
+
     // The scale a primitive needs for a full size (the engine's shapes fit the [-1, 1] box; the
     // capsule's radius is 0.5 there).
     static Vector3 ScaleFor( Moonlight::MeshType inShape, const Vector3& inSize );
@@ -47,4 +68,8 @@ private:
     World* m_world = nullptr;
     std::vector<EntityHandle> m_entities;
     UniquePtr<StandardMaterial> m_template;
+    // Parts' models, held so their meshes outlive the pieces drawn from them.
+    std::unordered_map<std::string, SharedPtr<ModelResource>> m_parts;
+    std::unordered_map<std::string, SharedPtr<Moonlight::Texture>> m_skins;
+    SharedPtr<Moonlight::Texture> m_skinAtlas;
 };
