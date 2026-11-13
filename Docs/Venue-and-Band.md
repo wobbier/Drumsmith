@@ -1,6 +1,7 @@
 # Venue and Band
 
-> Verified against game commit 5973499 plus the venue change, 2026-11-08; the concert look against 35a9edd plus the concert look change, 2026-11-09. Engine submodule at 0c32daef.
+> The stage dressing, effects, hype and camera pass against 278f82b plus those changes, 2026-11-12.
+> Verified against game commit 5973499 plus the venue change, 2026-11-08; the concert look against 35a9edd plus the concert look change, 2026-11-09. Engine submodule at 0c32daef. The rigged band and the crowd's character pieces against 278f82b plus those changes, 2026-11-12, engine at 78e47156 plus the FBX skin repair. The crowd's packed atlas (ME-365) against 278f82b plus that change, engine at 78e47156 plus per-instance data, 2026-11-12.
 
 The concert under the note highway: a stage with a band playing the song, a crowd reacting to it, the light show (`Docs/Stage-Lighting.md`) and a camera crew cutting between shots, all driven by the chart's Rock Band venue data and played on the song clock. The highway is drawn over it by an overlay camera, so the venue underneath can change without touching gameplay.
 
@@ -14,7 +15,9 @@ The concert under the note highway: a stage with a band playing the song, a crow
 
 | File | Role |
 |------|------|
-| `Game/Source/Venue/VenueShow.h/.cpp` | Owns the venue: builds the set, band, crowd, director and lights; turns the highway camera into the overlay; updates them on the song clock; pyro and the stage-edge LED strip |
+| `Game/Source/Venue/VenueShow.h/.cpp` | Owns the venue: builds the rooms, set, band, crowd, director, lights and effects; turns the highway camera into the overlay; updates them on the song clock; the show's hype and its big moments |
+| `Game/Source/Venue/StageSet.h/.cpp` | The stage's dressing: lattice truss and hoists, backline, riser, subs and barricade, wings, LED pieces that follow the show, each room's extras |
+| `Game/Source/Venue/StageFx.h/.cpp` | Effects, all particle systems: flame pots, spark fountains, CO2 jets, confetti cannons, dry ice, dust, fireworks |
 | `Game/Source/Venue/VenueLayout.h` | The floor plan: venue origin, stage size, member spots, crowd area |
 | `Game/Source/Venue/VenueKit.h/.cpp` | Spawns primitive pieces (full sizes in, primitive scale worked out) and deletes them on `Clear` |
 | `Game/Source/Venue/Performer.h/.cpp` | A band member's body: the rigged character posed through its skeleton (spine and head by angles, arms and legs by two-bone IK, hands that turn and grip) |
@@ -63,7 +66,19 @@ RB2 notes 96 / 97 used to be read as pyro; they are post-processing. Pyro comes 
 
 ### The set and the rooms
 
-`VenueShow::BuildStage` builds the stage, the same in every room: a 1.2 m deck, a drum riser, a back wall with the LED wall, speaker stacks, truss towers and an overhead truss (where the washes hang), a barricade, a front-edge LED strip that glows with the washes and chases on the beat, and four pyro emitters whose flame columns and point lights fire on the chart's bonus effects. Screens are planes whose emissive slot is a render texture, flipped upright with Tiling (1, -1) and Offset (0, 1).
+`VenueShow::BuildStage` builds the stage, the same in every room: a 1.2 m deck, a drum riser, a back wall with the LED wall and speaker stacks. Screens are planes whose emissive slot is a render texture, flipped upright with Tiling (1, -1) and Offset (0, 1).
+
+`StageSet` dresses it (`StageSet::Build`, per song from a seed of its title):
+
+- **Rig.** Open-web lattice truss on the old layout (three cross trusses at z 0.2 / 4.6 / 9.0, four fore-aft runs, four towers), chains up to the room's roof, cable looms into the wings. The light rig hangs under it (`Docs/Stage-Lighting.md`).
+- **Backline.** A wall of guitar stacks and bass cabinets behind the players, a keys corner when the chart has keys, pedalboards, wedges, setlists and tape marks, DI boxes, cables, flight cases.
+- **Riser.** Trim, skirts, a rug under the kit, steps, and an LED fascia that pulses with the player's kick.
+- **Front.** Subs along the stage front, lip fills, a segmented barricade, a camera track in the pit.
+- **Wings.** Guitar world on one side (a rack of spare guitars, a tool chest), the monitor desk and racks on the other.
+- **Pixels.** The stage-edge strip, tubes up the towers, battens along the trusses and the LED wall's panel seams. They have no lights of their own: `StageSet::Update` tints them from the rig's colour, the beat, the kick and the hype.
+- **Per room.** Arena: a front-of-house truss and cameras at the mix position. Club: posters and a merch table. Festival: scaffold PA towers, banners, festoon lights, food stalls, a truck and a tour bus behind the stage, flags in the field.
+
+Imported props are Synty models packaged under `Assets/Models/Venue` (`README.md` there lists each source and size). Every prop the set uses is in one table at the top of `Game/Source/Venue/StageSet.cpp` with its yaw, and is skipped when its file is missing.
 
 The room around it is a `VenueShow::Style`:
 
@@ -111,7 +126,34 @@ Charts with lyrics show them karaoke-style, on the HUD and on the LED wall (Sett
 
 `Crowd` fills the floor with the room's crowd of five-piece figures (`--crowd-size N`), keener toward the front, each with its own lag behind the beat, enthusiasm and habit (jumper, pumper, swayer, clapper). The mood comes from `[crowd_x]` (or the sections): standing about, bobbing and fist pumps (`normal`), jumping with their hands up (`intense`), swaying with lighters and phones up (`mellow`). `[crowd_clap]` has them clap on the beat. `realtime` follows the player: the core's streak (`NoteHighwayCore` → `VenueShow::SetPerformance`) gets them going; misses take the wind out of them; every fifty in a row and the chart's pyro get a cheer. Their energy also drives the light rig's crowd blinders.
 
-The posed crowd stops after its few hundred figures, well short of the back of most rooms, so `VenueShow::FillHouse` fills the rest with the **back of the house** (`Crowd::AddMob`): figures of four or five boxes (legs, torso, head, arms, sometimes a lighter or phone) moved as one, one transform a figure a frame, wherever the posed crowd doesn't stand (`Crowd::KeepClear` leaves the mixing desk, towers and stand aisles empty). They follow the same mood: bobbing, fists and hands up, jumping when it's intense, lights up and swaying when it's mellow. A cap thins an area evenly rather than leaving its back empty. Phone-holders film the intense parts with their phones up, now and then flashing a photo. On the chart's `crowdsurf` / `stagedive` shots (and every so often when it's intense) a crowd surfer is carried over their heads to the barricade by the hands under them. The director cuts to them as they go up (see *The cameras*).
+**The figure.** Everyone in the crowd is one of the characters the band isn't using. Hundreds of skinned figures would each be a draw of their own, so `Game/Tools/MakeCrowdPieces.py` cuts each character into rigid pieces by which bones its faces follow (the legs with the hips, the torso, the head, an arm each side), each an OBJ about its own pivot, at full detail (1,640 to 2,330 triangles a figure) and decimated (490 to 700). `Puppet` turns the pieces about those pivots: the torso leans from the hips, the head nods at the neck, the arms swing straight from the shoulder and shorten as the elbow bends. Pieces of one model instance into one draw (`VenueKit::Part`). The first 4.5 m of rows get the full pieces, the rest the decimated ones. To add or change a character, put its rigged FBX in the folder and run the tool again (two exports of one mesh count once). Figures differ by character, height, build and which of the atlas variants they wear (`VenueKit::Skin`: every `Assets/Models/Venue/PolygonTown_NN_L.png` there is, twelve today), picked per figure from its seed. The crowd draws them all from one texture, `PolygonTown_Crowd.png`: the tool packs the variants into a 4 x 3 grid of unchanged 2048 tiles (8192 x 6144; each tile's mips come out byte for byte the variant's own), and lists the tiles in `People.generated.h` (`People::kSkins`). `VenueKit::Part` gives a piece the packed atlas, a material tiling of one tile, and its tile as per-instance data (`Mesh::InstanceData`, which the engine's Standard vertex shader adds to the uv; `Engine/Docs/Rendering-Pipeline.md` → Per-instance data), so pieces batch per character and piece only, whatever the figure wears (ME-365). In the arena's crane shot that took the crowd from 404 instanced draws (about 4 instances each) to 42, twice over with the depth prepass. A variant missing from the atlas (added since the tool last ran), or a texture size cap below 8192 (a hardware profile's `MaxTextureSize`, which would shrink every tile) or a GPU that can't take it, falls back to the variant's own texture: the same picture, a batch per character, piece and atlas as before. The band's skinned members still use the separate variants.
+
+The posed crowd stops after its few hundred figures, well short of the back of most rooms, so `VenueShow::FillHouse` fills the rest with the **back of the house** (`Crowd::AddMob`): the decimated figure with its body in one piece and its two arms (hanging, or turned up), sometimes a lighter or phone, moved as one, one transform a figure a frame, wherever the posed crowd doesn't stand (`Crowd::KeepClear` leaves the mixing desk, towers and stand aisles empty). They follow the same mood: bobbing, fists and hands up, jumping when it's intense, lights up and swaying when it's mellow. A cap thins an area evenly rather than leaving its back empty. Phone-holders film the intense parts with their phones up, now and then flashing a photo. On the chart's `crowdsurf` / `stagedive` shots (and every so often when it's intense) a crowd surfer is carried over their heads to the barricade by the hands under them. The director cuts to them as they go up (see *The cameras*).
+
+### Hype and effects
+
+`VenueShow::UpdateHype` keeps one number for how hot the show is running, 0 calm to 1 peak: the chart's crowd mood (mellow 0.2, normal 0.45, intense 0.75) weighted three to one against the player's streak, plus an afterglow for six seconds after each big moment. The rig, the cameras and the set's LED pieces read it every frame.
+
+A **big moment** (`VenueShow::BigMoment`) comes in two sizes:
+
+| | When | What goes off |
+|---|---|---|
+| Lift | Each chorus or intense passage as it starts; every fifty notes in a row | CO2 jets, a hit on the blinders and strobes, a camera shake, a cheer (and two fireworks out of doors) |
+| Peak | The last of those in the song (the finale), the song's end, the player reaching the top multiplier (30 in a row) and every hundred, at most once in 45 s | The jets, spark fountains, confetti cannons, a flame burst, four fireworks, the whole rig to white, and the cameras cut to a hero shot for two measures (`Director::OnBigMoment`) |
+
+Lifts are at least 12 s apart and peaks 3 s. The chart's peaks are found at build (`m_peaks`): `[crowd_intense]` as it begins and sections named chorus, merged when within 12 s of each other.
+
+`StageFx` is the effects themselves, each an engine `ParticleSystem` on an emitter the kit owns (`Engine/Docs/Cores-and-Components-Reference.md` → ParticleSystem):
+
+- **Flame pots** (four along the stage front): a bright core column, flame and ember particles and a point light each. They fire on the chart's `[bonusfx]` on the song clock, and on a peak.
+- **CO2 jets** (six): lit alpha particles, so the plumes take the colour of the beams they rise through.
+- **Spark fountains** (four): stretched additive streaks that arc over and die before they land.
+- **Confetti** (four cannons on the front truss, two at the stage's front corners): square paper (`Assets/Textures/Venue/Confetti.png`), a pair of colours a cannon, drifting for five to nine seconds. Half the load in the club.
+- **Dry ice**: a low lit bank over the deck, full in mellow passages and gone in intense ones.
+- **Dust**: lit specks over the stage that only show where a beam finds them.
+- **Fireworks** (festival only): six shells that burst in the sky behind the stage.
+
+Stage Lights set to no flashes softens the flames and sparks. `--venue-moment N` fires a peak every N seconds, to tune them.
 
 ### The cameras
 
@@ -120,7 +162,15 @@ The posed crowd stops after its few hundred figures, well short of the back of m
 - `coop_<who>_<framing>`: `who` is `all`, `front` or member letters (`d`, `g`, `b`, `v`, `k`, pairs like `gv`); framing `far`, `near`, `behind`, `closeup_head`, `closeup_hand`.
 - `directed_<who>[_<style>]`: `cls` a hand close-up, `kd` the kick drum, `np` / `pnt` a head close-up, `lt` from behind, `cam` handheld; `all`, `crowd`, `stagedive`, `crowdsurf`, `bre` / `brej` (the big rock ending, from high up), `duo_x`.
 - RB2's `auto` cuts: a shot that fits the constraints, chosen repeatably from the cut's index; focused members are its subjects.
-- No cuts: one every two measures (`Director::BuildFallbackCuts`), wide at each new section, else on the busiest member (`Band::Activity`).
+- No cuts: `Director::BuildFallbackCuts` cuts on downbeats, paced by the section (every measure in choruses with half-measure flurries, two in verses, four in intros and mellow parts), opens each section wide, favours the busiest member (`Band::Activity`) and never repeats a subject and framing back to back.
+
+**The crew's shots.** Beyond the chart's framings the director has a crane that booms up out of the pit (or down into it), a dolly trucking along the pit rail, a drone over the crowd, a slow high orbit, a long lens from the mixing desk, a crowd's-eye view from a few rows back, a profile from the wings, the kit from overhead and from low through the cymbals, reverses over a member's shoulder at the crowd, a low hero angle at a player's feet and a fast push. `Director::Vary` picks among them for the chart's plain shots by the cut's variant (bits 2-3), so a song's third wide isn't its first again: all-far becomes a crane, drone, orbit or long lens, all-near a dolly or profile, a member's near shot a low hero, `directed_crowd` the crowd's view. Authored styled shots (`directed_x_cam` and the like) and the big rock ending are shot as asked. `--venue-shot cam_<kind>[_<member letters>][_<variant>]` holds one: `cam_crane`, `cam_dolly`, `cam_drone`, `cam_orbit`, `cam_foh`, `cam_crowd`, `cam_side`, `cam_drumtop`, `cam_drumlow`, `cam_reverse`, `cam_hero_g`, `cam_push`. A close-up asked to focus on two members takes one of them.
+
+**The room.** `Director::SetRoom` gives the back wall, ceiling, half width and mixing desk; cameras stay 2 m under the ceiling and 1 m inside the walls.
+
+**Lens.** Near shots, close-ups, the kick, the low angles and the long lens have depth of field (`Director::ApplyFocus`): the focus follows the subject and the aperture is solved per shot for the same background blur, so the lights behind a player are soft discs whatever the lens. The closer the subject, the further exposure is pulled down (to -1.1 stops at 1.5 m), since the rig is balanced for the wide picture and burns out a white shirt up close.
+
+**Energy.** Hype scales handheld sway and how fast a move runs, and adds a small push on each beat (1.2% of the field of view at most, none while a look steps the venue). `Director::Kick` shakes the camera for pyro and big moments. Moves keep creeping for as long as a shot is held.
 
 **The neck camera** (`Framing::Neck`) is mounted out past the guitarist's headstock and up off the fretboard, looking down the frets at an angle to the body and the player's face (`Band::NeckOf` reads the guitar's world matrix). It's bolted on like a GoPro on the headstock: no easing, drift or sway, it moves and rolls exactly as the guitar does. What keeps it from snapping is the guitar itself floating on its strap (`Band::SwingInstrument`, above), not the camera. Through a guitar solo (PART GUITAR note 103; charts without it use the guitarist's `play_solo` state or a "solo" section), every other cut of the guitarist alone becomes the neck camera, except wide, behind and `no_close` / `only_far` cuts. A marked solo of six seconds or more that never cuts to the guitarist alone gets a `solo_neck` cut for its middle third (five seconds at most), then goes back to the shot it interrupted. `--venue-shot guitar_neck` (or `bass_neck`) holds it. Charts converted before note 103 was imported need converting again (Settings > Convert Custom DLC, or `--convert-dlc`) for their solo markers.
 
@@ -140,7 +190,7 @@ Shots track the members' live positions, eased like an operator following them (
 
 `--venue-look concert_bw` holds it.
 
-Two render-texture cameras feed the screens, each every other frame:
+Two render-texture cameras feed the screens, each every other frame (when a look steps the venue, as the concert look does at 12 fps, about once a step instead: `Director::SetFeedStepRate` sets their `UpdateInterval` to frames per step, so the screens don't re-render an unchanged picture):
 
 - The **program feed** (`StageProgram.rendertexture`, the LED wall) films exactly what the main camera shows, graded the same, as if the show were being broadcast live. In its own shot the wall is black (a camera never samples its own image), so in a wide shot the wall shows the show one level deep.
 - The **close-up feed** (`StageFeed.rendertexture`, the side screens): the main shot's member, else whoever is busiest (the singer favoured), re-chosen every two measures from a pit position, slightly handheld.
@@ -151,7 +201,7 @@ Two render-texture cameras feed the screens, each every other frame:
 - **Room** (`VenueStyle`): Arena (0) / Club (1) / Festival (2) / Random (3). F7 swaps it mid-song.
 - **Venue Camera** (`VenueCamera`): Live show (0) / Music video (1).
 - **Lyrics** (`Lyrics`): Both (3) / HUD (1) / Venue (2) / Off (0).
-- `--no-venue` skips the venue; `--venue-only` fades the highway out entirely to frame the venue; `--venue-shot <name>` holds one shot (any cut name, or `debug_wall`); `--venue-look <name>` holds one post look; `--venue-time <seconds>` shows the venue that far into the song; `--venue-style N`; `--venue-swap-every <seconds>` swaps the room on a timer like F7; `--crowd-size N`; `--band-debug` logs the drummer's stick tips and hands twice a second. The engine's `--screenshot-every N` saves a numbered frame every N frames, to check motion headless.
+- `--no-venue` skips the venue; `--venue-only` fades the highway out entirely to frame the venue; `--venue-shot <name>` holds one shot (any cut name, or `debug_wall`); `--venue-look <name>` holds one post look; `--venue-time <seconds>` shows the venue that far into the song; `--venue-style N`; `--venue-swap-every <seconds>` swaps the room on a timer like F7; `--venue-moment <seconds>` fires a peak that often; `--venue-eye "x,y,z,tx,ty,tz[,fov]"` puts the main camera anywhere in venue space, to inspect the set; `--highway-log` also logs each cut and big moment; `--crowd-size N`; `--band-debug` logs the drummer's stick tips and hands twice a second. The engine's `--screenshot-every N` saves a numbered frame every N frames, to check motion headless.
 
 ```bash
 # Frame a shot of Boston (track 2) a minute in, without the highway.
@@ -162,6 +212,8 @@ Two render-texture cameras feed the screens, each every other frame:
 
 ## Caveats & Fragility
 
+- **The dressing is placed by hand in code.** `StageSet` knows where the band stands, the light rig hangs and the effects fire only by the numbers in `VenueLayout` and comments: move a member spot or a fixture and check the set around it. Its low shots (the low hero, the profile from the wings) pass close to wedges and cases.
+- **Effects run on real time.** Particles are simulated by the engine each frame, not on the song clock: a seek or the concert look's low frame rate doesn't rewind or step them.
 - **The venue and highway share a world.** Separation is by distance only: anything placed near `VenueLayout::kVenueOrigin` shows in the venue, and directional lights (the rig's dim key light) light both.
 - **The highway's coverage is its depth.** Transparent highway pieces that don't write depth add over the venue rather than covering it.
 - **RB2 camera note meanings** (61-64, 70-73) and the spotlight slot order (37 keys, 38 vocals, 39 guitar, 40 drums, 41 bass) follow community documentation, not an official spec; a wrong guess frames the wrong member, nothing worse.

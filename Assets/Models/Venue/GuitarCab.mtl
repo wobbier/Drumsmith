@@ -1,0 +1,4 @@
+newmtl GuitarCab
+Kd 1 1 1
+Ks 0 0 0
+map_Kd PolygonOffice_Texture_01_A.png

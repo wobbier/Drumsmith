@@ -65,8 +65,16 @@ void VenueShow::Clear()
     m_lyrics.Clear();
     m_kit.Clear();
     m_root = {};
-    m_edgeStrip.clear();
-    m_pyro.clear();
+    m_set.Clear();
+    m_fx.Clear();
+    m_hype = 0.f;
+    m_lastMoment = -1000.0;
+    m_lastSeconds = -1000.0;
+    m_lastPlayerPeak = -1000.0;
+    m_pendingMoment = 0;
+    m_kick = 0.f;
+    m_peaks.clear();
+    m_finale = 1e9f;
     m_venue.Clear();
     m_beats.clear();
     m_lastStep = INT64_MIN;
@@ -163,6 +171,8 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
             halfWidth = 24.f;
         }
         const int posed = CommandLine::GetInt( "--crowd-size", count );
+        // The crowd is everyone the band isn't.
+        m_crowd.SetModels( m_band.SpareModels() );
         m_crowd.Build( m_kit, &root, m_venue, m_beats, m_bpm, posed, back, halfWidth );
         // --crowd-size trims the back of the house in proportion.
         FillHouse( root, count > 0 ? std::clamp( static_cast<float>( posed ) / static_cast<float>( count ), 0.f, 4.f ) : 1.f );
@@ -170,7 +180,7 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     m_director.Build( inWorld, m_venue, m_beats, m_bpm, std::max( lastNote + 4.f, inTrack.m_duration ), GameSettings::GetInstance().VenueCamera == 1, &m_band );
     VenueKit* kit = &m_kit;
     m_lights.Build( inWorld, &root, m_director.MainCamera(), inTrack,
-        [kit]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return kit->Box( inPosition, inScale, inColor, inParent, inEmissive ); },
+        [kit]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return kit->Piece( Shape::Cube, inPosition, inScale, inColor, inParent, inEmissive, false ); },
         []( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive ) { VenueKit::SetColor( inTarget, inColor, inEmissive ); } );
     if( !m_lights.IsActive() )
     {
@@ -184,9 +194,52 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
             light.DirectionalSource = Moonlight::DirectionalSource::Manual;
             light.Color = Vector3( 1.f, 0.92f, 0.8f );
             light.Intensity = 7.f;
+            // No shadows: every room has a roof or a canopy over the stage, and a shadowed
+            // house light leaves the band in the dark.
+            light.CastShadows = false;
         }
     }
-    m_director.SetRoomBack( m_style == Style::Club ? -17.f : m_style == Style::Arena ? kArenaBackWallZ : -1000.f );
+    Director::Room room;
+    if( m_style == Style::Arena )
+    {
+        room.Back = kArenaBackWallZ;
+        room.Ceiling = 18.f;
+        room.HalfWidth = 21.f;
+        room.DeskZ = kArenaDeskZ;
+    }
+    else if( m_style == Style::Club )
+    {
+        room.Back = -17.f;
+        room.Ceiling = 10.6f;
+        room.HalfWidth = 12.5f;
+        room.DeskZ = -13.f;
+    }
+    else
+    {
+        room.DeskZ = -24.f;
+        room.Outdoor = true;
+    }
+    m_director.SetRoom( room );
+    // The chart's own peaks: where each chorus or intense passage starts. The last is the finale.
+    std::string mood;
+    for( const TimedCueData& crowd : m_venue.m_crowd )
+    {
+        if( crowd.m_name == "intense" && mood != "intense" ) m_peaks.push_back( crowd.m_time );
+        if( crowd.m_name == "intense" || crowd.m_name == "normal" || crowd.m_name == "mellow" || crowd.m_name == "realtime" ) mood = crowd.m_name;
+    }
+    for( const TimedCueData& section : m_venue.m_sections )
+    {
+        if( VenueTiming::Contains( section.m_name, "chorus" ) ) m_peaks.push_back( section.m_time );
+    }
+    std::sort( m_peaks.begin(), m_peaks.end() );
+    // Peaks that crowd each other (a chorus that's also marked intense) count once.
+    std::vector<float> peaks;
+    for( float peak : m_peaks )
+    {
+        if( peaks.empty() || peak - peaks.back() > 12.f ) peaks.push_back( peak );
+    }
+    m_peaks = peaks;
+    m_finale = m_peaks.size() >= 2 ? m_peaks.back() : 1e9f;
     if( m_style == Style::Festival )
     {
         // Out of doors: a night sky, and less haze for it to hang in.
@@ -207,7 +260,7 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     }
     else if( m_style == Style::Club )
     {
-        m_lights.SetHazeScale( 1.4f );
+        m_lights.SetHazeScale( 1.05f );
     }
 
     // The highway draws over the venue from now on, fading into it toward its far end instead of
@@ -271,14 +324,11 @@ void VenueShow::BuildStage( Transform& inRoot )
     using namespace VenueLayout;
     const Vector3 black( 0.015f, 0.015f, 0.018f );
     const Vector3 deckColor( 0.05f, 0.05f, 0.055f );
-    const Vector3 metal( 0.18f, 0.18f, 0.2f );
     // The stage, the same in every room: the deck, the drum riser, the back wall with its LED
-    // wall, speaker stacks, truss towers and the overhead truss (where the washes hang), the
-    // barricade, the LED strip along the front edge, and pyro.
+    // wall and the speaker stacks. StageSet dresses it and StageFx arms it.
     m_kit.Box( Vector3( 0.f, kStageHeight * 0.5f, kStageDepth * 0.5f + 0.3f ), Vector3( kStageHalfWidth * 2.f, kStageHeight, kStageDepth + 0.6f ), deckColor, &inRoot );
     m_kit.Box( Vector3( 0.f, kStageHeight * 0.5f, -0.02f ), Vector3( kStageHalfWidth * 2.f, kStageHeight, 0.06f ), black, &inRoot );
     m_kit.Box( Vector3( 0.f, kStageHeight + kRiserHeight * 0.5f, kRiserZ + 0.5f ), Vector3( 3.4f, kRiserHeight, 2.8f ), Vector3( 0.06f, 0.06f, 0.07f ), &inRoot );
-    m_kit.Box( Vector3( 0.f, kStageHeight + kRiserHeight * 0.5f, kRiserZ - 0.91f ), Vector3( 3.4f, kRiserHeight, 0.04f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot, Vector3( 0.05f, 0.05f, 0.06f ) );
     m_kit.Box( Vector3( 0.f, 6.f, kBackWallZ + 0.2f ), Vector3( 24.f, 12.f, 0.4f ), black, &inRoot );
     for( float side : { -1.f, 1.f } )
     {
@@ -288,44 +338,16 @@ void VenueShow::BuildStage( Transform& inRoot )
             m_kit.Box( centre, Vector3( 1.8f, 1.4f, 1.2f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
             m_kit.Box( centre + Vector3( 0.f, 0.f, -0.61f ), Vector3( 1.6f, 1.2f, 0.02f ), Vector3( 0.05f, 0.05f, 0.055f ), &inRoot );
         }
-        m_kit.Box( Vector3( side * ( kStageHalfWidth + 0.4f ), kTrussHeight * 0.5f, 0.2f ), Vector3( 0.4f, kTrussHeight, 0.4f ), metal, &inRoot );
-        m_kit.Box( Vector3( side * ( kStageHalfWidth + 0.4f ), kTrussHeight * 0.5f, 9.f ), Vector3( 0.4f, kTrussHeight, 0.4f ), metal, &inRoot );
-    }
-    for( float z : { 0.2f, 4.6f, 9.f } )
-    {
-        m_kit.Box( Vector3( 0.f, kTrussHeight, z ), Vector3( kStageHalfWidth * 2.f + 1.2f, 0.4f, 0.4f ), metal, &inRoot );
-    }
-    for( float x : { -kStageHalfWidth - 0.4f, -4.6f, 4.6f, kStageHalfWidth + 0.4f } )
-    {
-        m_kit.Box( Vector3( x, kTrussHeight, 4.6f ), Vector3( 0.3f, 0.3f, 9.2f ), metal, &inRoot );
     }
     BuildScreen( inRoot, Vector3( 0.f, 6.9f, kBackWallZ - 0.05f ), Vector3( 12.f, 6.f, 0.f ), 0.f, Director::kProgramTexture );
-    m_kit.Box( Vector3( 0.f, 0.55f, kBarricadeZ ), Vector3( 20.f, 1.1f, 0.12f ), metal, &inRoot );
-    for( int segment = 0; segment < 12; ++segment )
+    // The truss, backline, dressing and LED pieces (StageSet), and the effects (StageFx).
+    uint32_t seed = 2166136261u;
+    if( m_track )
     {
-        const float x = -kStageHalfWidth + ( segment + 0.5f ) * ( kStageHalfWidth * 2.f / 12.f );
-        m_edgeStrip.push_back( m_kit.Box( Vector3( x, kStageHeight - 0.08f, -0.06f ), Vector3( kStageHalfWidth * 2.f / 12.f - 0.05f, 0.08f, 0.03f ), Vector3( 0.f, 0.f, 0.f ), &inRoot ) );
+        for( char c : m_track->m_trackName ) seed = ( seed ^ static_cast<uint8_t>( c ) ) * 16777619u;
     }
-    // Pyro along the front edge: a flame column and its light per emitter, out of sight until the
-    // chart's bonus effects fire.
-    for( float x : { -7.5f, -3.f, 3.f, 7.5f } )
-    {
-        Pyro pyro;
-        pyro.Base = Vector3( x, kStageHeight, 0.35f );
-        m_kit.Box( pyro.Base + Vector3( 0.f, 0.1f, 0.f ), Vector3( 0.4f, 0.2f, 0.4f ), Vector3( 0.03f, 0.03f, 0.03f ), &inRoot );
-        pyro.Flame = m_kit.Piece( Shape::Capsule, pyro.Base + Vector3( 0.f, -5.f, 0.f ), Vector3( 0.5f, 3.f, 0.5f ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 30.f, 9.f, 1.5f ) );
-        pyro.Light = m_kit.Group( "PyroLight", &inRoot, pyro.Base + Vector3( 0.f, 1.5f, -0.4f ) );
-        if( pyro.Light )
-        {
-            Light& light = pyro.Light->AddComponent<Light>();
-            light.LightType = Moonlight::LightType::Point;
-            light.Color = Vector3( 1.f, 0.55f, 0.2f );
-            light.Intensity = 0.f;
-            light.Range = 14.f;
-            light.CastShadows = false;
-        }
-        m_pyro.push_back( pyro );
-    }
+    m_set.Build( m_kit, inRoot, static_cast<int>( m_style ), !m_venue.m_keysStrums.empty() || !m_venue.m_bandStates[VenueData::Keys].empty(), seed );
+    m_fx.Build( m_kit, inRoot, static_cast<int>( m_style ), m_venue );
     switch( m_style )
     {
     case Style::Club: BuildClub( inRoot ); break;
@@ -638,58 +660,6 @@ void VenueShow::BuildFestival( Transform& inRoot )
 }
 
 
-void VenueShow::UpdateSet( double inSeconds, float inDeltaTime )
-{
-    (void)inDeltaTime;
-    // The edge strip glows with the washes, a chase running along it on the beat.
-    double beat = 0.0;
-    int measureBeat = 0;
-    VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
-    const Vector3 glow = m_lights.WashGlow();
-    for( size_t i = 0; i < m_edgeStrip.size(); ++i )
-    {
-        const double phase = beat * 2.0 - static_cast<double>( i ) * 0.25;
-        const float chase = 0.5f + 0.5f * static_cast<float>( std::pow( 1.0 - ( phase - std::floor( phase ) ), 3.0 ) );
-        VenueKit::SetColor( m_edgeStrip[i], Vector3( 0.f, 0.f, 0.f ), glow * ( 3.f * chase ) + Vector3( 0.02f, 0.02f, 0.03f ) );
-    }
-    // Pyro: a column shooting up and dying away over a second and a half.
-    float burst = 0.f;
-    for( float time : m_venue.m_bonusFx )
-    {
-        if( time > inSeconds ) break;
-        const float since = static_cast<float>( inSeconds ) - time;
-        if( since < 1.6f ) burst = std::max( burst, std::exp( -since / 0.45f ) );
-    }
-    if( GameSettings::GetInstance().StageLighting == 1 )
-    {
-        burst *= 0.4f;
-    }
-    for( size_t i = 0; i < m_pyro.size(); ++i )
-    {
-        Pyro& pyro = m_pyro[i];
-        const float flicker = 0.85f + 0.15f * std::sin( static_cast<float>( inSeconds ) * 31.f + i * 2.f );
-        const float height = 3.2f * burst * flicker;
-        if( pyro.Flame )
-        {
-            Transform& flame = pyro.Flame->GetComponent<Transform>();
-            if( height > 0.05f )
-            {
-                flame.SetPosition( pyro.Base + Vector3( 0.f, 0.2f + height * 0.5f, 0.f ) );
-                flame.SetScale( VenueKit::ScaleFor( Shape::Capsule, Vector3( 0.35f + 0.25f * burst, height, 0.35f + 0.25f * burst ) ) );
-            }
-            else
-            {
-                flame.SetPosition( pyro.Base + Vector3( 0.f, -5.f, 0.f ) );
-            }
-        }
-        if( pyro.Light )
-        {
-            pyro.Light->GetComponent<Light>().Intensity = 4000.f * burst * flicker;
-        }
-    }
-}
-
-
 void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
 {
     if( !m_root )
@@ -705,6 +675,9 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     // A look with a frame rate steps the venue: update it on each step's time with the time since
     // the last step, and hold it (skip the update) in between.
     const float stepRate = m_director.FrameRateAt( seconds );
+    // (A smoothed frame time, so the feeds' interval doesn't jitter with it.)
+    m_frameSeconds += ( inDeltaTime - m_frameSeconds ) * 0.05f;
+    m_director.SetFeedStepRate( stepRate, m_frameSeconds );
     if( stepRate > 0.f )
     {
         m_stepDelta += inDeltaTime;
@@ -746,16 +719,20 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     m_director.FollowSurfer( surferUp, surfer );
     m_band.Update( seconds, inDeltaTime, m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
     m_lyricBoard.Update( seconds );
+    m_director.SetHype( m_hype );
     m_director.Update( seconds, inDeltaTime );
     m_lights.SetCrowdEnergy( m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
+    UpdateHype( seconds, inDeltaTime );
     // The follow spots keep a little front light on the band so they read in any look, and come
     // up full on whoever's soloing.
     const int spotMembers[5] = { VenueData::Keys, VenueData::Vocals, VenueData::Guitar, VenueData::Drums, VenueData::Bass };
+    int soloist = -1;
     for( int slot = 0; slot < 5; ++slot )
     {
         const int member = spotMembers[slot];
         const bool solo = m_band.StateOf( member, seconds ) == "play_solo";
-        m_lights.SetSpotlightFloor( slot, !m_band.HasMember( member ) ? 0.f : solo ? 0.85f : kFrontFill );
+        m_lights.SetSpotlightFloor( slot, !m_band.HasMember( member ) ? 0.f : solo ? 0.45f : kFrontFill );
+        if( solo && m_band.HasMember( member ) ) soloist = slot;
         if( m_band.HasMember( member ) )
         {
             // An operator keeps the spot on them, not on every bob: eased, snapped when far off
@@ -766,9 +743,115 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
             m_lights.SetSpotlightTarget( slot, aim );
         }
     }
+    m_lights.SetSoloist( soloist );
+    m_lights.SetHype( m_hype );
+    m_lights.SetBurn( m_fx.Burn() );
     m_lights.Update( inSongTimeMs, inDeltaTime );
-    UpdateSet( seconds, inDeltaTime );
+    // The dressing's LED pieces follow the rig, the beat and the kick.
+    m_kick *= std::exp( -std::clamp( inDeltaTime, 0.f, 0.1f ) * 8.f );
+    StageSet::Show show;
+    show.Seconds = seconds;
+    int measureBeat = 0;
+    VenueTiming::BeatAt( m_beats, m_bpm, seconds, show.Beat, measureBeat );
+    show.Glow = m_lights.WashGlow();
+    show.Kick = m_kick;
+    show.Hype = m_hype;
+    show.Energy = m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f;
+    m_set.Update( show );
     LogUpdateCost( started );
+}
+
+
+void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
+{
+    // How hot the show runs: the chart's mood, lifted by the player's streak, with a kick after
+    // each big moment. The rig, the cameras and the dressing all read it.
+    const std::string mood = m_crowd.Size() > 0 ? m_crowd.Mood( inSeconds ) : std::string( "normal" );
+    const float chart = mood == "intense" ? 0.75f : mood == "mellow" ? 0.2f : 0.45f;
+    const float afterglow = 0.25f * std::exp( -static_cast<float>( std::max( 0.0, inSeconds - m_lastMoment ) ) / 6.f );
+    const float target = std::clamp( chart * 0.75f + m_performance * 0.25f + afterglow, 0.f, 1.f );
+    m_hype += ( target - m_hype ) * ( 1.f - std::exp( -std::clamp( inDeltaTime, 0.f, 0.25f ) * 1.5f ) );
+
+    // The big moments. The chart's: each chorus or intense passage as it starts (the finale
+    // biggest of all) and the song's end. The player's: asked for by OnStreak.
+    const bool playing = inSeconds > m_lastSeconds && inSeconds - m_lastSeconds < 1.0;
+    if( playing )
+    {
+        for( float peak : m_peaks )
+        {
+            if( peak > m_lastSeconds && peak <= inSeconds )
+            {
+                BigMoment( inSeconds, peak >= m_finale ? 2 : 1 );
+            }
+        }
+        for( const TimedCueData& event : m_venue.m_songEvents )
+        {
+            if( ( event.m_name == "music_end" || event.m_name == "end" ) && event.m_time > m_lastSeconds && event.m_time <= inSeconds )
+            {
+                m_lastMoment = -1000.0;
+                BigMoment( inSeconds, 2 );
+            }
+        }
+    }
+    if( m_pendingMoment > 0 )
+    {
+        BigMoment( inSeconds, m_pendingMoment );
+        m_pendingMoment = 0;
+    }
+    // --venue-moment N: a big moment every N seconds, to tune the effects.
+    static const float kEvery = CommandLine::GetFloat( "--venue-moment", 0.f );
+    if( kEvery > 0.f && std::floor( inSeconds / kEvery ) != std::floor( m_lastSeconds / kEvery ) )
+    {
+        m_lastMoment = -1000.0;
+        BigMoment( inSeconds, 2 );
+    }
+    m_lastSeconds = inSeconds;
+
+    const bool gentle = GameSettings::GetInstance().StageLighting == 1;
+    // Dry ice rolls in for the slow parts and clears when it's intense.
+    m_fx.Update( inSeconds, inDeltaTime, gentle, mood == "mellow" ? 1.f : mood == "intense" ? 0.f : 0.3f );
+    if( m_fx.Ignited() )
+    {
+        m_director.Kick( 1.f );
+    }
+}
+
+
+void VenueShow::BigMoment( double inSeconds, int inLevel )
+{
+    // Not while the last one is still ringing (a peak may still top a lift).
+    const double since = inSeconds - m_lastMoment;
+    if( since < ( inLevel >= 2 ? 3.0 : 12.0 ) )
+    {
+        return;
+    }
+    m_lastMoment = inSeconds;
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Venue: big moment (level %d) at %.2f s, hype %.2f", inLevel, inSeconds, m_hype );
+    }
+    if( inLevel >= 2 )
+    {
+        // A peak: everything goes off, and the cameras take a hero shot for two measures.
+        m_fx.Jets( 1.3f );
+        m_fx.Sparks( 3.5f );
+        m_fx.Confetti( 1.f );
+        m_fx.Flames();
+        m_fx.Fireworks( 4 );
+        m_lights.Accent( 1.f );
+        m_director.OnBigMoment( inSeconds, 8.f * 60.f / m_bpm );
+        m_director.Kick( 1.f );
+        m_crowd.OnCheer( 1.f );
+    }
+    else
+    {
+        // A lift: the jets and a hit on the blinders.
+        m_fx.Jets( 0.8f );
+        m_fx.Fireworks( 2 );
+        m_lights.Accent( 0.7f );
+        m_director.Kick( 0.5f );
+        m_crowd.OnCheer( 0.5f );
+    }
 }
 
 
@@ -793,6 +876,7 @@ void VenueShow::LogUpdateCost( std::chrono::steady_clock::time_point inStarted )
 void VenueShow::OnHit( PadId inPad )
 {
     m_lights.OnHit( inPad );
+    if( inPad == PadId::Bass ) m_kick = 1.f;
 }
 
 
@@ -805,9 +889,20 @@ void VenueShow::OnMiss()
 
 void VenueShow::OnStreak( int inCombo )
 {
-    // Every fifty in a row gets a cheer.
+    // Every fifty in a row gets a cheer and a lift; reaching the top multiplier and every
+    // hundred set the whole show off (BigMoment keeps them from piling up).
     if( inCombo > 0 && inCombo % 50 == 0 )
     {
         m_crowd.OnCheer( std::min( 1.f, 0.5f + inCombo / 400.f ) );
+        // A peak for the player at most every 45 seconds, so a flawless run doesn't wear the
+        // confetti out: the hundreds in between are lifts.
+        const bool peak = inCombo % 100 == 0 && m_lastSeconds - m_lastPlayerPeak > 45.0;
+        if( peak ) m_lastPlayerPeak = m_lastSeconds;
+        m_pendingMoment = std::max( m_pendingMoment, peak ? 2 : 1 );
+    }
+    else if( inCombo == 30 && m_lastSeconds - m_lastPlayerPeak > 45.0 )
+    {
+        m_lastPlayerPeak = m_lastSeconds;
+        m_pendingMoment = std::max( m_pendingMoment, 2 );
     }
 }

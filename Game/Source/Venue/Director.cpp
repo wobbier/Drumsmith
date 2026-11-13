@@ -7,8 +7,11 @@
 #include "Components/Transform.h"
 #include "Core/CommandLine.h"
 #include "Engine/World.h"
+#include "CLog.h"
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <cstdlib>
 #include <sstream>
 
 namespace
@@ -60,6 +63,17 @@ namespace
         return inA + ( inB - inA ) * inT;
     }
 
+    // Smooth repeatable noise in [-1, 1] along a line: a wandering value, not a swinging one.
+    float Wander( float inT, uint32_t inSeed )
+    {
+        const float whole = std::floor( inT );
+        const float t = VenueTiming::Smooth( inT - whole );
+        const uint32_t cell = static_cast<uint32_t>( static_cast<int32_t>( whole ) );
+        const float a = VenueTiming::Noise( cell, inSeed );
+        const float b = VenueTiming::Noise( cell + 1u, inSeed );
+        return ( a + ( b - a ) * t ) * 2.f - 1.f;
+    }
+
     Vector3 Orbit( const Vector3& inEye, const Vector3& inTarget, float inDegrees )
     {
         const float angle = inDegrees * kPi / 180.f;
@@ -92,6 +106,13 @@ void Director::Clear()
     m_framedCut = -2;
     m_framedShot.clear();
     m_surferUp = false;
+    m_moveTime = 0.f;
+    m_hype = 0.f;
+    m_kick = 0.f;
+    m_bigStart = -1000.0;
+    m_bigEnd = -1000.0;
+    m_focus = 8.f;
+    m_blur = 0.f;
 }
 
 
@@ -148,7 +169,7 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
         camera.ClearType = Moonlight::ClearColorType::Color;
         camera.SetCurrent();
         PostProcess& post = m_main->AddComponent<PostProcess>();
-        post.AmbientOcclusion = false;
+        post.AmbientOcclusion = true;
         post.Bloom = true;
         post.BloomIntensity = 0.12f;
         post.BloomThreshold = 0.8f;
@@ -203,7 +224,7 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
     // Rock Band 3's shot names: "coop_<who>_<framing>" and "directed_<who>[_<style>]"; RB2's note
     // cuts arrive as "auto <constraints>".
     Plan plan;
-    plan.Variant = static_cast<int>( VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 41u ) * 4.f );
+    plan.Variant = static_cast<int>( VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 41u ) * 16.f );
     if( inName == "debug_wall" )
     {
         // Diagnostics (--venue-shot debug_wall): straight at the LED wall from the front of the stage.
@@ -215,6 +236,39 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
         // The neck camera (AddNeckShots; --venue-shot guitar_neck to frame it).
         plan.Subjects = { inName == "bass_neck" ? VenueData::Bass : VenueData::Guitar };
         plan.Frame = Framing::Neck;
+        return plan;
+    }
+    if( StartsWith( inName, "cam_" ) )
+    {
+        // The crew's own shots by name (--venue-shot cam_crane): "cam_<kind>[_<members>][_<variant>]",
+        // e.g. cam_foh_v, cam_hero_g_1, cam_reverse_d.
+        const std::vector<std::string> parts = Split( inName.substr( 4 ), '_' );
+        const std::string kind = parts.empty() ? std::string() : parts[0];
+        for( size_t i = 1; i < parts.size(); ++i )
+        {
+            if( std::isdigit( static_cast<unsigned char>( parts[i][0] ) ) )
+            {
+                plan.Variant = std::atoi( parts[i].c_str() );
+                continue;
+            }
+            for( char letter : parts[i] )
+            {
+                const int member = MemberFromLetter( letter );
+                if( member >= 0 ) plan.Subjects.push_back( member );
+            }
+        }
+        if( kind == "crane" ) plan.Frame = Framing::Crane;
+        else if( kind == "dolly" ) plan.Frame = Framing::Dolly;
+        else if( kind == "drone" ) plan.Frame = Framing::Drone;
+        else if( kind == "orbit" ) plan.Frame = Framing::Orbit;
+        else if( kind == "foh" ) plan.Frame = Framing::LongLens;
+        else if( kind == "crowd" ) { plan.Frame = Framing::CrowdPov; plan.Handheld = true; }
+        else if( kind == "side" ) plan.Frame = Framing::Profile;
+        else if( kind == "drumtop" ) { plan.Frame = Framing::DrumTop; plan.Subjects = { VenueData::Drums }; }
+        else if( kind == "drumlow" ) { plan.Frame = Framing::DrumLow; plan.Subjects = { VenueData::Drums }; }
+        else if( kind == "reverse" ) plan.Frame = Framing::Behind;
+        else if( kind == "hero" ) { plan.Frame = Framing::LowHero; if( plan.Subjects.empty() ) plan.Subjects = { VenueData::Vocals }; }
+        else if( kind == "push" ) plan.Frame = Framing::Push;
         return plan;
     }
     if( StartsWith( inName, "auto" ) )
@@ -240,7 +294,8 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
         if( framing == "behind" ) plan.Frame = Framing::Behind;
         else if( framing == "far" ) plan.Frame = Framing::Far;
         else if( framing == "closeup" ) plan.Frame = detail == "hand" ? Framing::CloseHand : Framing::CloseHead;
-        else plan.Frame = plan.Subjects.empty() ? Framing::Near : Framing::Near;
+        else plan.Frame = Framing::Near;
+        Vary( plan );
         return plan;
     }
     if( StartsWith( inName, "directed_" ) )
@@ -296,6 +351,8 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
             else if( style == "lt" ) plan.Frame = Framing::Behind;
             else plan.Frame = Framing::Near;
         }
+        // The chart's own handheld and locked-off shots are shot as asked.
+        if( style.empty() || who == "crowd" ) Vary( plan );
         return plan;
     }
     // Unknown names: a wide shot.
@@ -312,7 +369,7 @@ Director::Plan Director::PlanAuto( const std::string& inConstraints, int inIndex
     const auto has = [&inConstraints]( const char* inWord ) { return inConstraints.find( inWord ) != std::string::npos; };
     const float roll = VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 7u );
     const float roll2 = VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 8u );
-    plan.Variant = static_cast<int>( VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 9u ) * 4.f );
+    plan.Variant = static_cast<int>( VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 9u ) * 16.f );
     // Every member the cut focuses on is in it (two make a duo shot).
     for( const char* member : { "focus_bass", "focus_drums", "focus_guitar", "focus_vocals" } )
     {
@@ -347,88 +404,296 @@ Director::Plan Director::PlanAuto( const std::string& inConstraints, int inIndex
         else plan.Frame = plan.Subjects.empty() ? Framing::Far : Framing::Near;
     }
     plan.Handheld = VenueTiming::Noise( static_cast<uint32_t>( inIndex ), 10u ) < 0.25f;
+    // (An "only far" cut stays a wide of one kind or another; a close one stays close.)
+    Vary( plan );
     return plan;
+}
+
+
+void Director::Vary( Plan& ioPlan )
+{
+    // The chart asks for a kind of shot; the crew has several ways to shoot each. Bits 2-3 of
+    // the variant pick one, so a song's third wide shot isn't its first again.
+    const int treatment = ( ioPlan.Variant >> 2 ) & 3;
+    const bool alternate = ( ioPlan.Variant & 2 ) != 0;
+    // A close-up is of one player: asked to focus on two, it takes one of them. Framing the
+    // point between their heads shows whatever stands between them (an amp).
+    if( ( ioPlan.Frame == Framing::CloseHead || ioPlan.Frame == Framing::CloseHand ) && ioPlan.Subjects.size() >= 2 )
+    {
+        const int kept = ioPlan.Subjects[static_cast<size_t>( ioPlan.Variant ) % ioPlan.Subjects.size()];
+        ioPlan.Subjects = { kept };
+    }
+    const int subject = ioPlan.Subjects.size() == 1 ? ioPlan.Subjects[0] : -1;
+    switch( ioPlan.Frame )
+    {
+    case Framing::Far:
+        if( ioPlan.Subjects.empty() )
+        {
+            if( treatment == 1 ) ioPlan.Frame = Framing::Crane;
+            else if( treatment == 2 ) ioPlan.Frame = alternate ? Framing::Orbit : Framing::Drone;
+            else if( treatment == 3 ) ioPlan.Frame = Framing::LongLens;
+        }
+        else if( treatment == 2 )
+        {
+            ioPlan.Frame = Framing::LongLens;
+        }
+        break;
+    case Framing::Near:
+        if( ioPlan.Subjects.empty() )
+        {
+            if( treatment == 1 ) ioPlan.Frame = Framing::Dolly;
+            else if( treatment == 2 ) ioPlan.Frame = Framing::Profile;
+        }
+        else if( treatment == 3 && subject == VenueData::Drums )
+        {
+            ioPlan.Frame = Framing::DrumLow;
+        }
+        else if( treatment == 3 && ( subject == VenueData::Guitar || subject == VenueData::Bass || subject == VenueData::Vocals ) )
+        {
+            ioPlan.Frame = Framing::LowHero;
+        }
+        break;
+    case Framing::CloseHand:
+        if( subject == VenueData::Drums && treatment >= 2 ) ioPlan.Frame = Framing::DrumTop;
+        break;
+    case Framing::Crowd:
+        // (Handheld crowd shots are the stage dive and the crowd surfer: they stay as they are.)
+        if( ioPlan.Subjects.empty() && !ioPlan.Handheld && treatment >= 2 )
+        {
+            ioPlan.Frame = Framing::CrowdPov;
+            ioPlan.Handheld = true;
+        }
+        break;
+    case Framing::Overhead:
+        if( !ioPlan.Handheld && ( treatment & 1 ) != 0 ) ioPlan.Frame = Framing::Orbit;
+        break;
+    default:
+        break;
+    }
+}
+
+
+const char* Director::FramingName( Framing inFraming )
+{
+    switch( inFraming )
+    {
+    case Framing::Far: return "far";
+    case Framing::Near: return "near";
+    case Framing::Behind: return "behind";
+    case Framing::CloseHead: return "head";
+    case Framing::CloseHand: return "hand";
+    case Framing::Kick: return "kick";
+    case Framing::Crowd: return "crowd";
+    case Framing::Overhead: return "overhead";
+    case Framing::Wall: return "wall";
+    case Framing::Neck: return "neck";
+    case Framing::Surfer: return "surfer";
+    case Framing::Crane: return "crane";
+    case Framing::Dolly: return "dolly";
+    case Framing::Drone: return "drone";
+    case Framing::Orbit: return "orbit";
+    case Framing::LongLens: return "foh";
+    case Framing::CrowdPov: return "crowdpov";
+    case Framing::Profile: return "side";
+    case Framing::DrumTop: return "drumtop";
+    case Framing::DrumLow: return "drumlow";
+    case Framing::LowHero: return "hero";
+    case Framing::Push: return "push";
+    }
+    return "";
 }
 
 
 void Director::BuildFallbackCuts( const VenueData& inVenue, float inSongLength )
 {
-    // No camera cuts in the chart: a cut every two measures (on the downbeat when the tempo map
-    // allows), wide at the start of a section, then whoever's busiest.
-    std::vector<float> times;
+    // No camera cuts in the chart: cut it like a live director would. Always on a downbeat (a
+    // half measure in a flurry), paced by the section: a chorus or solo every measure, a verse
+    // every two, an intro or a quiet stretch every four with slow moves. A chorus opens on a
+    // wide or the crane, other sections on whoever carries them; a long section ends on a wide.
+    // In between it's the busiest member (the drummer on a fill, the singer on a line), never
+    // the same subject and framing twice running. All from seeded noise: a song cuts the same
+    // every time.
+    struct Beat
+    {
+        float Time = 0.f;
+        bool Downbeat = false;
+    };
+    std::vector<Beat> beats;
     if( m_beats.size() >= 8 )
     {
-        int measures = 0;
-        for( const BeatData& beat : m_beats )
-        {
-            if( beat.m_measure && measures++ % 2 == 0 ) times.push_back( beat.m_time );
-        }
+        for( const BeatData& beat : m_beats ) beats.push_back( { beat.m_time, beat.m_measure } );
     }
     else
     {
-        const float step = 8.f * 60.f / std::max( 30.f, m_bpm );
-        for( float time = 0.f; time < std::max( inSongLength, 30.f ); time += step ) times.push_back( time );
+        const float step = 60.f / std::max( 30.f, m_bpm );
+        int count = 0;
+        for( float time = 0.f; time < std::max( inSongLength, 30.f ); time += step ) beats.push_back( { time, count++ % 4 == 0 } );
     }
-    size_t section = 0;
-    for( size_t i = 0; i < times.size(); ++i )
+    if( beats.empty() )
     {
-        const float time = times[i];
+        return;
+    }
+    // Each section, lower case, with the beat it starts on.
+    struct Section
+    {
+        std::string Name;
+        size_t Beat = 0;
+    };
+    std::vector<Section> sections;
+    for( const TimedCueData& cue : inVenue.m_sections )
+    {
+        Section section;
+        section.Name = cue.m_name;
+        std::transform( section.Name.begin(), section.Name.end(), section.Name.begin(), []( unsigned char c ) { return static_cast<char>( std::tolower( c ) ); } );
+        while( section.Beat + 1 < beats.size() && beats[section.Beat].Time < cue.m_time - 0.05f ) ++section.Beat;
+        sections.push_back( section );
+    }
+    // 0 calm, 1 steady, 2 hot.
+    const auto energyOf = []( const std::string& inName ) {
+        const auto has = [&inName]( const char* inWord ) { return VenueTiming::Contains( inName, inWord ); };
+        if( has( "chorus" ) || has( "solo" ) || has( "outro" ) || has( "ending" ) || has( "bre" ) ) return 2;
+        if( has( "intro" ) || has( "bridge" ) || has( "break" ) || has( "quiet" ) || has( "spacey" ) || has( "mellow" ) || has( "interlude" ) ) return 0;
+        return 1;
+    };
+
+    size_t next = 0;           // the next section to start
+    int cutsInSection = 0;
+    int flurry = 0;            // half-measure cuts left to run
+    int lastSubject = -2;
+    Framing lastFrame = Framing::Wall;
+    uint32_t count = 0;
+    size_t beat = 0;
+    while( beat < beats.size() )
+    {
+        const float time = beats[beat].Time;
+        bool newSection = count == 0;
+        while( next < sections.size() && sections[next].Beat <= beat )
+        {
+            ++next;
+            newSection = true;
+            cutsInSection = 0;
+            flurry = 0;
+        }
+        const std::string sectionName = next > 0 ? sections[next - 1].Name : std::string();
+        const int energy = sections.empty() ? 1 : energyOf( sectionName );
+        const bool chorus = VenueTiming::Contains( sectionName, "chorus" );
+        const auto noise = [count]( uint32_t inSalt ) { return VenueTiming::Noise( count, inSalt ); };
+
+        // How long this cut holds, in beats: to a downbeat, and never past the section's end.
+        int hold = energy == 2 ? 4 : energy == 1 ? 8 : 16;
+        if( flurry > 0 )
+        {
+            hold = 2;
+            --flurry;
+        }
+        else if( energy == 2 && !newSection && noise( 54u ) < 0.18f )
+        {
+            // A flurry: three quick cuts on the half measure.
+            flurry = 2;
+            hold = 2;
+        }
+        size_t end = std::min( beat + static_cast<size_t>( hold ), beats.size() );
+        if( hold >= 4 )
+        {
+            // Land on a downbeat (the tempo map's own, whatever the time signature).
+            size_t snapped = end;
+            while( snapped < beats.size() && snapped < end + 3 && !beats[snapped].Downbeat ) ++snapped;
+            if( snapped < beats.size() && beats[snapped].Downbeat ) end = snapped;
+        }
+        const size_t sectionEnd = next < sections.size() ? sections[next].Beat : beats.size();
+        const bool lastInSection = end >= sectionEnd;
+        if( lastInSection ) end = sectionEnd;
+        if( end <= beat ) end = beat + 1;
+        // (A section that opens on the room doesn't need the one before it to end there too.)
+        const bool nextOpensWide = next < sections.size() && ( VenueTiming::Contains( sections[next].Name, "chorus" ) || energyOf( sections[next].Name ) == 0 );
+        const float length = ( end < beats.size() ? beats[end].Time : beats.back().Time + 2.f ) - time;
+
         Cut cut;
         cut.Time = time;
-        bool newSection = false;
-        while( section < inVenue.m_sections.size() && inVenue.m_sections[section].m_time <= time + 0.05f )
-        {
-            ++section;
-            newSection = true;
-        }
-        const std::string sectionName = section > 0 ? inVenue.m_sections[section - 1].m_name : std::string();
         Plan& plan = cut.Shot;
-        plan.Variant = static_cast<int>( VenueTiming::Noise( static_cast<uint32_t>( i ), 51u ) * 4.f );
-        plan.Handheld = VenueTiming::Noise( static_cast<uint32_t>( i ), 52u ) < 0.2f;
-        const float roll = VenueTiming::Noise( static_cast<uint32_t>( i ), 53u );
-        if( newSection || i == 0 )
+        plan.Variant = static_cast<int>( noise( 51u ) * 16.f );
+        plan.Handheld = noise( 52u ) < ( energy == 2 ? 0.4f : energy == 1 ? 0.2f : 0.05f );
+        const float roll = noise( 53u );
+        const float roll2 = noise( 55u );
+        const Framing wides[] = { Framing::Far, Framing::Crane, Framing::Drone, Framing::LongLens, Framing::Orbit, Framing::Overhead };
+        const auto wide = [&]( float inRoll ) {
+            Framing frame = wides[static_cast<int>( inRoll * 6.f ) % 6];
+            if( frame == lastFrame ) frame = wides[( static_cast<int>( inRoll * 6.f ) + 1 ) % 6];
+            return frame;
+        };
+        if( newSection && ( chorus || count == 0 || energy == 0 ) )
         {
-            plan.Frame = roll < 0.5f ? Framing::Far : Framing::Overhead;
-            cut.Name = "fallback_all_far";
+            // Open on the room: the crane or a wide for a chorus, the long lens or the drone
+            // coming in for a quiet start.
+            plan.Frame = chorus ? ( roll < 0.5f ? Framing::Crane : wide( roll2 ) ) : ( roll < 0.4f ? Framing::LongLens : roll < 0.7f ? Framing::Drone : wide( roll2 ) );
+            plan.Handheld = false;
+        }
+        else if( lastInSection && !nextOpensWide && cutsInSection >= 3 && flurry == 0 && lastSubject != -1 )
+        {
+            plan.Frame = wide( roll );
+            plan.Handheld = false;
+        }
+        else if( flurry == 0 && hold > 2 && roll2 < ( energy == 2 ? 0.22f : 0.12f ) && lastSubject != -1 )
+        {
+            // The band together, or the room they're playing to.
+            const Framing groups[] = { Framing::Dolly, Framing::Profile, Framing::Behind, Framing::Near, energy == 2 ? Framing::Crowd : Framing::LongLens, energy == 2 ? Framing::CrowdPov : Framing::Orbit };
+            plan.Frame = groups[static_cast<int>( roll * 6.f ) % 6];
+            if( plan.Frame == Framing::CrowdPov ) plan.Handheld = true;
         }
         else
         {
+            // Whoever's carrying this stretch: the drummer through a fill, the singer on a line,
+            // the guitarist through a solo. Not whoever just had the shot, unless nobody else is
+            // playing.
+            const double middle = time + std::min( length, 4.f ) * 0.5;
             int subject = VenueData::Vocals;
-            float best = -1.f;
+            float best = -1e9f;
             if( m_band )
             {
                 for( int member = 0; member < VenueData::MemberCount; ++member )
                 {
-                    float score = m_band->Activity( member, time + 2.0 ) + VenueTiming::Noise( static_cast<uint32_t>( i ), 60u + member ) * 0.9f;
+                    if( !m_band->HasMember( member ) ) continue;
+                    float score = m_band->Activity( member, middle ) + noise( 60u + static_cast<uint32_t>( member ) ) * 0.8f;
                     if( member == VenueData::Guitar && VenueTiming::Contains( sectionName, "solo" ) ) score += 2.f;
-                    if( member == VenueData::Vocals ) score += 0.2f;
-                    if( m_band->HasMember( member ) && score > best )
+                    if( member == VenueData::Vocals && m_band->Activity( member, middle ) > 0.5f ) score += 0.5f;
+                    // A fill: the drums flat out.
+                    if( member == VenueData::Drums && m_band->Activity( member, middle ) > 0.85f ) score += 0.7f;
+                    if( member == lastSubject ) score -= 0.9f;
+                    if( score > best )
                     {
                         best = score;
                         subject = member;
                     }
                 }
             }
-            if( roll < 0.18f )
+            plan.Subjects = { subject };
+            if( subject == VenueData::Drums )
             {
-                plan.Frame = Framing::Far;
-            }
-            else if( roll < 0.26f && VenueTiming::Contains( sectionName, "chorus" ) )
-            {
-                plan.Frame = Framing::Crowd;
-            }
-            else if( roll < 0.34f )
-            {
-                plan.Frame = Framing::Behind;
+                const Framing frames[] = { Framing::Near, Framing::DrumLow, Framing::CloseHand, Framing::DrumTop, Framing::Kick, Framing::Behind, Framing::CloseHead, Framing::LongLens };
+                plan.Frame = frames[static_cast<int>( roll * 8.f ) % 8];
             }
             else
             {
-                plan.Subjects = { subject };
-                plan.Frame = roll < 0.6f ? Framing::Near : roll < 0.8f ? Framing::CloseHead : Framing::CloseHand;
+                const bool front = subject != VenueData::Keys;
+                plan.Frame = roll < 0.32f ? Framing::Near : roll < 0.48f ? Framing::CloseHead : roll < 0.6f ? Framing::CloseHand
+                    : roll < 0.72f ? ( front ? Framing::LowHero : Framing::Near ) : roll < 0.8f ? Framing::Behind : roll < 0.9f ? Framing::LongLens : Framing::Far;
+                // The singer's hands aren't the story.
+                if( subject == VenueData::Vocals && plan.Frame == Framing::CloseHand ) plan.Frame = Framing::CloseHead;
             }
-            cut.Name = "fallback";
+            if( subject == lastSubject && plan.Frame == lastFrame )
+            {
+                plan.Frame = plan.Frame == Framing::Near ? Framing::CloseHead : Framing::Near;
+            }
+            // A quiet stretch holds still or moves slowly: no shoulder cameras in the pit.
+            if( energy == 0 ) plan.Handheld = false;
         }
+        lastSubject = plan.Subjects.size() == 1 ? plan.Subjects[0] : -1;
+        lastFrame = plan.Frame;
+        cut.Name = std::string( "fallback_" ) + FramingName( plan.Frame );
         m_cuts.push_back( cut );
+        ++count;
+        ++cutsInSection;
+        beat = end;
     }
 }
 
@@ -532,15 +797,44 @@ Vector3 Director::SubjectPoint( const Plan& inPlan, bool inHead ) const
 }
 
 
+void Director::Contain( Vector3& ioEye, bool inAmongCrowd ) const
+{
+    // Low cameras stay out of the audience: in the photo pit between the barricade and the stage,
+    // or up over their heads. The limit eases back as the camera rises (free by about 4.6 m), so
+    // a jib booming up out of the pit moves off over the crowd without a jump.
+    if( !inAmongCrowd )
+    {
+        const float over = std::max( 0.f, ioEye.y - 3.f ) / 1.6f;
+        const float limit = VenueLayout::kBarricadeZ + 0.3f - over * over * 40.f;
+        ioEye.z = std::max( ioEye.z, limit );
+    }
+    // And all stay inside the room: in front of the back wall, under the rig, between the walls.
+    ioEye.z = std::max( ioEye.z, m_room.Back + 1.5f );
+    if( m_room.Ceiling < 900.f )
+    {
+        ioEye.y = std::min( ioEye.y, m_room.Ceiling - 2.f );
+    }
+    if( ioEye.z < 0.f )
+    {
+        ioEye.x = std::clamp( ioEye.x, -( m_room.HalfWidth - 1.f ), m_room.HalfWidth - 1.f );
+    }
+}
+
+
 void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3& outTarget, float& outFov, Vector3* outUp ) const
 {
-    // A shot in venue space: where the camera sits and looks, then how it drifts while held.
+    // A shot in venue space: where the camera sits and looks, then how it moves while held.
     const float side = ( inPlan.Variant % 2 == 0 ) ? -1.f : 1.f;
-    const float alt = inPlan.Variant >= 2 ? 1.f : 0.f;
+    const float alt = ( inPlan.Variant & 2 ) != 0 ? 1.f : 0.f;
     const int subject = inPlan.Subjects.size() == 1 ? inPlan.Subjects[0] : -1;
     const bool duo = inPlan.Subjects.size() >= 2;
+    const float held = std::max( inHeld, 0.f );
+    // The move's progress: most of it in the first few seconds, then it keeps creeping rather
+    // than coming to rest, however long the shot is held.
+    const float progress = inPlan.Static ? 0.f : std::min( 1.f - std::exp( -held / 5.f ) + held * 0.03f, 3.f );
     float drift = 0.f;    // degrees of orbit over the shot
     float dolly = 0.f;    // metres toward the target over the shot
+    bool amongCrowd = false;
     if( outUp ) *outUp = Vector3::Up;
     Vector3 headstock;
     Vector3 body;
@@ -560,6 +854,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         if( outUp ) *outUp = ( edge * 0.7f + face * 0.3f ).Normalized();
         return;
     }
+    const Vector3 drums = VenueLayout::kMemberSpots[VenueData::Drums];
     switch( inPlan.Frame )
     {
     case Framing::Far:
@@ -605,18 +900,29 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     case Framing::Behind:
         if( subject >= 0 && subject != VenueData::Drums )
         {
+            // Over their shoulder at the crowd they're playing to, rising a little as it's held.
             const Vector3 chest = SubjectPoint( inPlan, false );
-            outEye = chest + Vector3( side * 0.9f, 0.7f, 2.6f );
-            outTarget = chest + Vector3( -side * 0.5f, -0.6f, -6.f );
-            outFov = 58.f;
+            outEye = chest + Vector3( side * 0.75f, 0.55f + 0.35f * std::min( progress, 1.5f ), 2.3f );
+            outTarget = chest + Vector3( -side * 1.2f, -0.3f, -12.f );
+            outFov = 54.f;
+            dolly = 0.4f;
+        }
+        else if( subject == VenueData::Drums )
+        {
+            // From behind the throne, over the drummer's head and the kit at the whole room.
+            outEye = drums + Vector3( side * 0.9f, 1.95f, 1.8f );
+            outTarget = Vector3( -side * 1.f, 1.7f, -10.f );
+            outFov = 62.f;
+            drift = 5.f * side;
         }
         else
         {
-            outEye = Vector3( side * 2.f, 3.8f, 9.8f );
+            // Along the back of the stage, the band's backs against the lit crowd.
+            const float travel = std::min( progress, 2.f );
+            outEye = Vector3( side * ( 2.6f - 1.6f * travel ), 3.6f + 0.3f * travel, 9.8f );
             outTarget = Vector3( 0.f, 1.8f, -6.f );
             outFov = 66.f;
         }
-        drift = 4.f * side;
         break;
     case Framing::CloseHead:
         outTarget = subject >= 0 || duo ? SubjectPoint( inPlan, true ) : Vector3( 0.f, 2.9f, 1.6f );
@@ -628,9 +934,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     case Framing::CloseHand:
         if( subject == VenueData::Drums )
         {
-            const Vector3 spot = VenueLayout::kMemberSpots[VenueData::Drums];
-            outTarget = m_band ? m_band->HandsOf( subject ) : spot + Vector3( 0.f, 0.9f, -0.5f );
-            outEye = spot + Vector3( side * 1.4f, 1.6f, -1.2f );
+            outTarget = m_band ? m_band->HandsOf( subject ) : drums + Vector3( 0.f, 0.9f, -0.5f );
+            outEye = drums + Vector3( side * 1.4f, 1.6f, -1.2f );
             outFov = 40.f;
         }
         else
@@ -642,14 +947,11 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         drift = 6.f * side;
         break;
     case Framing::Kick:
-    {
-        const Vector3 spot = VenueLayout::kMemberSpots[VenueData::Drums];
-        outTarget = spot + Vector3( 0.f, 0.45f, -0.6f );
-        outEye = spot + Vector3( side * 0.4f, 0.35f, -2.2f );
+        outTarget = drums + Vector3( 0.f, 0.45f, -0.6f );
+        outEye = drums + Vector3( side * 0.4f, 0.35f, -2.2f );
         outFov = 46.f;
         dolly = 0.3f;
         break;
-    }
     case Framing::Wall:
         outTarget = Vector3( 0.f, 6.9f, VenueLayout::kBackWallZ );
         outEye = Vector3( 0.f, 5.5f, -4.f );
@@ -673,29 +975,120 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         outFov = std::clamp( 2.f * std::atan( 2.f / distance ) * 180.f / kPi, 20.f, 65.f );
         break;
     }
-    }
-    if( inPlan.Static )
+    case Framing::Crane:
     {
-        drift = 0.f;
-        dolly = 0.f;
+        // A jib arm: from low in the pit it booms up and back over the crowd's heads, the band
+        // shrinking into the whole stage (the alternate take comes down the same arc into the pit).
+        float boom = std::min( progress * 0.75f, 1.2f );
+        if( alt > 0.f ) boom = 1.f - std::min( boom, 1.f );
+        outEye = Vector3( side * ( 5.f - 3.f * boom ), 2.f + 6.5f * std::sqrt( boom ), -1.2f - 9.8f * boom * boom );
+        outTarget = Vector3( 0.f, 2.7f - 0.4f * boom, 4.2f );
+        outFov = 58.f - 12.f * std::min( boom, 1.f );
+        break;
     }
-    // Low cameras stay out of the audience: in the photo pit between the barricade and the stage,
-    // or up over their heads. All stay inside the room.
-    const float roomBack = m_roomBack + 1.5f;
-    const auto keepClear = [roomBack]( Vector3& ioEye ) {
-        if( ioEye.y < 4.6f && ioEye.z < VenueLayout::kBarricadeZ + 0.3f )
-        {
-            ioEye.z = VenueLayout::kBarricadeZ + 0.3f;
-        }
-        ioEye.z = std::max( ioEye.z, roomBack );
-    };
-    keepClear( outEye );
-    // Drift: an orbit and a push in, easing over about eight seconds.
-    const float progress = 1.f - std::exp( -inHeld / 6.f );
+    case Framing::Dolly:
+    {
+        // On a track along the pit rail, below the deck's edge: the front line from underneath,
+        // the rig behind them, sliding past at walking pace.
+        const float x = side * std::clamp( -6.5f + held * 0.8f, -6.5f, 6.5f );
+        outEye = Vector3( x, 1.7f, VenueLayout::kBarricadeZ + 0.4f );
+        outTarget = Vector3( x * 0.35f, 2.75f, 3.8f );
+        outFov = 52.f;
+        break;
+    }
+    case Framing::Drone:
+    {
+        // Flown in from the back of the house over the crowd, sinking toward the stage.
+        const float top = std::min( m_room.Ceiling - 2.5f, 13.f );
+        const float start = std::max( m_room.Back + 4.f, -40.f );
+        outEye = Vector3( side * ( 4.f - std::min( held * 0.25f, 4.f ) ), top - std::min( held * 0.35f, 4.f ), std::min( start + held * 2.4f, -7.f ) );
+        outTarget = Vector3( 0.f, 2.4f, 5.f );
+        outFov = 55.f;
+        break;
+    }
+    case Framing::Orbit:
+    {
+        // High and slow round the front of the stage.
+        const float angle = side * std::min( 30.f + held * 2.5f, 75.f ) * kPi / 180.f;
+        const float height = std::min( m_room.Ceiling - 2.5f, 10.f );
+        outTarget = Vector3( 0.f, 2.2f, 3.5f );
+        outEye = Vector3( std::sin( angle ) * 15.f, height, outTarget.z - std::cos( angle ) * 15.f );
+        outFov = 50.f;
+        break;
+    }
+    case Framing::LongLens:
+    {
+        // From the mixing desk on a long lens: the stage flattened against its lights, the
+        // crowd's heads and hands soft in the foreground. A slow zoom in while it's held.
+        amongCrowd = true;
+        outEye = Vector3( side * 1.6f, 2.7f, std::max( m_room.DeskZ + 1.4f, m_room.Back + 2.f ) );
+        outTarget = subject >= 0 || duo ? SubjectPoint( inPlan, false ) + Vector3( 0.f, 0.2f, 0.f ) : Vector3( 0.f, 2.7f, 4.f );
+        const float distance = std::max( ( outTarget - outEye ).Length(), 1.f );
+        const float half = subject >= 0 ? 1.5f : duo ? 2.4f : 3.3f;
+        outFov = std::clamp( 2.f * std::atan( half / distance ) * 180.f / kPi, 5.f, 34.f ) * ( 1.f - 0.08f * std::min( progress, 1.5f ) );
+        break;
+    }
+    case Framing::CrowdPov:
+        // In the crowd a few rows back, on tiptoe: the stage through everyone's raised hands.
+        amongCrowd = true;
+        outEye = Vector3( side * 2.2f, 1.95f, -6.2f );
+        outTarget = Vector3( -side * 0.8f, 3.f, 2.5f );
+        outFov = 58.f;
+        dolly = 0.3f;
+        break;
+    case Framing::Profile:
+        // From the wings across the stage: the band in a line, the crowd beyond the edge.
+        outEye = Vector3( side * 8.4f, 2.55f, 0.9f + 0.5f * std::min( progress, 2.f ) );
+        outTarget = Vector3( -side * 4.5f, 2.35f, 3.4f );
+        outFov = 60.f;
+        break;
+    case Framing::DrumTop:
+    {
+        // Straight down on the kit from the rig, sinking toward it and turning slowly. The top
+        // of the picture is upstage.
+        outEye = drums + Vector3( side * 0.25f, 4.4f - 0.5f * std::min( progress, 1.5f ), -0.55f );
+        outTarget = drums + Vector3( 0.f, 0.75f, -0.45f );
+        outFov = 50.f;
+        const float turn = side * ( 8.f + 6.f * progress ) * kPi / 180.f;
+        if( outUp ) *outUp = Vector3( std::sin( turn ), 0.f, std::cos( turn ) );
+        break;
+    }
+    case Framing::DrumLow:
+        // Low at the front of the riser, the drummer through the cymbals.
+        outTarget = ( m_band && m_band->HasMember( VenueData::Drums ) ? m_band->HeadOf( VenueData::Drums ) : drums + Vector3( 0.f, 1.25f, 0.f ) ) + Vector3( 0.f, -0.2f, 0.f );
+        outEye = drums + Vector3( side * 1.35f, 0.95f, -1.75f );
+        outFov = 40.f;
+        drift = 9.f * side;
+        dolly = 0.3f;
+        break;
+    case Framing::LowHero:
+    {
+        // Down on the deck by their monitor, looking up: the player against the rig overhead.
+        const bool there = m_band && subject >= 0 && m_band->HasMember( subject );
+        const Vector3 feet = there ? m_band->FeetOf( subject ) : VenueLayout::kMemberSpots[VenueData::Vocals];
+        outTarget = ( there ? m_band->HeadOf( subject ) : feet + Vector3( 0.f, 1.7f, 0.f ) ) + Vector3( 0.f, -0.3f, 0.f );
+        outEye = feet + Vector3( side * 0.85f, 0.32f, -1.3f );
+        outFov = 50.f;
+        drift = 6.f * side;
+        dolly = 0.25f;
+        break;
+    }
+    case Framing::Push:
+    {
+        // A run in from over the crowd to the lip of the stage, most of it in the first second.
+        const float run = 1.f - std::exp( -held / 1.1f );
+        outEye = Lerp( Vector3( side * 1.5f, 5.6f, -12.f ), Vector3( side * 0.6f, 2.7f, -1.3f ), run );
+        outTarget = Vector3( 0.f, 2.6f, 4.f );
+        outFov = 56.f;
+        break;
+    }
+    }
+    Contain( outEye, amongCrowd );
+    // The generic move: an orbit and a push in.
     outEye = Orbit( outEye, outTarget, drift * progress );
     const Vector3 toward = ( outTarget - outEye ).Normalized();
     outEye = outEye + toward * ( dolly * progress );
-    keepClear( outEye );
+    Contain( outEye, amongCrowd );
 }
 
 
@@ -703,7 +1096,8 @@ float Director::LeadSideFor( const Plan& inPlan, const Vector3& inEye, const Vec
 {
     // One member, framed on them: not wide group shots, the guitar's neck camera (bolted on),
     // from behind, the kick drum or the crowd.
-    const bool framed = inPlan.Frame == Framing::Near || inPlan.Frame == Framing::CloseHead || inPlan.Frame == Framing::CloseHand || inPlan.Frame == Framing::Far;
+    const bool framed = inPlan.Frame == Framing::Near || inPlan.Frame == Framing::CloseHead || inPlan.Frame == Framing::CloseHand || inPlan.Frame == Framing::Far
+        || inPlan.Frame == Framing::LowHero || inPlan.Frame == Framing::LongLens;
     if( !framed || inPlan.Subjects.size() != 1 || inPlan.Subjects[0] < 0 || !m_band || !m_band->HasMember( inPlan.Subjects[0] ) )
     {
         return 0.f;
@@ -760,7 +1154,15 @@ Director::Grade Director::GradeFor( const std::string& inLook )
     // Rock Band's post-processing looks, as the engine's grading can make them.
     Grade grade;
     const auto has = [&inLook]( const char* inWord ) { return inLook.find( inWord ) != std::string::npos; };
-    if( inLook.empty() || StartsWith( inLook, "ProFilm_a" ) ) return grade;
+    if( inLook.empty() || StartsWith( inLook, "ProFilm_a" ) )
+    {
+        // The everyday look: a concert film's, a little contrast, the lights blooming, the
+        // corners falling off.
+        grade.Contrast = 1.04f;
+        grade.Bloom = 1.25f;
+        grade.Vignette = 0.38f;
+        return grade;
+    }
     if( StartsWith( inLook, "ProFilm_b" ) ) { grade.Contrast = 1.12f; grade.Temperature = 0.12f; return grade; }
     if( has( "psychedelic" ) ) { grade.Saturation = 1.7f; grade.Tint = 0.4f; grade.Bloom = 2.5f; return grade; }
     if( has( "mirror" ) ) { grade.Contrast = 1.15f; grade.Saturation = 1.2f; return grade; }
@@ -772,8 +1174,8 @@ Director::Grade Director::GradeFor( const std::string& inLook )
     {
         grade.Saturation = 0.f;
         grade.Contrast = 1.15f;
-        grade.Exposure = 0.35f;
-        grade.Bloom = 3.f;
+        grade.Exposure = 0.1f;
+        grade.Bloom = 2.2f;
         grade.Vignette = 0.55f;
         grade.Lut = 1.f;
         grade.Grain = 0.11f;
@@ -827,7 +1229,7 @@ void Director::ApplyGrade( float inDeltaTime )
     post.Tint = m_grade.Tint;
     post.BloomIntensity = 0.12f * m_grade.Bloom;
     post.VignetteIntensity = m_grade.Vignette;
-    post.ExposureCompensation = m_grade.Exposure;
+    post.ExposureCompensation = m_grade.Exposure + m_closeExposure;
     post.EraColorBits = m_grade.ColorBits;
     post.EraDither = m_grade.Dither;
     post.LutContribution = m_grade.Lut;
@@ -847,6 +1249,20 @@ float Director::FrameRateAt( double inSeconds ) const
         m_rate = GradeFor( !forcedLook.empty() ? forcedLook : look ? look->m_name : std::string() ).FrameRate;
     }
     return m_rate;
+}
+
+
+void Director::SetFeedStepRate( float inStepRate, float inFrameSeconds )
+{
+    // Frames per step, 2 (the smooth venue's rate) at the least. The feed then renders on about every step.
+    const int interval = inStepRate > 0.f && inFrameSeconds > 0.f ? std::clamp( static_cast<int>( std::lround( 1.f / ( inStepRate * inFrameSeconds ) ) ), 2, 30 ) : 2;
+    for( EntityHandle* feed : { &m_feed, &m_program } )
+    {
+        if( *feed && ( *feed )->HasComponent<Camera>() )
+        {
+            ( *feed )->GetComponent<Camera>().UpdateInterval = interval;
+        }
+    }
 }
 
 
@@ -934,6 +1350,74 @@ void Director::UpdateFeed( double inSeconds, float inDeltaTime, int inCutIndex )
 }
 
 
+void Director::OnBigMoment( double inSeconds, float inHoldSeconds )
+{
+    m_bigStart = inSeconds;
+    m_bigEnd = inSeconds + std::max( inHoldSeconds, 0.f );
+}
+
+
+float Director::BlurFor( const Plan& inPlan )
+{
+    // How soft the background goes, as a blur radius in pixels at 1080p for things far behind
+    // the subject: the tighter the shot, the softer. Wide shots, the neck camera and the crowd
+    // surfer's shot keep everything sharp.
+    switch( inPlan.Frame )
+    {
+    case Framing::Near: return inPlan.Subjects.empty() ? 0.f : 6.f;
+    case Framing::CloseHead:
+    case Framing::CloseHand: return 9.f;
+    case Framing::Kick:
+    case Framing::DrumLow: return 7.f;
+    case Framing::LowHero: return 6.f;
+    case Framing::LongLens: return 8.f;
+    default: return 0.f;
+    }
+}
+
+
+void Director::ApplyFocus( const Plan& inPlan, const Vector3& inEye, const Vector3& inSubject, float inFov, bool inCut, float inDeltaTime )
+{
+    if( !m_main || !m_main->HasComponent<PostProcess>() )
+    {
+        return;
+    }
+    // A focus puller on the subject: the distance and the blur ease (snapped on a cut), and the
+    // aperture is whatever gives this shot's blur at its lens and distance, so a long lens from
+    // the desk and a wide one in the pit both leave the lights behind the player as soft discs.
+    const float focus = std::clamp( ( inSubject - inEye ).Length(), 0.3f, 200.f );
+    const float blur = BlurFor( inPlan );
+    if( inCut )
+    {
+        m_focus = focus;
+        m_blur = blur;
+    }
+    else
+    {
+        const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
+        m_focus += ( focus - m_focus ) * ( 1.f - std::exp( -dt * 5.f ) );
+        m_blur += ( blur - m_blur ) * ( 1.f - std::exp( -dt * 6.f ) );
+    }
+    // The rig is balanced for the wide picture: up close the same light on a white shirt burns
+    // out, so the nearer the subject the further the lens is stopped down (eased with the focus).
+    m_closeExposure = -1.1f * ( 1.f - VenueTiming::Smooth( ( m_focus - 1.5f ) / 10.f ) );
+    PostProcess& post = m_main->GetComponent<PostProcess>();
+    post.DepthOfField = m_blur > 0.3f;
+    if( !post.DepthOfField )
+    {
+        return;
+    }
+    // The engine's thin lens (Engine/Docs/Depth-of-Field.md): at infinity the blur radius is
+    // f^2 * height / ( 2 N ( focus - f ) sensor ), with f from the field of view. Solved for N.
+    const float sensor = post.DoFSensorHeight * 0.001f;
+    const float focal = sensor / ( 2.f * std::tan( std::clamp( inFov, 2.f, 120.f ) * 0.5f * kPi / 180.f ) );
+    const float reach = std::max( m_focus - focal, 0.05f );
+    post.DoFFocusDistance = m_focus;
+    post.DoFAperture = std::clamp( focal * focal * 1080.f / ( 2.f * m_blur * reach * sensor ), 0.7f, 22.f );
+    post.DoFMaxBlurRadius = 20.f;
+}
+
+
 void Director::Update( double inSeconds, float inDeltaTime )
 {
     if( !m_main )
@@ -943,6 +1427,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
     // --venue-shot <name> holds one shot (a cut name) for the whole song, to frame it.
     static const std::string forcedShot = CommandLine::GetString( "--venue-shot", "" );
     static const std::string forcedLook = CommandLine::GetString( "--venue-look", "" );
+    const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
     int index = -1;
     Plan plan;
     float held = 0.f;
@@ -968,6 +1453,20 @@ void Director::Update( double inSeconds, float inDeltaTime )
             held = static_cast<float>( inSeconds ) - m_cuts[index].Time;
             m_shotName = m_cuts[index].Name;
         }
+        // A big moment gets a hero shot: the crane going up over the crowd, a run in to the
+        // band, or over the band at the crowd, the same one for the same moment. The guitar's
+        // neck camera keeps the screen.
+        if( inSeconds >= m_bigStart && inSeconds < m_bigEnd && plan.Frame != Framing::Neck )
+        {
+            const uint32_t moment = static_cast<uint32_t>( std::max( 0.0, m_bigStart ) * 2.0 );
+            const int pick = static_cast<int>( VenueTiming::Noise( moment, 91u ) * 3.f ) % 3;
+            plan = Plan();
+            plan.Frame = pick == 0 ? Framing::Crane : pick == 1 ? Framing::Push : Framing::Behind;
+            plan.Variant = static_cast<int>( VenueTiming::Noise( moment, 92u ) * 2.f );
+            index = -4;
+            held = static_cast<float>( inSeconds - m_bigStart );
+            m_shotName = pick == 0 ? "big_moment_crane" : pick == 1 ? "big_moment_push" : "big_moment_reverse";
+        }
         // A crowd surfer takes the shot until they reach the barricade.
         if( m_surferUp )
         {
@@ -979,15 +1478,34 @@ void Director::Update( double inSeconds, float inDeltaTime )
             m_shotName = "follow_surfer";
         }
     }
+    // The shot's move runs on its own clock, a little faster when the show is worked up: started
+    // from the time since the cut, so a seek lands mid-move. (A held shot follows the song clock,
+    // so a capture at a time always frames the same.)
+    const bool cut = index != m_framedCut || m_shotName != m_framedShot;
+    // --highway-log: each cut as it's taken.
+    static const bool kLogCuts = CommandLine::Has( "--highway-log" );
+    if( cut && kLogCuts )
+    {
+        BRUH_FMT( "Venue: cut at %.2f s to %s (framing %d, variant %d)", inSeconds, m_shotName.c_str(), static_cast<int>( plan.Frame ), plan.Variant );
+    }
+    if( !forcedShot.empty() || cut )
+    {
+        m_moveTime = std::max( held, 0.f );
+    }
+    else
+    {
+        m_moveTime += dt * ( 1.f + 0.5f * m_hype );
+    }
     Vector3 eye;
     Vector3 target;
     float fov = 45.f;
     Vector3 up = Vector3::Up;
-    Frame( plan, held, eye, target, fov, &up );
+    Frame( plan, m_moveTime, eye, target, fov, &up );
+    // What the lens is focused on: the subject, before the aim is turned off it for lead room.
+    const Vector3 subject = target;
     // The highway runs up the middle of the screen: a one-member shot puts its subject off to the
     // side they're looking away from, so they look across the frame and aren't hidden under it.
     // The side is chosen on the cut and held, so a turn of the head doesn't swing the shot.
-    const bool cut = index != m_framedCut || m_shotName != m_framedShot;
     if( cut )
     {
         m_leadSide = LeadSideFor( plan, eye, target );
@@ -1020,7 +1538,6 @@ void Director::Update( double inSeconds, float inDeltaTime )
     }
     else
     {
-        const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
         m_eye = Lerp( m_eye, eye, 1.f - std::exp( -dt * 2.5f ) );
         m_target = Lerp( m_target, target, 1.f - std::exp( -dt * 4.f ) );
         m_up = up;
@@ -1030,12 +1547,59 @@ void Director::Update( double inSeconds, float inDeltaTime )
     target = m_target;
     up = m_up;
     fov = m_fov;
-    // Handheld shots sway on top of the eased framing, so the easing doesn't damp the sway.
-    if( plan.Handheld )
+    ApplyFocus( plan, eye, subject, fov, cut, dt );
+    const bool bolted = plan.Frame == Framing::Neck;
+    const float t = static_cast<float>( inSeconds );
+    // Handheld shots sway on top of the eased framing, so the easing doesn't damp the sway: a
+    // camera on a shoulder, wandering rather than swinging, tipping a little, and less steady
+    // the more the show is worked up.
+    if( plan.Handheld && !bolted )
     {
-        const float t = static_cast<float>( inSeconds );
-        eye = eye + Vector3( 0.03f * std::sin( t * 2.1f ) + 0.015f * std::sin( t * 5.3f ), 0.025f * std::sin( t * 2.7f + 1.f ), 0.02f * std::sin( t * 1.7f ) );
-        target = target + Vector3( 0.05f * std::sin( t * 1.3f + 2.f ), 0.04f * std::sin( t * 1.9f ), 0.f );
+        const float sway = 0.7f + 0.9f * m_hype;
+        eye = eye + Vector3( 0.035f * Wander( t * 0.9f, 1u ) + 0.012f * Wander( t * 2.7f, 2u ), 0.028f * Wander( t * 1.1f, 3u ) + 0.01f * Wander( t * 3.1f, 4u ), 0.02f * Wander( t * 0.7f, 5u ) ) * sway;
+        // The aim wanders with the distance: the same few degrees at any range.
+        const float reach = std::clamp( ( target - eye ).Length(), 1.f, 40.f ) * 0.012f;
+        target = target + Vector3( Wander( t * 0.8f, 6u ) + 0.35f * Wander( t * 2.3f, 7u ), 0.8f * Wander( t * 1.f, 8u ) + 0.3f * Wander( t * 2.9f, 9u ), 0.f ) * ( reach * sway );
+        const Vector3 ahead = ( target - eye ).Normalized();
+        const Vector3 across = ahead.Cross( up );
+        if( across.Length() > 1e-3f )
+        {
+            const float roll = ( 1.1f * Wander( t * 0.6f, 10u ) + 0.35f * Wander( t * 2.2f, 11u ) ) * sway * kPi / 180.f;
+            up = ( up + across.Normalized() * std::tan( roll ) ).Normalized();
+        }
+    }
+    // A jolt (Kick): a quick rattle that settles in under half a second.
+    m_kick *= std::exp( -dt * 7.5f );
+    if( m_kick > 0.01f && !bolted )
+    {
+        const float shake = 0.05f * std::min( m_kick, 2.f );
+        eye = eye + Vector3( Wander( t * 23.f, 12u ), Wander( t * 27.f, 13u ), 0.f ) * shake;
+        target = target + Vector3( Wander( t * 19.f, 14u ), Wander( t * 25.f, 15u ), 0.f ) * ( shake * 1.5f );
+    }
+    // The picture pushes in a touch on each beat when the show is up, harder on the downbeat.
+    // Not while a look steps the venue: at twelve frames a second a pulse is just a flicker.
+    if( m_hype > 0.01f && !bolted && plan.Frame != Framing::Surfer && FrameRateAt( inSeconds ) <= 0.f )
+    {
+        double beat = 0.0;
+        int measureBeat = 0;
+        VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
+        const float since = static_cast<float>( beat - std::floor( beat ) );
+        const float pulse = std::exp( -since * 5.f ) * ( measureBeat == 0 ? 1.f : 0.45f ) * m_hype;
+        fov *= 1.f - 0.012f * pulse;
+    }
+    // --venue-eye "x,y,z,tx,ty,tz[,fov]": a free camera in venue space, to inspect the set.
+    static const std::string kFreeEye = CommandLine::GetString( "--venue-eye", "" );
+    if( !kFreeEye.empty() )
+    {
+        const std::vector<std::string> parts = Split( kFreeEye, ',' );
+        if( parts.size() >= 6 )
+        {
+            eye = Vector3( std::stof( parts[0] ), std::stof( parts[1] ), std::stof( parts[2] ) );
+            target = Vector3( std::stof( parts[3] ), std::stof( parts[4] ), std::stof( parts[5] ) );
+            up = Vector3::Up;
+            fov = parts.size() >= 7 ? std::stof( parts[6] ) : 60.f;
+            m_main->GetComponent<PostProcess>().DepthOfField = false;
+        }
     }
     Transform& transform = m_main->GetComponent<Transform>();
     transform.SetPosition( VenueLayout::kVenueOrigin + eye );

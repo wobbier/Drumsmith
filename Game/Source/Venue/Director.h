@@ -28,8 +28,29 @@ public:
     void FollowSurfer( bool inUp, const Vector3& inPosition );
 
     const EntityHandle& MainCamera() const { return m_main; }
+    // The room the cameras work in (venue space): every shot stays inside it. Back is the back
+    // wall's z, Ceiling the lowest thing overhead (the rigging grid), HalfWidth the side walls,
+    // DeskZ the mixing desk the long lens shoots from. An open-air venue leaves the defaults.
+    struct Room
+    {
+        float Back = -1000.f;
+        float Ceiling = 1000.f;
+        float HalfWidth = 30.f;
+        float DeskZ = -22.f;
+        bool Outdoor = false;
+    };
+    void SetRoom( const Room& inRoom ) { m_room = inRoom; }
     // The back of the room (venue z): wide shots stay in front of it.
-    void SetRoomBack( float inZ ) { m_roomBack = inZ; }
+    void SetRoomBack( float inZ ) { m_room.Back = inZ; }
+    // How worked up the show is, 0 calm .. 1 peak (set every frame): handheld shots sway more,
+    // moves run faster and the picture pushes a touch on each beat.
+    void SetHype( float inHype ) { m_hype = inHype < 0.f ? 0.f : inHype > 1.f ? 1.f : inHype; }
+    // A jolt (pyro, a CO2 jet, a big hit): the camera shakes and settles in under half a second.
+    void Kick( float inAmount ) { if( inAmount > m_kick ) m_kick = inAmount; }
+    // The show just went up a gear: a hero shot (a crane up over the crowd, a fast push to the
+    // band, or over the band at the crowd; the same one for the same moment) takes the scheduled
+    // cut's place for inHoldSeconds. The neck camera and the crowd surfer's shot keep the screen.
+    void OnBigMoment( double inSeconds, float inHoldSeconds );
     const EntityHandle& FeedCamera() const { return m_feed; }
     const EntityHandle& ProgramCamera() const { return m_program; }
     // The shot the main camera holds now ("coop_g_near"), for logs and tests.
@@ -40,6 +61,9 @@ public:
     float FrameRateAt( double inSeconds ) const;
     // The venue's step while stepping (-1 when not): the film grain holds still between steps.
     void SetGrainFrame( int inFrame );
+    // Screens' feeds re-render about as often as the venue steps (every other frame when it runs smooth):
+    // a stepped venue shows the same picture in between. inFrameSeconds is the game's frame time.
+    void SetFeedStepRate( float inStepRate, float inFrameSeconds );
     size_t CutCount() const { return m_cuts.size(); }
 
     // The side screens' close-ups, and the LED wall's program feed (what the main camera shows).
@@ -53,7 +77,15 @@ public:
 private:
     // Neck: mounted on the subject's headstock, looking down the frets (guitar solos).
     // Surfer: from the photo pit, following the crowd surfer (FollowSurfer).
-    enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck, Surfer };
+    // Crane: a jib from the pit up over the crowd's heads (or back down). Dolly: a track along
+    // the pit rail, low, looking up at the front line. Drone: flown in from the back of the house.
+    // Orbit: high and slow round the front of the stage. LongLens: from the mixing desk, the
+    // crowd's heads in the foreground. CrowdPov: among the crowd, a few rows back. Profile: from
+    // the wings across the stage. DrumTop / DrumLow: straight down on the kit, and low through
+    // the cymbals. LowHero: from the deck by a member's monitor, looking up. Push: a fast run in
+    // from over the crowd (big moments).
+    enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck, Surfer,
+        Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push };
 
     struct Plan
     {
@@ -61,6 +93,7 @@ private:
         Framing Frame = Framing::Far;
         bool Handheld = false;
         bool Static = false;
+        // Bit 0 the side, bit 1 an alternate take, bits 2-3 the treatment (Vary).
         int Variant = 0;
     };
 
@@ -84,12 +117,21 @@ private:
         int ColorBits = 0;
         float Dither = 0.f;
         float Lut = 0.f;          // the concert LUT's contribution
-        float Grain = 0.f;        // film grain
+        float Grain = 0.03f;      // film grain: a touch on every look
         float FrameRate = 0.f;    // venue steps a second (0: smooth); not eased
     };
 
     Plan PlanFor( const std::string& inName, int inIndex ) const;
     Plan PlanAuto( const std::string& inConstraints, int inIndex, float inTime ) const;
+    // Gives a chart's plain shot one of its treatments (a wide becomes a crane, a drone or the
+    // long lens; a near shot a low hero angle...), by the plan's Variant.
+    static void Vary( Plan& ioPlan );
+    static const char* FramingName( Framing inFraming );
+    // Keeps a camera in the room, and out of the audience unless the shot belongs there.
+    void Contain( Vector3& ioEye, bool inAmongCrowd ) const;
+    // Depth of field for the shot: the background blur it wants (pixels at 1080p; 0: everything sharp).
+    static float BlurFor( const Plan& inPlan );
+    void ApplyFocus( const Plan& inPlan, const Vector3& inEye, const Vector3& inSubject, float inFov, bool inCut, float inDeltaTime );
     void BuildFallbackCuts( const VenueData& inVenue, float inSongLength );
     // Charts without looks: the concert look through intros, bridges, breakdowns and quiet parts.
     void BuildFallbackLooks( const VenueData& inVenue );
@@ -114,7 +156,7 @@ private:
     std::vector<TimedCueData> m_looks;
     std::vector<BeatData> m_beats;
     float m_bpm = 120.f;
-    float m_roomBack = -1000.f;
+    Room m_room;
     std::string m_shotName;
     std::string m_lookName;
     Grade m_grade;
@@ -133,10 +175,21 @@ private:
     Vector3 m_eye;
     Vector3 m_target;
     Vector3 m_up = Vector3::Up;     // rolled only by the neck camera
+    float m_closeExposure = 0.f;   // stops taken off for a close subject (ApplyFocus)
     float m_fov = 45.f;
     int m_framedCut = -2;
     std::string m_framedShot;
     float m_leadSide = 0.f;    // this shot's lead room (LeadSideFor), chosen on the cut
+    // How long the shot's move has run: the time since the cut, running faster with the hype.
+    float m_moveTime = 0.f;
+    float m_hype = 0.f;
+    float m_kick = 0.f;        // a jolt, decaying
+    // A big moment's hero shot (OnBigMoment), from m_bigStart until m_bigEnd.
+    double m_bigStart = -1000.0;
+    double m_bigEnd = -1000.0;
+    // The lens: the focus distance and background blur, eased; snapped on a cut.
+    float m_focus = 8.f;
+    float m_blur = 0.f;
     // The crowd surfer being followed (FollowSurfer); the pit camera's side is chosen as they go up.
     bool m_surferUp = false;
     Vector3 m_surferPosition;
