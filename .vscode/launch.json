@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Havana (Editor_Debug, Linux)",
+      "name": "Havana Editor (Debug, Linux)",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/.build/Editor_Debug/Havana",
@@ -30,10 +30,81 @@
         }
       ],
       "preLaunchTask": "build-havana-editor-debug",
-      "miDebuggerArgs": "--project \"${workspaceFolder}\""
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Havana Editor"
+      }
     },
     {
-      "name": "Havana (Debug, Linux)",
+      "name": "Havana Editor (Release, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Editor_Release/Havana",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-havana-editor-release",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Havana Editor"
+      }
+    },
+    {
+      "name": "Havana Editor (Retail, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Editor_Retail/Havana",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-havana-editor-retail",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Havana Editor"
+      }
+    },
+    {
+      "name": "Game (Debug, Linux)",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/.build/Game_linux_Debug/Game_EntryPoint_x64",
@@ -61,7 +132,180 @@
         }
       ],
       "preLaunchTask": "build-havana-game-debug",
-      "miDebuggerArgs": "--project \"${workspaceFolder}\""
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Game"
+      }
+    },
+    {
+      "name": "Game (Release, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Game_linux_Release/Game_EntryPoint_x64",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-game-release",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Game"
+      }
+    },
+    {
+      "name": "Game (Retail, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Game_linux_Retail/Game_EntryPoint_x64",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-game-retail",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Game"
+      }
+    },
+    {
+      "name": "Server (Debug, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Server_linux_Debug/Game_EntryPoint_x64",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-server-debug",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Server"
+      }
+    },
+    {
+      "name": "Server (Release, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Server_linux_Release/Game_EntryPoint_x64",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-server-release",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Server"
+      }
+    },
+    {
+      "name": "Server (Retail, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Server_linux_Retail/Game_EntryPoint_x64",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-server-retail",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Server"
+      }
     }
   ]
 }
