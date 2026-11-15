@@ -83,9 +83,10 @@ private:
     // crowd's heads in the foreground. CrowdPov: among the crowd, a few rows back. Profile: from
     // the wings across the stage. DrumTop / DrumLow: straight down on the kit, and low through
     // the cymbals. LowHero: from the deck by a member's monitor, looking up. Push: a fast run in
-    // from over the crowd (big moments).
+    // from over the crowd (big moments). PitRun: an operator at a half sprint down the photo pit,
+    // camera on the shoulder, shooting along the front row of the crowd.
     enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck, Surfer,
-        Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push };
+        Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push, PitRun };
 
     struct Plan
     {
@@ -131,10 +132,14 @@ private:
     void Contain( Vector3& ioEye, bool inAmongCrowd ) const;
     // Depth of field for the shot: the background blur it wants (pixels at 1080p; 0: everything sharp).
     static float BlurFor( const Plan& inPlan );
+    // The fisheye the shot is seen through (PostProcess::LensDistortion; 0: a straight lens): the
+    // small cameras, the one bolted to the guitar, the one run down the pit and the one held up in the crowd.
+    static float LensFor( const Plan& inPlan );
     void ApplyFocus( const Plan& inPlan, const Vector3& inEye, const Vector3& inSubject, float inFov, bool inCut, float inDeltaTime );
     void BuildFallbackCuts( const VenueData& inVenue, float inSongLength );
     // Charts without looks: the concert look through intros, bridges, breakdowns and quiet parts.
     void BuildFallbackLooks( const VenueData& inVenue );
+    void FillAutoCuts( const VenueData& inVenue, float inSongLength );
     void AddNeckShots( const VenueData& inVenue );
     // outUp is world up, except for the neck camera, which rolls with the guitar.
     void Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3& outTarget, float& outFov, Vector3* outUp = nullptr ) const;

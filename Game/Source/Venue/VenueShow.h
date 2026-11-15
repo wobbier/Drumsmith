@@ -43,6 +43,13 @@ public:
     void SetPerformance( float inPerformance ) { m_performance = inPerformance; }
     void OnStreak( int inCombo );
 
+    // What reaches the screen: the highway over the venue (a play), or one of them alone (the
+    // Track Editor's preview: a charter watches the notes, a venue author the show). Kept across
+    // Build and Clear.
+    enum class Presentation : int { Both = 0, HighwayOnly, VenueOnly };
+    void SetPresentation( Presentation inPresentation );
+    Presentation GetPresentation() const { return m_presentation; }
+
     bool IsActive() const { return static_cast<bool>( m_root ); }
     const Director& GetDirector() const { return m_director; }
 
@@ -102,6 +109,12 @@ private:
     // The chart's own peaks, found at build: when each chorus or intense passage starts.
     std::vector<float> m_peaks;
     float m_finale = 1e9f;         // the last chorus, or the big rock ending
+
+    // Puts m_presentation on the cameras.
+    void ApplyPresentation();
+    Presentation m_presentation = Presentation::Both;
+    // The highway's camera has the screen to itself (Presentation::HighwayOnly).
+    bool m_highwayAlone = false;
 
     // The highway camera as it was.
     bool m_savedHighway = false;

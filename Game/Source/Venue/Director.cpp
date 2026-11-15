@@ -12,6 +12,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 #include <sstream>
 
 namespace
@@ -149,7 +150,19 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
     {
         BuildFallbackCuts( inVenue, inSongLength );
     }
+    else
+    {
+        FillAutoCuts( inVenue, inSongLength );
+    }
     AddNeckShots( inVenue );
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        // The cut list as it will play, chart cuts and the director's own.
+        for( const Cut& cut : m_cuts )
+        {
+            BRUH_FMT( "Venue: cut list %.2f s %s (framing %d)", cut.Time, cut.Name.c_str(), static_cast<int>( cut.Shot.Frame ) );
+        }
+    }
     m_looks = mv && !inVenue.m_mvPostFx.empty() ? inVenue.m_mvPostFx : inVenue.m_postFx;
     if( m_looks.empty() )
     {
@@ -269,6 +282,7 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
         else if( kind == "reverse" ) plan.Frame = Framing::Behind;
         else if( kind == "hero" ) { plan.Frame = Framing::LowHero; if( plan.Subjects.empty() ) plan.Subjects = { VenueData::Vocals }; }
         else if( kind == "push" ) plan.Frame = Framing::Push;
+        else if( kind == "run" ) { plan.Frame = Framing::PitRun; plan.Handheld = true; }
         return plan;
     }
     if( StartsWith( inName, "auto" ) )
@@ -463,6 +477,11 @@ void Director::Vary( Plan& ioPlan )
             ioPlan.Frame = Framing::CrowdPov;
             ioPlan.Handheld = true;
         }
+        else if( ioPlan.Subjects.empty() && !ioPlan.Handheld && treatment == 1 )
+        {
+            ioPlan.Frame = Framing::PitRun;
+            ioPlan.Handheld = true;
+        }
         break;
     case Framing::Overhead:
         if( !ioPlan.Handheld && ( treatment & 1 ) != 0 ) ioPlan.Frame = Framing::Orbit;
@@ -499,6 +518,7 @@ const char* Director::FramingName( Framing inFraming )
     case Framing::DrumLow: return "drumlow";
     case Framing::LowHero: return "hero";
     case Framing::Push: return "push";
+    case Framing::PitRun: return "run";
     }
     return "";
 }
@@ -639,6 +659,12 @@ void Director::BuildFallbackCuts( const VenueData& inVenue, float inSongLength )
             const Framing groups[] = { Framing::Dolly, Framing::Profile, Framing::Behind, Framing::Near, energy == 2 ? Framing::Crowd : Framing::LongLens, energy == 2 ? Framing::CrowdPov : Framing::Orbit };
             plan.Frame = groups[static_cast<int>( roll * 6.f ) % 6];
             if( plan.Frame == Framing::CrowdPov ) plan.Handheld = true;
+            // The room at full tilt: half the time it's the operator running the pit.
+            if( plan.Frame == Framing::Crowd && ( plan.Variant & 4 ) != 0 )
+            {
+                plan.Frame = Framing::PitRun;
+                plan.Handheld = true;
+            }
         }
         else
         {
@@ -694,6 +720,60 @@ void Director::BuildFallbackCuts( const VenueData& inVenue, float inSongLength )
         ++count;
         ++cutsInSection;
         beat = end;
+    }
+}
+
+
+void Director::FillAutoCuts( const VenueData& inVenue, float inSongLength )
+{
+    // A chart cut is one shot, held until the next cut. An "auto" cut held a long while (one
+    // dropped in the editor with nothing after it) hands the stretch to the director instead:
+    // its own shot first, then the cuts a chart without cameras would have got there. A
+    // constrained one ("auto only_close") keeps its constraints on every cut in the stretch.
+    const float kLongHold = 10.f;
+    const auto handsOver = [&]( const std::vector<Cut>& inCuts, size_t inCut ) {
+        const float hold = inCut + 1 < inCuts.size() ? inCuts[inCut + 1].Time - inCuts[inCut].Time
+            : inSongLength > 0.f ? inSongLength - inCuts[inCut].Time : kLongHold * 2.f;
+        return StartsWith( inCuts[inCut].Name, "auto" ) && hold > kLongHold;
+    };
+    bool any = false;
+    for( size_t i = 0; i < m_cuts.size() && !any; ++i )
+    {
+        any = handsOver( m_cuts, i );
+    }
+    if( !any )
+    {
+        return;
+    }
+    std::vector<Cut> chart;
+    chart.swap( m_cuts );
+    BuildFallbackCuts( inVenue, inSongLength );
+    std::vector<Cut> crew;
+    crew.swap( m_cuts );
+    for( size_t i = 0; i < chart.size(); ++i )
+    {
+        m_cuts.push_back( chart[i] );
+        if( !handsOver( chart, i ) )
+        {
+            continue;
+        }
+        const float from = chart[i].Time + 2.f;
+        const float to = i + 1 < chart.size() ? chart[i + 1].Time - 1.f : std::numeric_limits<float>::max();
+        const bool constrained = chart[i].Name.find_first_not_of( ' ', 4 ) != std::string::npos;
+        for( size_t j = 0; j < crew.size(); ++j )
+        {
+            if( crew[j].Time < from || crew[j].Time > to )
+            {
+                continue;
+            }
+            Cut fill = crew[j];
+            if( constrained )
+            {
+                fill.Name = chart[i].Name;
+                fill.Shot = PlanAuto( chart[i].Name.substr( 4 ), 1000 + static_cast<int>( j ), fill.Time );
+            }
+            m_cuts.push_back( fill );
+        }
     }
 }
 
@@ -1082,6 +1162,28 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         outFov = 56.f;
         break;
     }
+    case Framing::PitRun:
+    {
+        // An operator at a half sprint down the photo pit with the camera on their shoulder,
+        // like a reality show's crew chasing someone backstage: the lens ahead of them and turned
+        // into the front row, faces going by at arm's length. At the end of the pit they slow,
+        // swing round across the crowd and come back. The cut lands on them well into the run.
+        constexpr float kHalfRun = 7.f;     // short of the tripods parked at the pit's ends
+        constexpr float kTopSpeed = 2.7f;   // metres a second
+        // A rounded triangle wave, not a sine: they hold close to the top speed across the whole
+        // front of the crowd (over 84% of it for the middle four fifths of the pit) and only brake
+        // in the last metre or so. The cut finds them at speed, a second and a half short of centre.
+        constexpr float kSharp = 0.95f;     // 0: a sine's long slowing .. 1: an instant turn
+        const float span = std::asin( kSharp );
+        const float phase = -0.8f + held * kTopSpeed * span / ( kSharp * kHalfRun );
+        const float swing = kSharp * std::sin( phase );
+        const float x = side * kHalfRun * std::asin( swing ) / span;
+        const float pace = side * std::cos( phase ) / std::sqrt( 1.f - swing * swing );    // of the top speed, signed along the pit
+        outEye = Vector3( x, 1.55f, VenueLayout::kBarricadeZ + 0.5f );
+        outTarget = Vector3( x + pace * 1.6f, 1.6f, VenueLayout::kCrowdFrontZ - 2.2f );
+        outFov = 66.f;
+        break;
+    }
     }
     Contain( outEye, amongCrowd );
     // The generic move: an orbit and a push in.
@@ -1376,6 +1478,18 @@ float Director::BlurFor( const Plan& inPlan )
 }
 
 
+float Director::LensFor( const Plan& inPlan )
+{
+    switch( inPlan.Frame )
+    {
+    case Framing::PitRun: return 0.8f;
+    case Framing::Neck: return 0.6f;
+    case Framing::CrowdPov: return 0.8f;
+    default: return 0.f;
+    }
+}
+
+
 void Director::ApplyFocus( const Plan& inPlan, const Vector3& inEye, const Vector3& inSubject, float inFov, bool inCut, float inDeltaTime )
 {
     if( !m_main || !m_main->HasComponent<PostProcess>() )
@@ -1501,6 +1615,19 @@ void Director::Update( double inSeconds, float inDeltaTime )
     float fov = 45.f;
     Vector3 up = Vector3::Up;
     Frame( plan, m_moveTime, eye, target, fov, &up );
+    // A fisheye swells the middle of the picture: the shot is taken that much wider, so what it
+    // framed is still what's in the middle. The lens changes with the cut.
+    const float lens = LensFor( plan );
+    if( lens > 0.f )
+    {
+        fov = 2.f * std::atan( std::tan( fov * 0.5f * kPi / 180.f ) * Moonlight::PostProcessSettings::LensDistortionZoom( lens ) ) * 180.f / kPi;
+    }
+    if( m_main->HasComponent<PostProcess>() )
+    {
+        PostProcess& post = m_main->GetComponent<PostProcess>();
+        post.LensDistortion = lens;
+        post.LensFringe = lens > 0.f ? 0.6f : 0.f;
+    }
     // What the lens is focused on: the subject, before the aim is turned off it for lead room.
     const Vector3 subject = target;
     // The highway runs up the middle of the screen: a one-member shot puts its subject off to the
@@ -1566,6 +1693,20 @@ void Director::Update( double inSeconds, float inDeltaTime )
         {
             const float roll = ( 1.1f * Wander( t * 0.6f, 10u ) + 0.35f * Wander( t * 2.2f, 11u ) ) * sway * kPi / 180.f;
             up = ( up + across.Normalized() * std::tan( roll ) ).Normalized();
+        }
+    }
+    // The running operator's footfalls, by the ground covered (so none while they turn): the
+    // camera drops and jars on each step, rocks from foot to foot and tips with it.
+    if( plan.Frame == Framing::PitRun )
+    {
+        const float step = eye.x / 1.05f * kPi;
+        const float fall = std::fabs( std::sin( step ) );
+        eye = eye + Vector3( 0.f, 0.07f * fall - 0.035f, 0.035f * std::sin( step ) );
+        target = target + Vector3( 0.f, 0.16f * std::sin( step * 2.f + 0.9f ) + 0.07f * std::sin( step * 4.f ), 0.f );
+        const Vector3 across = ( target - eye ).Normalized().Cross( up );
+        if( across.Length() > 1e-3f )
+        {
+            up = ( up + across.Normalized() * std::tan( 2.2f * std::sin( step + 0.4f ) * kPi / 180.f ) ).Normalized();
         }
     }
     // A jolt (Kick): a quick rattle that settles in under half a second.

@@ -268,29 +268,74 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     m_highwayCamera = inHighwayCamera;
     if( m_highwayCamera && m_highwayCamera->HasComponent<Camera>() )
     {
-        Camera& camera = m_highwayCamera->GetComponent<Camera>();
-        camera.Overlay = true;
-        camera.OverlayFadeStart = kHighwayFadeStart;
-        camera.OverlayFadeEnd = kHighwayFadeEnd;
-        // The dark board lets the stage show through; notes, lines and pads stay solid.
-        camera.OverlayDarkOpacity = kHighwayBoardOpacity;
-        if( CommandLine::Has( "--venue-only" ) )
-        {
-            // Diagnostics: fade the whole highway out, to frame the venue.
-            camera.OverlayFadeStart = 0.f;
-            camera.OverlayFadeEnd = 0.001f;
-        }
         if( m_highwayCamera->HasComponent<PostProcess>() )
         {
-            PostProcess& post = m_highwayCamera->GetComponent<PostProcess>();
-            m_highwayFog = post.Fog;
-            post.Fog = false;
+            m_highwayFog = m_highwayCamera->GetComponent<PostProcess>().Fog;
         }
         m_savedHighway = true;
+        m_highwayAlone = false;
+        ApplyPresentation();
     }
     if( CommandLine::Has( "--highway-log" ) )
     {
         BRUH_FMT( "Venue: %d camera cuts, %d looks, crowd of %d", static_cast<int>( m_director.CutCount() ), static_cast<int>( m_venue.m_postFx.size() ), static_cast<int>( m_crowd.Size() ) );
+    }
+}
+
+
+void VenueShow::SetPresentation( Presentation inPresentation )
+{
+    if( m_presentation != inPresentation )
+    {
+        m_presentation = inPresentation;
+        ApplyPresentation();
+    }
+}
+
+
+void VenueShow::ApplyPresentation()
+{
+    if( !m_savedHighway || !m_highwayCamera || !m_highwayCamera->HasComponent<Camera>() )
+    {
+        return;
+    }
+    Camera& camera = m_highwayCamera->GetComponent<Camera>();
+    PostProcess* post = m_highwayCamera->HasComponent<PostProcess>() ? &m_highwayCamera->GetComponent<PostProcess>() : nullptr;
+    if( m_presentation == Presentation::HighwayOnly )
+    {
+        // The highway's camera takes the screen back, as it has it without a venue.
+        camera.Overlay = false;
+        camera.OverlayDarkOpacity = 1.f;
+        camera.SetCurrent();
+        if( post )
+        {
+            post->Fog = m_highwayFog;
+        }
+        m_highwayAlone = true;
+        return;
+    }
+    camera.Overlay = true;
+    camera.OverlayFadeStart = kHighwayFadeStart;
+    camera.OverlayFadeEnd = kHighwayFadeEnd;
+    // The dark board lets the stage show through; notes, lines and pads stay solid.
+    camera.OverlayDarkOpacity = kHighwayBoardOpacity;
+    if( m_presentation == Presentation::VenueOnly || CommandLine::Has( "--venue-only" ) )
+    {
+        // Fade the whole highway out, to frame the venue.
+        camera.OverlayFadeStart = 0.f;
+        camera.OverlayFadeEnd = 0.001f;
+    }
+    if( post )
+    {
+        post->Fog = false;
+    }
+    if( m_highwayAlone )
+    {
+        m_highwayAlone = false;
+        if( const EntityHandle& main = m_director.MainCamera() )
+        {
+            main->GetComponent<Camera>().SetCurrent();
+        }
     }
 }
 
@@ -664,6 +709,11 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
 {
     if( !m_root )
     {
+        return;
+    }
+    if( m_presentation == Presentation::HighwayOnly )
+    {
+        // Nothing of the venue is on screen.
         return;
     }
     const auto started = std::chrono::steady_clock::now();
