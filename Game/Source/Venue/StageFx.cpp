@@ -2,6 +2,7 @@
 #include "Venue/VenueKit.h"
 #include "Venue/VenueLayout.h"
 #include "Venue/VenueTiming.h"
+#include "Core/CommandLine.h"
 #include "Components/Effects/ParticleSystem.h"
 #include "Components/Lighting/Light.h"
 #include "Components/Transform.h"
@@ -34,6 +35,25 @@ namespace
     ParticleSystem* SystemOf( const EntityHandle& inEmitter )
     {
         return inEmitter && inEmitter->HasComponent<ParticleSystem>() ? &inEmitter->GetComponent<ParticleSystem>() : nullptr;
+    }
+
+
+    // Where a system's particles are simulated. The additive ones (flames, embers, sparks,
+    // firework stars) run on the GPU where the device has compute; elsewhere the engine silently
+    // keeps them on the CPU. The alpha-blended ones (CO2, dry ice, dust, confetti) stay on the CPU:
+    // the GPU sorts each alpha system for every camera, and with pools this small the sort's
+    // dispatches cost more than the CPU simulation they save (Docs/Venue-and-Band.md).
+    // --stagefx-cpu forces everything onto the CPU, --stagefx-gpu-alpha moves the alpha ones to
+    // the GPU too (--stagefx-sort-every keeps the feeds sorting for themselves): A/B stills, timings.
+    void ChooseSimulation( ParticleSystem& inSystem )
+    {
+        static const bool forceCpu = CommandLine::Has( "--stagefx-cpu" );
+        static const bool gpuAlpha = CommandLine::Has( "--stagefx-gpu-alpha" );
+        static const bool sortEvery = CommandLine::Has( "--stagefx-sort-every" );
+        const bool additive = inSystem.Blend == Moonlight::ParticleBlend::Additive;
+        inSystem.Simulation = !forceCpu && ( additive || gpuAlpha ) ? ParticleSimulation::GPU : ParticleSimulation::CPU;
+        // The screen-feed cameras reuse the main camera's alpha order rather than sorting for themselves.
+        inSystem.GpuSortCameras = sortEvery ? Moonlight::ParticleSortCameras::Every : Moonlight::ParticleSortCameras::MainCamera;
     }
 
 
@@ -110,6 +130,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
             fire->NoiseFrequency = 1.5f;
             fire->Blend = Moonlight::ParticleBlend::Additive;
             fire->SoftParticleDistance = 0.3f;
+            ChooseSimulation( *fire );
         }
         pot.Embers = Emitter( inKit, inRoot, "Embers", pot.Base + Vector3( 0.f, 1.2f, 0.f ), up );
         if( ParticleSystem* embers = SystemOf( pot.Embers ) )
@@ -133,6 +154,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
             embers->NoiseFrequency = 0.8f;
             embers->Blend = Moonlight::ParticleBlend::Additive;
             embers->SoftParticleDistance = 0.05f;
+            ChooseSimulation( *embers );
         }
         pot.Light = inKit.Group( "PyroLight", &inRoot, pot.Base + Vector3( 0.f, 1.5f, -0.4f ) );
         if( pot.Light )
@@ -177,6 +199,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
             plume->Blend = Moonlight::ParticleBlend::Alpha;
             plume->Lit = true;
             plume->SoftParticleDistance = 0.6f;
+            ChooseSimulation( *plume );
         }
         m_jets.push_back( jet );
     }
@@ -209,6 +232,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
             sparks->Alignment = Moonlight::ParticleAlignment::Stretched;
             sparks->StretchFactor = 0.05f;
             sparks->SoftParticleDistance = 0.05f;
+            ChooseSimulation( *sparks );
         }
         m_sparks.push_back( fountain );
     }
@@ -260,6 +284,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
             paper->Texture = Path( kConfettiTexture );
             paper->Blend = Moonlight::ParticleBlend::Alpha;
             paper->SoftParticleDistance = 0.f;
+            ChooseSimulation( *paper );
         }
         m_confetti.push_back( emitter );
     }
@@ -290,6 +315,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
         fog->Blend = Moonlight::ParticleBlend::Alpha;
         fog->Lit = true;
         fog->SoftParticleDistance = 0.9f;
+        ChooseSimulation( *fog );
     }
 
     // Dust: specks hanging in the air over the stage, dark until a beam finds them.
@@ -317,6 +343,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
         dust->Blend = Moonlight::ParticleBlend::Alpha;
         dust->Lit = true;
         dust->SoftParticleDistance = 0.1f;
+        ChooseSimulation( *dust );
         dust->EmissionRate = 70.f;
     }
 
@@ -358,6 +385,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
                 stars->Alignment = Moonlight::ParticleAlignment::Stretched;
                 stars->StretchFactor = 0.045f;
                 stars->SoftParticleDistance = 0.f;
+                ChooseSimulation( *stars );
             }
             m_shells.push_back( shell );
         }
