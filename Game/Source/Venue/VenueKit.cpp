@@ -189,7 +189,7 @@ EntityHandle VenueKit::Part( const char* inPath, Transform* inParent, const char
         if( atlas )
         {
             material->SetTexture( Moonlight::TextureType::Diffuse, atlas );
-            material->Tiling = Vector2( 1.f / static_cast<float>( People::kSkinColumns ), 1.f / static_cast<float>( People::kSkinRows ) );
+            material->SetTiling( Vector2( 1.f / static_cast<float>( People::kSkinColumns ), 1.f / static_cast<float>( People::kSkinRows ) ) );
             mesh.InstanceData = glm::vec3( static_cast<float>( tile % People::kSkinColumns ), static_cast<float>( tile / People::kSkinColumns ), 0.f );
         }
         else if( SharedPtr<Moonlight::Texture> skin = inSkin.empty() ? nullptr : SkinTexture( inSkin ); skin && material )
@@ -242,7 +242,7 @@ void VenueKit::SetColor( const EntityHandle& inPiece, const Vector3& inColor, co
 {
     if( StandardMaterial* material = MaterialOf( inPiece ) )
     {
-        material->DiffuseColor = inColor;
-        material->EmissiveColor = inEmissive;
+        material->SetDiffuseColor( inColor );
+        material->SetEmissiveColor( inEmissive );
     }
 }

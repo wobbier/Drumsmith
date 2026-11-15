@@ -212,14 +212,14 @@ bool Performer::Bind( Model& inModel )
         {
             continue;
         }
-        mesh.MeshMaterial->DiffuseColor = Vector3( 1.f, 1.f, 1.f );
+        mesh.MeshMaterial->SetDiffuseColor( Vector3( 1.f, 1.f, 1.f ) );
         if( texture )
         {
             mesh.MeshMaterial->SetTexture( Moonlight::TextureType::Diffuse, texture );
         }
         if( StandardMaterial* material = dynamic_cast<StandardMaterial*>( mesh.MeshMaterial.get() ) )
         {
-            material->Roughness = 0.8f;
+            material->SetRoughness( 0.8f );
         }
     }
     m_bound = true;

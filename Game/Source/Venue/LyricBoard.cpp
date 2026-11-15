@@ -89,9 +89,9 @@ void LyricBoard::Build( VenueKit& inKit, Transform& inRoot, const Vector3& inCen
             if( StandardMaterial* material = VenueKit::MaterialOf( glyph ) )
             {
                 material->SetTexture( Moonlight::TextureType::Emissive, atlas );
-                material->EmissiveIntensity = kGlow;
-                material->Roughness = 1.f;
-                material->Metallic = 0.f;
+                material->SetEmissiveIntensity( kGlow );
+                material->SetRoughness( 1.f );
+                material->SetMetallic( 0.f );
             }
             row.Glyphs.push_back( glyph );
         }
@@ -162,8 +162,8 @@ void LyricBoard::Show( Row& ioRow, const std::string& inText, size_t inLit )
             if( material )
             {
                 // The stood-up plane's v runs up the atlas: flip the cell vertically.
-                material->Tiling = Vector2( g.Width, -g.Height );
-                material->Offset = Vector2( g.U, g.V + g.Height );
+                material->SetTiling( Vector2( g.Width, -g.Height ) );
+                material->SetOffset( Vector2( g.U, g.V + g.Height ) );
             }
         }
         else if( !shown && relayout )
@@ -172,7 +172,7 @@ void LyricBoard::Show( Row& ioRow, const std::string& inText, size_t inLit )
         }
         if( material )
         {
-            material->EmissiveColor = !shown ? Vector3( 0.f, 0.f, 0.f ) : ioRow.Next ? kPreview : i < inLit ? kSung : kUnsung;
+            material->SetEmissiveColor( !shown ? Vector3( 0.f, 0.f, 0.f ) : ioRow.Next ? kPreview : i < inLit ? kSung : kUnsung );
         }
     }
 }

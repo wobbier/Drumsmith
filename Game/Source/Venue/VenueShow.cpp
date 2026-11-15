@@ -355,11 +355,11 @@ void VenueShow::BuildScreen( Transform& inRoot, const Vector3& inCentre, const V
     if( StandardMaterial* material = VenueKit::MaterialOf( screen ) )
     {
         material->SetTexture( Moonlight::TextureType::Emissive, ResourceCache::GetInstance().Get<Moonlight::Texture>( Path( inTexture ) ) );
-        material->EmissiveColor = Vector3( 1.f, 1.f, 1.f );
-        material->EmissiveIntensity = 2.2f;
-        material->Roughness = 0.9f;
-        material->Tiling = Vector2( 1.f, -1.f );
-        material->Offset = Vector2( 0.f, 1.f );
+        material->SetEmissiveColor( Vector3( 1.f, 1.f, 1.f ) );
+        material->SetEmissiveIntensity( 2.2f );
+        material->SetRoughness( 0.9f );
+        material->SetTiling( Vector2( 1.f, -1.f ) );
+        material->SetOffset( Vector2( 0.f, 1.f ) );
     }
 }
 

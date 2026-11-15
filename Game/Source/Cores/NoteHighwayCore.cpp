@@ -737,10 +737,10 @@ void NoteHighwayCore::Tint( const EntityHandle& inTarget, const Vector3& inColor
     Mesh& mesh = inTarget->GetComponent<Mesh>();
     if( mesh.MeshReferece && mesh.MeshMaterial )
     {
-        mesh.MeshMaterial->DiffuseColor = inColor;
+        mesh.MeshMaterial->SetDiffuseColor( inColor );
         if( auto* standard = dynamic_cast<StandardMaterial*>( mesh.MeshMaterial.get() ) )
         {
-            standard->EmissiveColor = inEmissive;
+            standard->SetEmissiveColor( inEmissive );
         }
         // A newer colour wins over one still waiting.
         m_pendingTints.erase( std::remove_if( m_pendingTints.begin(), m_pendingTints.end(), [&inTarget]( const PendingTint& t ) { return t.Target == inTarget; } ), m_pendingTints.end() );
