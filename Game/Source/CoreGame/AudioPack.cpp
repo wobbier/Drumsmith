@@ -26,11 +26,13 @@ namespace
 
 AudioPack::AudioPack( TrackData& inTrackData )
 {
-    m_trackData = &inTrackData;
+    // The stems are resolved here and nothing keeps a pointer to inTrackData: it lives in the
+    // TrackDatabase vector, which a reload (e.g. after a DLC download) reallocates under a live pack.
+    const std::string sourceDir = Path( inTrackData.m_trackSourcePath ).GetDirectoryString();
     // Create the channel group for these stems:
     FMOD::System* system = GetEngine().AudioThread->GetSystem();
     system->createChannelGroup(
-        m_trackData->m_trackName.c_str(),
+        inTrackData.m_trackName.c_str(),
         &m_syncGroup
     );
 
@@ -41,18 +43,18 @@ AudioPack::AudioPack( TrackData& inTrackData )
     }
 
     // I should track all the needed files in the track data
-    LoadStem( m_trackData->m_trackFileName.c_str() );
-    LoadStem( "crowd.ogg" );
-    LoadStem( "drums.ogg", true );
-    LoadStem( "drums_1.ogg", true );
-    LoadStem( "drums_2.ogg", true );
-    LoadStem( "drums_3.ogg", true );
-    LoadStem( "drums_4.ogg", true );
-    LoadStem( "guitar.ogg" );
-    LoadStem( "vocals.ogg" );
-    LoadStem( "rhythm.ogg" );
-    LoadStem( "keys.ogg" );
-    //GetEngine().AudioThread->GetSystem()->createChannelGroup( m_trackData->m_trackName.c_str(), &syncGroup );
+    LoadStem( sourceDir, inTrackData.m_trackFileName.c_str() );
+    LoadStem( sourceDir, "crowd.ogg" );
+    LoadStem( sourceDir, "drums.ogg", true );
+    LoadStem( sourceDir, "drums_1.ogg", true );
+    LoadStem( sourceDir, "drums_2.ogg", true );
+    LoadStem( sourceDir, "drums_3.ogg", true );
+    LoadStem( sourceDir, "drums_4.ogg", true );
+    LoadStem( sourceDir, "guitar.ogg" );
+    LoadStem( sourceDir, "vocals.ogg" );
+    LoadStem( sourceDir, "rhythm.ogg" );
+    LoadStem( sourceDir, "keys.ogg" );
+    //GetEngine().AudioThread->GetSystem()->createChannelGroup( inTrackData.m_trackName.c_str(), &syncGroup );
     //
     //for (auto& song : m_sounds)
     //{
@@ -82,12 +84,10 @@ AudioPack& AudioPack::operator=( AudioPack&& other ) noexcept
 
     Reset();
 
-    m_trackData = other.m_trackData;
     m_sounds = std::move( other.m_sounds );
     m_drumTracks = std::move( other.m_drumTracks );
     m_syncGroup = other.m_syncGroup;
 
-    other.m_trackData = nullptr;
     other.m_syncGroup = nullptr;
 
     return *this;
@@ -106,7 +106,6 @@ void AudioPack::Reset()
         m_syncGroup = nullptr;
     }
 
-    m_trackData = nullptr;
 }
 
 
@@ -435,12 +434,9 @@ bool AudioPack::IsPlaying() const
 }
 
 
-bool AudioPack::LoadStem( const char* inFileName, bool isDrumTrack )
+bool AudioPack::LoadStem( const std::string& inDirectory, const char* inFileName, bool isDrumTrack )
 {
-    Path drumsPath(
-        Path( m_trackData->m_trackSourcePath ).GetDirectoryString() +
-        inFileName
-    );
+    Path drumsPath( inDirectory + inFileName );
 
     if( !drumsPath.Exists )
     {

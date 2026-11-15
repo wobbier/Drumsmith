@@ -40,7 +40,10 @@ public:
     bool CanPlayNextTrack() const;
     void Resume();
 
-    TrackData* m_currentTrack = nullptr;
+    // The playing track, looked up by index each call: the database only appends, but an append
+    // (a finished DLC download) reallocates the vector, so a stored TrackData* would dangle.
+    const TrackData* GetCurrentTrack() const;
+    int GetCurrentTrackIndex() const { return m_currentTrackIndex; }
 
     AudioSource m_currentlyPlaying;
     SharedPtr<AudioSource> m_currentlyPlayingPtr;

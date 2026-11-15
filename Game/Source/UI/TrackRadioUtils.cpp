@@ -48,9 +48,9 @@ void TrackRadioUtils::OnUpdate( float dt )
     {
         PlayNextRandomTrack();
     }
-    if( radio.m_currentTrack != m_displayedTrack )
+    if( radio.GetCurrentTrackIndex() != m_displayedTrackIndex )
     {
-        m_displayedTrack = radio.m_currentTrack;
+        m_displayedTrackIndex = radio.GetCurrentTrackIndex();
         Show();
     }
     m_visibleTimer = std::max( 0.f, m_visibleTimer - dt );
@@ -157,13 +157,8 @@ void TrackRadioUtils::PlayLatestTrack()
 
 bool TrackRadioUtils::PlayRadioTrack()
 {
-    const TrackData* current = TrackRadio::GetInstance().m_currentTrack;
-    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    if( !current || tracks.empty() || current < tracks.data() || current >= tracks.data() + tracks.size() )
-    {
-        return false;
-    }
-    return LaunchTrack( static_cast<int>( current - tracks.data() ) );
+    // LaunchTrack range-checks the index.
+    return LaunchTrack( TrackRadio::GetInstance().GetCurrentTrackIndex() );
 }
 
 
@@ -219,7 +214,7 @@ void TrackRadioUtils::UpdateModel()
         return;
     }
     const TrackRadio& radio = TrackRadio::GetInstance();
-    const TrackData* track = radio.m_currentTrack;
+    const TrackData* track = radio.GetCurrentTrack();
     const float duration = radio.GetTotalLength();
     const float position = radio.GetPositionMS();
     ui->ModelSetNumber( m_model, "radio_available", track != nullptr );

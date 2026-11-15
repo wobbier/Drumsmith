@@ -10,6 +10,17 @@ namespace
     constexpr float kHandOverFadeSeconds = 0.03f;
 }
 
+const TrackData* TrackRadio::GetCurrentTrack() const
+{
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( m_currentTrackIndex < 0 || m_currentTrackIndex >= static_cast<int>( tracks.size() ) )
+    {
+        return nullptr;
+    }
+    return &tracks[m_currentTrackIndex];
+}
+
+
 void TrackRadio::Play( RadioArgs inTrackArgs )
 {
     if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrackIndex == m_currentTrackIndex )
@@ -22,16 +33,16 @@ void TrackRadio::Play( RadioArgs inTrackArgs )
     m_fadingTimer = kHandOverFadeSeconds + 0.05f;
     m_radioState = RadioState::None;
     m_radioArgs = inTrackArgs;
+    m_radioArgs.CurrentTrack = nullptr; // only valid for this call; see GetCurrentTrack
     bool isAsync = true;
 
-    m_currentTrack = inTrackArgs.CurrentTrack;
     m_currentTrackIndex = inTrackArgs.CurrentTrackIndex;
     m_previewPercent = 0.f;
     if( inTrackArgs.UsePreviewMarker )
     {
-        m_previewPercent = m_currentTrack->m_previewPercent;
+        m_previewPercent = inTrackArgs.CurrentTrack->m_previewPercent;
     }
-    m_audioPack = AudioPack( *m_currentTrack );
+    m_audioPack = AudioPack( *inTrackArgs.CurrentTrack );
 
     // Audio streams are pretty quick, why even have a preview audio file?
     //Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );

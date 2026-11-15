@@ -45,7 +45,7 @@ private:
     std::string m_model;
     Random64 m_random;
     float m_visibleTimer = 0.f;
-    const TrackData* m_displayedTrack = nullptr;
+    int m_displayedTrackIndex = -1;
     // RmlUi raises "change" on the seek slider whenever its value attribute is set, so the
     // position the widget was last given is remembered and echoes of it aren't seeks.
     double m_pushedProgress = -1.0;

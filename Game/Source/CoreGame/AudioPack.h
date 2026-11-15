@@ -59,10 +59,8 @@ private:
     // start mid-song doesn't step from zero to a full-scale sample.
     void FadeInAt( unsigned long long inGroupClock );
 
-    bool LoadStem( const char* inFileName, bool isDrumTrack = false );
+    bool LoadStem( const std::string& inDirectory, const char* inFileName, bool isDrumTrack = false );
     bool LoadURL( const char* inURL, bool isDrumTrack = false );
-    // awful
-    TrackData* m_trackData = nullptr;
     std::vector<AudioSource> m_sounds;
     std::vector<int> m_drumTracks;
 
