@@ -20,6 +20,9 @@ public class SharpGameProject : BaseGameProject
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/midifile/include"));
         conf.LibraryPaths.Add(Path.Combine("[project.SharpmakeCsPath]", $@"ThirdParty/Lib/{CommonTarget.GetThirdPartyOptimization(target.Optimization)}"));
         conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "ThirdParty/USB-MIDI/include"));
+        // The Track Editor builds on Havana's undo history and action routing (editor builds only;
+        // the headers compile to nothing elsewhere).
+        conf.IncludePaths.Add(Path.Combine("[project.SharpmakeCsPath]", "Engine/Modules/Havana/Source"));
     }
 
 

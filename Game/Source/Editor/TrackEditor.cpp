@@ -1,38 +1,60 @@
 #include "TrackEditor.h"
-#include "CoreGame/TrackList.h"
-#include "Events/HavanaEvents.h"
-#include "Components/Audio/AudioSource.h"
-#include "Events/GameEvents.h"
-#include "Events/AudioEvents.h"
-#include "Mathf.h"
-#include "Engine/Engine.h"
-#include "optick.h"
-#include "misc/cpp/imgui_stdlib.h"
-#include "RtMidi.h"
-#include "Utils/HavanaUtils.h"
+#include "CoreGame/BeatGrid.h"
 #include "CoreGame/Drumset.h"
+#include "CoreGame/TrackList.h"
 #include "Cores/AudioCore.h"
-#include "Events/EditorEvents.h"
+#include "Engine/Engine.h"
+#include "Events/GameEvents.h"
+#include "Events/HavanaEvents.h"
+#include "misc/cpp/imgui_stdlib.h"
+#include "optick.h"
+#include <algorithm>
+#include <chrono>
 #include <cmath>
 
 #if USING(ME_EDITOR)
+#include <Editor/AutomationCommands.h>
+#include <Editor/EditorActions.h>
+#include <Utils/EditorIcons.h>
+
+namespace
+{
+    constexpr const char* kEditorWindow = "Track Editor";
+    constexpr const char* kDetailsWindow = "Track Details";
+
+    // Grid steps per beat, and what a charter calls them in 4/4.
+    constexpr int kDivisions[] = { 1, 2, 3, 4, 6, 8, 12 };
+    constexpr const char* kDivisionNames[] = { "1/4", "1/8", "1/8 triplet", "1/16", "1/16 triplet", "1/32", "1/32 triplet" };
+
+    std::string ClockText( double inSeconds )
+    {
+        const int minutes = static_cast<int>( inSeconds ) / 60;
+        char text[32];
+        snprintf( text, sizeof( text ), "%d:%06.3f", minutes, inSeconds - minutes * 60.0 );
+        return text;
+    }
+
+
+    std::string Lower( std::string inText )
+    {
+        std::transform( inText.begin(), inText.end(), inText.begin(), []( unsigned char c ) { return static_cast<char>( std::tolower( c ) ); } );
+        return inText;
+    }
+}
+
 
 TrackEditor::TrackEditor()
-    : HavanaWidget( "Track Editor" )
+    : HavanaWidget( kEditorWindow )
 {
-    Listen<MouseScrollEvent>( [this]( const MouseScrollEvent& event ) {
-        if( IsWindowHovered )
-        {
-            ScrollDelta += event.Scroll.y;
-        }
-    } );
     Listen<EditTrackEvent>( [this]( const EditTrackEvent& event ) {
-        for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+        const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+        for( int i = 0; i < static_cast<int>( tracks.size() ); ++i )
         {
-            if( track.m_trackName == event.FileName )
+            if( tracks[i].m_trackName == event.FileName )
             {
-                SelectedTrackLocation = Path( track.m_trackSourcePath );
-                ResetTrack();
+                IsOpen = true;
+                RequestOpen( i );
+                return;
             }
         }
     } );
@@ -41,712 +63,847 @@ TrackEditor::TrackEditor()
 
 TrackEditor::~TrackEditor()
 {
-
 }
+
 
 void TrackEditor::Init()
 {
-    auto& trackList = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    for( auto& track : trackList )
-    {
-        //track.LoadNoteData();
-    }
-    hitNotes.resize( (int)PadId::COUNT );
-
+    m_padStates.resize( static_cast<size_t>( PadId::COUNT ) );
     m_drums = new Drumset( GetEngine().AudioThread->GetSystem() );
-    //m_drums->loadSound( PadId::Bass, "Assets/Drums/Basic/Bass.wav" );
-    //m_drums->loadSound( PadId::Snare, "Assets/Drums/Basic/Snare.wav" );
+    InstallActionRouting();
+    AutomationCommands::Register( "track-", [this]( const std::string& command, const std::string& args, std::string& error ) {
+        return ExecuteAutomation( command, args, error );
+    } );
 }
+
 
 void TrackEditor::Destroy()
 {
+    AutomationCommands::Unregister( "track-" );
+    m_preview.Stop();
+    m_transport.Close();
+    m_document.Close();
     delete m_drums;
+    m_drums = nullptr;
 }
+
 
 void TrackEditor::Update()
 {
 }
 
-float TrackEditor::GetNoteWidth( float timelineSizeScale )
+
+void TrackEditor::OpenTrack( const TrackData& inTrack )
 {
-    float scaledWidth = kDefaultMaxKeyframeWidth * timelineSizeScale;
-    return std::clamp( scaledWidth, kMinKeyframeWidth, kMaxKeyframeWidth );
+    StopRecording();
+    m_playPending = false;
+    m_preview.Stop();
+    m_transport.Close();
+    m_document.Open( inTrack );
+    m_transport.Open( m_document.Chart, m_document.Duration() );
+    m_timeline.ViewStart = 0.0;
+    m_timeline.ScrollY = 0.f;
+    m_pendingOpen = -1;
 }
 
-float TrackEditor::CalculateZoom()
-{
-    return std::pow( kBaseZoomFactor, ScrollDelta );
-}
 
-float TrackEditor::ScaleValue( float inValue )
+void TrackEditor::Save()
 {
-    return inValue * ( 1.f + CalculateZoom() * ( 50.f / TimelineSize ) );
-}
-
-bool TrackEditor::CullVisual( float posx )
-{
-    if( posx > WindowContentSize )
-    {
-        return true;
-    }
-    return false;
-}
-
-void TrackEditor::ResetTrack()
-{
-    SelectedTrackIndex = 0;
-    if( !SelectedTrackLocation.Exists )
+    if( !m_document.IsOpen() )
     {
         return;
     }
-
-    int i = 0;
-    for( auto& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
+    StopRecording();
+    m_document.Save();
+    // The library's copy, so the song list and a play pick the edit up without a reload.
+    for( TrackData& track : TrackDatabase::GetInstance().m_trackList.m_tracks )
     {
-        std::cout << Path( track.m_trackSourcePath ).GetDirectoryString().c_str() << std::endl;
-        std::cout << SelectedTrackLocation.GetDirectoryString().c_str() << std::endl;
-        if( Path( track.m_trackSourcePath ).GetDirectoryString() == SelectedTrackLocation.GetDirectoryString() )
+        if( track.m_trackSourcePath == m_document.Chart.m_trackSourcePath )
         {
-            SelectedTrackIndex = i;
-            TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex].LoadNoteData();
-            return;
+            track = m_document.Chart;
+            break;
         }
-        ++i;
     }
 }
+
+
+void TrackEditor::RequestOpen( int inIndex )
+{
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( inIndex < 0 || inIndex >= static_cast<int>( tracks.size() ) )
+    {
+        return;
+    }
+    if( m_document.IsDirty() )
+    {
+        m_pendingOpen = inIndex;
+        return;
+    }
+    OpenTrack( tracks[inIndex] );
+}
+
+
+void TrackEditor::InstallActionRouting()
+{
+    // The focused document takes the edit shortcuts (as the sequence editor and shader graphs do).
+    auto& actions = EditorActions::Get();
+    auto claims = actions.DocumentClaims;
+    auto execute = actions.DocumentExecute;
+    actions.DocumentClaims = [this, claims]( const std::string& id ) { return ClaimsAction( id ) || ( claims && claims( id ) ); };
+    actions.DocumentExecute = [this, claims, execute]( const std::string& id ) {
+        if( ClaimsAction( id ) ) ExecuteAction( id );
+        else if( claims && execute && claims( id ) ) execute( id );
+    };
+}
+
+
+bool TrackEditor::ClaimsAction( const std::string& inId ) const
+{
+    if( !IsOpen || !m_focused || !m_document.IsOpen() )
+    {
+        return false;
+    }
+    return inId == "Edit.Undo" || inId == "Edit.Redo" || inId == "Edit.Copy" || inId == "Edit.Cut" || inId == "Edit.Paste" || inId == "Edit.Duplicate"
+        || inId == "Edit.Delete" || inId == "Edit.SelectAll" || inId == "Edit.Deselect" || inId == "File.Save";
+}
+
+
+void TrackEditor::ExecuteAction( const std::string& inId )
+{
+    if( inId == "Edit.Undo" ) { StopRecording(); m_document.Undo(); }
+    else if( inId == "Edit.Redo" ) { StopRecording(); m_document.Redo(); }
+    else if( inId == "Edit.Copy" ) m_document.Copy();
+    else if( inId == "Edit.Cut" ) m_document.Cut();
+    else if( inId == "Edit.Paste" ) m_document.Paste( m_timeline.SnapTime( m_document, m_transport.Seconds() ) );
+    else if( inId == "Edit.Duplicate" ) m_document.Duplicate();
+    else if( inId == "Edit.Delete" ) m_document.DeleteSelection();
+    else if( inId == "Edit.SelectAll" ) m_document.SelectAll( m_timeline.VisibleTracks( m_document ) );
+    else if( inId == "Edit.Deselect" ) m_document.Selection.clear();
+    else if( inId == "File.Save" ) Save();
+}
+
 
 void TrackEditor::Render()
 {
     OPTICK_CATEGORY( "TrackEditor::Render", Optick::Category::UI );
-
-    if( TrackDatabase::GetInstance().m_trackList.m_tracks.empty() )
+    if( !IsOpen )
     {
+        if( m_transport.IsPlaying() )
+        {
+            m_transport.Pause();
+        }
+        m_focused = false;
         return;
     }
 
-    if( SelectedTrackIndex < 0 )
-    {
-        ResetTrack();
-    }
+    m_transport.Update( ImGui::GetIO().DeltaTime );
+    bool focused = false;
 
-    //ScrollDelta += GetEngine().GetEditorInput().GetMouseScrollDelta().x;
-    auto& trackData = TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
-    DrawTrackControls();
+    DrawDetails();
+    focused = focused || ImGui::IsWindowFocused( ImGuiFocusedFlags_RootAndChildWindows );
+    ImGui::End();
 
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-    ImGui::Begin( "Track Editor", &IsOpen, windowFlags );
-    //ImGui::SetScrollX( ImGui::GetScrollX() );
-    ImVec2 windowCursorPos = ImGui::GetCursorPos();
-
+    ImGui::Begin( kEditorWindow, &IsOpen, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ( m_document.IsDirty() ? ImGuiWindowFlags_UnsavedDocument : 0 ) );
+    focused = focused || ImGui::IsWindowFocused( ImGuiFocusedFlags_RootAndChildWindows );
     DrawMenuBar();
-
-    ImGui::SetCursorPosX( windowCursorPos.x );
-    auto& m_midi = MidiDevice::GetInstance();
+    if( !m_document.IsOpen() )
     {
-        static std::string m_selectedMidiDeviceName;
-        //HavanaUtils::Label( "Midi Device" );
-        if( ImGui::BeginCombo( "Midi Device", m_selectedMidiDeviceName.empty() ? "Select a device" : m_selectedMidiDeviceName.c_str() ) )
-        {
-            for( int i = 0; i < m_midi.m_devices.size(); ++i )
-            {
-                if( ImGui::Selectable( m_midi.m_devices[i].Name.c_str() ) )
-                {
-                    m_selectedMidiDeviceName = m_midi.m_devices[i].Name;
-                    m_midi.OpenMidiDevice( i );
-                    m_midi.PumpMessages();
-                }
-            }
-
-            ImGui::EndCombo();
-        }
+        ImGui::TextUnformatted( "Pick a song to chart." );
+        DrawTrackPicker();
     }
-    //m_midi.IsPaused = !ImGui::IsWindowFocused();
-
-    if( ImGui::IsWindowFocused() )
+    else
     {
-        m_messages = m_midi.PumpMessages();
-    }
-    TimelineSize = trackData.m_duration;
-
-    timelineSizeScale = 1.f + CalculateZoom() * ( 50.f / TimelineSize );
-    timelineSizeZoomed = TimelineSize * timelineSizeScale;
-
-    float timelineHeight = ( m_noteHeight + kLaneSpacing ) * PadId::COUNT;
-    float scrollOffsetX = ImGui::GetScrollX();
-    WindowContentSize = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x + ImGui::GetScrollX();
-    float windowPos = 0.f;
-    {
-        OPTICK_CATEGORY( "Debug Text", Optick::Category::Debug );
-        if( m_showDebugInfo )
+        DrawToolbar();
+        const float padStrip = m_showPadPreview ? 62.f : 0.f;
+        const ImVec2 available = ImGui::GetContentRegionAvail();
+        m_timeline.Draw( m_document, m_transport, { available.x, std::max( 120.f, available.y - padStrip ) } );
+        if( m_showPadPreview )
         {
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "ImGui::GetScrollX(): " + std::to_string( ImGui::GetScrollX() ) ).c_str() );
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "WindowContentSize: " + std::to_string( WindowContentSize ) ).c_str() );
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "ImGui::GetWindowPos().x: " + std::to_string( ImGui::GetWindowPos().x ) ).c_str() );
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "ImGui::GetMousePos().x: " + std::to_string( ImGui::GetMousePos().x ) ).c_str() );
-        }
-        windowPos = ImGui::GetWindowPos().x;
-        if( m_showDebugInfo )
-        {
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "ImGui::GetWindowSize().x: " + std::to_string( ImGui::GetWindowSize().x ) ).c_str() );
+            DrawPadPreview();
         }
     }
 
-    if( TrackPreview )
+    if( m_openPicker )
     {
-        OPTICK_CATEGORY( "TrackPreview", Optick::Category::Debug );
-        float progress = (float)TrackPreview->GetPositionMs();
-
-        ImGui::SetNextItemWidth( timelineSizeZoomed );
-        if( ImGui::SliderFloat( "##SeekSlider", &progress, 0, (float)TrackPreview->GetLength(), "%.3f" ) )
-        {
-            TrackPreview->SetPositionMs( progress );
-        }
+        ImGui::OpenPopup( "Open Track" );
+        m_openPicker = false;
     }
-    ImGui::BeginChildFrame( 200, { timelineSizeZoomed, timelineHeight }, ImGuiWindowFlags_NoScrollWithMouse );
-    bool isTimelineHovered = ImGui::IsWindowHovered();
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-    ImVec2 canvas_size = { timelineSizeZoomed, m_noteHeight };
+    ImGui::SetNextWindowSize( { 460.f, 520.f }, ImGuiCond_Appearing );
+    if( ImGui::BeginPopup( "Open Track" ) )
     {
-        OPTICK_CATEGORY( "SetCursorPosX", Optick::Category::Debug );
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
+        DrawTrackPicker();
+        ImGui::EndPopup();
     }
-    float relativeMouseX = 0.f;
-    float relativeMouseY = 0.f;
+    if( m_pendingOpen >= 0 )
     {
-        if( m_showDebugInfo )
-        {
-            OPTICK_CATEGORY( "Debug Info", Optick::Category::Debug );
-            ImGui::Text( ( "canvas_pos.x: " + std::to_string( canvas_pos.x ) ).c_str() );
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "canvas_size.x: " + std::to_string( canvas_size.x ) ).c_str() );
-        }
-        relativeMouseX = ImGui::GetMousePos().x - canvas_pos.x;
-        relativeMouseY = ImGui::GetMousePos().y - canvas_pos.y;
-        if( m_showDebugInfo )
-        {
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "relativeMouseX: " + std::to_string( relativeMouseX ) ).c_str() );
-            ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            ImGui::Text( ( "relativeMouseY: " + std::to_string( relativeMouseY ) ).c_str() );
-        }
+        ImGui::OpenPopup( "Unsaved Chart" );
     }
-
-    // Preview Marker
-    if( TrackPreview )
+    if( ImGui::BeginPopupModal( "Unsaved Chart", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) )
     {
-        float totalSongTime = ( TrackPreview->GetLength() / 1000.f );
-        float songTime = ( ( TrackPreview->GetLength() * trackData.m_previewPercent ) / 1000.f );
-        float scrubberX = canvas_pos.x + ( ( timelineSizeZoomed * ( songTime / totalSongTime ) ) );
-        drawList->AddLine( { scrubberX, canvas_pos.y }, { scrubberX, canvas_pos.y + timelineHeight }, 0xFFF00FFF );
-    }
-
-
-    float numBars = 0;
-    float numSubBars = 0;
-    float numNotes = 0;
-    float numCulled = 0;
-    // Track Lines
-    {
-        OPTICK_CATEGORY( "Track Lines", Optick::Category::UI );
-        float secondsPerMeasure = kBeatsPerMeasure * ( 60.f / trackData.m_bpm );
-        float scaledSecondsPerMeasure = secondsPerMeasure * ( CalculateZoom() );
-        for( float position = 0; position <= WindowContentSize; position += ScaleValue( secondsPerMeasure ) )
+        const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+        ImGui::Text( "%s has changes that aren't saved.", m_document.Chart.m_trackName.c_str() );
+        const bool valid = m_pendingOpen >= 0 && m_pendingOpen < static_cast<int>( tracks.size() );
+        if( ImGui::Button( "Save and Open" ) && valid )
         {
-            numBars++;
-            if( CullVisual( canvas_pos.x + position ) || canvas_pos.x + position < windowPos )
-            {
-                numCulled++;
-                //continue;
-            }
-            else
-            {
-                if( CalculateZoom() > 100.f )
-                {
-                    drawList->AddLine( { canvas_pos.x + position, canvas_pos.y }, { canvas_pos.x + position, canvas_pos.y + timelineHeight }, 0xFFFFFFFF );
-                }
-                if( CalculateZoom() > 400.f )
-                {
-                    float subMeasures = ( kBeatsPerMeasure / kSubMeasure ) * ( 60.f / trackData.m_bpm );
-                    for( float pos = position + subMeasures; pos < WindowContentSize; pos += ScaleValue( subMeasures ) )
-                    {
-                        numSubBars++;
-                        if( CullVisual( canvas_pos.x + pos ) )
-                        {
-                            numCulled++;
-                            //break;
-                        }
-                        else
-                        {
-                            drawList->AddLine( { canvas_pos.x + pos, canvas_pos.y }, { canvas_pos.x + pos, canvas_pos.y + timelineHeight }, 0x10FFFFFF );
-                        }
-                    }
-                }
-            }
+            Save();
+            OpenTrack( tracks[m_pendingOpen] );
+            ImGui::CloseCurrentPopup();
         }
-    }
-
-    // Hover row selection color and labels
-    if( relativeMouseY > 0 && relativeMouseY < timelineHeight )
-    {
-        PadId id = Bass;
-        for( int i = (int)id; i < PadId::COUNT; ++i )
+        ImGui::SameLine();
+        if( ImGui::Button( "Discard and Open" ) && valid )
         {
-            if( relativeMouseY > ( i * m_noteHeight ) + ( i * kLaneSpacing ) )
-            {
-                id = (PadId)i;
-            }
-
-            ImGui::SetCursorPosY( ( (int)i * ( m_noteHeight + kLaneSpacing ) ) + kLaneSpacing );
-            ImGui::SetCursorPosX( scrollOffsetX + kLaneSpacing );
-            ImGui::Text( PadUtils::GetPadName( (PadId)i ) );
+            OpenTrack( tracks[m_pendingOpen] );
+            ImGui::CloseCurrentPopup();
         }
-        float notePosX = canvas_pos.x;
-        float notePosY = canvas_pos.y + ( (int)id * ( m_noteHeight + kLaneSpacing ) );
-        ImVec2 timelinePos = { notePosX, notePosY };
-        ImVec2 rect( timelinePos.x + timelineSizeZoomed, notePosY + m_noteHeight );
-
-        drawList->AddRectFilled( timelinePos, rect, (ImU32)0x11FFFFFF ); // AGBR
-    }
-
-    // Adding Notes
-    bool doubleClickHandled = false;
-    {
-        OPTICK_CATEGORY( "Draw Note Data", Optick::Category::UI );
-        for( auto note = trackData.m_noteData.begin(); note != trackData.m_noteData.end(); note++ )
+        ImGui::SameLine();
+        if( ImGui::Button( "Cancel" ) || !valid )
         {
-            float notePosX = canvas_pos.x + ( note->m_triggerTime * timelineSizeScale );
-            float notePosY = canvas_pos.y + ( note->m_editorLane * m_noteHeight ) + ( note->m_editorLane * kLaneSpacing );
-            ImVec2 timelinePos = { notePosX, notePosY };
-
-            numNotes++;
-            if( CullVisual( timelinePos.x ) )
-            {
-                numCulled++;
-                //break;
-            }
-            else
-            {
-                ImVec2 rect( timelinePos.x + GetNoteWidth( timelineSizeScale ), timelinePos.y + canvas_size.y );
-                if( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
-                {
-                    if( canvas_pos.x + relativeMouseX > timelinePos.x && canvas_pos.x + relativeMouseX < rect.x
-                        && canvas_pos.y + relativeMouseY > timelinePos.y && canvas_pos.y + relativeMouseY < rect.y )
-                    {
-                        doubleClickHandled = true;
-                        trackData.m_noteData.erase( note );
-                        break;
-                    }
-                }
-                // Ghost notes are drawn faint; accents outlined; a stroke other than plain gets
-                // its initial (R rim/edge, X cross-stick, B bell).
-                ImU32 color = (ImU32)PadUtils::GetNoteColorABGR( note->m_editorLane );
-                if( note->m_velocity <= 40 )
-                {
-                    color = ( color & 0x00FFFFFF ) | 0x60000000;
-                }
-                drawList->AddRectFilled( timelinePos, rect/*+ ( 1.f * ScrollDelta/10.f )*/, color );
-                if( note->m_velocity >= 120 )
-                {
-                    drawList->AddRect( timelinePos, rect, 0xFFFFFFFF, 0.f, 0, 2.f );
-                }
-                if( note->m_articulation != Articulation::Normal )
-                {
-                    const char* mark = note->m_articulation == Articulation::Rim ? "R" : note->m_articulation == Articulation::CrossStick ? "X" : "B";
-                    drawList->AddText( { timelinePos.x + 2.f, timelinePos.y }, 0xFF000000, mark );
-                }
-            }
+            m_pendingOpen = -1;
+            ImGui::CloseCurrentPopup();
         }
-    }
-
-    // Removing Notes
-    if( !doubleClickHandled && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) && TrackPreview )
-    {
-        if( relativeMouseY > 0 && relativeMouseY < timelineHeight )
-        {
-            NoteData newNote;
-            PadId id = Bass;
-            for( int i = (int)id; i < PadId::COUNT; ++i )
-            {
-                if( relativeMouseY > ( i * m_noteHeight ) + ( i * kLaneSpacing ) )
-                {
-                    id = (PadId)i;
-                }
-            }
-            newNote.m_editorLane = id;
-            newNote.m_noteName = PadUtils::GetPadId( id );
-            float percent = relativeMouseX / timelineSizeZoomed;
-            newNote.m_triggerTime = ( TrackPreview->GetLength() * percent ) / 1000.f;
-            trackData.m_noteData.push_back( newNote );
-        }
-    }
-
-    if( m_showDebugInfo )
-    {
-        ImGui::Text( ( "Num Culled: " + std::to_string( numCulled ) ).c_str() );
-    }
-
-    if( TrackPreview )
-    {
-        float totalSongTime = ( TrackPreview->GetLength() / 1000.f );
-        float songTime = ( TrackPreview->GetPositionMs() / 1000.f );
-        float scrubberX = canvas_pos.x + ( ( timelineSizeZoomed * ( songTime / totalSongTime ) ) );
-        drawList->AddLine( { scrubberX, canvas_pos.y }, { scrubberX, canvas_pos.y + timelineHeight }, 0xFFFFFFFF );
-    }
-
-    {
-        PadMappingStorage& storage = PadMappingStorage::GetInstance();
-        std::vector<PadMappingStorage::Resolved> resolved;
-        for( auto msg : m_messages )
-        {
-            if( !msg.IsOnType() )
-            {
-                continue;
-            }
-            // Every pad and stroke the note is bound to (a rim note records a rimshot), with the
-            // hit's velocity, so charts keep the drummer's dynamics.
-            storage.Resolve( msg.m_data1, resolved );
-            for( const PadMappingStorage::Resolved& meaning : resolved )
-            {
-                m_drums->hitPad( meaning.pad, msg.m_data2 / 127.f );
-                if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
-                {
-                    NoteData newNote;
-                    newNote.m_editorLane = meaning.pad;
-                    newNote.m_noteName = PadUtils::GetPadId( meaning.pad );
-                    newNote.m_articulation = meaning.articulation;
-                    newNote.m_velocity = msg.m_data2;
-                    newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
-                    newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
-                    trackData.m_noteData.push_back( newNote );
-                }
-            }
-        }
-
-        Input& gameInput = GetEngine().GetEditorInput();
-        for( auto& pad : storage.mappedPads )
-        {
-            if( gameInput.WasKeyPressed( (KeyCode)pad.keyboardBinding ) )
-            {
-                m_drums->hitPad( (PadId)pad.padId, 1.f );
-                if( m_recordingActive && TrackPreview && TrackPreview->IsPlaying() )
-                {
-                    NoteData newNote;
-                    newNote.m_editorLane = (PadId)pad.padId;
-                    newNote.m_noteName = PadUtils::GetPadId( pad.padId );
-                    newNote.m_triggerTimeMS = TrackPreview->GetPositionMs();
-                    newNote.m_triggerTime = ( newNote.m_triggerTimeMS / 1000.f );
-                    trackData.m_noteData.push_back( newNote );
-                }
-            }
-        }
-    }
-
-    ImGui::EndChildFrame();
-
-    DrawPadPreview();
-
-    IsWindowHovered = ImGui::IsWindowHovered() || isTimelineHovered;
-    ImGui::End();
-}
-
-void TrackEditor::DrawTrackControls()
-{
-    OPTICK_CATEGORY( "Track Controls", Optick::Category::UI );
-
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-    ImGui::Begin( "Track Details", &IsOpen, windowFlags );
-    if( !SelectedTrackLocation.Exists )
-    {
-        TrackData& trackData = GetCurrentTrackData();
-        SelectedTrackLocation = Path( Path( trackData.m_trackSourcePath ).GetDirectoryString() + "NoteData.txt" );
-    }
-
-    Input& input = GetEngine().GetEditorInput();
-    ImVec2 windowCursorPos = ImGui::GetCursorPos();
-    {
-        TrackData& trackData = GetCurrentTrackData();
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        ImGui::Text( SelectedTrackLocation.GetLocalPath().data() );
-        ImGui::InputText( "Track Name", &trackData.m_trackName );
-        ImGui::InputText( "Artist", &trackData.m_artistName );
-        ImGui::InputInt( "BPM", &trackData.m_bpm, 1, 10 );
-        ImGui::SliderFloat( "Note Height", &m_noteHeight, 10.f, 50.f, "%.1f" );
-        if( TrackPreview )
-        {
-            float trackVolume = TrackPreview->GetVolume();
-            ImGui::SliderFloat( "Volume", &trackVolume, 0.f, 1.f, "%.1f" );
-            TrackPreview->SetVolume( trackVolume );
-        }
-        if( ImGui::Button( "Set Track Preview Marker" ) )
-        {
-            if( TrackPreview )
-            {
-                trackData.m_previewPercent = ( TrackPreview->GetPositionMs() / (float)TrackPreview->GetLength() );
-            }
-        }
-        if( TrackPreview )
-        {
-            float newFrequency = TrackPreview->GetPlaybackSpeed();
-            if( ImGui::SliderFloat( "Playback Speed", &newFrequency, 0.f, 2.f, "%.02f" ) )
-            {
-                TrackPreview->SetPlaybackSpeed( newFrequency );
-            }
-        }
-        DrawNoteSnappingControls();
-        if( ImGui::Button( "Delete All Bass Notes" ) )
-        {
-            trackData.m_noteData.erase( std::remove_if( trackData.m_noteData.begin(), trackData.m_noteData.end(),
-                []( const NoteData& note )
-                {
-                    return note.m_editorLane == PadId::Bass; // Condition for erasing
-                } ),
-                trackData.m_noteData.end() );
-        }
-        if( ImGui::Button( "Delete All Snare Notes" ) )
-        {
-            trackData.m_noteData.erase( std::remove_if( trackData.m_noteData.begin(), trackData.m_noteData.end(),
-                []( const NoteData& note )
-                {
-                    return note.m_editorLane == PadId::Snare; // Condition for erasing
-                } ),
-                trackData.m_noteData.end() );
-        }
-        //if( ImGui::Button( !SelectedTrackLocation.Exists ? "Select Asset" : SelectedTrackLocation.GetLocalPath().data(), { 200.f, 10.f } ) )
-        //{
-        //    RequestAssetSelectionEvent evt( [this]( Path selectedAsset ) {
-        //        
-        //        //ClearData();
-        //        //FilePath = selectedAsset;
-        //        }, AssetType::Audio );
-        //    evt.Fire();
-        //}
-
-        ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-        if( ( ( TrackPreview && !TrackPreview->IsPlaying() ) || !TrackPreview ) && ( ImGui::Button( "Play" ) || input.WasKeyPressed( KeyCode::Space ) ) )
-        {
-            PlayAudioEvent evt;
-            evt.SourceName = std::string( trackData.m_trackSourcePath );
-            evt.Callback = [this]( SharedPtr<AudioSource> inSource )
-                {
-                    TrackPreview = inSource;
-                };
-            evt.Fire();
-        }
-        else if( TrackPreview && TrackPreview->IsPlaying() )
-        {
-            if( TrackPreview->IsPaused() )
-            {
-                ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-                if( ImGui::Button( "Resume" ) || input.WasKeyPressed( KeyCode::Space ) )
-                {
-                    TrackPreview->Resume();
-                }
-            }
-            else
-            {
-                ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-                if( ImGui::Button( "Pause" ) || input.WasKeyPressed( KeyCode::Space ) )
-                {
-                    TrackPreview->Pause();
-                }
-            }
-            ImGui::SameLine();
-            //ImGui::SetCursorPosX( windowCursorPos.x + ImGui::GetScrollX() );
-            if( ImGui::Button( "Stop" ) )
-            {
-                TrackPreview->Stop();
-            }
-        }
+        ImGui::EndPopup();
     }
     ImGui::End();
-}
 
+    // A menu or popup of ours keeps the focus.
+    m_focused = focused || ( m_focused && ImGui::IsPopupOpen( "", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel ) );
 
-void TrackEditor::DrawNoteSnappingControls()
-{
-    static int selectedInterval = 1; // Default to 1/4 note
-    static const char* snappingOptions[] = { "1/4", "1/8", "1/16" };
-    static const float beatFractions[] = { 0.25f, 0.125f, 0.0625f }; // Fraction of a beat
-    static bool useBPM = false;
-
-    //ImGui::Begin( "Note Snapping" );
-
-    // Dropdown for snapping type
-    ImGui::Checkbox( "Use BPM for Snapping", &useBPM );
-    if( ImGui::BeginCombo( "Snapping Interval", snappingOptions[selectedInterval] ) )
+    if( m_document.IsOpen() )
     {
-        for( int i = 0; i < IM_ARRAYSIZE( snappingOptions ); ++i )
+        HandleRecording();
+        HandleKeys();
+        // A properties edit ends when its widget is let go.
+        if( m_propertyEdit && !ImGui::IsAnyItemActive() )
         {
-            if( ImGui::Selectable( snappingOptions[i], selectedInterval == i ) )
-            {
-                selectedInterval = i;
-            }
+            m_document.CommitEdit( "Edit Properties" );
+            m_propertyEdit = false;
         }
-        ImGui::EndCombo();
-    }
-
-    // Button to perform snapping
-    if( ImGui::Button( "Snap Notes" ) )
-    {
-        float beatFraction = beatFractions[selectedInterval];
-        float intervalMS = useBPM ? ( 60000.0f / GetCurrentTrackData().m_bpm ) * beatFraction
-            : ( 1000.0f * beatFraction );
-        for( auto& note : GetCurrentTrackData().m_noteData )
+        m_preview.Update( m_document, m_transport );
+        if( m_playPending && !m_preview.IsStarting() )
         {
-// Snap TriggerTimeMS to the nearest multiple of intervalMS
-            note.m_triggerTimeMS = std::round( note.m_triggerTimeMS / static_cast<float>( intervalMS ) ) * intervalMS;
-            note.m_triggerTime = note.m_triggerTimeMS / 1000.f;
+            m_playPending = false;
+            m_transport.Play();
         }
     }
-
-    //ImGui::End();
 }
 
-
-TrackData& TrackEditor::GetCurrentTrackData()
-{
-    return TrackDatabase::GetInstance().m_trackList.m_tracks[SelectedTrackIndex];
-}
 
 void TrackEditor::DrawMenuBar()
 {
-    OPTICK_CATEGORY( "Menu Bar", Optick::Category::UI );
-    TrackData& trackData = GetCurrentTrackData();
-    if( ImGui::BeginMenuBar() )
+    if( !ImGui::BeginMenuBar() )
     {
-        if( ImGui::BeginMenu( "File" ) )
+        return;
+    }
+    const bool open = m_document.IsOpen();
+    if( ImGui::BeginMenu( "File" ) )
+    {
+        if( ImGui::MenuItem( "Open Track..." ) )
         {
-            if( ImGui::MenuItem( "Open Track" ) )
-            {
-                auto callback = [this]( Path selectedAsset )
-                    {
-                        SelectedTrackLocation = Path( selectedAsset.GetDirectoryString() + "NoteData.txt" );
-
-                        if( !SelectedTrackLocation.Exists )
-                        {
-                            YIKES_FMT( "Failed to find note data: %s", SelectedTrackLocation.FullPath.c_str() );
-                        }
-                        ResetTrack();
-                    };
-                RequestAssetSelectionEvent evt( callback, AssetType::Audio );
-                evt.Fire();
-            }
-
-            if( ImGui::MenuItem( "Save Track" ) )
-            {
-                trackData.Save();
-            }
-            ImGui::EndMenu();
+            m_openPicker = true;
         }
-        if( ImGui::Button( m_recordingActive ? "Stop Recording" : "Start Recording" ) )
+        if( ImGui::MenuItem( "Save Track", "Ctrl+S", false, open ) )
         {
-            m_recordingActive = !m_recordingActive;
+            Save();
         }
-        ImGui::Text( std::to_string( CalculateZoom() ).c_str() );
-        ImGui::Checkbox( "Show Debug Info", &m_showDebugInfo );
-        ImGui::EndMenuBar();
+        ImGui::EndMenu();
+    }
+    if( ImGui::BeginMenu( "Edit", open ) )
+    {
+        const bool any = !m_document.Selection.empty();
+        if( ImGui::MenuItem( ( "Undo " + m_document.History.GetUndoName() ).c_str(), "Ctrl+Z", false, m_document.History.CanUndo() ) ) ExecuteAction( "Edit.Undo" );
+        if( ImGui::MenuItem( ( "Redo " + m_document.History.GetRedoName() ).c_str(), "Ctrl+Y", false, m_document.History.CanRedo() ) ) ExecuteAction( "Edit.Redo" );
+        ImGui::Separator();
+        if( ImGui::MenuItem( "Cut", "Ctrl+X", false, any ) ) ExecuteAction( "Edit.Cut" );
+        if( ImGui::MenuItem( "Copy", "Ctrl+C", false, any ) ) ExecuteAction( "Edit.Copy" );
+        if( ImGui::MenuItem( "Paste at Playhead", "Ctrl+V", false, m_document.CanPaste() ) ) ExecuteAction( "Edit.Paste" );
+        if( ImGui::MenuItem( "Duplicate", "Ctrl+D", false, any ) ) ExecuteAction( "Edit.Duplicate" );
+        if( ImGui::MenuItem( "Delete", "Del", false, any ) ) ExecuteAction( "Edit.Delete" );
+        ImGui::Separator();
+        if( ImGui::MenuItem( "Select All", "Ctrl+A" ) ) ExecuteAction( "Edit.SelectAll" );
+        if( ImGui::MenuItem( "Snap Selection to Grid", nullptr, false, any ) ) m_document.SnapSelection( m_timeline.SnapDivision );
+        ImGui::EndMenu();
+    }
+    if( ImGui::BeginMenu( "View", open ) )
+    {
+        for( int group = 0; group < static_cast<int>( TrackGroup::Count ); ++group )
+        {
+            bool shown = !m_timeline.Hidden[group];
+            if( ImGui::MenuItem( TrackGroupName( static_cast<TrackGroup>( group ) ), nullptr, &shown ) )
+            {
+                m_timeline.Hidden[group] = !shown;
+            }
+        }
+        ImGui::Separator();
+        // Presets for who is at the desk.
+        if( ImGui::MenuItem( "Charting: Notes and Gameplay" ) )
+        {
+            for( int group = 0; group < static_cast<int>( TrackGroup::Count ); ++group )
+            {
+                m_timeline.Hidden[group] = group != static_cast<int>( TrackGroup::Notes ) && group != static_cast<int>( TrackGroup::Gameplay ) && group != static_cast<int>( TrackGroup::Structure );
+            }
+            m_preview.SetMode( PreviewSession::Mode::Highway );
+        }
+        if( ImGui::MenuItem( "Venue: Show and Band" ) )
+        {
+            for( int group = 0; group < static_cast<int>( TrackGroup::Count ); ++group )
+            {
+                m_timeline.Hidden[group] = group == static_cast<int>( TrackGroup::Notes ) || group == static_cast<int>( TrackGroup::Gameplay );
+                m_timeline.Collapsed[group] = false;
+            }
+            m_preview.SetMode( PreviewSession::Mode::Scene );
+        }
+        if( ImGui::MenuItem( "Everything" ) )
+        {
+            m_timeline.Hidden.fill( false );
+            m_preview.SetMode( PreviewSession::Mode::Both );
+        }
+        ImGui::Separator();
+        ImGui::MenuItem( "Follow Playhead", nullptr, &m_timeline.Follow );
+        if( ImGui::MenuItem( "Loop", "L", m_transport.IsLooping() ) ) ToggleLoop();
+        if( ImGui::MenuItem( "Clear Loop", nullptr, false, m_transport.HasLoop() ) ) m_transport.ClearLoop();
+        ImGui::MenuItem( "Pad Preview", nullptr, &m_showPadPreview );
+        if( ImGui::MenuItem( "Zoom to Fit" ) ) m_timeline.ZoomToFit( m_document );
+        ImGui::EndMenu();
+    }
+    if( open )
+    {
+        // The song, and whether it has changes to save.
+        const std::string song = m_document.Chart.m_artistName + " - " + m_document.Chart.m_trackName + ( m_document.IsDirty() ? "  (unsaved)" : "" );
+        ImGui::SameLine( std::max( ImGui::GetCursorPosX() + 20.f, ImGui::GetWindowWidth() - ImGui::CalcTextSize( song.c_str() ).x - 16.f ) );
+        ImGui::TextDisabled( "%s", song.c_str() );
+    }
+    ImGui::EndMenuBar();
+}
+
+
+void TrackEditor::TogglePlay()
+{
+    if( m_transport.IsPlaying() || m_playPending )
+    {
+        m_playPending = false;
+        m_transport.Pause();
+        return;
+    }
+    if( !m_preview.IsActive() && m_preview.Start( m_document ) && m_preview.IsStarting() )
+    {
+        // Entering play stops all audio: the song starts when the game is up.
+        m_playPending = true;
+        return;
+    }
+    m_transport.Play();
+}
+
+
+void TrackEditor::ToggleLoop()
+{
+    if( m_transport.HasLoop() )
+    {
+        m_transport.SetLooping( !m_transport.IsLooping() );
+        return;
+    }
+    double start = 0.0;
+    double end = 0.0;
+    if( !m_document.SelectionSpan( start, end ) || end - start < Transport::kMinLoop )
+    {
+        const TrackData& chart = m_document.Chart;
+        const double playhead = m_transport.Seconds();
+        const std::vector<TimedCueData>& sections = chart.m_venue.m_sections;
+        int section = -1;
+        for( size_t i = 0; i < sections.size() && sections[i].m_time <= playhead; ++i )
+        {
+            section = static_cast<int>( i );
+        }
+        if( section >= 0 )
+        {
+            start = sections[section].m_time;
+            end = section + 1 < static_cast<int>( sections.size() ) ? sections[section + 1].m_time : m_transport.Length();
+        }
+        else
+        {
+            const float bpm = static_cast<float>( chart.m_bpm );
+            start = m_timeline.SnapTime( m_document, playhead );
+            end = BeatGrid::TimeOfBeat( chart.m_beats, bpm, BeatGrid::BeatOfTime( chart.m_beats, bpm, start ) + 16.0 );
+        }
+    }
+    m_transport.SetLoop( start, end );
+}
+
+
+void TrackEditor::DrawToolbar()
+{
+    constexpr float kGroupGap = 16.f;
+    constexpr float kItemGap = 4.f;
+
+    // Transport.
+    const bool playing = m_transport.IsPlaying() || m_playPending;
+    if( EditorIcons::Button( playing ? "player-pause" : "player-play", "Play / Pause", "Plays the song from the playhead, in the Game View too (Space)." ) )
+    {
+        TogglePlay();
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    if( EditorIcons::Button( "player-stop", "Stop", "Stops and goes back to the start." ) )
+    {
+        m_playPending = false;
+        m_transport.Stop();
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    if( EditorIcons::Button( "player-record", "Record", "While the song plays, pad hits (MIDI or the bound keys) become notes.", true, m_recording ) )
+    {
+        if( m_recording )
+        {
+            StopRecording();
+        }
+        else
+        {
+            m_recording = true;
+        }
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    if( EditorIcons::Button( "repeat", "Loop", "Repeats the loop zone (L). Ctrl-drag on the ruler marks one out, its edges drag, and a right-click there has the rest. Not saved with the song.", true, m_transport.IsLooping() ) )
+    {
+        ToggleLoop();
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    if( EditorIcons::Button( "current-location", "Follow Playhead", "The timeline scrolls to keep the playhead in view while the song plays. Off, the view stays where it is.", true, m_timeline.Follow ) )
+    {
+        m_timeline.Follow = !m_timeline.Follow;
+    }
+
+    // The clock, in a slot wide enough for any time so nothing after it moves.
+    ImGui::SameLine( 0.f, kGroupGap );
+    const float clockStart = ImGui::GetCursorPosX();
+    const float clockWidth = ImGui::CalcTextSize( "00:00.000 / 00:00.000" ).x;
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text( "%s / %s", ClockText( m_transport.Seconds() ).c_str(), ClockText( m_transport.Length() ).c_str() );
+    ImGui::SameLine( clockStart + clockWidth, kGroupGap );
+
+    // Speed and volume.
+    if( EditorIcons::Button( "gauge", "Speed", "Playback speed. Click to go back to 1.00x." ) )
+    {
+        m_transport.SetSpeed( 1.f );
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    float speed = m_transport.Speed();
+    ImGui::SetNextItemWidth( 80.f );
+    if( ImGui::SliderFloat( "##speed", &speed, 0.25f, 1.5f, "%.2fx" ) )
+    {
+        m_transport.SetSpeed( speed );
+    }
+    ImGui::SameLine( 0.f, kItemGap * 2.f );
+    const bool audio = m_transport.HasAudio();
+    float volume = m_transport.Volume();
+    const bool muted = volume <= 0.f;
+    if( EditorIcons::Button( !audio || muted ? "volume-off" : "volume", "Volume", audio ? "The song's volume in the editor. Click to mute." : "This song has no audio to play.", audio, audio && muted ) )
+    {
+        if( !muted )
+        {
+            m_unmutedVolume = volume;
+        }
+        m_transport.SetVolume( muted ? m_unmutedVolume : 0.f );
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    ImGui::BeginDisabled( !audio );
+    ImGui::SetNextItemWidth( 70.f );
+    if( ImGui::SliderFloat( "##volume", &volume, 0.f, 1.f, "%.1f" ) )
+    {
+        m_transport.SetVolume( volume );
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine( 0.f, kItemGap );
+    const bool drumStems = m_transport.HasDrumStems();
+    if( EditorIcons::Button( "headphones", "Drums Only", drumStems ? "Plays the drum stems alone." : "This song has no separate drum stems.", drumStems, drumStems && m_transport.DrumsOnly() ) )
+    {
+        m_transport.SetDrumsOnly( !m_transport.DrumsOnly() );
+    }
+
+    // Snapping.
+    ImGui::SameLine( 0.f, kGroupGap );
+    if( EditorIcons::Button( "magnet", "Snap", "Edits land on the grid.", true, m_timeline.SnapEnabled ) )
+    {
+        m_timeline.SnapEnabled = !m_timeline.SnapEnabled;
+    }
+    ImGui::SameLine( 0.f, kItemGap );
+    int division = 3;
+    for( int i = 0; i < IM_ARRAYSIZE( kDivisions ); ++i )
+    {
+        if( kDivisions[i] == m_timeline.SnapDivision )
+        {
+            division = i;
+        }
+    }
+    ImGui::SetNextItemWidth( 110.f );
+    if( ImGui::Combo( "##grid", &division, kDivisionNames, IM_ARRAYSIZE( kDivisionNames ) ) )
+    {
+        m_timeline.SnapDivision = kDivisions[division];
+    }
+    if( ImGui::IsItemHovered() )
+    {
+        ImGui::SetTooltip( "The grid: how a beat is divided." );
+    }
+
+    // The game preview, last: its status text has nothing after it to push.
+    ImGui::SameLine( 0.f, kGroupGap );
+    m_preview.DrawControls( m_document );
+}
+
+
+void TrackEditor::DrawTrackPicker()
+{
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    ImGui::SetNextItemWidth( -1.f );
+    ImGui::InputTextWithHint( "##filter", "Search songs", &m_pickerFilter );
+    const std::string filter = Lower( m_pickerFilter );
+    ImGui::BeginChild( "##songs", { 0.f, 0.f } );
+    for( int i = 0; i < static_cast<int>( tracks.size() ); ++i )
+    {
+        const std::string label = tracks[i].m_artistName + " - " + tracks[i].m_trackName;
+        if( !filter.empty() && Lower( label ).find( filter ) == std::string::npos )
+        {
+            continue;
+        }
+        ImGui::PushID( i );
+        if( ImGui::Selectable( label.c_str() ) )
+        {
+            RequestOpen( i );
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::PopID();
+    }
+    if( tracks.empty() )
+    {
+        ImGui::TextDisabled( "No songs in Assets/DLC." );
+    }
+    ImGui::EndChild();
+}
+
+
+void TrackEditor::DrawDetails()
+{
+    // The caller ends the window.
+    ImGui::Begin( kDetailsWindow, nullptr );
+    if( !m_document.IsOpen() )
+    {
+        ImGui::TextDisabled( "No song open." );
+        return;
+    }
+    TrackData& chart = m_document.Chart;
+    if( ImGui::CollapsingHeader( "Song", ImGuiTreeNodeFlags_DefaultOpen ) )
+    {
+        bool changed = false;
+        changed |= ImGui::InputText( "Title", &chart.m_trackName );
+        changed |= ImGui::InputText( "Artist", &chart.m_artistName );
+        changed |= ImGui::InputInt( "BPM", &chart.m_bpm, 1, 10 );
+        chart.m_bpm = std::clamp( chart.m_bpm, 20, 400 );
+        if( ImGui::Button( "Set Song Preview Start to Playhead" ) && m_transport.Length() > 0.0 )
+        {
+            chart.m_previewPercent = static_cast<float>( m_transport.Seconds() / m_transport.Length() );
+            changed = true;
+        }
+        m_document.MetaDirty = m_document.MetaDirty || changed;
+        ImGui::TextDisabled( "%d notes, %d beats%s", static_cast<int>( chart.m_noteData.size() ), static_cast<int>( chart.m_beats.size() ), chart.m_authored ? ", edited by hand" : "" );
+    }
+
+    if( ImGui::CollapsingHeader( "Selection", ImGuiTreeNodeFlags_DefaultOpen ) )
+    {
+        DrawSelectionProperties();
+    }
+
+    if( ImGui::CollapsingHeader( "Grid and Tempo" ) )
+    {
+        ImGui::SliderFloat( "Note Row Height", &m_timeline.NoteRowHeight, 12.f, 40.f, "%.0f" );
+        if( chart.m_beats.empty() )
+        {
+            ImGui::TextWrapped( "This chart has no tempo map; the grid is its BPM in 4/4." );
+        }
+        if( ImGui::Button( "Generate Beats from BPM" ) )
+        {
+            GenerateBeats();
+        }
+        if( ImGui::IsItemHovered() )
+        {
+            ImGui::SetTooltip( "Replaces the tempo map with a steady one at the song's BPM, 4/4, starting at the first note." );
+        }
+    }
+
+    if( ImGui::CollapsingHeader( "Recording" ) )
+    {
+        MidiDevice& midi = MidiDevice::GetInstance();
+        if( ImGui::BeginCombo( "MIDI Device", m_midiDeviceName.empty() ? "Select a device" : m_midiDeviceName.c_str() ) )
+        {
+            for( int i = 0; i < static_cast<int>( midi.m_devices.size() ); ++i )
+            {
+                if( ImGui::Selectable( midi.m_devices[i].Name.c_str() ) )
+                {
+                    m_midiDeviceName = midi.m_devices[i].Name;
+                    midi.OpenMidiDevice( i );
+                    midi.PumpMessages();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::TextWrapped( "Press Record, play the song, and hit the pads. The take is one undo step." );
+    }
+
+    if( ImGui::CollapsingHeader( "Keys" ) )
+    {
+        ImGui::TextWrapped(
+            "Double-click an empty row to add, an item to remove. Drag to move (Alt: off the grid); drag a span's edge to resize. "
+            "Drag empty space to box-select; Ctrl or Shift adds. Click the ruler to scrub; Ctrl-drag it for a loop zone (right-click for more). "
+            "Wheel zooms, Shift+wheel pans, Ctrl+wheel scrolls rows, middle-drag pans. "
+            "Space plays, L loops; arrows nudge the selection by a grid step or a row; Home and End jump." );
     }
 }
 
+
+void TrackEditor::DrawSelectionProperties()
+{
+    const std::vector<int> tracks = m_document.SelectedTracks();
+    if( tracks.empty() )
+    {
+        ImGui::TextDisabled( "Nothing selected." );
+        return;
+    }
+    if( tracks.size() > 1 )
+    {
+        ImGui::Text( "%d items on %d tracks", static_cast<int>( m_document.Selection.size() ), static_cast<int>( tracks.size() ) );
+        return;
+    }
+    const int trackIndex = tracks.front();
+    IEventTrack& track = *m_document.Tracks[trackIndex];
+    const std::vector<int> items = m_document.SelectedIn( trackIndex );
+    if( items.empty() )
+    {
+        return;
+    }
+    ImGui::Text( "%d on %s", static_cast<int>( items.size() ), track.Name.c_str() );
+    const auto beforeChange = [this, trackIndex]() {
+        m_document.BeginEdit( trackIndex );
+        m_propertyEdit = true;
+    };
+    // Don't fight a drag on the timeline for the same items.
+    ImGui::BeginDisabled( m_timeline.HasGesture() );
+    if( items.size() == 1 )
+    {
+        const int item = items.front();
+        double start = track.Start( item );
+        double end = track.End( item );
+        if( ImGui::InputDouble( track.Spans ? "Start (s)" : "Time (s)", &start, 0.01, 0.1, "%.3f" ) )
+        {
+            beforeChange();
+            track.Set( item, start, track.Spans ? std::max( end, start + 0.02 ) : start, track.Row( item ) );
+        }
+        if( track.Spans && ImGui::InputDouble( "End (s)", &end, 0.01, 0.1, "%.3f" ) )
+        {
+            beforeChange();
+            track.Set( item, start, std::max( end, start + 0.02 ), track.Row( item ) );
+        }
+    }
+    track.DrawProperties( items, beforeChange );
+    ImGui::EndDisabled();
+}
+
+
+void TrackEditor::GenerateBeats()
+{
+    const int beats = m_document.FindTrack( "Beats" );
+    if( beats < 0 )
+    {
+        return;
+    }
+    TrackData& chart = m_document.Chart;
+    const double start = chart.m_noteData.empty() ? 0.0 : static_cast<double>( chart.m_noteData.front().m_triggerTime );
+    // Back from the first note to the start of the song, so the first note sits on a measure line.
+    const double beat = 60.0 / std::max( 20, chart.m_bpm );
+    const double first = start - std::floor( start / ( beat * 4.0 ) ) * beat * 4.0;
+    m_document.BeginEdit( beats );
+    chart.m_beats = BeatGrid::Generate( static_cast<float>( chart.m_bpm ), 4, first, std::max( m_document.Duration(), m_transport.Length() ) );
+    m_document.Selection.clear();
+    m_document.CommitEdit( "Generate Beats" );
+}
+
+
+void TrackEditor::HandleKeys()
+{
+    const ImGuiIO& io = ImGui::GetIO();
+    if( !m_focused || io.WantTextInput || ImGui::IsPopupOpen( "", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel ) )
+    {
+        return;
+    }
+    if( ImGui::IsKeyPressed( ImGuiKey_Space, false ) )
+    {
+        TogglePlay();
+    }
+    if( ImGui::IsKeyPressed( ImGuiKey_Home, false ) )
+    {
+        m_transport.Seek( 0.0 );
+        m_timeline.Reveal( 0.0 );
+    }
+    if( ImGui::IsKeyPressed( ImGuiKey_End, false ) )
+    {
+        m_transport.Seek( m_transport.Length() );
+        m_timeline.Reveal( m_transport.Length() );
+    }
+    if( io.KeyCtrl || io.KeySuper || m_timeline.HasGesture() )
+    {
+        return;
+    }
+    if( ImGui::IsKeyPressed( ImGuiKey_L, false ) )
+    {
+        ToggleLoop();
+    }
+    const int horizontal = ( ImGui::IsKeyPressed( ImGuiKey_RightArrow ) ? 1 : 0 ) - ( ImGui::IsKeyPressed( ImGuiKey_LeftArrow ) ? 1 : 0 );
+    const int vertical = ( ImGui::IsKeyPressed( ImGuiKey_DownArrow ) ? 1 : 0 ) - ( ImGui::IsKeyPressed( ImGuiKey_UpArrow ) ? 1 : 0 );
+    const double step = 1.0 / static_cast<double>( m_timeline.SnapDivision );
+    if( !m_document.Selection.empty() )
+    {
+        if( horizontal != 0 )
+        {
+            m_document.MoveSelectionBeats( step * horizontal, 0 );
+        }
+        if( vertical != 0 )
+        {
+            m_document.MoveSelection( 0.0, vertical );
+        }
+    }
+    else if( horizontal != 0 )
+    {
+        // Nothing selected: the arrows step the playhead along the grid.
+        const TrackData& chart = m_document.Chart;
+        const float bpm = static_cast<float>( chart.m_bpm );
+        const double beat = std::round( BeatGrid::BeatOfTime( chart.m_beats, bpm, m_transport.Seconds() ) / step ) * step + step * horizontal;
+        m_transport.Seek( std::max( 0.0, BeatGrid::TimeOfBeat( chart.m_beats, bpm, beat ) ) );
+        m_timeline.Reveal( m_transport.Seconds() );
+    }
+}
+
+
+void TrackEditor::StopRecording()
+{
+    if( !m_recording )
+    {
+        return;
+    }
+    m_recording = false;
+    m_document.CommitEdit( "Record" );
+}
+
+
+void TrackEditor::HandleRecording()
+{
+    // The device is read only while the editor has focus (a play session reads it otherwise).
+    m_messages.clear();
+    if( m_focused && !m_preview.OwnsMidi() )
+    {
+        m_messages = MidiDevice::GetInstance().PumpMessages();
+    }
+    const bool take = m_recording && m_transport.IsPlaying();
+    // inAge: how long ago the hit happened (a MIDI message waits for the frame that reads it), so
+    // the note lands where it was played rather than a frame late.
+    const auto record = [&]( PadId inPad, Articulation inArticulation, int inVelocity, double inAge ) {
+        if( !take || inPad == PadId::Invalid )
+        {
+            return;
+        }
+        m_document.BeginEdit( ChartDocument::kNoteTrack );
+        const double seconds = std::max( 0.0, m_transport.Seconds() - std::clamp( inAge, 0.0, 0.25 ) * m_transport.Speed() );
+        const int item = m_document.Tracks[ChartDocument::kNoteTrack]->Add( seconds, seconds, static_cast<int>( inPad ) );
+        NoteData& note = m_document.Chart.m_noteData[item];
+        note.m_articulation = inArticulation;
+        note.m_velocity = static_cast<uint8_t>( std::clamp( inVelocity, 1, 127 ) );
+    };
+
+    PadMappingStorage& storage = PadMappingStorage::GetInstance();
+    std::vector<PadMappingStorage::Resolved> resolved;
+    for( const MidiMessageNew& message : m_messages )
+    {
+        for( const auto& pad : storage.mappedPads )
+        {
+            if( pad.midiBinding == message.m_data1 && pad.padId >= 0 && pad.padId < static_cast<int>( m_padStates.size() ) )
+            {
+                m_padStates[pad.padId] = message.IsOnType();
+            }
+        }
+        if( !message.IsOnType() )
+        {
+            continue;
+        }
+        // Every pad and stroke the note is bound to (a rim note records a rimshot), with the
+        // hit's velocity, so charts keep the drummer's dynamics.
+        storage.Resolve( message.m_data1, resolved );
+        const double age = message.m_arrival.time_since_epoch().count() != 0 ? std::chrono::duration<double>( std::chrono::steady_clock::now() - message.m_arrival ).count() : 0.0;
+        for( const PadMappingStorage::Resolved& meaning : resolved )
+        {
+            if( m_drums )
+            {
+                m_drums->hitPad( meaning.pad, message.m_data2 / 127.f );
+            }
+            record( meaning.pad, meaning.articulation, message.m_data2, age );
+        }
+    }
+
+    if( m_focused && m_recording && !ImGui::GetIO().WantTextInput )
+    {
+        Input& input = GetEngine().GetEditorInput();
+        for( const auto& pad : storage.mappedPads )
+        {
+            if( pad.keyboardBinding != 0 && input.WasKeyPressed( static_cast<KeyCode>( pad.keyboardBinding ) ) )
+            {
+                if( m_drums )
+                {
+                    m_drums->hitPad( static_cast<PadId>( pad.padId ), 1.f );
+                }
+                record( static_cast<PadId>( pad.padId ), Articulation::Normal, 100, 0.0 );
+            }
+        }
+    }
+    // A take ends with the song.
+    if( m_recording && m_document.HasOpenEdit() && !m_transport.IsPlaying() && !m_propertyEdit && !m_timeline.HasGesture() )
+    {
+        m_document.CommitEdit( "Record" );
+    }
+}
+
+
 void TrackEditor::DrawPadPreview()
 {
-    if( ImGui::CollapsingHeader( "Pad Preview", &m_showPadPreview ) )
+    // The pads the chart strikes at the playhead (and the ones being hit), as lights.
+    const std::vector<NoteData>& notes = m_document.Chart.m_noteData;
+    std::vector<bool> lit = m_padStates;
+    const float now = static_cast<float>( m_transport.Seconds() );
+    auto note = std::lower_bound( notes.begin(), notes.end(), now - 0.05f, []( const NoteData& n, float t ) { return n.m_triggerTime < t; } );
+    for( ; note != notes.end() && note->m_triggerTime <= now + 0.05f; ++note )
     {
-        auto& trackData = GetCurrentTrackData();
-        ImVec2 outerWindowSize = ImGui::GetWindowSize();
-        ImGui::SetCursorPosX( ImGui::GetScrollX() );
-        const float xSpacing = 10.f;
-        ImGui::BeginChildFrame( 2, { outerWindowSize.x - xSpacing, 55.f }, ImGuiWindowFlags_NoScrollWithMouse );
-
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
-        ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-        ImVec2 canvas_size = { timelineSizeZoomed, m_noteHeight };
-        ImVec2 windowSize = ImGui::GetWindowSize();
-
-        if( TrackPreview )
+        if( note->m_editorLane >= 0 && note->m_editorLane < PadId::COUNT )
         {
-            if( TrackPreview->GetPositionMs() < m_cachedTimestamp )
-            {
-                m_closestNoteIndex = 0;
-            }
-            m_cachedTimestamp = TrackPreview->GetPositionMs();
+            lit[note->m_editorLane] = true;
         }
-
-
-        PadMappingStorage& storage = PadMappingStorage::GetInstance();
-        if( TrackPreview )
-        {
-            for( size_t i = m_closestNoteIndex; i < trackData.m_noteData.size(); ++i )
-            {
-                auto& currentNote = trackData.m_noteData[i];
-                float triggerTime = currentNote.m_triggerTime * 1000.f;
-                float timeDiff = triggerTime - m_cachedTimestamp;
-                if( Mathf::Abs( timeDiff ) <= 50.f )
-                {
-                    hitNotes[(int)currentNote.m_editorLane] = true;
-                }
-
-                if( timeDiff > 500 )
-                {
-                    break;
-                }
-                if( timeDiff <= -500 )
-                {
-                    m_closestNoteIndex = i;
-                    //m_closestNoteIndex = i;
-                }
-            }
-            static std::vector<bool> padStates;
-            padStates.resize( (int)PadId::COUNT );
-            for( auto msg : m_messages )
-            {
-                for( auto& pad : storage.mappedPads )
-                {
-                    if( pad.midiBinding == msg.m_data1 )
-                    {
-                        //hitNotes[(int)pad.padId] = msg.IsOnType();
-                        padStates[(int)pad.padId] = msg.IsOnType();
-                    }
-                }
-            }
-
-            for( int i = 0; i < padStates.size(); ++i )
-            {
-                hitNotes[i] = padStates[i] || hitNotes[i];
-            }
-
-
-            for( int i = 0; i < (int)PadId::COUNT; ++i )
-            {
-                const float kPadHeight = 50.f;
-                float padWidth = ( ( windowSize.x - 5.f ) / (int)PadId::COUNT );
-                ImVec2 padPos = { canvas_pos.x + ( padWidth * i ), canvas_pos.y };
-                ImVec2 padSize = { padPos.x + padWidth - xSpacing, padPos.y + kPadHeight };
-                if( hitNotes[i] )
-                {
-                    drawList->AddRectFilled( padPos, padSize, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ) );
-                }
-                else
-                {
-                    drawList->AddRect( padPos, padSize, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ) );
-                }
-                const char* text = PadUtils::GetPadName( (PadId)i );
-                ImVec2 textSize = ImGui::CalcTextSize( text );
-                ImVec2 textPos = { ( padPos.x + padWidth / 2.f ) - ( textSize.x / 2.f ), canvas_pos.y + ( ( kPadHeight / 2.f ) - ( textSize.y / 2.f ) ) };
-                drawList->AddText( textPos, (ImU32)PadUtils::GetNoteColorABGR( (PadId)i ), text );
-
-                hitNotes[i] = false;
-            }
-        }
-
-        ImGui::EndChildFrame();
     }
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    const ImVec2 origin = ImGui::GetCursorScreenPos();
+    const float width = ImGui::GetContentRegionAvail().x;
+    const float padWidth = width / static_cast<float>( PadId::COUNT );
+    const float height = 50.f;
+    for( int pad = 0; pad < PadId::COUNT; ++pad )
+    {
+        const ImU32 color = static_cast<ImU32>( PadUtils::GetNoteColorABGR( static_cast<PadId>( pad ) ) );
+        const ImVec2 min = { origin.x + padWidth * pad + 2.f, origin.y + 4.f };
+        const ImVec2 max = { origin.x + padWidth * ( pad + 1 ) - 2.f, origin.y + 4.f + height };
+        if( lit[pad] )
+        {
+            drawList->AddRectFilled( min, max, color, 3.f );
+        }
+        else
+        {
+            drawList->AddRect( min, max, color, 3.f );
+        }
+        const char* name = PadUtils::GetPadName( static_cast<PadId>( pad ) );
+        const ImVec2 textSize = ImGui::CalcTextSize( name );
+        drawList->PushClipRect( min, max, true );
+        drawList->AddText( { ( min.x + max.x - textSize.x ) * 0.5f, ( min.y + max.y - textSize.y ) * 0.5f }, lit[pad] ? 0xFF000000 : color, name );
+        drawList->PopClipRect();
+    }
+    ImGui::Dummy( { width, height + 8.f } );
 }
 
 #endif

@@ -232,7 +232,7 @@ bool TrackDatabase::RegisterNewTrack( const std::string& inDirectory )
     return true;
 }
 
-void TrackDatabase::ExportMidiTrackMetaData()
+void TrackDatabase::ExportMidiTrackMetaData( bool inForce )
 {
     fs::path rootPath = Path( "Assets/DLC" ).FullPath;
     try
@@ -256,6 +256,14 @@ void TrackDatabase::ExportMidiTrackMetaData()
                 {
                     TrackData existing( Path( midiPath.FullPath + "/TrackData.txt" ) );
                     existing.Load();
+                    // A chart edited by hand is the song's source of truth from then on.
+                    existing.LoadNoteData();
+                    if( existing.m_authored && !inForce )
+                    {
+                        BRUH_FMT( "Kept %s: edited in the Track Editor", entry.path().filename().string().c_str() );
+                        continue;
+                    }
+                    existing.m_authored = false;
                     LegacySongMetaData legacy;
                     const Path ini( midiPath.FullPath + "/song.ini" );
                     if( ini.Exists )
@@ -666,6 +674,12 @@ void TrackData::OnSaveTrackData( json& outJson )
 
 void TrackData::OnSaveNoteData( json& outJson )
 {
+    // The millisecond stamp follows the time (notes placed in the editor used to keep a stale 0,
+    // and the de-duplication below then merged them).
+    for( NoteData& note : m_noteData )
+    {
+        note.m_triggerTimeMS = static_cast<uint32_t>( std::max( 0.f, note.m_triggerTime ) * 1000.f );
+    }
     std::sort( m_noteData.begin(), m_noteData.end(), []( NoteData& first, NoteData& second )
         {
             if( first.m_triggerTimeMS != second.m_triggerTimeMS )
@@ -712,6 +726,25 @@ void TrackData::OnSaveNoteData( json& outJson )
     if( !m_venue.IsEmpty() )
     {
         m_venue.Save( outJson["Venue"] );
+    }
+    const auto savePhrases = [&outJson]( const char* inKey, std::vector<VenueData::SpanData>& inSpans ) {
+        if( inSpans.empty() )
+        {
+            return;
+        }
+        std::stable_sort( inSpans.begin(), inSpans.end(), []( const VenueData::SpanData& a, const VenueData::SpanData& b ) { return a.m_start < b.m_start; } );
+        json& rows = outJson[inKey];
+        for( const VenueData::SpanData& span : inSpans )
+        {
+            rows.push_back( json::array( { span.m_start, span.m_end } ) );
+        }
+    };
+    savePhrases( "StarPower", m_starPower );
+    savePhrases( "DrumFills", m_drumFills );
+    savePhrases( "DrumSolos", m_drumSolos );
+    if( m_authored )
+    {
+        outJson["Authored"] = true;
     }
 }
 
@@ -837,6 +870,24 @@ void TrackData::OnLoadNoteData( const json& inJson )
     {
         m_venue.Load( inJson["Venue"] );
     }
+    const auto loadPhrases = [&inJson]( const char* inKey, std::vector<VenueData::SpanData>& outSpans ) {
+        outSpans.clear();
+        if( !inJson.contains( inKey ) || !inJson[inKey].is_array() )
+        {
+            return;
+        }
+        for( const json& row : inJson[inKey] )
+        {
+            if( row.is_array() && row.size() >= 2 && row[0].is_number() && row[1].is_number() )
+            {
+                outSpans.push_back( VenueData::SpanData{ row[0].get<float>(), row[1].get<float>(), 0 } );
+            }
+        }
+    };
+    loadPhrases( "StarPower", m_starPower );
+    loadPhrases( "DrumFills", m_drumFills );
+    loadPhrases( "DrumSolos", m_drumSolos );
+    m_authored = inJson.contains( "Authored" ) && inJson["Authored"].is_boolean() && inJson["Authored"].get<bool>();
 }
 
 

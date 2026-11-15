@@ -27,6 +27,10 @@ public:
 
     void SetVolume( float inVolumePercent );
     void SetDrumVolume( float inVolumePercent );
+    // The song came with its drums on stems of their own.
+    bool HasDrumStems() const { return !m_drumTracks.empty(); }
+    // Plays every stem faster or slower (pitch follows); 1 is normal. For the Track Editor.
+    void SetPlaybackSpeed( float inSpeed );
     float GetVolume();
     // Seeks every stem and restarts them together (see Update). Asynchronous: the stems are
     // non-blocking streams, so each seek completes on FMOD's loader thread in its own time.

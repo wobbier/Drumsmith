@@ -175,6 +175,14 @@ public:
     // Empty when the chart has no tempo map (native charts; conversions before beats were kept).
     std::vector<BeatData> m_beats;
     VenueData m_venue;
+    // Drum phrases from PART DRUMS (Docs/Songs-and-DLC.md): star power (note 116), fills that
+    // activate it (notes 120-124) and drum solos (note 103). Charted and editable; gameplay
+    // doesn't score them yet.
+    std::vector<VenueData::SpanData> m_starPower;
+    std::vector<VenueData::SpanData> m_drumFills;
+    std::vector<VenueData::SpanData> m_drumSolos;
+    // Saved from the Track Editor: converting from notes.mid again leaves the chart alone.
+    bool m_authored = false;
 
 private:
     std::string m_directory;
@@ -232,7 +240,9 @@ public:
 
     void Reload();
     bool RegisterNewTrack( const std::string& inDirectory );
-    void ExportMidiTrackMetaData();
+    // Converts every notes.mid song folder. A song edited in the Track Editor (TrackData::m_authored)
+    // keeps its chart unless inForce.
+    void ExportMidiTrackMetaData( bool inForce = false );
 
     std::vector<unsigned int>& SortTracks( TrackListSort inSortBy, TrackListFilter inFilterBy );
     std::vector<unsigned int>& FilterTracks( TrackListFilter inFilterBy );

@@ -206,6 +206,21 @@ void AudioPack::SetDrumVolume( float inVolumePercent )
 }
 
 
+void AudioPack::SetPlaybackSpeed( float inSpeed )
+{
+    // On the group, so every stem changes on one mixer tick and stays in step.
+    if( m_syncGroup )
+    {
+        m_syncGroup->setPitch( std::max( inSpeed, 0.01f ) );
+        return;
+    }
+    for( auto& sound : m_sounds )
+    {
+        sound.SetPlaybackSpeed( inSpeed );
+    }
+}
+
+
 float AudioPack::GetVolume()
 {
     return m_sounds[0].GetVolume();

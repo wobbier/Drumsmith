@@ -95,7 +95,7 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 | 31 | Sort comparators capture the track vector **by value** | `TrackDatabase::SortTracks` | Every sort copies all `TrackData` (strings + any note data) into the lambda | One-character fix (`&`) |
 | 32 | Filter enum, count logic, and match logic cover different tag sets; unknown tags `YIKES` per track per call | `TrackList.cpp` | GH1–4 filters can't match; log spam scales with library size | Cleanup batch |
 | 33 | DLC download: no hash/size check, no partial-failure cleanup | `DLCMenuController::DownloadDLC` | Half-downloaded songs register as playable if `TrackData.txt` landed | Harden when DLC matters |
-| 34 | Recording in the editor stamps UI-frame time | `TrackEditor::Render` | The charter's full input latency is baked into `NoteData.txt` for everyone | Inherits item 2's timestamped input |
+| 34 | Recording in the editor stamps UI-frame time | `TrackEditor::Render` | The charter's full input latency is baked into `NoteData.txt` for everyone | **Partly fixed** 2026-11-13: recorded MIDI hits are placed at their arrival time, not the frame that read them. Audio output latency is still in the take |
 | 35 | The `TrackDatabase.json` config loads at startup and does nothing | `TrackList` ctor | Dead I/O + confusion | Delete |
 
 ### UI & shell

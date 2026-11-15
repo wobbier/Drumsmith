@@ -206,6 +206,53 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     m_trackIndex = inTrackIndex;
 
     inTrackData.LoadNoteData();
+    BuildNotes();
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Highway: playing %s (track %d)", inTrackData.m_trackName.c_str(), inTrackIndex );
+    }
+
+    BuildHighway();
+    BuildBeatLines();
+    BuildVenue();
+
+    m_currentTrackPack = AudioPack( inTrackData );
+    ResetScore();
+    m_songState = SongState::Loading;
+    m_songTimeMs = -kLeadInMs;
+    m_isPaused = false;
+    if( RmlUiCore* ui = GetEngine().RmlUi )
+    {
+        ui->ModelSetString( kModel, "track_title", inTrackData.m_trackName );
+        ui->ModelSetString( kModel, "track_artist", inTrackData.m_artistName );
+        ui->ModelSetNumber( kModel, "track_index", inTrackIndex );
+        ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
+    }
+    m_lyrics.Clear();
+    if( GameSettings::GetInstance().LyricsOnHud() )
+    {
+        m_lyrics.Build( inTrackData.m_venue.m_lyrics, inTrackData.m_venue.m_vocalPhrases, inTrackData.m_venue.m_vocalNotes );
+    }
+    m_lyricSung.clear();
+    m_lyricRest.clear();
+    m_lyricNext.clear();
+}
+
+
+void NoteHighwayCore::BuildVenue()
+{
+    if( TrackMover && m_trackData )
+    {
+        Transform& mover = TrackMover->GetComponent<Transform>();
+        Transform* camera = mover.GetChildByName( "Main Camera" );
+        m_venueShow.Build( GetWorld(), *m_trackData, camera ? camera->Parent : EntityHandle() );
+    }
+}
+
+
+void NoteHighwayCore::BuildNotes()
+{
+    TrackData& inTrackData = *m_trackData;
     for( const NoteData& note : inTrackData.m_noteData )
     {
         if( note.m_editorLane >= 0 && note.m_editorLane < PadId::COUNT )
@@ -218,10 +265,6 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
         }
     }
     LayoutLanes();
-    if( CommandLine::Has( "--highway-log" ) )
-    {
-        BRUH_FMT( "Highway: playing %s (track %d)", inTrackData.m_trackName.c_str(), inTrackIndex );
-    }
 
     std::array<size_t, PadId::COUNT> nextInLane{};
     for( auto& laneNotes : m_laneNotes )
@@ -249,35 +292,61 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
         size_t& next = nextInLane[LaneOf( it->m_editorLane )];
         if( next < laneNotes.Notes.size() )
         {
-            laneNotes.Notes[next].Source = it;
+            laneNotes.Notes[next].Source = *it;
             SpawnNote( *it, laneNotes.Notes[next++] );
         }
         m_lastNoteMs = std::max( m_lastNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
         m_firstNoteMs = std::min( m_firstNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
         ++m_totalNotes;
     }
+}
 
+
+void NoteHighwayCore::ClearNotes()
+{
+    for( auto& lane : m_laneNotes )
+    {
+        for( NoteState& note : lane.Notes )
+        {
+            // Out of sight at once (a rebuild puts new gems in their place this frame).
+            HideNote( note );
+        }
+        lane = LaneNotes();
+    }
+    for( auto ent : GetEntities() )
+    {
+        ent.MarkForDelete();
+    }
+}
+
+
+void NoteHighwayCore::ClearBeatLines()
+{
+    for( BeatLine& line : m_beatLines )
+    {
+        if( line.Line )
+        {
+            line.Line->MarkForDelete();
+        }
+    }
+    m_beatLines.clear();
+}
+
+
+void NoteHighwayCore::BeginPreview( TrackData& inTrackData )
+{
+    ShutdownTrack();
+    m_trackData = &inTrackData;
+    m_trackIndex = -1;
+    BuildNotes();
     BuildHighway();
     BuildBeatLines();
-    if( TrackMover )
-    {
-        Transform& mover = TrackMover->GetComponent<Transform>();
-        Transform* camera = mover.GetChildByName( "Main Camera" );
-        m_venueShow.Build( GetWorld(), inTrackData, camera ? camera->Parent : EntityHandle() );
-    }
-
-    m_currentTrackPack = AudioPack( inTrackData );
+    BuildVenue();
     ResetScore();
-    m_songState = SongState::Loading;
-    m_songTimeMs = -kLeadInMs;
+    m_songState = SongState::Preview;
+    m_songTimeMs = 0.0;
+    m_previewLastMs = 0.0;
     m_isPaused = false;
-    if( RmlUiCore* ui = GetEngine().RmlUi )
-    {
-        ui->ModelSetString( kModel, "track_title", inTrackData.m_trackName );
-        ui->ModelSetString( kModel, "track_artist", inTrackData.m_artistName );
-        ui->ModelSetNumber( kModel, "track_index", inTrackIndex );
-        ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
-    }
     m_lyrics.Clear();
     if( GameSettings::GetInstance().LyricsOnHud() )
     {
@@ -286,6 +355,102 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     m_lyricSung.clear();
     m_lyricRest.clear();
     m_lyricNext.clear();
+}
+
+
+void NoteHighwayCore::EndPreview()
+{
+    if( m_songState == SongState::Preview )
+    {
+        ShutdownTrack();
+        m_trackData = nullptr;
+    }
+}
+
+
+void NoteHighwayCore::SetPreviewTime( double inTimeMs )
+{
+    if( m_songState == SongState::Preview )
+    {
+        m_songTimeMs = std::max( 0.0, inTimeMs );
+    }
+}
+
+
+void NoteHighwayCore::RefreshPreview( int inParts )
+{
+    if( m_songState != SongState::Preview || !m_trackData )
+    {
+        return;
+    }
+    if( inParts & PreviewNotes )
+    {
+        ClearNotes();
+        BuildNotes();
+    }
+    if( inParts & PreviewBeats )
+    {
+        ClearBeatLines();
+        BuildBeatLines();
+    }
+    if( inParts & PreviewVenue )
+    {
+        m_venueShow.Clear();
+        BuildVenue();
+        m_lyrics.Clear();
+        if( GameSettings::GetInstance().LyricsOnHud() )
+        {
+            m_lyrics.Build( m_trackData->m_venue.m_lyrics, m_trackData->m_venue.m_vocalPhrases, m_trackData->m_venue.m_vocalNotes );
+        }
+    }
+}
+
+
+void NoteHighwayCore::UpdatePreview( float inDeltaTime )
+{
+    ApplyPendingTints();
+    ApplySpeed();
+    // The editor's playhead is the time on the strike bar: no latency offsets, the editor isn't
+    // being played. Notes behind it are gone as a clean play leaves them, lighting their pads as
+    // they cross while the song plays on (not on a scrub); notes ahead are there again.
+    const double now = m_songTimeMs;
+    const bool playing = now > m_previewLastMs && now - m_previewLastMs < 250.0;
+    for( size_t lane = 0; lane < m_laneNotes.size(); ++lane )
+    {
+        for( NoteState& note : m_laneNotes[lane].Notes )
+        {
+            if( note.TimeMs <= now )
+            {
+                if( !note.Judged )
+                {
+                    note.Judged = true;
+                    HideNote( note );
+                    if( playing && note.TimeMs > m_previewLastMs )
+                    {
+                        FlashLane( static_cast<int>( lane ) );
+                    }
+                }
+            }
+            else if( note.Judged || !note.Note )
+            {
+                HideNote( note );
+                SpawnNote( note.Source, note );
+                note.Judged = false;
+            }
+        }
+    }
+    m_previewLastMs = now;
+    if( TrackMover )
+    {
+        Transform& mover = TrackMover->GetComponent<Transform>();
+        Vector3 position = mover.GetPosition();
+        position.z = static_cast<float>( now / 1000.0 ) * m_appliedSpeed;
+        mover.SetPosition( position );
+    }
+    UpdateTargetPads( inDeltaTime );
+    m_venueShow.SetPerformance( 0.8f );
+    m_venueShow.Update( now, inDeltaTime );
+    UpdateHud( inDeltaTime );
 }
 
 
@@ -507,24 +672,7 @@ void NoteHighwayCore::LayoutLanes()
 
 void NoteHighwayCore::ShutdownTrack()
 {
-    for( auto ent : GetEntities() )
-    {
-        ent.MarkForDelete();
-    }
-    for( auto& lane : m_laneNotes )
-    {
-        for( NoteState& note : lane.Notes )
-        {
-            for( Decoration& decoration : note.Decorations )
-            {
-                if( decoration.Piece )
-                {
-                    decoration.Piece->MarkForDelete();
-                }
-            }
-        }
-        lane = LaneNotes();
-    }
+    ClearNotes();
     for( EntityHandle& part : m_highwayParts )
     {
         if( part )
@@ -1227,10 +1375,10 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
                 HideNote( note );
                 continue;
             }
-            if( ( note.Judged || !note.Note ) && note.Source )
+            if( note.Judged || !note.Note )
             {
                 HideNote( note );
-                SpawnNote( *note.Source, note );
+                SpawnNote( note.Source, note );
             }
             note.Judged = false;
             lane.Cursor = std::min( lane.Cursor, i );
@@ -1368,6 +1516,12 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
 
 void NoteHighwayCore::Update( const UpdateContext& context )
 {
+    if( m_songState == SongState::Preview )
+    {
+        // The Track Editor drives: it has the clock, and the MIDI queue for recording.
+        UpdatePreview( context.GetDeltaTime() );
+        return;
+    }
     std::vector<Hit> hits;
     if( m_isPaused || m_songState == SongState::Idle || m_songState == SongState::Finished )
     {

@@ -481,7 +481,61 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
     }
     outTrackData.m_beats = ReadMidiBeats( midifile, lastNote + 4.0 );
     outTrackData.m_venue = ReadMidiVenue( midifile );
+    ReadMidiDrumPhrases( midifile, drumTrackIndex, outTrackData );
     return true;
+}
+
+
+void CustomTrackDefineTest::ReadMidiDrumPhrases( smf::MidiFile& inMidi, int inDrumTrack, TrackData& outTrackData )
+{
+    // PART DRUMS phrase markers, each held for its span: 116 star power (overdrive), 103 a drum
+    // solo, 120-124 a fill that activates star power (one fill however many of the five are held).
+    outTrackData.m_starPower.clear();
+    outTrackData.m_drumFills.clear();
+    outTrackData.m_drumSolos.clear();
+    if( inDrumTrack < 0 || inDrumTrack >= inMidi.getTrackCount() )
+    {
+        return;
+    }
+    auto& drumTrack = inMidi[inDrumTrack];
+    double starStart = -1.0;
+    double soloStart = -1.0;
+    double fillStart = -1.0;
+    bool fillHeld[5] = { false, false, false, false, false };
+    const auto close = []( std::vector<VenueData::SpanData>& outSpans, double& ioStart, double inEnd ) {
+        if( ioStart >= 0.0 && inEnd > ioStart )
+        {
+            outSpans.push_back( VenueData::SpanData{ static_cast<float>( ioStart ), static_cast<float>( inEnd ), 0 } );
+        }
+        ioStart = -1.0;
+    };
+    for( int event = 0; event < drumTrack.size(); ++event )
+    {
+        const smf::MidiEvent& message = drumTrack[event];
+        const bool on = message.isNoteOn();
+        if( !on && !message.isNoteOff() )
+        {
+            continue;
+        }
+        const int key = message.getKeyNumber();
+        if( key == 116 )
+        {
+            if( on && starStart < 0.0 ) starStart = message.seconds;
+            else if( !on ) close( outTrackData.m_starPower, starStart, message.seconds );
+        }
+        else if( key == 103 )
+        {
+            if( on && soloStart < 0.0 ) soloStart = message.seconds;
+            else if( !on ) close( outTrackData.m_drumSolos, soloStart, message.seconds );
+        }
+        else if( key >= 120 && key <= 124 )
+        {
+            fillHeld[key - 120] = on;
+            const bool any = fillHeld[0] || fillHeld[1] || fillHeld[2] || fillHeld[3] || fillHeld[4];
+            if( on && fillStart < 0.0 ) fillStart = message.seconds;
+            else if( !any ) close( outTrackData.m_drumFills, fillStart, message.seconds );
+        }
+    }
 }
 
 

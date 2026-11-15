@@ -34,9 +34,10 @@ void GameApp::PreRender()
 void GameApp::OnInitialize()
 {
 	// --convert-dlc: what Settings > Convert Custom DLC does, at startup (headless re-charting).
-	if( CommandLine::Has( "--convert-dlc" ) )
+	// Songs edited in the Track Editor keep their charts unless --convert-dlc-force.
+	if( CommandLine::Has( "--convert-dlc" ) || CommandLine::Has( "--convert-dlc-force" ) )
 	{
-		TrackDatabase::GetInstance().ExportMidiTrackMetaData();
+		TrackDatabase::GetInstance().ExportMidiTrackMetaData( CommandLine::Has( "--convert-dlc-force" ) );
 	}
 	GetEngine().LoadScene("Assets/MainMenu.lvl");
 }

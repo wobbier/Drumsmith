@@ -66,4 +66,6 @@ public:
     // The light show of a Rock Band chart: VENUE lighting cues, keyframes, fog, pyro and
     // spotlights, plus the EVENTS track's sections and crowd states.
     static VenueData ReadMidiVenue( smf::MidiFile& inMidi );
+    // PART DRUMS phrases into the track: star power (116), drum solos (103) and fills (120-124).
+    static void ReadMidiDrumPhrases( smf::MidiFile& inMidi, int inDrumTrack, TrackData& outTrackData );
 };

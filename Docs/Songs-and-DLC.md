@@ -15,7 +15,8 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 | `Game/Source/CoreGame/TrackList.h` | `NoteData`, `TrackData`, `TrackList`, `TrackDatabase`, sort/filter enums |
 | `Game/Source/CoreGame/TrackList.cpp` | Scan, load/save, legacy conversion, sort/filter implementation |
 | `Game/Source/CoreGame/CustomTrackDefineTest.h` | `song.ini` / `.chart` / MIDI parsing singleton (despite the name, this is the production parser) |
-| `Game/Source/Editor/TrackEditor.h` | ImGui chart editor widget (`ME_EDITOR` builds only) |
+| `Game/Source/Editor/TrackEditor.h`, `Game/Source/Editor/Chart/` | The chart editor (`ME_EDITOR` builds only): see Authoring |
+| `Game/Source/CoreGame/BeatGrid.h` | Beat grid math: snapping, grid lines |
 | `Assets/DLC/DLCParser.py` | Server-side generator for `dlc_index.json` |
 | `ThirdParty/midifile/` | `smf::MidiFile` MIDI parsing library |
 
@@ -39,7 +40,7 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 
 `TrackData::OnLoadTrackData` also accepts legacy keys (`SongName`, `SongArtist`, `AlbumName`), trims leading spaces off every string (the ini parser leaves them in — see Caveats), falls back to `Track.mp3` when `TrackFileName` is missing, and copies `Icon` into `m_dlcSource` when no explicit `DLCSource` exists.
 
-**`NoteData.txt` schema** (written by `TrackData::OnSaveNoteData`): `{ "Notes": [ { "EditorLane": <int PadId>, "NoteName": "snare1", "TriggerTime": <seconds float>, "TriggerTimeMS": <uint>, "Articulation": "Rim", "Velocity": 30 } ], "Beats": [ [ <seconds>, <1 measure / 0 beat> ] ] }`. `Articulation` (Rim, CrossStick, Bell) is omitted when plain and `Velocity` when 100; `Beats` is omitted without a tempo map. On save, notes are sorted by time then lane and deduplicated, and `TriggerTimeMS` is recomputed as `TriggerTime * 1000`. On load (`OnLoadNoteData`), **`NoteName` is authoritative**: the lane is derived via `PadUtils::GetNewPadId(NoteName)` and the JSON `EditorLane` value is ignored.
+**`NoteData.txt` schema** (written by `TrackData::OnSaveNoteData`): `{ "Notes": [ { "EditorLane": <int PadId>, "NoteName": "snare1", "TriggerTime": <seconds float>, "TriggerTimeMS": <uint>, "Articulation": "Rim", "Velocity": 30 } ], "Beats": [ [ <seconds>, <1 measure / 0 beat> ] ], "StarPower": [ [ <start>, <end> ] ], "DrumFills": [...], "DrumSolos": [...], "Authored": true }`. The phrase lists are omitted when empty and `Authored` unless the chart was saved from the Track Editor. `Articulation` (Rim, CrossStick, Bell) is omitted when plain and `Velocity` when 100; `Beats` is omitted without a tempo map. On save, notes are sorted by time then lane and deduplicated, and `TriggerTimeMS` is recomputed as `TriggerTime * 1000`. On load (`OnLoadNoteData`), **`NoteName` is authoritative**: the lane is derived via `PadUtils::GetNewPadId(NoteName)` and the JSON `EditorLane` value is ignored.
 
 ### The track database
 
@@ -51,7 +52,7 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 
 ### Chart conversion (`CustomTrackDefineTest`)
 
-Triggered by the settings-menu "Convert Custom DLC" button (or `--convert-dlc` at startup) → `TrackDatabase::ExportMidiTrackMetaData`, which walks `Assets/DLC/` for folders containing `notes.mid`. A folder that already has a `TrackData.txt` is **re-charted**: only `NoteData.txt` is rewritten from `notes.mid` (`TrackData::SaveNoteData`), keeping the metadata. A new folder runs:
+Triggered by the settings-menu "Convert Custom DLC" button (or `--convert-dlc` at startup) → `TrackDatabase::ExportMidiTrackMetaData`, which walks `Assets/DLC/` for folders containing `notes.mid`. A folder that already has a `TrackData.txt` is **re-charted**: only `NoteData.txt` is rewritten from `notes.mid` (`TrackData::SaveNoteData`), keeping the metadata. A chart saved from the Track Editor (`"Authored"`) is left alone unless the conversion is forced (`--convert-dlc-force`). A new folder runs:
 
 1. `ConvertFromLegacy` — parses `song.ini` via `CustomTrackDefineTest::readSongMetaData` (handles UTF-8 BOM; reads `name`, `artist`, `album`, `genre`, `year`, `icon`, `pro_drums`, `song_length` (ms), `preview_start_time`), requires `album.png`/`album.jpg` (`ME_ASSERT`), requires `song.ogg` (Opus is explicitly unsupported — commented out pending FMOD transcoding), and **hardcodes** `m_bpm = 180` and `m_noteSpeed = 10` (the sync-track derivation is commented out). Saves `TrackData.txt`.
 2. `CustomTrackDefineTest::ParseMidi` — reads `notes.mid` with `smf::MidiFile` (`doTimeAnalysis` gives absolute seconds per event), finds the track whose name meta-event is exactly `PART DRUMS`, and converts every note-on with pitch 96–100 into a `NoteData`:
@@ -87,13 +88,50 @@ flowchart LR
 
 ### Authoring: the Track Editor
 
-`TrackEditor` (`ME_EDITOR` builds, opened via `EditTrackEvent` from the DLC/track-list menus or the editor menu bar) is an ImGui timeline: lanes × time grid with zoom, note snapping controls, a scrubber driven by a preview `AudioSource`, and a pad-preview strip. Charting workflow:
+> This section verified 2026-11-13 against the working tree (Track Editor overhaul).
 
-1. Select a track (menu bar or `EditTrackEvent`); notes load from `NoteData.txt` and the preview audio from the track source.
-2. Click the timeline to place/remove notes, or **record**: with "Start Recording" active and the preview playing, any bound keyboard key or MIDI note-on appends a `NoteData` stamped with `TrackPreview->GetPositionMs()` at that UI frame. Each input also auditions through `Drumset::hitPad` (see `Docs/Audio.md`).
-3. Save writes `TrackData.txt` + `NoteData.txt` via `TrackData::Save` (sorted + deduplicated).
+`TrackEditor` (`ME_EDITOR` builds; opened from the editor's panels, or by `EditTrackEvent` from the DLC and track-list menus) edits a chart: the notes and every other charted event on one timeline, with the game's own highway and venue as a preview. `TrackEditor.cpp` is the windows and their wiring; the parts are in `Game/Source/Editor/Chart/`:
 
-MIDI input in the editor is pumped from the shared `MidiDevice` singleton, only while the editor window is focused (`ImGui::IsWindowFocused`). Unlike gameplay, the editor's note iteration is windowed via a cached `m_closestNoteIndex`.
+| File | Role |
+|------|------|
+| `ChartDocument` | A working copy of the song's `TrackData`, its tracks, the selection, the clipboard and its own `UndoStack`. No ImGui: the timeline, automation and unit tests all drive it |
+| `EventTrack.h`, `EventTrackDefs.cpp` | `IEventTrack`: one kind of event as rows on the timeline. `VectorTrack<T>` binds a list of the chart; `EventTracks::Build` lists them all |
+| `TimelineView` | The canvas: ruler, beat grid, rows, gestures |
+| `Transport` | The playhead over an editor-owned `AudioPack` (every stem, as in a play) |
+| `PreviewSession` | The highway and venue preview session (shown in the Game View) and its toolbar controls |
+| `TrackEditorAutomation.cpp` | `track-*` commands for `--editor-exec` scripts |
+| `CoreGame/BeatGrid` | Beat math shared with tests: snap, grid lines, a steady map from a BPM |
+
+**Windows.** *Track Editor* (menus, transport, the timeline, a strip of pad lights), *Track Details* (song fields, the selection's properties, tempo tools, the MIDI device). With no song open the editor lists the library to pick from.
+
+**Tracks.** Notes (a row per pad), then groups that fold: *Gameplay* (star power, drum fills, drum solos), *Song Structure* (sections, song events, the beats of the tempo map), *Venue* (lighting cues, light keyframes, fog, pyro, spotlights per member, camera cuts, post FX, crowd), *Band* (each member's states, singalongs, guitar solos) and *Lyrics* (syllables, vocal phrases). The band's animation data (drum hits, strums, frets, sung notes, harmonies, hand maps) and the music video's cameras and looks are not tracks; they load and save untouched. Adding a kind of track is a class over `VectorTrack<T>` (or a line using `CueTrack` / `SpanTrack`) in `EventTracks::Build`.
+
+**Editing.**
+
+- Double-click an empty row adds an item on the grid (a span starts a measure long); double-click an item removes it.
+- Click selects; Ctrl toggles, Shift adds; dragging empty space box-selects. A click on empty timeline also puts the playhead there.
+- Dragging moves the selection in time and, within a track with several rows, between rows. The grabbed item lands on the grid and the rest keep their distance; Alt moves off the grid. A span's edges resize it.
+- Delete, cut, copy, paste (at the playhead) and duplicate (onto the next beat after the selection) work across tracks. Arrow keys nudge the selection by a grid step or a row, or step the playhead when nothing is selected.
+- Every gesture is one undo step on the document's own history (the editor's scene history is suspended during play, and a chart isn't the scene). The editor's Undo, Redo, Copy, Cut, Paste, Duplicate, Delete, Select All and Save actions go to the chart while its windows have focus (`EditorActions::DocumentClaims`).
+- Velocity (Ghost 30, Normal 100, Accent 127, or a slider) and stroke (normal, rim, cross-stick, bell) are set on the selected notes in Track Details; cue names, fog, keyframe steps and measure starts likewise.
+
+**Grid.** The grid is the chart's tempo map (`m_beats`), or its BPM in 4/4 without one; snap is on by default at a chosen division of the beat. Beats are items on the *Beats* track (move, add, remove, mark a measure start), and *Generate Beats from BPM* replaces the map with a steady one.
+
+**Playback and recording.** Space plays. The playhead runs on frame time steered to the stems, keeps its place when paused, and runs silently when the song has no audio. Speed slows the stems together. A *loop zone* (`Transport::SetLoop`) repeats a stretch: Ctrl-drag on the ruler marks one out, its edges drag, the ruler's right-click menu sets it from the pointer, the section or the selection, and the toolbar's Loop button (L) switches it on and off, making one from the selection, the section under the playhead or four measures when there is none. Playing into the zone's end seeks to its start; a playhead put past the end plays on. The zone is the editor's, not the chart's: it isn't saved and goes when another song opens. *Follow Playhead* (toolbar, View) is whether the timeline scrolls with the playhead while playing. With Record on and the song playing, MIDI hits (and bound keys) become notes with their velocity and stroke; MIDI hits are placed where they arrived, not at the frame that read them. A take is one undo step.
+
+**Saving.** Save writes `TrackData.txt` and `NoteData.txt`, marks the chart `Authored` and copies it into the loaded `TrackDatabase` entry. Converting from `notes.mid` again skips authored songs (`--convert-dlc-force` overrides).
+
+**Preview.** Play (or the toolbar's eye button) starts the preview: the song waits until the game is up, because entering or leaving play stops all audio (`AudioCore::OnStop`), and `Transport` restarts its stems at the playhead if they were stopped under it. The preview runs the gameplay scene (`Assets/Example.lvl`) in play mode, entering play and loading the scene as needed, and puts `NoteHighwayCore` in its preview state (`BeginPreview`): the highway and venue of the document's chart at the editor's playhead, with no audio, judging or input of its own. Notes behind the playhead are gone and those ahead are back, so scrubbing works both ways. Committed edits reach the session: notes and beat lines are rebuilt at once, the venue 0.4 s after the last venue edit. *Both*, *Highway* and *Scene* choose what is on screen (`VenueShow::SetPresentation`). The picture is the editor's Game View, driven by the Track Editor's transport and playhead; play the preview starts is hosted (`HostedPlay::Active`), so the Game View opens beside the editor without maximizing or taking the focus, and the editor keeps the keyboard. *Stop Preview* leaves play, which restores the open scene. View > *Charting* and *Venue* set the timeline's groups and the preview mode together.
+
+**Drum phrases.** `TrackData::m_starPower`, `m_drumFills` and `m_drumSolos` are spans saved as `"StarPower"`, `"DrumFills"` and `"DrumSolos"` (`[[start, end], ...]`, omitted when empty) beside `"Beats"`. `ReadMidiDrumPhrases` imports them from PART DRUMS notes 116, 120-124 and 103. They are charted and editable only: gameplay has no star power meter, activation or solo bonus yet.
+
+**Tests.** `Game/Tests/Source/` builds into `MitchEngine_Tests`: chart save/load round trips, the MIDI phrase import, `BeatGrid`, and `ChartDocument` (move, undo, clipboard, duplicate, cancel). `Assets/Scenes/Tests/TrackEditorFlows.edscript` drives the editor on a copy of `Assets/Scenes/Tests/TrackEditorFixture/`, including a preview session in each mode:
+
+```bash
+Engine/Tools/RunEditorFlows.py --editor .build/Editor_Debug/Havana --wrapper Engine/Tools/Headless.sh --only TrackEditor
+```
+
+MIDI input in the editor is pumped from the shared `MidiDevice` singleton, only while the editor's windows have focus. A preview session never reads it.
 
 ## Caveats & Fragility
 

@@ -53,6 +53,20 @@ public:
 	void Pause();
 	void Resume();
 
+	// The Track Editor's preview (Docs/Songs-and-DLC.md): the highway and venue of a chart the
+	// editor owns, shown at the time the editor gives. No audio, no judging and no input: the
+	// editor has the stems, the clock and the MIDI queue. inTrackData must outlive the preview.
+	enum PreviewPart : int { PreviewNotes = 1, PreviewBeats = 2, PreviewVenue = 4 };
+	void BeginPreview( TrackData& inTrackData );
+	void EndPreview();
+	bool IsPreviewing() const { return m_songState == SongState::Preview; }
+	// Whether the scene's highway has been found (the core has started in a gameplay scene).
+	bool CanPreview() const { return static_cast<bool>( TrackMover ); }
+	void SetPreviewTime( double inTimeMs );
+	// Rebuilds what the editor changed (PreviewPart flags) from the chart as it now stands.
+	void RefreshPreview( int inParts );
+	void SetPreviewPresentation( VenueShow::Presentation inPresentation ) { m_venueShow.SetPresentation( inPresentation ); }
+
 	std::map<std::string, EntityHandle> m_lanes;
 	std::map<PadId, std::string> m_notePrefabs;
 	EntityHandle TrackMover;
@@ -81,8 +95,9 @@ private:
 		PadId Pad = PadId::Invalid;
 		Articulation Technique = Articulation::Normal;
 		std::vector<Decoration> Decorations;
-		// The chart note it was spawned from, to spawn it again when the song is scrubbed back.
-		const NoteData* Source = nullptr;
+		// The chart note it was spawned from (a copy: the chart may be edited meanwhile), to spawn
+		// it again when the song is scrubbed back.
+		NoteData Source;
 	};
 
 	// A colour for a spawned mesh. Applied once its model has bound: binding rebuilds the material
@@ -140,6 +155,12 @@ private:
 	EntityHandle SpawnBox( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent );
 	void BuildHighway();
 	void BuildBeatLines();
+	// The chart's notes as lane states and gems, and their removal.
+	void BuildNotes();
+	void ClearNotes();
+	void ClearBeatLines();
+	void BuildVenue();
+	void UpdatePreview( float inDeltaTime );
 	void UpdateTargetPads( float inDeltaTime );
 	void FlashLane( int inLane );
 	void ApplySpeed();
@@ -167,7 +188,7 @@ private:
 
 	// The song clock: ms into the song, negative during the lead-in. It runs on frame time and is
 	// steered toward FMOD's position, which only moves once per mixer block.
-	enum class SongState { Idle, Loading, LeadIn, Playing, Finished };
+	enum class SongState { Idle, Loading, LeadIn, Playing, Finished, Preview };
 	SongState m_songState = SongState::Idle;
 	double m_songTimeMs = 0.0;
 	unsigned int m_lastAudioPositionMs = 0;
@@ -226,6 +247,8 @@ private:
 	int m_autoplay = 0;
 	bool m_autoplayPlain = false;
 	bool m_seekedFromCommandLine = false;
+	// The preview's time last frame, to tell playing on from a scrub.
+	double m_previewLastMs = 0.0;
 };
 
 ME_REGISTER_CORE( NoteHighwayCore )
