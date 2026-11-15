@@ -32,10 +32,10 @@
         </div>
         <input id="debug-seek" type="range" min="0" max="1000" step="1" data-attr-value="song_progress" data-event-change="debug_seek(ev.value)"/>
     </div>
-    <div id="hud-countdown" data-if="playing && countdown > 0">
+    <div id="hud-countdown" data-if="playing && (countdown > 0 || countdown_intro)">
         <div id="countdown-title">{{track_title}}</div>
         <div id="countdown-artist">{{track_artist}}</div>
-        <div id="countdown-number">{{countdown}}</div>
+        <div id="countdown-number" data-if="countdown > 0">{{countdown}}</div>
     </div>
     <div id="results" data-if="finished">
         <h2>{{track_title}}</h2>

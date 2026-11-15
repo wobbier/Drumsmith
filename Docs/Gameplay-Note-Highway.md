@@ -29,7 +29,7 @@
 
 1. `ShutdownTrack()` deletes the previous notes and stops audio.
 2. `TrackData::LoadNoteData()` reads `NoteData.txt` (pad, stroke, velocity per note, and the beat grid); notes are sorted into one time-ordered list per lane (`m_laneNotes`). Open and closed hi-hat share a lane (the stroke tells them apart, below); the hi-hat pedal has its own.
-3. `LayoutLanes()` places only the columns this chart uses, left to right: crash, hi-hat, splash, snare, high/mid/floor tom, ride, second crash, china. The pedal draws in the hi-hat's column. Spacing is up to 1.8 units, shrunk so the highway is at most 8 units wide; the kick stays at the centre as a bar across all columns, and the strike `Bar` is scaled to the same width.
+3. `LayoutLanes()` places only the columns this chart uses (`ShowsColumn()`: the three toms appear together if any tom is charted), left to right: crash, hi-hat, splash, snare, high/mid/floor tom, ride, second crash, china. The pedal draws in the hi-hat's column. Spacing is up to 1.8 units, shrunk so the highway is at most 8 units wide with every column at full width; tom columns are then drawn at 0.7 of that (`kTomLaneScale`, `LaneWidth()`), so a kit with toms comes out narrower than the cap; the kick stays at the centre as a bar across all columns, and the strike `Bar` is scaled to the same width.
 4. `SpawnNote` builds each note in its lane at `Z = time × speed`, shaped by pad and stroke (the table below).
 5. `BuildHighway` and `BuildBeatLines` add the highway pieces (below).
 6. The `AudioPack` starts loading the stems; the clock is set to `-kLeadInMs` (2 s).

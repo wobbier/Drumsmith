@@ -31,6 +31,8 @@ public:
 	static constexpr float kGoodWindowMs = 90.f;
 	// Silence before the song starts so the first notes can scroll in (ms).
 	static constexpr double kLeadInMs = 2000.0;
+	// The countdown shows the last this-many ms before the first note (ms).
+	static constexpr double kCountdownMs = 3000.0;
 
 	NoteHighwayCore();
 	~NoteHighwayCore();
@@ -171,6 +173,10 @@ private:
 	void JudgeMisses( double inJudgeTimeMs );
 	void ApplyJudgement( Judgement inJudgement, double inOffsetMs );
 	void LayoutLanes();
+	// A lane's width at the strike bar: the lane spacing, slimmer for toms.
+	float LaneWidth( PadId inPad ) const;
+	// Whether a kit column is drawn: it has notes (toms come as a set of three).
+	bool ShowsColumn( PadId inPad ) const;
 	void ResetScore();
 	void UpdateHud( float inDeltaTime );
 	void SetDrumsAudible( bool inAudible );
@@ -202,6 +208,8 @@ private:
 	std::array<LaneNotes, PadId::COUNT> m_laneNotes;
 	float m_laneSpacing = 1.8f;
 	float m_highwayWidth = 7.2f;
+	// Lane divider x positions, left edge to right edge (tom lanes are narrower).
+	std::vector<float> m_columnEdges;
 	bool m_drumsAudible = true;
 	std::vector<PendingTint> m_pendingTints;
 	// Highway pieces built per chart: surface, dividers and pads move with the camera; beat lines

@@ -30,6 +30,13 @@ namespace
     // The widest the lanes may get at the strike bar (world units), and the most room one lane takes.
     constexpr float kMaxHighwayWidth = 8.f;
     constexpr float kMaxLaneSpacing = 1.8f;
+    // Tom lanes are this much of a full lane: toms are the plainest notes to read, and slimmer
+    // tom columns keep a full kit's highway from sprawling.
+    constexpr float kTomLaneScale = 0.7f;
+    bool IsTom( PadId inPad )
+    {
+        return inPad == PadId::HighTom || inPad == PadId::MidTom || inPad == PadId::FloorTom;
+    }
     // Widths at scale 1: the note gem (NewNote.obj, 2 units), and the unit cube the kick bar and
     // the strike bar (Example.lvl's "Bar") use.
     constexpr float kNoteMeshWidth = 2.f;
@@ -219,7 +226,9 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     m_currentTrackPack = AudioPack( inTrackData );
     ResetScore();
     m_songState = SongState::Loading;
-    m_songTimeMs = -kLeadInMs;
+    // At least kLeadInMs of silence, and enough that a song whose drums come in straight away still
+    // gets a full countdown before its first note.
+    m_songTimeMs = -std::max( kLeadInMs, kCountdownMs - m_firstNoteMs );
     m_isPaused = false;
     if( RmlUiCore* ui = GetEngine().RmlUi )
     {
@@ -489,7 +498,8 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     const float tall = accent ? 1.35f : 1.f;
     Vector3 scale;
     float lift = 0.f;
-    float width = m_laneSpacing * 0.9f * size;
+    const float laneWidth = LaneWidth( pad );
+    float width = laneWidth * 0.9f * size;
     if( kick )
     {
         scale = Vector3( m_highwayWidth / kKickMeshWidth, 0.12f * tall, 0.3f );
@@ -497,13 +507,13 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     }
     else if( pedal )
     {
-        width = m_laneSpacing * 0.5f;
+        width = laneWidth * 0.5f;
         scale = Vector3( width, 0.05f, 0.22f );
         lift = -0.02f;
     }
     else if( plate )
     {
-        width = m_laneSpacing * 0.92f * size;
+        width = laneWidth * 0.92f * size;
         scale = Vector3( width, kPlateHeight * tall, kPlateDepth * size );
         lift = kPlateLift;
     }
@@ -610,21 +620,50 @@ std::string NoteHighwayCore::TechniqueName( PadId inPad, Articulation inTechniqu
 }
 
 
+float NoteHighwayCore::LaneWidth( PadId inPad ) const
+{
+    return IsTom( inPad ) ? m_laneSpacing * kTomLaneScale : m_laneSpacing;
+}
+
+
+bool NoteHighwayCore::ShowsColumn( PadId inPad ) const
+{
+    const auto hasNotes = [this]( PadId inLanePad ) { return !m_laneNotes[LaneOf( inLanePad )].Notes.empty(); };
+    if( IsTom( inPad ) )
+    {
+        // All three toms or none: a chart that only uses two would otherwise leave the player
+        // guessing which drums those two columns are.
+        return hasNotes( PadId::HighTom ) || hasNotes( PadId::MidTom ) || hasNotes( PadId::FloorTom );
+    }
+    if( inPad == PadId::ClosedHiHat && hasNotes( PadId::HiHatPedal ) )
+    {
+        return true;
+    }
+    return hasNotes( inPad );
+}
+
+
 void NoteHighwayCore::LayoutLanes()
 {
     // Only the columns this chart uses, spread evenly and centred on the kick.
     std::vector<PadId> columns;
     for( PadId pad : kColumnOrder )
     {
-        const bool pedalNotes = pad == PadId::ClosedHiHat && !m_laneNotes[PadId::HiHatPedal].Notes.empty();
-        if( !m_laneNotes[LaneOf( pad )].Notes.empty() || pedalNotes )
+        if( ShowsColumn( pad ) )
         {
             columns.push_back( pad );
         }
     }
     const int count = std::max<int>( 1, static_cast<int>( columns.size() ) );
+    float units = 0.f;
+    for( PadId pad : columns )
+    {
+        units += IsTom( pad ) ? kTomLaneScale : 1.f;
+    }
+    // Spacing as if every lane were full width, so the slimmer toms narrow the highway rather than
+    // handing their room to the other lanes.
     m_laneSpacing = std::min( kMaxLaneSpacing, kMaxHighwayWidth / static_cast<float>( count ) );
-    m_highwayWidth = m_laneSpacing * static_cast<float>( count );
+    m_highwayWidth = m_laneSpacing * std::max( units, 1.f );
 
     const auto place = [this]( const char* inLane, float inX ) {
         const auto lane = m_lanes.find( inLane );
@@ -634,11 +673,20 @@ void NoteHighwayCore::LayoutLanes()
             Vector3 position = transform.GetPosition();
             position.x = inX;
             transform.SetPosition( position );
+            // Notes are sized in world units against LaneWidth; Example.lvl gives some lanes
+            // (toms, ride) a half-width scale that the notes would otherwise inherit.
+            transform.SetScale( Vector3( 1.f, 1.f, 1.f ) );
         }
     };
+    m_columnEdges.clear();
+    float edge = -m_highwayWidth * 0.5f;
+    m_columnEdges.push_back( edge );
     for( int i = 0; i < static_cast<int>( columns.size() ); ++i )
     {
-        const float x = ( static_cast<float>( i ) - ( static_cast<float>( count ) - 1.f ) * 0.5f ) * m_laneSpacing;
+        const float width = LaneWidth( columns[i] );
+        const float x = edge + width * 0.5f;
+        edge += width;
+        m_columnEdges.push_back( edge );
         place( PadUtils::GetPadId( columns[i] ), x );
         if( columns[i] == PadId::ClosedHiHat )
         {
@@ -802,15 +850,14 @@ void NoteHighwayCore::BuildHighway()
     {
         return;
     }
-    const float halfWidth = m_highwayWidth * 0.5f;
     const float length = kHighwayLength + kHighwayBehind;
     const float centreZ = kHighwayLength * 0.5f - kHighwayBehind * 0.5f;
     m_highwayParts.push_back( SpawnBox( Vector3( 0.f, -0.08f, centreZ ), Vector3( m_highwayWidth + 0.3f, 0.04f, length ), Vector3( 0.02f, 0.02f, 0.03f ), Vector3( 0.03f, 0.03f, 0.045f ), mover ) );
     // Edge rails and lane dividers.
-    for( int i = 0; i <= static_cast<int>( std::lround( m_highwayWidth / m_laneSpacing ) ); ++i )
+    for( size_t i = 0; i < m_columnEdges.size(); ++i )
     {
-        const float x = -halfWidth + static_cast<float>( i ) * m_laneSpacing;
-        const bool edge = i == 0 || std::fabs( x - halfWidth ) < 0.01f;
+        const float x = m_columnEdges[i];
+        const bool edge = i == 0 || i + 1 == m_columnEdges.size();
         const float brightness = edge ? 0.35f : 0.14f;
         m_highwayParts.push_back( SpawnBox( Vector3( x, -0.05f, centreZ ), Vector3( edge ? 0.08f : 0.035f, 0.02f, length ), Vector3( brightness, brightness, brightness ), Vector3( brightness, brightness, brightness ), mover ) );
     }
@@ -819,7 +866,7 @@ void NoteHighwayCore::BuildHighway()
     {
         const int lane = LaneOf( pad );
         const auto entity = m_lanes.find( PadUtils::GetPadId( pad ) );
-        if( m_laneNotes[lane].Notes.empty() || entity == m_lanes.end() || !entity->second )
+        if( !ShowsColumn( pad ) || entity == m_lanes.end() || !entity->second )
         {
             continue;
         }
@@ -828,7 +875,7 @@ void NoteHighwayCore::BuildHighway()
         TargetPad target;
         target.Lane = lane;
         target.Color = color;
-        target.Pad = SpawnBox( Vector3( x, -0.03f, 0.f ), Vector3( m_laneSpacing * 0.86f, 0.05f, 0.45f ), color * 0.5f, color * 0.35f, mover );
+        target.Pad = SpawnBox( Vector3( x, -0.03f, 0.f ), Vector3( LaneWidth( pad ) * 0.86f, 0.05f, 0.45f ), color * 0.5f, color * 0.35f, mover );
         m_highwayParts.push_back( target.Pad );
         m_targetPads.push_back( target );
 
@@ -1414,6 +1461,7 @@ void NoteHighwayCore::ResetScore()
         ui->ModelSetNumber( kModel, "playing", 0 );
         ui->ModelSetNumber( kModel, "finished", 0 );
         ui->ModelSetNumber( kModel, "countdown", 0 );
+        ui->ModelSetNumber( kModel, "countdown_intro", 0 );
         ui->ModelSetNumber( kModel, "track_index", m_trackIndex );
         ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
         ui->ModelSetNumber( kModel, "song_progress", 0 );
@@ -1496,7 +1544,12 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
     }
     ui->ModelSetNumber( kModel, "finished", m_songState == SongState::Finished );
     UpdateLyrics( *ui );
-    ui->ModelSetNumber( kModel, "countdown", m_songState == SongState::LeadIn || m_songState == SongState::Loading ? std::ceil( -m_songTimeMs / 1000.0 ) : 0.0 );
+    // The title card shows over the lead-in; the count runs down to the first note, not the
+    // song's start, so a long intro doesn't end the countdown long before there's anything to hit.
+    const bool counting = m_songState == SongState::Loading || m_songState == SongState::LeadIn || m_songState == SongState::Playing;
+    const double toFirstNoteMs = m_firstNoteMs - m_songTimeMs;
+    ui->ModelSetNumber( kModel, "countdown", counting && toFirstNoteMs > 0.0 && toFirstNoteMs <= kCountdownMs ? std::ceil( toFirstNoteMs / 1000.0 ) : 0.0 );
+    ui->ModelSetNumber( kModel, "countdown_intro", m_songState == SongState::Loading || m_songState == SongState::LeadIn );
     ui->ModelSetNumber( kModel, "score", m_score );
     ui->ModelSetNumber( kModel, "combo", m_combo );
     ui->ModelSetNumber( kModel, "multiplier", Multiplier( m_combo ) );
