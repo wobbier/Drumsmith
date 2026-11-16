@@ -123,7 +123,16 @@ private:
 	struct BeatLine
 	{
 		double TimeMs = 0.0;
+		bool Measure = false;
 		EntityHandle Line;
+	};
+
+	// The stretch of a time-sorted list that has entities: [Begin, End). Only what is on the
+	// visible highway is spawned (UpdateWindow).
+	struct LiveRange
+	{
+		size_t Begin = 0;
+		size_t End = 0;
 	};
 
 	// One lane's notes in time order; Cursor is the first that might still be judged.
@@ -131,6 +140,7 @@ private:
 	{
 		std::vector<NoteState> Notes;
 		size_t Cursor = 0;
+		LiveRange Live;
 	};
 
 	struct Hit
@@ -162,6 +172,11 @@ private:
 	void ClearNotes();
 	void ClearBeatLines();
 	void BuildVenue();
+	void SpawnBeatLine( BeatLine& ioLine );
+	// Spawns the notes and beat lines on the highway seen at inTimeMs (plus a margin ahead, so a gem
+	// is coloured before it comes into view) and deletes the ones past its back end. inRecheck also
+	// spawns notes inside a range that was already live (notes re-armed by a scrub).
+	void UpdateWindow( double inTimeMs, bool inRecheck = false );
 	void UpdatePreview( float inDeltaTime );
 	void UpdateTargetPads( float inDeltaTime );
 	void FlashLane( int inLane );
@@ -217,6 +232,7 @@ private:
 	std::vector<EntityHandle> m_highwayParts;
 	std::vector<TargetPad> m_targetPads;
 	std::vector<BeatLine> m_beatLines;
+	LiveRange m_beatLive;
 	float m_kickFlash = 0.f;
 	// The highway speed the notes were last placed for (chart NoteSpeed x the player's setting).
 	float m_appliedSpeed = 0.f;
@@ -257,6 +273,8 @@ private:
 	bool m_seekedFromCommandLine = false;
 	// The preview's time last frame, to tell playing on from a scrub.
 	double m_previewLastMs = 0.0;
+	// The preview's notes need re-arming from the playhead (a fresh build), as after a scrub.
+	bool m_previewRearm = true;
 };
 
 ME_REGISTER_CORE( NoteHighwayCore )

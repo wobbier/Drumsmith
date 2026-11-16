@@ -285,7 +285,8 @@ void NoteHighwayCore::BuildNotes()
     m_firstNoteMs = 1e12;
     m_appliedSpeed = UnitsPerSecond();
     m_totalNotes = 0;
-    // Spawn in time order per lane so each NoteState gets its entity.
+    // Match each NoteState to its chart note, in time order per lane. Gems are spawned later, as
+    // the highway reaches them (UpdateWindow).
     std::vector<const NoteData*> ordered;
     for( const NoteData& note : inTrackData.m_noteData )
     {
@@ -301,8 +302,7 @@ void NoteHighwayCore::BuildNotes()
         size_t& next = nextInLane[LaneOf( it->m_editorLane )];
         if( next < laneNotes.Notes.size() )
         {
-            laneNotes.Notes[next].Source = *it;
-            SpawnNote( *it, laneNotes.Notes[next++] );
+            laneNotes.Notes[next++].Source = *it;
         }
         m_lastNoteMs = std::max( m_lastNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
         m_firstNoteMs = std::min( m_firstNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
@@ -339,6 +339,7 @@ void NoteHighwayCore::ClearBeatLines()
         }
     }
     m_beatLines.clear();
+    m_beatLive = LiveRange();
 }
 
 
@@ -355,6 +356,7 @@ void NoteHighwayCore::BeginPreview( TrackData& inTrackData )
     m_songState = SongState::Preview;
     m_songTimeMs = 0.0;
     m_previewLastMs = 0.0;
+    m_previewRearm = true;
     m_isPaused = false;
     m_lyrics.Clear();
     if( GameSettings::GetInstance().LyricsOnHud() )
@@ -396,6 +398,7 @@ void NoteHighwayCore::RefreshPreview( int inParts )
     {
         ClearNotes();
         BuildNotes();
+        m_previewRearm = true;
     }
     if( inParts & PreviewBeats )
     {
@@ -423,31 +426,48 @@ void NoteHighwayCore::UpdatePreview( float inDeltaTime )
     // being played. Notes behind it are gone as a clean play leaves them, lighting their pads as
     // they cross while the song plays on (not on a scrub); notes ahead are there again.
     const double now = m_songTimeMs;
-    const bool playing = now > m_previewLastMs && now - m_previewLastMs < 250.0;
+    const bool playing = !m_previewRearm && now >= m_previewLastMs && now - m_previewLastMs < 250.0;
     for( size_t lane = 0; lane < m_laneNotes.size(); ++lane )
     {
-        for( NoteState& note : m_laneNotes[lane].Notes )
+        LaneNotes& notes = m_laneNotes[lane];
+        if( playing )
         {
-            if( note.TimeMs <= now )
+            // Playing on: only the notes that crossed the bar since last frame change.
+            for( ; notes.Cursor < notes.Notes.size() && notes.Notes[notes.Cursor].TimeMs <= now; ++notes.Cursor )
             {
+                NoteState& note = notes.Notes[notes.Cursor];
                 if( !note.Judged )
                 {
                     note.Judged = true;
                     HideNote( note );
-                    if( playing && note.TimeMs > m_previewLastMs )
+                    if( note.TimeMs > m_previewLastMs )
                     {
                         FlashLane( static_cast<int>( lane ) );
                     }
                 }
             }
-            else if( note.Judged || !note.Note )
+            continue;
+        }
+        // A scrub (or a fresh build): every note is re-armed from the playhead. Only flags change
+        // here; UpdateWindow spawns what is in view.
+        notes.Cursor = notes.Notes.size();
+        for( size_t i = 0; i < notes.Notes.size(); ++i )
+        {
+            NoteState& note = notes.Notes[i];
+            const bool past = note.TimeMs <= now;
+            if( past && !note.Judged )
             {
                 HideNote( note );
-                SpawnNote( note.Source, note );
-                note.Judged = false;
+            }
+            note.Judged = past;
+            if( !past )
+            {
+                notes.Cursor = std::min( notes.Cursor, i );
             }
         }
     }
+    UpdateWindow( now, !playing );
+    m_previewRearm = false;
     m_previewLastMs = now;
     if( TrackMover )
     {
@@ -605,6 +625,88 @@ void NoteHighwayCore::HideNote( NoteState& ioNote )
 }
 
 
+void NoteHighwayCore::UpdateWindow( double inTimeMs, bool inRecheck )
+{
+    // Only what is on the visible highway has entities: the renderer and the ECS visit every
+    // entity each frame, seen or not, so a whole song's worth would cost every frame of it.
+    // Margins: a gem spawns half a second before the far end (so its colour, which waits for its
+    // model to bind, is on before it shows) and goes half a second after the back end.
+    constexpr double kMarginMs = 500.0;
+    const double msPerUnit = 1000.0 / static_cast<double>( std::max( m_appliedSpeed, 0.01f ) );
+    const double fromMs = inTimeMs - static_cast<double>( kHighwayBehind ) * msPerUnit - kMarginMs;
+    const double toMs = inTimeMs + static_cast<double>( kHighwayLength ) * msPerUnit + kMarginMs;
+
+    // Moves [Begin, End) to the new range: what left it is despawned, what joined it spawned. The
+    // overlap is untouched, unless inRecheck asks for it to be spawned where it has to be.
+    const auto reconcile = [inRecheck]( LiveRange& ioLive, size_t inBegin, size_t inEnd, const auto& inSpawn, const auto& inDespawn ) {
+        for( size_t i = ioLive.Begin; i < std::min( ioLive.End, inBegin ); ++i )
+        {
+            inDespawn( i );
+        }
+        for( size_t i = std::max( ioLive.Begin, inEnd ); i < ioLive.End; ++i )
+        {
+            inDespawn( i );
+        }
+        if( inRecheck )
+        {
+            for( size_t i = inBegin; i < inEnd; ++i )
+            {
+                inSpawn( i );
+            }
+        }
+        else
+        {
+            for( size_t i = inBegin; i < std::min( inEnd, ioLive.Begin ); ++i )
+            {
+                inSpawn( i );
+            }
+            for( size_t i = std::max( inBegin, ioLive.End ); i < inEnd; ++i )
+            {
+                inSpawn( i );
+            }
+        }
+        ioLive.Begin = inBegin;
+        ioLive.End = inEnd;
+    };
+
+    for( LaneNotes& lane : m_laneNotes )
+    {
+        std::vector<NoteState>& notes = lane.Notes;
+        const size_t begin = static_cast<size_t>( std::lower_bound( notes.begin(), notes.end(), fromMs, []( const NoteState& n, double t ) { return n.TimeMs < t; } ) - notes.begin() );
+        const size_t end = static_cast<size_t>( std::upper_bound( notes.begin(), notes.end(), toMs, []( double t, const NoteState& n ) { return t < n.TimeMs; } ) - notes.begin() );
+        // A hit note stays gone and a missed one keeps its grey gem: only unjudged notes spawn.
+        reconcile( lane.Live, begin, std::max( begin, end ),
+            [&notes, this]( size_t i ) {
+                NoteState& note = notes[i];
+                if( !note.Judged && !note.Note )
+                {
+                    SpawnNote( note.Source, note );
+                }
+            },
+            [&notes, this]( size_t i ) { HideNote( notes[i] ); } );
+    }
+
+    const size_t beatBegin = static_cast<size_t>( std::lower_bound( m_beatLines.begin(), m_beatLines.end(), fromMs, []( const BeatLine& b, double t ) { return b.TimeMs < t; } ) - m_beatLines.begin() );
+    const size_t beatEnd = static_cast<size_t>( std::upper_bound( m_beatLines.begin(), m_beatLines.end(), toMs, []( double t, const BeatLine& b ) { return t < b.TimeMs; } ) - m_beatLines.begin() );
+    reconcile( m_beatLive, beatBegin, std::max( beatBegin, beatEnd ),
+        [this]( size_t i ) {
+            if( !m_beatLines[i].Line )
+            {
+                SpawnBeatLine( m_beatLines[i] );
+            }
+        },
+        [this]( size_t i ) {
+            BeatLine& line = m_beatLines[i];
+            if( line.Line )
+            {
+                line.Line->GetComponent<Transform>().SetScale( 0.f );
+                line.Line->MarkForDelete();
+                line.Line = EntityHandle();
+            }
+        } );
+}
+
+
 std::string NoteHighwayCore::TechniqueName( PadId inPad, Articulation inTechnique )
 {
     switch( inTechnique )
@@ -739,6 +841,7 @@ void NoteHighwayCore::ShutdownTrack()
     m_highwayParts.clear();
     m_targetPads.clear();
     m_beatLines.clear();
+    m_beatLive = LiveRange();
     m_pendingTints.clear();
     m_currentTrackPack.Stop();
     m_songState = SongState::Idle;
@@ -912,25 +1015,35 @@ void NoteHighwayCore::BuildBeatLines()
         }
     }
 
+    // Spawned as the highway reaches them (UpdateWindow), which needs them in time order.
+    for( const BeatData& beat : beats )
+    {
+        BeatLine line;
+        line.TimeMs = static_cast<double>( beat.m_time ) * 1000.0;
+        line.Measure = beat.m_measure;
+        m_beatLines.push_back( line );
+    }
+    std::stable_sort( m_beatLines.begin(), m_beatLines.end(), []( const BeatLine& a, const BeatLine& b ) { return a.TimeMs < b.TimeMs; } );
+    m_beatLive = LiveRange();
+    if( CommandLine::Has( "--highway-log" ) && !beats.empty() )
+    {
+        BRUH_FMT( "Highway: %d beat lines from %s", static_cast<int>( m_beatLines.size() ), source.c_str() );
+    }
+}
+
+
+void NoteHighwayCore::SpawnBeatLine( BeatLine& ioLine )
+{
+    // Beat lines sit in song space in the kick's lane, like the notes.
     Transform* parent = nullptr;
     const auto kickLane = m_lanes.find( PadUtils::GetPadId( PadId::Bass ) );
     if( kickLane != m_lanes.end() && kickLane->second )
     {
         parent = &kickLane->second->GetComponent<Transform>();
     }
-    for( const BeatData& beat : beats )
-    {
-        const double timeMs = static_cast<double>( beat.m_time ) * 1000.0;
-        const float brightness = beat.m_measure ? 0.5f : 0.2f;
-        BeatLine line;
-        line.TimeMs = timeMs;
-        line.Line = SpawnBox( Vector3( 0.f, -0.045f, static_cast<float>( timeMs / 1000.0 ) * m_appliedSpeed ), Vector3( m_highwayWidth, 0.015f, beat.m_measure ? 0.09f : 0.045f ), Vector3( brightness, brightness, brightness ), Vector3( brightness, brightness, brightness ), parent );
-        m_beatLines.push_back( line );
-    }
-    if( CommandLine::Has( "--highway-log" ) && !beats.empty() )
-    {
-        BRUH_FMT( "Highway: %d beat lines from %s", static_cast<int>( m_beatLines.size() ), source.c_str() );
-    }
+    const float brightness = ioLine.Measure ? 0.5f : 0.2f;
+    const Vector3 grey( brightness, brightness, brightness );
+    ioLine.Line = SpawnBox( Vector3( 0.f, -0.045f, static_cast<float>( ioLine.TimeMs / 1000.0 ) * m_appliedSpeed ), Vector3( m_highwayWidth, 0.015f, ioLine.Measure ? 0.09f : 0.045f ), grey, grey, parent );
 }
 
 
@@ -992,10 +1105,12 @@ void NoteHighwayCore::ApplySpeed()
         return;
     }
     m_appliedSpeed = speed;
+    // Only what has entities; the window spawns the rest at the new speed.
     for( LaneNotes& lane : m_laneNotes )
     {
-        for( NoteState& note : lane.Notes )
+        for( size_t i = lane.Live.Begin; i < lane.Live.End; ++i )
         {
+            NoteState& note = lane.Notes[i];
             const float z = static_cast<float>( note.TimeMs / 1000.0 ) * speed;
             if( note.Note )
             {
@@ -1016,8 +1131,9 @@ void NoteHighwayCore::ApplySpeed()
             }
         }
     }
-    for( BeatLine& line : m_beatLines )
+    for( size_t i = m_beatLive.Begin; i < m_beatLive.End; ++i )
     {
+        BeatLine& line = m_beatLines[i];
         if( line.Line )
         {
             Transform& transform = line.Line->GetComponent<Transform>();
@@ -1407,28 +1523,25 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
     m_lastAudioPositionMs = m_currentTrackPack.GetPositionMs();
     m_songClockStamp = std::chrono::steady_clock::now();
 
-    // Notes already past the judge are cleared without counting; the rest are spawned fresh
-    // (hit ones were deleted, missed ones greyed).
+    // Notes already past the judge are cleared without counting; the rest are armed again and the
+    // window spawns them fresh (hit ones were deleted, missed ones greyed).
     const double judgeTime = JudgeTimeMs();
     for( LaneNotes& lane : m_laneNotes )
     {
+        for( size_t i = lane.Live.Begin; i < lane.Live.End; ++i )
+        {
+            HideNote( lane.Notes[i] );
+        }
+        lane.Live = LiveRange();
         lane.Cursor = lane.Notes.size();
         for( size_t i = 0; i < lane.Notes.size(); ++i )
         {
             NoteState& note = lane.Notes[i];
-            if( note.TimeMs + kGoodWindowMs < judgeTime )
+            note.Judged = note.TimeMs + kGoodWindowMs < judgeTime;
+            if( !note.Judged )
             {
-                note.Judged = true;
-                HideNote( note );
-                continue;
+                lane.Cursor = std::min( lane.Cursor, i );
             }
-            if( note.Judged || !note.Note )
-            {
-                HideNote( note );
-                SpawnNote( note.Source, note );
-            }
-            note.Judged = false;
-            lane.Cursor = std::min( lane.Cursor, i );
         }
     }
     if( TrackMover )
@@ -1438,6 +1551,7 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
         position.z = static_cast<float>( VisualTimeMs() / 1000.0 ) * m_appliedSpeed;
         mover.SetPosition( position );
     }
+    UpdateWindow( VisualTimeMs() );
     SetDrumsAudible( true );
     m_lastJudgement.clear();
     m_lastHint.clear();
@@ -1624,6 +1738,10 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         position.z = static_cast<float>( VisualTimeMs() / 1000.0 ) * m_appliedSpeed;
         mover.SetPosition( position );
     }
+    if( m_trackData )
+    {
+        UpdateWindow( VisualTimeMs() );
+    }
 
     UpdateTargetPads( context.GetDeltaTime() );
     // F7 swaps the room under the highway mid-song (--venue-swap-every <seconds> does it on a
@@ -1660,8 +1778,9 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     if( logClock && m_songTimeMs >= nextLogMs )
     {
         nextLogMs = std::floor( m_songTimeMs / 1000.0 ) * 1000.0 + 1000.0;
-        BRUH_FMT( "Highway: song %.1f ms, audio %u ms (stems %u ms apart), judged %d (missed %d) of %d, first note %.0f ms",
-            m_songTimeMs, m_currentTrackPack.GetPositionMs(), m_currentTrackPack.StemSpreadMs(), m_perfect + m_great + m_good + m_missed, m_missed, m_totalNotes, m_firstNoteMs );
+        BRUH_FMT( "Highway: song %.1f ms, audio %u ms (stems %u ms apart), judged %d (missed %d) of %d, first note %.0f ms, %d gems and %d beat lines live",
+            m_songTimeMs, m_currentTrackPack.GetPositionMs(), m_currentTrackPack.StemSpreadMs(), m_perfect + m_great + m_good + m_missed, m_missed, m_totalNotes, m_firstNoteMs,
+            static_cast<int>( GetEntities().size() ), static_cast<int>( m_beatLive.End - m_beatLive.Begin ) );
     }
 }
 

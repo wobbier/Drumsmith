@@ -6,7 +6,7 @@
 
 ## Overview
 
-`NoteHighwayCore` is a scene-loaded core (declared in `Assets/Example.lvl`) filtering on `Transform + NoteTrigger`. It receives `LaunchPlayTrackEvent`, spawns one entity per chart note, lays the lanes out for that chart, starts the stems after a lead-in, and every frame advances its own song clock, judges keyboard and MIDI hits per lane, marks passed notes as misses, moves the highway, and fills the `in_game` view model the HUD in `Assets/UI/InGameMenu.rml` shows.
+`NoteHighwayCore` is a scene-loaded core (declared in `Assets/Example.lvl`) filtering on `Transform + NoteTrigger`. It receives `LaunchPlayTrackEvent`, builds a state per chart note (spawning gems only for the stretch of highway in view), lays the lanes out for that chart, starts the stems after a lead-in, and every frame advances its own song clock, judges keyboard and MIDI hits per lane, marks passed notes as misses, moves the highway, and fills the `in_game` view model the HUD in `Assets/UI/InGameMenu.rml` shows.
 
 ## Key Files
 
@@ -30,11 +30,11 @@
 1. `ShutdownTrack()` deletes the previous notes and stops audio.
 2. `TrackData::LoadNoteData()` reads `NoteData.txt` (pad, stroke, velocity per note, and the beat grid); notes are sorted into one time-ordered list per lane (`m_laneNotes`). Open and closed hi-hat share a lane (the stroke tells them apart, below); the hi-hat pedal has its own.
 3. `LayoutLanes()` places only the columns this chart uses (`ShowsColumn()`: the three toms appear together if any tom is charted), left to right: crash, hi-hat, splash, snare, high/mid/floor tom, ride, second crash, china. The pedal draws in the hi-hat's column. Spacing is up to 1.8 units, shrunk so the highway is at most 8 units wide with every column at full width; tom columns are then drawn at 0.7 of that (`kTomLaneScale`, `LaneWidth()`), so a kit with toms comes out narrower than the cap; the kick stays at the centre as a bar across all columns, and the strike `Bar` is scaled to the same width.
-4. `SpawnNote` builds each note in its lane at `Z = time × speed`, shaped by pad and stroke (the table below).
-5. `BuildHighway` and `BuildBeatLines` add the highway pieces (below).
+4. `BuildHighway` adds the highway pieces, and `BuildBeatLines` reads the beat grid (below).
+5. Each frame `UpdateWindow` spawns the notes and beat lines on the visible highway: from the back end (`kHighwayBehind`) to the far end (`kHighwayLength`), plus half a second each side, so a gem has its colour before it comes into view. Whatever leaves that stretch is deleted. Only these have entities: the renderer visits every entity each frame, seen or not, so a dense chart (3,649 notes and 885 beat lines in Beast and the Harlot) kept around 5,000 entities alive for the whole song. Now it keeps about 150. `SpawnNote` builds each note in its lane at `Z = time × speed`, shaped by pad and stroke (the table below). Each lane keeps its live range (`LaneNotes::Live`, binary-searched by time), so a frame touches only the notes entering or leaving it.
 6. The `AudioPack` starts loading the stems; the clock is set to `-kLeadInMs` (2 s).
 
-Speed is the chart's `NoteSpeed` times the player's **Highway Speed** (`GameSettings::HighwaySpeed`, 50-200%, on the settings page and in the pause options). Changing it mid-song moves every note and beat line to its new place (`ApplySpeed`).
+Speed is the chart's `NoteSpeed` times the player's **Highway Speed** (`GameSettings::HighwaySpeed`, 50-200%, on the settings page and in the pause options). Changing it mid-song moves every spawned note and beat line to its new place (`ApplySpeed`); the window then spawns or deletes at the new speed.
 
 Colours come from `PadUtils::GetNoteColor`; gems also glow in their colour (`EmissiveColor`), since the scene has no lights. Every colour goes through `Tint`, which applies it once the mesh's model has bound: binding (`Mesh::BindModelMesh`) rebuilds the material from the prefab's saved one, which would undo an earlier colour.
 
@@ -122,7 +122,7 @@ Points are multiplied by the combo multiplier: ×1, rising by one every 10 notes
 ### Feedback
 
 - **Drum stems:** a miss mutes the drum stems (`drums.ogg`, `drums_1..4.ogg`, via `AudioPack::SetDrumVolume`), and the next hit brings them back, so the player hears their part drop out. A song without separate drum stems can't do this.
-- **Notes:** a hit note is scaled to zero the same frame (its entity is deleted the next); a missed note turns grey and scrolls past.
+- **Notes:** a hit note is scaled to zero the same frame (its entity is deleted the next); a missed note turns grey and scrolls past, and is deleted once it is off the back of the highway.
 - **HUD (`in_game` model):** score, multiplier (orange above ×1), combo from 5, accuracy; the judgement word with early/late and the offset in ms, fading after about half a second; title, artist and a countdown during the lead-in. The chart's lyrics, karaoke-style, top centre (`NoteHighwayCore::UpdateLyrics`, Settings > Lyrics; `Docs/Venue-and-Band.md` → Lyrics).
 - **End:** once every note is judged and the audio has stopped, the results screen shows score, accuracy, each judgement's count and the best combo, with Retry (reloads the scene with the same track) and Continue (the library). Escape on the results screen also returns to the library.
 
@@ -147,8 +147,8 @@ The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the
 - **No fail.** Misses still count in the results, but don't break the combo, mute the drum stems or deflate the crowd and lights (`ApplyJudgement`). There is no fail state yet; this is what a miss costs today. `--no-fail` starts it on.
 - **Autoplay** (OFF / PERFECT / SLOPPY, `NoteHighwayCore::GatherHits`). PERFECT hits every note on time with its chart pad and stroke. SLOPPY plays like a person: each note early or late by up to 75 ms (a triangle around on time: about 64% perfect, 32% great, 4% good) and about one note in twenty-five never hit. The jitter comes from a hash of the note's time and lane, so a run, a retry or a seek plays the same way. Hits go through the normal judging, so scoring, combo, drum muting, the crowd and the lights all react. The HUD shows `AUTOPLAY <mode>` and the results say *Autoplayed*, so a demo score isn't mistaken for a real one.
 - **Strokes** (CHART / PLAIN). With autoplay on, PLAIN hits as a kit that only sends plain strokes and one hi-hat note would: open hi-hats come in closed, rims and flams as plain hits. That exercises technique judging (`TechniqueStrictness`).
-- **Scrubber.** Dragging it fires `InGameSeekTrack`; `NoteHighwayCore::SeekTo` seeks every stem (`AudioPack::Seek`), resets the song clock, clears the notes already past the judge without counting them, and respawns any hit or missed note still ahead (each `NoteState` keeps a copy of its chart note in `Source`). During the lead-in it starts the song first. `--seek <seconds>` does the same once the song starts; `--debug-panel` opens the panel at load.
-- **Editor preview.** `BeginPreview( TrackData& )` puts the core in `SongState::Preview` for the Track Editor (`Docs/Songs-and-DLC.md`, Authoring): it builds the notes, highway, beat lines and venue from a chart the editor owns, and from then on shows whatever time `SetPreviewTime` gives, with no `AudioPack`, lead-in, latency offsets, judging or MIDI pumping. `UpdatePreview` hides notes behind that time (lighting their pads when the time is playing forward) and respawns notes ahead of it. `RefreshPreview( PreviewNotes | PreviewBeats | PreviewVenue )` rebuilds parts after an edit, and `EndPreview` shuts the track down. `SetupTrack` and the preview share `BuildNotes`, `BuildVenue`, `ClearNotes` and `ClearBeatLines`.
+- **Scrubber.** Dragging it fires `InGameSeekTrack`; `NoteHighwayCore::SeekTo` seeks every stem (`AudioPack::Seek`), resets the song clock, clears the notes already past the judge without counting them, and re-arms every note still ahead; the window then spawns the ones in view (each `NoteState` keeps a copy of its chart note in `Source`). During the lead-in it starts the song first. `--seek <seconds>` does the same once the song starts; `--debug-panel` opens the panel at load.
+- **Editor preview.** `BeginPreview( TrackData& )` puts the core in `SongState::Preview` for the Track Editor (`Docs/Songs-and-DLC.md`, Authoring): it builds the notes, highway, beat lines and venue from a chart the editor owns, and from then on shows whatever time `SetPreviewTime` gives, with no `AudioPack`, lead-in, latency offsets, judging or MIDI pumping. `UpdatePreview` hides notes behind that time (lighting their pads when the time is playing forward, walking only the notes that crossed since last frame); a scrub or a rebuild re-arms every note from the playhead (flags only), and the window spawns what is in view. `RefreshPreview( PreviewNotes | PreviewBeats | PreviewVenue )` rebuilds parts after an edit, and `EndPreview` shuts the track down. `SetupTrack` and the preview share `BuildNotes`, `BuildVenue`, `ClearNotes` and `ClearBeatLines`.
 
 The song clock holds while the stems seek, and every stem restarts on the same DSP tick once all have got there (`AudioPack::Seek` / `Update`, `Docs/Audio.md`).
 
@@ -164,7 +164,7 @@ The song clock holds while the stems seek, and every stem restarts on the same D
 - **Mesh widths are constants** in `NoteHighwayCore.cpp` (`kNoteMeshWidth`, `kKickMeshWidth`, `kBarMeshWidth`); changing the note or bar meshes means updating them.
 - **Beat lines need `notes.mid`.** A converted song whose `notes.mid` was deleted, and every native chart, has no beat lines. Storing the tempo map in `NoteData.txt` at conversion would fix both.
 - **The camera is tuned for an 8-unit highway.** It's set in `Example.lvl`, not computed from the lane count.
-- **Highway pieces are separate entities**: a song with many beats adds several hundred meshes; they're instanced by colour.
+- **Highway pieces are separate entities**, instanced by colour. Gems and beat lines exist only while in view (`UpdateWindow`); the surface, dividers and pads are a handful for the whole song. Spawning one costs a few microseconds (a whole dense chart took about 25 ms at load), so they are created and deleted rather than pooled.
 - **No scores are saved.** The track stats page has nothing to show yet.
 
 ## Related Docs
