@@ -13,3 +13,4 @@
 #include "Cores/VocalsTestCore.h"
 #include "Editor/TrackEditor.h"
 #include "Editor/PadBindings.h"
+#include "Components/Venue/VenueMarkers.h"

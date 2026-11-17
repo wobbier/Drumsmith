@@ -1,0 +1,147 @@
+#pragma once
+#include "ECS/Component.h"
+#include "ECS/ComponentDetail.h"
+#include <string>
+
+// Markers a venue author places in a Havana scene (.lvl) to say where the game puts things. They
+// are plain data: nothing here moves, spawns or draws anything; the venue loader reads them.
+//
+// Venue space: metres, +x is the crowd's right, +y is up, +z runs from the crowd toward the band
+// and the back wall. The crowd faces +z and the band faces -z (back at the crowd). Each marker's
+// position, rotation and scale come from the entity's Transform; the facing of each marker is
+// stated on its own class.
+
+
+// One per venue scene: names the venue and describes the room the director and lights work in. The
+// room numbers mirror Director::Room. The Build toggles default off because a scene venue brings
+// its own geometry; switching one on also adds the built-in version of that piece.
+class VenueInfo
+    : public Component<VenueInfo>
+{
+    ME_REFLECTABLE( VenueInfo )
+public:
+    VenueInfo();
+
+    virtual void Init() final;
+
+    std::string Name;
+    std::string Author;
+    bool Outdoor = false;
+    // Metres, venue space. RoomBack and RoomCeiling are the back wall's z and the ceiling's y (the
+    // defaults are far enough away to mean "no wall" / "no ceiling").
+    float RoomBack = -1000.f;
+    float RoomCeiling = 1000.f;
+    float RoomHalfWidth = 30.f;
+    // The sound desk's z, where the crowd's far edge and the Desk camera sit.
+    float DeskZ = -22.f;
+    bool BuildStage = false;    // Also add the built-in stage deck
+    bool BuildSet = false;      // Also add the built-in set dressing
+    bool BuildRig = false;      // Also add the built-in light rig
+    bool BuildFx = false;       // Also add the built-in effects
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueInfo, "Venue" )
+
+
+// Where one band member stands. The entity's position is the performer's feet. The performer
+// faces the entity's local -Z, so a spot with identity rotation faces the crowd; a fresh entity
+// placed in Havana is already facing the right way. Yaw it to turn the performer.
+class VenueSpot
+    : public Component<VenueSpot>
+{
+    ME_REFLECTABLE( VenueSpot )
+public:
+    // Same order as VenueData::Member.
+    enum class Role : int { Drummer = 0, Guitar, Bass, Vocals, Keys };
+
+    VenueSpot();
+
+    virtual void Init() final;
+
+    Role Member = Role::Drummer;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueSpot, "Venue" )
+
+
+// A floor rectangle the crowd fills. Position is the centre of the rectangle, scale x and z are
+// its full width and depth in metres (scale y is ignored), and the crowd faces the entity's local
+// +Z, so identity rotation faces the band. Yaw it for a crowd that looks somewhere else.
+class VenueCrowdArea
+    : public Component<VenueCrowdArea>
+{
+    ME_REFLECTABLE( VenueCrowdArea )
+public:
+    VenueCrowdArea();
+
+    virtual void Init() final;
+
+    // How many people stand in the rectangle at a full house.
+    int HeadCount = 60;
+    // Spread of each person from their grid position, as a fraction of the grid spacing (0 is a
+    // neat grid, 1 is a loose mob).
+    float Jitter = 0.5f;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueCrowdArea, "Venue" )
+
+
+// A camera position the director can cut to. Position is the eye and the camera looks along the
+// entity's local +Z (the engine's forward axis, same as Camera and Light), so rotate it toward the
+// target as you would any camera.
+class VenueCameraSpot
+    : public Component<VenueCameraSpot>
+{
+    ME_REFLECTABLE( VenueCameraSpot )
+public:
+    enum class Kind : int { Wide = 0, Desk, Crane, Close, Custom };
+
+    VenueCameraSpot();
+
+    virtual void Init() final;
+
+    Kind Shot = Kind::Wide;
+    // Degrees, vertical.
+    float FieldOfView = 55.f;
+    // Free text to tell Custom shots apart.
+    std::string Tag;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueCameraSpot, "Venue" )
+
+
+// A screen that shows a feed. The entity's Transform is the quad: scale x and y are its width and
+// height in metres. The picture faces the entity's local -Z, the same way a VenueSpot faces, so a
+// screen behind the band with identity rotation already faces the crowd.
+class VenueScreen
+    : public Component<VenueScreen>
+{
+    ME_REFLECTABLE( VenueScreen )
+public:
+    enum class Feed : int { Stage = 0, Program, Lyrics };
+
+    VenueScreen();
+
+    virtual void Init() final;
+
+    Feed Source = Feed::Stage;
+    // HDR multiplier on the picture's emitted light.
+    float Emissive = 2.f;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueScreen, "Venue" )
+
+
+// Tags a light so the show can cue it. Put it on an entity that also has a Light component; the
+// light's own type, colour and cone still come from that Light.
+class VenueShowLight
+    : public Component<VenueShowLight>
+{
+    ME_REFLECTABLE( VenueShowLight )
+public:
+    enum class Role : int { Wash = 0, Beam, Spot, Blinder, Strobe, Static };
+
+    VenueShowLight();
+
+    virtual void Init() final;
+
+    Role Kind = Role::Wash;
+    // Lights in the same group are cued together; 0 is the default group.
+    int Group = 0;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueShowLight, "Venue" )
