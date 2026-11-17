@@ -38,7 +38,26 @@ public:
     // The same from a floor plan of the caller's (a scene venue's markers): where the band, crowd
     // and screens go and which built-in pieces go up. The plan's Style is the room it dresses as.
     void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan );
+    // The show around a venue scene that is already in the world, where it stands (a venue .lvl
+    // played in Havana: Cores/VenuePreviewCore): its markers read in place, the band, crowd,
+    // cameras and cued lights built around it at the world's origin, no highway. Ignores the
+    // Venue setting (it was asked for). False, with the reason, when the scene isn't a venue.
+    bool BuildAround( World& inWorld, const TrackData& inTrack, const std::vector<EntityHandle>& inSceneRoots, std::string& outProblem );
     void Clear();
+
+    // A venue that wins over the registry's pick for every Build without a style, process-wide:
+    // the Track Editor's preview showing the venue its author picked (Editor/Chart/PreviewSession).
+    // inVenue is what --venue takes: a registry id (hidden ones too), a room name (Arena, Club,
+    // Festival) or a .lvl path. It's resolved at each Build, so a registry Reload in between is
+    // seen. F7 steps on from it as usual. Empty clears it.
+    static void SetOverride( const std::string& inVenue );
+    static const std::string& GetOverride();
+    // What the last Build under the override came to: the scene or room built, or why the scene
+    // couldn't be a venue and which room stood in. Empty until one is built.
+    static const std::string& GetOverrideOutcome();
+    // The last Build under the override couldn't build what it named (no such venue, or a scene
+    // that can't be one) and built a room instead.
+    static bool OverrideFellBack();
     // Tears the venue down and builds the next one in its place, mid-song (F7): Arena, Club,
     // Festival, then each venue scene the menu lists, and round again. The highway on top carries
     // on regardless.
@@ -93,6 +112,8 @@ private:
     // hero shot). Ignored while the last one is still ringing.
     void BigMoment( double inSeconds, int inLevel );
 
+    // This build is the override's (SetOverride): BuildChoice reports what it came to.
+    bool m_fromOverride = false;
     VenueKit m_kit;
     // The venue scene showing (none in a procedural room), and its registry id.
     VenueScene m_scene;

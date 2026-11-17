@@ -11,6 +11,7 @@
 #include "Cores/MenuCore.h"
 #include "Cores/NoteHighwayCore.h"
 #include "Cores/VocalsTestCore.h"
+#include "Cores/VenuePreviewCore.h"
 #include "Editor/TrackEditor.h"
 #include "Editor/PadBindings.h"
 #include "Components/Venue/VenueMarkers.h"

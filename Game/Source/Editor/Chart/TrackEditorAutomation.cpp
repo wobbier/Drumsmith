@@ -1,4 +1,7 @@
 #include "Editor/TrackEditor.h"
+#include "Cores/VenuePreviewCore.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
 #include <cmath>
 #include <cstdlib>
 #include <filesystem>
@@ -26,12 +29,19 @@
 //   track-zoom-fit
 //   track-preview <start|stop>
 //   track-preview-mode <highway|scene|both>
+//   track-preview-venue <id|room|path.lvl>  the venue the preview builds; "song" for the song's pick
+//   track-preview-reload-venue              reads the venue from disk again and rebuilds it
 //   track-assert-count <track> | <n>
 //   track-assert-time <track> | <item> | <seconds>
 //   track-assert-row <track> | <item> | <row>
 //   track-assert-playhead <min> | <max>     seconds
 //   track-assert-dirty <0|1>
 //   track-assert-preview <0|1>              a preview session is running
+//   track-assert-venue-play <0|1>           a venue scene open in the editor is playing its show
+//                                           (Cores/VenuePreviewCore, in play mode)
+//   track-assert-preview-venue <text> [| fallback]  the venue built under the pick names <text>
+//                                           (a scene's name or path, "Arena"...); with fallback, the
+//                                           pick couldn't be built and a room stood in
 
 namespace
 {
@@ -63,6 +73,19 @@ bool TrackEditor::ExecuteAutomation( const std::string& inCommand, const std::st
     const auto arg = [&args]( size_t inIndex ) { return inIndex < args.size() ? args[inIndex] : std::string(); };
     const auto number = [&arg]( size_t inIndex ) { return std::atof( arg( inIndex ).c_str() ); };
 
+    if( inCommand == "track-assert-venue-play" )
+    {
+        // (No song needed, and the Track Editor stays shut: this is the open venue scene's own show.)
+        const SharedPtr<World> world = GetEngine().GetWorld().lock();
+        const VenuePreviewCore* core = world ? world->GetCore<VenuePreviewCore>() : nullptr;
+        const bool showing = core && core->IsShowing();
+        if( showing != ( number( 0 ) != 0.0 ) )
+        {
+            outError = showing ? "the open venue scene is playing its show" : core ? "the open scene's show isn't up" + ( core->GetProblem().empty() ? std::string() : ": " + core->GetProblem() ) : "the open scene has no VenuePreviewCore";
+            return false;
+        }
+        return true;
+    }
     IsOpen = true;
     if( inCommand == "track-open" )
     {
@@ -101,7 +124,6 @@ bool TrackEditor::ExecuteAutomation( const std::string& inCommand, const std::st
         }
         return true;
     }
-
     if( !m_document.IsOpen() )
     {
         outError = "no song is open";
@@ -166,6 +188,14 @@ bool TrackEditor::ExecuteAutomation( const std::string& inCommand, const std::st
     else if( inCommand == "track-preview-mode" )
     {
         m_preview.SetMode( arg( 0 ) == "highway" ? PreviewSession::Mode::Highway : arg( 0 ) == "scene" ? PreviewSession::Mode::Scene : PreviewSession::Mode::Both );
+    }
+    else if( inCommand == "track-preview-venue" )
+    {
+        m_preview.SetVenue( arg( 0 ) == "song" ? std::string() : arg( 0 ) );
+    }
+    else if( inCommand == "track-preview-reload-venue" )
+    {
+        m_preview.ReloadVenue();
     }
     else if( inCommand == "track-select" )
     {
@@ -245,6 +275,20 @@ bool TrackEditor::ExecuteAutomation( const std::string& inCommand, const std::st
         if( m_preview.IsActive() != ( number( 0 ) != 0.0 ) )
         {
             outError = m_preview.IsActive() ? "a preview is running" : "no preview is running";
+            return false;
+        }
+    }
+    else if( inCommand == "track-assert-preview-venue" )
+    {
+        const std::string& outcome = m_preview.GetVenueOutcome();
+        if( outcome.find( arg( 0 ) ) == std::string::npos )
+        {
+            outError = "the preview's venue is " + ( outcome.empty() ? std::string( "not built under a pick" ) : outcome ) + ", not " + arg( 0 );
+            return false;
+        }
+        if( m_preview.VenueFellBack() != ( arg( 1 ) == "fallback" ) )
+        {
+            outError = m_preview.VenueFellBack() ? "the pick fell back: " + outcome : "the pick was built: " + outcome;
             return false;
         }
     }

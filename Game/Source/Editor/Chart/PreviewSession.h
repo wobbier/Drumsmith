@@ -36,6 +36,18 @@ public:
     bool IsStarting() const { return m_state == State::EnteringPlay || m_state == State::LoadingScene; }
     void SetMode( Mode inMode ) { m_mode = inMode; }
     Mode GetMode() const { return m_mode; }
+    // The venue the preview builds (VenueShow::SetOverride): a registry id (hidden venues too), a
+    // room name (Arena, Club, Festival) or a .lvl path; empty for the song's own pick (as a play
+    // would choose it). A running session rebuilds its venue on the next Update.
+    void SetVenue( const std::string& inVenue ) { m_venue = inVenue; }
+    const std::string& GetVenue() const { return m_venue; }
+    // Rescans Assets/Venues and rebuilds the venue from disk (its .lvl read again), for an author
+    // editing the scene in another tab or regenerating it with Tools/Venues.
+    void ReloadVenue();
+    // What the last venue built under the session's pick came to (VenueShow::GetOverrideOutcome).
+    const std::string& GetVenueOutcome() const;
+    // That build couldn't make the pick (no such venue, or a scene that can't be one): a room stood in.
+    bool VenueFellBack() const;
     // The session has the MIDI device (never: a preview leaves it to the editor's recording).
     bool OwnsMidi() const { return false; }
 
@@ -44,6 +56,10 @@ private:
 
     NoteHighwayCore* FindCore() const;
     void Fail( const std::string& inWhy );
+    // The venue picker and its reload button, in the toolbar.
+    void DrawVenueControls( ChartDocument& inDocument );
+    // The session's over (stopped, or play ended): plays choose their own venue again.
+    void ReleaseVenue();
 
     State m_state = State::Idle;
     Mode m_mode = Mode::Both;
@@ -57,6 +73,11 @@ private:
     // rebuild (it is thousands of entities: one rebuild after the edits stop, not one per edit).
     std::array<uint32_t, 4> m_versions{};
     float m_venueWait = -1.f;
+    // The venue picked (SetVenue), the one the running venue was built for, and a reload asked for.
+    std::string m_venue;
+    std::string m_appliedVenue;
+    bool m_reloadVenue = false;
+    bool m_scannedVenues = false;
 };
 
 #endif

@@ -6,6 +6,8 @@
 #include "Engine/Engine.h"
 #include "Events/GameEvents.h"
 #include "Events/HavanaEvents.h"
+#include "Events/SceneEvents.h"
+#include "Cores/VenuePreviewCore.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "optick.h"
 #include <algorithm>
@@ -46,6 +48,14 @@ namespace
 TrackEditor::TrackEditor()
     : HavanaWidget( kEditorWindow )
 {
+    // A venue scene opened in the editor plays its show in play mode (Cores/VenuePreviewCore). The
+    // scene never lists that core, so it is added on load (and after Stop, which reloads the scene).
+    Listen<SceneLoadedEvent>( []( const SceneLoadedEvent& ) {
+        if( const SharedPtr<World> world = GetEngine().GetWorld().lock() )
+        {
+            VenuePreviewCore::AttachIfVenue( *world );
+        }
+    } );
     Listen<EditTrackEvent>( [this]( const EditTrackEvent& event ) {
         const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
         for( int i = 0; i < static_cast<int>( tracks.size() ); ++i )
@@ -74,6 +84,11 @@ void TrackEditor::Init()
     AutomationCommands::Register( "track-", [this]( const std::string& command, const std::string& args, std::string& error ) {
         return ExecuteAutomation( command, args, error );
     } );
+    // The scene the editor opened with may have loaded before this widget listened.
+    if( const SharedPtr<World> world = GetEngine().GetWorld().lock() )
+    {
+        VenuePreviewCore::AttachIfVenue( *world );
+    }
 }
 
 

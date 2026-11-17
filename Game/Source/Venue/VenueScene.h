@@ -65,6 +65,9 @@ public:
     // inVenueRoot, then collects its markers. False, with the reason, when the file can't be read
     // or the scene isn't a venue (whatever was instanced is cleared again).
     bool Load( World& inWorld, const std::string& inPath, Transform& inVenueRoot, std::string& outProblem );
+    // A venue scene that is already in the world (the open scene, played in Havana): its markers
+    // read in place, nothing instanced or stripped. Clear leaves those entities alone.
+    bool Adopt( const std::vector<EntityHandle>& inRoots, Transform& inVenueRoot, std::string& outProblem );
     void Clear();
 
     bool IsLoaded() const { return !m_roots.empty(); }
@@ -74,6 +77,8 @@ public:
 
 private:
     std::vector<EntityHandle> m_roots;
+    // The roots are the open scene's (Adopt), not this venue's to delete.
+    bool m_adopted = false;
     Markers m_markers;
     size_t m_entityCount = 0;
 };

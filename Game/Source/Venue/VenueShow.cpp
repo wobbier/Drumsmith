@@ -36,6 +36,53 @@ namespace
     using VenueLayout::kArenaTierRise;
     using VenueLayout::kArenaBackWallZ;
     using VenueLayout::kArenaSideStandsX;
+
+    // VenueShow::SetOverride's venue, and what its last build came to.
+    std::string& OverrideVenue()
+    {
+        static std::string venue;
+        return venue;
+    }
+
+
+    std::string& OverrideOutcome()
+    {
+        static std::string outcome;
+        return outcome;
+    }
+
+
+    bool& OverrideFallback()
+    {
+        static bool fellBack = false;
+        return fellBack;
+    }
+}
+
+
+void VenueShow::SetOverride( const std::string& inVenue )
+{
+    OverrideVenue() = inVenue;
+    OverrideOutcome().clear();
+    OverrideFallback() = false;
+}
+
+
+const std::string& VenueShow::GetOverride()
+{
+    return OverrideVenue();
+}
+
+
+const std::string& VenueShow::GetOverrideOutcome()
+{
+    return OverrideOutcome();
+}
+
+
+bool VenueShow::OverrideFellBack()
+{
+    return OverrideFallback();
 }
 
 
@@ -55,6 +102,7 @@ void VenueShow::Clear()
     }
     m_savedHighway = false;
     m_highwayCamera = {};
+    m_fromOverride = false;
     m_lights.Clear();
     m_director.Clear();
     m_crowd.Clear();
@@ -161,6 +209,33 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
         choice.Style = std::clamp( inStyle, 0, static_cast<int>( Style::Count ) - 1 );
         choice.Reason = "F7";
     }
+    else if( !OverrideVenue().empty() )
+    {
+        // The Track Editor preview's pick, resolved as --venue would be (hidden venues too).
+        VenueRegistry& registry = VenueRegistry::GetInstance();
+        if( registry.Get().empty() )
+        {
+            registry.Reload();
+        }
+        VenueChoiceInputs inputs;
+        inputs.CommandVenue = OverrideVenue();
+        inputs.SongVenues = false;
+        inputs.VenueStyle = GameSettings::GetInstance().VenueStyle;
+        inputs.SongHash = VenueSongHash( inTrack.m_trackName );
+        inputs.Registry = &registry.Get();
+        choice = ChooseVenue( inputs );
+        // (ChooseVenue answers "--venue..." when the name matched; otherwise it fell through to the setting.)
+        if( choice.Reason.rfind( "--venue", 0 ) != 0 )
+        {
+            choice.Id = OverrideVenue();
+            choice.Reason = "a fallback for the editor's venue " + OverrideVenue() + ", which matches no venue id, room or .lvl path";
+        }
+        else
+        {
+            choice.Reason = "the editor's venue override";
+        }
+        m_fromOverride = true;
+    }
     else
     {
         // --venue, --venue-style, the song's venue, the player's pick, the VenueStyle setting
@@ -183,6 +258,11 @@ void VenueShow::BuildChoice( World& inWorld, const TrackData& inTrack, const Ent
         if( m_root && m_scene.Load( inWorld, choice.ScenePath, m_root->GetComponent<Transform>(), problem ) )
         {
             m_sceneId = choice.Id;
+            if( m_fromOverride )
+            {
+                OverrideOutcome() = "\"" + m_scene.GetMarkers().Plan.Name + "\" (" + choice.ScenePath + ")";
+                OverrideFallback() = false;
+            }
             INFO_FMT( "[Venues]", "Venue: scene \"%s\" (%s), chosen by %s; %d entities in the world before the show", m_scene.GetMarkers().Plan.Name.c_str(), choice.ScenePath.c_str(),
                 choice.Reason.c_str(), static_cast<int>( inWorld.GetEntityCount() ) );
             BuildShow( inWorld, inTrack, inHighwayCamera, m_scene.GetMarkers().Plan );
@@ -194,6 +274,17 @@ void VenueShow::BuildChoice( World& inWorld, const TrackData& inTrack, const Ent
         m_scene.Clear();
         choice = room;
         choice.Reason = "a fallback for " + inChoice.Id;
+        if( m_fromOverride )
+        {
+            OverrideOutcome() = std::string( "the " ) + StyleName( static_cast<Style>( std::clamp( room.Style, 0, 2 ) ) ) + ": " + inChoice.ScenePath + " can't be a venue (" + problem + ")";
+            OverrideFallback() = true;
+        }
+    }
+    else if( m_fromOverride )
+    {
+        const std::string room = std::string( "the " ) + StyleName( static_cast<Style>( std::clamp( choice.Style, 0, static_cast<int>( Style::Count ) - 1 ) ) );
+        OverrideFallback() = choice.Reason.rfind( "a fallback", 0 ) == 0;
+        OverrideOutcome() = OverrideFallback() ? room + ": " + choice.Id + " matches no venue" : room;
     }
     const int style = std::clamp( choice.Style, 0, static_cast<int>( Style::Count ) - 1 );
     VenuePlan plan = VenuePlan::ForStyle( style );
@@ -227,6 +318,27 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
         return;
     }
     BuildShow( inWorld, inTrack, inHighwayCamera, plan );
+}
+
+
+bool VenueShow::BuildAround( World& inWorld, const TrackData& inTrack, const std::vector<EntityHandle>& inSceneRoots, std::string& outProblem )
+{
+    Clear();
+    m_world = &inWorld;
+    m_track = &inTrack;
+    // The scene stays where it was authored: venue space is world space.
+    m_kit.Begin( inWorld );
+    m_root = m_kit.Group( "Venue", nullptr, Vector3( 0.f, 0.f, 0.f ) );
+    if( !m_root || !m_scene.Adopt( inSceneRoots, m_root->GetComponent<Transform>(), outProblem ) )
+    {
+        Clear();
+        return false;
+    }
+    m_sceneId = "(open scene)";
+    INFO_FMT( "[Venues]", "Venue: the open scene \"%s\", built in place; %d entities in the world before the show", m_scene.GetMarkers().Plan.Name.c_str(),
+        static_cast<int>( inWorld.GetEntityCount() ) );
+    BuildShow( inWorld, inTrack, EntityHandle(), m_scene.GetMarkers().Plan );
+    return true;
 }
 
 

@@ -1,0 +1,16 @@
+# usage: Havana --scene Assets/Venues/Backyard/Backyard.lvl --editor-exec Assets/Scenes/Tests/VenuePlayFlows.edscript --frame-time 0.016666667
+# A venue scene opened in the editor and played (Cores/VenuePreviewCore): the band, crowd, cameras
+# and cued lights go up around the open scene, to a demo chart, and Stop puts the scene back.
+wait 20
+track-assert-venue-play 0
+play
+wait 150
+track-assert-venue-play 1
+screenshot .tmp/VenuePlayFlows_backyard.png
+wait 60
+screenshot .tmp/VenuePlayFlows_backyard_later.png
+assert-images .tmp/VenuePlayFlows_backyard.png | .tmp/VenuePlayFlows_backyard_later.png | different
+stop
+wait 30
+track-assert-venue-play 0
+quit

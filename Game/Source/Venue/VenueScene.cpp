@@ -424,12 +424,31 @@ bool VenueScene::Load( World& inWorld, const std::string& inPath, Transform& inV
 }
 
 
+bool VenueScene::Adopt( const std::vector<EntityHandle>& inRoots, Transform& inVenueRoot, std::string& outProblem )
+{
+    Clear();
+    if( !Collect( inRoots, inVenueRoot, m_markers, outProblem ) )
+    {
+        m_markers = Markers();
+        return false;
+    }
+    m_roots = inRoots;
+    m_adopted = true;
+    m_entityCount = inRoots.size();
+    INFO_FMT( "[Venues]", "The open scene (\"%s\"): %d spots, %d crowd areas, %d camera spots, %d screens, %d cued lights, %d static%s",
+        m_markers.Plan.Name.c_str(), m_markers.Spots, m_markers.CrowdAreas, m_markers.Cameras, m_markers.Screens, static_cast<int>( m_markers.Lights.size() ),
+        m_markers.StaticLights, m_markers.HasDirectional ? ", its own directional" : ", no directional" );
+    return true;
+}
+
+
 void VenueScene::Clear()
 {
     for( EntityHandle& root : m_roots )
     {
-        if( root ) root->MarkForDelete();
+        if( root && !m_adopted ) root->MarkForDelete();
     }
+    m_adopted = false;
     m_roots.clear();
     m_markers = Markers();
     m_entityCount = 0;

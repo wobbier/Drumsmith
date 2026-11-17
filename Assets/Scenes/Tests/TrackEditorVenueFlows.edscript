@@ -1,0 +1,61 @@
+# usage: Havana --scene Assets/Example.lvl --editor-exec Assets/Scenes/Tests/TrackEditorVenueFlows.edscript --frame-time 0.016666667
+# The Track Editor preview's venue picker (Editor/Chart/PreviewSession): a venue scene from
+# Assets/Venues picked before the preview starts, another (a hidden one) while it runs, a reload
+# from disk, a built-in room, a name that matches nothing (a room stands in), then the song's own pick.
+wait 20
+show-window Track Editor
+wait 3
+track-open-copy Assets/Scenes/Tests/TrackEditorFixture | .tmp/TrackEditorVenueFlows/Song
+wait 3
+
+# Picked before the preview starts: the session builds it.
+track-preview-venue Backyard
+track-preview-mode scene
+track-preview start
+wait 240
+track-assert-preview 1
+track-assert-preview-venue Backyard Party
+track-seek 1.2
+wait 60
+screenshot .tmp/TrackEditorVenueFlows_backyard.png
+
+# A hidden venue, while the preview runs.
+track-preview-venue Template
+wait 60
+track-assert-preview 1
+track-assert-preview-venue Template
+screenshot .tmp/TrackEditorVenueFlows_template.png
+assert-images .tmp/TrackEditorVenueFlows_backyard.png | .tmp/TrackEditorVenueFlows_template.png | different
+
+# Reload: the scene is read from disk again and the show rebuilt in place.
+track-preview-reload-venue
+wait 60
+track-assert-preview 1
+track-assert-preview-venue Template
+
+# A built-in room by name.
+track-preview-venue Club
+wait 60
+track-assert-preview-venue Club
+screenshot .tmp/TrackEditorVenueFlows_club.png
+assert-images .tmp/TrackEditorVenueFlows_template.png | .tmp/TrackEditorVenueFlows_club.png | different
+
+# A name that matches nothing: a room stands in, and the session says so.
+track-preview-venue NoSuchVenue
+wait 60
+track-assert-preview 1
+track-assert-preview-venue NoSuchVenue | fallback
+
+# Back to Backyard with the highway on top, then the song's own pick.
+track-preview-venue Backyard
+track-preview-mode both
+wait 60
+track-assert-preview-venue Backyard Party
+screenshot .tmp/TrackEditorVenueFlows_backyard_both.png
+track-preview-venue song
+wait 60
+track-assert-preview 1
+track-preview stop
+wait 30
+track-assert-preview 0
+quit
