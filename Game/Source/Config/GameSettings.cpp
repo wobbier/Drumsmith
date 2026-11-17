@@ -35,6 +35,8 @@ void GameSettings::Save()
     RootJson["Venue"] = Venue;
     RootJson["VenueCamera"] = VenueCamera;
     RootJson["VenueStyle"] = VenueStyle;
+    RootJson["VenueId"] = VenueId;
+    RootJson["SongVenues"] = SongVenues;
     RootJson["Lyrics"] = Lyrics;
     RootJson["Favorites"] = FavoriteTracks;
     RootJson["PracticeTempos"] = PracticeTempos;
@@ -164,6 +166,13 @@ void GameSettings::Load()
     if( RootJson.contains( "VenueStyle" ) && RootJson["VenueStyle"].is_number() )
     {
         VenueStyle = std::clamp( RootJson["VenueStyle"].get<int>(), 0, 3 );
+    }
+
+    VenueId = RootJson.contains( "VenueId" ) && RootJson["VenueId"].is_string() ? RootJson["VenueId"].get<std::string>() : std::string();
+
+    if( RootJson.contains( "SongVenues" ) && RootJson["SongVenues"].is_boolean() )
+    {
+        SongVenues = RootJson["SongVenues"].get<bool>();
     }
 
     if( RootJson.contains( "Lyrics" ) && RootJson["Lyrics"].is_number() )

@@ -2,5 +2,6 @@
  "Name": "Template",
  "Author": "Drumsmith",
  "Scene": "Template.lvl",
- "Version": 1
+ "Version": 1,
+ "Hidden": true
 }

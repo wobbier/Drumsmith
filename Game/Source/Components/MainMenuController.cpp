@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include "Venue/VenueRegistry.h"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -191,7 +192,7 @@ void MainMenuController::PopulateModel()
     }
     const GameSettings& settings = GameSettings::GetInstance();
     ui->ModelEnsure( kModel );
-    for( const char* event : { "open_settings", "close_settings", "save_settings", "select_device", "refresh_devices", "convert_dlc", "calibrate", "bind_key", "bind_midi", "kit_clear", "kit_standard", "settings_tab", "server_add", "server_remove", "server_test", "technique", "stage_lighting", "venue", "venue_camera", "venue_style", "lyrics", "metronome" } )
+    for( const char* event : { "open_settings", "close_settings", "save_settings", "select_device", "refresh_devices", "convert_dlc", "calibrate", "bind_key", "bind_midi", "kit_clear", "kit_standard", "settings_tab", "server_add", "server_remove", "server_test", "technique", "stage_lighting", "venue", "venue_camera", "venue_style", "venue_pick", "song_venues", "lyrics", "metronome" } )
     {
         ui->ModelRegisterEvent( kModel, event );
     }
@@ -207,6 +208,10 @@ void MainMenuController::PopulateModel()
     ui->ModelSetNumber( kModel, "venue", settings.Venue );
     ui->ModelSetNumber( kModel, "venue_camera", settings.VenueCamera );
     ui->ModelSetNumber( kModel, "venue_style", settings.VenueStyle );
+    ui->ModelSetNumber( kModel, "song_venues", settings.SongVenues );
+    RefreshVenues();
+    // A pick the registry no longer has is not in use: the room button shows selected instead.
+    ui->ModelSetString( kModel, "venue_id", VenueRegistry::GetInstance().Find( settings.VenueId ) ? settings.VenueId : std::string() );
     ui->ModelSetNumber( kModel, "lyrics", settings.Lyrics );
     ui->ModelSetNumber( kModel, "metronome", settings.Metronome );
     // The text box is for a server to add; the ones already set are the rows above it.
@@ -219,6 +224,33 @@ void MainMenuController::PopulateModel()
     RefreshPads();
     RefreshServers();
     m_modelReady = true;
+}
+
+
+void MainMenuController::RefreshVenues()
+{
+    RmlUiCore* ui = GetEngine().RmlUi;
+    if( !ui )
+    {
+        return;
+    }
+    VenueRegistry& registry = VenueRegistry::GetInstance();
+    registry.Reload();
+    // Hidden venues (the Template) stay out of the list but still work with --venue.
+    std::vector<const VenueEntry*> venues;
+    for( const VenueEntry& entry : registry.Get() )
+    {
+        if( !entry.Hidden )
+        {
+            venues.push_back( &entry );
+        }
+    }
+    ui->ModelSetListCount( kModel, "venues", static_cast<int>( venues.size() ) );
+    for( int i = 0; i < static_cast<int>( venues.size() ); ++i )
+    {
+        ui->ModelSetItemString( kModel, "venues", i, "id", venues[i]->Id );
+        ui->ModelSetItemString( kModel, "venues", i, "name", venues[i]->Name );
+    }
 }
 
 
@@ -495,8 +527,29 @@ void MainMenuController::Update( float dt )
         else if( event == "venue_style" )
         {
             const int style = std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 0.0 ) ), 0, 3 );
+            // A built-in room replaces a scene venue.
             GameSettings::GetInstance().VenueStyle = style;
+            GameSettings::GetInstance().VenueId.clear();
             ui->ModelSetNumber( kModel, "venue_style", style );
+            ui->ModelSetString( kModel, "venue_id", "" );
+            ui->ModelSetString( kModel, "settings_status", "" );
+        }
+        else if( event == "venue_pick" )
+        {
+            // A scene venue from Assets/Venues, by id.
+            const std::string id = UIModel::ArgString( args, 0 );
+            if( VenueRegistry::GetInstance().Find( id ) )
+            {
+                GameSettings::GetInstance().VenueId = id;
+                ui->ModelSetString( kModel, "venue_id", id );
+                ui->ModelSetString( kModel, "settings_status", "" );
+            }
+        }
+        else if( event == "song_venues" )
+        {
+            const bool on = UIModel::ArgNumber( args, 0, 1.0 ) != 0.0;
+            GameSettings::GetInstance().SongVenues = on;
+            ui->ModelSetNumber( kModel, "song_venues", on );
             ui->ModelSetString( kModel, "settings_status", "" );
         }
         else if( event == "metronome" )

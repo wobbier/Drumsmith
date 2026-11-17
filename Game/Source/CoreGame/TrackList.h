@@ -176,6 +176,9 @@ public:
     float m_startTime = 0.f;
     // The song on the streaming services (UI/MusicLinks.h), by service: "Links" in TrackData.txt.
     std::map<std::string, std::string> m_links;
+    // The venue this song asks for (a registry id or Arena/Club/Festival), when the player's
+    // "Song venues" setting is on: "Venue" in TrackData.txt, empty for none.
+    std::string m_venueId;
     int m_bpm = 69;
     int m_noteCount = 0;
     bool m_proDrums = false;
@@ -201,6 +204,11 @@ public:
     // The delay calibration's chart (CoreGame/Calibration.h): built in memory like a lesson's;
     // the highway measures the hits against it instead of judging them.
     bool m_calibration = false;
+
+    // The song's folder as the loader recorded it: an absolute disk path (maybe with a trailing
+    // slash), where its own Venue/ folder would sit.
+    const std::string& GetDirectory() const { return m_directory; }
+    void SetDirectory( const std::string& inDirectory ) { m_directory = inDirectory; }
 
 private:
     std::string m_directory;

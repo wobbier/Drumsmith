@@ -49,6 +49,10 @@ public:
     int VenueCamera = 0;
     // Which room (VenueShow::Style): 0 arena, 1 club, 2 festival, 3 a random one per song.
     int VenueStyle = 0;
+    // A scene venue picked from Assets/Venues (Venue/VenueRegistry.h) by its id; empty uses VenueStyle.
+    std::string VenueId;
+    // Whether a song may bring its own venue (its Venue field or Venue/ folder) over the player's pick.
+    bool SongVenues = true;
     // Where a chart's lyrics show (Docs/Venue-and-Band.md → Lyrics): 0 off, 1 the HUD, 2 the
     // venue's LED wall, 3 both.
     int Lyrics = 3;

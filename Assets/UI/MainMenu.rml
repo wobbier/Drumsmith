@@ -87,10 +87,16 @@
             </div>
             <div class="setting-row">
                 <label>Room <span>where the band plays (F7 swaps it mid-song)</span></label>
-                <button id="venue-style-arena" class="device-choice" data-class-selected="venue_style == 0" data-event-click="venue_style(0)">Arena</button>
-                <button id="venue-style-club" class="device-choice" data-class-selected="venue_style == 1" data-event-click="venue_style(1)">Club</button>
-                <button id="venue-style-festival" class="device-choice" data-class-selected="venue_style == 2" data-event-click="venue_style(2)">Festival</button>
-                <button id="venue-style-random" class="device-choice" data-class-selected="venue_style == 3" data-event-click="venue_style(3)">Random</button>
+                <button id="venue-style-arena" class="device-choice" data-class-selected="venue_id == '' && venue_style == 0" data-event-click="venue_style(0)">Arena</button>
+                <button id="venue-style-club" class="device-choice" data-class-selected="venue_id == '' && venue_style == 1" data-event-click="venue_style(1)">Club</button>
+                <button id="venue-style-festival" class="device-choice" data-class-selected="venue_id == '' && venue_style == 2" data-event-click="venue_style(2)">Festival</button>
+                <button id="venue-style-random" class="device-choice" data-class-selected="venue_id == '' && venue_style == 3" data-event-click="venue_style(3)">Random</button>
+                <button class="device-choice" data-for="place : venues" data-class-selected="venue_id == place.id" data-event-click="venue_pick(place.id)">{{place.name}}</button>
+            </div>
+            <div class="setting-row">
+                <label>Song Venues <span>let a song bring its own venue</span></label>
+                <button id="song-venues-on" class="device-choice" data-class-selected="song_venues == 1" data-event-click="song_venues(1)">On</button>
+                <button id="song-venues-off" class="device-choice" data-class-selected="song_venues == 0" data-event-click="song_venues(0)">Off</button>
             </div>
             <div class="setting-row">
                 <label>Venue Camera <span>whose camera cuts to follow</span></label>

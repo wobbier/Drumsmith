@@ -7,6 +7,7 @@ A floor, a 0.5 m stage with a raised drummer platform, the five band spots, one 
 camera spot, two cued wash lights and a static key light. Deterministic: rerun = same bytes.
 """
 import os
+import json
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -55,6 +56,14 @@ def main():
     folder = os.path.join(repo_root(), "Assets", "Venues", "Template")
     build().write(os.path.join(folder, "Template.lvl"))
     write_venue_json(folder, "Template", "Template.lvl")
+    # Findable with --venue Template, but not offered in the Venue menu.
+    path = os.path.join(folder, "venue.json")
+    with open(path) as f:
+        meta = json.load(f)
+    meta["Hidden"] = True
+    with open(path, "w", newline="\n") as f:
+        json.dump(meta, f, indent=1)
+        f.write("\n")
     print("wrote", folder)
 
 

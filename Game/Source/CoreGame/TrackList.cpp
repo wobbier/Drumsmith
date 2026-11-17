@@ -691,6 +691,10 @@ void TrackData::OnSaveTrackData( json& outJson )
     {
         outJson["Links"] = m_links;
     }
+    if( !m_venueId.empty() )
+    {
+        outJson["Venue"] = m_venueId;
+    }
     outJson["NoteCount"] = m_noteCount;
 }
 
@@ -849,6 +853,7 @@ void TrackData::OnLoadTrackData( const json& inJson )
             }
         }
     }
+    m_venueId = inJson.contains( "Venue" ) && inJson["Venue"].is_string() ? inJson["Venue"].get<std::string>() : std::string();
     m_startTime = inJson.contains( "StartTime" ) && inJson["StartTime"].is_number() ? std::max( 0.f, inJson["StartTime"].get<float>() ) : 0.f;
     if( inJson.contains( "PreviewPercent" ) )
     {

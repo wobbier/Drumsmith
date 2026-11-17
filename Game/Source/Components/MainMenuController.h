@@ -26,6 +26,8 @@ public:
 private:
     void PopulateModel();
     void RefreshDevices();
+    // The scene venues the Venue tab lists after the built-in rooms (VenueRegistry).
+    void RefreshVenues();
     void ApplySettings( bool inSave );
     void OpenSettings( bool inOpen );
     // The drum kit rows: each pad's key and MIDI note, and capturing a new one.
