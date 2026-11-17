@@ -1,0 +1,656 @@
+{
+ "Version": 2,
+ "Cores": [],
+ "Entities": [
+  {
+   "GUID": "5b2ce35b78bfb85d",
+   "Name": "Template Venue",
+   "DestroyOnLoad": true,
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "57b60a14ae2ab55f",
+   "Name": "Geometry",
+   "DestroyOnLoad": true,
+   "Parent": "5b2ce35b78bfb85d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "128608dee4c31bcc",
+   "Name": "Lights",
+   "DestroyOnLoad": true,
+   "Parent": "5b2ce35b78bfb85d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "09779e717c0b2694",
+   "Name": "Markers",
+   "DestroyOnLoad": true,
+   "Parent": "5b2ce35b78bfb85d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "3be76a7b4d0b2f29",
+   "Name": "Floor",
+   "DestroyOnLoad": true,
+   "Parent": "57b60a14ae2ab55f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -0.1,
+      -2.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      12.0,
+      0.1,
+      13.5
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.32,
+       0.33,
+       0.36
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2fda954040907096",
+   "Name": "Back Wall",
+   "DestroyOnLoad": true,
+   "Parent": "57b60a14ae2ab55f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.0,
+      11.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      12.0,
+      3.0,
+      0.15
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.12,
+       0.14
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "520c93b458ab897c",
+   "Name": "Stage Deck",
+   "DestroyOnLoad": true,
+   "Parent": "57b60a14ae2ab55f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.25,
+      4.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      7.0,
+      0.25,
+      4.0
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.55,
+       0.38,
+       0.22
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0f480534682e7a95",
+   "Name": "Drummer Platform",
+   "DestroyOnLoad": true,
+   "Parent": "57b60a14ae2ab55f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.65,
+      6.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      2.2,
+      0.15,
+      1.9
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.55,
+       0.38,
+       0.22
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "430deaa5a6270953",
+   "Name": "Wash Left",
+   "DestroyOnLoad": true,
+   "Parent": "128608dee4c31bcc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.0,
+      6.0,
+      1.0
+     ],
+     "Rotation": [
+      70.0,
+      15.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.3,
+      0.5,
+      1.0
+     ],
+     "Intensity": 6.0,
+     "Range": 16.0,
+     "InnerConeAngle": 25.0,
+     "OuterConeAngle": 45.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "46bc4c8c43376df0",
+   "Name": "Wash Right",
+   "DestroyOnLoad": true,
+   "Parent": "128608dee4c31bcc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.0,
+      6.0,
+      1.0
+     ],
+     "Rotation": [
+      70.0,
+      -15.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.3,
+      0.5
+     ],
+     "Intensity": 6.0,
+     "Range": 16.0,
+     "InnerConeAngle": 25.0,
+     "OuterConeAngle": 45.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "2827e28e7c8ad4a2",
+   "Name": "Key Light",
+   "DestroyOnLoad": true,
+   "Parent": "128608dee4c31bcc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      5.0,
+      -3.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.9,
+      0.75
+     ],
+     "Intensity": 2.0,
+     "Range": 20.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Static",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "2b146af60a38e919",
+   "Name": "VenueInfo",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueInfo",
+     "Name": "Template",
+     "Author": "Drumsmith",
+     "Outdoor": false,
+     "RoomBack": -16.0,
+     "RoomCeiling": 7.0,
+     "RoomHalfWidth": 12.0,
+     "DeskZ": -13.0,
+     "BuildStage": false,
+     "BuildSet": false,
+     "BuildRig": false,
+     "BuildFx": false
+    }
+   ]
+  },
+  {
+   "GUID": "1049432d562e7570",
+   "Name": "Spot_Drummer",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.8,
+      6.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Drummer"
+    }
+   ]
+  },
+  {
+   "GUID": "43240e12c772020c",
+   "Name": "Spot_Guitar",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.4,
+      0.5,
+      3.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Guitar"
+    }
+   ]
+  },
+  {
+   "GUID": "413cad53f976ee2c",
+   "Name": "Spot_Bass",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.4,
+      0.5,
+      3.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Bass"
+    }
+   ]
+  },
+  {
+   "GUID": "37a5eb190032b5a2",
+   "Name": "Spot_Vocals",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.5,
+      1.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Vocals"
+    }
+   ]
+  },
+  {
+   "GUID": "3e015c218864c1c8",
+   "Name": "Spot_Keys",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.2,
+      0.5,
+      5.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Keys"
+    }
+   ]
+  },
+  {
+   "GUID": "037b716143162e30",
+   "Name": "Crowd",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      -8.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      14.0,
+      1.0,
+      9.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 60,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "174499b3b1dca0e5",
+   "Name": "Camera Wide",
+   "DestroyOnLoad": true,
+   "Parent": "09779e717c0b2694",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.2,
+      -14.0
+     ],
+     "Rotation": [
+      4.4474,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Wide",
+     "FieldOfView": 55.0,
+     "Tag": ""
+    }
+   ]
+  }
+ ]
+}
