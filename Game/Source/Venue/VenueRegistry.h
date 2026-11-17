@@ -29,6 +29,7 @@ struct VenueChoice
     int Style = 0;           // VenueShow::Style (0 arena, 1 club, 2 festival) when !IsScene
     std::string ScenePath;   // when IsScene
     std::string Id;          // the registry id, "song:<folder>", or the path given to --venue
+    std::string Reason;      // the rule that picked it, for the log ("--venue", "the VenueStyle setting"...)
 };
 
 // Everything the pick reads, so ChooseVenue stays free of globals.
@@ -80,6 +81,9 @@ public:
     // The thin wrapper VenueShow::Build calls: gathers --venue, --venue-style, the song, the
     // settings and this registry, then ChooseVenue.
     VenueChoice ChooseForSong( const TrackData& inTrack ) const;
+    // The same pick with no scenes in it (a scene that can't be a venue falls back to this room):
+    // --venue or the song's Venue only when they name a room, --venue-style, the VenueStyle setting.
+    VenueChoice ChooseRoomForSong( const TrackData& inTrack ) const;
 
 private:
     std::vector<VenueEntry> m_venues;

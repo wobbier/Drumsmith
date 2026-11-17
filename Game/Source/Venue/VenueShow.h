@@ -9,6 +9,8 @@
 #include "Venue/StageSet.h"
 #include "Venue/VenueKit.h"
 #include "Venue/VenuePlan.h"
+#include "Venue/VenueRegistry.h"
+#include "Venue/VenueScene.h"
 #include "ECS/EntityHandle.h"
 #include <chrono>
 #include <cstdint>
@@ -29,17 +31,22 @@ public:
     enum class Style : int { Arena = 0, Club, Festival, Count };
     static const char* StyleName( Style inStyle );
 
-    // inHighwayCamera: the highway's camera entity, made an overlay while the show runs. The style
-    // comes from the VenueStyle setting (or --venue-style) unless one is given.
+    // inHighwayCamera: the highway's camera entity, made an overlay while the show runs. Without
+    // a style the venue is the registry's pick (VenueRegistry::ChooseForSong: --venue, a venue
+    // scene, --venue-style, the song's, the player's, the VenueStyle setting); with one, that room.
     void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, int inStyle = -1 );
     // The same from a floor plan of the caller's (a scene venue's markers): where the band, crowd
     // and screens go and which built-in pieces go up. The plan's Style is the room it dresses as.
     void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan );
     void Clear();
-    // Tears the venue down and builds the next style in its place, mid-song: the highway on top
-    // carries on regardless.
+    // Tears the venue down and builds the next one in its place, mid-song (F7): Arena, Club,
+    // Festival, then each venue scene the menu lists, and round again. The highway on top carries
+    // on regardless.
     void NextStyle();
+    // The room, or the room a scene venue dresses as.
     Style GetStyle() const { return m_style; }
+    // The venue scene showing (its registry id or path); empty for a procedural room.
+    const std::string& GetSceneId() const { return m_sceneId; }
     // The floor plan the show was built from (an empty default before Build).
     const VenuePlan& GetPlan() const { return m_plan; }
     void Update( double inSongTimeMs, float inDeltaTime );
@@ -63,6 +70,11 @@ public:
 private:
     // Whether a show goes up at all (the Venue setting, --no-venue, a practice lesson).
     bool Wanted( const TrackData& inTrack ) const;
+    // Builds the venue a pick came to: its scene (falling back to a room when the scene can't be
+    // a venue) or a room.
+    void BuildChoice( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenueChoice& inChoice );
+    // A crowd stands, posed or mob (a scene's may be all mob).
+    bool CrowdUp() const { return m_crowd.Size() + m_crowd.MobSize() > 0; }
     // Build's work once the plan is settled.
     void BuildShow( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan );
     void BuildStage( Transform& inRoot );
@@ -82,6 +94,9 @@ private:
     void BigMoment( double inSeconds, int inLevel );
 
     VenueKit m_kit;
+    // The venue scene showing (none in a procedural room), and its registry id.
+    VenueScene m_scene;
+    std::string m_sceneId;
     Band m_band;
     Crowd m_crowd;
     Director m_director;

@@ -162,6 +162,7 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
         DropAbsent( cut.Shot );
     }
     AddNeckShots( inVenue );
+    AddSpotCuts();
     if( CommandLine::Has( "--highway-log" ) )
     {
         // The cut list as it will play, chart cuts and the director's own.
@@ -387,7 +388,9 @@ void Director::DropAbsent( Plan& ioPlan ) const
     const bool named = !ioPlan.Subjects.empty();
     ioPlan.Subjects.erase( std::remove_if( ioPlan.Subjects.begin(), ioPlan.Subjects.end(), [this]( int inMember ) { return inMember >= 0 && !m_plan.HasMember( inMember ); } ), ioPlan.Subjects.end() );
     const bool kit = ioPlan.Frame == Framing::Kick || ioPlan.Frame == Framing::DrumTop || ioPlan.Frame == Framing::DrumLow;
-    if( ( named && ioPlan.Subjects.empty() ) || ( kit && !m_plan.HasMember( VenueData::Drums ) ) )
+    // A close-up of nobody in particular is of the singer: with no singer it's a wide.
+    const bool lonelyClose = ioPlan.Frame == Framing::CloseHead && ioPlan.Subjects.empty() && !m_plan.HasMember( VenueData::Vocals );
+    if( ( named && ioPlan.Subjects.empty() ) || ( kit && !m_plan.HasMember( VenueData::Drums ) ) || lonelyClose )
     {
         ioPlan.Subjects.clear();
         ioPlan.Frame = Framing::Far;
@@ -540,6 +543,7 @@ const char* Director::FramingName( Framing inFraming )
     case Framing::LowHero: return "hero";
     case Framing::Push: return "push";
     case Framing::PitRun: return "run";
+    case Framing::Spot: return "spot";
     }
     return "";
 }
@@ -880,11 +884,93 @@ void Director::AddNeckShots( const VenueData& inVenue )
 }
 
 
+const VenuePlan::CameraSpot* Director::SpotFor( VenuePlan::CameraSpot::Kind inKind, int inPick ) const
+{
+    std::vector<const VenuePlan::CameraSpot*> spots;
+    for( const VenuePlan::CameraSpot& spot : m_plan.Cameras )
+    {
+        if( spot.Shot == inKind ) spots.push_back( &spot );
+    }
+    return spots.empty() ? nullptr : spots[static_cast<size_t>( std::max( inPick, 0 ) ) % spots.size()];
+}
+
+
+Vector3 Director::SpotTarget( const VenuePlan::CameraSpot& inSpot, const Vector3* inSubject ) const
+{
+    // Along the spot's own aim, as far off as the subject (or the band's middle) is.
+    const Vector3 toward = ( inSubject ? *inSubject : m_plan.MemberCentre() + Vector3( 0.f, 1.3f, 0.f ) ) - inSpot.Eye;
+    const float reach = std::max( toward.Dot( inSpot.Forward ), 2.f );
+    return inSpot.Eye + inSpot.Forward * reach;
+}
+
+
+void Director::AddSpotCuts()
+{
+    // The venue's own close and custom positions are extra cuts: about a quarter of the cuts (not
+    // the guitar's neck camera, the surfer's, the wall or a run in) go to one, the spots taking
+    // turns. A cut of someone only goes to a spot aimed at them; a cut of the band or the room
+    // to any, on whoever its aim lands nearest.
+    std::vector<int> extras;
+    std::vector<int> aimedAt;
+    for( size_t i = 0; i < m_plan.Cameras.size(); ++i )
+    {
+        const VenuePlan::CameraSpot& spot = m_plan.Cameras[i];
+        if( spot.Shot != VenuePlan::CameraSpot::Kind::Close && spot.Shot != VenuePlan::CameraSpot::Kind::Custom ) continue;
+        int nearest = -1;
+        float best = 0.35f;
+        for( int member = 0; member < VenueData::MemberCount; ++member )
+        {
+            if( !m_plan.HasMember( member ) ) continue;
+            const Vector3 toward = m_plan.Members[member].Feet + Vector3( 0.f, 1.3f, 0.f ) - spot.Eye;
+            const float along = toward.Dot( spot.Forward );
+            if( along <= 0.5f ) continue;
+            const float off = ( toward - spot.Forward * along ).Length() / along;
+            if( off < best )
+            {
+                best = off;
+                nearest = member;
+            }
+        }
+        extras.push_back( static_cast<int>( i ) );
+        aimedAt.push_back( nearest );
+    }
+    if( extras.empty() )
+    {
+        return;
+    }
+    size_t turn = 0;
+    for( size_t i = 0; i < m_cuts.size(); ++i )
+    {
+        Plan& shot = m_cuts[i].Shot;
+        if( shot.Frame == Framing::Neck || shot.Frame == Framing::Surfer || shot.Frame == Framing::Wall || shot.Frame == Framing::Push
+            || VenueTiming::Noise( static_cast<uint32_t>( i ), 131u ) >= 0.25f )
+        {
+            continue;
+        }
+        for( size_t tried = 0; tried < extras.size(); ++tried )
+        {
+            const size_t pick = ( turn + tried ) % extras.size();
+            const int member = aimedAt[pick];
+            const bool fits = shot.Subjects.empty() || std::find( shot.Subjects.begin(), shot.Subjects.end(), member ) != shot.Subjects.end();
+            if( !fits ) continue;
+            shot.Frame = Framing::Spot;
+            shot.Variant = extras[pick];
+            shot.Handheld = false;
+            shot.Static = false;
+            shot.Subjects.clear();
+            if( member >= 0 ) shot.Subjects.push_back( member );
+            turn = pick + 1;
+            break;
+        }
+    }
+}
+
+
 Vector3 Director::SubjectPoint( const Plan& inPlan, bool inHead ) const
 {
     if( inPlan.Subjects.empty() || !m_band )
     {
-        return Vector3( 0.f, 2.7f, 4.2f );
+        return OnStage( Vector3( 0.f, 2.7f, 4.2f ) );
     }
     Vector3 sum( 0.f, 0.f, 0.f );
     int count = 0;
@@ -894,7 +980,7 @@ Vector3 Director::SubjectPoint( const Plan& inPlan, bool inHead ) const
         sum = sum + ( inHead ? m_band->HeadOf( member ) : m_band->ChestOf( member ) );
         ++count;
     }
-    return count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : Vector3( 0.f, 2.7f, 4.2f );
+    return count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : OnStage( Vector3( 0.f, 2.7f, 4.2f ) );
 }
 
 
@@ -936,6 +1022,9 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     float drift = 0.f;    // degrees of orbit over the shot
     float dolly = 0.f;    // metres toward the target over the shot
     bool amongCrowd = false;
+    // A camera spot of the venue's own: where its author put it, not kept to the room.
+    bool authored = false;
+    const auto pick = [this, &inPlan]( VenuePlan::CameraSpot::Kind inKind ) { return SpotFor( inKind, inPlan.Variant ); };
     if( outUp ) *outUp = Vector3::Up;
     Vector3 headstock;
     Vector3 body;
@@ -966,10 +1055,21 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
             outEye = outTarget + Vector3( side * 3.f, 1.4f, -9.f );
             outFov = 30.f;
         }
+        else if( const VenuePlan::CameraSpot* spot = pick( VenuePlan::CameraSpot::Kind::Wide ) )
+        {
+            // The venue's own wide: held, creeping in.
+            outEye = spot->Eye;
+            outTarget = SpotTarget( *spot, nullptr );
+            outFov = spot->FieldOfView;
+            authored = true;
+            drift = 2.f * side;
+            dolly = 1.f;
+            break;
+        }
         else
         {
-            outTarget = Vector3( 0.f, 2.8f, 4.5f );
-            outEye = alt > 0.f ? Vector3( side * 9.f, 5.5f, -13.f ) : Vector3( side * 1.5f, 6.4f, -17.f );
+            outTarget = OnStage( Vector3( 0.f, 2.8f, 4.5f ) );
+            outEye = OnStage( alt > 0.f ? Vector3( side * 9.f, 5.5f, -13.f ) : Vector3( side * 1.5f, 6.4f, -17.f ) );
             outTarget.y -= 0.6f;
             outFov = 42.f;
         }
@@ -977,8 +1077,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         dolly = 1.5f;
         break;
     case Framing::Overhead:
-        outTarget = Vector3( 0.f, 2.f, 4.f );
-        outEye = Vector3( side * 6.f, 9.5f, -7.f );
+        outTarget = OnStage( Vector3( 0.f, 2.f, 4.f ) );
+        outEye = OnStage( Vector3( side * 6.f, 9.5f, -7.f ) );
         outFov = 55.f;
         drift = 14.f * side;
         break;
@@ -992,8 +1092,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         }
         else
         {
-            outTarget = Vector3( 0.f, 2.6f, 4.f );
-            outEye = Vector3( side * 3.f, 2.2f - alt * 0.5f, -3.4f );
+            outTarget = OnStage( Vector3( 0.f, 2.6f, 4.f ) );
+            outEye = OnStage( Vector3( side * 3.f, 2.2f - alt * 0.5f, -3.4f ) );
             outFov = 62.f;
         }
         drift = 5.f * side;
@@ -1021,13 +1121,15 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         {
             // Along the back of the stage, the band's backs against the lit crowd.
             const float travel = std::min( progress, 2.f );
-            outEye = Vector3( side * ( 2.6f - 1.6f * travel ), 3.6f + 0.3f * travel, 9.8f );
-            outTarget = Vector3( 0.f, 1.8f, -6.f );
+            outEye = OnStage( Vector3( side * ( 2.6f - 1.6f * travel ), 3.6f + 0.3f * travel, 9.8f ) );
+            outTarget = OnStage( Vector3( 0.f, 1.8f, -6.f ) );
             outFov = 66.f;
         }
         break;
     case Framing::CloseHead:
-        outTarget = subject >= 0 || duo ? SubjectPoint( inPlan, true ) : Vector3( 0.f, 2.9f, 1.6f );
+        // (No subject: the singer, where there is one; DropAbsent makes it a wide otherwise.)
+        outTarget = subject >= 0 || duo ? SubjectPoint( inPlan, true )
+            : m_band && m_band->HasMember( VenueData::Vocals ) ? m_band->HeadOf( VenueData::Vocals ) : OnStage( Vector3( 0.f, 2.9f, 1.6f ) );
         outEye = outTarget + Vector3( side * 0.7f, 0.05f - alt * 0.2f, -1.4f );
         outFov = 32.f;
         drift = 7.f * side;
@@ -1055,13 +1157,13 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         dolly = 0.3f;
         break;
     case Framing::Wall:
-        outTarget = Vector3( 0.f, 6.9f, m_plan.Stage.BackWallZ );
-        outEye = Vector3( 0.f, 5.5f, -4.f );
+        outTarget = Vector3( m_plan.ShotOffset.x, 6.9f + m_plan.ShotOffset.y, m_plan.Stage.BackWallZ );
+        outEye = OnStage( Vector3( 0.f, 5.5f, -4.f ) );
         outFov = 50.f;
         break;
     case Framing::Crowd:
-        outEye = subject >= 0 ? SubjectPoint( inPlan, true ) + Vector3( side * 0.6f, 0.4f, 0.8f ) : Vector3( side * 4.f, 3.6f, 0.4f );
-        outTarget = Vector3( -side * 2.f, 1.4f, -12.f );
+        outEye = subject >= 0 ? SubjectPoint( inPlan, true ) + Vector3( side * 0.6f, 0.4f, 0.8f ) : OnStage( Vector3( side * 4.f, 3.6f, 0.4f ) );
+        outTarget = OnStage( Vector3( -side * 2.f, 1.4f, -12.f ) );
         outFov = 60.f;
         drift = 10.f * side;
         break;
@@ -1083,8 +1185,21 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         // shrinking into the whole stage (the alternate take comes down the same arc into the pit).
         float boom = std::min( progress * 0.75f, 1.2f );
         if( alt > 0.f ) boom = 1.f - std::min( boom, 1.f );
-        outEye = Vector3( side * ( 5.f - 3.f * boom ), 2.f + 6.5f * std::sqrt( boom ), -1.2f - 9.8f * boom * boom );
-        outTarget = Vector3( 0.f, 2.7f - 0.4f * boom, 4.2f );
+        if( const VenuePlan::CameraSpot* spot = pick( VenuePlan::CameraSpot::Kind::Crane ) )
+        {
+            // The venue's own crane position: the arm rises into it from lower and further in
+            // (the alternate take comes down out of it).
+            const float rest = 1.f - std::min( boom, 1.f );
+            const Vector3 flat = Vector3( spot->Forward.x, 0.f, spot->Forward.z ).Length() > 1e-3f ? Vector3( spot->Forward.x, 0.f, spot->Forward.z ).Normalized() : Vector3( 0.f, 0.f, 1.f );
+            outEye = spot->Eye + Vector3( 0.f, -2.2f * rest, 0.f ) + flat * ( 2.f * rest );
+            outEye.y = std::max( outEye.y, 0.8f );
+            outTarget = SpotTarget( *spot, nullptr );
+            outFov = spot->FieldOfView;
+            authored = true;
+            break;
+        }
+        outEye = OnStage( Vector3( side * ( 5.f - 3.f * boom ), 2.f + 6.5f * std::sqrt( boom ), -1.2f - 9.8f * boom * boom ) );
+        outTarget = OnStage( Vector3( 0.f, 2.7f - 0.4f * boom, 4.2f ) );
         outFov = 58.f - 12.f * std::min( boom, 1.f );
         break;
     }
@@ -1093,8 +1208,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         // On a track along the pit rail, below the deck's edge: the front line from underneath,
         // the rig behind them, sliding past at walking pace.
         const float x = side * std::clamp( -6.5f + held * 0.8f, -6.5f, 6.5f );
-        outEye = Vector3( x, 1.7f, m_plan.Stage.BarricadeZ + 0.4f );
-        outTarget = Vector3( x * 0.35f, 2.75f, 3.8f );
+        outEye = Vector3( x + m_plan.ShotOffset.x, 1.7f, m_plan.Stage.BarricadeZ + 0.4f );
+        outTarget = OnStage( Vector3( x * 0.35f, 2.75f, 3.8f ) );
         outFov = 52.f;
         break;
     }
@@ -1104,7 +1219,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         const float top = std::min( m_room.Ceiling - 2.5f, 13.f );
         const float start = std::max( m_room.Back + 4.f, -40.f );
         outEye = Vector3( side * ( 4.f - std::min( held * 0.25f, 4.f ) ), top - std::min( held * 0.35f, 4.f ), std::min( start + held * 2.4f, -7.f ) );
-        outTarget = Vector3( 0.f, 2.4f, 5.f );
+        outTarget = OnStage( Vector3( 0.f, 2.4f, 5.f ) );
         outFov = 55.f;
         break;
     }
@@ -1113,8 +1228,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         // High and slow round the front of the stage.
         const float angle = side * std::min( 30.f + held * 2.5f, 75.f ) * kPi / 180.f;
         const float height = std::min( m_room.Ceiling - 2.5f, 10.f );
-        outTarget = Vector3( 0.f, 2.2f, 3.5f );
-        outEye = Vector3( std::sin( angle ) * 15.f, height, outTarget.z - std::cos( angle ) * 15.f );
+        outTarget = OnStage( Vector3( 0.f, 2.2f, 3.5f ) );
+        outEye = Vector3( outTarget.x + std::sin( angle ) * 15.f, height, outTarget.z - std::cos( angle ) * 15.f );
         outFov = 50.f;
         break;
     }
@@ -1123,8 +1238,16 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         // From the mixing desk on a long lens: the stage flattened against its lights, the
         // crowd's heads and hands soft in the foreground. A slow zoom in while it's held.
         amongCrowd = true;
-        outEye = Vector3( side * 1.6f, 2.7f, std::max( m_room.DeskZ + 1.4f, m_room.Back + 2.f ) );
-        outTarget = subject >= 0 || duo ? SubjectPoint( inPlan, false ) + Vector3( 0.f, 0.2f, 0.f ) : Vector3( 0.f, 2.7f, 4.f );
+        if( const VenuePlan::CameraSpot* spot = pick( VenuePlan::CameraSpot::Kind::Desk ) )
+        {
+            outEye = spot->Eye;
+            authored = true;
+        }
+        else
+        {
+            outEye = Vector3( side * 1.6f + m_plan.ShotOffset.x, 2.7f, std::max( m_room.DeskZ + 1.4f, m_room.Back + 2.f ) );
+        }
+        outTarget = subject >= 0 || duo ? SubjectPoint( inPlan, false ) + Vector3( 0.f, 0.2f, 0.f ) : OnStage( Vector3( 0.f, 2.7f, 4.f ) );
         const float distance = std::max( ( outTarget - outEye ).Length(), 1.f );
         const float half = subject >= 0 ? 1.5f : duo ? 2.4f : 3.3f;
         outFov = std::clamp( 2.f * std::atan( half / distance ) * 180.f / kPi, 5.f, 34.f ) * ( 1.f - 0.08f * std::min( progress, 1.5f ) );
@@ -1133,15 +1256,15 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     case Framing::CrowdPov:
         // In the crowd a few rows back, on tiptoe: the stage through everyone's raised hands.
         amongCrowd = true;
-        outEye = Vector3( side * 2.2f, 1.95f, -6.2f );
-        outTarget = Vector3( -side * 0.8f, 3.f, 2.5f );
+        outEye = Vector3( side * 2.2f + m_plan.ShotOffset.x, 1.95f, -6.2f + m_plan.ShotOffset.z );
+        outTarget = OnStage( Vector3( -side * 0.8f, 3.f, 2.5f ) );
         outFov = 58.f;
         dolly = 0.3f;
         break;
     case Framing::Profile:
         // From the wings across the stage: the band in a line, the crowd beyond the edge.
-        outEye = Vector3( side * 8.4f, 2.55f, 0.9f + 0.5f * std::min( progress, 2.f ) );
-        outTarget = Vector3( -side * 4.5f, 2.35f, 3.4f );
+        outEye = OnStage( Vector3( side * 8.4f, 2.55f, 0.9f + 0.5f * std::min( progress, 2.f ) ) );
+        outTarget = OnStage( Vector3( -side * 4.5f, 2.35f, 3.4f ) );
         outFov = 60.f;
         break;
     case Framing::DrumTop:
@@ -1183,8 +1306,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     {
         // A run in from over the crowd to the lip of the stage, most of it in the first second.
         const float run = 1.f - std::exp( -held / 1.1f );
-        outEye = Lerp( Vector3( side * 1.5f, 5.6f, -12.f ), Vector3( side * 0.6f, 2.7f, -1.3f ), run );
-        outTarget = Vector3( 0.f, 2.6f, 4.f );
+        outEye = OnStage( Lerp( Vector3( side * 1.5f, 5.6f, -12.f ), Vector3( side * 0.6f, 2.7f, -1.3f ), run ) );
+        outTarget = OnStage( Vector3( 0.f, 2.6f, 4.f ) );
         outFov = 56.f;
         break;
     }
@@ -1205,18 +1328,39 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         const float swing = kSharp * std::sin( phase );
         const float x = side * kHalfRun * std::asin( swing ) / span;
         const float pace = side * std::cos( phase ) / std::sqrt( 1.f - swing * swing );    // of the top speed, signed along the pit
-        outEye = Vector3( x, 1.55f, m_plan.Stage.BarricadeZ + 0.5f );
-        outTarget = Vector3( x + pace * 1.6f, 1.6f, m_plan.CrowdFront() - 2.2f );
+        outEye = Vector3( x + m_plan.ShotOffset.x, 1.55f, m_plan.Stage.BarricadeZ + 0.5f );
+        outTarget = Vector3( x + m_plan.ShotOffset.x + pace * 1.6f, 1.6f, m_plan.CrowdFront() - 2.2f );
         outFov = 66.f;
         break;
     }
+    case Framing::Spot:
+    {
+        // One of the venue's own close or custom positions (AddSpotCuts), held, on its subject
+        // when it has one.
+        if( m_plan.Cameras.empty() )
+        {
+            outTarget = SubjectPoint( inPlan, false );
+            outEye = outTarget + Vector3( 0.f, 0.5f, -6.f );
+            outFov = 45.f;
+            break;
+        }
+        const VenuePlan::CameraSpot& spot = m_plan.Cameras[static_cast<size_t>( std::max( inPlan.Variant, 0 ) ) % m_plan.Cameras.size()];
+        const Vector3 chest = SubjectPoint( inPlan, false );
+        outEye = spot.Eye;
+        outTarget = SpotTarget( spot, subject >= 0 || duo ? &chest : nullptr );
+        outFov = spot.FieldOfView;
+        authored = true;
+        drift = 2.f * side;
+        dolly = 0.3f;
+        break;
     }
-    Contain( outEye, amongCrowd );
+    }
+    if( !authored ) Contain( outEye, amongCrowd );
     // The generic move: an orbit and a push in.
     outEye = Orbit( outEye, outTarget, drift * progress );
     const Vector3 toward = ( outTarget - outEye ).Normalized();
     outEye = outEye + toward * ( dolly * progress );
-    Contain( outEye, amongCrowd );
+    if( !authored ) Contain( outEye, amongCrowd );
 }
 
 

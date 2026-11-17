@@ -1,6 +1,7 @@
 #pragma once
 #include "ECS/Component.h"
 #include "ECS/ComponentDetail.h"
+#include "Math/Vector3.h"
 #include <string>
 
 // Markers a venue author places in a Havana scene (.lvl) to say where the game puts things. They
@@ -38,6 +39,16 @@ public:
     bool BuildSet = false;      // Also add the built-in set dressing
     bool BuildRig = false;      // Also add the built-in light rig
     bool BuildFx = false;       // Also add the built-in effects
+    // The room's look, all optional. AmbientColor: indoors, the colour the camera clears to,
+    // which also lights the whole room a little (black leaves a faint grey base). FogColor: the
+    // light the haze scatters, which lifts whatever is far off. Haze: how thick the haze hangs
+    // (1 the usual; out of doors it is already under half that). SkyTime and MoonBrightness: out
+    // of doors, the night sky's hour (0-24; 20 is dusk) and its moon.
+    Vector3 AmbientColor{ 0.f, 0.f, 0.f };
+    Vector3 FogColor{ 0.01f, 0.01f, 0.015f };
+    float Haze = 1.f;
+    float SkyTime = 22.f;
+    float MoonBrightness = 1.f;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueInfo, "Venue" )
 

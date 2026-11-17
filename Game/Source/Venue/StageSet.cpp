@@ -216,7 +216,7 @@ void StageSet::Build( VenueKit& inKit, Transform& inRoot, const VenuePlan& inPla
     const int style = inPlan.Style;
     BuildRig( inKit, inRoot, style );
     BuildBackline( inKit, inRoot, inHasKeys, inSeed );
-    BuildRiser( inKit, inRoot );
+    if( m_plan.HasMember( 0 ) ) BuildRiser( inKit, inRoot );
     BuildFront( inKit, inRoot, style );
     BuildWings( inKit, inRoot );
     BuildPixels( inKit, inRoot );
@@ -327,16 +327,21 @@ void StageSet::BuildBackline( VenueKit& inKit, Transform& inRoot, bool inHasKeys
     }
     const float bassZ = 6.f;
     float bassTop = 0.f;
+    // (The bass rig only for a bassist the plan has.)
+    const bool bass = m_plan.HasMember( 2 );
     for( float x : { 3.75f, 4.5f } )
     {
-        bassTop = stack( x, bassZ, true );
+        if( bass ) bassTop = stack( x, bassZ, true );
     }
     // Lived-in: a towel and a bottle on a head each side, drinks within reach.
     inKit.Piece( Shape::Cube, Vector3( -4.55f, guitarTop + 0.012f, guitarZ - 0.02f ), Vector3( 0.34f, 0.024f, 0.3f ), Vector3( 0.5f, 0.5f, 0.52f ), &inRoot, kNone, false, "Towel" );
     Put( inKit, inRoot, kBottle, Vector3( -3.55f, guitarTop, guitarZ ) );
-    Put( inKit, inRoot, kBottle, Vector3( 4.6f, bassTop, bassZ ) );
-    Put( inKit, inRoot, kBeerCup, Vector3( 3.65f, bassTop, bassZ + 0.03f ) );
-    inKit.Piece( Shape::Cube, Vector3( 3.9f, bassTop + 0.012f, bassZ - 0.03f ), Vector3( 0.3f, 0.024f, 0.26f ), Vector3( 0.5f, 0.5f, 0.52f ), &inRoot, kNone, false, "Towel" );
+    if( bass )
+    {
+        Put( inKit, inRoot, kBottle, Vector3( 4.6f, bassTop, bassZ ) );
+        Put( inKit, inRoot, kBeerCup, Vector3( 3.65f, bassTop, bassZ + 0.03f ) );
+        inKit.Piece( Shape::Cube, Vector3( 3.9f, bassTop + 0.012f, bassZ - 0.03f ), Vector3( 0.3f, 0.024f, 0.26f ), Vector3( 0.5f, 0.5f, 0.52f ), &inRoot, kNone, false, "Towel" );
+    }
 
     if( inHasKeys )
     {

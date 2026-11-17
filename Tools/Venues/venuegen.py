@@ -117,7 +117,9 @@ class Scene:
     # ---- lights ----------------------------------------------------------------------------
     def light(self, name, parent, pos, kind="Point", color=(1, 1, 1), intensity=1.0, range_=10.0,
               rot=(0, 0, 0), inner=20.0, outer=30.0, shadows=False, show=None, group=0):
-        """An engine Light. show = None for a plain light, or a VenueShowLight role name."""
+        """An engine Light. show = None for a plain light, or a VenueShowLight role name.
+        intensity is the engine's (a point or spot falls off as intensity / d^2: a few hundred
+        lights a band from 3-4 m); for a cued light it is its level at full."""
         e = self.entity(name, parent, pos, rot)
         comp = {"Type": "Light", "LightType": kind, "Color": vec(color), "Intensity": _r(intensity),
                 "Range": _r(range_)}
@@ -136,13 +138,18 @@ class Scene:
     # ---- markers ---------------------------------------------------------------------------
     def info(self, parent, name, author, outdoor=False, room_back=-1000.0, room_ceiling=1000.0,
              half_width=30.0, desk_z=-22.0, build_stage=False, build_set=False, build_rig=False,
-             build_fx=False, entity_name="VenueInfo"):
+             build_fx=False, entity_name="VenueInfo", ambient=(0.0, 0.0, 0.0),
+             fog_color=(0.01, 0.01, 0.015), haze=1.0, sky_time=22.0, moon=1.0):
+        """The room and its look. ambient: indoors, the colour behind everything (it also lights
+        the room a little). fog_color: the light the haze scatters. haze: its thickness (1 the
+        usual). sky_time / moon: out of doors, the night sky's hour and the moon's brightness."""
         e = self.entity(entity_name, parent)
         e.add({"Type": "VenueInfo", "Name": name, "Author": author, "Outdoor": bool(outdoor),
                "RoomBack": _r(room_back), "RoomCeiling": _r(room_ceiling),
                "RoomHalfWidth": _r(half_width), "DeskZ": _r(desk_z),
                "BuildStage": build_stage, "BuildSet": build_set, "BuildRig": build_rig,
-               "BuildFx": build_fx})
+               "BuildFx": build_fx, "AmbientColor": vec(ambient), "FogColor": vec(fog_color),
+               "Haze": _r(haze), "SkyTime": _r(sky_time), "MoonBrightness": _r(moon)})
         return e
 
     def spot(self, parent, member, pos, yaw=0.0):

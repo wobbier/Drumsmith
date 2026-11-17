@@ -1,4 +1,5 @@
 #pragma once
+#include "Components/Venue/VenueMarkers.h"
 #include "CoreGame/TrackList.h"
 #include "ECS/EntityHandle.h"
 #include "Editor/PadBindings.h"
@@ -26,7 +27,16 @@ public:
     // inCamera is the venue's camera, whose fog the rig turns into haze while the show runs.
     // inPlan: the stage the rig hangs over (its deck and truss heights) and the members the follow
     // spots light; a member the plan leaves out gets no follow spot.
+    // A plan without its BuildRig (a scene venue with lights of its own) gets the show, the haze
+    // and the palettes but no rig: AdoptFixture then hands it the scene's lights.
     void Build( World& inWorld, Transform* inParent, const EntityHandle& inCamera, const TrackData& inTrack, const VenuePlan& inPlan, const SpawnBoxFn& inSpawnBox, const TintFn& inTint );
+    // A light of the venue scene's own (VenueShowLight) cued with the rig from now on, its Light's
+    // colour, intensity and aim as authored being its look at full. Wash: a wash can; Beam: a
+    // beam that sways about its aim; Spot: a follow spot (the first on the drummer, then the
+    // singer, guitar, bass and keys); Blinder: a crowd blinder; Strobe: flashes on strobe cues,
+    // big moments and at the peak, groups taking turns. Static lights are left alone. Call after
+    // Build; ignored when the rig is off (Stage Lights: Off), which leaves the light as authored.
+    void AdoptFixture( const EntityHandle& inLight, VenueShowLight::Role inRole, int inGroup );
     void Clear();
     void Update( double inSongTimeMs, float inDeltaTime );
 
@@ -61,7 +71,8 @@ public:
 private:
     // Beam: moving heads on the deck. Wash: fixed cans over the band. Spot: follow spots. Crowd:
     // audience blinders. Mover: moving heads under the trusses. Side: cross light from the wings.
-    enum class Group { Beam, Wash, Spot, Crowd, Mover, Side };
+    // Strobe: a scene's strobe light (AdoptFixture), flashing.
+    enum class Group { Beam, Wash, Spot, Crowd, Mover, Side, Strobe };
 
     struct Fixture
     {
@@ -80,6 +91,11 @@ private:
         float Level = 0.f;
         float Yaw = 0.f;       // beams: degrees around vertical, positive leaning right
         float Pitch = 60.f;    // beams: degrees above horizontal
+        // A scene's light (AdoptFixture): left in place on Clear, put back as it was authored.
+        bool Adopted = false;
+        Vector3 BaseAim{ 0.f, 0.f, 1.f };    // its aim as authored, the rig's space
+        Vector3 BaseColor{ 1.f, 1.f, 1.f };
+        float BaseIntensity = 0.f;
     };
 
     // What a fixture should show this frame.
@@ -113,8 +129,16 @@ private:
     float EaseRate( const std::string& inCue ) const;
     void SetFog( double inSeconds, float inDeltaTime );
 
+    // An adopted fixture's light this frame: aimed, coloured and set.
+    void UpdateAdopted( Fixture& ioFixture, const Vector3& inColor, float inLevel );
+
     World* m_world = nullptr;
     TintFn m_tint;
+    // The middle of the band (the rig's space): which side of the stage an adopted light is on.
+    Vector3 m_bandCentre{ 0.f, 0.f, 0.f };
+    int m_adoptedSpots = 0;
+    // Which follow-spot slots have a member (the plan's), for the adopted spots.
+    std::array<bool, 5> m_members{};
     std::vector<Fixture> m_fixtures;
     std::vector<EntityHandle> m_props;
     EntityHandle m_camera;

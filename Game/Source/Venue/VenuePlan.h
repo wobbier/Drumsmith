@@ -1,6 +1,7 @@
 #pragma once
 #include "Math/Vector3.h"
 #include <array>
+#include <string>
 #include <vector>
 
 // The venue's floor plan at run time (Docs/Venue-and-Band.md): where the band stands and faces,
@@ -65,6 +66,8 @@ struct VenuePlan
         float Yaw = 0.f;
         float Turn = 0.8f;
         Vector3 Focus{ 0.f, 0.f, 4.f };
+        // Mob: how far each figure strays from its grid spot, as a share of the usual stray.
+        float Scatter = 1.f;
     };
 
     // The room the cameras work in (Director::Room): every shot stays inside it. Back is the back
@@ -92,6 +95,8 @@ struct VenuePlan
         float Yaw = 0.f;
         Feed Source = Feed::Program;
         bool Seams = false;
+        // HDR multiplier on the picture's light.
+        float Emissive = 2.2f;
     };
 
     // The karaoke band (LyricBoard): Width wide, centred at Centre, facing the crowd.
@@ -100,6 +105,20 @@ struct VenuePlan
         bool Present = true;
         Vector3 Centre;
         float Width = 11.f;
+    };
+
+    // A camera position of the venue's own (a scene's VenueCameraSpot) the director cuts to: the
+    // eye and the way it looks (venue space), its vertical field of view, and the kind of shot it
+    // is for. Wide, Desk and Crane spots take the place of the director's own wides, crane and
+    // long lens; Close and Custom ones are extra cuts.
+    struct CameraSpot
+    {
+        enum class Kind : int { Wide = 0, Desk, Crane, Close, Custom };
+        Vector3 Eye;
+        Vector3 Forward{ 0.f, 0.f, 1.f };
+        float FieldOfView = 55.f;
+        Kind Shot = Kind::Wide;
+        std::string Tag;
     };
 
     // The procedural room this plan dresses as (VenueShow::Style as an int): BuildRoom's
@@ -114,6 +133,20 @@ struct VenuePlan
     LyricBand Lyrics;
     // How thick the haze hangs (StageLights::SetHazeScale): less of it out of doors.
     float HazeScale = 1.f;
+    // The venue's own camera positions (none in the procedural rooms).
+    std::vector<CameraSpot> Cameras;
+    // How far this stage sits from the procedural rooms' (the members' middle against theirs):
+    // the director's framings placed for those rooms move with it. Zero in the rooms.
+    Vector3 ShotOffset{ 0.f, 0.f, 0.f };
+    // The room's look. Background: the main camera's clear colour indoors, which also sets the
+    // renderer's ambient light. FogColor: the light the fog scatters. Out of doors, the night
+    // sky's hour and how bright its moon is.
+    Vector3 Background{ 0.f, 0.f, 0.f };
+    Vector3 FogColor{ 0.01f, 0.01f, 0.015f };
+    float SkyTime = 22.f;
+    float MoonBrightness = 1.f;
+    // The venue's name, for the logs (a scene's VenueInfo; the rooms leave it empty).
+    std::string Name;
 
     // Which built-in pieces go up. Stage: the deck, riser, back wall and speaker stacks. Set: the
     // dressing (StageSet). Rig: the light rig (StageLights; without it a soft key light). Fx: the
@@ -127,6 +160,9 @@ struct VenuePlan
 
     // One of the three procedural rooms (VenueShow::Style as an int), as they have always been.
     static VenuePlan ForStyle( int inStyle );
+    // Nothing placed yet: no members, no lyric band, no screens, no crowd (a scene's markers fill
+    // it in). A default VenuePlan has every member present at the origin.
+    static VenuePlan Empty();
 
     bool HasMember( int inMember ) const { return inMember >= 0 && inMember < static_cast<int>( Members.size() ) && Members[inMember].Present; }
     // A member's spot (clamped to the five), present or not.
@@ -134,6 +170,8 @@ struct VenuePlan
     // The front of the crowd (venue z): the nearest Posed area's front edge, else just behind
     // the barricade.
     float CrowdFront() const;
+    // The middle of the present members' feet (the stage's centre as the band stands on it).
+    Vector3 MemberCentre() const;
     // A point given in the frame a member facing the crowd (Yaw 180) would have, turned with
     // that member's own yaw about their feet: inPoint unchanged at Yaw 180.
     Vector3 TurnWith( int inMember, const Vector3& inPoint ) const;

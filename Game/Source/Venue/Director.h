@@ -83,7 +83,10 @@ private:
     // from over the crowd (big moments). PitRun: an operator at a half sprint down the photo pit,
     // camera on the shoulder, shooting along the front row of the crowd.
     enum class Framing { Far, Near, Behind, CloseHead, CloseHand, Kick, Crowd, Overhead, Wall, Neck, Surfer,
-        Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push, PitRun };
+        Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push, PitRun,
+        // Spot: one of the venue's own close or custom camera positions (VenuePlan::Cameras), the
+        // plan's Variant its index.
+        Spot };
 
     struct Plan
     {
@@ -127,6 +130,14 @@ private:
     // is built in their frame).
     Vector3 AtDrums( const Vector3& inPoint ) const { return m_plan.TurnWith( VenueData::Drums, inPoint ); }
     Plan PlanAuto( const std::string& inConstraints, int inIndex, float inTime ) const;
+    // A point placed for the procedural rooms' stage, moved to this venue's (VenuePlan::ShotOffset).
+    Vector3 OnStage( const Vector3& inPoint ) const { return inPoint + m_plan.ShotOffset; }
+    // The venue's camera spots: the inPick'th of a kind (wrapping), null when it has none.
+    const VenuePlan::CameraSpot* SpotFor( VenuePlan::CameraSpot::Kind inKind, int inPick ) const;
+    // Where a camera spot looks: along its aim, as far off as inSubject (or the band's middle).
+    Vector3 SpotTarget( const VenuePlan::CameraSpot& inSpot, const Vector3* inSubject ) const;
+    // Turns some of the cuts over to the venue's close and custom camera spots.
+    void AddSpotCuts();
     // Gives a chart's plain shot one of its treatments (a wide becomes a crane, a drone or the
     // long lens; a near shot a low hero angle...), by the plan's Variant.
     static void Vary( Plan& ioPlan );

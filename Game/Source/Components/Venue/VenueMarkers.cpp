@@ -18,6 +18,11 @@ ME_REFLECT_BEGIN( VenueInfo )
     ME_FIELD( BuildSet ).Category( "Built-in pieces" ).Tooltip( "Also add the built-in set dressing" );
     ME_FIELD( BuildRig ).Category( "Built-in pieces" ).Tooltip( "Also add the built-in light rig" );
     ME_FIELD( BuildFx ).Category( "Built-in pieces" ).Tooltip( "Also add the built-in effects" );
+    ME_FIELD( AmbientColor ).Category( "Look" ).Color().Tooltip( "Indoors: the colour behind everything, which also lights the whole room a little" );
+    ME_FIELD( FogColor ).Category( "Look" ).HDR().Tooltip( "The light the haze scatters: lifts whatever is far off" );
+    ME_FIELD( Haze ).Category( "Look" ).Unit( Reflection::Unit::Multiplier ).Range( 0.f, 4.f ).Tooltip( "How thick the haze hangs (1 the usual; out of doors it is already under half that)" );
+    ME_FIELD( SkyTime ).Category( "Look" ).Unit( Reflection::Unit::Hours ).Range( 0.f, 24.f ).Tooltip( "Out of doors: the night sky's hour (20 is dusk, 22 night)" );
+    ME_FIELD( MoonBrightness ).Category( "Look" ).Unit( Reflection::Unit::Multiplier ).Range( 0.f, 10.f ).Tooltip( "Out of doors: how bright the moon is" );
 ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( VenueSpot )

@@ -1,5 +1,6 @@
 #include "Venue/VenueShow.h"
 #include "Venue/VenueLayout.h"
+#include "Venue/VenueRegistry.h"
 #include "Venue/VenueTiming.h"
 #include "Components/Camera.h"
 #include "Components/Graphics/PostProcess.h"
@@ -60,8 +61,10 @@ void VenueShow::Clear()
     m_band.Clear();
     m_lyricBoard.Clear();
     m_lyrics.Clear();
+    m_scene.Clear();
     m_kit.Clear();
     m_root = {};
+    m_sceneId.clear();
     m_set.Clear();
     m_fx.Clear();
     m_hype = 0.f;
@@ -101,8 +104,37 @@ void VenueShow::NextStyle()
     World& world = *m_world;
     const TrackData& track = *m_track;
     const EntityHandle highway = m_highwayCamera;
-    const int next = ( static_cast<int>( m_style ) + 1 ) % static_cast<int>( Style::Count );
-    Build( world, track, highway, next );
+    // Arena, Club, Festival, then each venue scene the menu lists, then the arena again.
+    const std::vector<VenueEntry>& venues = VenueRegistry::GetInstance().Get();
+    size_t from = 0;
+    if( m_sceneId.empty() && m_style != Style::Festival )
+    {
+        Build( world, track, highway, static_cast<int>( m_style ) + 1 );
+        return;
+    }
+    if( !m_sceneId.empty() )
+    {
+        // After the scene showing (a song's own venue, or a hidden one, starts the list over).
+        for( size_t i = 0; i < venues.size(); ++i )
+        {
+            if( venues[i].Id == m_sceneId ) from = i + 1;
+        }
+    }
+    for( size_t i = from; i < venues.size(); ++i )
+    {
+        if( venues[i].Hidden ) continue;
+        VenueChoice choice;
+        choice.IsScene = true;
+        choice.ScenePath = venues[i].ScenePath;
+        choice.Id = venues[i].Id;
+        choice.Reason = "F7";
+        Clear();
+        m_world = &world;
+        m_track = &track;
+        if( Wanted( track ) ) BuildChoice( world, track, highway, choice );
+        return;
+    }
+    Build( world, track, highway, static_cast<int>( Style::Arena ) );
 }
 
 
@@ -122,19 +154,49 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     {
         return;
     }
-    int style = inStyle >= 0 ? inStyle : GameSettings::GetInstance().VenueStyle;
-    if( CommandLine::Has( "--venue-style" ) )
+    VenueChoice choice;
+    if( inStyle >= 0 )
     {
-        style = CommandLine::GetInt( "--venue-style", style );
+        // A room asked for by name (F7 stepping through the rooms).
+        choice.Style = std::clamp( inStyle, 0, static_cast<int>( Style::Count ) - 1 );
+        choice.Reason = "F7";
     }
-    if( inStyle < 0 && style >= static_cast<int>( Style::Count ) )
+    else
     {
-        // Random: a different room each song, repeatable for a track.
-        uint32_t hash = 2166136261u;
-        for( char c : inTrack.m_trackName ) hash = ( hash ^ static_cast<uint8_t>( c ) ) * 16777619u;
-        style = static_cast<int>( hash % static_cast<uint32_t>( Style::Count ) );
+        // --venue, --venue-style, the song's venue, the player's pick, the VenueStyle setting
+        // (VenueRegistry: ChooseVenue), the same pick every time for a song.
+        choice = VenueRegistry::GetInstance().ChooseForSong( inTrack );
     }
-    VenuePlan plan = VenuePlan::ForStyle( std::clamp( style, 0, static_cast<int>( Style::Count ) - 1 ) );
+    BuildChoice( inWorld, inTrack, inHighwayCamera, choice );
+}
+
+
+void VenueShow::BuildChoice( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenueChoice& inChoice )
+{
+    VenueChoice choice = inChoice;
+    if( choice.IsScene )
+    {
+        // The venue root first: the scene is instanced under it.
+        m_kit.Begin( inWorld );
+        m_root = m_kit.Group( "Venue", nullptr, VenueLayout::kVenueOrigin );
+        std::string problem;
+        if( m_root && m_scene.Load( inWorld, choice.ScenePath, m_root->GetComponent<Transform>(), problem ) )
+        {
+            m_sceneId = choice.Id;
+            INFO_FMT( "[Venues]", "Venue: scene \"%s\" (%s), chosen by %s; %d entities in the world before the show", m_scene.GetMarkers().Plan.Name.c_str(), choice.ScenePath.c_str(),
+                choice.Reason.c_str(), static_cast<int>( inWorld.GetEntityCount() ) );
+            BuildShow( inWorld, inTrack, inHighwayCamera, m_scene.GetMarkers().Plan );
+            return;
+        }
+        // Not a venue after all: the room the pick would have made without scenes.
+        const VenueChoice room = VenueRegistry::GetInstance().ChooseRoomForSong( inTrack );
+        YIKES_FMT( "[Venues] Venue scene %s can't be used (%s): the %s instead", choice.ScenePath.c_str(), problem.c_str(), StyleName( static_cast<Style>( std::clamp( room.Style, 0, 2 ) ) ) );
+        m_scene.Clear();
+        choice = room;
+        choice.Reason = "a fallback for " + inChoice.Id;
+    }
+    const int style = std::clamp( choice.Style, 0, static_cast<int>( Style::Count ) - 1 );
+    VenuePlan plan = VenuePlan::ForStyle( style );
     if( CommandLine::Has( "--venue-plan-test" ) )
     {
         // A plan unlike the rooms': no bassist or keyboard player, the drummer and kit moved
@@ -147,12 +209,16 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
         const Vector3& feet = plan.Members[VenueData::Drums].Feet;
         BRUH_FMT( "Venue: plan test: no bass or keys, the drummer at (%.2f, %.2f, %.2f) turned to %.0f degrees", feet.x, feet.y, feet.z, plan.Members[VenueData::Drums].Yaw );
     }
+    INFO_FMT( "[Venues]", "Venue: the %s, chosen by %s; %d entities in the world before the show", StyleName( static_cast<Style>( style ) ), choice.Reason.c_str(),
+        static_cast<int>( inWorld.GetEntityCount() ) );
     BuildShow( inWorld, inTrack, inHighwayCamera, plan );
 }
 
 
 void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan )
 {
+    // (By value before Clear: the plan may be this show's own, GetPlan.)
+    const VenuePlan plan = inPlan;
     Clear();
     m_world = &inWorld;
     m_track = &inTrack;
@@ -160,7 +226,7 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     {
         return;
     }
-    BuildShow( inWorld, inTrack, inHighwayCamera, inPlan );
+    BuildShow( inWorld, inTrack, inHighwayCamera, plan );
 }
 
 
@@ -172,8 +238,12 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
     m_venue = inTrack.m_venue;
     m_beats = inTrack.m_beats;
     m_bpm = inTrack.m_bpm > 30 ? static_cast<float>( inTrack.m_bpm ) : 120.f;
-    m_kit.Begin( inWorld );
-    m_root = m_kit.Group( "Venue", nullptr, VenueLayout::kVenueOrigin );
+    if( !m_root )
+    {
+        // (A scene venue's root is already up, the scene under it.)
+        m_kit.Begin( inWorld );
+        m_root = m_kit.Group( "Venue", nullptr, VenueLayout::kVenueOrigin );
+    }
     if( !m_root )
     {
         return;
@@ -207,13 +277,38 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
     }
     m_director.Build( inWorld, m_plan, m_venue, m_beats, m_bpm, std::max( lastNote + 4.f, inTrack.m_duration ), GameSettings::GetInstance().VenueCamera == 1, &m_band );
     VenueKit* kit = &m_kit;
-    if( m_plan.BuildRig )
+    const VenueScene::Markers* scene = m_scene.IsLoaded() ? &m_scene.GetMarkers() : nullptr;
+    if( m_plan.BuildRig || ( scene && !scene->Lights.empty() ) )
     {
         m_lights.Build( inWorld, &root, m_director.MainCamera(), inTrack, m_plan,
             [kit]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return kit->Piece( Shape::Cube, inPosition, inScale, inColor, inParent, inEmissive, false ); },
             []( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive ) { VenueKit::SetColor( inTarget, inColor, inEmissive ); } );
     }
-    if( !m_lights.IsActive() )
+    if( scene )
+    {
+        // The scene's own show lights join the rig (or are the rig).
+        for( const VenueScene::ShowLight& light : scene->Lights )
+        {
+            m_lights.AdoptFixture( light.Light, light.Role, light.Group );
+        }
+    }
+    if( scene && !m_plan.BuildRig && !scene->HasDirectional )
+    {
+        // A scene lit only by its own lights, with no sun or moon of its own: a key light, soft
+        // under the show and the house light without one. Without any directional the renderer
+        // would light the room with a daylight sun.
+        if( EntityHandle key = m_kit.Group( "VenueKeyLight", &root ) )
+        {
+            key->GetComponent<Transform>().LookDirection( Vector3( 0.15f, -0.8f, 0.6f ).Normalized() );
+            Light& light = key->AddComponent<Light>();
+            light.LightType = Moonlight::LightType::Directional;
+            light.DirectionalSource = Moonlight::DirectionalSource::Manual;
+            light.Color = m_lights.IsActive() ? Vector3( 0.85f, 0.9f, 1.f ) : Vector3( 1.f, 0.92f, 0.8f );
+            light.Intensity = m_lights.IsActive() ? 2.f : 7.f;
+            light.CastShadows = false;
+        }
+    }
+    else if( !scene && !m_lights.IsActive() )
     {
         // Stage Lights off: no rig, but a soft house light so the band still reads. Without any
         // directional the renderer would light the room with a daylight sun.
@@ -260,13 +355,27 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
         {
             Camera& sky = camera->GetComponent<Camera>();
             sky.ClearType = Moonlight::ClearColorType::Procedural;
-            sky.ProceduralSky.Time = 22.f;
+            sky.ProceduralSky.Time = m_plan.SkyTime;
             sky.ProceduralSky.StarBrightness = 2.f;
             sky.ProceduralSky.MoonPhase = 0.5f;
+            sky.ProceduralSky.MoonBrightness = m_plan.MoonBrightness;
             sky.ProceduralSky.CloudCoverage = 0.25f;
             if( camera->HasComponent<PostProcess>() )
             {
                 camera->GetComponent<PostProcess>().FogMaxOpacity = 0.55f;
+            }
+        }
+    }
+    if( scene )
+    {
+        // A scene's look (VenueInfo): the colour behind it all, which lights the room a little
+        // indoors, and the light its haze scatters.
+        if( const EntityHandle& camera = m_director.MainCamera() )
+        {
+            camera->GetComponent<Camera>().ClearColor = m_plan.Background;
+            if( camera->HasComponent<PostProcess>() )
+            {
+                camera->GetComponent<PostProcess>().FogColor = m_plan.FogColor;
             }
         }
     }
@@ -355,7 +464,10 @@ void VenueShow::BuildScreen( Transform& inRoot, const VenuePlan::Screen& inScree
     const Vector3 size( inScreen.Width, inScreen.Height, 0.f );
     const float yaw = inScreen.Yaw;
     const char* texture = inScreen.Source == VenuePlan::Screen::Feed::Stage ? Director::kFeedTexture : Director::kProgramTexture;
-    EntityHandle frame = m_kit.Box( centre + Vector3( 0.f, 0.f, 0.08f ), Vector3( size.x + 0.3f, size.y + 0.3f, 0.14f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
+    // The frame sits behind the picture, turned with it.
+    const float turn = yaw * 3.14159265f / 180.f;
+    const Vector3 behind( 0.08f * std::sin( turn ), 0.f, 0.08f * std::cos( turn ) );
+    EntityHandle frame = m_kit.Box( centre + behind, Vector3( size.x + 0.3f, size.y + 0.3f, 0.14f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
     if( frame ) frame->GetComponent<Transform>().SetRotation( Vector3( 0.f, yaw, 0.f ) );
     EntityHandle screen = m_kit.Piece( Shape::Plane, centre, Vector3( size.x, 1.f, size.y ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 1.f, 1.f, 1.f ) );
     if( !screen )
@@ -368,7 +480,7 @@ void VenueShow::BuildScreen( Transform& inRoot, const VenuePlan::Screen& inScree
     {
         material->SetTexture( Moonlight::TextureType::Emissive, ResourceCache::GetInstance().Get<Moonlight::Texture>( Path( texture ) ) );
         material->SetEmissiveColor( Vector3( 1.f, 1.f, 1.f ) );
-        material->SetEmissiveIntensity( 2.2f );
+        material->SetEmissiveIntensity( inScreen.Emissive );
         material->SetRoughness( 0.9f );
         material->SetTiling( Vector2( 1.f, -1.f ) );
         material->SetOffset( Vector2( 0.f, 1.f ) );
@@ -755,11 +867,11 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     Vector3 surfer;
     const bool surferUp = m_crowd.SurferUp( surfer );
     m_director.FollowSurfer( surferUp, surfer );
-    m_band.Update( seconds, inDeltaTime, m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
+    m_band.Update( seconds, inDeltaTime, CrowdUp() ? m_crowd.Energy() : 0.6f );
     m_lyricBoard.Update( seconds );
     m_director.SetHype( m_hype );
     m_director.Update( seconds, inDeltaTime );
-    m_lights.SetCrowdEnergy( m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f );
+    m_lights.SetCrowdEnergy( CrowdUp() ? m_crowd.Energy() : 0.6f );
     UpdateHype( seconds, inDeltaTime );
     // The follow spots keep a little front light on the band so they read in any look, and come
     // up full on whoever's soloing.
@@ -794,7 +906,7 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     show.Glow = m_lights.WashGlow();
     show.Kick = m_kick;
     show.Hype = m_hype;
-    show.Energy = m_crowd.Size() > 0 ? m_crowd.Energy() : 0.6f;
+    show.Energy = CrowdUp() ? m_crowd.Energy() : 0.6f;
     m_set.Update( show );
     LogUpdateCost( started );
 }
@@ -804,7 +916,7 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
 {
     // How hot the show runs: the chart's mood, lifted by the player's streak, with a kick after
     // each big moment. The rig, the cameras and the dressing all read it.
-    const std::string mood = m_crowd.Size() > 0 ? m_crowd.Mood( inSeconds ) : std::string( "normal" );
+    const std::string mood = CrowdUp() ? m_crowd.Mood( inSeconds ) : std::string( "normal" );
     const float chart = mood == "intense" ? 0.75f : mood == "mellow" ? 0.2f : 0.45f;
     const float afterglow = 0.25f * std::exp( -static_cast<float>( std::max( 0.0, inSeconds - m_lastMoment ) ) / 6.f );
     const float target = std::clamp( chart * 0.75f + m_performance * 0.25f + afterglow, 0.f, 1.f );

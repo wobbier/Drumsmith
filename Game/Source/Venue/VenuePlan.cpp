@@ -173,6 +173,20 @@ VenuePlan VenuePlan::ForStyle( int inStyle )
 }
 
 
+VenuePlan VenuePlan::Empty()
+{
+    VenuePlan plan;
+    for( Spot& spot : plan.Members )
+    {
+        spot.Present = false;
+    }
+    plan.Lyrics.Present = false;
+    plan.Screens.clear();
+    plan.Crowd.clear();
+    return plan;
+}
+
+
 const VenuePlan::Spot& VenuePlan::SpotOf( int inMember ) const
 {
     return Members[static_cast<size_t>( std::clamp( inMember, 0, static_cast<int>( Members.size() ) - 1 ) )];
@@ -187,6 +201,20 @@ float VenuePlan::CrowdFront() const
         if( area.Type == CrowdArea::Kind::Posed ) front = std::max( front, area.MaxZ );
     }
     return front > -1e8f ? front : Stage.BarricadeZ - 0.8f;
+}
+
+
+Vector3 VenuePlan::MemberCentre() const
+{
+    Vector3 sum( 0.f, 0.f, 0.f );
+    int count = 0;
+    for( const Spot& spot : Members )
+    {
+        if( !spot.Present ) continue;
+        sum = sum + spot.Feet;
+        ++count;
+    }
+    return count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : sum;
 }
 
 

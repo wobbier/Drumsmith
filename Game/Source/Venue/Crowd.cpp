@@ -232,7 +232,8 @@ void Crowd::OnCheer( float inAmount )
 
 void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
 {
-    if( m_people.empty() )
+    // (A scene venue's crowd can be all mob, with no posed figures.)
+    if( m_people.empty() && m_mob.empty() )
     {
         return;
     }
@@ -476,7 +477,8 @@ void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, const VenuePlan::CrowdA
     const float z0 = inArea.MaxZ;
     const float z1 = inArea.MinZ;
     const float floorY = inArea.FloorY;
-    const float spacing = inArea.Spacing;
+    // (A scene's area could ask for none: the grid would never advance.)
+    const float spacing = std::max( inArea.Spacing, 0.2f );
     const float density = inArea.Density;
     // Figures far enough back that a silhouette and a bob read as a crowd: four or five boxes
     // each, moved as one, so filling a room costs a transform a figure a frame.
@@ -490,8 +492,8 @@ void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, const VenuePlan::CrowdA
         for( float x = x0; x <= x1; x += spacing )
         {
             ++seed;
-            const float fx = x + ( VenueTiming::Noise( seed, 22u ) - 0.5f ) * spacing * 0.6f;
-            const float fz = z + ( VenueTiming::Noise( seed, 23u ) - 0.5f ) * spacing * 0.5f;
+            const float fx = x + ( VenueTiming::Noise( seed, 22u ) - 0.5f ) * spacing * 0.6f * inArea.Scatter;
+            const float fz = z + ( VenueTiming::Noise( seed, 23u ) - 0.5f ) * spacing * 0.5f * inArea.Scatter;
             if( VenueTiming::Noise( seed, 21u ) <= density && !Occupied( fx, fz ) )
             {
                 spots.push_back( { Vector3( fx, 0.f, fz ), seed } );

@@ -143,6 +143,7 @@ VenueChoice ChooseVenue( const VenueChoiceInputs& inInputs )
     VenueChoice choice;
     if( ResolveName( inInputs, inInputs.CommandVenue, choice ) )
     {
+        choice.Reason = "--venue";
         return choice;
     }
     if( EndsWithLvl( inInputs.CommandVenue ) )
@@ -150,28 +151,38 @@ VenueChoice ChooseVenue( const VenueChoiceInputs& inInputs )
         choice.IsScene = true;
         choice.ScenePath = inInputs.CommandVenue;
         choice.Id = inInputs.CommandVenue;
+        choice.Reason = "--venue (a scene path)";
         return choice;
     }
     if( inInputs.CommandStyle >= 0 )
     {
-        return StyleChoice( inInputs.CommandStyle, inInputs.SongHash );
+        choice = StyleChoice( inInputs.CommandStyle, inInputs.SongHash );
+        choice.Reason = inInputs.CommandStyle >= VenueRegistry::kStyleCount ? "--venue-style (random for the song)" : "--venue-style";
+        return choice;
     }
     if( inInputs.SongVenues )
     {
         if( ResolveName( inInputs, inInputs.SongVenue, choice ) )
         {
+            choice.Reason = "the song's Venue";
             return choice;
         }
         if( inInputs.HasSongLocal )
         {
-            return SceneChoice( inInputs.SongLocal );
+            choice = SceneChoice( inInputs.SongLocal );
+            choice.Reason = "the song's own Venue folder";
+            return choice;
         }
     }
     if( const VenueEntry* entry = FindIn( inInputs.Registry, inInputs.VenueId ) )
     {
-        return SceneChoice( *entry );
+        choice = SceneChoice( *entry );
+        choice.Reason = "the player's venue (VenueId)";
+        return choice;
     }
-    return StyleChoice( inInputs.VenueStyle, inInputs.SongHash );
+    choice = StyleChoice( inInputs.VenueStyle, inInputs.SongHash );
+    choice.Reason = inInputs.VenueStyle >= VenueRegistry::kStyleCount ? "the VenueStyle setting (random for the song)" : "the VenueStyle setting";
+    return choice;
 }
 
 
@@ -348,4 +359,20 @@ VenueChoice VenueRegistry::ChooseForSong( const TrackData& inTrack ) const
         INFO_FMT( "[Venues]", "--venue %s matches no venue id, room or .lvl path; using the normal pick", inputs.CommandVenue.c_str() );
     }
     return choice;
+}
+
+
+VenueChoice VenueRegistry::ChooseRoomForSong( const TrackData& inTrack ) const
+{
+    const GameSettings& settings = GameSettings::GetInstance();
+    VenueChoiceInputs inputs;
+    const std::string command = CommandLine::GetString( "--venue" );
+    inputs.CommandVenue = VenueStyleFromName( command ) >= 0 ? command : std::string();
+    inputs.CommandStyle = CommandLine::Has( "--venue-style" ) ? CommandLine::GetInt( "--venue-style", -1 ) : -1;
+    inputs.SongVenue = VenueStyleFromName( inTrack.m_venueId ) >= 0 ? inTrack.m_venueId : std::string();
+    inputs.SongVenues = settings.SongVenues;
+    inputs.VenueStyle = settings.VenueStyle;
+    inputs.SongHash = VenueSongHash( inTrack.m_trackName );
+    inputs.Registry = nullptr;
+    return ChooseVenue( inputs );
 }

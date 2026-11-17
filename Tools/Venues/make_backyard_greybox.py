@@ -113,6 +113,8 @@ def build():
         s.slab(f"Ground Window {i}", house, x - w / 2, x + w / 2, 1.0, 2.4, 10.88, 10.95, GLASS,
                emissive=WARM if i != 1 else (0.3, 0.4, 0.9), emissive_intensity=0.8)
     for i, x in enumerate([-9.5, -6.0, -2.0, 2.0, 6.0, 9.5]):
+        if i == 0:
+            continue  # the projector sheet hangs there
         w = 1.6
         s.slab(f"Upper Window {i} Frame", house, x - w / 2 - 0.1, x + w / 2 + 0.1, 3.7, 5.5, 10.93, 11.0, TRIM)
         lit = i in (0, 2, 3, 5)
@@ -261,48 +263,57 @@ def build():
     r3 = run("Run Lawn", (-14.1, 3.2, -8.0), (14.1, 3.2, -8.0), 1.2, 2, mixed + warm, 14, 2)
     for tag, (px, py, pz) in (("W", (-14.1, 0, -14.0)), ("E", (14.1, 0, -12.0)), ("L", (-14.1, 0, -8.0)), ("R", (14.1, 0, -8.0))):
         s.slab(f"Pole {tag}", sl, px - 0.07, px + 0.07, 0, 3.4, pz - 0.07, pz + 0.07, WOOD)
+    # Intensities are the engine's (falling off as intensity / d^2); a cued light's is its level
+    # at full, the show takes it down from there.
     # Show lights for the strings: wash points under the cable, three per run.
-    s.light("String Wash W0", lights, (-9.0, 2.6, -2.5), "Point", (1.0, 0.7, 0.35), 5.0, 9, show="Wash", group=0)
-    s.light("String Wash W1", lights, (-11.0, 2.4, -8.5), "Point", (1.0, 0.6, 0.3), 5.0, 9, show="Wash", group=0)
-    s.light("String Wash W2", lights, (-12.0, 2.4, -13.0), "Point", (1.0, 0.7, 0.35), 5.0, 9, show="Wash", group=0)
-    s.light("String Wash E0", lights, (9.0, 2.6, 0.5), "Point", (1.0, 0.3, 0.6), 5.0, 9, show="Wash", group=1)
-    s.light("String Wash E1", lights, (12.0, 2.4, -6.0), "Point", (0.4, 0.8, 1.0), 5.0, 9, show="Wash", group=1)
-    s.light("String Wash E2", lights, (13.0, 2.4, -11.0), "Point", (1.0, 0.85, 0.3), 5.0, 9, show="Wash", group=1)
-    s.light("String Wash L0", lights, (-6.0, 2.6, -8.3), "Point", (0.4, 1.0, 0.6), 6.0, 10, show="Wash", group=2)
-    s.light("String Wash L1", lights, (0.0, 2.2, -8.3), "Point", (1.0, 0.5, 0.7), 6.0, 10, show="Wash", group=2)
-    s.light("String Wash L2", lights, (6.0, 2.6, -8.3), "Point", (0.4, 0.7, 1.0), 6.0, 10, show="Wash", group=2)
+    s.light("String Wash W0", lights, (-9.0, 2.6, -2.5), "Point", (1.0, 0.7, 0.35), 120.0, 11, show="Wash", group=0)
+    s.light("String Wash W1", lights, (-11.0, 2.4, -8.5), "Point", (1.0, 0.6, 0.3), 120.0, 11, show="Wash", group=0)
+    s.light("String Wash W2", lights, (-12.0, 2.4, -13.0), "Point", (1.0, 0.7, 0.35), 120.0, 11, show="Wash", group=0)
+    s.light("String Wash E0", lights, (9.0, 2.6, 0.5), "Point", (1.0, 0.3, 0.6), 120.0, 11, show="Wash", group=1)
+    s.light("String Wash E1", lights, (12.0, 2.4, -6.0), "Point", (0.4, 0.8, 1.0), 120.0, 11, show="Wash", group=1)
+    s.light("String Wash E2", lights, (13.0, 2.4, -11.0), "Point", (1.0, 0.85, 0.3), 120.0, 11, show="Wash", group=1)
+    s.light("String Wash L0", lights, (-6.0, 2.6, -8.3), "Point", (0.4, 1.0, 0.6), 140.0, 12, show="Wash", group=2)
+    s.light("String Wash L1", lights, (0.0, 2.2, -8.3), "Point", (1.0, 0.5, 0.7), 140.0, 12, show="Wash", group=2)
+    s.light("String Wash L2", lights, (6.0, 2.6, -8.3), "Point", (0.4, 0.7, 1.0), 140.0, 12, show="Wash", group=2)
     # Pool glow: a cyan wash just above the water (a light under an opaque water slab would light nothing).
-    s.light("Pool Glow", lights, (8.5, 0.35, -5.5), "Point", (0.1, 0.85, 1.0), 6.0, 9, show="Wash", group=3)
+    s.light("Pool Glow", lights, (8.5, 0.35, -5.5), "Point", (0.1, 0.85, 1.0), 60.0, 9, show="Wash", group=3)
     # Band washes from the pergola's front beam, warm and magenta.
-    s.light("Band Wash L", lights, (-2.6, 3.2, 3.8), "Spot", (1.0, 0.45, 0.2), 6.0, 14, rot=(55, -12, 0), inner=25, outer=50, show="Wash", group=4)
-    s.light("Band Wash R", lights, (2.6, 3.2, 3.8), "Spot", (0.9, 0.2, 0.7), 6.0, 14, rot=(55, 12, 0), inner=25, outer=50, show="Wash", group=4)
+    s.light("Band Wash L", lights, (-2.6, 3.2, 3.8), "Spot", (1.0, 0.45, 0.2), 1100.0, 14, rot=(55, -12, 0), inner=30, outer=60, show="Wash", group=4)
+    s.light("Band Wash R", lights, (2.6, 3.2, 3.8), "Spot", (0.9, 0.2, 0.7), 1100.0, 14, rot=(55, 12, 0), inner=30, outer=60, show="Wash", group=4)
     # Beams: narrow coloured spots from the eave over the crowd.
     for i, (x, col) in enumerate([(-9.0, (0.2, 0.5, 1.0)), (-3.0, (1.0, 0.2, 0.4)), (3.0, (0.3, 1.0, 0.5)), (9.0, (1.0, 0.8, 0.2))]):
-        s.light(f"Eave Beam {i}", lights, (x, 5.6, 10.0), "Spot", col, 8.0, 30, rot=(35 + 4 * (i % 2), (-1 if x < 0 else 1) * 10, 0),
+        s.light(f"Eave Beam {i}", lights, (x, 5.6, 10.0), "Spot", col, 6000.0, 30, rot=(35 + 4 * (i % 2), (-1 if x < 0 else 1) * 10, 0),
                 inner=6, outer=12, show="Beam", group=i % 2)
     # Blinders: wide white floods at the eave aimed at the crowd.
     for i, x in enumerate((-3.2, 3.2)):
-        s.light(f"Blinder {i}", lights, (x, 5.0, 10.4), "Spot", (1.0, 0.95, 0.85), 10.0, 26, rot=(28, 0, 0), inner=30, outer=60, show="Blinder", group=0)
+        s.light(f"Blinder {i}", lights, (x, 5.0, 10.4), "Spot", (1.0, 0.95, 0.85), 700.0, 26, rot=(42, 0, 0), inner=30, outer=60, show="Blinder", group=0)
     # Searchlight from above ("helicopter"), a narrow follow spot on the drummer.
-    s.light("Searchlight", lights, (-6.0, 40.0, -30.0), "Spot", (0.9, 0.95, 1.0), 20.0, 90,
+    s.light("Searchlight", lights, (-6.0, 40.0, -30.0), "Spot", (0.9, 0.95, 1.0), 150000.0, 90,
             rot=look_at((-6.0, 40.0, -30.0), (0.0, 0.8, 6.2)), inner=2.5, outer=4.0, show="Spot", group=0)
+    # Party floods on poles at the lawn's front corners and over the crowd: follow spots (after the
+    # searchlight on the drummer: the singer, the guitarist, the bassist), the band's front light.
+    for i, pos in enumerate([(0.0, 4.6, -7.0), (-7.5, 4.2, -3.0), (7.5, 4.2, -3.0)]):
+        s.slab(f"Flood Pole {i}", lights, pos[0] - 0.05, pos[0] + 0.05, 0, pos[1] - 0.15, pos[2] - 0.05, pos[2] + 0.05, BLACK)
+        s.light(f"Party Flood {i}", lights, pos, "Spot", (1.0, 0.93, 0.82), 2400.0, 24,
+                rot=look_at(pos, (0.0, 1.5, 2.5)), inner=7, outer=13, show="Spot", group=0)
     # Strobes: the patrol car's red/blue pair.
-    s.light("Patrol Red", lights, (qx - 0.3, 1.9, qz), "Point", (1.0, 0.05, 0.05), 14.0, 22, show="Strobe", group=0)
-    s.light("Patrol Blue", lights, (qx + 0.3, 1.9, qz), "Point", (0.1, 0.2, 1.0), 14.0, 22, show="Strobe", group=1)
+    s.light("Patrol Red", lights, (qx - 0.3, 1.9, qz), "Point", (1.0, 0.05, 0.05), 400.0, 22, show="Strobe", group=0)
+    s.light("Patrol Blue", lights, (qx + 0.3, 1.9, qz), "Point", (0.1, 0.2, 1.0), 400.0, 22, show="Strobe", group=1)
     # Tiki torches: static warm points (the flame is a small emissive box).
     tk = s.group("Tiki Torches", lights)
     for i, (x, z) in enumerate([(-8.5, 0.8), (8.5, 0.8), (-12.5, -6.0), (4.0, -1.2), (12.8, -1.5), (0.0, -10.5)]):
         s.slab(f"Torch {i} Pole", tk, x - 0.04, x + 0.04, 0, 1.8, z - 0.04, z + 0.04, WOOD)
         s.box(f"Torch {i} Flame", tk, (x, 1.95, z), (0.14, 0.26, 0.14), (1.0, 0.5, 0.1), shape="Sphere",
               emissive=(1.0, 0.5, 0.1), emissive_intensity=4.0, shadows=False)
-        s.light(f"Torch {i} Light", tk, (x, 2.0, z), "Point", (1.0, 0.55, 0.2), 2.0, 6.5, show="Static")
+        s.light(f"Torch {i} Light", tk, (x, 2.0, z), "Point", (1.0, 0.55, 0.2), 25.0, 6.5, show="Static")
     # Moonlight: the only shadowed light. Travels from the street side over the crowd toward the
     # house, so it rims the crowd and lights the band's front. Manual so it keeps this rotation.
-    s.light("Moon", lights, (0, 30, -40), "Directional", (0.55, 0.65, 1.0), 1.6,
+    s.light("Moon", lights, (0, 30, -40), "Directional", (0.55, 0.65, 1.0), 4.0,
             rot=(48, 18, 0), shadows=True, show="Static")
 
     # ---- Markers --------------------------------------------------------------------------
-    s.info(marks, "Backyard Party", "Drumsmith", outdoor=True, room_back=-30.0, half_width=14.0, desk_z=-20.0)
+    s.info(marks, "Backyard Party", "Drumsmith", outdoor=True, room_back=-30.0, half_width=14.0, desk_z=-20.0,
+           sky_time=21.0, moon=2.0, fog_color=(0.03, 0.035, 0.06))
     s.spot(marks, "Drummer", (0.0, 0.55, 6.2))
     s.spot(marks, "Guitar", (-3.6, 0.25, 2.9))
     s.spot(marks, "Bass", (3.6, 0.25, 3.1))
@@ -321,10 +332,10 @@ def build():
     s.camera_spot("Cam Through Crowd", cm, (-2.0, 1.8, -10.5), (0.0, 1.8, 5.0), "Custom", 38, "through-crowd")
     s.camera_spot("Cam Desk", cm, (0.0, 2.2, -22.0), (0.0, 1.8, 4.0), "Desk", 30)
     s.camera_spot("Cam Vocal Close", cm, (1.6, 1.6, -1.4), (0.0, 1.5, 1.4), "Close", 40)
-    s.camera_spot("Cam Drummer Close", cm, (3.6, 1.6, 2.2), (0.0, 1.1, 6.2), "Close", 38)
+    s.camera_spot("Cam Drummer Close", cm, (1.9, 1.75, 3.4), (0.0, 1.2, 6.2), "Close", 40)
     s.camera_spot("Cam Pool Side", cm, (13.4, 1.8, -0.8), (0.0, 1.5, 4.0), "Custom", 50, "pool-side")
     # Projector sheet on the house wall: shows the Program feed to the crowd. The picture faces -Z.
-    s.screen("Projector Sheet", marks, (-9.0, 4.8, 10.9), 4.0, 2.25, "Program", 2.0)
+    s.screen("Projector Sheet", marks, (-9.0, 4.8, 10.85), 4.0, 2.25, "Program", 2.0)
     return s
 
 

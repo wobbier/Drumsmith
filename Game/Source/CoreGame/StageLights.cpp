@@ -192,6 +192,39 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
     m_clash[0] = palette.Clash[0];
     m_clash[1] = palette.Clash[1];
 
+    // Haze, so the beams show: the camera's fog turns volumetric and starts close.
+    if( m_camera && m_camera->HasComponent<PostProcess>() )
+    {
+        PostProcess& post = m_camera->GetComponent<PostProcess>();
+        m_savedFog = true;
+        m_fogWasVolumetric = post.VolumetricFog;
+        m_fogDensity = post.FogDensity;
+        m_fogStart = post.FogStartDistance;
+        m_fogScatter = post.FogSunIntensity;
+        m_fogSteps = post.VolumetricSteps;
+        m_fogDistance = post.VolumetricDistance;
+        m_fogLightSamples = post.VolumetricLightSamples;
+        post.Fog = true;
+        post.VolumetricFog = true;
+        post.VolumetricSteps = std::max( post.VolumetricSteps, 64 );
+        post.VolumetricDistance = std::max( post.VolumetricDistance, 60.f );
+        post.FogStartDistance = std::min( post.FogStartDistance, kHazeStart );
+        post.FogSunIntensity = kHazeScatter;
+        post.FogLocalAnisotropy = 0.2f;
+        post.VolumetricLightSamples = CommandLine::GetInt( "--haze-light-samples", kHazeLightSamples );
+        m_hazeLevel = 0.f;
+    }
+    m_bandCentre = inPlan.MemberCentre();
+    for( int slot = 0; slot < kSpotCount; ++slot )
+    {
+        m_members[slot] = inPlan.HasMember( kSpotMember[slot] );
+    }
+    if( !inPlan.BuildRig )
+    {
+        // A scene venue lit by its own lights (AdoptFixture): the show without the rig.
+        return;
+    }
+
     const float deck = inPlan.Stage.Height;
     // The overhead rig hangs just under the truss (lower in a room with a low ceiling).
     const float truss = inPlan.Stage.TrussHeight - m_trussDrop;
@@ -314,28 +347,6 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
         m_props.push_back( key );
     }
 
-    // Haze, so the beams show: the camera's fog turns volumetric and starts close.
-    if( m_camera && m_camera->HasComponent<PostProcess>() )
-    {
-        PostProcess& post = m_camera->GetComponent<PostProcess>();
-        m_savedFog = true;
-        m_fogWasVolumetric = post.VolumetricFog;
-        m_fogDensity = post.FogDensity;
-        m_fogStart = post.FogStartDistance;
-        m_fogScatter = post.FogSunIntensity;
-        m_fogSteps = post.VolumetricSteps;
-        m_fogDistance = post.VolumetricDistance;
-        m_fogLightSamples = post.VolumetricLightSamples;
-        post.Fog = true;
-        post.VolumetricFog = true;
-        post.VolumetricSteps = std::max( post.VolumetricSteps, 64 );
-        post.VolumetricDistance = std::max( post.VolumetricDistance, 60.f );
-        post.FogStartDistance = std::min( post.FogStartDistance, kHazeStart );
-        post.FogSunIntensity = kHazeScatter;
-        post.FogLocalAnisotropy = 0.2f;
-        post.VolumetricLightSamples = CommandLine::GetInt( "--haze-light-samples", kHazeLightSamples );
-        m_hazeLevel = 0.f;
-    }
 }
 
 
@@ -469,6 +480,17 @@ void StageLights::Clear()
 {
     for( Fixture& fixture : m_fixtures )
     {
+        if( fixture.Adopted )
+        {
+            // The scene's own light: it goes with the scene, as it was authored.
+            if( fixture.Light && fixture.Light->HasComponent<Light>() )
+            {
+                Light& light = fixture.Light->GetComponent<Light>();
+                light.Color = fixture.BaseColor;
+                light.Intensity = fixture.BaseIntensity;
+            }
+            continue;
+        }
         if( fixture.Light ) fixture.Light->MarkForDelete();
         for( EntityHandle& lens : fixture.Lenses )
         {
@@ -517,6 +539,8 @@ void StageLights::Clear()
     m_hype = 0.f;
     m_accent = 0.f;
     m_burn = 0.f;
+    m_adoptedSpots = 0;
+    m_members = {};
 }
 
 
@@ -1094,10 +1118,47 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
     // hot, and in the cues that are all movement).
     const bool quick = cue.Name == "frenzy" || cue.Name == "bre" || cue.Name == "searchlights" || cue.Name == "sweep";
     const float swing = 1.f - std::exp( -inDeltaTime * ( quick ? 14.f : 4.5f + 3.f * m_hype ) );
+    // Strobe bars: with the strobe cues, and a burst of flashes on an accent.
+    float strobe = 0.f;
+    if( !m_gentle )
+    {
+        if( StartsWith( cue.Name, "strobe" ) )
+        {
+            const double rate = cue.Name == "strobe_fast" ? 4.0 : 2.0;
+            strobe = ( beat * rate - std::floor( beat * rate ) ) < 0.3 ? 1.f : 0.f;
+        }
+        if( m_accent > 0.25f )
+        {
+            strobe = std::max( strobe, std::fmod( static_cast<float>( seconds ) * 14.f, 1.f ) < 0.4f ? m_accent : 0.f );
+        }
+    }
     const bool blackout = StartsWith( cue.Name, "blackout" );
     for( Fixture& fixture : m_fixtures )
     {
         Look look = LookFor( fixture, cue, seconds, beat );
+        if( fixture.Kind == Group::Strobe )
+        {
+            // A scene's strobe (a patrol car's light bar): flashing with the strobe cues and on
+            // big moments, the groups taking turns, and at the show's peak a slow alternation.
+            const float turn = 0.5f * static_cast<float>( fixture.Index % 2 );
+            float flash = 0.f;
+            if( StartsWith( cue.Name, "strobe" ) )
+            {
+                const double rate = cue.Name == "strobe_fast" ? 4.0 : 2.0;
+                flash = m_gentle ? 0.4f : ( std::fmod( static_cast<float>( beat * rate ) + turn, 1.f ) < 0.3f ? 1.f : 0.f );
+            }
+            if( m_accent > 0.25f && !m_gentle )
+            {
+                flash = std::max( flash, std::fmod( static_cast<float>( seconds ) * 7.f + turn, 1.f ) < 0.4f ? m_accent : 0.f );
+            }
+            if( m_hype > 0.72f && !blackout )
+            {
+                flash = std::max( flash, std::fmod( static_cast<float>( seconds ) * 1.5f + turn, 1.f ) < 0.5f ? ( m_gentle ? 0.3f : 0.7f ) : 0.f );
+            }
+            fixture.Level = flash;
+            UpdateAdopted( fixture, fixture.BaseColor, flash );
+            continue;
+        }
         if( fixture.Kind == Group::Spot )
         {
             for( const VenueData::SpotlightData& spot : m_venue.m_spotlights )
@@ -1113,6 +1174,11 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
             if( cue.Name == "silhouettes_spot" || cue.Name == "blackout_spot" )
             {
                 look.Level = std::max( look.Level, fixture.Index < 2 ? 1.f : 0.f );
+            }
+            if( fixture.Adopted && !blackout )
+            {
+                // A scene's searchlight is part of the set: always on its member.
+                look.Level = std::max( look.Level, 0.35f );
             }
         }
         const bool head = fixture.Kind == Group::Beam || fixture.Kind == Group::Mover;
@@ -1165,6 +1231,11 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
             level *= 1.f - 0.55f * ( least / most );
         }
 
+        if( fixture.Adopted )
+        {
+            UpdateAdopted( fixture, color, level );
+            continue;
+        }
         if( fixture.Light )
         {
             Transform& transform = fixture.Light->GetComponent<Transform>();
@@ -1200,20 +1271,6 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
         }
     }
 
-    // Strobe bars: with the strobe cues, and a burst of flashes on an accent.
-    float strobe = 0.f;
-    if( !m_gentle )
-    {
-        if( StartsWith( cue.Name, "strobe" ) )
-        {
-            const double rate = cue.Name == "strobe_fast" ? 4.0 : 2.0;
-            strobe = ( beat * rate - std::floor( beat * rate ) ) < 0.3 ? 1.f : 0.f;
-        }
-        if( m_accent > 0.25f )
-        {
-            strobe = std::max( strobe, std::fmod( static_cast<float>( seconds ) * 14.f, 1.f ) < 0.4f ? m_accent : 0.f );
-        }
-    }
     if( m_tint )
     {
         for( const EntityHandle& bar : m_strobes )
@@ -1222,6 +1279,103 @@ void StageLights::Update( double inSongTimeMs, float inDeltaTime )
         }
     }
     UpdateLasers( cue, seconds, beat, inDeltaTime );
+}
+
+
+void StageLights::AdoptFixture( const EntityHandle& inLight, VenueShowLight::Role inRole, int inGroup )
+{
+    if( !m_world || !m_root || !inLight || !inLight->HasComponent<Light>() || !inLight->HasComponent<Transform>() || inRole == VenueShowLight::Role::Static )
+    {
+        return;
+    }
+    Fixture fixture;
+    fixture.Adopted = true;
+    fixture.Light = inLight;
+    const Light& light = inLight->GetComponent<Light>();
+    fixture.BaseColor = light.Color;
+    fixture.BaseIntensity = light.Intensity;
+    fixture.MaxIntensity = light.Intensity;
+    fixture.Color = light.Color;
+    Transform& transform = inLight->GetComponent<Transform>();
+    const Vector3 position = m_root->InverseTransformPoint( transform.GetWorldPosition() );
+    const Vector3 aim = m_root->InverseTransformDirection( transform.Front() );
+    fixture.BaseAim = aim.Length() > 1e-4f ? aim.Normalized() : Vector3( 0.f, 0.f, 1.f );
+    fixture.Side = position.x < m_bandCentre.x ? -1 : 1;
+    // Lights of a group share a seed (Index), so a look gives them the same colour and moves.
+    const int group = std::abs( inGroup );
+    fixture.Index = group;
+    switch( inRole )
+    {
+    case VenueShowLight::Role::Wash:
+        fixture.Kind = Group::Wash;
+        fixture.Row = group % kWashRows;
+        break;
+    case VenueShowLight::Role::Beam:
+        fixture.Kind = Group::Beam;
+        fixture.Row = group % kBeamRows;
+        break;
+    case VenueShowLight::Role::Blinder:
+        fixture.Kind = Group::Crowd;
+        break;
+    case VenueShowLight::Role::Strobe:
+        fixture.Kind = Group::Strobe;
+        break;
+    case VenueShowLight::Role::Spot:
+    {
+        // Follow spots go to the drummer first, then the singer, guitar, bass and keys: the
+        // members there are, in turn.
+        fixture.Kind = Group::Spot;
+        const int order[kSpotCount] = { VenueData::Drums, VenueData::Vocals, VenueData::Guitar, VenueData::Bass, VenueData::Keys };
+        std::vector<int> slots;
+        for( int member : order )
+        {
+            for( int slot = 0; slot < kSpotCount; ++slot )
+            {
+                if( kSpotMember[slot] == member && m_members[slot] ) slots.push_back( slot );
+            }
+        }
+        if( slots.empty() )
+        {
+            return;
+        }
+        fixture.Index = slots[static_cast<size_t>( m_adoptedSpots++ ) % slots.size()];
+        break;
+    }
+    default:
+        return;
+    }
+    m_fixtures.push_back( fixture );
+}
+
+
+void StageLights::UpdateAdopted( Fixture& ioFixture, const Vector3& inColor, float inLevel )
+{
+    if( !ioFixture.Light || !ioFixture.Light->HasComponent<Light>() )
+    {
+        return;
+    }
+    Transform& transform = ioFixture.Light->GetComponent<Transform>();
+    if( ioFixture.Kind == Group::Beam )
+    {
+        // Swaying about its authored aim as a moving head would move: the look's pan and tilt,
+        // scaled down and kept within reach of where it was pointed.
+        const float pan = std::clamp( ( ioFixture.Yaw - static_cast<float>( ioFixture.Side ) * 18.f ) * 0.5f, -30.f, 30.f ) * kPi / 180.f;
+        const float tilt = std::clamp( ( ioFixture.Pitch - 62.f ) * 0.35f, -12.f, 12.f ) * kPi / 180.f;
+        const Vector3& base = ioFixture.BaseAim;
+        const float flat = std::sqrt( base.x * base.x + base.z * base.z );
+        const float heading = std::atan2( base.x, base.z ) + pan;
+        const float pitch = std::clamp( std::atan2( base.y, flat ) + tilt, -85.f * kPi / 180.f, 85.f * kPi / 180.f );
+        const Vector3 aim( std::sin( heading ) * std::cos( pitch ), std::sin( pitch ), std::cos( heading ) * std::cos( pitch ) );
+        transform.LookDirection( m_root->TransformDirection( aim ) );
+    }
+    else if( ioFixture.Kind == Group::Spot && m_spotTracked[std::clamp( ioFixture.Index, 0, 4 )] )
+    {
+        transform.LookAt( m_root->TransformPoint( m_spotTargets[std::clamp( ioFixture.Index, 0, 4 )] ) );
+    }
+    Light& light = ioFixture.Light->GetComponent<Light>();
+    // The cue's colour, keeping a little of the light's own.
+    light.Color = Mix( inColor, ioFixture.BaseColor, 0.3f );
+    light.Intensity = ioFixture.MaxIntensity * std::max( inLevel, 0.f );
 }
 
 

@@ -32,11 +32,11 @@ def build():
     s.slab("Drummer Platform", geo, -2.2, 2.2, 0.5, 0.8, 4.2, 8, WOOD)
 
     # Lights: two cued washes from above the front of the stage, one uncued key light.
-    s.light("Wash Left", lights, (-4, 6, 1), "Spot", (0.3, 0.5, 1.0), 6.0, 16, rot=(70, 15, 0),
+    s.light("Wash Left", lights, (-4, 6, 1), "Spot", (0.3, 0.5, 1.0), 1200.0, 16, rot=(70, 15, 0),
             inner=25, outer=45, show="Wash", group=0)
-    s.light("Wash Right", lights, (4, 6, 1), "Spot", (1.0, 0.3, 0.5), 6.0, 16, rot=(70, -15, 0),
+    s.light("Wash Right", lights, (4, 6, 1), "Spot", (1.0, 0.3, 0.5), 1200.0, 16, rot=(70, -15, 0),
             inner=25, outer=45, show="Wash", group=0)
-    s.light("Key Light", lights, (0, 5, -3), "Point", (1.0, 0.9, 0.75), 2.0, 20, show="Static")
+    s.light("Key Light", lights, (0, 5, -3), "Point", (1.0, 0.9, 0.75), 80.0, 20, show="Static")
 
     # Markers. VenueSpot faces local -Z (identity = faces the crowd), feet position.
     s.info(marks, "Template", "Drumsmith", outdoor=False, room_back=-16, room_ceiling=7,

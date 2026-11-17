@@ -301,7 +301,7 @@
       0.5,
       1.0
      ],
-     "Intensity": 6.0,
+     "Intensity": 1200.0,
      "Range": 16.0,
      "InnerConeAngle": 25.0,
      "OuterConeAngle": 45.0
@@ -345,7 +345,7 @@
       0.3,
       0.5
      ],
-     "Intensity": 6.0,
+     "Intensity": 1200.0,
      "Range": 16.0,
      "InnerConeAngle": 25.0,
      "OuterConeAngle": 45.0
@@ -389,7 +389,7 @@
       0.9,
       0.75
      ],
-     "Intensity": 2.0,
+     "Intensity": 80.0,
      "Range": 20.0
     },
     {
@@ -435,7 +435,20 @@
      "BuildStage": false,
      "BuildSet": false,
      "BuildRig": false,
-     "BuildFx": false
+     "BuildFx": false,
+     "AmbientColor": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "FogColor": [
+      0.01,
+      0.01,
+      0.015
+     ],
+     "Haze": 1.0,
+     "SkyTime": 22.0,
+     "MoonBrightness": 1.0
     }
    ]
   },
