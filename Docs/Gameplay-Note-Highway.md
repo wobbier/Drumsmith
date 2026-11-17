@@ -17,10 +17,10 @@
 | `Game/Source/Cores/NoteHighwayCore.h` / `.cpp` | The core: clock, lanes, judging, score, HUD values |
 | `Game/Source/Components/NoteTrigger.h` | Per-note data on each note entity |
 | `Game/Source/Midi/MidiDevice.h` / `.cpp` | Timestamped MIDI queue (RtMidi callback) |
-| `Assets/Prefabs/Notes/NewBaseNote.prefab` | Note gem (Transform + textured Mesh, `NewNote.obj`, 2 units wide) |
-| `Assets/Prefabs/Notes/BassNotePrefab.prefab` | Kick note: an orange bar (`Engine/Assets/cube.obj`, 1 unit wide) |
+| `Assets/Prefabs/Notes/DrumGem.prefab`, `CymbalGem.prefab`, `CymbalRing.prefab`, `KickBar.prefab` | The note models (`Assets/Models/Notes/`), each with a diffuse and an emissive ramp texture (`Assets/Textures/Notes/`) |
+| `Tools/NoteAssets/build.py` | Generates those models and textures (plain Python; see "Note models" below) |
 | `Assets/Example.lvl` | Gameplay scene: lane entities, `TrackMover` (camera, its fog, the strike `Bar`), the cores |
-| `Assets/Prefabs/Highway/HighwayBox.prefab` | The unit cube every highway piece is spawned from |
+| `Assets/Prefabs/Highway/HighwayBox.prefab` | The unit cube every highway piece and note marking is spawned from (plain white texture) |
 | `Assets/UI/InGameMenu.rml` / `.rcss` | HUD, countdown, results, pause menu |
 
 ## How It Works
@@ -38,25 +38,27 @@
 
 Speed is the chart's `NoteSpeed` times the player's **Highway Speed** (`GameSettings::HighwaySpeed`, 50-200%, on the settings page and in the pause options). Changing it mid-song moves every spawned note and beat line to its new place (`ApplySpeed`); the window then spawns or deletes at the new speed.
 
-Colours come from `PadUtils::GetNoteColor`; gems also glow in their colour (`EmissiveColor`), since the scene has no lights. Every colour goes through `Tint`, which applies it once the mesh's model has bound: binding (`Mesh::BindModelMesh`) rebuilds the material from the prefab's saved one, which would undo an earlier colour.
+Colours come from `PadUtils::GetNoteColor`, pushed away from grey (`Vivid`). A note shows its colour as a glow (`EmissiveColor`), since the scene has no lights; its material colour stays near white and only lights the pale base. Every colour goes through `Tint`, which applies it once the mesh's model has bound: binding (`Mesh::BindModelMesh`) rebuilds the material from the prefab's saved one, which would undo an earlier colour.
 
 ### Note shapes
 
 | Note | Shape |
 |------|-------|
-| Kick | An orange bar across the highway |
+| Kick | A low orange bar with pointed ends, lying on the highway under the other notes and reaching just past the rails. It is deeper front to back than a gem, so it shows either side of a note on the same beat |
 | Double bass kick | The bar on its foot's half of the highway (right foot right, left foot left), with a thin line across the other half |
-| Snare, toms | A chunky gem (`NewNote.obj`) in the lane colour |
-| Hi-hat, crashes, ride, splash, china | A thin plate raised above the lane |
-| Open hi-hat | The plate with a dark centre (a ring) |
-| Hi-hat pedal | A small low bar in the hi-hat column, with its own small target pad |
+| Snare, toms | A rounded gem on a bright base (`DrumGem.obj`), standing on the highway |
+| Hi-hat, crashes, ride, splash, china | A bowed disc with a bell (`CymbalGem.obj`), floating above the lane and the kick |
+| Open hi-hat | The disc with its middle open (`CymbalRing.obj`) |
+| Hi-hat pedal | A small kick-shaped bar in the hi-hat column, with its own small target pad |
 | Rimshot (cymbal: edge) | White strip along the near edge |
 | Cross-stick | White bar down the left side |
-| Bell | White dot in the middle |
-| Ghost (velocity ≤ 40) | 70% size, dim |
+| Bell | White dot on the cymbal's bell |
+| Ghost (velocity ≤ 40) | 70% size, lower, dim |
 | Accent (velocity ≥ 120) | Taller, glows brighter |
 
 Markings are separate entities in the note's lane (`NoteState::Decorations`), hidden, greyed and moved with their note.
+
+**Note models.** `python3 Tools/NoteAssets/build.py` writes the four models and their textures; delete the cooked `.assbin` / `.dds` twins afterwards and a tools build recooks them. Each model is one unit wide with its base at y = 0, so a note's x scale is its width. Every vertex's v is a place on a ramp (base trim, seam, body, crest, top) and the two textures say what each place looks like: the emissive ramp is multiplied by the note's colour and by the prefab's `EmissiveIntensity` (6), so the trim and crest go past white and bloom while the body keeps its colour. Changing the look is a matter of editing the ramps in `textures()`; changing a shape means updating the heights in `NoteHighwayCore.cpp` (`kGemTop`, `kCymbalBellTop`...) that place the markings. The textures are square on purpose: as 32 × 512 strips they rendered striped wherever they were minified.
 
 **Double bass** (`KickFeet::Assign` in `Game/Source/CoreGame/ChartAdvice.h`, called from `NoteHighwayCore::AssignKickFeet`). Where a chart marks kicks for the second pedal (`NoteData::m_secondPedal`, Rock Band's 2x kick note), those are the left foot's, and an unmarked kick within 260 ms either side of one is the right foot's. A chart with no marks is read by spacing: a run of three or more kicks no more than 150 ms apart alternates, right foot first; two quick kicks stay full bars (one foot plays those). Every other kick is a full bar. Judging doesn't know feet: either pedal hits either bar.
 
@@ -175,7 +177,7 @@ The song clock holds while the stems seek, and every stem restarts on the same D
 - **Pause/resume can drift the stems** (`AudioPack` only DSP-schedules the first start, `Docs/Audio.md`). The clock follows stem 0.
 - **Results need the audio to end.** A chart that stops long before its song waits for the song.
 - **Lane entities are found by name** in `OnStart` (`open_hh`, `closed_hh`, `Snare1`, `Crash1`, `crash2`, `Bass1`, `ride1`, `tom1`-`tom3`, `TrackMover`). A missing one is logged and its notes stay unparented at the origin.
-- **Mesh widths are constants** in `NoteHighwayCore.cpp` (`kNoteMeshWidth`, `kKickMeshWidth`, `kBarMeshWidth`); changing the note or bar meshes means updating them.
+- **Mesh sizes are constants** in `NoteHighwayCore.cpp` (`kBarMeshWidth` for the strike bar, `kGemTop` and its neighbours for the note models); changing the note or bar meshes means updating them.
 - **Beat lines need `notes.mid`.** A converted song whose `notes.mid` was deleted, and every native chart, has no beat lines. Storing the tempo map in `NoteData.txt` at conversion would fix both.
 - **The camera is tuned for an 8-unit highway.** It's set in `Example.lvl`, not computed from the lane count.
 - **Highway pieces are separate entities**, instanced by colour. Gems and beat lines exist only while in view (`UpdateWindow`); the surface, dividers and pads are a handful for the whole song. Spawning one costs a few microseconds (a whole dense chart took about 25 ms at load), so they are created and deleted rather than pooled.

@@ -1,0 +1,62 @@
+{
+    "Components": [
+        {
+            "Position": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Rotation": [
+                0.0,
+                -0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Type": "Transform"
+        },
+        {
+            "CastShadows": false,
+            "Material": {
+                "DiffuseColor": [
+                    0.85,
+                    0.85,
+                    0.85
+                ],
+                "EmissiveColor": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "EmissiveIntensity": 6.0,
+                "Metallic": 0.0,
+                "Roughness": 0.45,
+                "Textures": {
+                    "Diffuse": {
+                        "Path": "Assets/Textures/Notes/NoteCymbal_Diffuse.png",
+                        "RenderMode": "Opaque"
+                    },
+                    "Emissive": {
+                        "Path": "Assets/Textures/Notes/NoteCymbal_Emissive.png",
+                        "RenderMode": "Opaque"
+                    }
+                },
+                "Tiling": [
+                    1.0,
+                    1.0
+                ],
+                "Type": "StandardMaterial"
+            },
+            "MeshType": "Model",
+            "Type": "Mesh"
+        },
+        {
+            "ModelPath": "Assets/Models/Notes/CymbalGem.obj",
+            "Type": "Model"
+        }
+    ],
+    "Name": "CymbalGem"
+}

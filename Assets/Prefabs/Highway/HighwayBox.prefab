@@ -27,7 +27,7 @@
                 ],
                 "Textures": {
                     "Diffuse": {
-                        "Path": "Engine/Assets/default.png",
+                        "Path": "Assets/Textures/Notes/White.png",
                         "RenderMode": "Opaque"
                     }
                 },

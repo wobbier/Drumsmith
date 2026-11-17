@@ -40,10 +40,8 @@ namespace
     {
         return inPad == PadId::HighTom || inPad == PadId::MidTom || inPad == PadId::FloorTom;
     }
-    // Widths at scale 1: the note gem (NewNote.obj, 2 units), and the unit cube the kick bar and
-    // the strike bar (Example.lvl's "Bar") use.
-    constexpr float kNoteMeshWidth = 2.f;
-    constexpr float kKickMeshWidth = 1.f;
+    // Width at scale 1 of the unit cube the strike bar (Example.lvl's "Bar") uses. The note models
+    // are one unit wide too (Tools/NoteAssets/build.py).
     constexpr float kBarMeshWidth = 1.f;
     // Steering the song clock toward FMOD's position: how long the clock takes to close the gap
     // (a time constant, spread over the frames between mixer updates rather than stepped at
@@ -52,26 +50,52 @@ namespace
     constexpr double kClockSnapMs = 120.0;
     // MIDI hits older than this when read are judged as if they arrived this long ago.
     constexpr double kMaxInputAgeMs = 250.0;
-    // Gem shape (NewNote.obj scale): taller and deeper than the prefab so they read at a glance.
-    constexpr float kGemHeight = 1.8f;
-    constexpr float kGemDepth = 1.6f;
-    // How strongly gems glow in their lane colour (the scene has no lights; emissive carries them).
-    constexpr float kGemGlow = 0.55f;
+    // The note models (Tools/NoteAssets/build.py): one unit wide with their base at y = 0, so a
+    // note's scale is its width, and 1 in height and depth is the size they were drawn at.
+    constexpr const char* kDrumGemPrefab = "Assets/Prefabs/Notes/DrumGem.prefab";
+    constexpr const char* kCymbalPrefab = "Assets/Prefabs/Notes/CymbalGem.prefab";
+    constexpr const char* kOpenHiHatPrefab = "Assets/Prefabs/Notes/CymbalRing.prefab";
+    constexpr const char* kKickPrefab = "Assets/Prefabs/Notes/KickBar.prefab";
+    // Where each model's top is, and how deep its top is front to back (for the technique markings).
+    constexpr float kGemTop = 0.29f;
+    constexpr float kGemTopDepth = 0.2f;
+    constexpr float kCymbalBellTop = 0.18f;
+    constexpr float kCymbalBowTop = 0.06f;
+    constexpr float kCymbalDepth = 0.5f;
+    // Heights above the lane (the highway's surface is at -0.06). The kick lies on the surface, the
+    // drums stand on it with the kick's top level with their base, and the cymbals float over both.
+    constexpr float kKickBase = -0.055f;
+    constexpr float kGemBase = -0.05f;
+    constexpr float kCymbalBase = 0.05f;
+    // A note's colour is its glow: the models' textures leave only the pale base to the material's
+    // own colour (kNoteTrim), and the rest to the emissive colour (the scene has no lights).
+    constexpr float kNoteTrim = 0.85f;
+    constexpr float kGemGlow = 1.f;
+    constexpr float kGhostGlow = 0.6f;
+    constexpr float kAccentGlow = 1.3f;
     // Highway pieces (world units): the surface runs this far ahead of the strike bar.
     constexpr float kHighwayLength = 120.f;
     constexpr float kHighwayBehind = 6.f;
     constexpr float kPadFlashSeconds = 0.15f;
     constexpr const char* kHighwayBoxPrefab = "Assets/Prefabs/Highway/HighwayBox.prefab";
-    // Cymbals are thin raised plates (the unit cube), drums the chunky gem.
-    constexpr float kPlateHeight = 0.07f;
-    constexpr float kPlateDepth = 0.42f;
-    constexpr float kPlateLift = 0.12f;
-    // A note past the Perfect window but still hittable keeps this much of its colour and glow.
+    // A note past the Perfect window but still hittable keeps this much of its base and glow.
     constexpr float kLateDim = 0.4f;
-    constexpr float kLateGlow = 0.08f;
+    constexpr float kLateGlow = 0.45f;
+    // A missed note's grey.
+    constexpr float kMissedGlow = 0.25f;
     // Ghost notes are smaller and dimmer, accents taller and brighter.
     constexpr uint8_t kGhostVelocity = 40;
     constexpr uint8_t kAccentVelocity = 120;
+
+
+    // The lane colour pushed away from grey: a note shows its colour as a glow, where a pale
+    // colour (the hi-hat's yellow) would read as a dull one.
+    Vector3 Vivid( const Vector3& inColor )
+    {
+        const float luma = inColor.x * 0.3f + inColor.y * 0.59f + inColor.z * 0.11f;
+        const auto push = [luma]( float inChannel ) { return std::clamp( luma + ( inChannel - luma ) * 1.5f, 0.f, 1.f ); };
+        return Vector3( push( inColor.x ), push( inColor.y ), push( inColor.z ) );
+    }
 
 
     int Multiplier( int inCombo )
@@ -165,7 +189,6 @@ void NoteHighwayCore::OnEntityRemoved( Entity& InEntity )
 void NoteHighwayCore::OnStart()
 {
     m_lanes.clear();
-    m_notePrefabs[PadId::Bass] = "Assets/Prefabs/Notes/BassNotePrefab.prefab";
 
     SceneCore* scene = static_cast<SceneCore*>( GetWorld().GetCore( SceneCore::GetTypeId() ) );
     Transform* root = scene ? scene->GetRootTransform() : nullptr;
@@ -567,14 +590,14 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     const bool ghost = inNote.m_velocity <= kGhostVelocity;
     const bool accent = inNote.m_velocity >= kAccentVelocity;
 
-    std::string prefab = "Assets/Prefabs/Notes/NewBaseNote.prefab";
-    if( kick )
+    const char* prefab = kDrumGemPrefab;
+    if( kick || pedal )
     {
-        prefab = m_notePrefabs[PadId::Bass];
+        prefab = kKickPrefab;
     }
-    else if( plate || pedal )
+    else if( plate )
     {
-        prefab = kHighwayBoxPrefab;
+        prefab = pad == PadId::OpenHiHat ? kOpenHiHatPrefab : kCymbalPrefab;
     }
     EntityHandle note = GetWorld().CreateFromPrefab( prefab );
     if( !note )
@@ -584,17 +607,17 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     outState.Note = note;
 
     Transform& transform = note->GetComponent<Transform>();
-    const Vector3 baseColor = kick ? Vector3( 1.f, 0.49f, 0.f ) : PadUtils::GetNoteColor( pad );
-    const float glow = ghost ? 0.2f : accent ? 1.f : kGemGlow;
-    const Vector3 color = ghost ? baseColor * 0.6f : baseColor;
-    Tint( note, color, color * glow );
+    const Vector3 baseColor = kick ? Vector3( 1.f, 0.49f, 0.f ) : Vivid( PadUtils::GetNoteColor( pad ) );
+    const float glow = ghost ? kGhostGlow : accent ? kAccentGlow : kGemGlow;
+    const Vector3 color = baseColor * glow;
+    Tint( note, Vector3( kNoteTrim, kNoteTrim, kNoteTrim ), color );
     outState.Color = color;
     outState.Late = false;
 
     const float size = ghost ? 0.7f : 1.f;
-    const float tall = accent ? 1.35f : 1.f;
+    const float tall = ( accent ? 1.35f : 1.f ) * ( ghost ? 0.8f : 1.f );
     Vector3 scale;
-    float lift = 0.f;
+    float base = kGemBase;
     const float laneWidth = LaneWidth( pad );
     float width = laneWidth * 0.9f * size;
     // Double bass: the bar fills the half of the highway on its foot's side, and a thin line
@@ -602,32 +625,33 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     float kickSide = 0.f;
     if( kick )
     {
-        scale = Vector3( m_highwayWidth / kKickMeshWidth, 0.12f * tall, 0.3f );
-        width = m_highwayWidth;
+        // Past the rails, so its points show even where notes cover the lanes.
+        width = m_highwayWidth + 0.3f;
         if( outState.Foot != KickFoot::Either )
         {
             kickSide = outState.Foot == KickFoot::Right ? 1.f : -1.f;
             width = m_highwayWidth * 0.5f;
-            scale.x = width / kKickMeshWidth;
         }
+        scale = Vector3( width, tall, 1.f );
+        base = kKickBase;
     }
     else if( pedal )
     {
         width = laneWidth * 0.5f;
-        scale = Vector3( width, 0.05f, 0.22f );
-        lift = -0.02f;
+        scale = Vector3( width, 0.8f, 0.6f );
+        base = kKickBase;
     }
     else if( plate )
     {
-        width = laneWidth * 0.92f * size;
-        scale = Vector3( width, kPlateHeight * tall, kPlateDepth * size );
-        lift = kPlateLift;
+        width = laneWidth * 0.94f * size;
+        scale = Vector3( width, tall, size );
+        base = kCymbalBase;
     }
     else
     {
-        scale = Vector3( width / kNoteMeshWidth, kGemHeight * tall, kGemDepth * size );
+        scale = Vector3( width, tall, size );
     }
-    const Vector3 position( kickSide * m_highwayWidth * 0.25f, lift, static_cast<float>( outState.TimeMs / 1000.0 ) * m_appliedSpeed );
+    const Vector3 position( kickSide * m_highwayWidth * 0.25f, base, static_cast<float>( outState.TimeMs / 1000.0 ) * m_appliedSpeed );
     transform.SetPosition( position );
     transform.SetScale( scale );
     transform.SetName( inNote.m_noteName + std::to_string( (uint8_t)pad ) );
@@ -643,32 +667,34 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
         YIKES( "NoteHighwayCore: no lane for note '" + inNote.m_noteName + "'" );
     }
 
-    // Technique markings, on top of the gem (drum gems reach ~0.16 up at their base height).
-    const float top = plate ? lift + kPlateHeight * tall * 0.5f : 0.16f * tall;
-    const float depth = plate ? kPlateDepth * size : 0.28f * size;
+    // Technique markings: white pieces on top of the note.
+    const float top = base + ( plate ? kCymbalBowTop : kGemTop ) * tall;
+    const float depth = ( plate ? kCymbalDepth : kGemTopDepth ) * size;
     const Vector3 white( 0.95f, 0.95f, 0.95f );
-    if( pad == PadId::OpenHiHat )
-    {
-        // A dark centre makes the plate read as a ring: the open hi-hat.
-        AddDecoration( outState, lane, position, Vector3( 0.f, top + 0.005f, 0.f ), Vector3( width * 0.55f, 0.02f, depth * 0.5f ), Vector3( 0.01f, 0.01f, 0.01f ) );
-    }
     if( kickSide != 0.f )
     {
-        AddDecoration( outState, lane, position, Vector3( -kickSide * m_highwayWidth * 0.5f, 0.f, 0.f ), Vector3( m_highwayWidth * 0.5f, 0.04f, 0.07f ), color );
+        AddDecoration( outState, lane, position, Vector3( -kickSide * m_highwayWidth * 0.5f, kKickBase + 0.015f, 0.f ), Vector3( m_highwayWidth * 0.5f, 0.03f, 0.07f ), baseColor );
     }
     switch( inNote.m_articulation )
     {
     case Articulation::Rim:
         // Rimshot (or a cymbal's edge): a white strip along the near edge.
-        AddDecoration( outState, lane, position, Vector3( 0.f, top + 0.01f, -depth * 0.4f ), Vector3( width, 0.03f, depth * 0.2f ), white );
+        if( plate )
+        {
+            AddDecoration( outState, lane, position, Vector3( 0.f, base + 0.045f * tall, -depth * 0.4f ), Vector3( width * 0.55f, 0.025f, depth * 0.12f ), white );
+        }
+        else
+        {
+            AddDecoration( outState, lane, position, Vector3( 0.f, top + 0.008f, -depth * 0.32f ), Vector3( width * 0.78f, 0.02f, depth * 0.3f ), white );
+        }
         break;
     case Articulation::CrossStick:
         // Cross-stick: a white bar down the left side.
-        AddDecoration( outState, lane, position, Vector3( -width * 0.4f, top + 0.01f, 0.f ), Vector3( width * 0.18f, 0.03f, depth ), white );
+        AddDecoration( outState, lane, position, Vector3( -width * 0.3f, top + 0.008f, 0.f ), Vector3( width * 0.14f, 0.02f, depth ), white );
         break;
     case Articulation::Bell:
-        // Bell: a white dot in the middle.
-        AddDecoration( outState, lane, position, Vector3( 0.f, top + 0.01f, 0.f ), Vector3( width * 0.22f, 0.04f, depth * 0.45f ), white );
+        // Bell: a white dot on the cymbal's bell (or the middle of a drum).
+        AddDecoration( outState, lane, position, Vector3( 0.f, plate ? base + kCymbalBellTop * tall + 0.005f : top + 0.008f, 0.f ), Vector3( width * 0.18f, 0.02f, plate ? 0.09f * size : depth * 0.6f ), white );
         break;
     default:
         break;
@@ -717,8 +743,10 @@ void NoteHighwayCore::HideNote( NoteState& ioNote )
 
 void NoteHighwayCore::GreyOut( NoteState& ioNote, float inGlow )
 {
+    // The note's body shows only what it glows, so a missed one keeps a little.
+    const float body = std::max( inGlow, kMissedGlow );
     const Vector3 glow( inGlow, inGlow, inGlow );
-    Tint( ioNote.Note, Vector3( 0.2f, 0.2f, 0.2f ), glow );
+    Tint( ioNote.Note, Vector3( 0.2f, 0.2f, 0.2f ), Vector3( body, body, body ) );
     for( Decoration& decoration : ioNote.Decorations )
     {
         Tint( decoration.Piece, Vector3( 0.15f, 0.15f, 0.15f ), glow * 0.75f );
@@ -730,10 +758,10 @@ void NoteHighwayCore::DimLate( NoteState& ioNote )
 {
     // Still its own colour, so it reads as "late" rather than "missed" (grey).
     ioNote.Late = true;
-    Tint( ioNote.Note, ioNote.Color * kLateDim, ioNote.Color * kLateGlow );
+    Tint( ioNote.Note, Vector3( kNoteTrim, kNoteTrim, kNoteTrim ) * kLateDim, ioNote.Color * kLateGlow );
     for( Decoration& decoration : ioNote.Decorations )
     {
-        Tint( decoration.Piece, decoration.Color * kLateDim, decoration.Color * kLateGlow );
+        Tint( decoration.Piece, decoration.Color * kLateDim, decoration.Color * 0.08f );
     }
 }
 
@@ -1568,11 +1596,7 @@ void NoteHighwayCore::JudgeHit( const Hit& inHit )
     if( wrongTechnique && strictness >= 2 )
     {
         ++m_wrongTechnique;
-        for( Decoration& decoration : best->Decorations )
-        {
-            Tint( decoration.Piece, Vector3( 0.2f, 0.2f, 0.2f ), Vector3( 0.f, 0.f, 0.f ) );
-        }
-        Tint( best->Note, Vector3( 0.2f, 0.2f, 0.2f ), Vector3( 0.f, 0.f, 0.f ) );
+        GreyOut( *best );
         ApplyJudgement( Judgement::Miss, bestOffset );
         m_lastHint = TechniqueName( best->Pad, best->Technique ) + "!";
         return;

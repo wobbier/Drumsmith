@@ -75,7 +75,6 @@ public:
 	void SetPreviewPresentation( VenueShow::Presentation inPresentation ) { m_venueShow.SetPresentation( inPresentation ); }
 
 	std::map<std::string, EntityHandle> m_lanes;
-	std::map<PadId, std::string> m_notePrefabs;
 	EntityHandle TrackMover;
 	TrackData* m_trackData = nullptr;
 
