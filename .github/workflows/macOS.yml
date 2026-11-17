@@ -2,7 +2,7 @@ name: macOS
 
 on:
   push:
-    branches: [main]
+    branches: [main, overhaul]
   pull_request:
     branches: [main]
 
@@ -11,29 +11,30 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - macOS
         xcode:
-          - ^15
+          - ^16
         configuration:
           - Debug
           - Release
         type:
           - Editor
           - Game_macOS
-    runs-on: macos-13
+    runs-on: macos-15-intel
 
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "5.0.100"
+          dotnet-version: "8.0.x"
 
       - name: Download FMOD from Private URL
         run: curl -L -o file.zip ${{ secrets.FMOD_MACOS }}
@@ -54,7 +55,7 @@ jobs:
 
       - name: Build Editor
         if: ${{ matrix.type == 'Editor' }}
-        uses: mxcl/xcodebuild@v2
+        uses: mxcl/xcodebuild@v3
         with:
           xcode: ${{ matrix.xcode }}
           platform: ${{ matrix.platform }}
@@ -67,7 +68,7 @@ jobs:
 
       - name: Build Game
         if: ${{ matrix.type == 'Game_macOS' }}
-        uses: mxcl/xcodebuild@v2
+        uses: mxcl/xcodebuild@v3
         with:
           xcode: ${{ matrix.xcode }}
           platform: ${{ matrix.platform }}
@@ -85,6 +86,6 @@ jobs:
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
-          name: Drumsmith - ${{matrix.type}} - ${{matrix.buildconfig}}
-          path: |
-            Build/${{matrix.buildconfig}}
+          name: Drumsmith - ${{ matrix.type }} - ${{ matrix.configuration }}
+          path: Build
+          if-no-files-found: warn
