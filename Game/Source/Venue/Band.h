@@ -8,6 +8,7 @@
 
 class Transform;
 class VenueKit;
+struct VenuePlan;
 
 // The band on stage (Docs/Venue-and-Band.md): a drummer whose sticks land on the chart's notes
 // (the PART DRUMS animation notes when the chart has them), a guitarist and bassist strumming
@@ -17,13 +18,15 @@ class VenueKit;
 class Band
 {
 public:
-    void Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue, const std::vector<NoteData>& inNotes, const std::vector<BeatData>& inBeats, float inBpm );
+    // inPlan: where each member stands and faces, and who's there at all (VenuePlan::Spot).
+    void Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<NoteData>& inNotes, const std::vector<BeatData>& inBeats, float inBpm );
     void Clear();
     // The characters (People::kPeople indices) no member on stage is: the crowd's.
     std::vector<int> SpareModels() const;
     void Update( double inSeconds, float inDeltaTime, float inCrowdEnergy );
 
-    // Venue-space points for the director and the lights: a member's head, chest and hands.
+    // Venue-space points for the director and the lights: a member's head, chest and hands (for
+    // a member who isn't there, points over their spot).
     Vector3 HeadOf( int inMember ) const;
     // Which way the member's face looks (venue space, unit length).
     Vector3 GazeOf( int inMember ) const;
@@ -98,7 +101,8 @@ private:
         float Phase = 0.f;         // a per-member offset for idle motion
         float Energy = 0.f;        // eased
         float Solo = 0.f;          // 0 to 1 out front for a play_solo, eased
-        Vector3 Spot;
+        Vector3 Spot;              // the plan's, whether they're there or not
+        float Yaw = 180.f;
     };
 
     void BuildDrums( VenueKit& inKit, Member& ioMember );

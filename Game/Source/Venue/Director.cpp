@@ -1,6 +1,7 @@
 #include "Venue/Director.h"
 #include "Venue/Band.h"
 #include "Venue/VenueLayout.h"
+#include "Venue/VenuePlan.h"
 #include "Venue/VenueTiming.h"
 #include "Components/Camera.h"
 #include "Components/Graphics/PostProcess.h"
@@ -99,6 +100,7 @@ void Director::Clear()
     m_beats.clear();
     m_world = nullptr;
     m_band = nullptr;
+    m_plan = VenuePlan();
     m_shotName.clear();
     m_lookName.clear();
     m_rateCue = -2;
@@ -129,11 +131,12 @@ void Director::FollowSurfer( bool inUp, const Vector3& inPosition )
 }
 
 
-void Director::Build( World& inWorld, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, float inSongLength, bool inMusicVideo, const Band* inBand )
+void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, float inSongLength, bool inMusicVideo, const Band* inBand )
 {
     Clear();
     m_world = &inWorld;
     m_band = inBand;
+    m_plan = inPlan;
     m_beats = inBeats;
     m_bpm = inBpm;
     const bool mv = inMusicVideo && !inVenue.m_mvCameras.empty();
@@ -153,6 +156,10 @@ void Director::Build( World& inWorld, const VenueData& inVenue, const std::vecto
     else
     {
         FillAutoCuts( inVenue, inSongLength );
+    }
+    for( Cut& cut : m_cuts )
+    {
+        DropAbsent( cut.Shot );
     }
     AddNeckShots( inVenue );
     if( CommandLine::Has( "--highway-log" ) )
@@ -371,6 +378,20 @@ Director::Plan Director::PlanFor( const std::string& inName, int inIndex ) const
     }
     // Unknown names: a wide shot.
     return plan;
+}
+
+
+void Director::DropAbsent( Plan& ioPlan ) const
+{
+    // Only the plan's absences: a member the chart has no part for (keys) still has a spot.
+    const bool named = !ioPlan.Subjects.empty();
+    ioPlan.Subjects.erase( std::remove_if( ioPlan.Subjects.begin(), ioPlan.Subjects.end(), [this]( int inMember ) { return inMember >= 0 && !m_plan.HasMember( inMember ); } ), ioPlan.Subjects.end() );
+    const bool kit = ioPlan.Frame == Framing::Kick || ioPlan.Frame == Framing::DrumTop || ioPlan.Frame == Framing::DrumLow;
+    if( ( named && ioPlan.Subjects.empty() ) || ( kit && !m_plan.HasMember( VenueData::Drums ) ) )
+    {
+        ioPlan.Subjects.clear();
+        ioPlan.Frame = Framing::Far;
+    }
 }
 
 
@@ -885,7 +906,7 @@ void Director::Contain( Vector3& ioEye, bool inAmongCrowd ) const
     if( !inAmongCrowd )
     {
         const float over = std::max( 0.f, ioEye.y - 3.f ) / 1.6f;
-        const float limit = VenueLayout::kBarricadeZ + 0.3f - over * over * 40.f;
+        const float limit = m_plan.Stage.BarricadeZ + 0.3f - over * over * 40.f;
         ioEye.z = std::max( ioEye.z, limit );
     }
     // And all stay inside the room: in front of the back wall, under the rig, between the walls.
@@ -934,7 +955,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         if( outUp ) *outUp = ( edge * 0.7f + face * 0.3f ).Normalized();
         return;
     }
-    const Vector3 drums = VenueLayout::kMemberSpots[VenueData::Drums];
+    // The drummer's shots are placed for a drummer facing the crowd and turn with their spot.
+    const Vector3 drums = m_plan.SpotOf( VenueData::Drums ).Feet;
     switch( inPlan.Frame )
     {
     case Framing::Far:
@@ -990,8 +1012,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         else if( subject == VenueData::Drums )
         {
             // From behind the throne, over the drummer's head and the kit at the whole room.
-            outEye = drums + Vector3( side * 0.9f, 1.95f, 1.8f );
-            outTarget = Vector3( -side * 1.f, 1.7f, -10.f );
+            outEye = AtDrums( drums + Vector3( side * 0.9f, 1.95f, 1.8f ) );
+            outTarget = AtDrums( Vector3( -side * 1.f, 1.7f, -10.f ) );
             outFov = 62.f;
             drift = 5.f * side;
         }
@@ -1014,8 +1036,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     case Framing::CloseHand:
         if( subject == VenueData::Drums )
         {
-            outTarget = m_band ? m_band->HandsOf( subject ) : drums + Vector3( 0.f, 0.9f, -0.5f );
-            outEye = drums + Vector3( side * 1.4f, 1.6f, -1.2f );
+            outTarget = m_band ? m_band->HandsOf( subject ) : AtDrums( drums + Vector3( 0.f, 0.9f, -0.5f ) );
+            outEye = AtDrums( drums + Vector3( side * 1.4f, 1.6f, -1.2f ) );
             outFov = 40.f;
         }
         else
@@ -1027,13 +1049,13 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         drift = 6.f * side;
         break;
     case Framing::Kick:
-        outTarget = drums + Vector3( 0.f, 0.45f, -0.6f );
-        outEye = drums + Vector3( side * 0.4f, 0.35f, -2.2f );
+        outTarget = AtDrums( drums + Vector3( 0.f, 0.45f, -0.6f ) );
+        outEye = AtDrums( drums + Vector3( side * 0.4f, 0.35f, -2.2f ) );
         outFov = 46.f;
         dolly = 0.3f;
         break;
     case Framing::Wall:
-        outTarget = Vector3( 0.f, 6.9f, VenueLayout::kBackWallZ );
+        outTarget = Vector3( 0.f, 6.9f, m_plan.Stage.BackWallZ );
         outEye = Vector3( 0.f, 5.5f, -4.f );
         outFov = 50.f;
         break;
@@ -1049,7 +1071,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         // them so they read against the crowd rather than among its raised arms, panning with them
         // from the back of the room to the barricade: zoomed in while they're far off (about
         // four metres of crowd across the frame), widening as they come.
-        outEye = Vector3( m_surferSide * 2.5f, 5.2f, VenueLayout::kBarricadeZ + 1.2f );
+        outEye = Vector3( m_surferSide * 2.5f, 5.2f, m_plan.Stage.BarricadeZ + 1.2f );
         outTarget = m_surferPosition;
         const float distance = std::max( ( outTarget - outEye ).Length(), 0.5f );
         outFov = std::clamp( 2.f * std::atan( 2.f / distance ) * 180.f / kPi, 20.f, 65.f );
@@ -1071,7 +1093,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         // On a track along the pit rail, below the deck's edge: the front line from underneath,
         // the rig behind them, sliding past at walking pace.
         const float x = side * std::clamp( -6.5f + held * 0.8f, -6.5f, 6.5f );
-        outEye = Vector3( x, 1.7f, VenueLayout::kBarricadeZ + 0.4f );
+        outEye = Vector3( x, 1.7f, m_plan.Stage.BarricadeZ + 0.4f );
         outTarget = Vector3( x * 0.35f, 2.75f, 3.8f );
         outFov = 52.f;
         break;
@@ -1126,17 +1148,21 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     {
         // Straight down on the kit from the rig, sinking toward it and turning slowly. The top
         // of the picture is upstage.
-        outEye = drums + Vector3( side * 0.25f, 4.4f - 0.5f * std::min( progress, 1.5f ), -0.55f );
-        outTarget = drums + Vector3( 0.f, 0.75f, -0.45f );
+        outEye = AtDrums( drums + Vector3( side * 0.25f, 4.4f - 0.5f * std::min( progress, 1.5f ), -0.55f ) );
+        outTarget = AtDrums( drums + Vector3( 0.f, 0.75f, -0.45f ) );
         outFov = 50.f;
         const float turn = side * ( 8.f + 6.f * progress ) * kPi / 180.f;
-        if( outUp ) *outUp = Vector3( std::sin( turn ), 0.f, std::cos( turn ) );
+        if( outUp )
+        {
+            *outUp = Vector3( std::sin( turn ), 0.f, std::cos( turn ) );
+            if( m_plan.SpotOf( VenueData::Drums ).Yaw != 180.f ) *outUp = AtDrums( drums + *outUp ) - drums;
+        }
         break;
     }
     case Framing::DrumLow:
         // Low at the front of the riser, the drummer through the cymbals.
         outTarget = ( m_band && m_band->HasMember( VenueData::Drums ) ? m_band->HeadOf( VenueData::Drums ) : drums + Vector3( 0.f, 1.25f, 0.f ) ) + Vector3( 0.f, -0.2f, 0.f );
-        outEye = drums + Vector3( side * 1.35f, 0.95f, -1.75f );
+        outEye = AtDrums( drums + Vector3( side * 1.35f, 0.95f, -1.75f ) );
         outFov = 40.f;
         drift = 9.f * side;
         dolly = 0.3f;
@@ -1145,7 +1171,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     {
         // Down on the deck by their monitor, looking up: the player against the rig overhead.
         const bool there = m_band && subject >= 0 && m_band->HasMember( subject );
-        const Vector3 feet = there ? m_band->FeetOf( subject ) : VenueLayout::kMemberSpots[VenueData::Vocals];
+        const Vector3 feet = there ? m_band->FeetOf( subject ) : m_plan.SpotOf( VenueData::Vocals ).Feet;
         outTarget = ( there ? m_band->HeadOf( subject ) : feet + Vector3( 0.f, 1.7f, 0.f ) ) + Vector3( 0.f, -0.3f, 0.f );
         outEye = feet + Vector3( side * 0.85f, 0.32f, -1.3f );
         outFov = 50.f;
@@ -1179,8 +1205,8 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         const float swing = kSharp * std::sin( phase );
         const float x = side * kHalfRun * std::asin( swing ) / span;
         const float pace = side * std::cos( phase ) / std::sqrt( 1.f - swing * swing );    // of the top speed, signed along the pit
-        outEye = Vector3( x, 1.55f, VenueLayout::kBarricadeZ + 0.5f );
-        outTarget = Vector3( x + pace * 1.6f, 1.6f, VenueLayout::kCrowdFrontZ - 2.2f );
+        outEye = Vector3( x, 1.55f, m_plan.Stage.BarricadeZ + 0.5f );
+        outTarget = Vector3( x + pace * 1.6f, 1.6f, m_plan.CrowdFront() - 2.2f );
         outFov = 66.f;
         break;
     }
@@ -1220,7 +1246,7 @@ float Director::LeadSideFor( const Plan& inPlan, const Vector3& inEye, const Vec
     {
         return looking > 0.f ? 1.f : -1.f;
     }
-    const float standing = ( VenueLayout::kMemberSpots[member] - Vector3( 0.f, 0.f, 0.f ) ).Dot( across );
+    const float standing = ( m_plan.SpotOf( member ).Feet - Vector3( 0.f, 0.f, 0.f ) ).Dot( across );
     if( std::fabs( standing ) > 0.5f )
     {
         return standing > 0.f ? -1.f : 1.f;
@@ -1548,6 +1574,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
     if( !forcedShot.empty() )
     {
         plan = PlanFor( forcedShot, 0 );
+        DropAbsent( plan );
         held = static_cast<float>( inSeconds );
         m_shotName = forcedShot;
     }

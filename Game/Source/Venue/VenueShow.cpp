@@ -20,24 +20,21 @@
 namespace
 {
     using Shape = Moonlight::MeshType;
-    constexpr int kCrowdSize = 520;
     // The highway fades into the venue between these distances from its camera.
     constexpr float kHighwayFadeStart = 42.f;
     constexpr float kHighwayFadeEnd = 120.f;
     constexpr float kHighwayBoardOpacity = 0.6f;
     // The follow spots' floor: a front light on the band in every look.
     constexpr float kFrontFill = 0.18f;
-    // The arena's floor plan behind the crowd (venue z): the mixing desk, where the back stands
-    // start, their steps, and the back wall behind the top step; the side stands start at
-    // kArenaSideStandsX either side.
-    constexpr float kArenaDeskZ = -22.f;
-    constexpr float kArenaStandsZ = -32.f;
-    constexpr int kArenaTiers = 7;
-    constexpr int kArenaSideTiers = 3;
-    constexpr float kArenaTierDepth = 2.f;
-    constexpr float kArenaTierRise = 0.8f;
-    constexpr float kArenaBackWallZ = kArenaStandsZ - kArenaTierDepth * kArenaTiers;
-    constexpr float kArenaSideStandsX = 15.5f;
+    // The arena's floor plan behind the crowd (VenueLayout): its geometry is built here.
+    using VenueLayout::kArenaDeskZ;
+    using VenueLayout::kArenaStandsZ;
+    using VenueLayout::kArenaTiers;
+    using VenueLayout::kArenaSideTiers;
+    using VenueLayout::kArenaTierDepth;
+    using VenueLayout::kArenaTierRise;
+    using VenueLayout::kArenaBackWallZ;
+    using VenueLayout::kArenaSideStandsX;
 }
 
 
@@ -76,6 +73,7 @@ void VenueShow::Clear()
     m_peaks.clear();
     m_finale = 1e9f;
     m_venue.Clear();
+    m_plan = VenuePlan();
     m_beats.clear();
     m_lastStep = INT64_MIN;
     m_stepDelta = 0.f;
@@ -108,14 +106,19 @@ void VenueShow::NextStyle()
 }
 
 
+bool VenueShow::Wanted( const TrackData& inTrack ) const
+{
+    // A practice lesson has no show: just the highway and the click.
+    return GameSettings::GetInstance().Venue > 0 && !inTrack.m_practice && !inTrack.m_calibration && !CommandLine::Has( "--no-venue" );
+}
+
+
 void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, int inStyle )
 {
     Clear();
     m_world = &inWorld;
     m_track = &inTrack;
-    const int setting = GameSettings::GetInstance().Venue;
-    // A practice lesson has no show: just the highway and the click.
-    if( setting <= 0 || inTrack.m_practice || inTrack.m_calibration || CommandLine::Has( "--no-venue" ) )
+    if( !Wanted( inTrack ) )
     {
         return;
     }
@@ -131,7 +134,41 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
         for( char c : inTrack.m_trackName ) hash = ( hash ^ static_cast<uint8_t>( c ) ) * 16777619u;
         style = static_cast<int>( hash % static_cast<uint32_t>( Style::Count ) );
     }
-    m_style = static_cast<Style>( std::clamp( style, 0, static_cast<int>( Style::Count ) - 1 ) );
+    VenuePlan plan = VenuePlan::ForStyle( std::clamp( style, 0, static_cast<int>( Style::Count ) - 1 ) );
+    if( CommandLine::Has( "--venue-plan-test" ) )
+    {
+        // A plan unlike the rooms': no bassist or keyboard player, the drummer and kit moved
+        // down onto the deck in the bassist's place and turned in toward the middle. Everything
+        // of a member should follow their spot, and nothing should be left of the missing.
+        plan.Members[VenueData::Bass].Present = false;
+        plan.Members[VenueData::Keys].Present = false;
+        plan.Members[VenueData::Drums].Feet = Vector3( 3.6f, plan.Stage.Height, 3.4f );
+        plan.Members[VenueData::Drums].Yaw = 215.f;
+        const Vector3& feet = plan.Members[VenueData::Drums].Feet;
+        BRUH_FMT( "Venue: plan test: no bass or keys, the drummer at (%.2f, %.2f, %.2f) turned to %.0f degrees", feet.x, feet.y, feet.z, plan.Members[VenueData::Drums].Yaw );
+    }
+    BuildShow( inWorld, inTrack, inHighwayCamera, plan );
+}
+
+
+void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan )
+{
+    Clear();
+    m_world = &inWorld;
+    m_track = &inTrack;
+    if( !Wanted( inTrack ) )
+    {
+        return;
+    }
+    BuildShow( inWorld, inTrack, inHighwayCamera, inPlan );
+}
+
+
+void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan )
+{
+    const int setting = GameSettings::GetInstance().Venue;
+    m_plan = inPlan;
+    m_style = static_cast<Style>( std::clamp( inPlan.Style, 0, static_cast<int>( Style::Count ) - 1 ) );
     m_venue = inTrack.m_venue;
     m_beats = inTrack.m_beats;
     m_bpm = inTrack.m_bpm > 30 ? static_cast<float>( inTrack.m_bpm ) : 120.f;
@@ -143,46 +180,39 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     }
     Transform& root = m_root->GetComponent<Transform>();
     BuildStage( root );
-    // Karaoke on the LED wall's lower part, above the drummer's head (the wall spans 3.9-9.9 m).
+    // Karaoke on the plan's lyric band (the LED wall's lower part, above the drummer's head).
     m_lyrics.Build( m_venue.m_lyrics, m_venue.m_vocalPhrases, m_venue.m_vocalNotes );
-    if( GameSettings::GetInstance().LyricsInVenue() )
+    if( GameSettings::GetInstance().LyricsInVenue() && m_plan.Lyrics.Present )
     {
-        m_lyricBoard.Build( m_kit, root, Vector3( 0.f, 4.75f, VenueLayout::kBackWallZ - 0.12f ), 11.f, m_lyrics );
+        m_lyricBoard.Build( m_kit, root, m_plan.Lyrics.Centre, m_plan.Lyrics.Width, m_lyrics );
     }
 
     float lastNote = 0.f;
     for( const NoteData& note : inTrack.m_noteData ) lastNote = std::max( lastNote, note.m_triggerTime );
-    m_band.Build( m_kit, &root, m_venue, inTrack.m_noteData, m_beats, m_bpm );
-    if( setting >= 2 )
+    m_band.Build( m_kit, &root, m_plan, m_venue, inTrack.m_noteData, m_beats, m_bpm );
+    if( setting >= 2 && m_plan.BuildCrowd )
     {
-        // Each room holds a different crowd.
-        int count = kCrowdSize;
-        float back = VenueLayout::kCrowdBackZ;
-        float halfWidth = VenueLayout::kCrowdHalfWidth;
-        if( m_style == Style::Club )
+        // Each room holds a different crowd: the plan's posed areas' heads.
+        int count = 0;
+        for( const VenuePlan::CrowdArea& area : m_plan.Crowd )
         {
-            count = 240;
-            back = -15.f;
-            halfWidth = 11.5f;
-        }
-        else if( m_style == Style::Festival )
-        {
-            count = 800;
-            back = -42.f;
-            halfWidth = 24.f;
+            if( area.Type == VenuePlan::CrowdArea::Kind::Posed ) count += std::max( area.Heads, 0 );
         }
         const int posed = CommandLine::GetInt( "--crowd-size", count );
         // The crowd is everyone the band isn't.
         m_crowd.SetModels( m_band.SpareModels() );
-        m_crowd.Build( m_kit, &root, m_venue, m_beats, m_bpm, posed, back, halfWidth );
+        m_crowd.Build( m_kit, &root, m_plan, m_venue, m_beats, m_bpm, posed );
         // --crowd-size trims the back of the house in proportion.
         FillHouse( root, count > 0 ? std::clamp( static_cast<float>( posed ) / static_cast<float>( count ), 0.f, 4.f ) : 1.f );
     }
-    m_director.Build( inWorld, m_venue, m_beats, m_bpm, std::max( lastNote + 4.f, inTrack.m_duration ), GameSettings::GetInstance().VenueCamera == 1, &m_band );
+    m_director.Build( inWorld, m_plan, m_venue, m_beats, m_bpm, std::max( lastNote + 4.f, inTrack.m_duration ), GameSettings::GetInstance().VenueCamera == 1, &m_band );
     VenueKit* kit = &m_kit;
-    m_lights.Build( inWorld, &root, m_director.MainCamera(), inTrack,
-        [kit]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return kit->Piece( Shape::Cube, inPosition, inScale, inColor, inParent, inEmissive, false ); },
-        []( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive ) { VenueKit::SetColor( inTarget, inColor, inEmissive ); } );
+    if( m_plan.BuildRig )
+    {
+        m_lights.Build( inWorld, &root, m_director.MainCamera(), inTrack, m_plan,
+            [kit]( const Vector3& inPosition, const Vector3& inScale, const Vector3& inColor, const Vector3& inEmissive, Transform* inParent ) { return kit->Piece( Shape::Cube, inPosition, inScale, inColor, inParent, inEmissive, false ); },
+            []( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive ) { VenueKit::SetColor( inTarget, inColor, inEmissive ); } );
+    }
     if( !m_lights.IsActive() )
     {
         // Stage Lights off: no rig, but a soft house light so the band still reads. Without any
@@ -200,27 +230,7 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
             light.CastShadows = false;
         }
     }
-    Director::Room room;
-    if( m_style == Style::Arena )
-    {
-        room.Back = kArenaBackWallZ;
-        room.Ceiling = 18.f;
-        room.HalfWidth = 21.f;
-        room.DeskZ = kArenaDeskZ;
-    }
-    else if( m_style == Style::Club )
-    {
-        room.Back = -17.f;
-        room.Ceiling = 10.6f;
-        room.HalfWidth = 12.5f;
-        room.DeskZ = -13.f;
-    }
-    else
-    {
-        room.DeskZ = -24.f;
-        room.Outdoor = true;
-    }
-    m_director.SetRoom( room );
+    m_director.SetRoom( m_plan.Bounds );
     // The chart's own peaks: where each chorus or intense passage starts. The last is the finale.
     std::string mood;
     for( const TimedCueData& crowd : m_venue.m_crowd )
@@ -241,10 +251,11 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     }
     m_peaks = peaks;
     m_finale = m_peaks.size() >= 2 ? m_peaks.back() : 1e9f;
-    if( m_style == Style::Festival )
+    // Less haze out of doors, a touch more in a club.
+    m_lights.SetHazeScale( m_plan.HazeScale );
+    if( m_plan.Bounds.Outdoor )
     {
-        // Out of doors: a night sky, and less haze for it to hang in.
-        m_lights.SetHazeScale( 0.45f );
+        // Out of doors: a night sky.
         if( const EntityHandle& camera = m_director.MainCamera() )
         {
             Camera& sky = camera->GetComponent<Camera>();
@@ -258,10 +269,6 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
                 camera->GetComponent<PostProcess>().FogMaxOpacity = 0.55f;
             }
         }
-    }
-    else if( m_style == Style::Club )
-    {
-        m_lights.SetHazeScale( 1.05f );
     }
 
     // The highway draws over the venue from now on, fading into it toward its far end instead of
@@ -341,21 +348,25 @@ void VenueShow::ApplyPresentation()
 }
 
 
-void VenueShow::BuildScreen( Transform& inRoot, const Vector3& inCentre, const Vector3& inSize, float inYaw, const char* inTexture )
+void VenueShow::BuildScreen( Transform& inRoot, const VenuePlan::Screen& inScreen )
 {
     // A frame, and a plane facing the crowd whose emission is the feed camera's image.
-    EntityHandle frame = m_kit.Box( inCentre + Vector3( 0.f, 0.f, 0.08f ), Vector3( inSize.x + 0.3f, inSize.y + 0.3f, 0.14f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
-    if( frame ) frame->GetComponent<Transform>().SetRotation( Vector3( 0.f, inYaw, 0.f ) );
-    EntityHandle screen = m_kit.Piece( Shape::Plane, inCentre, Vector3( inSize.x, 1.f, inSize.y ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 1.f, 1.f, 1.f ) );
+    const Vector3& centre = inScreen.Centre;
+    const Vector3 size( inScreen.Width, inScreen.Height, 0.f );
+    const float yaw = inScreen.Yaw;
+    const char* texture = inScreen.Source == VenuePlan::Screen::Feed::Stage ? Director::kFeedTexture : Director::kProgramTexture;
+    EntityHandle frame = m_kit.Box( centre + Vector3( 0.f, 0.f, 0.08f ), Vector3( size.x + 0.3f, size.y + 0.3f, 0.14f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
+    if( frame ) frame->GetComponent<Transform>().SetRotation( Vector3( 0.f, yaw, 0.f ) );
+    EntityHandle screen = m_kit.Piece( Shape::Plane, centre, Vector3( size.x, 1.f, size.y ), Vector3( 0.f, 0.f, 0.f ), &inRoot, Vector3( 1.f, 1.f, 1.f ) );
     if( !screen )
     {
         return;
     }
     // The plane lies in XZ facing +y: stand it up facing the crowd (-z).
-    screen->GetComponent<Transform>().SetRotation( Quaternion::FromEulerDegrees( Vector3( 0.f, inYaw, 0.f ) ) * Quaternion::FromEulerDegrees( Vector3( -90.f, 0.f, 0.f ) ) );
+    screen->GetComponent<Transform>().SetRotation( Quaternion::FromEulerDegrees( Vector3( 0.f, yaw, 0.f ) ) * Quaternion::FromEulerDegrees( Vector3( -90.f, 0.f, 0.f ) ) );
     if( StandardMaterial* material = VenueKit::MaterialOf( screen ) )
     {
-        material->SetTexture( Moonlight::TextureType::Emissive, ResourceCache::GetInstance().Get<Moonlight::Texture>( Path( inTexture ) ) );
+        material->SetTexture( Moonlight::TextureType::Emissive, ResourceCache::GetInstance().Get<Moonlight::Texture>( Path( texture ) ) );
         material->SetEmissiveColor( Vector3( 1.f, 1.f, 1.f ) );
         material->SetEmissiveIntensity( 2.2f );
         material->SetRoughness( 0.9f );
@@ -367,38 +378,55 @@ void VenueShow::BuildScreen( Transform& inRoot, const Vector3& inCentre, const V
 
 void VenueShow::BuildStage( Transform& inRoot )
 {
-    using namespace VenueLayout;
+    const VenuePlan::StageDims& stage = m_plan.Stage;
     const Vector3 black( 0.015f, 0.015f, 0.018f );
     const Vector3 deckColor( 0.05f, 0.05f, 0.055f );
     // The stage, the same in every room: the deck, the drum riser, the back wall with its LED
     // wall and the speaker stacks. StageSet dresses it and StageFx arms it.
-    m_kit.Box( Vector3( 0.f, kStageHeight * 0.5f, kStageDepth * 0.5f + 0.3f ), Vector3( kStageHalfWidth * 2.f, kStageHeight, kStageDepth + 0.6f ), deckColor, &inRoot );
-    m_kit.Box( Vector3( 0.f, kStageHeight * 0.5f, -0.02f ), Vector3( kStageHalfWidth * 2.f, kStageHeight, 0.06f ), black, &inRoot );
-    m_kit.Box( Vector3( 0.f, kStageHeight + kRiserHeight * 0.5f, kRiserZ + 0.5f ), Vector3( 3.4f, kRiserHeight, 2.8f ), Vector3( 0.06f, 0.06f, 0.07f ), &inRoot );
-    m_kit.Box( Vector3( 0.f, 6.f, kBackWallZ + 0.2f ), Vector3( 24.f, 12.f, 0.4f ), black, &inRoot );
-    for( float side : { -1.f, 1.f } )
+    if( m_plan.BuildStage )
     {
-        for( int box = 0; box < 3; ++box )
+        m_kit.Box( Vector3( 0.f, stage.Height * 0.5f, stage.Depth * 0.5f + 0.3f ), Vector3( stage.HalfWidth * 2.f, stage.Height, stage.Depth + 0.6f ), deckColor, &inRoot );
+        m_kit.Box( Vector3( 0.f, stage.Height * 0.5f, -0.02f ), Vector3( stage.HalfWidth * 2.f, stage.Height, 0.06f ), black, &inRoot );
+        m_kit.Box( Vector3( 0.f, stage.Height + stage.RiserHeight * 0.5f, stage.RiserZ + 0.5f ), Vector3( 3.4f, stage.RiserHeight, 2.8f ), Vector3( 0.06f, 0.06f, 0.07f ), &inRoot );
+        m_kit.Box( Vector3( 0.f, 6.f, stage.BackWallZ + 0.2f ), Vector3( 24.f, 12.f, 0.4f ), black, &inRoot );
+        for( float side : { -1.f, 1.f } )
         {
-            const Vector3 centre( side * ( kStageHalfWidth + 1.1f ), 0.75f + box * 1.45f, 1.2f );
-            m_kit.Box( centre, Vector3( 1.8f, 1.4f, 1.2f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
-            m_kit.Box( centre + Vector3( 0.f, 0.f, -0.61f ), Vector3( 1.6f, 1.2f, 0.02f ), Vector3( 0.05f, 0.05f, 0.055f ), &inRoot );
+            for( int box = 0; box < 3; ++box )
+            {
+                const Vector3 centre( side * ( stage.HalfWidth + 1.1f ), 0.75f + box * 1.45f, 1.2f );
+                m_kit.Box( centre, Vector3( 1.8f, 1.4f, 1.2f ), Vector3( 0.02f, 0.02f, 0.02f ), &inRoot );
+                m_kit.Box( centre + Vector3( 0.f, 0.f, -0.61f ), Vector3( 1.6f, 1.2f, 0.02f ), Vector3( 0.05f, 0.05f, 0.055f ), &inRoot );
+            }
         }
     }
-    BuildScreen( inRoot, Vector3( 0.f, 6.9f, kBackWallZ - 0.05f ), Vector3( 12.f, 6.f, 0.f ), 0.f, Director::kProgramTexture );
+    // The LED wall and any other screens the plan has.
+    for( const VenuePlan::Screen& screen : m_plan.Screens )
+    {
+        BuildScreen( inRoot, screen );
+    }
     // The truss, backline, dressing and LED pieces (StageSet), and the effects (StageFx).
     uint32_t seed = 2166136261u;
     if( m_track )
     {
         for( char c : m_track->m_trackName ) seed = ( seed ^ static_cast<uint8_t>( c ) ) * 16777619u;
     }
-    m_set.Build( m_kit, inRoot, static_cast<int>( m_style ), !m_venue.m_keysStrums.empty() || !m_venue.m_bandStates[VenueData::Keys].empty(), seed );
-    m_fx.Build( m_kit, inRoot, static_cast<int>( m_style ), m_venue );
-    switch( m_style )
+    if( m_plan.BuildSet )
     {
-    case Style::Club: BuildClub( inRoot ); break;
-    case Style::Festival: BuildFestival( inRoot ); break;
-    default: BuildArena( inRoot ); break;
+        const bool keys = !m_venue.m_keysStrums.empty() || !m_venue.m_bandStates[VenueData::Keys].empty();
+        m_set.Build( m_kit, inRoot, m_plan, keys && m_plan.HasMember( VenueData::Keys ), seed );
+    }
+    if( m_plan.BuildFx )
+    {
+        m_fx.Build( m_kit, inRoot, m_plan, m_venue );
+    }
+    if( m_plan.BuildRoom )
+    {
+        switch( m_style )
+        {
+        case Style::Club: BuildClub( inRoot ); break;
+        case Style::Festival: BuildFestival( inRoot ); break;
+        default: BuildArena( inRoot ); break;
+        }
     }
 }
 
@@ -412,10 +440,10 @@ void VenueShow::BuildArena( Transform& inRoot )
     const Vector3 seating( 0.035f, 0.03f, 0.04f );
     const Vector3 aisleGlow( 0.5f, 0.28f, 0.08f );
     const float back = kArenaBackWallZ;
-    const float length = VenueLayout::kBackWallZ + 1.f - back;
-    const float middle = ( VenueLayout::kBackWallZ + 1.f + back ) * 0.5f;
+    const float length = m_plan.Stage.BackWallZ + 1.f - back;
+    const float middle = ( m_plan.Stage.BackWallZ + 1.f + back ) * 0.5f;
     m_kit.Box( Vector3( 0.f, -0.05f, middle ), Vector3( 70.f, 0.1f, length + 4.f ), Vector3( 0.03f, 0.03f, 0.035f ), &inRoot );
-    m_kit.Box( Vector3( 0.f, 11.f, VenueLayout::kBackWallZ + 0.6f ), Vector3( 70.f, 22.f, 0.4f ), black, &inRoot );
+    m_kit.Box( Vector3( 0.f, 11.f, m_plan.Stage.BackWallZ + 0.6f ), Vector3( 70.f, 22.f, 0.4f ), black, &inRoot );
     m_kit.Box( Vector3( 0.f, 11.f, back - 0.2f ), Vector3( 70.f, 22.f, 0.4f ), black, &inRoot );
     // The roof, and the grid the house rig hangs from.
     m_kit.Box( Vector3( 0.f, 22.f, middle ), Vector3( 46.f, 0.4f, length ), Vector3( 0.012f, 0.012f, 0.014f ), &inRoot );
@@ -439,7 +467,6 @@ void VenueShow::BuildArena( Transform& inRoot )
     for( float side : { -1.f, 1.f } )
     {
         m_kit.Box( Vector3( side * 22.f, 11.f, middle ), Vector3( 0.5f, 22.f, length + 4.f ), black, &inRoot );
-        BuildScreen( inRoot, Vector3( side * 14.f, 7.2f, 2.f ), Vector3( 6.f, 3.4f, 0.f ), side * 16.f, Director::kFeedTexture );
         m_kit.Box( Vector3( side * 14.f, 4.2f, 2.3f ), Vector3( 0.2f, 2.8f, 0.2f ), metal, &inRoot );
         // The side stands, from beside the stage back to the back stands.
         for( int tier = 0; tier < kArenaSideTiers; ++tier )
@@ -580,55 +607,16 @@ void VenueShow::BuildArenaDetail( Transform& inRoot )
 void VenueShow::FillHouse( Transform& inRoot, float inScale )
 {
     // The back of the house: cheap figures everywhere the posed crowd doesn't reach, so no shot
-    // finds an empty floor behind the front rows.
+    // finds an empty floor behind the front rows. The floor kept clear first (a desk, the aisles,
+    // the towers' feet), then the plan's mobs in turn.
     const auto cap = [inScale]( int inCount ) { return static_cast<int>( static_cast<float>( inCount ) * inScale ); };
-    switch( m_style )
+    for( const VenuePlan::CrowdArea& area : m_plan.Crowd )
     {
-    case Style::Arena:
-    {
-        m_crowd.KeepClear( -3.6f, 3.6f, kArenaDeskZ - 2.6f, kArenaDeskZ + 2.6f );
-        m_crowd.AddMob( m_kit, &inRoot, -14.8f, 14.8f, VenueLayout::kCrowdFrontZ, kArenaStandsZ + 0.6f, 0.f, 0.62f, 0.8f, cap( 900 ) );
-        // Aisles up the stands.
-        for( float x : { -14.f, -5.f, 5.f, 14.f } )
-        {
-            m_crowd.KeepClear( x - 0.5f, x + 0.5f, kArenaBackWallZ, kArenaStandsZ );
-        }
-        for( int tier = 0; tier < kArenaTiers; ++tier )
-        {
-            const float z0 = kArenaStandsZ - kArenaTierDepth * static_cast<float>( tier );
-            m_crowd.AddMob( m_kit, &inRoot, -20.8f, 20.8f, z0 - 0.35f, z0 - kArenaTierDepth + 0.3f, kArenaTierRise * static_cast<float>( tier + 1 ), 0.66f, 0.72f - 0.06f * tier, cap( 140 ) );
-        }
-        for( float side : { -1.f, 1.f } )
-        {
-            for( int tier = 0; tier < kArenaSideTiers; ++tier )
-            {
-                const float inner = kArenaSideStandsX + kArenaTierDepth * static_cast<float>( tier ) + 0.35f;
-                const float outer = inner + kArenaTierDepth - 0.65f;
-                m_crowd.AddMob( m_kit, &inRoot, side < 0.f ? -outer : inner, side < 0.f ? -inner : outer, -3.5f, kArenaStandsZ + 0.3f, kArenaTierRise * static_cast<float>( tier + 1 ), 0.66f, 0.6f, cap( 80 ) );
-            }
-        }
-        break;
+        if( area.Type == VenuePlan::CrowdArea::Kind::Clear ) m_crowd.KeepClear( area.MinX, area.MaxX, area.MinZ, area.MaxZ );
     }
-    case Style::Club:
-        // Packed to the bar.
-        m_crowd.AddMob( m_kit, &inRoot, -12.1f, 12.1f, VenueLayout::kCrowdFrontZ, -14.7f, 0.f, 0.56f, 0.85f, cap( 420 ) );
-        break;
-    case Style::Festival:
-        // A field full to the delay towers, thinning out past them into the dark.
-        m_crowd.KeepClear( -3.8f, 3.8f, -26.8f, -21.2f );
-        for( float side : { -1.f, 1.f } )
-        {
-            for( float z : { -26.f, -40.f } )
-            {
-                m_crowd.KeepClear( side * 14.f - 0.7f, side * 14.f + 0.7f, z - 0.7f, z + 0.7f );
-            }
-        }
-        m_crowd.AddMob( m_kit, &inRoot, -25.f, 25.f, VenueLayout::kCrowdFrontZ, -34.f, 0.f, 0.66f, 0.8f, cap( 900 ) );
-        m_crowd.AddMob( m_kit, &inRoot, -28.f, 28.f, -34.f, -50.f, 0.f, 0.74f, 0.55f, cap( 450 ) );
-        m_crowd.AddMob( m_kit, &inRoot, -30.f, 30.f, -50.f, -66.f, 0.f, 0.85f, 0.32f, cap( 250 ) );
-        break;
-    default:
-        break;
+    for( const VenuePlan::CrowdArea& area : m_plan.Crowd )
+    {
+        if( area.Type == VenuePlan::CrowdArea::Kind::Mob ) m_crowd.AddMob( m_kit, &inRoot, area, cap( area.Heads ) );
     }
 }
 
@@ -689,9 +677,8 @@ void VenueShow::BuildFestival( Transform& inRoot )
     }
     for( float side : { -1.f, 1.f } )
     {
-        // Screen towers flanking the stage.
+        // Screen towers flanking the stage (the screens are the plan's).
         m_kit.Box( Vector3( side * 17.f, 5.f, 1.5f ), Vector3( 0.8f, 10.f, 0.8f ), metal, &inRoot );
-        BuildScreen( inRoot, Vector3( side * 17.f, 9.5f, 1.f ), Vector3( 8.f, 4.5f, 0.f ), side * 10.f, Director::kFeedTexture );
         // Delay towers with a wash of their own colour.
         for( float z : { -26.f, -40.f } )
         {

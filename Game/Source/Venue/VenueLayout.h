@@ -1,11 +1,14 @@
 #pragma once
 #include "Math/Vector3.h"
 
-// The venue's floor plan (Docs/Venue-and-Band.md), in venue space: metres, +x stage left as the
-// crowd sees it... no: +x is the crowd's right, +y up, +z from the crowd toward the back wall. The
-// crowd stands at z < 0 facing +z; the band faces -z. VenueShow places the venue far from the note
-// highway (kVenueOrigin), so the highway's overlay camera never sees it and the venue's cameras
-// never see the highway.
+// The procedural rooms' numbers (Docs/Venue-and-Band.md), in venue space: metres, +x is the
+// crowd's right, +y up, +z from the crowd toward the back wall. The crowd stands at z < 0 facing
+// +z; the band faces -z. VenueShow places the venue far from the note highway (kVenueOrigin), so
+// the highway's overlay camera never sees it and the venue's cameras never see the highway.
+// The floor plan the show is built from is a VenuePlan (Venue/VenuePlan.h): only
+// VenuePlan::ForStyle reads the stage, member and crowd numbers here, to fill one for each of
+// the three rooms. Beyond kVenueOrigin, the arena's own geometry (VenueShow::BuildArena) reads
+// the arena's numbers below.
 namespace VenueLayout
 {
     // Far enough that neither world is in the other's view (the venue cameras see 400 m, the
@@ -40,4 +43,16 @@ namespace VenueLayout
     constexpr float kCrowdFrontZ = -2.4f;
     constexpr float kCrowdBackZ = -26.f;
     constexpr float kCrowdHalfWidth = 13.f;
+
+    // The arena's floor plan behind the crowd: the mixing desk, where the back stands start,
+    // their steps, and the back wall behind the top step; the side stands start at
+    // kArenaSideStandsX either side.
+    constexpr float kArenaDeskZ = -22.f;
+    constexpr float kArenaStandsZ = -32.f;
+    constexpr int kArenaTiers = 7;
+    constexpr int kArenaSideTiers = 3;
+    constexpr float kArenaTierDepth = 2.f;
+    constexpr float kArenaTierRise = 0.8f;
+    constexpr float kArenaBackWallZ = kArenaStandsZ - kArenaTierDepth * kArenaTiers;
+    constexpr float kArenaSideStandsX = 15.5f;
 }

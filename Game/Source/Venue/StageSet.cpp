@@ -1,6 +1,6 @@
 #include "Venue/StageSet.h"
 #include "Venue/VenueKit.h"
-#include "Venue/VenueLayout.h"
+#include "Venue/VenuePlan.h"
 #include "Venue/VenueTiming.h"
 #include "Components/Transform.h"
 #include "Math/Quaternion.h"
@@ -11,7 +11,6 @@
 namespace
 {
     using Shape = Moonlight::MeshType;
-    using namespace VenueLayout;
 
     // Every imported prop the set uses, with the yaw that turns its front toward the crowd (-z).
     // Facings are easiest to judge from a screenshot: fix them here and every placement follows.
@@ -52,7 +51,6 @@ namespace
     const PropDef kTruck{ "Assets/Models/Venue/Truck.obj", 0.f };               // 7.6 m along z
     const PropDef kTourBus{ "Assets/Models/Venue/TourBus.obj", 0.f };           // 11.4 m along z
 
-    constexpr float kDeck = kStageHeight;
     constexpr int kEdgeSegments = 12;
     constexpr int kFasciaSegments = 8;
     constexpr int kTubeSegments = 6;
@@ -205,19 +203,24 @@ void StageSet::Clear()
     m_battens.clear();
     m_flags.clear();
     m_flagYaws.clear();
+    m_plan = VenuePlan();
 }
 
 
-void StageSet::Build( VenueKit& inKit, Transform& inRoot, int inStyle, bool inHasKeys, uint32_t inSeed )
+void StageSet::Build( VenueKit& inKit, Transform& inRoot, const VenuePlan& inPlan, bool inHasKeys, uint32_t inSeed )
 {
     Clear();
-    BuildRig( inKit, inRoot, inStyle );
+    // The dressing is placed by hand for the procedural rooms' stage, relative to the plan's
+    // sizes and member spots.
+    m_plan = inPlan;
+    const int style = inPlan.Style;
+    BuildRig( inKit, inRoot, style );
     BuildBackline( inKit, inRoot, inHasKeys, inSeed );
     BuildRiser( inKit, inRoot );
-    BuildFront( inKit, inRoot, inStyle );
+    BuildFront( inKit, inRoot, style );
     BuildWings( inKit, inRoot );
     BuildPixels( inKit, inRoot );
-    switch( inStyle )
+    switch( style )
     {
     case 1: BuildClub( inKit, inRoot, inSeed ); break;
     case 2: BuildFestival( inKit, inRoot, inSeed ); break;
@@ -228,20 +231,23 @@ void StageSet::Build( VenueKit& inKit, Transform& inRoot, int inStyle, bool inHa
 
 void StageSet::BuildRig( VenueKit& inKit, Transform& inRoot, int inStyle )
 {
+    const float deck = m_plan.Stage.Height;
+    const float stageHalfWidth = m_plan.Stage.HalfWidth;
+    const float trussHeight = m_plan.Stage.TrussHeight;
     // The rig the lights hang from, as open lattice: three cross trusses over the stage, four
     // runs tying them together, a tower at each corner.
-    const float y = kTrussHeight;
-    const float reach = kStageHalfWidth + 0.6f;
+    const float y = trussHeight;
+    const float reach = stageHalfWidth + 0.6f;
     for( float z : kTrussZ )
     {
         Truss( inKit, inRoot, Vector3( -reach, y, z ), Vector3( reach, y, z ), kTrussSize, kSteel );
     }
-    for( float x : { -kStageHalfWidth - 0.4f, -4.6f, 4.6f, kStageHalfWidth + 0.4f } )
+    for( float x : { -stageHalfWidth - 0.4f, -4.6f, 4.6f, stageHalfWidth + 0.4f } )
     {
         // Only the sides of these show from the floor.
         Truss( inKit, inRoot, Vector3( x, y, kTrussZ[0] + 0.2f ), Vector3( x, y, kTrussZ[2] - 0.2f ), kTrussSize, kSteel, 3 );
     }
-    for( float x : { -kStageHalfWidth - 0.4f, kStageHalfWidth + 0.4f } )
+    for( float x : { -stageHalfWidth - 0.4f, stageHalfWidth + 0.4f } )
     {
         for( float z : { kTrussZ[0], kTrussZ[2] } )
         {
@@ -268,8 +274,8 @@ void StageSet::BuildRig( VenueKit& inKit, Transform& inRoot, int inStyle )
     // Cable looms: down the truss' ends into the wings, sagging on the way.
     for( float side : { -1.f, 1.f } )
     {
-        const Vector3 from( side * ( kStageHalfWidth + 0.2f ), y - 0.25f, 4.6f );
-        const Vector3 to( side * 11.2f, kDeck + 0.9f, 8.6f );
+        const Vector3 from( side * ( stageHalfWidth + 0.2f ), y - 0.25f, 4.6f );
+        const Vector3 to( side * 11.2f, deck + 0.9f, 8.6f );
         Vector3 last = from;
         for( int i = 1; i <= 6; ++i )
         {
@@ -286,6 +292,7 @@ void StageSet::BuildRig( VenueKit& inKit, Transform& inRoot, int inStyle )
 
 void StageSet::BuildBackline( VenueKit& inKit, Transform& inRoot, bool inHasKeys, uint32_t inSeed )
 {
+    const float deck = m_plan.Stage.Height;
     // The guitarist's wall: full stacks behind them (the band's own combo sits in front of it). A
     // song's amps share a finish; the panel is gold or silver, the tolex black, wine or cream.
     const int finish = static_cast<int>( VenueTiming::Noise( inSeed, 71u ) * 3.f );
@@ -299,11 +306,11 @@ void StageSet::BuildBackline( VenueKit& inKit, Transform& inRoot, bool inHasKeys
         const int cabs = inFridge ? 1 : 2;
         for( int i = 0; i < cabs; ++i )
         {
-            Cabinet( inKit, inRoot, Vector3( inX, kDeck + cab.y * static_cast<float>( i ), inZ ), cab, tolex, cloth );
+            Cabinet( inKit, inRoot, Vector3( inX, deck + cab.y * static_cast<float>( i ), inZ ), cab, tolex, cloth );
             // The maker's plate, top left of the grille.
-            inKit.Piece( Shape::Cube, Vector3( inX - cab.x * 0.3f, kDeck + cab.y * static_cast<float>( i + 1 ) - 0.1f, inZ - cab.z * 0.5f - 0.014f ), Vector3( 0.16f, 0.035f, 0.006f ), kPaper, &inRoot, kNone, false, "Plate" );
+            inKit.Piece( Shape::Cube, Vector3( inX - cab.x * 0.3f, deck + cab.y * static_cast<float>( i + 1 ) - 0.1f, inZ - cab.z * 0.5f - 0.014f ), Vector3( 0.16f, 0.035f, 0.006f ), kPaper, &inRoot, kNone, false, "Plate" );
         }
-        const float top = kDeck + cab.y * static_cast<float>( cabs );
+        const float top = deck + cab.y * static_cast<float>( cabs );
         const Vector3 head( cab.x - 0.08f, 0.27f, cab.z - 0.1f );
         inKit.Box( Vector3( inX, top + head.y * 0.5f, inZ ), head, tolex, &inRoot );
         inKit.Piece( Shape::Cube, Vector3( inX, top + 0.07f, inZ - head.z * 0.5f - 0.004f ), Vector3( head.x - 0.06f, 0.07f, 0.008f ), panel, &inRoot, kNone, false, "Panel" );
@@ -334,16 +341,16 @@ void StageSet::BuildBackline( VenueKit& inKit, Transform& inRoot, bool inHasKeys
     if( inHasKeys )
     {
         // The keys corner: a rotary cabinet and a combo behind the player, a rug under them.
-        const Vector3 spot = kMemberSpots[4];
+        const Vector3 spot = m_plan.SpotOf( 4 ).Feet;
         const Vector3 wood( 0.16f, 0.08f, 0.04f );
-        inKit.Box( Vector3( spot.x - 0.25f, kDeck + 0.52f, spot.z + 1.5f ), Vector3( 0.74f, 1.04f, 0.52f ), wood, &inRoot );
+        inKit.Box( Vector3( spot.x - 0.25f, deck + 0.52f, spot.z + 1.5f ), Vector3( 0.74f, 1.04f, 0.52f ), wood, &inRoot );
         for( float y : { 0.2f, 0.26f, 0.32f, 0.84f, 0.9f, 0.96f } )
         {
-            inKit.Piece( Shape::Cube, Vector3( spot.x - 0.25f, kDeck + y, spot.z + 1.5f - 0.265f ), Vector3( 0.6f, 0.03f, 0.012f ), kBlack, &inRoot, kNone, false, "Louvre" );
+            inKit.Piece( Shape::Cube, Vector3( spot.x - 0.25f, deck + y, spot.z + 1.5f - 0.265f ), Vector3( 0.6f, 0.03f, 0.012f ), kBlack, &inRoot, kNone, false, "Louvre" );
         }
-        Cabinet( inKit, inRoot, Vector3( spot.x + 0.7f, kDeck, spot.z + 1.55f ), Vector3( 0.6f, 0.5f, 0.3f ), tolex, cloth );
-        inKit.Piece( Shape::Cube, Vector3( spot.x + 0.92f, kDeck + 0.46f, spot.z + 1.55f - 0.16f ), Vector3( 0.02f, 0.02f, 0.01f ), kNone, &inRoot, Vector3( 0.2f, 3.f, 0.4f ), false, "Pilot" );
-        Put( inKit, inRoot, kDrumRug, Vector3( spot.x, kDeck, spot.z + 0.2f ), 0.f, 0.6f );
+        Cabinet( inKit, inRoot, Vector3( spot.x + 0.7f, deck, spot.z + 1.55f ), Vector3( 0.6f, 0.5f, 0.3f ), tolex, cloth );
+        inKit.Piece( Shape::Cube, Vector3( spot.x + 0.92f, deck + 0.46f, spot.z + 1.55f - 0.16f ), Vector3( 0.02f, 0.02f, 0.01f ), kNone, &inRoot, Vector3( 0.2f, 3.f, 0.4f ), false, "Pilot" );
+        Put( inKit, inRoot, kDrumRug, Vector3( spot.x, deck, spot.z + 0.2f ), 0.f, 0.6f );
     }
 
     // At their feet: pedalboards off to the outside (the soloist's walk forward stays clear), a
@@ -352,42 +359,50 @@ void StageSet::BuildBackline( VenueKit& inKit, Transform& inRoot, bool inHasKeys
     const Vector3 pedalLeds[4] = { Vector3( 3.f, 0.2f, 0.1f ), Vector3( 0.2f, 3.f, 0.3f ), Vector3( 3.f, 0.2f, 0.1f ), Vector3( 0.2f, 0.8f, 3.f ) };
     for( float side : { -1.f, 1.f } )
     {
-        const Vector3 spot = kMemberSpots[side < 0.f ? 1 : 2];
-        const Vector3 board( spot.x + side * 0.75f, kDeck, spot.z - 0.75f );
-        inKit.Piece( Shape::Cube, board + Vector3( 0.f, 0.02f, 0.f ), Vector3( 0.66f, 0.04f, 0.34f ), kBlack, &inRoot, kNone, false, "Pedalboard" );
-        const int pedals = side < 0.f ? 4 : 2;
-        for( int i = 0; i < pedals; ++i )
+        const Vector3 spot = m_plan.SpotOf( side < 0.f ? 1 : 2 ).Feet;
+        // Theirs, unless the plan leaves them out: pedalboard, wedge, setlist and marks.
+        if( m_plan.HasMember( side < 0.f ? 1 : 2 ) )
         {
-            const float x = board.x + ( static_cast<float>( i ) - ( pedals - 1 ) * 0.5f ) * 0.15f;
-            inKit.Piece( Shape::Cube, Vector3( x, kDeck + 0.065f, board.z ), Vector3( 0.09f, 0.05f, 0.14f ), pedalColors[i], &inRoot, kNone, false, "Pedal" );
-            inKit.Piece( Shape::Cube, Vector3( x, kDeck + 0.093f, board.z + 0.05f ), Vector3( 0.014f, 0.008f, 0.014f ), kNone, &inRoot, pedalLeds[i], false, "LED" );
+            const Vector3 board( spot.x + side * 0.75f, deck, spot.z - 0.75f );
+            inKit.Piece( Shape::Cube, board + Vector3( 0.f, 0.02f, 0.f ), Vector3( 0.66f, 0.04f, 0.34f ), kBlack, &inRoot, kNone, false, "Pedalboard" );
+            const int pedals = side < 0.f ? 4 : 2;
+            for( int i = 0; i < pedals; ++i )
+            {
+                const float x = board.x + ( static_cast<float>( i ) - ( pedals - 1 ) * 0.5f ) * 0.15f;
+                inKit.Piece( Shape::Cube, Vector3( x, deck + 0.065f, board.z ), Vector3( 0.09f, 0.05f, 0.14f ), pedalColors[i], &inRoot, kNone, false, "Pedal" );
+                inKit.Piece( Shape::Cube, Vector3( x, deck + 0.093f, board.z + 0.05f ), Vector3( 0.014f, 0.008f, 0.014f ), kNone, &inRoot, pedalLeds[i], false, "LED" );
+            }
+            Wedge( inKit, inRoot, Vector3( spot.x + side * 0.7f, deck, 1.25f ), 0.f );
+            // The setlist, taped down beside the mic stand, and a spike mark where they stand.
+            inKit.Piece( Shape::Cube, Vector3( spot.x - side * 0.45f, deck + 0.003f, spot.z - 0.8f ), Vector3( 0.21f, 0.004f, 0.3f ), kPaper, &inRoot, kNone, false, "Setlist" );
+            inKit.Piece( Shape::Cube, Vector3( spot.x, deck + 0.002f, spot.z - 0.3f ), Vector3( 0.3f, 0.003f, 0.04f ), Vector3( 0.5f, 0.42f, 0.05f ), &inRoot, kNone, false, "Tape" );
+            inKit.Piece( Shape::Cube, Vector3( spot.x, deck + 0.002f, spot.z - 0.2f ), Vector3( 0.04f, 0.003f, 0.2f ), Vector3( 0.5f, 0.42f, 0.05f ), &inRoot, kNone, false, "Tape" );
+            // A DI box by the amps, and the cable run from the backline toward the front.
+            inKit.Piece( Shape::Cube, Vector3( spot.x + side * 1.6f, deck + 0.03f, 5.3f ), Vector3( 0.12f, 0.06f, 0.16f ), Vector3( 0.3f, 0.05f, 0.05f ), &inRoot, kNone, false, "DI" );
+            Put( inKit, inRoot, kCableA, Vector3( spot.x + side * 0.2f, deck, 5.1f ), side * 12.f );
         }
-        Wedge( inKit, inRoot, Vector3( spot.x + side * 0.7f, kDeck, 1.25f ), 0.f );
-        // The setlist, taped down beside the mic stand, and a spike mark where they stand.
-        inKit.Piece( Shape::Cube, Vector3( spot.x - side * 0.45f, kDeck + 0.003f, spot.z - 0.8f ), Vector3( 0.21f, 0.004f, 0.3f ), kPaper, &inRoot, kNone, false, "Setlist" );
-        inKit.Piece( Shape::Cube, Vector3( spot.x, kDeck + 0.002f, spot.z - 0.3f ), Vector3( 0.3f, 0.003f, 0.04f ), Vector3( 0.5f, 0.42f, 0.05f ), &inRoot, kNone, false, "Tape" );
-        inKit.Piece( Shape::Cube, Vector3( spot.x, kDeck + 0.002f, spot.z - 0.2f ), Vector3( 0.04f, 0.003f, 0.2f ), Vector3( 0.5f, 0.42f, 0.05f ), &inRoot, kNone, false, "Tape" );
-        // A DI box by the amps, and the cable run from the backline toward the front.
-        inKit.Piece( Shape::Cube, Vector3( spot.x + side * 1.6f, kDeck + 0.03f, 5.3f ), Vector3( 0.12f, 0.06f, 0.16f ), Vector3( 0.3f, 0.05f, 0.05f ), &inRoot, kNone, false, "DI" );
-        Put( inKit, inRoot, kCableA, Vector3( spot.x + side * 0.2f, kDeck, 5.1f ), side * 12.f );
-        Put( inKit, inRoot, kCableB, Vector3( side * 2.4f, kDeck, 4.9f ), side * 62.f );
-        Put( inKit, inRoot, kCableCoil, Vector3( side * 6.3f, kDeck, 7.7f ) );
+        Put( inKit, inRoot, kCableB, Vector3( side * 2.4f, deck, 4.9f ), side * 62.f );
+        Put( inKit, inRoot, kCableCoil, Vector3( side * 6.3f, deck, 7.7f ) );
         // Flight cases upstage of the backline, where the crew left them.
         for( float x : { 3.6f, 4.9f } )
         {
-            if( !Put( inKit, inRoot, kFlightCase, Vector3( side * x, kDeck, 8.2f ), side * 4.f ) )
+            if( !Put( inKit, inRoot, kFlightCase, Vector3( side * x, deck, 8.2f ), side * 4.f ) )
             {
-                inKit.Box( Vector3( side * x, kDeck + 0.3f, 8.2f ), Vector3( 1.2f, 0.6f, 0.66f ), kBlack, &inRoot );
+                inKit.Box( Vector3( side * x, deck + 0.3f, 8.2f ), Vector3( 1.2f, 0.6f, 0.66f ), kBlack, &inRoot );
             }
         }
         // A fan on each side of the deck, blowing across the front line.
     }
     // The singer's setlist and mark, and a rug to stand on.
-    const Vector3 singer = kMemberSpots[3];
-    inKit.Piece( Shape::Cube, Vector3( singer.x, kDeck + 0.003f, singer.z - 0.85f ), Vector3( 0.21f, 0.004f, 0.3f ), kPaper, &inRoot, kNone, false, "Setlist" );
+    if( !m_plan.HasMember( 3 ) )
+    {
+        return;
+    }
+    const Vector3 singer = m_plan.SpotOf( 3 ).Feet;
+    inKit.Piece( Shape::Cube, Vector3( singer.x, deck + 0.003f, singer.z - 0.85f ), Vector3( 0.21f, 0.004f, 0.3f ), kPaper, &inRoot, kNone, false, "Setlist" );
     for( float turn : { 45.f, -45.f } )
     {
-        EntityHandle mark = inKit.Piece( Shape::Cube, Vector3( singer.x, kDeck + 0.002f, singer.z + 0.25f ), Vector3( 0.3f, 0.003f, 0.04f ), Vector3( 0.6f, 0.6f, 0.58f ), &inRoot, kNone, false, "Tape" );
+        EntityHandle mark = inKit.Piece( Shape::Cube, Vector3( singer.x, deck + 0.002f, singer.z + 0.25f ), Vector3( 0.3f, 0.003f, 0.04f ), Vector3( 0.6f, 0.6f, 0.58f ), &inRoot, kNone, false, "Tape" );
         if( mark ) mark->GetComponent<Transform>().SetRotation( Vector3( 0.f, turn, 0.f ) );
     }
 }
@@ -395,30 +410,33 @@ void StageSet::BuildBackline( VenueKit& inKit, Transform& inRoot, bool inHasKeys
 
 void StageSet::BuildRiser( VenueKit& inKit, Transform& inRoot )
 {
+    const float deck = m_plan.Stage.Height;
+    const float riserHeight = m_plan.Stage.RiserHeight;
+    const float riserZ = m_plan.Stage.RiserZ;
     // The drum riser (3.4 x 2.8 m, its front at z 5.7): an aluminium frame round the top, black
     // skirts, an LED fascia across the front that thumps with the kick, a rug under the kit and
     // steps up its side.
-    const float top = kDeck + kRiserHeight;
-    const float centreZ = kRiserZ + 0.5f;
+    const float top = deck + riserHeight;
+    const float centreZ = riserZ + 0.5f;
     const float front = centreZ - 1.4f;
     const float width = 3.4f;
     inKit.Piece( Shape::Cube, Vector3( 0.f, top - 0.03f, front - 0.02f ), Vector3( width + 0.06f, 0.06f, 0.04f ), kAlu, &inRoot, kNone, false, "Trim" );
     for( float side : { -1.f, 1.f } )
     {
         inKit.Piece( Shape::Cube, Vector3( side * ( width * 0.5f + 0.02f ), top - 0.03f, centreZ ), Vector3( 0.04f, 0.06f, 2.84f ), kAlu, &inRoot, kNone, false, "Trim" );
-        inKit.Piece( Shape::Cube, Vector3( side * ( width * 0.5f + 0.015f ), kDeck + ( kRiserHeight - 0.06f ) * 0.5f, centreZ ), Vector3( 0.02f, kRiserHeight - 0.06f, 2.8f ), kBlack, &inRoot, kNone, false, "Skirt" );
+        inKit.Piece( Shape::Cube, Vector3( side * ( width * 0.5f + 0.015f ), deck + ( riserHeight - 0.06f ) * 0.5f, centreZ ), Vector3( 0.02f, riserHeight - 0.06f, 2.8f ), kBlack, &inRoot, kNone, false, "Skirt" );
     }
     const float cell = width / static_cast<float>( kFasciaSegments );
     for( int i = 0; i < kFasciaSegments; ++i )
     {
         const float x = -width * 0.5f + ( static_cast<float>( i ) + 0.5f ) * cell;
-        m_fascia.push_back( inKit.Piece( Shape::Cube, Vector3( x, kDeck + 0.27f, front - 0.045f ), Vector3( cell - 0.04f, 0.42f, 0.02f ), kNone, &inRoot, Vector3( 0.02f, 0.02f, 0.03f ), false, "Fascia" ) );
+        m_fascia.push_back( inKit.Piece( Shape::Cube, Vector3( x, deck + 0.27f, front - 0.045f ), Vector3( cell - 0.04f, 0.42f, 0.02f ), kNone, &inRoot, Vector3( 0.02f, 0.02f, 0.03f ), false, "Fascia" ) );
     }
     // The rug: a touch narrower than the riser, the long way across it.
     Put( inKit, inRoot, kDrumRug, Vector3( 0.f, top, centreZ ), 0.f, 0.92f );
     // Steps on the bass side, clear of the floor lights along the back.
-    inKit.Box( Vector3( width * 0.5f + 0.32f, kDeck + 0.2f, centreZ + 0.9f ), Vector3( 0.56f, 0.4f, 0.7f ), kDeckColor, &inRoot );
-    inKit.Box( Vector3( width * 0.5f + 0.82f, kDeck + 0.1f, centreZ + 0.9f ), Vector3( 0.44f, 0.2f, 0.7f ), kDeckColor, &inRoot );
+    inKit.Box( Vector3( width * 0.5f + 0.32f, deck + 0.2f, centreZ + 0.9f ), Vector3( 0.56f, 0.4f, 0.7f ), kDeckColor, &inRoot );
+    inKit.Box( Vector3( width * 0.5f + 0.82f, deck + 0.1f, centreZ + 0.9f ), Vector3( 0.44f, 0.2f, 0.7f ), kDeckColor, &inRoot );
     // The drummer's wedge on the hi-hat side, their setlist, water and a towel.
     Wedge( inKit, inRoot, Vector3( -1.3f, top, centreZ + 0.35f ), -100.f );
     inKit.Piece( Shape::Cube, Vector3( 1.25f, top + 0.045f, front + 0.3f ), Vector3( 0.21f, 0.004f, 0.3f ), kPaper, &inRoot, kNone, false, "Setlist" );
@@ -430,6 +448,8 @@ void StageSet::BuildRiser( VenueKit& inKit, Transform& inRoot )
 
 void StageSet::BuildFront( VenueKit& inKit, Transform& inRoot, int inStyle )
 {
+    const float deck = m_plan.Stage.Height;
+    const float barricadeZ = m_plan.Stage.BarricadeZ;
     // Subs in a row against the stage's front, their grilles to the crowd. The pit's cameras work
     // above and in front of them.
     for( int i = 0; i < 12; ++i )
@@ -440,7 +460,7 @@ void StageSet::BuildFront( VenueKit& inKit, Transform& inRoot, int inStyle )
     // Front fills on the lip, between the floor lights and the pyro.
     for( float x : { -8.45f, -4.5f, 4.5f, 8.45f } )
     {
-        Cabinet( inKit, inRoot, Vector3( x, kDeck, 0.24f ), Vector3( 0.5f, 0.24f, 0.3f ), kTolex, kGrille );
+        Cabinet( inKit, inRoot, Vector3( x, deck, 0.24f ), Vector3( 0.5f, 0.24f, 0.3f ), kTolex, kGrille );
     }
     // The barricade: panels with a post at each joint, a rail along the top and a brace on the
     // pit side of every post. As wide as the room's floor.
@@ -451,14 +471,14 @@ void StageSet::BuildFront( VenueKit& inKit, Transform& inRoot, int inStyle )
     for( int i = 0; i <= panels; ++i )
     {
         const float x = start + static_cast<float>( i ) * panel;
-        inKit.Piece( Shape::Cube, Vector3( x, 0.58f, kBarricadeZ ), Vector3( 0.07f, 1.16f, 0.09f ), kSteel, &inRoot, kNone, false, "Post" );
-        Beam( inKit, inRoot, Vector3( x, 0.95f, kBarricadeZ + 0.03f ), Vector3( x, 0.03f, kBarricadeZ + 0.5f ), 0.045f, kSteel );
+        inKit.Piece( Shape::Cube, Vector3( x, 0.58f, barricadeZ ), Vector3( 0.07f, 1.16f, 0.09f ), kSteel, &inRoot, kNone, false, "Post" );
+        Beam( inKit, inRoot, Vector3( x, 0.95f, barricadeZ + 0.03f ), Vector3( x, 0.03f, barricadeZ + 0.5f ), 0.045f, kSteel );
         if( i < panels )
         {
-            inKit.Box( Vector3( x + panel * 0.5f, 0.55f, kBarricadeZ ), Vector3( panel - 0.05f, 1.02f, 0.035f ), Vector3( 0.1f, 0.1f, 0.115f ), &inRoot );
+            inKit.Box( Vector3( x + panel * 0.5f, 0.55f, barricadeZ ), Vector3( panel - 0.05f, 1.02f, 0.035f ), Vector3( 0.1f, 0.1f, 0.115f ), &inRoot );
         }
     }
-    inKit.Piece( Shape::Cube, Vector3( 0.f, 1.13f, kBarricadeZ ), Vector3( static_cast<float>( panels ) * panel + 0.1f, 0.06f, 0.11f ), kAlu, &inRoot, kNone, false, "Rail" );
+    inKit.Piece( Shape::Cube, Vector3( 0.f, 1.13f, barricadeZ ), Vector3( static_cast<float>( panels ) * panel + 0.1f, 0.06f, 0.11f ), kAlu, &inRoot, kNone, false, "Rail" );
     // The pit: a camera track along it with a dolly parked at the guitarist's end, and a second
     // operator's tripod at the other. Both stay at the ends, out of the director's own shots.
     for( float z : { -0.98f, -1.24f } )
@@ -480,78 +500,79 @@ void StageSet::BuildFront( VenueKit& inKit, Transform& inRoot, int inStyle )
 
 void StageSet::BuildWings( VenueKit& inKit, Transform& inRoot )
 {
+    const float deck = m_plan.Stage.Height;
     // Wing platforms at deck height either side, upstage of the access stairs: guitar world on
     // the guitarist's side, monitor world on the bassist's.
     const float wingX = 10.3f;
     for( float side : { -1.f, 1.f } )
     {
-        inKit.Box( Vector3( side * wingX, kDeck * 0.5f, 7.1f ), Vector3( 2.6f, kDeck, 5.8f ), kDeckColor, &inRoot );
-        inKit.Box( Vector3( side * wingX, kDeck * 0.5f, 4.19f ), Vector3( 2.6f, kDeck, 0.02f ), kBlack, &inRoot );
+        inKit.Box( Vector3( side * wingX, deck * 0.5f, 7.1f ), Vector3( 2.6f, deck, 5.8f ), kDeckColor, &inRoot );
+        inKit.Box( Vector3( side * wingX, deck * 0.5f, 4.19f ), Vector3( 2.6f, deck, 0.02f ), kBlack, &inRoot );
     }
 
     // Guitar world: a rack of spares, the tech's bench and stool, a work light.
     const float rackX = -10.7f;
-    inKit.Piece( Shape::Cube, Vector3( rackX, kDeck + 0.05f, 6.2f ), Vector3( 0.5f, 0.1f, 2.8f ), kBlack, &inRoot, kNone, false, "Rack" );
-    inKit.Piece( Shape::Cube, Vector3( rackX - 0.2f, kDeck + 1.f, 6.2f ), Vector3( 0.04f, 0.04f, 2.8f ), kSteel, &inRoot, kNone, false, "Rack" );
+    inKit.Piece( Shape::Cube, Vector3( rackX, deck + 0.05f, 6.2f ), Vector3( 0.5f, 0.1f, 2.8f ), kBlack, &inRoot, kNone, false, "Rack" );
+    inKit.Piece( Shape::Cube, Vector3( rackX - 0.2f, deck + 1.f, 6.2f ), Vector3( 0.04f, 0.04f, 2.8f ), kSteel, &inRoot, kNone, false, "Rack" );
     for( float z : { 4.85f, 7.55f } )
     {
-        inKit.Piece( Shape::Cube, Vector3( rackX - 0.2f, kDeck + 0.5f, z ), Vector3( 0.04f, 1.f, 0.04f ), kSteel, &inRoot, kNone, false, "Rack" );
+        inKit.Piece( Shape::Cube, Vector3( rackX - 0.2f, deck + 0.5f, z ), Vector3( 0.04f, 1.f, 0.04f ), kSteel, &inRoot, kNone, false, "Rack" );
     }
     for( int i = 0; i < 4; ++i )
     {
         // Stood on end, necks up, leaning back on the rail, faces to the stage.
         const PropDef& model = i == 3 ? kBass : kGuitar;
-        if( EntityHandle spare = Put( inKit, inRoot, model, Vector3( rackX, kDeck + 0.42f, 5.2f + static_cast<float>( i ) * 0.62f ) ) )
+        if( EntityHandle spare = Put( inKit, inRoot, model, Vector3( rackX, deck + 0.42f, 5.2f + static_cast<float>( i ) * 0.62f ) ) )
         {
             spare->GetComponent<Transform>().SetRotation( Quaternion::FromEulerDegrees( Vector3( 0.f, model.Yaw + 90.f, 0.f ) )
                 * Quaternion::FromEulerDegrees( Vector3( -9.f, 0.f, 0.f ) ) * Quaternion::FromEulerDegrees( Vector3( 0.f, 0.f, -90.f ) ) );
         }
     }
-    if( !Put( inKit, inRoot, kToolChest, Vector3( -10.9f, kDeck, 8.6f ), 90.f ) )
+    if( !Put( inKit, inRoot, kToolChest, Vector3( -10.9f, deck, 8.6f ), 90.f ) )
     {
-        inKit.Box( Vector3( -10.9f, kDeck + 0.45f, 8.6f ), Vector3( 0.74f, 0.9f, 1.f ), kBlack, &inRoot );
+        inKit.Box( Vector3( -10.9f, deck + 0.45f, 8.6f ), Vector3( 0.74f, 0.9f, 1.f ), kBlack, &inRoot );
     }
-    Put( inKit, inRoot, kToolBox, Vector3( -10.9f, kDeck + 0.9f, 8.75f ), 80.f );
-    inKit.Piece( Shape::Cube, Vector3( -10.95f, kDeck + 1.02f, 8.3f ), Vector3( 0.1f, 0.03f, 0.18f ), kNone, &inRoot, Vector3( 2.4f, 1.6f, 0.7f ), false, "Work light" );
-    Put( inKit, inRoot, kStool, Vector3( -10.1f, kDeck, 8.4f ) );
-    Put( inKit, inRoot, kCableCoil, Vector3( -9.9f, kDeck, 9.3f ) );
-    Put( inKit, inRoot, kRoadCase, Vector3( -10.6f, kDeck, 9.45f ), 8.f );
+    Put( inKit, inRoot, kToolBox, Vector3( -10.9f, deck + 0.9f, 8.75f ), 80.f );
+    inKit.Piece( Shape::Cube, Vector3( -10.95f, deck + 1.02f, 8.3f ), Vector3( 0.1f, 0.03f, 0.18f ), kNone, &inRoot, Vector3( 2.4f, 1.6f, 0.7f ), false, "Work light" );
+    Put( inKit, inRoot, kStool, Vector3( -10.1f, deck, 8.4f ) );
+    Put( inKit, inRoot, kCableCoil, Vector3( -9.9f, deck, 9.3f ) );
+    Put( inKit, inRoot, kRoadCase, Vector3( -10.6f, deck, 9.45f ), 8.f );
 
     // Monitor world: the desk facing across the stage, its engineer's stool, amp and dimmer
     // racks behind it, the power distro, a cooler.
     const float deskX = 10.4f;
     const float deskZ = 6.f;
-    inKit.Box( Vector3( deskX, kDeck + 0.42f, deskZ ), Vector3( 0.8f, 0.84f, 1.9f ), kBlack, &inRoot );
-    if( EntityHandle surface = inKit.Piece( Shape::Cube, Vector3( deskX - 0.02f, kDeck + 0.93f, deskZ ), Vector3( 0.86f, 0.06f, 1.8f ), Vector3( 0.06f, 0.06f, 0.07f ), &inRoot, kNone, false, "Desk" ) )
+    inKit.Box( Vector3( deskX, deck + 0.42f, deskZ ), Vector3( 0.8f, 0.84f, 1.9f ), kBlack, &inRoot );
+    if( EntityHandle surface = inKit.Piece( Shape::Cube, Vector3( deskX - 0.02f, deck + 0.93f, deskZ ), Vector3( 0.86f, 0.06f, 1.8f ), Vector3( 0.06f, 0.06f, 0.07f ), &inRoot, kNone, false, "Desk" ) )
     {
         // Tipped toward the engineer, who sits on the offstage side.
         surface->GetComponent<Transform>().SetRotation( Vector3( 0.f, 0.f, -12.f ) );
     }
-    Dots( inKit, inRoot, Vector3( deskX - 0.12f, kDeck + 0.975f, deskZ - 0.78f ), Vector3( 0.f, 0.f, 0.12f ), 14, Vector3( 0.2f, 0.012f, 0.02f ), Vector3( 0.1f, 1.4f, 2.4f ), Vector3( 2.4f, 0.7f, 0.1f ) );
+    Dots( inKit, inRoot, Vector3( deskX - 0.12f, deck + 0.975f, deskZ - 0.78f ), Vector3( 0.f, 0.f, 0.12f ), 14, Vector3( 0.2f, 0.012f, 0.02f ), Vector3( 0.1f, 1.4f, 2.4f ), Vector3( 2.4f, 0.7f, 0.1f ) );
     for( float z : { -0.45f, 0.45f } )
     {
-        inKit.Piece( Shape::Cube, Vector3( deskX - 0.36f, kDeck + 1.25f, deskZ + z ), Vector3( 0.03f, 0.34f, 0.56f ), kBlack, &inRoot, kNone, false, "Screen" );
-        inKit.Piece( Shape::Cube, Vector3( deskX - 0.34f, kDeck + 1.25f, deskZ + z ), Vector3( 0.012f, 0.3f, 0.52f ), kNone, &inRoot, Vector3( 0.25f, 0.5f, 0.9f ), false, "Screen" );
+        inKit.Piece( Shape::Cube, Vector3( deskX - 0.36f, deck + 1.25f, deskZ + z ), Vector3( 0.03f, 0.34f, 0.56f ), kBlack, &inRoot, kNone, false, "Screen" );
+        inKit.Piece( Shape::Cube, Vector3( deskX - 0.34f, deck + 1.25f, deskZ + z ), Vector3( 0.012f, 0.3f, 0.52f ), kNone, &inRoot, Vector3( 0.25f, 0.5f, 0.9f ), false, "Screen" );
     }
-    Put( inKit, inRoot, kStool, Vector3( deskX + 0.75f, kDeck, deskZ ) );
+    Put( inKit, inRoot, kStool, Vector3( deskX + 0.75f, deck, deskZ ) );
     for( float z : { 7.9f, 8.55f } )
     {
-        if( !Put( inKit, inRoot, kAmpRack, Vector3( 11.1f, kDeck, z ), -90.f ) )
+        if( !Put( inKit, inRoot, kAmpRack, Vector3( 11.1f, deck, z ), -90.f ) )
         {
-            inKit.Box( Vector3( 11.1f, kDeck + 0.65f, z ), Vector3( 0.64f, 1.3f, 0.6f ), kBlack, &inRoot );
+            inKit.Box( Vector3( 11.1f, deck + 0.65f, z ), Vector3( 0.64f, 1.3f, 0.6f ), kBlack, &inRoot );
         }
         // Signal lights down the rack's face, toward the stage.
-        Dots( inKit, inRoot, Vector3( 10.76f, kDeck + 0.3f, z - 0.15f ), Vector3( 0.f, 0.16f, 0.f ), 6, Vector3( 0.012f, 0.02f, 0.02f ), Vector3( 0.2f, 3.f, 0.4f ), Vector3( 3.f, 1.5f, 0.1f ) );
+        Dots( inKit, inRoot, Vector3( 10.76f, deck + 0.3f, z - 0.15f ), Vector3( 0.f, 0.16f, 0.f ), 6, Vector3( 0.012f, 0.02f, 0.02f ), Vector3( 0.2f, 3.f, 0.4f ), Vector3( 3.f, 1.5f, 0.1f ) );
     }
-    if( !Put( inKit, inRoot, kPowerDistro, Vector3( 10.9f, kDeck, 9.4f ), -90.f ) )
+    if( !Put( inKit, inRoot, kPowerDistro, Vector3( 10.9f, deck, 9.4f ), -90.f ) )
     {
-        inKit.Box( Vector3( 10.9f, kDeck + 0.5f, 9.4f ), Vector3( 0.8f, 1.f, 0.9f ), Vector3( 0.3f, 0.08f, 0.03f ), &inRoot );
+        inKit.Box( Vector3( 10.9f, deck + 0.5f, 9.4f ), Vector3( 0.8f, 1.f, 0.9f ), Vector3( 0.3f, 0.08f, 0.03f ), &inRoot );
     }
-    Put( inKit, inRoot, kCooler, Vector3( 9.7f, kDeck, 9.3f ), 20.f );
-    Put( inKit, inRoot, kBottle, Vector3( 9.55f, kDeck + 0.45f, 9.3f ) );
-    Put( inKit, inRoot, kBeerCup, Vector3( 9.85f, kDeck + 0.45f, 9.25f ) );
-    Put( inKit, inRoot, kRoadCase, Vector3( 10.9f, kDeck, 4.75f ), -6.f );
-    if( EntityHandle ladder = Put( inKit, inRoot, kLadder, Vector3( 11.35f, kDeck, 7.2f ) ) )
+    Put( inKit, inRoot, kCooler, Vector3( 9.7f, deck, 9.3f ), 20.f );
+    Put( inKit, inRoot, kBottle, Vector3( 9.55f, deck + 0.45f, 9.3f ) );
+    Put( inKit, inRoot, kBeerCup, Vector3( 9.85f, deck + 0.45f, 9.25f ) );
+    Put( inKit, inRoot, kRoadCase, Vector3( 10.9f, deck, 4.75f ), -6.f );
+    if( EntityHandle ladder = Put( inKit, inRoot, kLadder, Vector3( 11.35f, deck, 7.2f ) ) )
     {
         // Leant against the racks.
         ladder->GetComponent<Transform>().SetRotation( Quaternion::FromEulerDegrees( Vector3( 0.f, kLadder.Yaw + 90.f, 0.f ) ) * Quaternion::FromEulerDegrees( Vector3( 0.f, 0.f, 10.f ) ) );
@@ -561,12 +582,15 @@ void StageSet::BuildWings( VenueKit& inKit, Transform& inRoot )
 
 void StageSet::BuildPixels( VenueKit& inKit, Transform& inRoot )
 {
+    const float deck = m_plan.Stage.Height;
+    const float stageHalfWidth = m_plan.Stage.HalfWidth;
+    const float trussHeight = m_plan.Stage.TrussHeight;
     // The LED strip along the stage's front edge.
-    const float cell = kStageHalfWidth * 2.f / static_cast<float>( kEdgeSegments );
+    const float cell = stageHalfWidth * 2.f / static_cast<float>( kEdgeSegments );
     for( int i = 0; i < kEdgeSegments; ++i )
     {
-        const float x = -kStageHalfWidth + ( static_cast<float>( i ) + 0.5f ) * cell;
-        m_edgeStrip.push_back( inKit.Piece( Shape::Cube, Vector3( x, kDeck - 0.08f, -0.06f ), Vector3( cell - 0.05f, 0.08f, 0.03f ), kNone, &inRoot, kNone, false, "Edge strip" ) );
+        const float x = -stageHalfWidth + ( static_cast<float>( i ) + 0.5f ) * cell;
+        m_edgeStrip.push_back( inKit.Piece( Shape::Cube, Vector3( x, deck - 0.08f, -0.06f ), Vector3( cell - 0.05f, 0.08f, 0.03f ), kNone, &inRoot, kNone, false, "Edge strip" ) );
     }
     // Pixel tubes up the crowd's side of the two front towers.
     for( float side : { -1.f, 1.f } )
@@ -574,29 +598,38 @@ void StageSet::BuildPixels( VenueKit& inKit, Transform& inRoot )
         for( int i = 0; i < kTubeSegments; ++i )
         {
             const float y = 1.7f + static_cast<float>( i ) * 1.3f;
-            m_tubes.push_back( inKit.Piece( Shape::Cube, Vector3( side * ( kStageHalfWidth + 0.4f ), y + 0.6f, kTrussZ[0] - 0.26f ), Vector3( 0.07f, 1.2f, 0.05f ), kNone, &inRoot, kNone, false, "Pixel tube" ) );
+            m_tubes.push_back( inKit.Piece( Shape::Cube, Vector3( side * ( stageHalfWidth + 0.4f ), y + 0.6f, kTrussZ[0] - 0.26f ), Vector3( 0.07f, 1.2f, 0.05f ), kNone, &inRoot, kNone, false, "Pixel tube" ) );
         }
     }
     // Battens along the crowd's face of each cross truss.
-    const float span = ( kStageHalfWidth - 0.4f ) * 2.f / static_cast<float>( kBattensPerTruss );
+    const float span = ( stageHalfWidth - 0.4f ) * 2.f / static_cast<float>( kBattensPerTruss );
     for( float z : kTrussZ )
     {
         for( int i = 0; i < kBattensPerTruss; ++i )
         {
-            const float x = -( kStageHalfWidth - 0.4f ) + ( static_cast<float>( i ) + 0.5f ) * span;
-            m_battens.push_back( inKit.Piece( Shape::Cube, Vector3( x, kTrussHeight, z - 0.26f ), Vector3( span - 0.25f, 0.07f, 0.05f ), kNone, &inRoot, kNone, false, "Batten" ) );
+            const float x = -( stageHalfWidth - 0.4f ) + ( static_cast<float>( i ) + 0.5f ) * span;
+            m_battens.push_back( inKit.Piece( Shape::Cube, Vector3( x, trussHeight, z - 0.26f ), Vector3( span - 0.25f, 0.07f, 0.05f ), kNone, &inRoot, kNone, false, "Batten" ) );
         }
     }
-    // The LED wall is built of panels: seams a metre apart, just in front of the screen and
-    // behind the lyric band.
-    const Vector3 wall( 0.f, 6.9f, kBackWallZ - 0.07f );
-    for( int i = 1; i < 12; ++i )
+    // An LED wall is built of panels: seams a metre apart, just in front of the screen and
+    // behind the lyric band. (Only on a wall facing straight out.)
+    for( const VenuePlan::Screen& screen : m_plan.Screens )
     {
-        inKit.Piece( Shape::Cube, wall + Vector3( -6.f + static_cast<float>( i ), 0.f, 0.f ), Vector3( 0.012f, 6.f, 0.004f ), kNone, &inRoot, kNone, false, "Seam" );
-    }
-    for( int i = 1; i < 6; ++i )
-    {
-        inKit.Piece( Shape::Cube, wall + Vector3( 0.f, -3.f + static_cast<float>( i ), 0.f ), Vector3( 12.f, 0.012f, 0.004f ), kNone, &inRoot, kNone, false, "Seam" );
+        if( !screen.Seams || screen.Yaw != 0.f )
+        {
+            continue;
+        }
+        const Vector3 wall( screen.Centre.x, screen.Centre.y, screen.Centre.z - 0.02f );
+        const int columns = static_cast<int>( std::round( screen.Width ) );
+        const int rows = static_cast<int>( std::round( screen.Height ) );
+        for( int i = 1; i < columns; ++i )
+        {
+            inKit.Piece( Shape::Cube, wall + Vector3( -screen.Width * 0.5f + static_cast<float>( i ), 0.f, 0.f ), Vector3( 0.012f, screen.Height, 0.004f ), kNone, &inRoot, kNone, false, "Seam" );
+        }
+        for( int i = 1; i < rows; ++i )
+        {
+            inKit.Piece( Shape::Cube, wall + Vector3( 0.f, -screen.Height * 0.5f + static_cast<float>( i ), 0.f ), Vector3( screen.Width, 0.012f, 0.004f ), kNone, &inRoot, kNone, false, "Seam" );
+        }
     }
 }
 
@@ -634,6 +667,8 @@ void StageSet::BuildArena( VenueKit& inKit, Transform& inRoot )
 
 void StageSet::BuildClub( VenueKit& inKit, Transform& inRoot, uint32_t inSeed )
 {
+    const float deck = m_plan.Stage.Height;
+    const float backWallZ = m_plan.Stage.BackWallZ;
     // Small and scrappy: years of gig posters on the wall either side of the screen and down
     // the side walls by the stage, a merch table against the wall near the bar.
     const Vector3 inks[5] = { Vector3( 0.45f, 0.06f, 0.05f ), Vector3( 0.5f, 0.4f, 0.08f ), Vector3( 0.06f, 0.2f, 0.4f ), Vector3( 0.4f, 0.38f, 0.33f ), Vector3( 0.05f, 0.3f, 0.2f ) };
@@ -641,9 +676,9 @@ void StageSet::BuildClub( VenueKit& inKit, Transform& inRoot, uint32_t inSeed )
     {
         const float side = i % 2 == 0 ? -1.f : 1.f;
         const float x = side * ( 6.7f + VenueTiming::Noise( inSeed + i, 3u ) * 4.6f );
-        const float y = kDeck + 1.1f + VenueTiming::Noise( inSeed + i, 5u ) * 2.2f;
+        const float y = deck + 1.1f + VenueTiming::Noise( inSeed + i, 5u ) * 2.2f;
         const float size = 0.4f + VenueTiming::Noise( inSeed + i, 7u ) * 0.25f;
-        EntityHandle poster = inKit.Piece( Shape::Cube, Vector3( x, y, kBackWallZ - 0.01f - 0.002f * static_cast<float>( i ) ), Vector3( size, size * 1.4f, 0.004f ),
+        EntityHandle poster = inKit.Piece( Shape::Cube, Vector3( x, y, backWallZ - 0.01f - 0.002f * static_cast<float>( i ) ), Vector3( size, size * 1.4f, 0.004f ),
             inks[static_cast<int>( VenueTiming::Noise( inSeed + i, 9u ) * 5.f ) % 5], &inRoot, kNone, false, "Poster" );
         if( poster ) poster->GetComponent<Transform>().SetRotation( Vector3( 0.f, 0.f, ( VenueTiming::Noise( inSeed + i, 11u ) - 0.5f ) * 14.f ) );
     }

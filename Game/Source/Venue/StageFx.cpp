@@ -1,6 +1,6 @@
 #include "Venue/StageFx.h"
 #include "Venue/VenueKit.h"
-#include "Venue/VenueLayout.h"
+#include "Venue/VenuePlan.h"
 #include "Venue/VenueTiming.h"
 #include "Core/CommandLine.h"
 #include "Components/Effects/ParticleSystem.h"
@@ -91,12 +91,12 @@ EntityHandle StageFx::Emitter( VenueKit& inKit, Transform& inRoot, const char* i
 }
 
 
-void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const VenueData& inVenue )
+void StageFx::Build( VenueKit& inKit, Transform& inRoot, const VenuePlan& inPlan, const VenueData& inVenue )
 {
     Clear();
-    m_style = inStyle;
+    m_style = inPlan.Style;
     m_bonusFx = inVenue.m_bonusFx;
-    const float deck = VenueLayout::kStageHeight;
+    const float deck = inPlan.Stage.Height;
     const Vector3 up( 0.f, 1.f, 0.f );
 
     // Flame pots: a column of fire, the embers it throws off and the light it casts.
@@ -246,7 +246,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
         Vector3 ColorA;
         Vector3 ColorB;
     };
-    const float truss = inStyle == kClub ? 8.2f : VenueLayout::kTrussHeight - 0.5f;
+    const float truss = m_style == kClub ? 8.2f : inPlan.Stage.TrussHeight - 0.5f;
     const Cannon cannons[] = {
         { Vector3( -7.2f, truss, -0.3f ), Vector3( -0.15f, 0.45f, -1.f ), Vector3( 1.f, 0.1f, 0.25f ), Vector3( 1.f, 0.85f, 0.1f ) },
         { Vector3( -2.6f, truss, -0.3f ), Vector3( -0.05f, 0.5f, -1.f ), Vector3( 0.1f, 0.6f, 1.f ), Vector3( 1.f, 1.f, 1.f ) },
@@ -348,7 +348,7 @@ void StageFx::Build( VenueKit& inKit, Transform& inRoot, int inStyle, const Venu
     }
 
     // Fireworks, out of doors: shells that burst high behind the stage.
-    if( inStyle == kFestival )
+    if( m_style == kFestival )
     {
         const Vector3 colors[][2] = {
             { Vector3( 1.f, 0.75f, 0.3f ), Vector3( 1.f, 0.95f, 0.7f ) },

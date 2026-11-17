@@ -5,7 +5,7 @@
 #include "Config/GameSettings.h"
 #include "Engine/World.h"
 #include "Core/CommandLine.h"
-#include "Venue/VenueLayout.h"
+#include "Venue/VenuePlan.h"
 #include <algorithm>
 #include <cmath>
 
@@ -13,8 +13,8 @@ namespace
 {
     constexpr float kPi = 3.14159265f;
 
-    // The rig, in venue space (Venue/VenueLayout.h: the stage's front edge at z 0, the crowd at
-    // -z). Light settings follow MitchGame's ConcertTest study: narrow, very bright cones in haze.
+    // The rig, in venue space (Venue/VenuePlan.h: the stage's front edge at z 0, the crowd at
+    // -z), placed for the procedural rooms' stage; its heights come from the plan. Light settings follow MitchGame's ConcertTest study: narrow, very bright cones in haze.
     // Beams: moving heads on the deck, rows 0-1 along the stage's front edge throwing up and back
     // over the band, rows 2-3 along the back throwing up and out over the crowd (the silhouette
     // lights).
@@ -157,7 +157,7 @@ namespace
 }
 
 
-void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle& inCamera, const TrackData& inTrack, const SpawnBoxFn& inSpawnBox, const TintFn& inTint )
+void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle& inCamera, const TrackData& inTrack, const VenuePlan& inPlan, const SpawnBoxFn& inSpawnBox, const TintFn& inTint )
 {
     Clear();
     // --stage-lights N overrides the setting (0 off, 1 gentle, 2 full) for a run.
@@ -192,9 +192,9 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
     m_clash[0] = palette.Clash[0];
     m_clash[1] = palette.Clash[1];
 
-    const float deck = VenueLayout::kStageHeight;
+    const float deck = inPlan.Stage.Height;
     // The overhead rig hangs just under the truss (lower in a room with a low ceiling).
-    const float truss = VenueLayout::kTrussHeight - m_trussDrop;
+    const float truss = inPlan.Stage.TrussHeight - m_trussDrop;
     const float hang = truss - 0.55f;
     int index = 0;
     for( int row = 0; row < kBeamRows; ++row )
@@ -246,7 +246,11 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
     }
     for( int slot = 0; slot < kSpotCount; ++slot )
     {
-        const Vector3 target = VenueLayout::kMemberSpots[kSpotMember[slot]] + Vector3( 0.f, 1.f, 0.f );
+        if( !inPlan.HasMember( kSpotMember[slot] ) )
+        {
+            continue;
+        }
+        const Vector3 target = inPlan.SpotOf( kSpotMember[slot] ).Feet + Vector3( 0.f, 1.f, 0.f );
         const Vector3 position( target.x * 0.4f, std::min( 11.f, truss + 1.5f ), -9.f );
         SpawnFixture( Group::Spot, target.x < 0.f ? -1 : 1, 0, slot, position, target - position, 3.5f, 6.f, 32.f, kSpotIntensity, inParent, {} );
     }

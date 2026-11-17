@@ -10,11 +10,12 @@
 
 class Transform;
 class World;
+struct VenuePlan;
 
 // The light show on the venue's stage (Docs/Stage-Lighting.md): a rig of real spot lights in
 // volumetric haze that plays a chart's VENUE lighting cues on the song clock, falls back to a show
 // built from the song's sections or tempo, and pulses with the player's hits. VenueShow owns it;
-// the rig is built in venue space (Venue/VenueLayout.h) under the venue's root.
+// the rig is built in venue space (Venue/VenuePlan.h) under the venue's root.
 class StageLights
 {
 public:
@@ -23,7 +24,9 @@ public:
     using TintFn = std::function<void( const EntityHandle& inTarget, const Vector3& inColor, const Vector3& inEmissive )>;
 
     // inCamera is the venue's camera, whose fog the rig turns into haze while the show runs.
-    void Build( World& inWorld, Transform* inParent, const EntityHandle& inCamera, const TrackData& inTrack, const SpawnBoxFn& inSpawnBox, const TintFn& inTint );
+    // inPlan: the stage the rig hangs over (its deck and truss heights) and the members the follow
+    // spots light; a member the plan leaves out gets no follow spot.
+    void Build( World& inWorld, Transform* inParent, const EntityHandle& inCamera, const TrackData& inTrack, const VenuePlan& inPlan, const SpawnBoxFn& inSpawnBox, const TintFn& inTint );
     void Clear();
     void Update( double inSongTimeMs, float inDeltaTime );
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreGame/TrackList.h"
+#include "Venue/VenuePlan.h"
 #include "ECS/EntityHandle.h"
 #include "Math/Vector3.h"
 #include <string>
@@ -18,8 +19,10 @@ class World;
 class Director
 {
 public:
-    // inMusicVideo: play MV VENUE's cuts and looks when the chart has them.
-    void Build( World& inWorld, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, float inSongLength, bool inMusicVideo, const Band* inBand );
+    // inMusicVideo: play MV VENUE's cuts and looks when the chart has them. inPlan: where the
+    // members stand (the shots of them follow their spots; a member the plan leaves out is never
+    // a shot's subject), the barricade and the crowd's front, the back wall.
+    void Build( World& inWorld, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, float inSongLength, bool inMusicVideo, const Band* inBand );
     void Clear();
     void Update( double inSeconds, float inDeltaTime );
     // A crowd surfer going up cuts to them: a handheld camera in the photo pit follows them over
@@ -31,14 +34,8 @@ public:
     // The room the cameras work in (venue space): every shot stays inside it. Back is the back
     // wall's z, Ceiling the lowest thing overhead (the rigging grid), HalfWidth the side walls,
     // DeskZ the mixing desk the long lens shoots from. An open-air venue leaves the defaults.
-    struct Room
-    {
-        float Back = -1000.f;
-        float Ceiling = 1000.f;
-        float HalfWidth = 30.f;
-        float DeskZ = -22.f;
-        bool Outdoor = false;
-    };
+    // (A plan carries one: VenuePlan::Bounds.)
+    using Room = VenuePlan::Room;
     void SetRoom( const Room& inRoom ) { m_room = inRoom; }
     // The back of the room (venue z): wide shots stay in front of it.
     void SetRoomBack( float inZ ) { m_room.Back = inZ; }
@@ -123,6 +120,12 @@ private:
     };
 
     Plan PlanFor( const std::string& inName, int inIndex ) const;
+    // Takes the members the plan leaves out off a shot; a shot only of them (or of the kit with
+    // no drummer) becomes a wide of whoever's there.
+    void DropAbsent( Plan& ioPlan ) const;
+    // A point placed for the drummer facing the crowd, turned with the drummer's spot (the kit
+    // is built in their frame).
+    Vector3 AtDrums( const Vector3& inPoint ) const { return m_plan.TurnWith( VenueData::Drums, inPoint ); }
     Plan PlanAuto( const std::string& inConstraints, int inIndex, float inTime ) const;
     // Gives a chart's plain shot one of its treatments (a wide becomes a crane, a drone or the
     // long lens; a near shot a low hero angle...), by the plan's Variant.
@@ -154,6 +157,7 @@ private:
 
     World* m_world = nullptr;
     const Band* m_band = nullptr;
+    VenuePlan m_plan;
     EntityHandle m_main;
     EntityHandle m_feed;
     EntityHandle m_program;

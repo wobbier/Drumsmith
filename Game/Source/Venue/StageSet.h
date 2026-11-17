@@ -1,5 +1,6 @@
 #pragma once
 #include "ECS/EntityHandle.h"
+#include "Venue/VenuePlan.h"
 #include "Math/Vector3.h"
 #include <cstdint>
 #include <vector>
@@ -28,9 +29,11 @@ public:
         float Energy = 0.5f;        // crowd energy
     };
 
-    // inStyle: VenueShow::Style as an int (0 arena, 1 club, 2 festival). inSeed: per song, for
-    // repeatable variety (amp finishes, banners, posters).
-    void Build( VenueKit& inKit, Transform& inRoot, int inStyle, bool inHasKeys, uint32_t inSeed );
+    // inPlan: the stage it dresses (its sizes, where each member stands and who's there, the LED
+    // wall) and its Style (VenueShow::Style as an int: 0 arena, 1 club, 2 festival) for each
+    // room's extras. inHasKeys: a keyboard player is on stage. inSeed: per song, for repeatable
+    // variety (amp finishes, banners, posters).
+    void Build( VenueKit& inKit, Transform& inRoot, const VenuePlan& inPlan, bool inHasKeys, uint32_t inSeed );
     // Forgets its handles; the kit deletes the entities.
     void Clear();
     void Update( const Show& inShow );
@@ -54,4 +57,6 @@ private:
     // Festival flags, swaying on their poles.
     std::vector<EntityHandle> m_flags;
     std::vector<float> m_flagYaws;
+    // The plan being dressed, while it's built.
+    VenuePlan m_plan;
 };

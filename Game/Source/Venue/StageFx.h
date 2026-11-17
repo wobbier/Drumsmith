@@ -6,6 +6,7 @@
 
 class Transform;
 class VenueKit;
+struct VenuePlan;
 
 // The show's special effects (Docs/Venue-and-Band.md): flame pots, spark fountains, CO2 jets,
 // confetti cannons, dry ice rolling over the deck, dust drifting through the beams and, out of
@@ -15,8 +16,9 @@ class VenueKit;
 class StageFx
 {
 public:
-    // inStyle: VenueShow::Style as an int (fireworks only out of doors, less confetti in a club).
-    void Build( VenueKit& inKit, Transform& inRoot, int inStyle, const VenueData& inVenue );
+    // inPlan: the stage the effects stand on and hang over, and its Style (VenueShow::Style as an
+    // int: fireworks only out of doors, less confetti in a club).
+    void Build( VenueKit& inKit, Transform& inRoot, const VenuePlan& inPlan, const VenueData& inVenue );
     // Forgets the emitters (the kit deletes them).
     void Clear();
     // inGentle: Stage Lights set to no flashes (flames soften). inLowFog: 0 .. 1 of dry ice.

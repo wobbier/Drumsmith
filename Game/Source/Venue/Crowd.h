@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreGame/TrackList.h"
 #include "Venue/Puppet.h"
-#include "Venue/VenueLayout.h"
+#include "Venue/VenuePlan.h"
 #include "ECS/EntityHandle.h"
 #include <array>
 #include <string>
@@ -19,9 +19,9 @@ class VenueKit;
 class Crowd
 {
 public:
-    // inBackZ / inHalfWidth: how far back and wide the floor fills (VenueLayout's by default).
-    void Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount,
-        float inBackZ = VenueLayout::kCrowdBackZ, float inHalfWidth = VenueLayout::kCrowdHalfWidth );
+    // The posed crowd: inCount figures over the plan's Posed areas (shared by their Heads), and the
+    // crowd surfer. The plan's Mob and Clear areas are the caller's, through AddMob and KeepClear.
+    void Build( VenueKit& inKit, Transform* inFloor, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount );
     void Clear();
     // The characters the crowd is made of (People::kPeople indices): the ones the band isn't
     // using. Set before Build; empty means all of them.
@@ -49,9 +49,9 @@ public:
 
     // The back of the house: cheap figures (a body, a head, sometimes arms and a light, all boxes
     // that move together) filling a floor area or a tier wherever the posed crowd doesn't stand.
-    // They bob, jump and put their hands or lights up with the crowd's mood. inFloorY: the
-    // height they stand at (a tier); inSpacing: metres between them; inMax: at most this many.
-    void AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1, float inZ0, float inZ1, float inFloorY, float inSpacing, float inDensity, int inMax );
+    // They bob, jump and put their hands or lights up with the crowd's mood. inArea: a plan's Mob
+    // area (its floor height, spacing, density and facing); inMax: at most this many.
+    void AddMob( VenueKit& inKit, Transform* inFloor, const VenuePlan::CrowdArea& inArea, int inMax );
     // Floor the mob leaves empty (a mixing desk, an aisle).
     void KeepClear( float inX0, float inX1, float inZ0, float inZ1 ) { m_keepClear.push_back( { inX0, inX1, inZ0, inZ1 } ); }
     size_t MobSize() const { return m_mob.size(); }
@@ -83,6 +83,8 @@ private:
         bool LightUp = false;
     };
 
+    // The rows of one Posed area, inCount figures at most (ioSeed runs on across areas).
+    void BuildRows( VenueKit& inKit, Transform* inFloor, const VenuePlan::CrowdArea& inArea, int inCount, uint32_t& ioSeed );
     void BuildFallbackMoods();
     bool Occupied( float inX, float inZ ) const;
     void UpdateMob( double inBeat, float inSeconds, float inEnergy, bool inLightsUp, bool inClapping );
@@ -92,10 +94,14 @@ private:
     std::vector<int> m_models;
     std::vector<MobFigure> m_mob;
     std::vector<std::array<float, 4>> m_keepClear;
-    // Where the posed crowd stands: rows from the front back to m_builtBackZ, each as wide as
-    // RowHalfWidth.
-    float m_builtBackZ = 0.f;
-    float m_builtHalfWidth = 0.f;
+    // Where the posed crowd stands: each Posed area's rows, from its front back to BackZ (the
+    // last row built), widening from its front.
+    struct Rows
+    {
+        VenuePlan::CrowdArea Area;
+        float BackZ = 0.f;
+    };
+    std::vector<Rows> m_rows;
 
     std::vector<Person> m_people;
     std::vector<TimedCueData> m_moods;
@@ -115,6 +121,9 @@ private:
     bool m_surfRequested = false;
     float m_surfProgress = -1.f;   // < 0: nobody up
     float m_surfX = 0.f;
+    float m_surfFromZ = -12.f;     // carried from here (the back of the front rows) ..
+    float m_surfToZ = -2.2f;       // .. to here (just short of the barricade)
+    float m_surfCentreX = 0.f;
     Vector3 m_surfPosition;
     int m_surfCount = 0;
 };

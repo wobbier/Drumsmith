@@ -3,6 +3,7 @@
 #include "Venue/Puppet.h"
 #include "Venue/VenueKit.h"
 #include "Venue/VenueLayout.h"
+#include "Venue/VenuePlan.h"
 #include "Venue/VenueTiming.h"
 #include "Components/Transform.h"
 #include "Materials/StandardMaterial.h"
@@ -191,7 +192,7 @@ void Band::Clear()
 }
 
 
-void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue, const std::vector<NoteData>& inNotes, const std::vector<BeatData>& inBeats, float inBpm )
+void Band::Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<NoteData>& inNotes, const std::vector<BeatData>& inBeats, float inBpm )
 {
     Clear();
     m_stage = inStage;
@@ -213,7 +214,8 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
         Member& member = m_members[index];
         member.States = inVenue.m_bandStates[index];
         member.Phase = VenueTiming::Noise( 17u, static_cast<uint32_t>( index ) ) * 6.f;
-        member.Spot = VenueLayout::kMemberSpots[index];
+        member.Spot = inPlan.SpotOf( index ).Feet;
+        member.Yaw = inPlan.SpotOf( index ).Yaw;
     }
     m_members[VenueData::Guitar].Strums = inVenue.m_guitarStrums;
     m_members[VenueData::Bass].Strums = inVenue.m_bassStrums;
@@ -274,7 +276,7 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
 
     for( int index = 0; index < VenueData::MemberCount; ++index )
     {
-        if( index == VenueData::Keys && !keys )
+        if( ( index == VenueData::Keys && !keys ) || !inPlan.HasMember( index ) )
         {
             continue;
         }
@@ -287,7 +289,9 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
             continue;
         }
         Transform& group = member.Group->GetComponent<Transform>();
-        group.SetRotation( Vector3( 0.f, index == VenueData::Keys ? 155.f : 180.f, 0.f ) );
+        // Everything a member has (their kit, instrument, mic stand) is built in their own frame,
+        // their front +z: it turns with them.
+        group.SetRotation( Vector3( 0.f, member.Yaw, 0.f ) );
         // Each a character of their own in an atlas of their own, a different cast every song
         // (the same every time it's played): a step through each list that visits all of it
         // before repeating.
@@ -1716,7 +1720,7 @@ namespace
 
 Vector3 Band::HeadOf( int inMember ) const
 {
-    if( !HasMember( inMember ) ) return VenueLayout::kMemberSpots[std::clamp( inMember, 0, 4 )] + Vector3( 0.f, 1.6f, 0.f );
+    if( !HasMember( inMember ) ) return m_members[std::clamp( inMember, 0, 4 )].Spot + Vector3( 0.f, 1.6f, 0.f );
     const Member& member = m_members[inMember];
     return ToVenue( member.Group ? &member.Group->GetComponent<Transform>() : nullptr, member.Body.HeadCentre() );
 }
@@ -1733,7 +1737,7 @@ Vector3 Band::GazeOf( int inMember ) const
 
 Vector3 Band::ChestOf( int inMember ) const
 {
-    if( !HasMember( inMember ) ) return VenueLayout::kMemberSpots[std::clamp( inMember, 0, 4 )] + Vector3( 0.f, 1.3f, 0.f );
+    if( !HasMember( inMember ) ) return m_members[std::clamp( inMember, 0, 4 )].Spot + Vector3( 0.f, 1.3f, 0.f );
     const Member& member = m_members[inMember];
     return ToVenue( member.Group ? &member.Group->GetComponent<Transform>() : nullptr, member.Body.Chest() );
 }
@@ -1741,7 +1745,7 @@ Vector3 Band::ChestOf( int inMember ) const
 
 Vector3 Band::HandsOf( int inMember ) const
 {
-    if( !HasMember( inMember ) ) return VenueLayout::kMemberSpots[std::clamp( inMember, 0, 4 )] + Vector3( 0.f, 1.f, 0.f );
+    if( !HasMember( inMember ) ) return m_members[std::clamp( inMember, 0, 4 )].Spot + Vector3( 0.f, 1.f, 0.f );
     const Member& member = m_members[inMember];
     return ToVenue( member.Group ? &member.Group->GetComponent<Transform>() : nullptr, ( member.Body.Hand( 0 ) + member.Body.Hand( 1 ) ) * 0.5f );
 }
@@ -1749,7 +1753,7 @@ Vector3 Band::HandsOf( int inMember ) const
 
 Vector3 Band::FeetOf( int inMember ) const
 {
-    return VenueLayout::kMemberSpots[std::clamp( inMember, 0, 4 )];
+    return m_members[std::clamp( inMember, 0, 4 )].Spot;
 }
 
 

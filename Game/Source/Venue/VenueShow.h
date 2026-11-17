@@ -8,6 +8,7 @@
 #include "Venue/StageFx.h"
 #include "Venue/StageSet.h"
 #include "Venue/VenueKit.h"
+#include "Venue/VenuePlan.h"
 #include "ECS/EntityHandle.h"
 #include <chrono>
 #include <cstdint>
@@ -23,18 +24,24 @@ class World;
 class VenueShow
 {
 public:
-    // The room around the stage. The stage, band and rig are the same in each.
+    // The room around the stage. The stage, band and rig are the same in each
+    // (VenuePlan::ForStyle).
     enum class Style : int { Arena = 0, Club, Festival, Count };
     static const char* StyleName( Style inStyle );
 
     // inHighwayCamera: the highway's camera entity, made an overlay while the show runs. The style
     // comes from the VenueStyle setting (or --venue-style) unless one is given.
     void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, int inStyle = -1 );
+    // The same from a floor plan of the caller's (a scene venue's markers): where the band, crowd
+    // and screens go and which built-in pieces go up. The plan's Style is the room it dresses as.
+    void Build( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan );
     void Clear();
     // Tears the venue down and builds the next style in its place, mid-song: the highway on top
     // carries on regardless.
     void NextStyle();
     Style GetStyle() const { return m_style; }
+    // The floor plan the show was built from (an empty default before Build).
+    const VenuePlan& GetPlan() const { return m_plan; }
     void Update( double inSongTimeMs, float inDeltaTime );
 
     void OnHit( PadId inPad );
@@ -54,6 +61,10 @@ public:
     const Director& GetDirector() const { return m_director; }
 
 private:
+    // Whether a show goes up at all (the Venue setting, --no-venue, a practice lesson).
+    bool Wanted( const TrackData& inTrack ) const;
+    // Build's work once the plan is settled.
+    void BuildShow( World& inWorld, const TrackData& inTrack, const EntityHandle& inHighwayCamera, const VenuePlan& inPlan );
     void BuildStage( Transform& inRoot );
     void BuildArena( Transform& inRoot );
     void BuildArenaDetail( Transform& inRoot );
@@ -62,7 +73,7 @@ private:
     void FillHouse( Transform& inRoot, float inScale );
     // --highway-log: the venue's main-thread cost, every five seconds.
     void LogUpdateCost( std::chrono::steady_clock::time_point inStarted );
-    void BuildScreen( Transform& inRoot, const Vector3& inCentre, const Vector3& inSize, float inYaw, const char* inTexture );
+    void BuildScreen( Transform& inRoot, const VenuePlan::Screen& inScreen );
     // The show's hype (Docs/Venue-and-Band.md, Hype): how hot it's running now, and the big
     // moments that set off the effects.
     void UpdateHype( double inSeconds, float inDeltaTime );
@@ -80,6 +91,7 @@ private:
     World* m_world = nullptr;
     const TrackData* m_track = nullptr;
     Style m_style = Style::Arena;
+    VenuePlan m_plan;
     VenueData m_venue;
     Lyrics m_lyrics;
     LyricBoard m_lyricBoard;

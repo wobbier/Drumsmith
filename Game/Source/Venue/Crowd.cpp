@@ -1,7 +1,6 @@
 #include "Venue/Crowd.h"
 #include "Venue/People.generated.h"
 #include "Venue/VenueKit.h"
-#include "Venue/VenueLayout.h"
 #include "Venue/VenueTiming.h"
 #include "Components/Transform.h"
 #include <algorithm>
@@ -24,6 +23,17 @@ namespace
         const float spread = ( inUp ? 12.f : 8.f ) * s * kPi / 180.f;
         const float raise = ( inUp ? 172.f : 5.f ) * kPi / 180.f;
         return glm::angleAxis( -raise, glm::vec3( 1.f, 0.f, 0.f ) ) * glm::angleAxis( spread, glm::vec3( 0.f, 0.f, 1.f ) );
+    }
+
+
+    // Which way someone standing at x, z in an area faces (degrees): the area's yaw, turned part
+    // of the way toward its focus.
+    float FacingIn( const VenuePlan::CrowdArea& inArea, float inX, float inZ )
+    {
+        float toward = std::atan2( inArea.Focus.x - inX, inArea.Focus.z - inZ ) * 180.f / kPi - inArea.Yaw;
+        if( toward > 180.f ) toward -= 360.f;
+        else if( toward < -180.f ) toward += 360.f;
+        return inArea.Yaw + toward * inArea.Turn;
     }
 }
 
@@ -55,12 +65,13 @@ void Crowd::Clear()
     m_surfCount = 0;
     m_mob.clear();
     m_keepClear.clear();
-    m_builtBackZ = 0.f;
-    m_builtHalfWidth = 0.f;
+    m_rows.clear();
+    m_surfFromZ = -12.f;
+    m_surfToZ = -2.2f;
 }
 
 
-void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount, float inBackZ, float inHalfWidth )
+void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<BeatData>& inBeats, float inBpm, int inCount )
 {
     Clear();
     m_beats = inBeats;
@@ -77,13 +88,55 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
         BuildFallbackMoods();
     }
 
-    // Rows from the barricade back, widening toward the back of the room and thinning out.
-    uint32_t seed = 1;
-    const float span = VenueLayout::kCrowdFrontZ - inBackZ;
-    for( float z = VenueLayout::kCrowdFrontZ; z > inBackZ && static_cast<int>( m_people.size() ) < inCount; z -= 0.64f )
+    // The posed figures, shared between the Posed areas by their head counts.
+    int heads = 0;
+    std::vector<const VenuePlan::CrowdArea*> posed;
+    for( const VenuePlan::CrowdArea& area : inPlan.Crowd )
     {
-        const float depth = VenueLayout::kCrowdFrontZ - z;
-        const float halfWidth = std::min( inHalfWidth, 7.5f + depth * 0.35f );
+        if( area.Type != VenuePlan::CrowdArea::Kind::Posed ) continue;
+        posed.push_back( &area );
+        heads += std::max( area.Heads, 0 );
+    }
+    uint32_t seed = 1;
+    int given = 0;
+    for( size_t i = 0; i < posed.size(); ++i )
+    {
+        const int count = i + 1 == posed.size() ? inCount - given
+            : heads > 0 ? static_cast<int>( std::lround( static_cast<double>( inCount ) * std::max( posed[i]->Heads, 0 ) / heads ) ) : 0;
+        given += count;
+        BuildRows( inKit, inFloor, *posed[i], static_cast<int>( m_people.size() ) + count, seed );
+    }
+    if( !m_people.empty() )
+    {
+        // The crowd surfer goes up behind the front rows of the first area and is carried to
+        // the barricade.
+        const VenuePlan::CrowdArea& first = m_rows.front().Area;
+        m_surfFromZ = std::min( std::max( -12.f, first.MinZ + 2.f ), first.MaxZ );
+        m_surfToZ = inPlan.Stage.BarricadeZ - 0.6f;
+        m_surfCentreX = ( first.MinX + first.MaxX ) * 0.5f;
+        Puppet::Look look;
+        look.Skin = static_cast<uint32_t>( m_people.size() );
+        look.Model = ModelFor( 0.5f );
+        m_surfer.Build( inKit, inFloor, Vector3( 0.f, -10.f, 0.f ), 0.f, look );
+    }
+}
+
+
+void Crowd::BuildRows( VenueKit& inKit, Transform* inFloor, const VenuePlan::CrowdArea& inArea, int inCount, uint32_t& ioSeed )
+{
+    // Rows from the front back, widening toward the back of the room and thinning out.
+    uint32_t& seed = ioSeed;
+    const float front = inArea.MaxZ;
+    const float back = inArea.MinZ;
+    const float widest = ( inArea.MaxX - inArea.MinX ) * 0.5f;
+    const float centre = ( inArea.MinX + inArea.MaxX ) * 0.5f;
+    const float span = front - back;
+    Rows rows{ inArea, front };
+    const size_t before = m_people.size();
+    for( float z = front; z > back && static_cast<int>( m_people.size() ) < inCount; z -= 0.64f )
+    {
+        const float depth = front - z;
+        const float halfWidth = std::min( widest, inArea.FrontHalfWidth + depth * inArea.Widen );
         const float density = depth < span * 0.3f ? 0.95f : depth < span * 0.65f ? 0.75f : 0.5f;
         for( float x = -halfWidth; x <= halfWidth && static_cast<int>( m_people.size() ) < inCount; x += 0.58f )
         {
@@ -93,9 +146,9 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
                 continue;
             }
             Person person;
-            const Vector3 feet( x + ( VenueTiming::Noise( seed, 2u ) - 0.5f ) * 0.36f, 0.f, z + ( VenueTiming::Noise( seed, 3u ) - 0.5f ) * 0.3f );
+            const Vector3 feet( centre + x + ( VenueTiming::Noise( seed, 2u ) - 0.5f ) * 0.36f, 0.f, z + ( VenueTiming::Noise( seed, 3u ) - 0.5f ) * 0.3f );
             // Facing the stage, the singer's spot for those off to the side.
-            const float yaw = std::atan2( -feet.x, 4.f - feet.z ) * 180.f / kPi * 0.8f + ( VenueTiming::Noise( seed, 4u ) - 0.5f ) * 16.f;
+            const float yaw = FacingIn( inArea, feet.x, feet.z ) + ( VenueTiming::Noise( seed, 4u ) - 0.5f ) * 16.f;
             Puppet::Look look;
             look.Height = 0.9f + VenueTiming::Noise( seed, 10u ) * 0.2f;
             look.Build = 0.9f + VenueTiming::Noise( seed, 11u ) * 0.25f;
@@ -118,16 +171,12 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenueData& inVenue
                     Vector3( 0.f, 0.f, 0.f ), person.Body.Root(), lighter ? Vector3( 4.f, 1.6f, 0.3f ) : Vector3( 1.6f, 2.f, 3.f ) );
             }
             m_people.push_back( std::move( person ) );
-            m_builtBackZ = z;
+            rows.BackZ = z;
         }
     }
-    m_builtHalfWidth = inHalfWidth;
-    if( !m_people.empty() )
+    if( m_people.size() > before )
     {
-        Puppet::Look look;
-        look.Skin = static_cast<uint32_t>( m_people.size() );
-        look.Model = ModelFor( 0.5f );
-        m_surfer.Build( inKit, inFloor, Vector3( 0.f, -10.f, 0.f ), 0.f, look );
+        m_rows.push_back( rows );
     }
 }
 
@@ -218,7 +267,7 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
     if( m_surfProgress < 0.f && m_surfRequested && m_surfer.Root() )
     {
         m_surfProgress = 0.f;
-        m_surfX = ( VenueTiming::Noise( static_cast<uint32_t>( ++m_surfCount ), 99u ) - 0.5f ) * 8.f;
+        m_surfX = m_surfCentreX + ( VenueTiming::Noise( static_cast<uint32_t>( ++m_surfCount ), 99u ) - 0.5f ) * 8.f;
     }
     if( m_surfProgress >= 0.f && m_surfer.Root() )
     {
@@ -231,7 +280,7 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
         }
         else
         {
-            const float z = -12.f + ( VenueLayout::kBarricadeZ - 0.6f + 12.f ) * m_surfProgress;
+            const float z = m_surfFromZ + ( m_surfToZ - m_surfFromZ ) * m_surfProgress;
             const float bob = 0.12f * std::sin( t * 5.f ) + 0.06f * std::sin( t * 8.3f );
             m_surfPosition = Vector3( m_surfX + 0.6f * std::sin( t * 0.9f ), 2.4f + bob, z );
             // Face down, head toward the stage.
@@ -395,12 +444,17 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
 bool Crowd::Occupied( float inX, float inZ ) const
 {
     // The posed crowd's rows, widening toward the back as Build lays them out.
-    if( !m_people.empty() && inZ > m_builtBackZ - 0.4f && inZ < VenueLayout::kCrowdFrontZ + 0.4f )
+    for( const Rows& rows : m_rows )
     {
-        const float depth = VenueLayout::kCrowdFrontZ - inZ;
-        if( std::fabs( inX ) < std::min( m_builtHalfWidth, 7.5f + depth * 0.35f ) + 0.4f )
+        const VenuePlan::CrowdArea& area = rows.Area;
+        if( inZ > rows.BackZ - 0.4f && inZ < area.MaxZ + 0.4f )
         {
-            return true;
+            const float depth = area.MaxZ - inZ;
+            const float centre = ( area.MinX + area.MaxX ) * 0.5f;
+            if( std::fabs( inX - centre ) < std::min( ( area.MaxX - area.MinX ) * 0.5f, area.FrontHalfWidth + depth * area.Widen ) + 0.4f )
+            {
+                return true;
+            }
         }
     }
     for( const std::array<float, 4>& area : m_keepClear )
@@ -414,23 +468,31 @@ bool Crowd::Occupied( float inX, float inZ ) const
 }
 
 
-void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1, float inZ0, float inZ1, float inFloorY, float inSpacing, float inDensity, int inMax )
+void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, const VenuePlan::CrowdArea& inArea, int inMax )
 {
+    // (z0 is the front edge, where the seed starts.)
+    const float x0 = inArea.MinX;
+    const float x1 = inArea.MaxX;
+    const float z0 = inArea.MaxZ;
+    const float z1 = inArea.MinZ;
+    const float floorY = inArea.FloorY;
+    const float spacing = inArea.Spacing;
+    const float density = inArea.Density;
     // Figures far enough back that a silhouette and a bob read as a crowd: four or five boxes
     // each, moved as one, so filling a room costs a transform a figure a frame.
     // Two passes over the same spots: count where they'd stand, then thin evenly to inMax, so a
     // cap leaves the area sparser rather than empty at the back.
-    const uint32_t firstSeed = static_cast<uint32_t>( m_mob.size() ) * 7919u + static_cast<uint32_t>( std::fabs( inZ0 * 31.f + inFloorY * 7.f ) ) + 17u;
+    const uint32_t firstSeed = static_cast<uint32_t>( m_mob.size() ) * 7919u + static_cast<uint32_t>( std::fabs( z0 * 31.f + floorY * 7.f ) ) + 17u;
     std::vector<std::pair<Vector3, uint32_t>> spots;
     uint32_t seed = firstSeed;
-    for( float z = std::max( inZ0, inZ1 ); z > std::min( inZ0, inZ1 ); z -= inSpacing * 1.1f )
+    for( float z = std::max( z0, z1 ); z > std::min( z0, z1 ); z -= spacing * 1.1f )
     {
-        for( float x = inX0; x <= inX1; x += inSpacing )
+        for( float x = x0; x <= x1; x += spacing )
         {
             ++seed;
-            const float fx = x + ( VenueTiming::Noise( seed, 22u ) - 0.5f ) * inSpacing * 0.6f;
-            const float fz = z + ( VenueTiming::Noise( seed, 23u ) - 0.5f ) * inSpacing * 0.5f;
-            if( VenueTiming::Noise( seed, 21u ) <= inDensity && !Occupied( fx, fz ) )
+            const float fx = x + ( VenueTiming::Noise( seed, 22u ) - 0.5f ) * spacing * 0.6f;
+            const float fz = z + ( VenueTiming::Noise( seed, 23u ) - 0.5f ) * spacing * 0.5f;
+            if( VenueTiming::Noise( seed, 21u ) <= density && !Occupied( fx, fz ) )
             {
                 spots.push_back( { Vector3( fx, 0.f, fz ), seed } );
             }
@@ -448,7 +510,7 @@ void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1,
         const float fx = spot.x;
         const float fz = spot.z;
         MobFigure figure;
-        figure.Base = Vector3( fx, inFloorY, fz );
+        figure.Base = Vector3( fx, floorY, fz );
         figure.Phase = VenueTiming::Noise( seed, 24u );
         figure.Enthusiasm = 0.2f + 0.7f * VenueTiming::Noise( seed, 25u );
         figure.Jumper = VenueTiming::Noise( seed, 26u ) < 0.45f;
@@ -458,7 +520,7 @@ void Crowd::AddMob( VenueKit& inKit, Transform* inFloor, float inX0, float inX1,
             return;
         }
         Transform* root = &figure.Root->GetComponent<Transform>();
-        root->SetRotation( Vector3( 0.f, std::atan2( -fx, 4.f - fz ) * 180.f / kPi * 0.85f + ( VenueTiming::Noise( seed, 27u ) - 0.5f ) * 20.f, 0.f ) );
+        root->SetRotation( Vector3( 0.f, FacingIn( inArea, fx, fz ) + ( VenueTiming::Noise( seed, 27u ) - 0.5f ) * 20.f, 0.f ) );
         const float height = 0.9f + VenueTiming::Noise( seed, 28u ) * 0.2f;
         const float build = 0.9f + VenueTiming::Noise( seed, 29u ) * 0.25f;
         root->SetScale( Vector3( height * build, height, height * build ) );
