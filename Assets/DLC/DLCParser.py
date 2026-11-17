@@ -1,72 +1,126 @@
-import os
-import json
+#!/usr/bin/env python3
+"""Builds a Drumsmith DLC server's catalogue (Docs/Songs-and-DLC.md).
 
-# List of common image file extensions
-IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']
+Run it in the folder the server serves (the one holding the song folders):
+
+    python3 DLCParser.py [root] [--output dlc_index.json]
+
+It writes two files there:
+
+  dlc_index.json  one entry per song folder that has a TrackData.txt
+  dlc_index.hash  the SHA-256 of dlc_index.json: the game fetches this first and only
+                  downloads the index again when it differs from the copy it has
+
+Per song: the metadata the catalogue shows, the files to download with their sizes (the
+game checks each download against them), and "Version", a hash of the song's files that
+changes when any of them does, so installed copies can be offered an update.
+"""
+import argparse
+import hashlib
+import json
+import os
+
+IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.gif')
+# Never served: the index itself, this script, OS droppings and dot-files (the game keeps
+# its own notes in a song folder as dot-files).
+SKIPPED_FILES = {'desktop.ini', 'thumbs.db', 'dlc_index.json', 'dlc_index.hash', 'dlcparser.py', 'parse_dlc.py'}
+
+
+def served_files(folder):
+    files = []
+    for name in sorted(os.listdir(folder)):
+        if name.startswith('.') or name.lower() in SKIPPED_FILES:
+            continue
+        if os.path.isfile(os.path.join(folder, name)):
+            files.append(name)
+    return files
+
 
 def find_album_art(files):
-    # Iterate through the list of files to find the first image file
-    for file in files:
-        if any(file.lower().endswith(ext) for ext in IMAGE_EXTENSIONS):
-            return file
+    for name in files:
+        if name.lower().endswith(IMAGE_EXTENSIONS):
+            return name
     return None
 
-def scan_and_collect_data(root_dir):
-    master_index = []
-    
-    # Walk through the directory
-    for subdir, _, files in os.walk(root_dir):
 
-        # Gather all files in the current directory
-        all_files = os.listdir(subdir)
-        relative_folder_path = os.path.relpath(subdir, root_dir)
-        album_art = find_album_art(all_files)
+def file_hash(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as handle:
+        for block in iter(lambda: handle.read(1 << 20), b''):
+            digest.update(block)
+    return digest.hexdigest()
 
-        for file in files:
-            # Process only .txt files
-            if file.endswith('TrackData.txt'):
-                file_path = os.path.join(subdir, file)
-                
-                # Read and parse the JSON content from the .txt file
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
 
-                        # Extract only the desired fields
-                        extracted_data = {
-                            "Album": data.get("Album"),
-                            "Title": data.get("Title"),
-                            "Artist": data.get("Artist"),
-                            "Year": data.get("Year", 1994),
-                            "DLCSource": data.get("DLCSource", "DS"),
-                            "AlbumArtFileName": album_art,
-                            "FolderPath": relative_folder_path,  # Add the folder path to the exported data
-                            "FilesInFolder": all_files  # Add the list of files in the folder
-                        }
+def song_version(folder, files):
+    """A hash over every served file's name and contents."""
+    digest = hashlib.sha256()
+    for name in files:
+        digest.update(name.encode('utf-8'))
+        digest.update(b'\0')
+        digest.update(file_hash(os.path.join(folder, name)).encode('ascii'))
+        digest.update(b'\0')
+    return digest.hexdigest()[:32]
 
-                        master_index.append(extracted_data)
-                except json.JSONDecodeError as e:
-                    print(f"Error parsing JSON from {file_path}: {e}")
-                except Exception as e:
-                    print(f"Error processing file {file_path}: {e}")
-    
-    return master_index
 
-def write_master_index(master_index, output_file):
+def is_authored(folder):
+    """Whether the chart was saved from the Track Editor (the "DS ready" badge)."""
     try:
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(master_index, f, indent=4)
-        print(f"Master index successfully written to {output_file}")
-    except Exception as e:
-        print(f"Error writing master index to {output_file}: {e}")
+        with open(os.path.join(folder, 'NoteData.txt'), 'r', encoding='utf-8') as handle:
+            return bool(json.load(handle).get('Authored', False))
+    except (OSError, ValueError):
+        return False
 
-if __name__ == "__main__":
-    # Specify the directory to scan and the output file
-    root_directory = "./"  # Replace with your directory path
-    output_file = "dlc_index.json"
 
-    # Scan the directory and collect data
-    master_index_data = scan_and_collect_data(root_directory)
+def scan(root):
+    index = []
+    for subdir, dirs, _ in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if not d.startswith('.'))
+        relative = os.path.relpath(subdir, root).replace(os.sep, '/')
+        if relative == '.' or not os.path.isfile(os.path.join(subdir, 'TrackData.txt')):
+            continue
+        try:
+            with open(os.path.join(subdir, 'TrackData.txt'), 'r', encoding='utf-8') as handle:
+                data = json.load(handle)
+        except (OSError, ValueError) as error:
+            print(f'Skipping {relative}: {error}')
+            continue
+        files = served_files(subdir)
+        index.append({
+            'Album': data.get('Album'),
+            'Title': data.get('Title'),
+            'Artist': data.get('Artist'),
+            'Year': data.get('Year', 1994),
+            'Genre': data.get('Genre'),
+            'DLCSource': data.get('DLCSource', 'DS'),
+            'AlbumArtFileName': find_album_art(files),
+            'TrackFileName': data.get('TrackFileName'),
+            'PreviewPercent': data.get('PreviewPercent', 0.25),
+            'NoteCount': data.get('NoteCount', 0),
+            'Authored': is_authored(subdir),
+            'FolderPath': relative,
+            'FilesInFolder': files,
+            'FileSizes': [os.path.getsize(os.path.join(subdir, name)) for name in files],
+            'Version': song_version(subdir, files),
+        })
+    return index
 
-    # Write the collected data to the master index file
-    write_master_index(master_index_data, output_file)
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('root', nargs='?', default='.', help='the folder holding the song folders')
+    parser.add_argument('--output', default=None, help='where to write the index (default: <root>/dlc_index.json)')
+    args = parser.parse_args()
+
+    output = args.output or os.path.join(args.root, 'dlc_index.json')
+    index = scan(args.root)
+    text = json.dumps(index, indent=4)
+    with open(output, 'w', encoding='utf-8') as handle:
+        handle.write(text)
+    hash_path = os.path.join(os.path.dirname(output) or '.', 'dlc_index.hash')
+    with open(hash_path, 'w', encoding='ascii') as handle:
+        handle.write(hashlib.sha256(text.encode('utf-8')).hexdigest())
+    print(f'{len(index)} songs written to {output} (hash in {hash_path})')
+
+
+if __name__ == '__main__':
+    main()

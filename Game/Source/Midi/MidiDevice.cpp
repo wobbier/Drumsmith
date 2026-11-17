@@ -3,6 +3,7 @@
 #include "Core/Assert.h"
 #include "CLog.h"
 #include <algorithm>
+#include <cctype>
 
 MidiDevice::MidiDevice()
 {
@@ -46,17 +47,103 @@ void MidiDevice::OnMessage( double inDeltaTime, std::vector<unsigned char>* inMe
 }
 
 
+namespace
+{
+    // A port name without the numbers the system appends: ALSA's client and port ("TD-17 28:0"),
+    // WinMM's device index ("TD-17 1").
+    std::string BaseName( const std::string& inName )
+    {
+        size_t end = inName.size();
+        while( end > 0 && ( std::isdigit( static_cast<unsigned char>( inName[end - 1] ) ) || inName[end - 1] == ':' ) )
+        {
+            --end;
+        }
+        if( end == inName.size() || end == 0 || inName[end - 1] != ' ' )
+        {
+            return inName;
+        }
+        while( end > 0 && inName[end - 1] == ' ' )
+        {
+            --end;
+        }
+        return inName.substr( 0, end );
+    }
+
+
+    std::vector<std::string> PortNames( RtMidiIn& inMidi )
+    {
+        std::vector<std::string> names;
+        try
+        {
+            const unsigned int count = inMidi.getPortCount();
+            for( unsigned int i = 0; i < count; ++i )
+            {
+                names.push_back( inMidi.getPortName( i ) );
+            }
+        }
+        catch( RtMidiError& error )
+        {
+            error.printMessage();
+        }
+        return names;
+    }
+}
+
+
+bool MidiDevice::SameDevice( const std::string& inName, const std::string& inOther )
+{
+    return inName == inOther || ( !inName.empty() && BaseName( inName ) == BaseName( inOther ) );
+}
+
+
+int MidiDevice::FindDevice( const std::string& inName ) const
+{
+    for( const auto& device : m_devices )
+    {
+        if( device.Name == inName )
+        {
+            return device.Port;
+        }
+    }
+    for( const auto& device : m_devices )
+    {
+        if( SameDevice( inName, device.Name ) )
+        {
+            return device.Port;
+        }
+    }
+    return -1;
+}
+
+
 bool MidiDevice::OpenMidiDevice( unsigned int inIndex )
 {
     if( !m_midiIn || inIndex >= m_devices.size() )
     {
         return false;
     }
+    if( !m_wantsDevice || !SameDevice( m_wantedName, m_devices[inIndex].Name ) )
+    {
+        // Opened by index (the editor's device lists): this is the device to come back to.
+        m_wantedName = m_devices[inIndex].Name;
+    }
+    m_wantsDevice = true;
     if( !m_devices[inIndex].IsOpen )
     {
         CloseMidiDevice();
-        m_midiIn->openPort( inIndex );
+        try
+        {
+            m_midiIn->openPort( inIndex );
+        }
+        catch( RtMidiError& error )
+        {
+            error.printMessage();
+            return false;
+        }
         m_devices[inIndex].IsOpen = true;
+        m_openName = m_devices[inIndex].Name;
+        m_unplugged = false;
+        ++m_generation;
     }
     return true;
 }
@@ -64,18 +151,25 @@ bool MidiDevice::OpenMidiDevice( unsigned int inIndex )
 
 bool MidiDevice::OpenMidiDevice( const std::string& inName )
 {
-    for( auto& device : m_devices )
+    m_wantedName = inName;
+    m_wantsDevice = true;
+    const int port = FindDevice( inName );
+    if( port >= 0 )
     {
-        if( device.Name == inName )
-        {
-            return OpenMidiDevice( device.Port );
-        }
+        return OpenMidiDevice( static_cast<unsigned int>( port ) );
     }
-    if( !m_devices.empty() )
+    if( m_devices.empty() )
+    {
+        return false;
+    }
+    if( !inName.empty() )
     {
         BRUH( "MIDI: no device named '" + inName + "'; opening " + m_devices.front().Name );
     }
-    return OpenMidiDevice( 0u );
+    // The fallback isn't what was asked for: keep wanting the named device.
+    const bool opened = OpenMidiDevice( 0u );
+    m_wantedName = inName;
+    return opened;
 }
 
 
@@ -90,26 +184,104 @@ void MidiDevice::CloseMidiDevice()
     {
         device.IsOpen = false;
     }
+    if( !m_openName.empty() )
+    {
+        m_openName.clear();
+        ++m_generation;
+    }
 }
 
 
 void MidiDevice::RefreshDevices()
 {
-    m_devices.clear();
-    // Check available ports.
-    unsigned int nPorts = m_midiIn->getPortCount();
-    if( nPorts == 0 )
+    if( !m_midiIn )
     {
-        BRUH( "No MIDI input ports available!" );
         return;
     }
-
-    for( unsigned int i = 0; i < nPorts; ++i )
+    const std::vector<std::string> names = PortNames( *m_midiIn );
+    m_devices.clear();
+    for( unsigned int i = 0; i < names.size(); ++i )
     {
         MidiDeviceInfo newDevice;
-        newDevice.Name = m_midiIn->getPortName( i );
-        newDevice.Port = i;
+        newDevice.Name = names[i];
+        newDevice.Port = static_cast<int>( i );
+        // The open port stays open when the others around it change; only its index moves.
+        newDevice.IsOpen = !m_openName.empty() && names[i] == m_openName;
         m_devices.push_back( newDevice );
+    }
+}
+
+
+void MidiDevice::Poll()
+{
+    if( !m_midiIn )
+    {
+        return;
+    }
+    const auto now = std::chrono::steady_clock::now();
+    if( now - m_lastPoll < std::chrono::seconds( 1 ) )
+    {
+        return;
+    }
+    m_lastPoll = now;
+
+    const std::vector<std::string> names = PortNames( *m_midiIn );
+    bool changed = names.size() != m_devices.size();
+    for( size_t i = 0; i < names.size() && !changed; ++i )
+    {
+        changed = names[i] != m_devices[i].Name;
+    }
+    if( !changed )
+    {
+        return;
+    }
+    ++m_generation;
+    const bool openGone = !m_openName.empty() && std::find( names.begin(), names.end(), m_openName ) == names.end();
+    if( openGone )
+    {
+        BRUH( "MIDI: " + m_openName + " was unplugged" );
+        // Its port is gone; close our end so the next open starts clean.
+        m_midiIn->closePort();
+        m_openName.clear();
+        m_unplugged = true;
+    }
+    RefreshDevices();
+    OpenWanted();
+}
+
+
+void MidiDevice::OpenWanted()
+{
+    if( !m_wantsDevice || m_devices.empty() )
+    {
+        return;
+    }
+    // The wanted device when it's there (also when a fallback is open in its place); else, with
+    // nothing open, whatever is.
+    const int wanted = FindDevice( m_wantedName );
+    if( wanted >= 0 )
+    {
+        if( !m_devices[wanted].IsOpen )
+        {
+            const std::string name = m_wantedName;
+            if( OpenMidiDevice( static_cast<unsigned int>( wanted ) ) )
+            {
+                BRUH( "MIDI: opened " + m_devices[wanted].Name );
+            }
+            m_wantedName = name;
+        }
+    }
+    else if( m_openName.empty() )
+    {
+        // A stand-in for the wanted device: it is still wanted, and still counts as unplugged.
+        const std::string name = m_wantedName;
+        const bool unplugged = m_unplugged;
+        if( OpenMidiDevice( 0u ) )
+        {
+            BRUH( "MIDI: opened " + m_devices.front().Name );
+        }
+        m_wantedName = name;
+        m_unplugged = unplugged;
     }
 }
 

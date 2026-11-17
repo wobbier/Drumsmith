@@ -26,6 +26,7 @@
                     <span class="song-title">{{track.title}}</span>
                     <span class="song-artist">{{track.artist}}</span>
                     <span class="song-year">{{track.year}}</span>
+                    <span class="song-badges"><span class="badge source" data-if="track.badge != ''">{{track.badge}}</span></span>
                 </button>
                 <span class="song-notes">Note Count: {{track.notes}}</span>
                 <button class="favorite-toggle" data-class-on="track.favorite" data-event-click="favorite(track.index)" data-event-focus="select(track.index)"><span data-if="track.favorite">&#x2605;</span><span data-if="!track.favorite">&#x2606;</span></button>
@@ -40,11 +41,26 @@
             <p>{{detail_album}}</p>
             <p>{{detail_genre}}</p>
             <p>{{detail_year}}</p>
+            <p class="detail-badges"><span class="badge source" data-if="detail_badge != ''">{{detail_badge}}</span><span class="badge ds-ready" data-if="detail_ds_ready">DS READY</span></p>
             <p class="detail-notes">Note Count: {{detail_notes}}</p>
+            <div class="detail-advice">
+                <p data-for="line : advice">{{line.text}}</p>
+            </div>
             <button id="play-selected" class="detail-action green" data-event-click="play(selected)">PLAY</button>
             <button class="detail-action" data-event-click="preview(selected)">Preview</button>
             <button class="detail-action pink" data-event-click="favorite(selected)"><span data-if="detail_favorite">&#x2605; Unfavorite</span><span data-if="!detail_favorite">&#x2606; Favorite</span></button>
             <button class="detail-action" data-event-click="stats">View Stats</button>
+            <button id="edit-selected" class="detail-action" data-if="tools" data-event-click="edit">Edit chart (F4)</button>
+            <p class="listen-caption">Hear the original on</p>
+            <div class="listen-links">
+                <button class="listen-link" data-event-click="listen(0)">Spotify</button>
+                <button class="listen-link" data-event-click="listen(1)">Apple Music</button>
+                <button class="listen-link" data-event-click="listen(2)">YouTube Music</button>
+            </div>
+            <button id="remove-selected" class="detail-action red" data-if="!detail_confirm_remove" data-event-click="remove">Remove</button>
+            <p class="detail-state" data-if="detail_confirm_remove">Remove this song? Its folder is deleted from this computer.</p>
+            <button id="remove-confirm" class="detail-action red" data-if="detail_confirm_remove" data-event-click="remove_confirm">Yes, remove it</button>
+            <button id="remove-cancel" class="detail-action" data-if="detail_confirm_remove" data-event-click="remove_cancel">Keep it</button>
         </div>
     </div>
     <div class="library-footer">

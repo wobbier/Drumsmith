@@ -20,6 +20,8 @@ namespace
     constexpr float kStickLength = 0.4f;
     // The grip: the hand holds the stick this far from its tip (a quarter up from the butt).
     constexpr float kStickReach = 0.3f;
+    // How far a stick's tip is from its shoulder (level) before the drummer leans for it.
+    constexpr float kComfort = 0.74f;
     // The drummer's hip joints, seated: on the throne (its top is at 0.58), sunk in a little.
     constexpr float kSeatHeight = 0.67f;
     // Where a guitar or bass hangs, from just above the hips: clear of the belly, the bass
@@ -96,10 +98,72 @@ namespace
         }
     }
 
+    // The shortest distance between two segments (a to b, c to d).
+    float Between( const glm::vec3& inA, const glm::vec3& inB, const glm::vec3& inC, const glm::vec3& inD )
+    {
+        const glm::vec3 u = inB - inA;
+        const glm::vec3 v = inD - inC;
+        const glm::vec3 w = inA - inC;
+        const float a = glm::dot( u, u );
+        const float b = glm::dot( u, v );
+        const float c = glm::dot( v, v );
+        const float d = glm::dot( u, w );
+        const float e = glm::dot( v, w );
+        const float det = a * c - b * b;
+        float s = det > 1e-8f ? std::clamp( ( b * e - c * d ) / det, 0.f, 1.f ) : 0.f;
+        float t = c > 1e-8f ? std::clamp( ( b * s + e ) / c, 0.f, 1.f ) : 0.f;
+        s = a > 1e-8f ? std::clamp( ( b * t - d ) / a, 0.f, 1.f ) : 0.f;
+        return glm::length( w + u * s - v * t );
+    }
+
     bool IsCymbal( VenueData::DrumPiece inPiece )
     {
         using Piece = VenueData::DrumPiece;
         return inPiece == Piece::HiHat || inPiece == Piece::Crash1 || inPiece == Piece::Crash2 || inPiece == Piece::Ride;
+    }
+
+    // Where a hand's stick lands on a piece, from kStrike: each hand has its own side of a head
+    // (so the sticks of a roll don't share a spot), and the hi-hat is struck on its near edge,
+    // toward the hand reaching for it, not on its bell.
+    glm::vec3 HandSpot( VenueData::DrumPiece inPiece, int inHand )
+    {
+        using Piece = VenueData::DrumPiece;
+        const float side = inHand == 0 ? -1.f : 1.f;
+        switch( inPiece )
+        {
+        case Piece::HiHat: return inHand == 0 ? glm::vec3( 0.01f, 0.01f, -0.11f ) : glm::vec3( 0.1f, 0.01f, -0.07f );
+        case Piece::Snare: return glm::vec3( side * 0.045f, 0.f, inHand == 0 ? -0.02f : 0.01f );
+        case Piece::Tom1:
+        case Piece::Tom2: return glm::vec3( side * 0.035f, 0.f, -0.02f );
+        case Piece::FloorTom: return glm::vec3( side * 0.045f, 0.f, 0.f );
+        case Piece::Crash1:
+        case Piece::Crash2:
+        case Piece::Ride:
+        {
+            // A cymbal is struck where the hand's shoulder is nearest it: on a crash's edge, on
+            // the ride's bow. (kStrike has them at their near edge; their middles are behind.)
+            const glm::vec3 point = kStrike[static_cast<int>( inPiece )];
+            const bool ride = inPiece == Piece::Ride;
+            const glm::vec3 middle( point.x, 0.f, point.z + ( ride ? 0.1f : 0.12f ) );
+            const glm::vec3 shoulder( side * 0.19f, 0.f, 0.03f );
+            return middle + glm::normalize( shoulder - middle ) * ( ride ? 0.11f : 0.19f ) - glm::vec3( point.x, 0.f, point.z );
+        }
+        default: return glm::vec3( 0.f );
+        }
+    }
+
+    // Two pieces struck together: the one lower in this order takes the left hand. The kit from
+    // left to right, except that the right hand crosses over to the hi-hat (a backbeat is the
+    // left hand on the snare under the right on the hi-hat).
+    float HandOrder( VenueData::DrumPiece inPiece )
+    {
+        using Piece = VenueData::DrumPiece;
+        switch( inPiece )
+        {
+        case Piece::HiHat: return 0.05f;
+        case Piece::Tom1: return -0.1f;
+        default: return kStrike[static_cast<int>( inPiece )].x;
+        }
     }
 }
 
@@ -191,9 +255,20 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenueData& inVenue,
             }
         }
     }
+    int crashes[2] = { 0, 0 };
     for( auto& strokes : m_strokes )
     {
         std::stable_sort( strokes.begin(), strokes.end(), []( const Stroke& a, const Stroke& b ) { return a.Time < b.Time; } );
+        for( const Stroke& stroke : strokes )
+        {
+            if( stroke.Target == Piece::Crash1 ) ++crashes[0];
+            else if( stroke.Target == Piece::Crash2 ) ++crashes[1];
+        }
+    }
+    if( CommandLine::Has( "--band-debug" ) )
+    {
+        BRUH_FMT( "Drummer strokes: %s, left hand %d, right hand %d, crashes left %d right %d", inVenue.m_drumHits.empty() ? "from the gems" : "animation notes",
+            static_cast<int>( m_strokes[0].size() ), static_cast<int>( m_strokes[1].size() ), crashes[0], crashes[1] );
     }
     DeriveFallbacks( inNotes );
 
@@ -257,12 +332,17 @@ std::vector<int> Band::SpareModels() const
 
 void Band::DeriveStrokes( const std::vector<NoteData>& inNotes )
 {
-    // Hands from the chart's gems: notes struck together go left-most piece to the left hand;
-    // alone, cymbals and the floor tom take the right hand, the snare the left (both alternate in
-    // fast runs); the kick is the right foot and the hi-hat pedal the left.
+    // Hands from the chart's gems: of two struck together the one further left takes the left
+    // hand (HandOrder); alone, cymbals and the right-hand toms take the right hand, the snare and
+    // the left crash the left (both alternate in fast runs); the kick is the right foot and the hi-hat pedal the left.
     std::vector<const NoteData*> notes;
     for( const NoteData& note : inNotes ) notes.push_back( &note );
     std::stable_sort( notes.begin(), notes.end(), []( const NoteData* a, const NoteData* b ) { return a->m_triggerTime < b->m_triggerTime; } );
+    std::vector<Piece> pieces;
+    pieces.reserve( notes.size() );
+    for( const NoteData* note : notes ) pieces.push_back( PieceFor( note->m_editorLane ) );
+    ChooseCrashes( notes, pieces );
+
     float lastHand[2] = { -10.f, -10.f };
     Piece lastPiece[2] = { Piece::Snare, Piece::HiHat };
     for( size_t i = 0; i < notes.size(); )
@@ -272,7 +352,7 @@ void Band::DeriveStrokes( const std::vector<NoteData>& inNotes )
         size_t j = i;
         for( ; j < notes.size() && notes[j]->m_triggerTime - time < 0.015f; ++j )
         {
-            const Piece piece = PieceFor( notes[j]->m_editorLane );
+            const Piece piece = pieces[j];
             const bool soft = notes[j]->m_velocity <= 40;
             if( piece == Piece::Kick ) m_strokes[static_cast<int>( Limb::RightFoot )].push_back( Stroke{ time, piece, soft } );
             else if( piece == Piece::HiHatPedal ) m_strokes[static_cast<int>( Limb::LeftFoot )].push_back( Stroke{ time, piece, soft } );
@@ -283,7 +363,7 @@ void Band::DeriveStrokes( const std::vector<NoteData>& inNotes )
         {
             continue;
         }
-        std::sort( hands.begin(), hands.end(), []( const auto& a, const auto& b ) { return kStrike[static_cast<int>( a.first )].x < kStrike[static_cast<int>( b.first )].x; } );
+        std::stable_sort( hands.begin(), hands.end(), []( const auto& a, const auto& b ) { return HandOrder( a.first ) < HandOrder( b.first ); } );
         int hand = 0;
         if( hands.size() >= 2 )
         {
@@ -297,7 +377,7 @@ void Band::DeriveStrokes( const std::vector<NoteData>& inNotes )
         const Piece piece = hands.front().first;
         const bool fast0 = time - lastHand[0] < 0.14f;
         const bool fast1 = time - lastHand[1] < 0.14f;
-        if( IsCymbal( piece ) || piece == Piece::FloorTom || piece == Piece::Tom2 )
+        if( ( IsCymbal( piece ) && piece != Piece::Crash1 ) || piece == Piece::FloorTom || piece == Piece::Tom2 )
         {
             hand = fast1 && !fast0 ? 0 : 1;
         }
@@ -313,6 +393,68 @@ void Band::DeriveStrokes( const std::vector<NoteData>& inNotes )
         m_strokes[hand].push_back( Stroke{ time, piece, hands.front().second } );
         lastHand[hand] = time;
         lastPiece[hand] = piece;
+    }
+}
+
+
+void Band::ChooseCrashes( const std::vector<const NoteData*>& inNotes, std::vector<Piece>& ioPieces ) const
+{
+    // A chart with one crash lane (a Rock Band green cymbal says "a crash", not which) has every
+    // crash as Crash1. Pick a side for each from what's played around it, as a drummer would: the
+    // crash beside the cymbal keeping time (the left one over the hi-hat, the right one by the
+    // ride), the right one off the end of a fill down the toms; a run of crashes stays on one
+    // cymbal, and with nothing else to go by the runs take turns. A chart that uses both lanes
+    // has made its own choice.
+    bool left = false;
+    bool right = false;
+    for( size_t i = 0; i < inNotes.size(); ++i )
+    {
+        left = left || inNotes[i]->m_editorLane == PadId::Crash1;
+        right = right || inNotes[i]->m_editorLane == PadId::Crash2;
+    }
+    if( left == right )
+    {
+        return;
+    }
+    constexpr float kAround = 2.5f;    // the groove a crash belongs to
+    constexpr float kRun = 0.7f;       // crashes this close are one run
+    constexpr float kFill = 0.4f;      // a tom this soon before leads into the crash
+    float lastCrash = -100.f;
+    Piece lastSide = Piece::Crash2;
+    size_t from = 0;
+    for( size_t i = 0; i < inNotes.size(); ++i )
+    {
+        if( inNotes[i]->m_editorLane != PadId::Crash1 && inNotes[i]->m_editorLane != PadId::Crash2 )
+        {
+            continue;
+        }
+        const float time = inNotes[i]->m_triggerTime;
+        Piece side = lastSide;
+        if( time - lastCrash > kRun )
+        {
+            while( from < i && inNotes[from]->m_triggerTime < time - kAround ) ++from;
+            int hats = 0;
+            int rides = 0;
+            Piece lead = Piece::Kick;
+            for( size_t k = from; k < inNotes.size() && inNotes[k]->m_triggerTime < time + kAround; ++k )
+            {
+                const float at = inNotes[k]->m_triggerTime;
+                if( ioPieces[k] == Piece::HiHat ) ++hats;
+                else if( ioPieces[k] == Piece::Ride ) ++rides;
+                if( at < time - 0.015f && at > time - kFill && ( ioPieces[k] == Piece::Tom1 || ioPieces[k] == Piece::Tom2 || ioPieces[k] == Piece::FloorTom ) )
+                {
+                    lead = ioPieces[k];
+                }
+            }
+            if( lead == Piece::Tom2 || lead == Piece::FloorTom ) side = Piece::Crash2;
+            else if( lead == Piece::Tom1 ) side = Piece::Crash1;
+            else if( rides > hats ) side = Piece::Crash2;
+            else if( hats > rides ) side = Piece::Crash1;
+            else side = lastSide == Piece::Crash1 ? Piece::Crash2 : Piece::Crash1;
+        }
+        ioPieces[i] = side;
+        lastSide = side;
+        lastCrash = time;
     }
 }
 
@@ -605,52 +747,78 @@ float Band::Activity( int inMember, double inSeconds ) const
 }
 
 
-glm::vec3 Band::StrikePoint( Piece inPiece ) const
+glm::vec3 Band::StrikePoint( Piece inPiece, int inHand ) const
 {
-    return kStrike[static_cast<int>( inPiece )];
+    const glm::vec3 point = kStrike[static_cast<int>( inPiece )];
+    return inHand == 0 || inHand == 1 ? point + HandSpot( inPiece, inHand ) : point;
 }
 
 
 glm::vec3 Band::StickTip( int inLimb, double inSeconds, float& outLift ) const
 {
-    // The tip arcs from stroke to stroke, landing on each note: up as high as the gap allows,
-    // across to the next piece on the way.
+    // A stroke at a time: the tip bounces off the last piece to a ready height, crosses to the
+    // next piece early and waits over it, then winds up and whips down onto the note. The time
+    // between the two sets how high it can go; a crash gets a bigger swing, a ghost note a
+    // small one. outLift is the tip's height over the pieces (the returned point less it lies
+    // on them): the hand rises by a part of it and the wrist does the rest.
+    constexpr float kReady = 0.09f;      // the tip's height over a piece, waiting
+    constexpr float kRebound = 0.1f;     // seconds up off the head
+    constexpr float kSwing = 0.28f;      // seconds of wind-up and downstroke
+    constexpr float kIdle = 2.5f;        // a longer gap goes by way of the rest
+    constexpr float kLeadIn = 0.7f;      // from the rest to a note
     const auto& strokes = m_strokes[inLimb];
-    const glm::vec3 rest = inLimb == 0 ? StrikePoint( Piece::Snare ) + glm::vec3( 0.02f, 0.14f, -0.04f ) : StrikePoint( Piece::HiHat ) + glm::vec3( 0.08f, 0.14f, -0.02f );
-    auto it = std::upper_bound( strokes.begin(), strokes.end(), static_cast<float>( inSeconds ), []( float t, const Stroke& s ) { return t < s.Time; } );
+    const float t = static_cast<float>( inSeconds );
+    auto it = std::upper_bound( strokes.begin(), strokes.end(), t, []( float inTime, const Stroke& s ) { return inTime < s.Time; } );
     const Stroke* next = it != strokes.end() ? &*it : nullptr;
     const Stroke* prev = it != strokes.begin() ? &*( it - 1 ) : nullptr;
-    const float t = static_cast<float>( inSeconds );
-    constexpr float kWindUp = 0.28f;
-    constexpr float kRecover = 0.3f;
-    glm::vec3 from = prev ? StrikePoint( prev->Target ) : rest;
+    // At rest the sticks hover side by side over the snare.
+    const glm::vec3 rest = StrikePoint( Piece::Snare, inLimb ) + glm::vec3( inLimb == 0 ? -0.04f : 0.07f, 0.f, -0.06f );
+
+    glm::vec3 from = prev ? StrikePoint( prev->Target, inLimb ) : rest;
     float fromTime = prev ? prev->Time : -1000.f;
-    if( !next || next->Time - t > kWindUp + 0.05f )
-    {
-        // Between phrases: recover from the last stroke toward rest.
-        const float since = prev ? t - prev->Time : 10.f;
-        const float s = VenueTiming::Smooth( since / kRecover );
-        outLift = 0.14f * s + 0.12f * std::sin( std::min( 1.f, since / kRecover ) * kPi ) * ( 1.f - s );
-        glm::vec3 tip = glm::mix( from, rest, s );
-        tip.y += 0.12f * std::sin( std::min( 1.f, since / kRecover ) * kPi ) * ( 1.f - s );
-        if( next && next->Time - t <= kWindUp + 0.05f + 0.25f )
-        {
-            // Lining up for the next phrase.
-            const float s2 = VenueTiming::Smooth( 1.f - ( next->Time - t - kWindUp - 0.05f ) / 0.25f );
-            tip = glm::mix( tip, StrikePoint( next->Target ) + glm::vec3( 0.f, 0.14f, 0.f ), s2 );
-        }
-        return tip;
-    }
-    if( !prev || t - fromTime > kWindUp * 2.f )
+    bool bounced = prev != nullptr;
+    if( next && next->Time - fromTime > kIdle && next->Time - t < kLeadIn )
     {
         from = rest;
-        fromTime = next->Time - kWindUp;
+        fromTime = next->Time - kLeadIn;
+        bounced = false;
     }
+    else if( !next || next->Time - fromTime > kIdle )
+    {
+        // Nothing to play for a while: off the last piece and back to the rest.
+        const float since = t - fromTime;
+        outLift = kReady * std::sin( std::clamp( since / kRebound, 0.f, 1.f ) * kPi * 0.5f );
+        glm::vec3 tip = glm::mix( from, rest, VenueTiming::Smooth( ( since - 0.05f ) / 0.45f ) );
+        tip.y += outLift;
+        return tip;
+    }
+
+    const glm::vec3 to = StrikePoint( next->Target, inLimb );
     const float gap = std::max( 0.03f, next->Time - fromTime );
-    const float s = std::clamp( ( t - fromTime ) / gap, 0.f, 1.f );
-    const float height = std::clamp( gap * 0.55f, 0.05f, 0.3f ) * ( next->Soft ? 0.45f : 1.f );
-    outLift = height * 4.f * s * ( 1.f - s );
-    glm::vec3 tip = glm::mix( from, StrikePoint( next->Target ), VenueTiming::Smooth( ( s - 0.1f ) / 0.75f ) );
+    const bool accent = next->Target == Piece::Crash1 || next->Target == Piece::Crash2;
+    const float height = std::clamp( gap * 0.6f, 0.04f, accent ? 0.38f : 0.26f ) * ( next->Soft ? 0.45f : 1.f );
+    const float ready = std::min( kReady, height * 0.6f );
+    const float rebound = std::min( kRebound, gap * 0.25f );
+    const float swing = std::min( kSwing, gap * 0.55f );
+    const float since = t - fromTime;
+    const float until = next->Time - t;
+    if( until < swing )
+    {
+        // Up for the first part, then down faster and faster: it lands moving.
+        const float w = 1.f - until / swing;
+        constexpr float kTop = 0.55f;
+        const float fall = ( w - kTop ) / ( 1.f - kTop );
+        outLift = w < kTop ? ready + ( height - ready ) * VenueTiming::Smooth( w / kTop ) : height * ( 1.f - fall * fall );
+    }
+    else
+    {
+        outLift = bounced ? ready * std::sin( std::clamp( since / rebound, 0.f, 1.f ) * kPi * 0.5f ) : ready;
+    }
+    // Across as soon as it's off the head, there before the downstroke.
+    const float start = rebound * 0.3f;
+    const float arrive = gap - swing * 0.4f;
+    const float travel = 0.12f + 0.45f * glm::length( to - from );
+    glm::vec3 tip = glm::mix( from, to, VenueTiming::Smooth( ( since - start ) / std::max( 0.02f, std::min( arrive - start, travel ) ) ) );
     tip.y += outLift;
     return tip;
 }
@@ -694,7 +862,7 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
     if( Singing( VenueData::Drums, inSeconds, &open ) )
     {
         pose.Mouth = open;
-        pose.HeadTurn = 35.f;
+        pose.HeadTurn = -35.f;    // toward the mic, on their left
         pose.Nod = -4.f;
     }
 
@@ -705,10 +873,56 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
     {
         tips[side] = StickTip( side, inSeconds, lift[side] );
     }
-    // The shoulders follow the hands across the kit.
-    const float reach = ( tips[0].x + tips[1].x ) * 0.5f;
-    pose.Turn = -reach * 40.f;
-    pose.Side = reach * 10.f;
+    // The body goes with the hands across the kit: turned and tipped toward where they are, and
+    // leaning in for what's far away (a crash). Where they are is averaged from a little behind
+    // now to a little ahead, so the body moves smoothly and leads the sticks slightly.
+    glm::vec3 reach( 0.f );
+    glm::vec3 stretch( 0.f );
+    float twist = 0.f;
+    constexpr int kSamples = 6;
+    for( int sample = 0; sample < kSamples; ++sample )
+    {
+        const double at = inSeconds - 0.12 + 0.08 * sample;
+        for( int side = 0; side < 2; ++side )
+        {
+            float unused = 0.f;
+            const glm::vec3 tip = StickTip( side, at, unused );
+            reach += tip;
+            // Further than the arm and stick go from a shoulder sitting square: the body makes
+            // up the difference, toward the piece.
+            const float outward = side == 0 ? -1.f : 1.f;
+            const glm::vec3 away( tip.x - outward * 0.19f, 0.f, tip.z - 0.03f );
+            const float distance = glm::length( away );
+            if( distance > kComfort )
+            {
+                stretch += away * ( ( distance - kComfort ) / distance );
+                twist += ( distance - kComfort ) * ( outward * away.x < 0.f ? outward : 0.f );
+            }
+        }
+    }
+    reach /= static_cast<float>( kSamples * 2 );
+    stretch /= static_cast<float>( kSamples );
+    twist /= static_cast<float>( kSamples );
+    // (A turn is positive toward the figure's right, +x.)
+    pose.Turn = std::clamp( reach.x * 30.f - twist * 55.f, -38.f, 38.f );
+    pose.Side = std::clamp( reach.x * 10.f + stretch.x * 30.f, -13.f, 13.f );
+    pose.Lean = std::min( pose.Lean + stretch.z * 38.f, 25.f );
+    // Leaning in, the head stays up: they're looking at what they're reaching for.
+    pose.Nod *= 1.f - std::clamp( glm::length( stretch ) / 0.2f, 0.f, 0.7f );
+    if( !idle && pose.Mouth <= 0.f )
+    {
+        // Eyes on the kit, toward the hands (unless they're at the mic).
+        pose.HeadTurn = std::clamp( reach.x * 30.f, -25.f, 25.f );
+    }
+    // A kick rocks the shoulders.
+    {
+        const auto& kicks = m_strokes[static_cast<int>( Limb::RightFoot )];
+        auto it = std::upper_bound( kicks.begin(), kicks.end(), static_cast<float>( inSeconds ), []( float t, const Stroke& s ) { return t < s.Time; } );
+        if( it != kicks.begin() )
+        {
+            pose.Lean += 2.5f * std::exp( -( static_cast<float>( inSeconds ) - ( it - 1 )->Time ) / 0.12f );
+        }
+    }
     // Feet: on the kick and hi-hat pedals, the ball of the foot over each one's middle.
     for( int side = 0; side < 2; ++side )
     {
@@ -734,22 +948,68 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
         return toe;
     };
     pose.Legs[1].Toe = footFor( Limb::RightFoot, 0.f );
-    pose.Legs[0].Toe = footFor( Limb::LeftFoot, m_strokes[static_cast<int>( Limb::LeftFoot )].empty() ? 14.f : 4.f );
+    // With no pedal part of its own the hi-hat foot keeps time, heel bouncing on the beat.
+    pose.Legs[0].Toe = footFor( Limb::LeftFoot, m_strokes[static_cast<int>( Limb::LeftFoot )].empty() ? ( idle ? 8.f : 6.f + 9.f * pulse ) : 4.f );
     // The body first: the arms reach from wherever it puts the chest.
     ioMember.Body.Stand( pose );
+    // Each stick points away from its own shoulder, pivoting in the hand: the hand goes up by a
+    // part of the tip's lift and the wrist cocks the stick back for the rest. A hand reaching
+    // across the body (the right, to the hi-hat) comes at its piece from further forward, so it
+    // passes ahead of the other hand, not through it.
+    constexpr float kGripRise = 0.1f;     // the hand above the tip as it lands
+    constexpr float kArm = 0.6f;          // as far from the shoulder as the palm goes
+    constexpr float kHandLift = 0.22f;    // of the tip's lift
+    const glm::vec3 chest = ioMember.Body.Chest();
+    const glm::quat spine = ioMember.Body.SpineRotation();
+    glm::vec3 toward[2];
+    float handHeight[2];
+    const auto handAt = [&]( int inSide ) {
+        const float sine = std::clamp( ( handHeight[inSide] - tips[inSide].y ) / kStickReach, -0.85f, 0.8f );
+        const glm::vec3 stick = toward[inSide] * std::sqrt( 1.f - sine * sine ) - kY * sine;
+        glm::vec3 hand = tips[inSide] - stick * kStickReach;
+        // Out of the arm's reach: bring the hand in toward the line from the shoulder to the
+        // tip, where it's nearest.
+        const glm::vec3 shoulder = ioMember.Body.Shoulder( inSide );
+        const float over = VenueTiming::Smooth( ( glm::length( hand - shoulder ) - ( kArm - 0.08f ) ) / 0.1f );
+        if( over > 0.f )
+        {
+            const glm::vec3 direct = tips[inSide] - glm::normalize( tips[inSide] - shoulder ) * kStickReach;
+            hand = tips[inSide] + glm::normalize( glm::mix( hand, direct, over ) - tips[inSide] ) * kStickReach;
+        }
+        return hand;
+    };
     for( int side = 0; side < 2; ++side )
     {
-        const glm::vec3 chest = ioMember.Body.Chest();
-        glm::vec3 toward = tips[side] - chest;
-        toward.y = 0.f;
-        toward = glm::dot( toward, toward ) > 1e-6f ? glm::normalize( toward ) : kZ;
-        const float angle = ( 24.f - 100.f * lift[side] ) * kDeg;   // tip down at the stroke, up as it lifts
-        const glm::vec3 stick = glm::normalize( toward * std::cos( angle ) - kY * std::sin( angle ) );
-        const glm::vec3 hand = tips[side] - stick * kStickReach;
+        const float outward = side == 0 ? -1.f : 1.f;
+        const float across = std::max( 0.f, -outward * tips[side].x - 0.05f );
+        glm::vec3 origin = chest + spine * glm::vec3( outward * 0.16f, 0.f, 0.f );
+        origin.z += 0.05f + across * 0.9f;
+        glm::vec3 away = tips[side] - origin;
+        away.y = 0.f;
+        toward[side] = glm::dot( away, away ) > 1e-6f ? glm::normalize( away ) : kZ;
+        // No higher than the arm can hold it: a high cymbal is struck from below its edge.
+        handHeight[side] = std::min( tips[side].y - lift[side] + kGripRise, chest.y + 0.12f ) + kHandLift * lift[side];
+    }
+    // One hand over the other (a backbeat under the hi-hat hand): keep the upper one clear.
+    {
+        const glm::vec3 hands[2] = { handAt( 0 ), handAt( 1 ) };
+        const int upper = hands[0].y > hands[1].y ? 0 : 1;
+        const glm::vec3 apart = hands[upper] - hands[1 - upper];
+        const float level = std::sqrt( apart.x * apart.x + apart.z * apart.z );
+        const float needed = 0.19f * ( 1.f - VenueTiming::Smooth( ( level - 0.12f ) / 0.1f ) );
+        if( apart.y < needed )
+        {
+            handHeight[upper] += needed - apart.y;
+        }
+    }
+    for( int side = 0; side < 2; ++side )
+    {
+        const glm::vec3 hand = handAt( side );
+        const glm::vec3 stick = glm::normalize( tips[side] - hand );
         Performer::Arm& arm = pose.Arms[side];
         arm.Reach = true;
         arm.Target = hand;
-        arm.Pole = ioMember.Body.SpineRotation() * glm::vec3( side == 0 ? -1.f : 1.f, -0.45f, 0.65f );
+        arm.Pole = spine * glm::vec3( side == 0 ? -1.f : 1.f, -0.45f, 0.65f );
         arm.ClearTorso = true;
         // Palm down, the stick running across it: the fingers point a little outside the stick.
         arm.Fingers = Axis( side == 0 ? -30.f : 30.f, kY ) * stick;
@@ -758,14 +1018,48 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
     }
     ioMember.Body.Apply( pose );
     static const bool kDebug = CommandLine::Has( "--band-debug" );
-    if( kDebug && static_cast<int>( inSeconds * 2.0 ) != static_cast<int>( m_lastSeconds * 2.0 ) )
+    if( kDebug )
     {
+        // How near one arm (forearm and stick) comes to the other.
+        float apart = 10.f;
+        int nearest = 0;
+        glm::vec3 chain[2][3];
+        for( int side = 0; side < 2; ++side )
+        {
+            chain[side][0] = ioMember.Body.Elbow( side );
+            chain[side][1] = ioMember.Body.Hand( side );
+            chain[side][2] = tips[side];
+        }
+        for( int i = 0; i < 2; ++i )
+        {
+            for( int j = 0; j < 2; ++j )
+            {
+                const float gap = Between( chain[0][i], chain[0][i + 1], chain[1][j], chain[1][j + 1] );
+                if( gap < apart )
+                {
+                    apart = gap;
+                    nearest = i * 2 + j;
+                }
+            }
+        }
+        if( apart < 0.09f )
+        {
+            static const char* const kPairs[] = { "forearms", "left forearm, right stick", "left stick, right forearm", "sticks" };
+            BRUH_FMT( "Drummer arms %.3f apart at t=%.2f (%s)", apart, inSeconds, kPairs[nearest] );
+        }
+        // Twice a second, and whenever a hand falls short of where its stick needs it.
+        const bool tick = static_cast<int>( inSeconds * 2.0 ) != static_cast<int>( m_lastSeconds * 2.0 );
         for( int side = 0; side < 2; ++side )
         {
             const glm::vec3 h = ioMember.Body.Hand( side );
             const glm::vec3 s = ioMember.Body.Shoulder( side );
-            BRUH_FMT( "Drummer %d t=%.2f tip(%.2f %.2f %.2f) target(%.2f %.2f %.2f) hand(%.2f %.2f %.2f) shoulder(%.2f %.2f %.2f) lift %.2f", side, inSeconds,
-                tips[side].x, tips[side].y, tips[side].z, pose.Arms[side].Target.x, pose.Arms[side].Target.y, pose.Arms[side].Target.z, h.x, h.y, h.z, s.x, s.y, s.z, lift[side] );
+            if( !tick && glm::length( h - pose.Arms[side].Target ) < 0.03f )
+            {
+                continue;
+            }
+            BRUH_FMT( "Drummer %d t=%.2f tip(%.2f %.2f %.2f) target(%.2f %.2f %.2f) hand(%.2f %.2f %.2f) shoulder(%.2f %.2f %.2f) lift %.2f lean %.0f side %.0f turn %.0f short %.3f", side, inSeconds,
+                tips[side].x, tips[side].y, tips[side].z, pose.Arms[side].Target.x, pose.Arms[side].Target.y, pose.Arms[side].Target.z, h.x, h.y, h.z, s.x, s.y, s.z, lift[side], pose.Lean, pose.Side, pose.Turn,
+                glm::length( h - pose.Arms[side].Target ) );
         }
     }
     for( int side = 0; side < 2; ++side )
@@ -774,7 +1068,9 @@ void Band::UpdateDrums( Member& ioMember, double inSeconds, double inBeat, float
         {
             const glm::vec3 hand = ioMember.Body.Hand( side );
             const glm::vec3 along = glm::normalize( tips[side] - hand );
-            Puppet::PlaceBone( ioMember.Sticks[side], hand - along * ( kStickLength - kStickReach ), hand + along * kStickReach );
+            // At full stretch the stick slides through the fingers a little to make the distance.
+            const float held = std::clamp( glm::length( tips[side] - hand ), kStickReach, kStickLength - 0.03f );
+            Puppet::PlaceBone( ioMember.Sticks[side], hand - along * ( kStickLength - held ), hand + along * held );
         }
     }
 

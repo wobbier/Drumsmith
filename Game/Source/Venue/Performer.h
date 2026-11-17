@@ -70,7 +70,7 @@ public:
         float Crouch = 0.f;        // metres the hips drop, the knees bending to suit
         float Lean = 0.f;          // the spine forward, degrees
         float Side = 0.f;          // the spine to the figure's right, degrees
-        float Turn = 0.f;          // the shoulders to the figure's left (+), degrees
+        float Turn = 0.f;          // the chest toward the figure's right (+x), degrees; HeadTurn the same way
         float Nod = 0.f;           // the head down
         float HeadTurn = 0.f;
         float HeadTilt = 0.f;
@@ -92,6 +92,7 @@ public:
     glm::vec3 Chest() const { return m_chest; }
     glm::vec3 HeadCentre() const { return m_headPos; }
     glm::vec3 Shoulder( int inSide ) const { return m_shoulders[inSide]; }
+    glm::vec3 Elbow( int inSide ) const { return m_elbows[inSide]; }
     // The palm's centre: where a held thing sits.
     glm::vec3 Hand( int inSide ) const { return m_hands[inSide]; }
     // How far the chest has turned from standing straight.
@@ -184,5 +185,6 @@ private:
     glm::quat m_headRotation{ 1.f, 0.f, 0.f, 0.f };
     glm::vec3 m_spineBase{ 0.f, 0.95f, 0.f };
     std::array<glm::vec3, 2> m_shoulders{ glm::vec3( -0.19f, 1.39f, 0.f ), glm::vec3( 0.19f, 1.39f, 0.f ) };
+    std::array<glm::vec3, 2> m_elbows{ glm::vec3( -0.25f, 1.1f, 0.f ), glm::vec3( 0.25f, 1.1f, 0.f ) };
     std::array<glm::vec3, 2> m_hands{ glm::vec3( -0.25f, 0.8f, 0.f ), glm::vec3( 0.25f, 0.8f, 0.f ) };
 };

@@ -457,6 +457,7 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
         note.m_noteName = PadUtils::GetPadId( pad );
         const int velocity = message.getVelocity();
         note.m_velocity = !dynamics ? 100 : velocity <= 1 ? 30 : velocity >= 127 ? 127 : 100;
+        note.m_secondPedal = key == 95;
         outTrackData.m_noteData.push_back( note );
         ++outTrackData.m_noteCount;
     }

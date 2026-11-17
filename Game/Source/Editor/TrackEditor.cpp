@@ -621,7 +621,30 @@ void TrackEditor::DrawDetails()
         }
         if( ImGui::IsItemHovered() )
         {
-            ImGui::SetTooltip( "Replaces the tempo map with a steady one at the song's BPM, 4/4, starting at the first note." );
+            ImGui::SetTooltip( "Replaces the tempo map with a steady one at the song's BPM, 4/4, with a measure line on the start marker (or the first note without one)." );
+        }
+        // The start marker: where the first measure begins. The game counts in to it.
+        if( chart.m_startTime > 0.f )
+        {
+            ImGui::Text( "Start marker: %.3f s", chart.m_startTime );
+        }
+        else
+        {
+            ImGui::TextDisabled( "No start marker" );
+        }
+        if( ImGui::Button( "Set Start Marker to Playhead" ) )
+        {
+            chart.m_startTime = static_cast<float>( std::max( 0.0, m_transport.Seconds() ) );
+            m_document.MetaDirty = true;
+        }
+        if( chart.m_startTime > 0.f )
+        {
+            ImGui::SameLine();
+            if( ImGui::Button( "Clear##StartMarker" ) )
+            {
+                chart.m_startTime = 0.f;
+                m_document.MetaDirty = true;
+            }
         }
     }
 
@@ -711,8 +734,10 @@ void TrackEditor::GenerateBeats()
         return;
     }
     TrackData& chart = m_document.Chart;
-    const double start = chart.m_noteData.empty() ? 0.0 : static_cast<double>( chart.m_noteData.front().m_triggerTime );
-    // Back from the first note to the start of the song, so the first note sits on a measure line.
+    // From the start marker when the chart has one, else the first note.
+    const double start = chart.m_startTime > 0.f ? static_cast<double>( chart.m_startTime )
+        : chart.m_noteData.empty() ? 0.0 : static_cast<double>( chart.m_noteData.front().m_triggerTime );
+    // Back from there to the start of the song, so it sits on a measure line.
     const double beat = 60.0 / std::max( 20, chart.m_bpm );
     const double first = start - std::floor( start / ( beat * 4.0 ) ) * beat * 4.0;
     m_document.BeginEdit( beats );

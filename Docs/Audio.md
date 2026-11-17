@@ -1,6 +1,8 @@
 # Audio
 
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
+>
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the `TrackRadio` section and its caveats. The rest is as last verified.
 
 The game's three audio systems — `AudioPack` (synchronized stem playback for gameplay and radio), `TrackRadio` (menu background music), and `Drumset` (pad hit sounds, currently dormant) — and the FMOD facts underneath them.
 
@@ -16,7 +18,7 @@ All game audio goes through FMOD Core via the engine's `AudioCore` (`Engine/Sour
 |------|------|
 | `Game/Source/CoreGame/AudioPack.h` | Multi-stem playback wrapper (gameplay + radio) |
 | `Game/Source/Global/TrackRadio.h` | Menu music singleton state machine |
-| `Game/Source/UI/TrackRadioUtils.cpp` | Drives `TrackRadio::Update` and the radio widget's view-model values |
+| `Game/Source/UI/TrackRadioUtils.cpp` | Starts the next random song and fills the radio widget's view-model values |
 | `Game/Source/CoreGame/Drumset.h` | Pad→sample hit-sound player (unused at runtime) |
 | `Engine/Source/Cores/AudioCore.cpp` | FMOD system init/update (engine) |
 | `Engine/Source/Components/Audio/AudioSource.cpp` | Per-sound channel wrapper: play/pause/seek/position (engine) |
@@ -43,11 +45,23 @@ Constructed from a `TrackData`, an `AudioPack`:
 
 `LoadURL` (streaming a remote file) exists but is only lightly used; it calls `Play()` immediately per stem added.
 
+### Metronome
+
+With **Metronome** on (`GameSettings::Metronome`; Settings > Sound & Timing, or the pause options), a song plays with a click on every beat of its beat grid, higher on each bar's first. The click is one more stem, so it starts, pauses, seeks and fades with the song and can't drift from it:
+
+1. `NoteHighwayCore::UpdateMetronome` turns the chart's beat lines into clicks and asks `ClickTrack::MetronomeFile` (`CoreGame/ClickTrack.h/.cpp`) for their file: a 22.05 kHz mono WAV under `.tmp/Metronome/`, named by a hash of the click times, written if it isn't there (about 2.6 MB a minute of song; the folder keeps the newest six).
+2. `AudioPack::AddMetronome` loads it like any stem. At song start that is before `Play`, so it starts on the shared tick. Switched on mid-song (the pause options), the stem has no channel until the next `Seek`, which gives it one held with the rest; the resume's run-up is that seek, so the click comes in when the song does.
+3. `SetMetronomeVolume` silences it when the setting goes off; the stem stays loaded.
+
+A practice lesson and the calibration are click tracks already and get none. A chart with no beat grid (no beat lines on the highway) has nothing to click on. `--metronome [seconds]` forces it on from that point of the song; `--highway-log` says whether its stem is playing. Headless (FMOD's silent output), Gimme Shelter's 544 clicks read 0 ms apart from the other stems, both from the start and switched on at 4 s with a pause at 6 s.
+
+`ClickTrack::Write` is also what writes a practice lesson's and the calibration's click (`Practice::WriteClickTrack`).
+
 ### TrackRadio — menu music
 
-A singleton state machine (`None → Loading → Seeking → Playing`) that owns its own `AudioPack`. `Play(RadioArgs)` selects a track (ignoring requests for the already-playing index), and `Update` — called **not by the engine loop but by `TrackRadioUtils::OnUpdate`, i.e. only while a menu controller with a radio widget is alive** — walks the states:
+A singleton state machine (`None → Loading → Seeking → Playing`) that owns its own `AudioPack`. `Play(RadioArgs)` selects a library track (ignoring requests for the already-playing index); `PlayGuest(track, usePreviewMarker)` plays a song that isn't in the library from the radio's own copy of its `TrackData` (the DLC page's preview of a song not downloaded yet; `GetCurrentTrack` returns that copy and `GetCurrentTrackIndex` -1). Opening a song's stems takes about 0.2 ms (they are non-blocking streams; measured 2026-11-17), so nothing here needs a thread of its own. `Update` is called once a frame by `MenuCore::Update`, on every page, and walks the states:
 
-- `Loading`: while `!IsReady()` it calls `Play()` every frame ("this feels weird, but okay??" — see Caveats); once ready, plays, applies `GameSettings::RadioVolume`, and either starts playing or seeks to the track's `PreviewPercent` marker first.
+- `Loading`: waits for every stem to load (`AudioPack::IsReady`); then plays, applies `GameSettings::RadioVolume`, and either starts playing or seeks to the track's `PreviewPercent` marker first. A song that hasn't loaded after 10 s (a broken file) is given up on, so the next can play.
 - `Seeking`: waits for readiness, then `Resume()`.
 - `Playing`: when playback ends, returns to `None`, which lets `TrackRadioUtils` auto-play the next random track.
 
@@ -68,7 +82,8 @@ A singleton state machine (`None → Loading → Seeking → Playing`) that owns
 ## Caveats & Fragility
 
 - **A seek waits for every stem.** A stem whose seek never completes holds the restart for up to 500 ms, then everything starts anyway, possibly that stem out of step.
-- **`TrackRadio::Update` calls `Play()` every frame while loading.** Each call walks all stems calling `AudioSource::Play` again; it converges once loaded, but it papers over the `AudioPack` readiness model rather than waiting for it.
+- **Only a page with the radio widget starts the next song.** `MenuCore` ticks the radio everywhere, but picking the next random track is `TrackRadioUtils`' job; on the library, stats and practice pages a song that ends is followed by silence until a preview or another page.
+- **`TrackDatabase::RemoveTrack` shifts indices under the radio**; `TrackRadio::OnTrackRemoved` keeps its index right and drops the song if it was the one removed.
 - **`GetPositionMs` conflates errors with position 0** (`AudioSource::GetPositionMs` returns 0 when the channel is missing or `getPosition` fails, in a variable misnamed `isPlaying`). During gameplay, a transient channel error reads as "song at 0:00" to hit detection.
 - **`m_sounds[0]` is assumed to be the main track.** `LoadStem` order guarantees it today (main file loads first), but nothing enforces it; `GetVolume`/`GetPositionMs`/`GetLength` index it unchecked (safe only behind `IsReady()`/`IsPlaying()` empty-checks).
 - **The `AudioPack` copy hazard**: it holds a raw `TrackData* m_trackData` into `TrackDatabase::m_trackList.m_tracks` — any database `Reload()` while a pack is alive leaves it dangling.

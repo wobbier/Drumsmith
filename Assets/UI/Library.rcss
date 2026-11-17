@@ -36,6 +36,13 @@ body.library-page { background-color: #121212; font-family: Inter; }
 .song-notes { position: absolute; right: 14dp; bottom: 10dp; font-size: 14dp; color: #ffffffaa; pointer-events: none; }
 .song-actions { position: absolute; right: 14dp; top: 12dp; }
 .library-page .song-action { display: inline-block; padding: 6dp 10dp; margin-left: 6dp; font-size: 14dp; letter-spacing: 1dp; background-color: #ffffff14; }
+.library-details .listen-caption { margin: 14dp 0 4dp; font-size: 14dp; color: #ffffff90; }
+.listen-links { display: block; margin-bottom: 6dp; }
+.library-page .listen-link { display: inline-block; width: auto; margin: 0 6dp 4dp 0; padding: 5dp 10dp; font-size: 15dp; color: #9fd8ff; background-color: #ffffff14; }
+.song-badges { display: block; margin-top: 6dp; }
+.badge { display: inline-block; margin-right: 6dp; padding: 2dp 7dp; font-size: 12dp; letter-spacing: 1dp; color: #101010; background-color: #c5c5c5; border-radius: 3dp; }
+.badge.ds-ready { background-color: #ff9933; }
+.library-page .detail-action.red { color: #e36363; }
 .library-page .song-action.download { color: #e363c3; }
 .library-page .song-action.play { color: #77cc77; }
 .library-page .song-action.tools { color: #ff9933; }
@@ -47,6 +54,7 @@ body.library-page { background-color: #121212; font-family: Inter; }
 .library-details p { font-size: 17dp; color: #ffffffb8; margin: 0 0 8dp; }
 .library-details .detail-notes { margin: 20dp 0; }
 .library-details .detail-state { color: #ff9933; }
+.library-details .detail-advice p { color: #ffb347; font-size: 15dp; margin: 0 0 6dp; }
 .library-page .detail-action { display: block; font-size: 23dp; padding: 8dp 0; margin: 4dp 0; }
 .library-page .detail-action.green { color: #77cc77; }
 .library-page .detail-action.pink { color: #e363c3; }

@@ -25,9 +25,11 @@
                     <span class="song-title">{{track.title}}</span>
                     <span class="song-artist">{{track.artist}}</span>
                     <span class="song-year">{{track.year}}</span>
+                    <span class="song-badges"><span class="badge source" data-if="track.badge != ''">{{track.badge}}</span><span class="badge ds-ready" data-if="track.ds_ready">DS READY</span></span>
                 </button>
                 <div class="song-actions">
                     <button class="song-action download" data-if="!track.installed && !track.busy" data-event-click="download(track.index)">DOWNLOAD TRACK</button>
+                    <button class="song-action download" data-if="track.update" data-event-click="update(track.index)">UPDATE</button>
                     <button class="song-action play" data-if="track.installed" data-event-click="play(track.index)">PLAY</button>
                     <button class="song-action tools" data-if="track.installed && tools" data-event-click="edit(track.index)">EDIT CHART</button>
                 </div>
@@ -38,18 +40,32 @@
     <div class="library-details" data-if="selected >= 0 && details_open">
         <img class="detail-art" data-attr-src="detail_art"/>
         <div class="detail-copy">
-            <h1>{{detail_title}}</h1>
+            <h1 id="detail-title-text">{{detail_title}}</h1>
             <h2>{{detail_artist}}</h2>
             <p>{{detail_album}}</p>
             <p>{{detail_source}}</p>
             <p>{{detail_year}}</p>
+            <p class="detail-badges"><span class="badge source" data-if="detail_badge != ''">{{detail_badge}}</span><span class="badge ds-ready" data-if="detail_ds_ready">DS READY</span></p>
+            <p data-if="detail_ds_ready">Charted for Drumsmith: open and closed hi-hat, rimshots and the rest of a real kit.</p>
+            <p data-if="detail_server != ''">{{detail_server}}</p>
             <p class="detail-notes" data-if="detail_installed">Note Count: {{detail_notes}}</p>
             <p class="detail-notes" data-if="!detail_installed">{{detail_files}} files to download</p>
             <p class="detail-state" data-if="detail_state != ''">{{detail_state}}</p>
             <button id="download-selected" class="detail-action pink" data-if="!detail_installed && !detail_busy" data-event-click="download(selected)">Download</button>
+            <button id="update-selected" class="detail-action pink" data-if="detail_update" data-event-click="update(selected)">Update</button>
             <button id="play-selected" class="detail-action green" data-if="detail_installed" data-event-click="play(selected)">PLAY</button>
-            <button class="detail-action" data-if="detail_installed" data-event-click="preview(selected)">Preview</button>
+            <button id="preview-selected" class="detail-action" data-if="!detail_busy" data-event-click="preview(selected)">Preview</button>
             <button class="detail-action" data-if="detail_installed && tools" data-event-click="edit(selected)">Edit chart</button>
+            <p class="listen-caption">Hear the original on</p>
+            <div class="listen-links">
+                <button class="listen-link" data-event-click="listen(0)">Spotify</button>
+                <button class="listen-link" data-event-click="listen(1)">Apple Music</button>
+                <button class="listen-link" data-event-click="listen(2)">YouTube Music</button>
+            </div>
+            <button id="remove-selected" class="detail-action red" data-if="detail_installed && !detail_busy && !detail_confirm_remove" data-event-click="remove(selected)">Remove</button>
+            <p class="detail-state" data-if="detail_confirm_remove">Remove this song? Its folder is deleted from this computer.</p>
+            <button id="remove-confirm" class="detail-action red" data-if="detail_confirm_remove" data-event-click="remove_confirm">Yes, remove it</button>
+            <button id="remove-cancel" class="detail-action" data-if="detail_confirm_remove" data-event-click="remove_cancel">Keep it</button>
         </div>
     </div>
     <div class="library-footer">

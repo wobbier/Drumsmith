@@ -1,6 +1,8 @@
 # Gameplay: The Note Highway
 
 > Verified against the working tree on 2026-11-08 (the gameplay rewrite, not yet committed). Engine submodule at 8cee2340.
+>
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): double bass kicks, the resume run-up, the countdown's start marker, average timing and the `--practice` / `--pause-at` flags. The rest is as last verified.
 
 `NoteHighwayCore` end to end: how a selected track becomes notes on the highway, the song clock, how hits are judged and scored, what the player sees and hears, and the end of a song. Appendix: the experimental vocals mode.
 
@@ -43,6 +45,7 @@ Colours come from `PadUtils::GetNoteColor`; gems also glow in their colour (`Emi
 | Note | Shape |
 |------|-------|
 | Kick | An orange bar across the highway |
+| Double bass kick | The bar on its foot's half of the highway (right foot right, left foot left), with a thin line across the other half |
 | Snare, toms | A chunky gem (`NewNote.obj`) in the lane colour |
 | Hi-hat, crashes, ride, splash, china | A thin plate raised above the lane |
 | Open hi-hat | The plate with a dark centre (a ring) |
@@ -54,6 +57,8 @@ Colours come from `PadUtils::GetNoteColor`; gems also glow in their colour (`Emi
 | Accent (velocity ≥ 120) | Taller, glows brighter |
 
 Markings are separate entities in the note's lane (`NoteState::Decorations`), hidden, greyed and moved with their note.
+
+**Double bass** (`KickFeet::Assign` in `Game/Source/CoreGame/ChartAdvice.h`, called from `NoteHighwayCore::AssignKickFeet`). Where a chart marks kicks for the second pedal (`NoteData::m_secondPedal`, Rock Band's 2x kick note), those are the left foot's, and an unmarked kick within 260 ms either side of one is the right foot's. A chart with no marks is read by spacing: a run of three or more kicks no more than 150 ms apart alternates, right foot first; two quick kicks stay full bars (one foot plays those). Every other kick is a full bar. Judging doesn't know feet: either pedal hits either bar.
 
 ### The highway
 
@@ -122,17 +127,24 @@ Points are multiplied by the combo multiplier: ×1, rising by one every 10 notes
 ### Feedback
 
 - **Drum stems:** a miss mutes the drum stems (`drums.ogg`, `drums_1..4.ogg`, via `AudioPack::SetDrumVolume`), and the next hit brings them back, so the player hears their part drop out. A song without separate drum stems can't do this.
-- **Notes:** a hit note is scaled to zero the same frame (its entity is deleted the next); a missed note turns grey and scrolls past, and is deleted once it is off the back of the highway.
+- **Notes:** a hit note is scaled to zero the same frame (its entity is deleted the next); a note that goes past the Perfect window unhit dims to 40% of its colour (`DimLate`, from `JudgeMisses`) and can still be hit for Great or Good; a missed note turns grey and scrolls past, and is deleted once it is off the back of the highway.
 - **HUD (`in_game` model):** score, multiplier (orange above ×1), combo from 5, accuracy; the judgement word with early/late and the offset in ms, fading after about half a second; title, artist and a countdown during the lead-in. The chart's lyrics, karaoke-style, top centre (`NoteHighwayCore::UpdateLyrics`, Settings > Lyrics; `Docs/Venue-and-Band.md` → Lyrics).
-- **End:** once every note is judged and the audio has stopped, the results screen shows score, accuracy, each judgement's count and the best combo, with Retry (reloads the scene with the same track) and Continue (the library). Escape on the results screen also returns to the library.
+- **End:** once every note is judged and the audio has stopped, the results screen shows score, accuracy, each judgement's count, the average timing of the hits (`avg_timing`: so many ms early or late) and the best combo, with Retry (reloads the scene with the same track) and Continue (the library; after a practice lesson, Lessons). Escape on the results screen also returns there.
+- **Countdown:** it counts in to the first note, or to the chart's start marker (`TrackData::m_startTime`, set in the Track Editor) when that comes first (`m_countInMs`).
 
 ### Pause
 
 The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the core stops its clock and pauses the stems. While paused (and when idle or finished) the MIDI queue is still drained, so nothing stale is judged on resume.
 
+**Resume gives a run-up** (`NoteHighwayCore::ResumeWithRunUp`). The song is pulled back `kResumeRewindMs` (2 s) and the stems fade in over `kResumeFadeSeconds` (1.5 s; `AudioPack::Seek` takes the fade length). Notes judged before the pause stay judged: they come back as grey gems (`NoteState::Passed`, `GreyOut`) where the run-up passes them again, score nothing and can't be hit twice. Notes that hadn't been judged yet are live as usual. The drum stems are audible for the run-up even if a miss had muted them. During the lead-in (nothing has played) resume just carries on.
+
+`InGameMenuController` also pauses the song when the MIDI device is unplugged mid-song (`MidiDevice::IsUnplugged`, `Docs/MIDI-and-Pads.md`); the pause menu says so, and says when it is back.
+
 ### Diagnostics
 
 - `--play-track <index>`: start a track when `Example.lvl` is opened directly. The index is the library's scan order.
+- `--practice <lesson index> [--practice-bpm <bpm>]`: start a practice lesson the same way (`Docs/Practice.md`).
+- `--pause-at <seconds>`: pause there for a second and resume, to check the run-up without a hand on the keyboard.
 - `--highway-log`: the lane layout, the track, a line a second comparing the clock with FMOD's position and the judged/missed counts, drum mute changes, and the final result.
 - `--highway-autoplay [offset ms]`: hits every note at that offset, with its pad and stroke (the debug panel's Autoplay, started on PERFECT). Add `--highway-autoplay-sloppy` to start it on SLOPPY, and `--highway-autoplay-plain` to hit as a kit with plain strokes and one hi-hat note would (exercises technique judging). With `--frames N --screenshot` under `Engine/Tools/Headless.sh` this checks judging, the HUD and the results without a kit.
 
@@ -144,6 +156,8 @@ The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the
 
 **F8** during a song shows a panel over the bottom of the highway (`Assets/UI/InGameMenu.rml`, `#debug-panel`; `InGameMenuController` owns the `debug`, `debug_nofail`, `debug_autoplay` (+ `debug_autoplay_label`) and `debug_plain` model keys, `NoteHighwayCore` fills `song_progress` and `song_clock`):
 
+- **Metronome.** With the Metronome setting on (or `--metronome`), a click stem written from the beat lines plays with the song (`UpdateMetronome`; `Docs/Audio.md` → Metronome).
+- **Calibration.** `--calibrate` (or Settings > Sound & Timing) plays the delay calibration's chart: hits are measured against the beat instead of judged, with the latency settings left out (`CalibrationHits`; `Docs/Latency-and-Responsiveness.md` → Calibration).
 - **No fail.** Misses still count in the results, but don't break the combo, mute the drum stems or deflate the crowd and lights (`ApplyJudgement`). There is no fail state yet; this is what a miss costs today. `--no-fail` starts it on.
 - **Autoplay** (OFF / PERFECT / SLOPPY, `NoteHighwayCore::GatherHits`). PERFECT hits every note on time with its chart pad and stroke. SLOPPY plays like a person: each note early or late by up to 75 ms (a triangle around on time: about 64% perfect, 32% great, 4% good) and about one note in twenty-five never hit. The jitter comes from a hash of the note's time and lane, so a run, a retry or a seek plays the same way. Hits go through the normal judging, so scoring, combo, drum muting, the crowd and the lights all react. The HUD shows `AUTOPLAY <mode>` and the results say *Autoplayed*, so a demo score isn't mistaken for a real one.
 - **Strokes** (CHART / PLAIN). With autoplay on, PLAIN hits as a kit that only sends plain strokes and one hi-hat note would: open hi-hats come in closed, rims and flams as plain hits. That exercises technique judging (`TechniqueStrictness`).

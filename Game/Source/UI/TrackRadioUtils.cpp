@@ -42,8 +42,8 @@ void TrackRadioUtils::RegisterEvents( RmlUiCore& inUI )
 
 void TrackRadioUtils::OnUpdate( float dt )
 {
+    // MenuCore ticks the radio itself; the widget only starts the next song and shows it.
     TrackRadio& radio = TrackRadio::GetInstance();
-    radio.Update( dt );
     if( radio.CanPlayNextTrack() )
     {
         PlayNextRandomTrack();

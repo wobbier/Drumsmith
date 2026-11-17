@@ -107,6 +107,8 @@ private:
     void BuildKeys( VenueKit& inKit, Member& ioMember );
     void BuildMicStand( VenueKit& inKit, Member& ioMember, const Vector3& inPosition, float inHeight );
     void DeriveStrokes( const std::vector<NoteData>& inNotes );
+    // Which crash each crash note is, for a chart that doesn't say (ioPieces: inNotes' pieces).
+    void ChooseCrashes( const std::vector<const NoteData*>& inNotes, std::vector<Piece>& ioPieces ) const;
     void DeriveFallbacks( const std::vector<NoteData>& inNotes );
     void DerivePercussion( const VenueData& inVenue );
     void DeriveHarmonies( const VenueData& inVenue );
@@ -121,7 +123,9 @@ private:
     void UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float inEnergy );
     void UpdateKit( float inDeltaTime );
 
-    glm::vec3 StrikePoint( Piece inPiece ) const;
+    // Where a piece is struck (the drummer's space): its middle, or where a hand's (0 left, 1
+    // right) stick lands on it.
+    glm::vec3 StrikePoint( Piece inPiece, int inHand = -1 ) const;
     glm::vec3 StickTip( int inLimb, double inSeconds, float& outLift ) const;
     bool Singing( int inMember, double inSeconds, float* outOpen = nullptr ) const;
     // How far the singer is from the mic (0 at it, 1 out working the stage); outBreak numbers the break.

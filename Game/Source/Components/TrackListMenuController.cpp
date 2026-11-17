@@ -4,9 +4,11 @@
 #include <Engine/Input.h>
 #include <Events/SceneEvents.h>
 #include "CoreGame/TrackList.h"
+#include "CoreGame/ChartAdvice.h"
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
 #include "UI/TrackRadioUtils.h"
+#include "UI/MusicLinks.h"
 #include <cctype>
 #include <sstream>
 
@@ -67,7 +69,7 @@ void TrackListMenuController::PopulateModel()
         indices.push_back( index );
     }
     ui->ModelEnsure( "song_library" );
-    for( const char* event : { "play", "preview", "select", "sort", "filter", "toggle_filters", "back", "stats", "favorite", "favorites_only", "clear_search" } )
+    for( const char* event : { "play", "preview", "select", "sort", "filter", "toggle_filters", "back", "stats", "favorite", "favorites_only", "clear_search", "edit", "remove", "remove_confirm", "remove_cancel", "listen" } )
         ui->ModelRegisterEvent( "song_library", event );
     if( !m_modelReady )
     {
@@ -82,6 +84,16 @@ void TrackListMenuController::PopulateModel()
         ui->ModelSetNumber( "song_library", "detail_notes", 0 );
         ui->ModelSetNumber( "song_library", "detail_favorite", 0 );
         ui->ModelSetString( "song_library", "search", m_search );
+        ui->ModelSetListCount( "song_library", "advice", 0 );
+        ui->ModelSetString( "song_library", "detail_badge", "" );
+        ui->ModelSetNumber( "song_library", "detail_ds_ready", 0 );
+        ui->ModelSetNumber( "song_library", "detail_confirm_remove", 0 );
+        // The Track Editor lives in the editor: its button and F4 only show there.
+#if USING( ME_EDITOR )
+        ui->ModelSetNumber( "song_library", "tools", 1 );
+#else
+        ui->ModelSetNumber( "song_library", "tools", 0 );
+#endif
     }
     ui->ModelSetNumber( "song_library", "favorites_only", m_favoritesOnly );
     ui->ModelSetNumber( "song_library", "favorite_count", favoriteCount );
@@ -108,6 +120,7 @@ void TrackListMenuController::PopulateModel()
         ui->ModelSetItemNumber( "song_library", "tracks", row, "year", track.m_year );
         ui->ModelSetItemNumber( "song_library", "tracks", row, "notes", track.m_noteCount );
         ui->ModelSetItemNumber( "song_library", "tracks", row, "favorite", database.IsFavorite( track ) );
+        ui->ModelSetItemString( "song_library", "tracks", row, "badge", TrackDatabase::SourceBadge( TrackDatabase::FilterForSource( track.m_dlcSource ) ) );
     }
     int filterRow = 0;
     ui->ModelSetListCount( "song_library", "filters", 0 );
@@ -141,6 +154,7 @@ void TrackListMenuController::SelectTrack( int inTrackIndex )
     const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
     if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) || inTrackIndex == m_selectedTrack ) return;
     m_selectedTrack = inTrackIndex;
+    m_confirmRemove = -1;
     m_previewTrack = inTrackIndex;
     m_previewDelay = 0.25f;
     const TrackData& track = tracks[inTrackIndex];
@@ -154,6 +168,26 @@ void TrackListMenuController::SelectTrack( int inTrackIndex )
     ui->ModelSetNumber( "song_library", "detail_year", track.m_year );
     ui->ModelSetNumber( "song_library", "detail_notes", track.m_noteCount );
     ui->ModelSetNumber( "song_library", "detail_favorite", TrackDatabase::GetInstance().IsFavorite( track ) );
+    ui->ModelSetString( "song_library", "detail_badge", TrackDatabase::SourceBadge( TrackDatabase::FilterForSource( track.m_dlcSource ) ) );
+    ui->ModelSetNumber( "song_library", "detail_ds_ready", track.m_adviceKnown && track.m_authored );
+    ui->ModelSetNumber( "song_library", "detail_confirm_remove", 0 );
+    // What the chart recommends is read from its notes once the selection has settled (Update).
+    ui->ModelSetListCount( "song_library", "advice", 0 );
+    m_adviceTrack = inTrackIndex;
+    m_adviceDelay = 0.25f;
+}
+
+
+void TrackListMenuController::ShowAdvice( int inTrackIndex )
+{
+    auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    RmlUiCore* ui = GetEngine().RmlUi;
+    if( !ui || inTrackIndex != m_selectedTrack || inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) ) return;
+    const std::vector<std::string>& advice = ChartAdvice::For( tracks[inTrackIndex] );
+    ui->ModelSetListCount( "song_library", "advice", static_cast<int>( advice.size() ) );
+    for( int i = 0; i < static_cast<int>( advice.size() ); ++i )
+        ui->ModelSetItemString( "song_library", "advice", i, "text", advice[i] );
+    ui->ModelSetNumber( "song_library", "detail_ds_ready", tracks[inTrackIndex].m_authored );
 }
 
 
@@ -175,6 +209,17 @@ void TrackListMenuController::PlayTrack( int inTrackIndex )
 }
 
 
+void TrackListMenuController::EditTrack( int inTrackIndex )
+{
+    // Opens the song in the Track Editor (editor builds; nothing listens elsewhere).
+    const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    if( inTrackIndex < 0 || inTrackIndex >= static_cast<int>( tracks.size() ) ) return;
+    EditTrackEvent edit;
+    edit.FileName = tracks[inTrackIndex].m_trackName;
+    edit.Fire();
+}
+
+
 void TrackListMenuController::ToggleFavorite( int inTrackIndex )
 {
     auto& database = TrackDatabase::GetInstance();
@@ -187,7 +232,6 @@ void TrackListMenuController::ToggleFavorite( int inTrackIndex )
 
 void TrackListMenuController::Update( float inDeltaTime )
 {
-    TrackRadio::GetInstance().Update( inDeltaTime );
     if( !m_modelReady ) PopulateModel();
     RmlUiCore* ui = GetEngine().RmlUi;
     if( !ui ) return;
@@ -197,6 +241,10 @@ void TrackListMenuController::Update( float inDeltaTime )
         else if( !m_search.empty() ) { m_search.clear(); ui->ModelSetString( "song_library", "search", "" ); PopulateModel(); }
         else { LoadSceneEvent event; event.Level = "Assets/MainMenu.lvl"; event.Queue(); }
     }
+#if USING( ME_EDITOR )
+    // F4 pulls up the Track Editor on the selected song.
+    if( GetEngine().GetInput().WasKeyPressed( KeyCode::F4 ) ) EditTrack( m_selectedTrack );
+#endif
     // The search box binds two-way and changes with every key; refilter when its text moves.
     if( const std::string search = ui->ModelGetString( "song_library", "search" ); search != m_search )
     {
@@ -238,7 +286,47 @@ void TrackListMenuController::Update( float inDeltaTime )
             ui->ModelSetString( "song_library", "search", "" );
             PopulateModel();
         }
+        else if( event == "edit" ) EditTrack( m_selectedTrack );
+        else if( event == "listen" && index >= 0 && index < static_cast<int>( MusicLinks::Service::Count ) )
+        {
+            // Out to the real thing: the song on a streaming service, in the player's browser.
+            const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+            if( m_selectedTrack >= 0 && m_selectedTrack < static_cast<int>( tracks.size() ) )
+            {
+                const TrackData& track = tracks[m_selectedTrack];
+                MusicLinks::Open( static_cast<MusicLinks::Service>( index ), track.m_artistName, track.m_trackName, track.m_links );
+            }
+        }
+        else if( event == "remove" )
+        {
+            // Asked once; the details panel then offers the yes that deletes the files.
+            m_confirmRemove = m_selectedTrack;
+            ui->ModelSetNumber( "song_library", "detail_confirm_remove", m_confirmRemove >= 0 );
+        }
+        else if( event == "remove_cancel" )
+        {
+            m_confirmRemove = -1;
+            ui->ModelSetNumber( "song_library", "detail_confirm_remove", 0 );
+        }
+        else if( event == "remove_confirm" && m_confirmRemove >= 0 && m_confirmRemove == m_selectedTrack )
+        {
+            m_confirmRemove = -1;
+            m_previewTrack = -1;
+            m_adviceTrack = -1;
+            if( TrackDatabase::GetInstance().RemoveTrack( m_selectedTrack ) )
+            {
+                // Every index after it moved: list again, and select whatever is first.
+                m_selectedTrack = -1;
+                PopulateModel();
+            }
+            ui->ModelSetNumber( "song_library", "detail_confirm_remove", 0 );
+        }
         else if( event == "stats" ) { LoadSceneEvent scene; scene.Level = "Assets/TrackStats.lvl"; scene.Queue(); return; }
+    }
+    if( m_adviceTrack >= 0 && ( m_adviceDelay -= inDeltaTime ) <= 0.f )
+    {
+        ShowAdvice( m_adviceTrack );
+        m_adviceTrack = -1;
     }
     if( m_previewTrack >= 0 && ( m_previewDelay -= inDeltaTime ) <= 0.f )
     {

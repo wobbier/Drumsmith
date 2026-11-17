@@ -545,6 +545,13 @@ void TimelineView::DrawRuler( const ChartDocument& inDocument, const Transport& 
         const float x = TimeToX( inTransport.Length() * chart.m_previewPercent );
         inDrawList->AddLine( { x, m_min.y }, { x, m_contentMin.y }, 0xFFF040F0, 2.f );
     }
+    // The start marker: a green flag on the ruler.
+    if( chart.m_startTime > 0.f )
+    {
+        const float x = TimeToX( chart.m_startTime );
+        inDrawList->AddLine( { x, m_min.y }, { x, m_contentMin.y }, 0xFF60E060, 2.f );
+        inDrawList->AddTriangleFilled( { x, m_min.y }, { x + 8.f, m_min.y + 4.f }, { x, m_min.y + 8.f }, 0xFF60E060 );
+    }
     const float playheadX = TimeToX( inTransport.Seconds() );
     inDrawList->AddTriangleFilled( { playheadX - 6.f, m_min.y }, { playheadX + 6.f, m_min.y }, { playheadX, m_min.y + 9.f }, kPlayhead );
     inDrawList->AddLine( { playheadX, m_min.y }, { playheadX, m_contentMin.y }, kPlayhead, 1.5f );

@@ -7,6 +7,8 @@
 #include "Utils/StringUtils.h"
 #include "CLog.h"
 #include "Config/GameSettings.h"
+#include "Global/TrackRadio.h"
+#include <cctype>
 
 DISABLE_OPTIMIZATION;
 
@@ -322,51 +324,7 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy, Tr
     sortedTracks.reserve( trackList.size() );
     for( int i = 0; i < trackList.size(); ++i )
     {
-        bool passesFilter = false;
-        BRUH( trackList[i].m_dlcSource );
-        switch( inFilterBy )
-        {
-        case TrackListFilter::Drumsmith:
-            passesFilter = trackList[i].m_dlcSource == "DS";
-            break;
-        case TrackListFilter::RockBand:
-            passesFilter = trackList[i].m_dlcSource == "rb1";
-            break;
-        case TrackListFilter::RockBand2:
-            passesFilter = trackList[i].m_dlcSource == "rb2";
-            break;
-        case TrackListFilter::RockBand3:
-            passesFilter = trackList[i].m_dlcSource == "rb3";
-            break;
-        case TrackListFilter::RockBand4:
-            passesFilter = trackList[i].m_dlcSource == "rb4";
-            break;
-        case TrackListFilter::RockBandBlitz:
-            passesFilter = trackList[i].m_dlcSource == "rbb";
-            break;
-        case TrackListFilter::LegoRockBand:
-            passesFilter = trackList[i].m_dlcSource == "lrb";
-            break;
-        case TrackListFilter::GreenDayRockBand:
-            passesFilter = trackList[i].m_dlcSource == "gdrb";
-            break;
-        case TrackListFilter::GuitarHero5:
-            passesFilter = trackList[i].m_dlcSource == "gh5";
-            break;
-        case TrackListFilter::GuitarHero5DLC:
-            passesFilter = trackList[i].m_dlcSource == "gh5dlc";
-            break;
-        case TrackListFilter::GuitarHeroWorldTour:
-            passesFilter = trackList[i].m_dlcSource == "ghwt";
-            break;
-        case TrackListFilter::GuitarHeroWorldTourDLC:
-            passesFilter = trackList[i].m_dlcSource == "ghwtdlc";
-            break;
-        case TrackListFilter::None:
-        default:
-            passesFilter = true;
-            break;
-        }
+        const bool passesFilter = inFilterBy == TrackListFilter::None || FilterForSource( trackList[i].m_dlcSource ) == inFilterBy;
 
         if( passesFilter )
         {
@@ -380,19 +338,19 @@ std::vector<unsigned int>& TrackDatabase::SortTracks( TrackListSort inSortBy, Tr
     switch( inSortBy )
     {
     case TrackListSort::Title:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [&trackList]( unsigned int& first, unsigned int& second )
             {
                 return trackList[first].m_trackName < trackList[second].m_trackName;
             } );
         break;
     case TrackListSort::Artist:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [&trackList]( unsigned int& first, unsigned int& second )
             {
                 return trackList[first].m_artistName < trackList[second].m_artistName;
             } );
         break;
     case TrackListSort::Year:
-        std::sort( sortedTracks.begin(), sortedTracks.end(), [trackList]( unsigned int& first, unsigned int& second )
+        std::sort( sortedTracks.begin(), sortedTracks.end(), [&trackList]( unsigned int& first, unsigned int& second )
             {
                 return trackList[first].m_year < trackList[second].m_year;
             } );
@@ -415,73 +373,129 @@ std::vector<unsigned int>& TrackDatabase::FilterTracks( TrackListFilter inFilter
 
 void TrackDatabase::GatherFilterCounts()
 {
-    auto& trackList = m_trackList.m_tracks;
-    m_filterMatches.clear();
-    m_filterMatches.resize( (int)TrackListFilter::Count );
-    for( int i = 0; i < trackList.size(); ++i )
+    m_filterMatches.assign( static_cast<size_t>( TrackListFilter::Count ), 0u );
+    for( const TrackData& track : m_trackList.m_tracks )
     {
-        if( trackList[i].m_dlcSource == "DS" )
-        {
-            m_filterMatches[(int)TrackListFilter::Drumsmith]++;
-        }
-        else if( trackList[i].m_dlcSource == "rb1" )
-        {
-            m_filterMatches[(int)TrackListFilter::RockBand]++;
-        }
-        else if( trackList[i].m_dlcSource == "rb2" )
-        {
-            m_filterMatches[(int)TrackListFilter::RockBand2]++;
-        }
-        else if( trackList[i].m_dlcSource == "rb3" )
-        {
-            m_filterMatches[(int)TrackListFilter::RockBand3]++;
-        }
-        else if( trackList[i].m_dlcSource == "rb3dlc" ) // This is messy, just make it a part of regular RB?
-        {
-            m_filterMatches[(int)TrackListFilter::RockBand3]++;
-        }
-        else if( trackList[i].m_dlcSource == "rb4" )
-        {
-            m_filterMatches[(int)TrackListFilter::RockBand4]++;
-        }
-        else if( trackList[i].m_dlcSource == "lrb" )
-        {
-            m_filterMatches[(int)TrackListFilter::LegoRockBand]++;
-        }
-        else if( trackList[i].m_dlcSource == "gdrb" )
-        {
-            m_filterMatches[(int)TrackListFilter::GreenDayRockBand]++;
-        }
-        else if( trackList[i].m_dlcSource == "rbb" )
-        {
-            m_filterMatches[(int)TrackListFilter::RockBandBlitz]++;
-        }
-        else if( trackList[i].m_dlcSource == "gh" )
-        {
-            m_filterMatches[(int)TrackListFilter::GuitarHero]++;
-        }
-        else if( trackList[i].m_dlcSource == "ghwt" )
-        {
-            m_filterMatches[(int)TrackListFilter::GuitarHeroWorldTour]++;
-        }
-        else if( trackList[i].m_dlcSource == "ghwtdlc" )
-        {
-            m_filterMatches[(int)TrackListFilter::GuitarHeroWorldTourDLC]++;
-        }
-        else if( trackList[i].m_dlcSource == "gh5" )
-        {
-            m_filterMatches[(int)TrackListFilter::GuitarHero5]++;
-        }
-        else if( trackList[i].m_dlcSource == "gh5dlc" )
-        {
-            m_filterMatches[(int)TrackListFilter::GuitarHero5DLC]++;
-        }
-        else
-        {
-            YIKES_FMT( "Unhandled %s", trackList[i].m_dlcSource.c_str() );
-        }
+        ++m_filterMatches[static_cast<size_t>( FilterForSource( track.m_dlcSource ) )];
     }
 }
+
+
+TrackListFilter TrackDatabase::FilterForSource( const std::string& inSource )
+{
+    // song.ini's icon tags, as Rock Band and Clone Hero conversions carry them.
+    static const std::pair<const char*, TrackListFilter> kTags[] = {
+        { "ds", TrackListFilter::Drumsmith },
+        { "rb1", TrackListFilter::RockBand },
+        { "rb2", TrackListFilter::RockBand2 },
+        { "rb3", TrackListFilter::RockBand3 },
+        { "rb3dlc", TrackListFilter::RockBand3 },
+        { "rb4", TrackListFilter::RockBand4 },
+        { "rbb", TrackListFilter::RockBandBlitz },
+        { "lrb", TrackListFilter::LegoRockBand },
+        { "gdrb", TrackListFilter::GreenDayRockBand },
+        { "gh", TrackListFilter::GuitarHero },
+        { "gh1", TrackListFilter::GuitarHero },
+        { "gh2", TrackListFilter::GuitarHero2 },
+        { "gh3", TrackListFilter::GuitarHero3 },
+        { "gh4", TrackListFilter::GuitarHero4 },
+        { "ghwt", TrackListFilter::GuitarHeroWorldTour },
+        { "ghwtdlc", TrackListFilter::GuitarHeroWorldTourDLC },
+        { "gh5", TrackListFilter::GuitarHero5 },
+        { "gh5dlc", TrackListFilter::GuitarHero5DLC },
+    };
+    std::string tag;
+    for( char c : inSource )
+    {
+        if( !std::isspace( static_cast<unsigned char>( c ) ) )
+        {
+            tag += static_cast<char>( std::tolower( static_cast<unsigned char>( c ) ) );
+        }
+    }
+    for( const auto& [name, filter] : kTags )
+    {
+        if( tag == name )
+        {
+            return filter;
+        }
+    }
+    return TrackListFilter::Other;
+}
+
+
+const char* TrackDatabase::SourceBadge( TrackListFilter inFilter )
+{
+    switch( inFilter )
+    {
+    case TrackListFilter::Drumsmith: return "DS";
+    case TrackListFilter::RockBand: return "RB1";
+    case TrackListFilter::RockBand2: return "RB2";
+    case TrackListFilter::RockBand3: return "RB3";
+    case TrackListFilter::RockBand4: return "RB4";
+    case TrackListFilter::RockBandBlitz: return "RBB";
+    case TrackListFilter::LegoRockBand: return "LRB";
+    case TrackListFilter::GreenDayRockBand: return "GDRB";
+    case TrackListFilter::GuitarHero: return "GH";
+    case TrackListFilter::GuitarHero2: return "GH2";
+    case TrackListFilter::GuitarHero3: return "GH3";
+    case TrackListFilter::GuitarHero4: return "GH4";
+    case TrackListFilter::GuitarHero5: return "GH5";
+    case TrackListFilter::GuitarHero5DLC: return "GH5";
+    case TrackListFilter::GuitarHeroWorldTour: return "GHWT";
+    case TrackListFilter::GuitarHeroWorldTourDLC: return "GHWT";
+    default: return "";
+    }
+}
+
+
+bool TrackDatabase::RemoveTrack( int inIndex )
+{
+    auto& tracks = m_trackList.m_tracks;
+    if( inIndex < 0 || inIndex >= static_cast<int>( tracks.size() ) )
+    {
+        return false;
+    }
+    // Only ever a song's own folder directly under Assets/DLC, and only one that is a song.
+    const std::string folder = FavoriteKey( tracks[inIndex] );
+    if( folder.empty() || folder == "." || folder == ".." || folder.find_first_of( "/\\" ) != std::string::npos )
+    {
+        YIKES_FMT( "RemoveTrack: '%s' isn't a song folder", folder.c_str() );
+        return false;
+    }
+    const fs::path songFolder = fs::path( Path( "Assets/DLC" ).FullPath ) / folder;
+    std::error_code error;
+    if( !fs::is_directory( songFolder, error ) || !fs::is_regular_file( songFolder / "TrackData.txt", error ) )
+    {
+        YIKES_FMT( "RemoveTrack: no song at %s", songFolder.generic_string().c_str() );
+        return false;
+    }
+    // The radio lets go of the song before its files go.
+    TrackRadio::GetInstance().OnTrackRemoved( inIndex );
+    fs::remove_all( songFolder, error );
+    if( error )
+    {
+        YIKES_FMT( "RemoveTrack: couldn't delete %s (%s)", songFolder.generic_string().c_str(), error.message().c_str() );
+    }
+    SetFavorite( tracks[inIndex], false );
+    tracks.erase( tracks.begin() + inIndex );
+    m_needsSort = true;
+    return true;
+}
+
+
+void TrackDatabase::ReloadTrack( int inIndex )
+{
+    auto& tracks = m_trackList.m_tracks;
+    if( inIndex < 0 || inIndex >= static_cast<int>( tracks.size() ) )
+    {
+        return;
+    }
+    TrackData& track = tracks[inIndex];
+    track.m_noteData.clear();
+    track.m_adviceKnown = false;
+    track.Load();
+}
+
 
 std::string TrackDatabase::FavoriteKey( const TrackData& inTrack )
 {
@@ -669,6 +683,14 @@ void TrackData::OnSaveTrackData( json& outJson )
     outJson["BPM"] = m_bpm;
     outJson["TrackFileName"] = m_trackFileName;
     outJson["PreviewPercent"] = m_previewPercent;
+    if( m_startTime > 0.f )
+    {
+        outJson["StartTime"] = m_startTime;
+    }
+    if( !m_links.empty() )
+    {
+        outJson["Links"] = m_links;
+    }
     outJson["NoteCount"] = m_noteCount;
 }
 
@@ -711,6 +733,10 @@ void TrackData::OnSaveNoteData( json& outJson )
         if( note.m_velocity != 100 )
         {
             noteEntry["Velocity"] = note.m_velocity;
+        }
+        if( note.m_secondPedal )
+        {
+            noteEntry["SecondPedal"] = true;
         }
 
         noteData.push_back( noteEntry );
@@ -812,6 +838,18 @@ void TrackData::OnLoadTrackData( const json& inJson )
         m_trackSourcePath = m_directory + "/" + m_trackFileName;
     }
 
+    m_links.clear();
+    if( inJson.contains( "Links" ) && inJson["Links"].is_object() )
+    {
+        for( const auto& [service, link] : inJson["Links"].items() )
+        {
+            if( link.is_string() )
+            {
+                m_links[service] = link.get<std::string>();
+            }
+        }
+    }
+    m_startTime = inJson.contains( "StartTime" ) && inJson["StartTime"].is_number() ? std::max( 0.f, inJson["StartTime"].get<float>() ) : 0.f;
     if( inJson.contains( "PreviewPercent" ) )
     {
         m_previewPercent = inJson["PreviewPercent"];
@@ -850,6 +888,8 @@ void TrackData::OnLoadNoteData( const json& inJson )
                 noteEntry.m_articulation = PadUtils::GetArticulation( note["Articulation"].get<std::string>() );
             if( note.contains( "Velocity" ) && note["Velocity"].is_number() )
                 noteEntry.m_velocity = static_cast<uint8_t>( std::clamp( note["Velocity"].get<int>(), 0, 127 ) );
+            if( note.contains( "SecondPedal" ) && note["SecondPedal"].is_boolean() )
+                noteEntry.m_secondPedal = note["SecondPedal"].get<bool>();
 
             m_noteData.push_back( noteEntry );
         }

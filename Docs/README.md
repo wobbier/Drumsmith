@@ -13,7 +13,8 @@ Technical documentation for the game side of Drumsmith — a drum rhythm game fo
 | [Songs-and-DLC.md](Songs-and-DLC.md) | On-disk song format, chart parsing (`notes.mid` / `song.ini` / `.chart`), `TrackDatabase`, the DLC index/download flow, the in-editor track editor |
 | [Audio.md](Audio.md) | `AudioPack` stem playback and sync, `TrackRadio` menu music, `Drumset` hit sounds, FMOD threading facts |
 | [MIDI-and-Pads.md](MIDI-and-Pads.md) | `MidiDevice` (RtMidi) input path, pad bindings and mapping storage, platform gates |
-| [UI-and-Menus.md](UI-and-Menus.md) | The RmlUi menu pages, their view models and the controller components that drive them (radio widget, DLC catalogue, latency test) |
+| [Practice.md](Practice.md) | The practice page: rudiment and groove lessons as data, built into charts and played over a click track |
+| [UI-and-Menus.md](UI-and-Menus.md) | The RmlUi menu pages, their view models and the controller components that drive them (radio widget, DLC catalogue, the way into the delay calibration) |
 | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) | **The latency budget**: every millisecond from drum pad to feedback, the clock inventory, engine constraints on fixes |
 | [State-of-the-Game.md](State-of-the-Game.md) | **Opinions live here**: maturity scorecard, gotchas catalog, half-finished inventory, responsiveness roadmap |
 | [SharpmakeDependencies.md](SharpmakeDependencies.md) | Sharpmake project graph, binary names, per-project third-party dependencies |

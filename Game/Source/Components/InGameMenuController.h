@@ -12,6 +12,7 @@ private:
     bool m_modelReady = false;
     bool m_paused = false;
     bool m_options = false;
+    bool m_midiUnplugged = false;
     const char* m_focusTarget = nullptr;
 };
 ME_REGISTER_COMPONENT( InGameMenuController )

@@ -1,0 +1,14 @@
+/* The practice page: the library's list / details / footer layout with lesson rows. */
+.library-page .lesson-row { display: block; width: 100%; margin-bottom: 6dp; padding: 14dp 18dp; text-align: left; font-size: 24dp; color: #ffffffd8; background-color: #00000012; border-left: 3dp #ffffff00; }
+.library-page .lesson-row:hover, .library-page .lesson-row:focus, .library-page .lesson-row.selected { background-color: #ffffff12; border-left-color: #ffffff80; color: #ffffff; }
+.library-details .lesson-pattern { margin: 16dp 0 4dp; padding: 10dp 12dp; font-size: 22dp; letter-spacing: 2dp; color: #ffb347; background-color: #00000040; }
+.library-details .lesson-key { font-size: 14dp; color: #ffffff90; }
+.lesson-lane { display: flex; margin: 2dp 0; padding: 3dp 12dp; background-color: #00000040; }
+.lesson-lane .lane-name { display: block; width: 110dp; font-size: 15dp; color: #ffffffb8; }
+.lesson-lane .lane-steps { display: block; flex: 1; font-size: 15dp; letter-spacing: 2dp; color: #ffb347; }
+.lesson-tempo, .lesson-length { margin: 18dp 0 6dp; }
+.lesson-tempo label, .lesson-length label { display: block; margin-bottom: 8dp; font-size: 20dp; color: #ffffff; }
+.lesson-tempo label span { color: #ffb347; }
+.lesson-tempo input { display: block; width: 100%; margin-bottom: 8dp; }
+.library-page .tempo-step { display: inline-block; width: auto; margin: 0 6dp 0 0; padding: 6dp 12dp; font-size: 16dp; background-color: #ffffff14; }
+.library-page .tempo-step.selected { color: #101010; background-color: #ffb347; }

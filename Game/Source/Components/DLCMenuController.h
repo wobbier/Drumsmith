@@ -12,9 +12,10 @@
 
 class TrackRadioUtils;
 
-// Drives Assets/UI/DLC.rml through the "dlc_store" view model: the DLC server's catalogue
-// (dlc_index.json, Docs/Songs-and-DLC.md) with sort/filter, a details panel, downloads into
-// Assets/DLC, and the radio widget. Network work runs on one worker thread, a transfer at a time;
+// Drives Assets/UI/DLC.rml through the "dlc_store" view model: the catalogue of every DLC server
+// in the settings (each one's dlc_index.json, Docs/Songs-and-DLC.md) with sort/filter, a details
+// panel, downloads, updates and removals under Assets/DLC, previews of songs not downloaded yet,
+// and the radio widget. Network work runs on one worker thread, a transfer at a time;
 // the controller polls it every update and only ever touches the track database on the main thread.
 class DLCMenuController final
     : public Component<DLCMenuController>
@@ -35,20 +36,46 @@ private:
         std::string Source;        // The DLCSource tag (song.ini's icon)
         std::string Folder;        // FolderPath on the server, and under Assets/DLC
         std::string ArtFile;       // AlbumArtFileName ("" when the server found none)
+        std::string AudioFile;     // TrackFileName: the main mix, for a preview
+        std::string Version;       // The server's hash of the song's files ("" on an old index)
         std::vector<std::string> Files;
+        std::vector<long long> FileSizes;   // Beside Files; empty on an old index
+        int Server = 0;            // Which of m_servers lists it
         int Year = 0;
+        float PreviewPercent = 0.25f;
+        bool Authored = false;     // Charted in the Track Editor: the "DS ready" badge
         int InstalledIndex = -1;   // Its TrackDatabase index once installed
-        std::string State;         // "", "Queued", "Downloading 3/12", "Failed", "Installed"
+        bool UpdateAvailable = false;   // Installed from a server whose copy has changed since
+        std::string State;         // "", "Queued", "Downloading 3/12", "Failed", "Installed", ...
         bool Busy = false;
+        bool ArtQueued = false;
     };
 
-    // A worker-thread download: the index, one track's art, or every file of a track.
+    // A server of the settings, and how fetching its index went.
+    struct Server
+    {
+        std::string Url;
+        std::string RemoteHash;    // dlc_index.hash as just fetched ("" when it has none)
+        int Songs = 0;
+        bool Loaded = false;
+        bool Reached = true;
+    };
+
+    // A worker-thread download: a server's index hash or index, one track's art, every file of a
+    // track, or the audio for a preview.
     struct Transfer
     {
-        enum class Kind { Index, Art, Track };
+        enum class Kind { Hash, Index, Art, Track, Preview };
+        struct FileJob
+        {
+            std::string Url;
+            Path Target;
+            long long Size = -1;   // What the index says it is; checked when known
+        };
         Kind Type = Kind::Index;
         int Track = -1;
-        std::vector<std::pair<std::string, Path>> Files;
+        int Server = -1;
+        std::vector<FileJob> Files;
         std::atomic<int> Done{ 0 };
         std::atomic<bool> Finished{ false };
         std::atomic<bool> Cancel{ false };
@@ -58,9 +85,18 @@ private:
 
     void PopulateModel();
     void BeginIndexFetch();
-    void LoadIndex( const std::string& inText, const std::string& inStatus );
+    // Adds a server's index to the catalogue; songs an earlier server already lists are skipped.
+    void AppendIndex( int inServer, const std::string& inText );
+    void LoadCachedIndex( int inServer );
+    void UpdateStatus();
     void QueueMissingArt();
     void QueueTrackDownload( int inTrack );
+    void QueuePreview( int inTrack );
+    void RemoveInstalled( int inTrack );
+    // Whether the installed copy matches the server's (the version noted at download).
+    void RefreshInstallState( CatalogueTrack& ioTrack ) const;
+    std::string ServerCacheFolder( int inServer ) const;
+    Path PreviewPath( const CatalogueTrack& inTrack ) const;
     void PumpTransfers();
     void FinishTransfer( Transfer& inTransfer );
     void RefreshRows();
@@ -69,6 +105,7 @@ private:
     void SelectTrack( int inTrack );
     void PlayInstalled( int inTrack );
     void PreviewInstalled( int inTrack );
+    void EditInstalled( int inTrack );
     std::string ArtSource( const CatalogueTrack& inTrack ) const;
     std::string FileURL( const CatalogueTrack& inTrack, const std::string& inFile ) const;
     Path FilePath( const CatalogueTrack& inTrack, const std::string& inFile ) const;
@@ -81,7 +118,11 @@ private:
     std::vector<int> m_rowOfTrack;          // Catalogue index -> row of the "tracks" list, or -1
     std::deque<std::unique_ptr<Transfer>> m_queue;
     std::unique_ptr<Transfer> m_active;
-    std::string m_server;
+    std::vector<Server> m_servers;
+    int m_pendingServers = 0;
+    // The song whose Remove is waiting for a yes, and the preview file last fetched.
+    int m_confirmRemove = -1;
+    std::string m_previewFile;
     TrackListSort m_sort = TrackListSort::None;
     TrackListFilter m_filter = TrackListFilter::None;
     int m_selectedTrack = -1;

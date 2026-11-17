@@ -15,15 +15,16 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 | Scoring, combo, miss handling | **Usable** | Score, multiplier, combo, accuracy, misses mute the drums, results screen; nothing is saved | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 | Hit sounds (`Drumset`) | **Experimental** | Right design (`FMOD_CREATESAMPLE` one-shots), zero callers with loaded sounds — silent even in the editor | [Audio.md](Audio.md) |
 | Stem playback (`AudioPack`) | **Usable** | Sample-accurate start is genuinely good; pause/seek desync stems, judge clock conflates errors with 0 | [Audio.md](Audio.md) |
-| Menu radio (`TrackRadio`) | **Usable** | Works; odd load-loop; only ticks while a menu page is alive | [Audio.md](Audio.md) |
-| MIDI input (`MidiDevice`) | **Usable** | Callback with arrival stamps; one queue shared by gameplay and editor widgets; no hot-plug | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
-| Pad bindings | **Usable** | Clean data model; rebinding UI is editor-only, so game builds can't remap | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
+| Menu radio (`TrackRadio`) | **Usable** | Ticked by `MenuCore` on every page; waits for its stems instead of re-playing each frame (2026-11-17) | [Audio.md](Audio.md) |
+| MIDI input (`MidiDevice`) | **Usable** | Callback with arrival stamps; one queue shared by gameplay and editor widgets; hot-plug by polling since 2026-11-17, tried only with a virtual ALSA device | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
+| Pad bindings | **Usable** | Clean data model; Settings > Drum Kit rebinds keys and main notes in the game (2026-11-17), extra strokes still editor-only | [MIDI-and-Pads.md](MIDI-and-Pads.md) |
 | Chart parsing / conversion | **Usable** | Pro drums (8 voices), dynamics, tempo map, tolerant MIDI reading; `DISABLE_OPTIMIZATION` remains; RB data can't express hi-hat open/pedal or rims | [Songs-and-DLC.md](Songs-and-DLC.md) |
-| Track database / DLC | **Usable** | Scan + download + register work; partial filter coverage, unvalidated downloads | [Songs-and-DLC.md](Songs-and-DLC.md) |
+| Track database / DLC | **Usable** | Several servers, hash-checked index, size-checked downloads, updates, previews and removal (2026-11-17), all tested against a local server only | [Songs-and-DLC.md](Songs-and-DLC.md) |
+| Practice | **Experimental** | Built 2026-11-17: 16 lessons as data, played over a generated click; judged only from autoplay, never with sticks | [Practice.md](Practice.md) |
 | Track editor | **Usable** | The most complete tool in the project — windowed note iteration gameplay should copy | [Songs-and-DLC.md](Songs-and-DLC.md) |
-| Menus / UI | **Usable** | Ported to RmlUi (2026-11-08): sliders read back and apply, DLC catalogue with background downloads, ms latency test; `VideoLatency` still consumed by nothing | [UI-and-Menus.md](UI-and-Menus.md) |
+| Menus / UI | **Usable** | Ported to RmlUi (2026-11-08): sliders read back and apply, DLC catalogue with background downloads, the way into the delay calibration | [UI-and-Menus.md](UI-and-Menus.md) |
 | Settings (`GameSettings`) | **Usable** | Latency fields now consumed; save-on-button only | [Game-Architecture.md](Game-Architecture.md) |
-| Latency compensation | **Usable** | Audio and video offsets applied; visual test feeds the video offset; no audio calibration test, positive offsets only | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) |
+| Latency compensation | **Usable** | Audio and video offsets applied, and a calibration on the highway measures both (2026-11-17; not yet run by a person on real hardware); positive offsets only | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) |
 | Vocals mode | **Experimental** | FFT spike printing to stdout; not gameplay | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 | Venue, band and crowd | **Experimental** | Built 2026-11-08 and only judged from headless software-rendered captures: every chart venue event is used, three rooms with a live swap, with eight characters shared out between the band and crowd (2026-11-12), no real-GPU or frame-pacing check yet | [Venue-and-Band.md](Venue-and-Band.md) |
 
@@ -59,8 +60,8 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 | 10 | O(all notes) iteration with two component lookups each, every frame | `NoteHighwayCore::Update` | 4,872 entities scanned per frame for the bundled Everlong chart; author comment says it best | **Fixed** in the 2026-11-08 gameplay rewrite |
 | 11 | Velocity parsed from MIDI and dropped — at conversion *and* at input | `ParseMidi`, `PumpMessages` consumers | Dynamics unavailable for hit sounds, scoring, or charts | **Fixed** 2026-11-08: velocity is stored per note (charts and Track Editor recordings); not judged |
 | 12 | MIDI device opened by name with assert-then-port-0 fallback; empty device list = UB index | `MidiDevice::OpenMidiDevice` | Wrong device silently opens in release; crash potential with no devices | **Fixed** in the 2026-11-08 gameplay rewrite |
-| 13 | Device never closed; `IsOpen` never cleared; no hot-plug rescan | `MidiDevice`, `NoteHighwayCore` | Reconnect/replug requires restart | Same pass as #12 |
-| 14 | No in-game pad rebinding (widget is `ME_EDITOR`) | `PadBindingWidget` | Shipped builds depend on a checked-in `PadMappings.json` matching the player's kit | Needs a game-side binding screen eventually |
+| 13 | Device never closed; `IsOpen` never cleared; no hot-plug rescan | `MidiDevice`, `NoteHighwayCore` | Reconnect/replug requires restart | **Fixed 2026-11-17 (DRU-54)**: `MidiDevice::Poll` rescans, reopens the wanted device, and a song pauses when its device goes |
+| 14 | No in-game pad rebinding (widget is `ME_EDITOR`) | `PadBindingWidget` | Shipped builds depend on a checked-in `PadMappings.json` matching the player's kit | **Fixed 2026-11-17 (DRU-18)**: Settings > Drum Kit; extra strokes (rim, bell) still need the editor or the file |
 
 ### Feedback & scoring
 
@@ -78,7 +79,7 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 |---|--------|-------|-------------|---------|
 | 20 | Pause/Resume/Seek never re-sync stems (only initial `Play` is DSP-scheduled; `Seek`'s re-sync is commented out) | `AudioPack` | Stems audibly drift after pause or scrub; judge clock moves relative to the mix | **Fixed** 2026-11-08: group pause, and seeks restart every stem on one DSP tick once all have seeked (`Docs/Audio.md`) |
 | 21 | `AudioPack` holds a raw `TrackData*` into the database vector | `AudioPack::m_trackData` | `TrackDatabase::Reload` (e.g. after a DLC download) dangles any live pack | **Fixed 2026-11-15 (DRU-55)**: `AudioPack` keeps no pointer, `TrackRadio` looks its track up by index |
-| 22 | Radio `Update` spams `Play()` every frame while loading | `TrackRadio::Update` | Converges, but masks the readiness model; "this feels weird, but okay??" | Cleanup batch |
+| 22 | Radio `Update` spams `Play()` every frame while loading | `TrackRadio::Update` | Converges, but masks the readiness model; "this feels weird, but okay??" | **Fixed 2026-11-17 (DRU-19)** |
 | 23 | FMOD runs on default mixer settings, never queried | `AudioCore` (engine) | Nobody knows the actual output latency on any machine | Measure in item 3's calibration work |
 
 ### Content pipeline
@@ -92,9 +93,9 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 | 28 | Pro-drums remap commented out; 100→`Crash2` catch-all | `GetNoteIdFromLegacy` | Pro charts flatten; cymbal/tom distinction lost | **Fixed** 2026-11-08: tom markers map yellow/blue/green to hi-hat/ride/crash or high/mid/floor tom |
 | 29 | `.chart` reader exists but is unreachable; OPUS unsupported | `TrackDatabase::Reload` | Clone Hero-only content silently invisible | Finish or delete |
 | 30 | `song.ini` values keep leading spaces; `pro_drums == " True"` | `readSongMetaData` | Shipped `TrackData.txt` files contain padded strings; exact-match filters are one odd tag from missing | Parser pass |
-| 31 | Sort comparators capture the track vector **by value** | `TrackDatabase::SortTracks` | Every sort copies all `TrackData` (strings + any note data) into the lambda | One-character fix (`&`) |
-| 32 | Filter enum, count logic, and match logic cover different tag sets; unknown tags `YIKES` per track per call | `TrackList.cpp` | GH1–4 filters can't match; log spam scales with library size | Cleanup batch |
-| 33 | DLC download: no hash/size check, no partial-failure cleanup | `DLCMenuController::DownloadDLC` | Half-downloaded songs register as playable if `TrackData.txt` landed | Harden when DLC matters |
+| 31 | Sort comparators capture the track vector **by value** | `TrackDatabase::SortTracks` | Every sort copies all `TrackData` (strings + any note data) into the lambda | **Fixed 2026-11-17** |
+| 32 | Filter enum, count logic, and match logic cover different tag sets; unknown tags `YIKES` per track per call | `TrackList.cpp` | GH1–4 filters can't match; log spam scales with library size | **Fixed 2026-11-17 (DRU-41)**: one table, `TrackDatabase::FilterForSource` |
+| 33 | DLC download: no hash/size check, no partial-failure cleanup | `DLCMenuController::DownloadDLC` | Half-downloaded songs register as playable if `TrackData.txt` landed | **Fixed 2026-11-17 (DRU-41)**: sizes checked, a failed new song deleted. Contents aren't hashed on the client |
 | 34 | Recording in the editor stamps UI-frame time | `TrackEditor::Render` | The charter's full input latency is baked into `NoteData.txt` for everyone | **Partly fixed** 2026-11-13: recorded MIDI hits are placed at their arrival time, not the frame that read them. Audio output latency is still in the take |
 | 35 | The `TrackDatabase.json` config loads at startup and does nothing | `TrackList` ctor | Dead I/O + confusion | Delete |
 
@@ -104,8 +105,8 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 |---|--------|-------|-------------|---------|
 | 36 | ~~Radio volume slider bound to a misnamed JS global~~ | `MainMenuController` | Fixed by the RmlUi port: the slider is a two-way model value applied live | Done |
 | 37 | ~~Latency sliders have no read-back~~ | `MainMenuController` | Fixed by the RmlUi port: sliders show the stored values | Done (consumers still missing, item 3) |
-| 38 | The visual latency test measures keyboard-vs-marker offsets in ms and can write the average into `VideoLatency`, but nothing reads that field and MIDI pads don't register | `MainMenuController::UpdateLatencyTest` | Calibrates a value nobody consumes | Wire into judgment in item 3 |
-| 39 | The library and the DLC page each build their own `tracks` list and sort/filter code; the DLC page keeps its own copy of the `DLCSource` tag table | `DLCMenuController`, `TrackListMenuController`, `TrackList.cpp` | Three places to update when a tag or sort changes | Share one tag table when touched |
+| 38 | The visual latency test measures keyboard-vs-marker offsets in ms and can write the average into `VideoLatency`, but nothing reads that field and MIDI pads don't register | `MainMenuController::UpdateLatencyTest` | Calibrates a value nobody consumes | **Fixed** 2026-11-17: replaced by the highway calibration, which hears the kit and sets both delays |
+| 39 | The library and the DLC page each build their own `tracks` list and sort/filter code; the DLC page keeps its own copy of the `DLCSource` tag table | `DLCMenuController`, `TrackListMenuController`, `TrackList.cpp` | Three places to update when a tag or sort changes | **Partly fixed 2026-11-17**: the tag table is shared; the two pages still sort their own lists |
 | 40 | The retired Vue project and HTML/CSS/JS pages still ship under `Game/ui/` and `Assets/UI/` | `Game/ui/`, `Assets/UI/*.html` | Dead weight in the assets; misleads readers | Delete |
 | 41 | Leaving the DLC page mid-download joins the worker thread, so the scene change waits for the file in flight | `DLCMenuController::~DLCMenuController` | A multi-megabyte stem can stall the transition for seconds | Add a cancel hook to `Web::DownloadFile` |
 | 42 | `LaunchPlayTrackEvent` handoff relies on scene-load callback ordering; `TrackID`/`Callback` fields dead | controllers → `NoteHighwayCore` | Works today; silently drops the event if core registration ever lands later | Cleanup batch |

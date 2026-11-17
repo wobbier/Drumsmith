@@ -43,6 +43,19 @@
 .results-grid { width: 360dp; margin: 0 auto 10dp; }
 .results-row { display: flex; justify-content: space-between; font-size: 22dp; padding: 4dp 0; border-bottom: 1dp #ffffff20; }
 #results .menu-link { font-size: 36dp; margin-top: 14dp; }
+/* The delay calibration: what to do now, and what it found. */
+#hud-calibration { position: absolute; top: 24dp; left: 0; width: 100%; text-align: center; font-effect: outline( 2dp #000000d0 ); }
+#calibration-prompt { font-size: 48dp; font-weight: bold; color: #ff9933; }
+#calibration-detail { font-size: 24dp; margin-top: 4dp; }
+#calibration-progress { font-size: 20dp; color: #ffffffb0; margin-top: 6dp; }
+#calibration-results { position: absolute; width: 100%; height: 100%; padding-top: 8vh; text-align: center; background-color: #000000c8; }
+#calibration-results h2 { font-size: 40dp; }
+#calibration-results .results-artist { font-size: 22dp; color: #ffffffb0; margin: 6dp 0 18dp; }
+.calibration-grid { width: 520dp; max-width: 90vw; margin: 0 auto 10dp; }
+.calibration-row { display: flex; justify-content: space-between; font-size: 28dp; padding: 6dp 0 2dp; }
+.calibration-value { font-weight: bold; color: #ff9933; }
+.calibration-note { font-size: 18dp; color: #ffffffb0; text-align: left; padding-bottom: 8dp; margin-bottom: 8dp; border-bottom: 1dp #ffffff20; }
+#calibration-results .menu-link { font-size: 36dp; margin-top: 14dp; }
 /* Debug panel (F8): no fail and the song scrubber. */
 #debug-panel { position: absolute; bottom: 16dp; left: 50%; width: 720dp; max-width: 92vw; transform: translateX(-50%); padding: 10dp 16dp 14dp; background-color: #000000b0; border: 1dp #ffffff30; border-radius: 6dp; }
 .debug-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8dp; font-size: 18dp; }

@@ -396,6 +396,7 @@ void Performer::PoseArm( int inSide, const Arm& inArm, float inInvScale )
     Turn( hand, turn * hand.BindWorld );
     CurlFingers( inSide, inArm.Grip );
     m_hands[inSide] = ( hand.Position + turn * m_grip[inSide] ) * m_look.Height;
+    m_elbows[inSide] = fore.Position * m_look.Height;
 }
 
 

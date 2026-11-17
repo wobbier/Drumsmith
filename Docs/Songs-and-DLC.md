@@ -1,6 +1,8 @@
 # Songs and DLC
 
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
+>
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the track database's tag table, removal and chart advice, the whole DLC distribution section, the start marker and F4. The rest is as last verified.
 
 Everything about song content: the on-disk format, how charts are parsed out of Rock Band-style `notes.mid` files, the `TrackDatabase` that feeds the menus, the DLC download flow, and the in-editor track editor used to author/record charts.
 
@@ -17,7 +19,8 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 | `Game/Source/CoreGame/CustomTrackDefineTest.h` | `song.ini` / `.chart` / MIDI parsing singleton (despite the name, this is the production parser) |
 | `Game/Source/Editor/TrackEditor.h`, `Game/Source/Editor/Chart/` | The chart editor (`ME_EDITOR` builds only): see Authoring |
 | `Game/Source/CoreGame/BeatGrid.h` | Beat grid math: snapping, grid lines |
-| `Assets/DLC/DLCParser.py` | Server-side generator for `dlc_index.json` |
+| `Assets/DLC/DLCParser.py` | Server-side generator for `dlc_index.json` and `dlc_index.hash` |
+| `Game/Source/CoreGame/ChartAdvice.h` | What a chart asks of the kit (the library's recommendations), and which foot plays each kick |
 | `ThirdParty/midifile/` | `smf::MidiFile` MIDI parsing library |
 
 ## How It Works
@@ -36,17 +39,21 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 | `song.ini` | for conversion | Rock Band/Clone Hero metadata |
 | `album.png` / `album.jpg` | conversion asserts if missing | Cover art |
 
-**`TrackData.txt` schema** (written by `TrackData::OnSaveTrackData`): `Title`, `Artist`, `Album`, `Genre`, `Year` (int), `Icon`, `AlbumArtFileName`, `DLCSource`, `NoteSpeed` (float — highway scroll scale), `Duration` (seconds, float), `BPM` (int), `TrackFileName`, `PreviewPercent` (0–1 float, radio preview start), `NoteCount`.
+**`TrackData.txt` schema** (written by `TrackData::OnSaveTrackData`): `Title`, `Artist`, `Album`, `Genre`, `Year` (int), `Icon`, `AlbumArtFileName`, `DLCSource`, `NoteSpeed` (float — highway scroll scale), `Duration` (seconds, float), `BPM` (int), `TrackFileName`, `PreviewPercent` (0–1 float, radio preview start), `NoteCount`, and when set `StartTime` (seconds: the start marker, see Authoring) and `Links` (`{ "Spotify": "https://...", "AppleMusic": ..., "YouTubeMusic": ... }`: the song on the streaming services, `Game/Source/UI/MusicLinks.h`).
 
 `TrackData::OnLoadTrackData` also accepts legacy keys (`SongName`, `SongArtist`, `AlbumName`), trims leading spaces off every string (the ini parser leaves them in — see Caveats), falls back to `Track.mp3` when `TrackFileName` is missing, and copies `Icon` into `m_dlcSource` when no explicit `DLCSource` exists.
 
-**`NoteData.txt` schema** (written by `TrackData::OnSaveNoteData`): `{ "Notes": [ { "EditorLane": <int PadId>, "NoteName": "snare1", "TriggerTime": <seconds float>, "TriggerTimeMS": <uint>, "Articulation": "Rim", "Velocity": 30 } ], "Beats": [ [ <seconds>, <1 measure / 0 beat> ] ], "StarPower": [ [ <start>, <end> ] ], "DrumFills": [...], "DrumSolos": [...], "Authored": true }`. The phrase lists are omitted when empty and `Authored` unless the chart was saved from the Track Editor. `Articulation` (Rim, CrossStick, Bell) is omitted when plain and `Velocity` when 100; `Beats` is omitted without a tempo map. On save, notes are sorted by time then lane and deduplicated, and `TriggerTimeMS` is recomputed as `TriggerTime * 1000`. On load (`OnLoadNoteData`), **`NoteName` is authoritative**: the lane is derived via `PadUtils::GetNewPadId(NoteName)` and the JSON `EditorLane` value is ignored.
+**`NoteData.txt` schema** (written by `TrackData::OnSaveNoteData`): `{ "Notes": [ { "EditorLane": <int PadId>, "NoteName": "snare1", "TriggerTime": <seconds float>, "TriggerTimeMS": <uint>, "Articulation": "Rim", "Velocity": 30 } ], "Beats": [ [ <seconds>, <1 measure / 0 beat> ] ], "StarPower": [ [ <start>, <end> ] ], "DrumFills": [...], "DrumSolos": [...], "Authored": true }`. The phrase lists are omitted when empty and `Authored` unless the chart was saved from the Track Editor. `Articulation` (Rim, CrossStick, Bell) is omitted when plain and `Velocity` when 100; a kick for the second bass pedal carries `"SecondPedal": true` (`NoteData::m_secondPedal`); `Beats` is omitted without a tempo map. On save, notes are sorted by time then lane and deduplicated, and `TriggerTimeMS` is recomputed as `TriggerTime * 1000`. On load (`OnLoadNoteData`), **`NoteName` is authoritative**: the lane is derived via `PadUtils::GetNewPadId(NoteName)` and the JSON `EditorLane` value is ignored.
 
 ### The track database
 
 `TrackDatabase` (singleton) scans `Assets/DLC/` in `Reload()` — every subdirectory containing a `TrackData.txt` becomes a `TrackData` entry (its `NoteData.txt` is loaded lazily by `NoteHighwayCore::SetupTrack`, not at scan time). Missing audio logs `YIKES` and skips. `RegisterNewTrack` appends a single folder after a DLC download.
 
-`SortTracks(sort, filter)` builds `m_sortedIndices`: a filter pass matching `m_dlcSource` tags (`"DS"`, `"rb1"`–`"rb4"`, `"rbb"`, `"lrb"`, `"gdrb"`, `"gh5"`, `"gh5dlc"`, `"ghwt"`, `"ghwtdlc"`) then an optional sort by title/artist/year. `GatherFilterCounts` produces per-filter counts for the UI flyout. The UI consumes indices via the menu controllers (`Docs/UI-and-Menus.md`).
+`SortTracks(sort, filter)` builds `m_sortedIndices`: a filter pass on each song's `m_dlcSource` tag, then an optional sort by title/artist/year. `GatherFilterCounts` produces per-filter counts for the UI flyout. Both go through **`TrackDatabase::FilterForSource`**, the one tag table the library and the DLC catalogue share: `ds`, `rb1`–`rb4`, `rb3dlc`, `rbb`, `lrb`, `gdrb`, `gh`/`gh1`–`gh4`, `ghwt`, `ghwtdlc`, `gh5`, `gh5dlc`, matched in any case with spaces ignored. A tag nobody knows, or none, is **Other**, which is a filter like the rest. `SourceBadge` gives a filter's short badge ("RB2", "GH5", "DS"). The UI consumes indices via the menu controllers (`Docs/UI-and-Menus.md`).
+
+`RemoveTrack(index)` deletes a song: its folder directly under `Assets/DLC/` (only a folder that holds a `TrackData.txt`), its favorite, and its entry, so every index after it moves down one. The radio is told first (`TrackRadio::OnTrackRemoved`) so it lets go of the files and keeps pointing at the right song. `ReloadTrack(index)` reads a song's `TrackData.txt` again after a DLC update replaced its files.
+
+`ChartAdvice::For(track)` is what the library's details panel shows under a song: a double bass pedal recommendation (eight or more kicks for the second pedal, by the highway's own rule, `Docs/Gameplay-Note-Highway.md`), kit pieces beyond a basic kit (second crash, splash, china, hi-hat pedal) and techniques charted (open hi-hat, rimshots, cross-stick, bell). It reads the song's `NoteData.txt` into a copy the first time and keeps the answer on the track for the session; nothing is saved.
 
 `TrackList` inherits the engine's `ConfigFile` pointed at a `TrackDatabase.json` under `Assets/` (not present in the repo), but both `OnSave` and `OnLoadConfig` are empty — the file is vestigial; the directory scan is the only source of truth.
 
@@ -59,7 +66,7 @@ Triggered by the settings-menu "Convert Custom DLC" button (or `--convert-dlc` a
 
 | MIDI pitch | `PadId` (via `GetNoteIdFromLegacy`) |
 |------------|-------------------------------------|
-| 95, 96 | `Bass` (95 is the 2x-kick note) |
+| 95, 96 | `Bass` (95 is the 2x-kick note: the note is marked `m_secondPedal`) |
 | 97 | `Snare` |
 | 98 | `ClosedHiHat`, or `HighTom` under a 110 tom marker |
 | 99 | `Ride`, or `MidTom` under a 111 tom marker |
@@ -75,16 +82,32 @@ The `.chart` text-format reader (`readSongFile`) exists but its call sites in `T
 
 ```mermaid
 flowchart LR
-    subgraph server [DLC server]
-        P[DLCParser.py] -->|scans TrackData.txt folders| IDX[dlc_index.json]
+    subgraph server [A DLC server]
+        P[DLCParser.py] -->|scans TrackData.txt folders| IDX[dlc_index.json and dlc_index.hash]
     end
-    IDX -->|fetch in DLC.vue over https| UI[DLC menu]
-    UI -->|DownloadDLC JS callback| C[DLCMenuController]
-    C -->|Web DownloadFile per FilesInFolder entry| F[Assets/DLC/folder/]
-    F --> R[TrackDatabase RegisterNewTrack]
+    IDX -->|hash first, index only when it changed| C[DLCMenuController]
+    C -->|Web DownloadFile per file, sizes checked| F[Assets/DLC/folder/]
+    F --> R[TrackDatabase RegisterNewTrack or ReloadTrack]
 ```
 
-`Assets/DLC/DLCParser.py` runs server-side over the DLC root and emits an array of `{ Album, Title, Artist, Year, DLCSource, AlbumArtFileName, FolderPath, FilesInFolder }` per song. The DLC page fetches `https://<DLCURL>/dlc_index.json` directly in JS (`Game/ui/src/DLC.vue`); a track's `DownloadDLC` handler (`DLCMenuController::DownloadDLC`) then downloads **every** file listed in `FilesInFolder` via `Web::DownloadFile` into `Assets/DLC/<FolderPath>/` and registers the track. `MainMenuController::SetDLCURL` validates a new server URL by test-downloading its `dlc_index.json` to `Assets/DLC/dlc_index.json` (that local copy is otherwise unused — the menu always fetches over the network).
+**Servers.** A DLC server is any web server holding song folders and the two files `Assets/DLC/DLCParser.py` writes beside them. The player lists servers under Settings > Songs (`GameSettings::DLCServers`; a host name or a URL, `https://` assumed without a scheme); the catalogue is every server's songs, and when two servers list the same folder the first server in the list wins. Settings checks a server when it is added and from its Test button (`MainMenuController::QueueServerCheck`): it fetches `<server>/dlc_index.json` on a worker thread and reports *Works: N songs*, *Answers, but has no Drumsmith catalogue* or *Couldn't reach it*.
+
+**The index.** `python3 DLCParser.py [root]` scans the folders under `root` and writes:
+
+- `dlc_index.json`: an array with, per song, `Title`, `Artist`, `Album`, `Year`, `Genre`, `DLCSource`, `AlbumArtFileName`, `TrackFileName`, `PreviewPercent`, `NoteCount`, `Authored` (the chart was saved from the Track Editor), `FolderPath`, `FilesInFolder`, `FileSizes` (bytes, beside `FilesInFolder`) and `Version` (a hash over every served file's name and contents). Dot-files, `desktop.ini`, `Thumbs.db` and the index files themselves aren't listed.
+- `dlc_index.hash`: the SHA-256 of `dlc_index.json`.
+
+An index from the old script (no `FileSizes`, `Version` or hash file) still works: its songs download unchecked and are never offered updates, and the index is fetched on every visit.
+
+**Fetching** (`DLCMenuController`, `Docs/UI-and-Menus.md`). Per server the page fetches `dlc_index.hash` and compares it with the hash stored beside its cached index (`Assets/DLC/.catalogue/_servers/<server>/`); the index itself is downloaded only when they differ, or when either is missing. A server that can't be reached shows its cached catalogue.
+
+**Downloading.** Every file of `FilesInFolder` goes to `Assets/DLC/<FolderPath>/`; each is checked against its `FileSizes` entry, and `TrackData.txt` must parse. A new song that fails is deleted again, so a half-downloaded folder never shows up as a song. A good one gets a note of what it was installed from, `Assets/DLC/<FolderPath>/.dlc.json` (`{ "Server", "Version" }`), and is registered (`TrackDatabase::RegisterNewTrack`).
+
+**Updates.** An installed song whose `.dlc.json` version differs from the server's `Version` is offered an **Update**: the files are downloaded over the old ones and the library's entry reloaded (`TrackDatabase::ReloadTrack`). A song with no `.dlc.json` (converted locally, or downloaded before versions) is never offered one. An update replaces a chart edited locally in the Track Editor; it only happens when the player asks.
+
+**Previews.** A song that isn't installed can be previewed: the page downloads its main mix alone (`TrackFileName`, else `song.ogg`, else the first audio file) into `Assets/DLC/.catalogue/<FolderPath>/` and the radio plays it as a guest (`TrackRadio::PlayGuest`, `Docs/Audio.md`). One preview file is kept at a time.
+
+**Removing.** Installed songs can be removed from the DLC page or the library (`TrackDatabase::RemoveTrack`), after a confirmation; the folder is deleted from disk.
 
 ### Authoring: the Track Editor
 
@@ -117,6 +140,10 @@ flowchart LR
 
 **Grid.** The grid is the chart's tempo map (`m_beats`), or its BPM in 4/4 without one; snap is on by default at a chosen division of the beat. Beats are items on the *Beats* track (move, add, remove, mark a measure start), and *Generate Beats from BPM* replaces the map with a steady one.
 
+**Start marker.** *Set Start Marker to Playhead* (Track Details > Grid and Tempo) marks where the song's first measure begins (`TrackData::m_startTime`, `StartTime` in `TrackData.txt`; a green flag on the ruler). *Generate Beats from BPM* puts a measure line on it (without a marker, on the first note), which lines a steady grid up with a recording that doesn't start on the beat. In the game the countdown counts in to the marker when it comes before the first note (`Docs/Gameplay-Note-Highway.md`).
+
+**F4** in an editor build opens the Track Editor on a song from the game: the one selected in the library or the DLC page, or the one being played (`EditTrackEvent`).
+
 **Playback and recording.** Space plays. The playhead runs on frame time steered to the stems, keeps its place when paused, and runs silently when the song has no audio. Speed slows the stems together. A *loop zone* (`Transport::SetLoop`) repeats a stretch: Ctrl-drag on the ruler marks one out, its edges drag, the ruler's right-click menu sets it from the pointer, the section or the selection, and the toolbar's Loop button (L) switches it on and off, making one from the selection, the section under the playhead or four measures when there is none. Playing into the zone's end seeks to its start; a playhead put past the end plays on. The zone is the editor's, not the chart's: it isn't saved and goes when another song opens. *Follow Playhead* (toolbar, View) is whether the timeline scrolls with the playhead while playing. With Record on and the song playing, MIDI hits (and bound keys) become notes with their velocity and stroke; MIDI hits are placed where they arrived, not at the frame that read them. A take is one undo step.
 
 **Saving.** Save writes `TrackData.txt` and `NoteData.txt`, marks the chart `Authored` and copies it into the loaded `TrackDatabase` entry. Converting from `notes.mid` again skips authored songs (`--convert-dlc-force` overrides).
@@ -138,11 +165,10 @@ MIDI input in the editor is pumped from the shared `MidiDevice` singleton, only 
 - **`DISABLE_OPTIMIZATION` at file scope** in both `Game/Source/CoreGame/TrackList.cpp` and `Game/Source/CoreGame/CustomTrackDefineTest.cpp` — the entire database scan, JSON load/save, sorting, and MIDI parsing compile without optimization **in every build config**, including release.
 - **Hardcoded musical metadata on new conversions**: `ConvertFromLegacy` sets `m_noteSpeed = 10` for every song (BPM now comes from the MIDI tempo map).
 - **`song.ini` values keep their leading space** (`artist = Foo Fighters` parses as `" Foo Fighters"`). Only keys are whitespace-stripped; loads compensate with `StringUtils::TrimLeadingSpaces`, and `pro_drums` is compared against the literal `" True"`. Shipping `TrackData.txt` files contain the padded strings.
-- **Sort lambdas copy the track list**: the `std::sort` comparators in `TrackDatabase::SortTracks` capture `trackList` **by value** — each sort copies every `TrackData` (with its strings and any loaded `m_noteData`) into the closure.
-- **Filter coverage is partial**: `GatherFilterCounts` and `SortTracks` handle different tag sets (`"gh"` and `"rb3dlc"` count but can't be selected; `GuitarHero2/3/4` and `Other` exist in the enum but match nothing) and every unrecognized `DLCSource` logs `YIKES` per track per call.
-- **`TrackListFilter`/`DLCSource` matching is exact-string** on tags inherited from `song.ini` `icon` values — one unpadded/odd tag and a track silently lands in no filter bucket.
+- **`DLCSource` tags are whatever `song.ini`'s `icon` said.** `TrackDatabase::FilterForSource` matches them in any case; a tag it doesn't know lands in Other.
 - **Recording stamps UI-frame time**: recorded notes get `TrackPreview->GetPositionMs()` at ImGui render time — MIDI arrival→frame latency is baked into authored charts (see `Docs/Latency-and-Responsiveness.md`).
-- **DLC downloads are unauthenticated plain HTTP(S) file pulls** with no hash/size validation and no partial-download cleanup; a failed multi-file download leaves a half-song folder that the next scan will happily register if `TrackData.txt` arrived.
+- **DLC downloads are unauthenticated HTTP(S) file pulls.** Sizes are checked against the index and a failed new song is deleted, but the index itself is trusted: a server can serve anything under a song's folder. File and folder names from an index are refused when they could leave the song's folder (`SafeFolder` / `SafeFile` in `DLCMenuController.cpp`). An update that fails part-way leaves a mix of old and new files; the update stays on offer.
+- **Removing a song deletes its folder**, including anything else kept in it (the original `notes.mid`, a chart edited by hand).
 - **The `TrackDatabase.json` config is dead** (empty `ConfigFile` overrides) but the `TrackList` constructor still attempts to read it from `Assets/` at startup.
 
 ## Related Docs

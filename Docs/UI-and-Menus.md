@@ -1,6 +1,8 @@
 # UI and Menus
 
 > Verified against the working tree on 2026-11-08 (the RmlUi port, not yet committed). Engine submodule at 8cee2340.
+>
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the tabbed settings panel (Drum Kit, Songs), the library's details, the DLC catalogue, the pause menu and the practice page. The rest is as last verified.
 
 The game's menus are RmlUi documents (`.rml` + `.rcss` under `Assets/UI/`) shown by the engine's `UIDocument` component, and plain game components that drive them through the engine's script view models. There is no JavaScript and no browser: every value a page shows is a model value a controller sets, and every button either carries an engine inline action (`load-scene:`, `quit`) or raises a model event the controller polls. The engine side is documented in `Engine/Docs/UI-RmlUi-and-ImGui.md`.
 
@@ -13,6 +15,7 @@ Each menu scene has one entity carrying two components: a `UIDocument` naming th
 | `Assets/MainMenu.lvl` | `Assets/UI/MainMenu.rml` | `main_menu` | `MainMenuController` |
 | `Assets/TrackList.lvl` | `Assets/UI/TrackList.rml` | `song_library` | `TrackListMenuController` |
 | `Assets/DLC.lvl` | `Assets/UI/DLC.rml` | `dlc_store` | `DLCMenuController` |
+| `Assets/Practice.lvl` | `Assets/UI/Practice.rml` | `practice_menu` | `PracticeMenuController` (`Docs/Practice.md`) |
 | `Assets/Example.lvl` (gameplay) | `Assets/UI/InGameMenu.rml` | `in_game` | `InGameMenuController` |
 | `Assets/TrackStats.lvl` | `Assets/UI/TrackStats.rml` | none | `TrackStatsMenuController` (Escape only) |
 | `Assets/Vocals.lvl` | `Assets/UI/Vocals.rml` | `vocals` | `VocalsTestCore` fills it; `VocalsTestComponent` only tags the entity |
@@ -24,7 +27,8 @@ Each menu scene has one entity carrying two components: a `UIDocument` naming th
 | `Assets/UI/Drumsmith.rcss` | Shared controls: buttons with the coloured underline, sliders, scrollbars, the plain "menu page" layout |
 | `Assets/UI/Radio.rcss` | The radio widget both the main menu and the DLC page carry |
 | `Assets/UI/Library.rcss` | The list/details/footer/flyout layout the song library and the DLC catalogue share |
-| `Assets/UI/MainMenu.rcss`, `InGameMenu.rcss`, `Vocals.rcss` | Per-page layout |
+| `Assets/UI/MainMenu.rcss`, `InGameMenu.rcss`, `Vocals.rcss`, `Practice.rcss` | Per-page layout |
+| `Game/Source/UI/MusicLinks.h/.cpp` | The song panels' links out to Spotify, Apple Music and YouTube Music |
 | `Game/Source/Components/*MenuController.h/.cpp` | The controllers |
 | `Game/Source/Cores/MenuCore.h/.cpp` | Ticks the controllers of the loaded scene |
 | `Game/Source/UI/TrackRadioUtils.h/.cpp` | The radio: random playback between menus, and the `radio_*` values and events of a page's model |
@@ -55,13 +59,17 @@ for( std::string e; !( e = ui->ModelPollEvent( "main_menu" ) ).empty(); )
 
 ### Main menu (`main_menu`)
 
-Six links (Practice is a disabled placeholder) and a settings panel over the same backdrop. The panel's sliders bind two-way with `data-value`, and `ApplySettings( false )` copies them into `GameSettings` every frame while it is open; Back, Escape and Save Settings write the file. The DLC server is a text field (host name; a scheme is optional, trailing slashes are stripped). MIDI devices are listed from `MidiDevice::GetDevices()` as choice buttons, and the chosen name is what `PreferredMidiDevice` stores.
+Six links and a settings panel over the same backdrop. The panel is five tabs (`settings_tab`): **Game** (highway speed, technique, lyrics), **Sound & Timing** (radio volume, the metronome, the two delays, the way into the calibration), **Venue** (stage lights, venue, room, camera), **Drum Kit** and **Songs**. The sliders bind two-way with `data-value`, and `ApplySettings( false )` copies them into `GameSettings` every frame while the panel is open; Back, Escape and Save Settings write the file.
 
-The **visual latency test** replaces the old pixel-based widget: while the test runs, a marker sweeps a box every 2 s and the controller watches the keyboard (`UpdateLatencyTest`; Escape, Tab, Enter and Space are excluded because the UI reacts to them). Each press records `(marker position - centre)` in milliseconds, positive when late; the page shows the last value and the rolling average of 10, and "Use the average" copies that into the Visual Delay slider. Nothing consumes `VideoLatency` yet (`Docs/Latency-and-Responsiveness.md`).
+**Drum Kit.** MIDI devices are listed from `MidiDevice::GetDevices()` as choice buttons; choosing one stores its name (`PreferredMidiDevice`) and opens it at once, and the list follows devices being plugged in and unplugged (`MidiDevice::GetGeneration`, `Docs/MIDI-and-Pads.md`). Below it every pad has a **Key** and a **MIDI** button (`pads` list; `RefreshPads`): press one, then press the key or hit the pad (`UpdateKitBinding`; Escape cancels, and Escape itself can't be bound). A captured MIDI note becomes the pad's main note and is dropped from its other strokes. *Clear* unbinds a pad, *Use the standard e-kit MIDI notes* calls `PadMappingStorage::ApplyStandardKitMidi`, and *Last hit* shows what every incoming note is bound to while the panel is open. Changes apply to `PadMappingStorage` at once and are written to `Assets/Config/PadMappings.json` with the settings (Save, Back or Escape).
+
+**Songs.** The DLC servers (`GameSettings::DLCServers`) as rows with *Test* and *Remove*, and a text field with *Add and test this server* (a server typed but not added is added on Save). A test runs on a worker thread and the row shows the answer (`QueueServerCheck` / `PumpServerChecks`, `Docs/Songs-and-DLC.md`). *Convert Custom DLC* is here too.
+
+**Calibrate audio and video** (the `calibrate` event) saves the panel, starts a `Calibration` session and loads `Assets/Example.lvl` with `LaunchPlayTrackEvent::TrackID = Calibration::kTrackId`, the way the practice page starts a lesson. The session runs on the highway and its HUD (`#hud-calibration`, `#calibration-results` in `InGameMenu.rml`; the `in_game` model's `calibration` and `cal_*` values); *Use these* (`cal_apply`, `InGameMenuController`) writes the delays and returns here, as do Back and Escape. It replaced the keyboard-only visual latency test that sat on this tab (`Docs/Latency-and-Responsiveness.md` → Calibration).
 
 ### The radio widget (`TrackRadioUtils`)
 
-Both pages that play menu music carry the same markup (`#track-radio`, styled by `Assets/UI/Radio.rcss`) and give their model to a `TrackRadioUtils`. It ticks `TrackRadio::Update`, auto-plays the next random track, and fills `radio_title`, `radio_artist`, `radio_art`, `radio_position`, `radio_duration`, `radio_progress` (0..1000) and `radio_visible`. The widget slides in for a new track or a hover (`radio_show`, also raised by a hover zone where it hides) and slides out 15 s later. Events: `skip`, `seek(ev.value)`, `radio_play` (the widget's Play button: `PlayRadioTrack` loads the gameplay scene with the song on the radio). `TrackRadioUtils::LaunchTrack( index )` is the one place a menu starts a song; the library, the DLC page and the radio all call it. `TrackRadio` therefore still only advances while a menu with the widget is loaded (`Docs/Audio.md`).
+Both pages that play menu music carry the same markup (`#track-radio`, styled by `Assets/UI/Radio.rcss`) and give their model to a `TrackRadioUtils`. It ticks `TrackRadio::Update`, auto-plays the next random track, and fills `radio_title`, `radio_artist`, `radio_art`, `radio_position`, `radio_duration`, `radio_progress` (0..1000) and `radio_visible`. The widget slides in for a new track or a hover (`radio_show`, also raised by a hover zone where it hides) and slides out 15 s later. Events: `skip`, `seek(ev.value)`, `radio_play` (the widget's Play button: `PlayRadioTrack` loads the gameplay scene with the song on the radio). `TrackRadioUtils::LaunchTrack( index )` is the one place a menu starts a song; the library, the DLC page and the radio all call it. `MenuCore::Update` ticks `TrackRadio` itself on every page, so a page without the widget still loads, fades and finishes its songs; only a page with the widget starts the next random one (`Docs/Audio.md`).
 
 `TrackRadioUtils::ArtSource` is the one place album-art paths are built: `/Assets/DLC/<song>/<art>`. The leading slash makes RmlUi resolve the path through the VFS instead of relative to the document.
 
@@ -69,22 +77,30 @@ Both pages that play menu music carry the same markup (`#track-radio`, styled by
 
 `TrackListMenuController::PopulateModel` turns `TrackDatabase::SortTracks( sort, filter )` into the `tracks` list (category headers when sorting by title, artist or year) and the `filters` list with counts. Hovering or focusing a row selects it (details panel, and a radio preview of the song after 0.25 s); clicking the art or PLAY loads the gameplay scene with that track; View Stats loads `Assets/TrackStats.lvl`. The footer button opens the sort/filter flyout; a scrim click or Escape closes it.
 
+**Details.** Under the song's fields the panel shows its source badge ("RB2", "DS"; `TrackDatabase::SourceBadge`), *DS READY* once the chart is known to be one saved from the Track Editor, and what the chart recommends (`advice` list, `ChartAdvice::For`: a double bass pedal, extra kit pieces, techniques), filled 0.25 s after the selection settles since it reads the chart file. *Hear the original on* links out to Spotify, Apple Music and YouTube Music (`MusicLinks::Open`: the chart's own `Links`, else a search for the artist and title, in the player's browser). *Remove* deletes the song after a second, explicit yes (`TrackDatabase::RemoveTrack`). In editor builds *Edit chart* and **F4** open the song in the Track Editor.
+
 **Search and favorites.** The search box (`search`, bound two-way) narrows the sorted, filtered list as you type: every word must appear in the title, artist, album or genre, any case. The controller compares the model's text with its own copy each frame and repopulates when it moves; Clear or Escape (with the flyout closed) empties it. Each row has a star (`favorite(track.index)`), the details panel a Favorite button, and the Favorites toggle beside the search box (also in the flyout's Filter section) lists only favorites (`favorites_only`, `favorite_count`). Favorites are saved at once in `Settings.json` (`GameSettings::FavoriteTracks`) under the song's folder name (`TrackDatabase::FavoriteKey`), so a rescan or reinstall keeps them; two DLC folders with the same name would share a star.
 
 ### DLC catalogue (`dlc_store`)
 
-`DLCMenuController` owns the whole flow the old page split between JavaScript and C++:
+`DLCMenuController` shows every song of every server in `GameSettings::DLCServers` (the formats and rules are in `Docs/Songs-and-DLC.md`):
 
-1. **Index:** the first update queues a download of `<server>/dlc_index.json` to `Assets/DLC/dlc_index.download`; on success the file replaces `Assets/DLC/dlc_index.json`, so a failed fetch never truncates the cached copy. With no server set, or when the server can't be reached, the cached copy is shown with a status line saying so.
-2. **Catalogue:** each entry (`Title`, `Artist`, `Album`, `Year`, `DLCSource`, `AlbumArtFileName`, `FolderPath`, `FilesInFolder`; `Assets/DLC/DLCParser.py`) becomes a `CatalogueTrack`. A track already in `TrackDatabase` (its source path contains `/<FolderPath>/`) is marked installed and gets PLAY, Preview and (editor builds) Edit chart instead of a download button.
+1. **Index:** per server, a fetch of `dlc_index.hash`; the index itself is downloaded only when the hash differs from the cached copy's (`Assets/DLC/.catalogue/_servers/<server>/`). Each server's songs are appended as it answers (`AppendIndex`); a song an earlier server already lists is skipped. The status line counts songs and servers and names the servers that couldn't be reached (their cached catalogue is shown).
+2. **Catalogue:** each entry becomes a `CatalogueTrack`. A track already in `TrackDatabase` (its source path contains `/<FolderPath>/`) is installed: PLAY, Preview, Remove and (editor builds) Edit chart; when the server's `Version` differs from the one noted at download it also gets **Update** (`RefreshInstallState`). Rows carry the source badge and *DS READY* for charts made in the Track Editor.
 3. **Art:** covers are prefetched one at a time into `Assets/DLC/.catalogue/<FolderPath>/<art>`; rows show `img/track-bg.png` until theirs arrives. The library scan ignores dot-folders.
-4. **Download:** `download(index)` queues every file of `FilesInFolder` into `Assets/DLC/<FolderPath>/`, ahead of the art prefetch; the row shows `Downloading n/m`. When all files landed, `TrackDatabase::RegisterNewTrack` adds the song and the radio plays it (`PlayLatestTrack`), as the old page did.
+4. **Download and update:** `download(index)` / `update(index)` queue every file of `FilesInFolder` into `Assets/DLC/<FolderPath>/`, ahead of the art prefetch; the row shows `Downloading n/m`. Sizes are checked; a new song that fails is deleted, a good one is registered and played on the radio (`PlayLatestTrack`), an updated one reloaded.
+5. **Preview:** on a song that isn't installed, Preview fetches its main mix into the catalogue cache and the radio plays it as a guest (`QueuePreview`, `TrackRadio::PlayGuest`).
+6. **Remove:** asks once in the details panel, then deletes the song's folder (`RemoveInstalled`). The other songs' library indices are re-resolved.
 
-All network work runs on one worker thread, one `Transfer` at a time (`Web::DownloadFile` per file); `Update` polls it and does every model and database change on the main thread. Sorting and filtering are the library's (`TrackListSort`, `TrackListFilter` by `DLCSource` tag, the same tag table as `TrackDatabase::GatherFilterCounts`).
+All network work runs on one worker thread, one `Transfer` at a time (`Web::DownloadFile` per file); `Update` polls it and does every model and database change on the main thread. Sorting and filtering are the library's (`TrackListSort`, `TrackListFilter` through `TrackDatabase::FilterForSource`). The details panel also has the *Hear the original on* links.
 
 ### Pause menu (`in_game`)
 
-Escape or Resume toggles the overlay (in editor builds **Shift+Escape**: plain Escape belongs to Havana, which frees the mouse and hands input to the editor while the song keeps playing; the `pause_hint` model value shows the right key, and the results screen's leave-for-library key follows the same rule) and fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; `NoteHighwayCore` also stops ticking while paused. Options holds the two delay sliders (saved on Back) and Exit returns to the library. The controller focuses the right button after each panel change so a gamepad can drive it.
+Escape or Resume toggles the overlay (in editor builds **Shift+Escape**: plain Escape belongs to Havana, which frees the mouse and hands input to the editor while the song keeps playing; the `pause_hint` model value shows the right key, and the results screen's leave-for-library key follows the same rule) and fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; `NoteHighwayCore` also stops ticking while paused. Options holds the two delay sliders (saved on Back) and Exit returns to the library (to the lessons after a practice lesson). The controller focuses the right button after each panel change so a gamepad can drive it. Resuming pulls the song back two seconds and fades it in (`Docs/Gameplay-Note-Highway.md`). If the MIDI device is unplugged mid-song the controller pauses and the menu says so (`midi_notice`); it also says when the device is back. In editor builds **F4** opens the song in the Track Editor.
+
+### Practice (`practice_menu`)
+
+`PracticeMenuController` lists the lessons of `Assets/Practice/Lessons.json` by category, with the chosen one's description, pattern, tempo (a slider and -5 / +5, remembered per lesson in `GameSettings::PracticeTempos`) and length (8, 16 or 32 bars). START builds the lesson's chart and click track (`Practice::Begin`) and loads the gameplay scene with `LaunchPlayTrackEvent::TrackID` set to `Practice::kTrackId`. `Docs/Practice.md` has the rest.
 
 ### Track stats and vocal test
 
@@ -104,7 +120,9 @@ Nothing records play statistics, so `TrackStats.rml` says so and offers Back. `V
 - **Tab is focus navigation, not the flyout.** The old pages opened the sort/filter flyout on Tab; RmlUi uses Tab (and the dpad) to move focus, so the footer button and Escape are the only ways to open and close it.
 - **`MenuCore` ticks controllers by type.** A new controller must be added to its `Update`, and a new menu scene must declare `MenuCore` in its `Cores`, or the page stays static.
 - **MIDI devices are matched by name.** The settings panel stores the chosen device's name; two devices with the same name are indistinguishable (`Docs/MIDI-and-Pads.md`).
-- **The latency test only hears the keyboard.** MIDI pads don't register, and `VideoLatency` is still read by nothing.
+- **Space and Enter also press the focused button.** Binding one of them to a pad would click the pad's Key button again, so `bind_key` / `bind_midi` events are ignored for 0.3 s after either is bound (`m_bindIgnore`).
+- **A server check in flight is joined on scene change**, like the DLC worker.
+- **The music links open the system browser** (`SDL_OpenURL`); nothing checks that the search finds the song.
 - **Leftovers:** the Vue project (`Game/ui/`) and the old HTML/CSS/JS under `Assets/UI/` are unused and ship with the assets until deleted.
 
 ## Related Docs

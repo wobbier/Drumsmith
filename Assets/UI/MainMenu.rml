@@ -12,7 +12,7 @@
         <img class="brand-underline" src="img/Underline.png"/>
         <div class="main-menu-items">
             <button id="play" class="menu-link blue" autofocus onclick="load-scene:Assets/TrackList.lvl">PLAY<span class="underline"></span></button>
-            <button id="practice" class="menu-link green disabled">PRACTICE<span class="underline"></span></button>
+            <button id="practice" class="menu-link green" onclick="load-scene:Assets/Practice.lvl">PRACTICE<span class="underline"></span></button>
             <button id="dlc" class="menu-link pink" onclick="load-scene:Assets/DLC.lvl">DLC<span class="underline"></span></button>
             <button id="vocals" class="menu-link pink" onclick="load-scene:Assets/Vocals.lvl">Vocal Test<span class="underline"></span></button>
             <button id="settings" class="menu-link orange" data-event-click="open_settings">SETTINGS<span class="underline"></span></button>
@@ -22,82 +22,124 @@
     <div id="settings-menu" data-if="settings_open">
         <button id="settings-back" class="menu-link blue" data-event-click="close_settings">&lt; Back<span class="underline"></span></button>
         <h1>SETTINGS</h1>
-        <div class="setting-row">
-            <label>Radio Volume <span>{{radio_volume}}%</span></label>
-            <input id="radio-volume" type="range" min="0" max="100" step="1" data-value="radio_volume"/>
+        <div id="settings-tabs">
+            <button id="tab-game" class="settings-tab" data-class-selected="settings_tab == 0" data-event-click="settings_tab(0)">Game</button>
+            <button id="tab-sound" class="settings-tab" data-class-selected="settings_tab == 1" data-event-click="settings_tab(1)">Sound &amp; Timing</button>
+            <button id="tab-venue" class="settings-tab" data-class-selected="settings_tab == 2" data-event-click="settings_tab(2)">Venue</button>
+            <button id="tab-kit" class="settings-tab" data-class-selected="settings_tab == 3" data-event-click="settings_tab(3)">Drum Kit</button>
+            <button id="tab-songs" class="settings-tab" data-class-selected="settings_tab == 4" data-event-click="settings_tab(4)">Songs</button>
         </div>
-        <div class="setting-row">
-            <label>Audio Delay <span>{{audio_delay}} ms</span></label>
-            <input id="audio-delay" type="range" min="0" max="100" step="1" data-value="audio_delay"/>
-        </div>
-        <div class="setting-row">
-            <label>Visual Delay <span>{{video_delay}} ms</span></label>
-            <input id="video-delay" type="range" min="0" max="100" step="1" data-value="video_delay"/>
-        </div>
-        <div class="setting-row">
-            <label>Highway Speed <span>{{highway_speed}}%</span></label>
-            <input id="highway-speed" type="range" min="50" max="200" step="5" data-value="highway_speed"/>
-        </div>
-        <div class="setting-row">
-            <label>Technique <span>open/closed hi-hat, rimshots, bells</span></label>
-            <button id="technique-off" class="device-choice" data-class-selected="technique == 0" data-event-click="technique(0)">Off: any stroke on the right drum counts</button>
-            <button id="technique-lenient" class="device-choice" data-class-selected="technique == 1" data-event-click="technique(1)">Lenient: wrong stroke is one grade lower</button>
-            <button id="technique-strict" class="device-choice" data-class-selected="technique == 2" data-event-click="technique(2)">Strict: wrong stroke is a miss</button>
-        </div>
-        <div class="setting-row">
-            <label>Stage Lights <span>the light show from the chart</span></label>
-            <button id="lighting-full" class="device-choice" data-class-selected="stage_lighting == 2" data-event-click="stage_lighting(2)">Full show</button>
-            <button id="lighting-gentle" class="device-choice" data-class-selected="stage_lighting == 1" data-event-click="stage_lighting(1)">No strobes or flashes</button>
-            <button id="lighting-off" class="device-choice" data-class-selected="stage_lighting == 0" data-event-click="stage_lighting(0)">Off</button>
-        </div>
-        <div class="setting-row">
-            <label>Venue <span>the stage, band and crowd under the highway</span></label>
-            <button id="venue-full" class="device-choice" data-class-selected="venue == 2" data-event-click="venue(2)">Band and crowd</button>
-            <button id="venue-band" class="device-choice" data-class-selected="venue == 1" data-event-click="venue(1)">Band only</button>
-            <button id="venue-off" class="device-choice" data-class-selected="venue == 0" data-event-click="venue(0)">Off</button>
-        </div>
-        <div class="setting-row">
-            <label>Room <span>where the band plays (F7 swaps it mid-song)</span></label>
-            <button id="venue-style-arena" class="device-choice" data-class-selected="venue_style == 0" data-event-click="venue_style(0)">Arena</button>
-            <button id="venue-style-club" class="device-choice" data-class-selected="venue_style == 1" data-event-click="venue_style(1)">Club</button>
-            <button id="venue-style-festival" class="device-choice" data-class-selected="venue_style == 2" data-event-click="venue_style(2)">Festival</button>
-            <button id="venue-style-random" class="device-choice" data-class-selected="venue_style == 3" data-event-click="venue_style(3)">Random</button>
-        </div>
-        <div class="setting-row">
-            <label>Venue Camera <span>whose camera cuts to follow</span></label>
-            <button id="venue-camera-live" class="device-choice" data-class-selected="venue_camera == 0" data-event-click="venue_camera(0)">Live show</button>
-            <button id="venue-camera-mv" class="device-choice" data-class-selected="venue_camera == 1" data-event-click="venue_camera(1)">Music video</button>
-        </div>
-        <div class="setting-row">
-            <label>Lyrics <span>karaoke lines, where the chart has them</span></label>
-            <button id="lyrics-both" class="device-choice" data-class-selected="lyrics == 3" data-event-click="lyrics(3)">Both</button>
-            <button id="lyrics-hud" class="device-choice" data-class-selected="lyrics == 1" data-event-click="lyrics(1)">HUD</button>
-            <button id="lyrics-venue" class="device-choice" data-class-selected="lyrics == 2" data-event-click="lyrics(2)">Venue</button>
-            <button id="lyrics-off" class="device-choice" data-class-selected="lyrics == 0" data-event-click="lyrics(0)">Off</button>
-        </div>
-        <div class="setting-row">
-            <label>DLC Server <span>host name, without http://</span></label>
-            <input id="dlc-server" type="text" data-value="dlc_url"/>
-        </div>
-        <div class="setting-row">
-            <label>Select a MIDI Device</label>
-            <button class="device-choice" data-for="device : devices" data-class-selected="midi_device == device.name" data-event-click="select_device(device.name)">{{device.name}}</button>
-            <p data-if="devices.size == 0">No devices available</p>
-            <p class="selected-device">Selected device: {{midi_device == '' ? 'None' : midi_device}}</p>
-            <button class="small-action" data-event-click="refresh_devices">Refresh devices</button>
-        </div>
-        <div class="setting-row">
-            <label>Visual Latency Test</label>
-            <p>Start the test, then hit any letter key as the line crosses the centre. Positive means you were late.</p>
-            <div id="latency-box" data-class-active="latency_active">
-                <div class="latency-target"></div>
-                <div class="latency-marker" data-style-left="latency_marker"></div>
+        <div class="settings-page" data-if="settings_tab == 0">
+            <div class="setting-row">
+                <label>Highway Speed <span>{{highway_speed}}%</span></label>
+                <input id="highway-speed" type="range" min="50" max="200" step="5" data-value="highway_speed"/>
             </div>
-            <p id="latency-results">Last: {{latency_last}} &#183; Average: {{latency_average}} ({{latency_samples}} of 10 samples)</p>
-            <button id="latency-toggle" class="small-action" data-event-click="latency_toggle">{{latency_active ? 'Stop test' : 'Start test'}}</button>
-            <button id="latency-apply" class="small-action" data-if="latency_samples > 0" data-event-click="latency_apply">Use the average as the visual delay</button>
+            <div class="setting-row">
+                <label>Technique <span>open/closed hi-hat, rimshots, bells</span></label>
+                <button id="technique-off" class="device-choice" data-class-selected="technique == 0" data-event-click="technique(0)">Off: any stroke on the right drum counts</button>
+                <button id="technique-lenient" class="device-choice" data-class-selected="technique == 1" data-event-click="technique(1)">Lenient: wrong stroke is one grade lower</button>
+                <button id="technique-strict" class="device-choice" data-class-selected="technique == 2" data-event-click="technique(2)">Strict: wrong stroke is a miss</button>
+            </div>
+            <div class="setting-row">
+                <label>Lyrics <span>karaoke lines, where the chart has them</span></label>
+                <button id="lyrics-both" class="device-choice" data-class-selected="lyrics == 3" data-event-click="lyrics(3)">Both</button>
+                <button id="lyrics-hud" class="device-choice" data-class-selected="lyrics == 1" data-event-click="lyrics(1)">HUD</button>
+                <button id="lyrics-venue" class="device-choice" data-class-selected="lyrics == 2" data-event-click="lyrics(2)">Venue</button>
+                <button id="lyrics-off" class="device-choice" data-class-selected="lyrics == 0" data-event-click="lyrics(0)">Off</button>
+            </div>
         </div>
-        <button id="convert-dlc" class="small-action pink" data-event-click="convert_dlc">Convert Custom DLC</button>
+        <div class="settings-page" data-if="settings_tab == 1">
+            <div class="setting-row">
+                <label>Radio Volume <span>{{radio_volume}}%</span></label>
+                <input id="radio-volume" type="range" min="0" max="100" step="1" data-value="radio_volume"/>
+            </div>
+            <div class="setting-row">
+                <label>Metronome <span>a click on every beat, over the song</span></label>
+                <button id="metronome-off" class="device-choice" data-class-selected="metronome == 0" data-event-click="metronome(0)">Off</button>
+                <button id="metronome-on" class="device-choice" data-class-selected="metronome == 1" data-event-click="metronome(1)">On</button>
+            </div>
+            <div class="setting-row">
+                <label>Audio Delay <span>{{audio_delay}} ms</span></label>
+                <input id="audio-delay" type="range" min="0" max="250" step="1" data-value="audio_delay"/>
+            </div>
+            <div class="setting-row">
+                <label>Visual Delay <span>{{video_delay}} ms</span></label>
+                <input id="video-delay" type="range" min="0" max="250" step="1" data-value="video_delay"/>
+            </div>
+            <div class="setting-row">
+                <label>Calibration</label>
+                <p>Finds both delays for you, in about half a minute on the note highway: first hit as each note crosses the line, in silence, then hit on every click with nothing to watch. Use the kit and the screen and speakers you play with.</p>
+                <button id="calibrate" class="small-action" data-event-click="calibrate">Calibrate audio and video</button>
+            </div>
+        </div>
+        <div class="settings-page" data-if="settings_tab == 2">
+            <div class="setting-row">
+                <label>Stage Lights <span>the light show from the chart</span></label>
+                <button id="lighting-full" class="device-choice" data-class-selected="stage_lighting == 2" data-event-click="stage_lighting(2)">Full show</button>
+                <button id="lighting-gentle" class="device-choice" data-class-selected="stage_lighting == 1" data-event-click="stage_lighting(1)">No strobes or flashes</button>
+                <button id="lighting-off" class="device-choice" data-class-selected="stage_lighting == 0" data-event-click="stage_lighting(0)">Off</button>
+            </div>
+            <div class="setting-row">
+                <label>Venue <span>the stage, band and crowd under the highway</span></label>
+                <button id="venue-full" class="device-choice" data-class-selected="venue == 2" data-event-click="venue(2)">Band and crowd</button>
+                <button id="venue-band" class="device-choice" data-class-selected="venue == 1" data-event-click="venue(1)">Band only</button>
+                <button id="venue-off" class="device-choice" data-class-selected="venue == 0" data-event-click="venue(0)">Off</button>
+            </div>
+            <div class="setting-row">
+                <label>Room <span>where the band plays (F7 swaps it mid-song)</span></label>
+                <button id="venue-style-arena" class="device-choice" data-class-selected="venue_style == 0" data-event-click="venue_style(0)">Arena</button>
+                <button id="venue-style-club" class="device-choice" data-class-selected="venue_style == 1" data-event-click="venue_style(1)">Club</button>
+                <button id="venue-style-festival" class="device-choice" data-class-selected="venue_style == 2" data-event-click="venue_style(2)">Festival</button>
+                <button id="venue-style-random" class="device-choice" data-class-selected="venue_style == 3" data-event-click="venue_style(3)">Random</button>
+            </div>
+            <div class="setting-row">
+                <label>Venue Camera <span>whose camera cuts to follow</span></label>
+                <button id="venue-camera-live" class="device-choice" data-class-selected="venue_camera == 0" data-event-click="venue_camera(0)">Live show</button>
+                <button id="venue-camera-mv" class="device-choice" data-class-selected="venue_camera == 1" data-event-click="venue_camera(1)">Music video</button>
+            </div>
+        </div>
+        <div class="settings-page" data-if="settings_tab == 3">
+            <div class="setting-row">
+                <label>Select a MIDI Device</label>
+                <button class="device-choice" data-for="device : devices" data-class-selected="midi_device == device.name" data-event-click="select_device(device.name)">{{device.name}}</button>
+                <p data-if="devices.size == 0">No devices available</p>
+                <p class="selected-device">Selected device: {{midi_device == '' ? 'None' : midi_device}}</p>
+                <p class="selected-device">{{midi_open == '' ? 'No device connected. Plug one in and it appears here.' : 'Connected: ' + midi_open}}</p>
+                <button class="small-action" data-event-click="refresh_devices">Refresh devices</button>
+            </div>
+            <div class="setting-row">
+                <label>Drum Kit <span>the key and the MIDI note that play each pad</span></label>
+                <p>Press a pad's Key or MIDI button, then press the key or hit the pad. Esc cancels.</p>
+                <div class="kit-row" data-for="pad : pads">
+                    <span class="kit-name">{{pad.name}}</span>
+                    <button class="kit-bind key" data-class-armed="pad.binding == 1" data-event-click="bind_key(pad.id)">{{pad.key}}</button>
+                    <button class="kit-bind midi" data-class-armed="pad.binding == 2" data-event-click="bind_midi(pad.id)">{{pad.midi}}</button>
+                    <button class="kit-clear" data-event-click="kit_clear(pad.id)">Clear</button>
+                    <span class="kit-extra">{{pad.extra}}</span>
+                </div>
+                <p>Last hit: {{kit_last}}</p>
+                <button id="kit-standard" class="small-action" data-event-click="kit_standard">Use the standard e-kit MIDI notes</button>
+            </div>
+        </div>
+        <div class="settings-page" data-if="settings_tab == 4">
+            <div class="setting-row">
+                <label>DLC Servers <span>where Download Songs gets its catalogue</span></label>
+                <div class="server-row" data-for="server : servers">
+                    <span class="server-url">{{server.url}}</span>
+                    <span class="server-status" data-class-ok="server.state == 2" data-class-bad="server.state == 3">{{server.status}}</span>
+                    <button class="kit-clear server-test" data-event-click="server_test(server.index)">Test</button>
+                    <button class="kit-clear server-remove" data-event-click="server_remove(server.index)">Remove</button>
+                </div>
+                <p data-if="servers.size == 0">No servers yet. Add one below.</p>
+                <input id="dlc-server" type="text" placeholder="dlc.example.com" data-value="dlc_url"/>
+                <button id="server-add" class="small-action" data-event-click="server_add">Add and test this server</button>
+                <p>A server is a host name or a URL; https is assumed without one. Adding it checks that it has a Drumsmith catalogue.</p>
+            </div>
+            <div class="setting-row">
+                <label>Custom Songs <span>Rock Band and Clone Hero folders in Assets/DLC</span></label>
+                <button id="convert-dlc" class="small-action pink" data-event-click="convert_dlc">Convert Custom DLC</button>
+            </div>
+        </div>
         <button id="save-settings" class="menu-link green" data-event-click="save_settings">Save Settings<span class="underline"></span></button>
         <p id="settings-status">{{settings_status}}</p>
     </div>

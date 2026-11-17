@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "Config.h"
 #include "Editor/PadBindings.h"
 #include <array>
@@ -23,6 +24,8 @@ struct NoteData
     // Ghost notes are quiet (<= 40), accents loud (>= 120).
     Articulation m_articulation = Articulation::Normal;
     uint8_t m_velocity = 100;
+    // A kick the chart marks for the second bass pedal (Rock Band's 2x kick note, MIDI 95).
+    bool m_secondPedal = false;
 
     bool operator==( const NoteData& other ) const
     {
@@ -167,6 +170,12 @@ public:
     float m_duration = 1.f;
     float m_durationMS = 1.f;
     float m_previewPercent = 0.f;
+    // The start marker (seconds; 0 when the chart has none): where the song's first measure
+    // begins. A steady beat grid is laid from it (Track Editor > Generate Beats from BPM) and the
+    // countdown counts in to it when it comes before the first note.
+    float m_startTime = 0.f;
+    // The song on the streaming services (UI/MusicLinks.h), by service: "Links" in TrackData.txt.
+    std::map<std::string, std::string> m_links;
     int m_bpm = 69;
     int m_noteCount = 0;
     bool m_proDrums = false;
@@ -183,6 +192,15 @@ public:
     std::vector<VenueData::SpanData> m_drumSolos;
     // Saved from the Track Editor: converting from notes.mid again leaves the chart alone.
     bool m_authored = false;
+    // What the chart asks of the player's kit (ChartAdvice::For fills it on first use; not saved).
+    std::vector<std::string> m_advice;
+    bool m_adviceKnown = false;
+    // A practice lesson's chart (CoreGame/Practice.h): not a library song, never saved; it plays
+    // without the venue and shows its sticking on the HUD's lyric line.
+    bool m_practice = false;
+    // The delay calibration's chart (CoreGame/Calibration.h): built in memory like a lesson's;
+    // the highway measures the hits against it instead of judging them.
+    bool m_calibration = false;
 
 private:
     std::string m_directory;
@@ -250,6 +268,17 @@ public:
     void GatherFilterCounts();
 
     std::string GetFilterName( TrackListFilter inFilter );
+    // The filter a song's DLCSource tag belongs to (any case): the one tag table the library and
+    // the DLC catalogue share. A tag nobody knows, or none, is Other.
+    static TrackListFilter FilterForSource( const std::string& inSource );
+    // A few letters for a source's badge beside a song ("DS", "RB2", "GH5"); empty for Other.
+    static const char* SourceBadge( TrackListFilter inFilter );
+
+    // Deletes a song's folder under Assets/DLC and drops it from the list. Every index after it
+    // moves down one: callers holding indices re-resolve them (the radio is told here).
+    bool RemoveTrack( int inIndex );
+    // Reads a song's TrackData.txt again after its files changed (a DLC update).
+    void ReloadTrack( int inIndex );
 
     // Favorites live in GameSettings, keyed by the song's folder name; SetFavorite saves them.
     static std::string FavoriteKey( const TrackData& inTrack );

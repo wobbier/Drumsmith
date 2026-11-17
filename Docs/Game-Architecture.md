@@ -1,6 +1,8 @@
 # Game Architecture
 
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
+>
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the `DLCServers` and `PracticeTempos` settings rows. The rest is as last verified.
 
 How Drumsmith hangs off MitchEngine: the entry point, what gets registered, how scenes and events wire the game flow together, the global singletons, and the settings file. For the engine side of everything here (frame loop, ECS, events), see `Engine/Docs/Architecture.md`, `Engine/Docs/ECS.md`, and `Engine/Docs/Jobs-and-Events.md`.
 
@@ -93,10 +95,12 @@ All are `ME_SINGLETON_DEFINITION`, lazily constructed on first `GetInstance()`, 
 | Field | JSON key | Written by | Read by |
 |-------|----------|------------|---------|
 | `RadioVolume` | `RadioVolume` | `MainMenuController::ApplySettings` (slider, applied live) | `TrackRadio` (applied to the radio `AudioPack` when a track starts playing) |
-| `DLCURL` | `DLCURL` | `MainMenuController::ApplySettings` on save (trimmed, no validation) | `DLCMenuController` (index, art and song downloads) |
+| `DLCServers` (`DLCURL` is the first, kept for old files) | `DLCServers`, `DLCURL` | `MainMenuController` (Settings > Songs: add, remove; each can be tested) | `DLCMenuController` (indexes, art, previews and song downloads) |
+| `Metronome` | `Metronome` | `MainMenuController` (`metronome` event), `InGameMenuController` (pause options) | `NoteHighwayCore::UpdateMetronome` (`Docs/Audio.md` → Metronome) |
+| `PracticeTempos` | `PracticeTempos` | `PracticeMenuController::StartLesson` | `PracticeMenuController::SelectLesson` (the tempo a lesson opens at) |
 | `PreferredMidiDevice` | `Device` | `MainMenuController::ApplySettings` (device choice buttons) | `NoteHighwayCore::OnAddedToWorld` → `MidiDevice::OpenMidiDevice` |
-| `AudioLatency` | `AudioLatency` | `MainMenuController::ApplySettings`, `InGameMenuController` (pause options) | **nothing** — persisted but never consumed |
-| `VideoLatency` | `VideoLatency` | `MainMenuController::ApplySettings` (slider or the latency test's average), `InGameMenuController` | **nothing** — persisted but never consumed |
+| `AudioLatency` | `AudioLatency` | `MainMenuController::ApplySettings`, `InGameMenuController` (pause options, or the calibration's result) | `NoteHighwayCore::JudgeTimeMs` |
+| `VideoLatency` | `VideoLatency` | `MainMenuController::ApplySettings` (slider), `InGameMenuController` (slider, or the calibration's result) | `NoteHighwayCore::VisualTimeMs` |
 
 Persistence is explicit: nothing auto-saves; Save Settings, Back and Escape on the settings panel (and Back in the pause options) call `GameSettings::Save()`. Hit-detection timing uses a hardcoded offset instead of these fields — see `Docs/Latency-and-Responsiveness.md`.
 

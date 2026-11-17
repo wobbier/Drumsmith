@@ -21,8 +21,8 @@ body.main-menu-page {
     left: 4vw;
     top: 4vh;
     bottom: 4vh;
-    width: 560dp;
-    max-width: 62vw;
+    width: 700dp;
+    max-width: 80vw;
     padding: 24dp;
     overflow-y: auto;
     background-color: #101010e8;
@@ -37,6 +37,21 @@ body.main-menu-page {
 .setting-row input[type=text]:focus { border-color: #ff9933; }
 #settings-menu .device-choice { display: block; width: 100%; margin: 4dp 0; padding: 9dp 12dp; text-align: left; font-size: 18dp; border: 1dp #ffffff30; background-color: #ffffff08; }
 #settings-menu .device-choice.selected { border-color: #66ff66; background-color: #66ff6618; }
+#settings-tabs { display: flex; margin: 0 0 22dp; border-bottom: 1dp #ffffff30; }
+#settings-menu .settings-tab { display: block; width: auto; margin: 0 4dp 0 0; padding: 9dp 13dp; font-size: 19dp; color: #c5c5c5; border-bottom: 3dp #ffffff00; }
+#settings-menu .settings-tab:hover, #settings-menu .settings-tab:focus { color: #ffffff; }
+#settings-menu .settings-tab.selected { color: #ffffff; border-bottom-color: #ff9933; }
+.server-row { display: flex; align-items: center; margin: 3dp 0; padding: 4dp 0 4dp 12dp; border: 1dp #ffffff30; background-color: #ffffff08; }
+.server-row .server-url { display: block; flex: 1; font-size: 18dp; }
+.server-row .server-status { display: block; margin: 0 12dp; font-size: 15dp; color: #c5c5c5; }
+.server-row .server-status.ok { color: #77cc77; }
+.server-row .server-status.bad { color: #e36363; }
+.kit-row { display: flex; align-items: center; margin: 3dp 0; }
+.kit-row .kit-name { display: block; width: 150dp; font-size: 18dp; }
+#settings-menu .kit-bind { display: block; width: 160dp; margin: 0 8dp 0 0; padding: 7dp 10dp; text-align: left; font-size: 17dp; border: 1dp #ffffff30; background-color: #ffffff08; }
+#settings-menu .kit-bind.armed { border-color: #ff9933; background-color: #ff993328; color: #ffffff; }
+.kit-row .kit-extra { display: block; flex: 1; margin-left: 8dp; font-size: 15dp; color: #a8a8a8; }
+#settings-menu .kit-clear { display: block; width: auto; padding: 7dp 10dp; font-size: 15dp; color: #c5c5c5; }
 #settings-menu .small-action { display: inline-block; width: auto; margin: 4dp 8dp 4dp 0; padding: 4dp 0; font-size: 18dp; }
 #settings-status { min-height: 24dp; margin: 8dp 0; color: #66ff66; font-size: 16dp; }
 .main-menu-page input[type=range] { display: block; width: 100%; height: 24dp; tab-index: auto; nav: auto; }
@@ -44,13 +59,6 @@ body.main-menu-page {
 .main-menu-page input[type=range] sliderbar { width: 14dp; height: 24dp; margin-top: -10dp; background-color: #eeeeee; }
 .main-menu-page input[type=range]:focus sliderbar, .main-menu-page input[type=range] sliderbar:hover { background-color: #ff9933; }
 .main-menu-page input[type=range] sliderarrowdec, .main-menu-page input[type=range] sliderarrowinc { display: none; }
-/* The visual latency test: a marker sweeps the box, the centre line is "on time". */
-#latency-box { position: relative; width: 100%; height: 90dp; margin: 6dp 0 10dp; background-color: #ffffff10; border: 1dp #ffffff30; overflow: hidden; }
-#latency-box.active { border-color: #ff9933; }
-.latency-target { position: absolute; left: 50%; top: 0; width: 2dp; height: 100%; margin-left: -1dp; background-color: #66ff66; }
-.latency-marker { position: absolute; left: 0; top: 0; width: 4dp; height: 100%; margin-left: -2dp; background-color: #ffffff30; }
-#latency-box.active .latency-marker { background-color: #ffffff; }
-#latency-results { color: #ffffff; }
 @media (max-height: 800px) {
     .main-menu-items .menu-link { font-size: 38dp; margin: 8dp 0 0; }
     .brand-logo { width: 500dp; }

@@ -22,11 +22,14 @@ void GameSettings::Save()
 {
     RootJson = json();
     RootJson["RadioVolume"] = RadioVolume;
+    DLCURL = DLCServers.empty() ? std::string() : DLCServers.front();
     RootJson["DLCURL"] = DLCURL;
+    RootJson["DLCServers"] = DLCServers;
     RootJson["Device"] = PreferredMidiDevice;
     RootJson["AudioLatency"] = AudioLatency;
     RootJson["VideoLatency"] = VideoLatency;
     RootJson["HighwaySpeed"] = HighwaySpeed;
+    RootJson["Metronome"] = Metronome;
     RootJson["TechniqueStrictness"] = TechniqueStrictness;
     RootJson["StageLighting"] = StageLighting;
     RootJson["Venue"] = Venue;
@@ -34,11 +37,54 @@ void GameSettings::Save()
     RootJson["VenueStyle"] = VenueStyle;
     RootJson["Lyrics"] = Lyrics;
     RootJson["Favorites"] = FavoriteTracks;
+    RootJson["PracticeTempos"] = PracticeTempos;
 
     Path settingsFilePath( "Settings.json" );
     File settingsFile( settingsFilePath );
     settingsFile.Write(RootJson.dump());
 }
+
+std::string GameSettings::CleanServer( std::string inServer )
+{
+    const size_t first = inServer.find_first_not_of( " \t\r\n" );
+    if( first == std::string::npos )
+    {
+        return {};
+    }
+    inServer = inServer.substr( first, inServer.find_last_not_of( " \t\r\n" ) - first + 1 );
+    while( !inServer.empty() && inServer.back() == '/' )
+    {
+        inServer.pop_back();
+    }
+    return inServer;
+}
+
+
+bool GameSettings::AddDLCServer( const std::string& inServer )
+{
+    const std::string server = CleanServer( inServer );
+    if( server.empty() || std::find( DLCServers.begin(), DLCServers.end(), server ) != DLCServers.end() )
+    {
+        return false;
+    }
+    DLCServers.push_back( server );
+    DLCURL = DLCServers.front();
+    return true;
+}
+
+
+bool GameSettings::RemoveDLCServer( const std::string& inServer )
+{
+    const auto it = std::find( DLCServers.begin(), DLCServers.end(), CleanServer( inServer ) );
+    if( it == DLCServers.end() )
+    {
+        return false;
+    }
+    DLCServers.erase( it );
+    DLCURL = DLCServers.empty() ? std::string() : DLCServers.front();
+    return true;
+}
+
 
 void GameSettings::Load()
 {
@@ -53,10 +99,27 @@ void GameSettings::Load()
         RadioVolume = RootJson["RadioVolume"];
     }
 
-    if( RootJson.contains( "DLCURL" ) )
+    if( RootJson.contains( "DLCURL" ) && RootJson["DLCURL"].is_string() )
     {
         DLCURL = RootJson["DLCURL"];
     }
+    DLCServers.clear();
+    if( RootJson.contains( "DLCServers" ) && RootJson["DLCServers"].is_array() )
+    {
+        for( const json& server : RootJson["DLCServers"] )
+        {
+            if( server.is_string() )
+            {
+                AddDLCServer( server.get<std::string>() );
+            }
+        }
+    }
+    else
+    {
+        // A settings file from when there was one server.
+        AddDLCServer( DLCURL );
+    }
+    DLCURL = DLCServers.empty() ? std::string() : DLCServers.front();
 
     if( RootJson.contains( "Device" ) )
     {
@@ -71,6 +134,11 @@ void GameSettings::Load()
     if( RootJson.contains( "VideoLatency" ) )
     {
         VideoLatency = RootJson["VideoLatency"];
+    }
+
+    if( RootJson.contains( "Metronome" ) && RootJson["Metronome"].is_boolean() )
+    {
+        Metronome = RootJson["Metronome"].get<bool>();
     }
 
     if( RootJson.contains( "TechniqueStrictness" ) && RootJson["TechniqueStrictness"].is_number() )
@@ -111,6 +179,18 @@ void GameSettings::Load()
             if( favorite.is_string() )
             {
                 FavoriteTracks.insert( favorite.get<std::string>() );
+            }
+        }
+    }
+
+    PracticeTempos.clear();
+    if( RootJson.contains( "PracticeTempos" ) && RootJson["PracticeTempos"].is_object() )
+    {
+        for( const auto& [lesson, tempo] : RootJson["PracticeTempos"].items() )
+        {
+            if( tempo.is_number() )
+            {
+                PracticeTempos[lesson] = tempo.get<int>();
             }
         }
     }

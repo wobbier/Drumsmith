@@ -114,7 +114,8 @@ void VenueShow::Build( World& inWorld, const TrackData& inTrack, const EntityHan
     m_world = &inWorld;
     m_track = &inTrack;
     const int setting = GameSettings::GetInstance().Venue;
-    if( setting <= 0 || CommandLine::Has( "--no-venue" ) )
+    // A practice lesson has no show: just the highway and the click.
+    if( setting <= 0 || inTrack.m_practice || inTrack.m_calibration || CommandLine::Has( "--no-venue" ) )
     {
         return;
     }

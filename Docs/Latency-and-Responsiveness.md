@@ -67,9 +67,9 @@ These are derivations from the mechanics above, not measurements — see "How to
 
 ### Compensation state today
 
-- Judge time = song clock − `AudioLatency`; the highway is drawn at judge time + `VideoLatency` (`NoteHighwayCore::JudgeTimeMs` / `VisualTimeMs`). Both settings are 0-100 ms. The old hardcoded −30 ms offset is gone.
+- Judge time = song clock − `AudioLatency`; the highway is drawn at judge time + `VideoLatency` (`NoteHighwayCore::JudgeTimeMs` / `VisualTimeMs`). Both settings are 0-250 ms (`GameSettings::kMaxLatencyMs`). The old hardcoded −30 ms offset is gone.
 - `GameSettings::AudioLatency` / `VideoLatency`: set from the settings page and the pause options, persisted in `Settings.json`, read by `NoteHighwayCore` every frame.
-- The main menu's visual latency test measures keyboard-vs-marker offsets in **milliseconds** and can copy its average into `VideoLatency` (`Docs/UI-and-Menus.md`). There is no audio calibration test.
+- The **calibration** (below) measures both settings and writes them.
 - Hit windows: Perfect ±30, Great ±60, Good ±90 ms, the same for every chart (`Docs/Gameplay-Note-Highway.md`).
 - Chart-side: notes recorded in the `TrackEditor` inherit the full input→UI-frame latency at authoring time, silently baking the charter's setup latency into `NoteData.txt` (`Docs/Songs-and-DLC.md`).
 
@@ -85,6 +85,21 @@ Each constraint links the doc that states it:
 - **Menus are RmlUi documents composited every frame** (`Engine/Docs/UI-RmlUi-and-ImGui.md`) — UI-side feedback (combo counters etc.) no longer has a 60 fps cap, but model values reach the screen on the frame after they are set.
 - **`CameraCore` updates in LateUpdate** (`Engine/Docs/Architecture.md`) — camera-dependent visuals computed in `Update` see last frame's camera.
 
+### Calibration
+
+Settings > Sound & Timing > *Calibrate audio and video* (`--calibrate` from the command line) plays a 30-second session on the note highway and sets both delays from it. `CoreGame/Calibration.h/.cpp` holds the session; `NoteHighwayCore` plays its chart (`TrackData::m_calibration`) the way it plays a practice lesson's, with three differences: the two latency settings are left out of `JudgeTimeMs` / `VisualTimeMs` (they are what is being measured), hits go to `CalibrationHits` instead of the judge, and there are no beat lines.
+
+| Part | What the player gets | What is measured |
+|------|----------------------|------------------|
+| **Watch** (beats 4-23) | 20 snare notes crossing the bar, in silence | hit time − note time = display delay + input delay → `VideoLatency` |
+| **Listen** (beats 28-47) | 20 clicks (a WAV that is silent until then), nothing on the highway | hit time − click time = audio output delay + input delay → `AudioLatency` |
+
+Both are at 100 BPM. Any pad, or any key bound to one, counts (hits within 80 ms of each other are one strike). A hit belongs to the nearest beat within 45% of a beat (270 ms); the first four beats of each part are warm-up and aren't measured; a beat hit twice keeps the later hit. Each part's result is the **median** of its hits (`Calibration::Summarise`), with their mean distance from it as the spread: fewer than 8 hits is no result, more than 35 ms of spread is flagged as uneven. The results screen shows both; *Use these* writes the valid ones into the settings (clamped to 0-250) and saves.
+
+The input delay is in both numbers, which is what makes them right together: the highway is drawn at clock − `AudioLatency` + `VideoLatency`, where it cancels, and a hit is judged at its arrival − `AudioLatency`, which takes out the output delay and the input delay both. So calibrate with the input you play with: a keyboard's frame of input delay is not a MIDI kit's.
+
+`--calibrate --highway-autoplay <ms>` hits every beat of both parts that late; the results should read that number (the headless check).
+
 ### How to measure (re-stamp numbers before relying on them)
 
 - `System::getDSPBufferSize` / `getSoftwareFormat` at runtime for the actual mixer block/count and sample rate.
@@ -96,7 +111,9 @@ Each constraint links the doc that states it:
 
 - Every number in the budget table above is a *derivation* from code structure, except the mechanics themselves; hardware terms are typical figures. Do not quote totals as measurements.
 - The ~10 ms clock tracking figure is from headless runs on FMOD's silent output; real devices have larger mixer blocks, which the clock smooths over but which add output latency only `AudioLatency` can account for.
-- The settings only allow positive offsets (0-100 ms); a setup that needs the highway drawn *later* than the audio can't be calibrated.
+- The settings only allow positive offsets (0-250 ms); a setup that needs the highway drawn *later* than the audio can't be calibrated.
+- **The calibration measures the player as well as the hardware.** People tapping to a click tend to land a little ahead of it, so a result can come out lower than the true delay, or negative (shown as 0 with a remark). It has only been run headless with autoplay, never by a person on real audio and display hardware.
+- **A delay beyond 270 ms wraps:** the hits read as early hits on the next beat.
 
 ## Related Docs
 

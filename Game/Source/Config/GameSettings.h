@@ -1,8 +1,10 @@
 #pragma once
 #include "Singleton.h"
 #include "JSON.h"
+#include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 class GameSettings
 {
@@ -14,10 +16,23 @@ public:
     void Save();
 
     float RadioVolume = .5f;
+    // The DLC servers the catalogue is read from, in the player's order (Docs/Songs-and-DLC.md):
+    // host names or URLs without a trailing slash. DLCURL is the first of them, kept for
+    // settings files and code from when there was one.
+    std::vector<std::string> DLCServers;
     std::string DLCURL;
+    // A server as it is stored: trimmed, no trailing slashes. Empty when there is nothing left.
+    static std::string CleanServer( std::string inServer );
+    // Adds a server (cleaned); false when it is empty or already listed.
+    bool AddDLCServer( const std::string& inServer );
+    bool RemoveDLCServer( const std::string& inServer );
     std::string PreferredMidiDevice;
+    // The delays the highway makes up for (Docs/Latency-and-Responsiveness.md), 0 to kMaxLatencyMs.
+    static constexpr int kMaxLatencyMs = 250;
     int AudioLatency = 0;
     int VideoLatency = 0;
+    // A click on every beat of the song's beat grid, over the song (Docs/Audio.md → Metronome).
+    bool Metronome = false;
     // Scroll speed of the note highway, as a multiple of each chart's NoteSpeed (0.5 to 2).
     float HighwaySpeed = 1.f;
     // How playing the right pad with the wrong technique (closed for open hi-hat, head for a
@@ -40,6 +55,8 @@ public:
     // Favorite songs, by song folder name (TrackDatabase::FavoriteKey), so a rescan or a moved
     // DLC folder keeps them.
     std::set<std::string> FavoriteTracks;
+    // The tempo each practice lesson was last played at, by lesson id (CoreGame/Practice.h).
+    std::map<std::string, int> PracticeTempos;
     bool LyricsOnHud() const { return ( Lyrics & 1 ) != 0; }
     bool LyricsInVenue() const { return ( Lyrics & 2 ) != 0; }
 private:

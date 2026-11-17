@@ -15,6 +15,9 @@
 #include "Materials/StandardMaterial.h"
 #include "CoreGame/CustomTrackDefineTest.h"
 #include "Config/GameSettings.h"
+#include "CoreGame/Practice.h"
+#include "CoreGame/Calibration.h"
+#include "CoreGame/ClickTrack.h"
 #include "ECS/Core.h"
 #include <algorithm>
 #include <cmath>
@@ -63,6 +66,9 @@ namespace
     constexpr float kPlateHeight = 0.07f;
     constexpr float kPlateDepth = 0.42f;
     constexpr float kPlateLift = 0.12f;
+    // A note past the Perfect window but still hittable keeps this much of its colour and glow.
+    constexpr float kLateDim = 0.4f;
+    constexpr float kLateGlow = 0.08f;
     // Ghost notes are smaller and dimmer, accents taller and brighter.
     constexpr uint8_t kGhostVelocity = 40;
     constexpr uint8_t kAccentVelocity = 120;
@@ -95,7 +101,22 @@ void NoteHighwayCore::OnAddedToWorld()
 {
     m_launchTrackSubscription = EventSubscription::Create<LaunchPlayTrackEvent>( [this]( const LaunchPlayTrackEvent& event ) {
         auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
-        if( event.TrackIndex >= 0 && event.TrackIndex < static_cast<int>( tracks.size() ) )
+        if( event.TrackID == Practice::kTrackId )
+        {
+            // A practice lesson: its chart is the session's, not a library song.
+            if( Practice::GetInstance().IsActive() )
+            {
+                SetupTrack( Practice::GetInstance().Chart(), -1 );
+            }
+        }
+        else if( event.TrackID == Calibration::kTrackId )
+        {
+            if( Calibration::GetInstance().IsActive() )
+            {
+                SetupTrack( Calibration::GetInstance().Chart(), -1 );
+            }
+        }
+        else if( event.TrackIndex >= 0 && event.TrackIndex < static_cast<int>( tracks.size() ) )
         {
             SetupTrack( tracks[event.TrackIndex], event.TrackIndex );
         }
@@ -197,6 +218,23 @@ void NoteHighwayCore::OnStart()
             SetupTrack( tracks[index], index );
         }
     }
+    // --practice <lesson index> [--practice-bpm <bpm>] starts a practice lesson the same way.
+    if( CommandLine::Has( "--practice" ) && !m_trackData )
+    {
+        Practice& practice = Practice::GetInstance();
+        const int lesson = CommandLine::GetInt( "--practice", 0 );
+        const int bpm = lesson >= 0 && lesson < static_cast<int>( practice.Lessons().size() ) ? practice.Lessons()[lesson].Bpm : 80;
+        if( practice.Begin( lesson, CommandLine::GetInt( "--practice-bpm", bpm ), 8 ) )
+        {
+            SetupTrack( practice.Chart(), -1 );
+        }
+    }
+    // --calibrate starts the delay calibration; with --highway-autoplay <ms> every beat of both
+    // parts is hit that late, so the results should read that many ms.
+    if( CommandLine::Has( "--calibrate" ) && !m_trackData && Calibration::GetInstance().Begin() )
+    {
+        SetupTrack( Calibration::GetInstance().Chart(), -1 );
+    }
 }
 
 
@@ -212,7 +250,14 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     m_trackData = &inTrackData;
     m_trackIndex = inTrackIndex;
 
-    inTrackData.LoadNoteData();
+    // A library song's notes are on disk; a practice lesson's chart (and the calibration's) was
+    // built in memory.
+    if( !inTrackData.m_practice && !inTrackData.m_calibration )
+    {
+        inTrackData.LoadNoteData();
+    }
+    m_calibrating = inTrackData.m_calibration;
+    m_lastTapMs = m_autoTapsToMs = -1e9;
     BuildNotes();
     if( CommandLine::Has( "--highway-log" ) )
     {
@@ -220,15 +265,21 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     }
 
     BuildHighway();
-    BuildBeatLines();
+    // The calibration's Listen part has nothing to watch: no beat lines crossing the bar.
+    if( !m_calibrating )
+    {
+        BuildBeatLines();
+    }
     BuildVenue();
 
     m_currentTrackPack = AudioPack( inTrackData );
+    m_metronomeTried = false;
+    UpdateMetronome();
     ResetScore();
     m_songState = SongState::Loading;
     // At least kLeadInMs of silence, and enough that a song whose drums come in straight away still
     // gets a full countdown before its first note.
-    m_songTimeMs = -std::max( kLeadInMs, kCountdownMs - m_firstNoteMs );
+    m_songTimeMs = -std::max( kLeadInMs, kCountdownMs - m_countInMs );
     m_isPaused = false;
     if( RmlUiCore* ui = GetEngine().RmlUi )
     {
@@ -236,9 +287,11 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
         ui->ModelSetString( kModel, "track_artist", inTrackData.m_artistName );
         ui->ModelSetNumber( kModel, "track_index", inTrackIndex );
         ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
+        ui->ModelSetNumber( kModel, "practice", inTrackData.m_practice );
     }
     m_lyrics.Clear();
-    if( GameSettings::GetInstance().LyricsOnHud() )
+    // A lesson's sticking is its lyric line, whatever the lyrics setting says.
+    if( GameSettings::GetInstance().LyricsOnHud() || inTrackData.m_practice )
     {
         m_lyrics.Build( inTrackData.m_venue.m_lyrics, inTrackData.m_venue.m_vocalPhrases, inTrackData.m_venue.m_vocalNotes );
     }
@@ -307,6 +360,28 @@ void NoteHighwayCore::BuildNotes()
         m_lastNoteMs = std::max( m_lastNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
         m_firstNoteMs = std::min( m_firstNoteMs, static_cast<double>( it->m_triggerTime ) * 1000.0 );
         ++m_totalNotes;
+    }
+    const double startMarkerMs = static_cast<double>( inTrackData.m_startTime ) * 1000.0;
+    m_countInMs = startMarkerMs > 0.0 && startMarkerMs < m_firstNoteMs ? startMarkerMs : m_firstNoteMs;
+    AssignKickFeet();
+}
+
+
+void NoteHighwayCore::AssignKickFeet()
+{
+    // Double bass: which half of the highway each kick's bar is drawn on (SpawnNote).
+    std::vector<NoteState>& kicks = m_laneNotes[PadId::Bass].Notes;
+    std::vector<double> times;
+    std::vector<bool> marks;
+    for( const NoteState& kick : kicks )
+    {
+        times.push_back( kick.TimeMs );
+        marks.push_back( kick.Source.m_secondPedal );
+    }
+    const std::vector<KickFoot> feet = KickFeet::Assign( times, marks );
+    for( size_t i = 0; i < kicks.size(); ++i )
+    {
+        kicks[i].Foot = feet[i];
     }
 }
 
@@ -513,6 +588,8 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     const float glow = ghost ? 0.2f : accent ? 1.f : kGemGlow;
     const Vector3 color = ghost ? baseColor * 0.6f : baseColor;
     Tint( note, color, color * glow );
+    outState.Color = color;
+    outState.Late = false;
 
     const float size = ghost ? 0.7f : 1.f;
     const float tall = accent ? 1.35f : 1.f;
@@ -520,10 +597,19 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     float lift = 0.f;
     const float laneWidth = LaneWidth( pad );
     float width = laneWidth * 0.9f * size;
+    // Double bass: the bar fills the half of the highway on its foot's side, and a thin line
+    // carries it across the other half.
+    float kickSide = 0.f;
     if( kick )
     {
         scale = Vector3( m_highwayWidth / kKickMeshWidth, 0.12f * tall, 0.3f );
         width = m_highwayWidth;
+        if( outState.Foot != KickFoot::Either )
+        {
+            kickSide = outState.Foot == KickFoot::Right ? 1.f : -1.f;
+            width = m_highwayWidth * 0.5f;
+            scale.x = width / kKickMeshWidth;
+        }
     }
     else if( pedal )
     {
@@ -541,7 +627,7 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     {
         scale = Vector3( width / kNoteMeshWidth, kGemHeight * tall, kGemDepth * size );
     }
-    const Vector3 position( 0.f, lift, static_cast<float>( outState.TimeMs / 1000.0 ) * m_appliedSpeed );
+    const Vector3 position( kickSide * m_highwayWidth * 0.25f, lift, static_cast<float>( outState.TimeMs / 1000.0 ) * m_appliedSpeed );
     transform.SetPosition( position );
     transform.SetScale( scale );
     transform.SetName( inNote.m_noteName + std::to_string( (uint8_t)pad ) );
@@ -565,6 +651,10 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     {
         // A dark centre makes the plate read as a ring: the open hi-hat.
         AddDecoration( outState, lane, position, Vector3( 0.f, top + 0.005f, 0.f ), Vector3( width * 0.55f, 0.02f, depth * 0.5f ), Vector3( 0.01f, 0.01f, 0.01f ) );
+    }
+    if( kickSide != 0.f )
+    {
+        AddDecoration( outState, lane, position, Vector3( -kickSide * m_highwayWidth * 0.5f, 0.f, 0.f ), Vector3( m_highwayWidth * 0.5f, 0.04f, 0.07f ), color );
     }
     switch( inNote.m_articulation )
     {
@@ -599,7 +689,7 @@ void NoteHighwayCore::AddDecoration( NoteState& ioState, Transform* inLane, cons
     EntityHandle piece = SpawnBox( position, inScale, inColor, inColor * 0.8f, inLane );
     if( piece )
     {
-        ioState.Decorations.push_back( Decoration{ piece, inOffset } );
+        ioState.Decorations.push_back( Decoration{ piece, inOffset, inColor } );
     }
 }
 
@@ -622,6 +712,29 @@ void NoteHighwayCore::HideNote( NoteState& ioNote )
         }
     }
     ioNote.Decorations.clear();
+}
+
+
+void NoteHighwayCore::GreyOut( NoteState& ioNote, float inGlow )
+{
+    const Vector3 glow( inGlow, inGlow, inGlow );
+    Tint( ioNote.Note, Vector3( 0.2f, 0.2f, 0.2f ), glow );
+    for( Decoration& decoration : ioNote.Decorations )
+    {
+        Tint( decoration.Piece, Vector3( 0.15f, 0.15f, 0.15f ), glow * 0.75f );
+    }
+}
+
+
+void NoteHighwayCore::DimLate( NoteState& ioNote )
+{
+    // Still its own colour, so it reads as "late" rather than "missed" (grey).
+    ioNote.Late = true;
+    Tint( ioNote.Note, ioNote.Color * kLateDim, ioNote.Color * kLateGlow );
+    for( Decoration& decoration : ioNote.Decorations )
+    {
+        Tint( decoration.Piece, decoration.Color * kLateDim, decoration.Color * kLateGlow );
+    }
 }
 
 
@@ -674,13 +787,18 @@ void NoteHighwayCore::UpdateWindow( double inTimeMs, bool inRecheck )
         std::vector<NoteState>& notes = lane.Notes;
         const size_t begin = static_cast<size_t>( std::lower_bound( notes.begin(), notes.end(), fromMs, []( const NoteState& n, double t ) { return n.TimeMs < t; } ) - notes.begin() );
         const size_t end = static_cast<size_t>( std::upper_bound( notes.begin(), notes.end(), toMs, []( double t, const NoteState& n ) { return t < n.TimeMs; } ) - notes.begin() );
-        // A hit note stays gone and a missed one keeps its grey gem: only unjudged notes spawn.
+        // A hit note stays gone and a missed one keeps its grey gem: only unjudged notes spawn,
+        // and the ones a resume is playing again (grey: they have been judged).
         reconcile( lane.Live, begin, std::max( begin, end ),
             [&notes, this]( size_t i ) {
                 NoteState& note = notes[i];
-                if( !note.Judged && !note.Note )
+                if( ( !note.Judged || note.Passed ) && !note.Note )
                 {
                     SpawnNote( note.Source, note );
+                    if( note.Judged )
+                    {
+                        GreyOut( note, 0.3f );
+                    }
                 }
             },
             [&notes, this]( size_t i ) { HideNote( notes[i] ); } );
@@ -822,6 +940,7 @@ void NoteHighwayCore::LayoutLanes()
 
 void NoteHighwayCore::ShutdownTrack()
 {
+    m_calibrating = false;
     ClearNotes();
     for( EntityHandle& part : m_highwayParts )
     {
@@ -859,14 +978,67 @@ void NoteHighwayCore::Pause()
 void NoteHighwayCore::Resume()
 {
     m_isPaused = false;
-    m_currentTrackPack.Resume();
+    ResumeWithRunUp();
     m_songClockStamp = std::chrono::steady_clock::now();
+}
+
+
+void NoteHighwayCore::ResumeWithRunUp()
+{
+    const double lengthMs = SongLengthMs();
+    if( m_songState != SongState::Playing || lengthMs <= 0.0 || m_songTimeMs <= 0.0 )
+    {
+        // Nothing has played yet (the lead-in), or nothing to rewind.
+        m_currentTrackPack.Resume();
+        return;
+    }
+    const double target = std::max( 0.0, m_songTimeMs - kResumeRewindMs );
+    // Everything on the highway is respawned for the new time. What was judged before the pause
+    // stays judged, and comes back grey where the run-up passes it again.
+    const double greyFromMs = target - 10000.0;
+    for( LaneNotes& lane : m_laneNotes )
+    {
+        for( size_t i = lane.Live.Begin; i < lane.Live.End; ++i )
+        {
+            HideNote( lane.Notes[i] );
+        }
+        lane.Live = LiveRange();
+        for( NoteState& note : lane.Notes )
+        {
+            note.Passed = note.Judged && note.TimeMs >= greyFromMs;
+        }
+    }
+    // AudioPack::Seek leaves the stems held until all have seeked; they start together, fading in.
+    m_currentTrackPack.Seek( static_cast<float>( target / lengthMs ), kResumeFadeSeconds );
+    m_currentTrackPack.Resume();
+    m_songTimeMs = target;
+    m_clockErrorMs = 0.0;
+    m_lastAudioPositionMs = m_currentTrackPack.GetPositionMs();
+    // The drums come back for the run-up even if a miss had muted them.
+    SetDrumsAudible( true );
+    if( TrackMover )
+    {
+        Transform& mover = TrackMover->GetComponent<Transform>();
+        Vector3 position = mover.GetPosition();
+        position.z = static_cast<float>( VisualTimeMs() / 1000.0 ) * m_appliedSpeed;
+        mover.SetPosition( position );
+    }
+    UpdateWindow( VisualTimeMs() );
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Highway: resumed %.0f ms back, at %.0f ms", kResumeRewindMs, target );
+    }
 }
 
 
 double NoteHighwayCore::JudgeTimeMs() const
 {
     // What the player hears now: the audio reaches their ears AudioLatency after FMOD plays it.
+    // The calibration measures against the bare clock: the settings are what it is finding.
+    if( m_calibrating )
+    {
+        return m_songTimeMs;
+    }
     return m_songTimeMs - static_cast<double>( GameSettings::GetInstance().AudioLatency );
 }
 
@@ -875,6 +1047,10 @@ double NoteHighwayCore::VisualTimeMs() const
 {
     // What should be on screen: what they hear, drawn VideoLatency early since the display shows
     // this frame that much later.
+    if( m_calibrating )
+    {
+        return m_songTimeMs;
+    }
     return JudgeTimeMs() + static_cast<double>( GameSettings::GetInstance().VideoLatency );
 }
 
@@ -1169,6 +1345,13 @@ void NoteHighwayCore::UpdateSongClock( float inDeltaTime )
         m_songTimeMs += stepMs;
         if( m_songTimeMs >= 0.0 )
         {
+            // A stem added during the lead-in (the metronome, from the pause options) may still
+            // be opening: the song waits at its start for it.
+            if( !m_currentTrackPack.IsReady() )
+            {
+                m_songTimeMs = 0.0;
+                break;
+            }
             m_currentTrackPack.Play();
             m_lastAudioPositionMs = 0;
             m_clockErrorMs = 0.0;
@@ -1408,8 +1591,118 @@ void NoteHighwayCore::JudgeHit( const Hit& inHit )
 }
 
 
+void NoteHighwayCore::UpdateMetronome()
+{
+    // A lesson and the calibration are click tracks already. A chart with no beat grid has no
+    // beat lines, and nothing to click on.
+    // --metronome [seconds]: on whatever the setting says, from that point of the song (with
+    // --pause-at, a headless check of switching it on mid-song).
+    static const bool kForced = CommandLine::Has( "--metronome" );
+    static const double kForcedFromMs = static_cast<double>( CommandLine::GetFloat( "--metronome", 0.f ) ) * 1000.0;
+    const bool wanted = GameSettings::GetInstance().Metronome || ( kForced && ( kForcedFromMs <= 0.0 || m_songTimeMs >= kForcedFromMs ) );
+    if( !m_trackData || m_trackData->m_practice || m_trackData->m_calibration || m_beatLines.empty() )
+    {
+        return;
+    }
+    if( wanted && !m_metronomeTried )
+    {
+        // Once a song: written from the beat lines, so the clicks are where the lines are.
+        m_metronomeTried = true;
+        std::vector<ClickTrack::Click> clicks;
+        clicks.reserve( m_beatLines.size() );
+        for( const BeatLine& line : m_beatLines )
+        {
+            clicks.push_back( { line.TimeMs / 1000.0, line.Measure } );
+        }
+        const std::string file = ClickTrack::MetronomeFile( clicks );
+        const bool added = !file.empty() && m_currentTrackPack.AddMetronome( file );
+        if( CommandLine::Has( "--highway-log" ) )
+        {
+            BRUH_FMT( "Highway: metronome %s, %d clicks, %s", added ? "added" : "not added", static_cast<int>( clicks.size() ), file.c_str() );
+        }
+    }
+    m_currentTrackPack.SetMetronomeVolume( wanted ? 1.f : 0.f );
+}
+
+
+void NoteHighwayCore::CalibrationHits( const std::vector<Hit>& inHits )
+{
+    Calibration& calibration = Calibration::GetInstance();
+    std::vector<double> taps;
+    if( m_autoplay > 0 )
+    {
+        // Autoplay stands in for the player in both parts: every beat, late by its offset.
+        static const double offsetMs = CommandLine::GetFloat( "--highway-autoplay", 0.f );
+        for( Calibration::Part part : { Calibration::Part::Watch, Calibration::Part::Listen } )
+        {
+            for( int beat = 0; beat < Calibration::kPartBeats; ++beat )
+            {
+                const double time = Calibration::BeatTimeMs( part, beat ) + offsetMs;
+                if( time > m_autoTapsToMs && time <= m_songTimeMs )
+                {
+                    taps.push_back( time );
+                }
+            }
+        }
+        m_autoTapsToMs = std::max( m_autoTapsToMs, m_songTimeMs );
+    }
+    else
+    {
+        for( const Hit& hit : inHits )
+        {
+            taps.push_back( hit.TimeMs );
+        }
+    }
+    std::sort( taps.begin(), taps.end() );
+    for( double tap : taps )
+    {
+        // One strike can arrive as several hits (a key or a note bound to pads in several lanes,
+        // a pad that double-triggers): only the first counts.
+        constexpr double kSameStrikeMs = 80.0;
+        if( std::fabs( tap - m_lastTapMs ) < kSameStrikeMs )
+        {
+            continue;
+        }
+        m_lastTapMs = tap;
+        // The pad lights for every strike, so the player can see it was heard.
+        FlashLane( LaneOf( PadId::Snare ) );
+        if( !calibration.AddTap( tap ) )
+        {
+            continue;
+        }
+        // Watch: the note the hit was for goes, as a hit note does in a song.
+        NoteState* best = nullptr;
+        double bestGap = 0.0;
+        for( LaneNotes& lane : m_laneNotes )
+        {
+            for( size_t i = lane.Cursor; i < lane.Notes.size(); ++i )
+            {
+                NoteState& note = lane.Notes[i];
+                const double gap = std::fabs( note.TimeMs - tap );
+                if( note.TimeMs - tap > Calibration::kReachMs )
+                {
+                    break;
+                }
+                if( !note.Judged && gap <= Calibration::kReachMs && ( !best || gap < bestGap ) )
+                {
+                    best = &note;
+                    bestGap = gap;
+                }
+            }
+        }
+        if( best )
+        {
+            best->Judged = true;
+            HideNote( *best );
+        }
+    }
+}
+
+
 void NoteHighwayCore::JudgeMisses( double inJudgeTimeMs )
 {
+    // The calibration counts nothing as a miss; a note nobody hit goes grey once it is out of reach.
+    const double window = m_calibrating ? Calibration::kReachMs : static_cast<double>( kGoodWindowMs );
     for( LaneNotes& lane : m_laneNotes )
     {
         while( lane.Cursor < lane.Notes.size() )
@@ -1417,21 +1710,39 @@ void NoteHighwayCore::JudgeMisses( double inJudgeTimeMs )
             NoteState& note = lane.Notes[lane.Cursor];
             if( !note.Judged )
             {
-                if( note.TimeMs + kGoodWindowMs >= inJudgeTimeMs )
+                if( note.TimeMs + window >= inJudgeTimeMs )
                 {
                     break;
                 }
                 note.Judged = true;
                 // Missed notes go grey and keep scrolling past.
-                Tint( note.Note, Vector3( 0.2f, 0.2f, 0.2f ), Vector3( 0.f, 0.f, 0.f ) );
-                for( Decoration& decoration : note.Decorations )
+                GreyOut( note );
+                if( !m_calibrating )
                 {
-                    Tint( decoration.Piece, Vector3( 0.15f, 0.15f, 0.15f ), Vector3( 0.f, 0.f, 0.f ) );
+                    ApplyJudgement( Judgement::Miss, 0.0 );
+                    m_lastHint.clear();
                 }
-                ApplyJudgement( Judgement::Miss, 0.0 );
-                m_lastHint.clear();
             }
             ++lane.Cursor;
+        }
+        if( m_calibrating )
+        {
+            // How late a hit lands is the thing being measured: no dimming to hurry the player.
+            continue;
+        }
+        // What is left at the cursor is still in reach. Once a note is past the Perfect window its
+        // gem dims: it has gone by the bar, and a hit now scores less.
+        for( size_t i = lane.Cursor; i < lane.Notes.size(); ++i )
+        {
+            NoteState& note = lane.Notes[i];
+            if( note.TimeMs + kPerfectWindowMs >= inJudgeTimeMs )
+            {
+                break;
+            }
+            if( !note.Judged && !note.Late && note.Note )
+            {
+                DimLate( note );
+            }
         }
     }
 }
@@ -1470,6 +1781,8 @@ void NoteHighwayCore::ApplyJudgement( Judgement inJudgement, double inOffsetMs )
     default: ++m_good; points = 50; m_lastJudgement = "GOOD"; break;
     }
     m_score += points * Multiplier( m_combo );
+    m_offsetSumMs += inOffsetMs;
+    ++m_offsetCount;
     const int offset = static_cast<int>( std::lround( inOffsetMs ) );
     m_lastTiming = std::abs( offset ) <= static_cast<int>( kPerfectWindowMs ) ? std::string() : ( offset < 0 ? "EARLY " : "LATE +" ) + std::to_string( offset ) + " ms";
     SetDrumsAudible( true );
@@ -1538,6 +1851,7 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
         {
             NoteState& note = lane.Notes[i];
             note.Judged = note.TimeMs + kGoodWindowMs < judgeTime;
+            note.Passed = false;
             if( !note.Judged )
             {
                 lane.Cursor = std::min( lane.Cursor, i );
@@ -1565,6 +1879,8 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
 void NoteHighwayCore::ResetScore()
 {
     m_score = m_combo = m_maxCombo = m_perfect = m_great = m_good = m_missed = m_wrongTechnique = 0;
+    m_offsetSumMs = 0.0;
+    m_offsetCount = 0;
     m_lastJudgement.clear();
     m_lastHint.clear();
     m_lastTiming.clear();
@@ -1579,7 +1895,8 @@ void NoteHighwayCore::ResetScore()
         ui->ModelSetNumber( kModel, "track_index", m_trackIndex );
         ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
         ui->ModelSetNumber( kModel, "song_progress", 0 );
-        for( const char* key : { "track_title", "track_artist", "judgement", "timing", "hint", "accuracy", "judgement_opacity", "song_clock" } )
+        ui->ModelSetNumber( kModel, "practice", 0 );
+        for( const char* key : { "track_title", "track_artist", "judgement", "timing", "hint", "accuracy", "judgement_opacity", "song_clock", "avg_timing" } )
         {
             ui->ModelSetString( kModel, key, "" );
         }
@@ -1661,7 +1978,7 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
     // The title card shows over the lead-in; the count runs down to the first note, not the
     // song's start, so a long intro doesn't end the countdown long before there's anything to hit.
     const bool counting = m_songState == SongState::Loading || m_songState == SongState::LeadIn || m_songState == SongState::Playing;
-    const double toFirstNoteMs = m_firstNoteMs - m_songTimeMs;
+    const double toFirstNoteMs = m_countInMs - m_songTimeMs;
     ui->ModelSetNumber( kModel, "countdown", counting && toFirstNoteMs > 0.0 && toFirstNoteMs <= kCountdownMs ? std::ceil( toFirstNoteMs / 1000.0 ) : 0.0 );
     ui->ModelSetNumber( kModel, "countdown_intro", m_songState == SongState::Loading || m_songState == SongState::LeadIn );
     ui->ModelSetNumber( kModel, "score", m_score );
@@ -1677,6 +1994,40 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
     ui->ModelSetString( kModel, "timing", m_lastTiming );
     ui->ModelSetString( kModel, "hint", m_lastHint );
     ui->ModelSetNumber( kModel, "wrong_technique", m_wrongTechnique );
+    // Whether the player sits ahead of the beat or behind it, over every note they hit.
+    std::string averageTiming = "--";
+    if( m_offsetCount > 0 )
+    {
+        const int average = static_cast<int>( std::lround( m_offsetSumMs / m_offsetCount ) );
+        averageTiming = average == 0 ? std::string( "On the beat" ) : std::to_string( std::abs( average ) ) + ( average < 0 ? " ms early" : " ms late" );
+    }
+    ui->ModelSetString( kModel, "avg_timing", averageTiming );
+    // The delay calibration: what to do now, how far along, and what it found.
+    ui->ModelSetNumber( kModel, "calibration", m_calibrating );
+    if( m_calibrating )
+    {
+        const Calibration& calibration = Calibration::GetInstance();
+        const Calibration::Part part = Calibration::PartAt( m_songTimeMs );
+        const bool watch = part == Calibration::Part::Watch;
+        const Calibration::Result video = calibration.ResultOf( Calibration::Part::Watch );
+        const Calibration::Result audio = calibration.ResultOf( Calibration::Part::Listen );
+        ui->ModelSetString( kModel, "cal_prompt", watch ? "WATCH" : "LISTEN" );
+        ui->ModelSetString( kModel, "cal_detail", watch ? "Hit as each note crosses the line. This part is silent." : "Hit on every click. There is nothing to watch." );
+        ui->ModelSetString( kModel, "cal_progress", std::to_string( calibration.Measured( part ) ) + " / " + std::to_string( Calibration::kMeasuredBeats ) );
+        ui->ModelSetString( kModel, "cal_video", Calibration::ValueText( video ) );
+        ui->ModelSetString( kModel, "cal_video_note", Calibration::Remark( video ) );
+        ui->ModelSetString( kModel, "cal_audio", Calibration::ValueText( audio ) );
+        ui->ModelSetString( kModel, "cal_audio_note", Calibration::Remark( audio ) );
+        ui->ModelSetNumber( kModel, "cal_can_apply", video.Valid() || audio.Valid() );
+    }
+    else
+    {
+        for( const char* key : { "cal_prompt", "cal_detail", "cal_progress", "cal_video", "cal_video_note", "cal_audio", "cal_audio_note" } )
+        {
+            ui->ModelSetString( kModel, key, "" );
+        }
+        ui->ModelSetNumber( kModel, "cal_can_apply", 0 );
+    }
     ui->ModelSetString( kModel, "judgement_opacity", std::to_string( opacity ) );
 }
 
@@ -1690,10 +2041,27 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         return;
     }
     std::vector<Hit> hits;
+    // --pause-at <seconds>: pause there for a second, then resume (headless checks of the resume).
+    static const float kPauseAt = CommandLine::GetFloat( "--pause-at", -1.f );
+    static int pauseAtStage = 0;
+    static float pausedFor = 0.f;
+    if( kPauseAt >= 0.f && pauseAtStage == 0 && m_songState == SongState::Playing && m_songTimeMs >= kPauseAt * 1000.0 )
+    {
+        pauseAtStage = 1;
+        pausedFor = 0.f;
+        Pause();
+    }
+    else if( pauseAtStage == 1 && ( pausedFor += context.GetDeltaTime() ) >= 1.f )
+    {
+        pauseAtStage = 2;
+        Resume();
+    }
     if( m_isPaused || m_songState == SongState::Idle || m_songState == SongState::Finished )
     {
         // Keep the MIDI queue empty so nothing stale is judged on resume.
         MidiDevice::GetInstance().PumpMessages();
+        // Switched on in the pause options: its stem is in place before the resume's seek.
+        UpdateMetronome();
         UpdateHud( context.GetDeltaTime() );
         return;
     }
@@ -1714,6 +2082,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     }
     ApplyPendingTints();
     ApplySpeed();
+    UpdateMetronome();
     UpdateSongClock( context.GetDeltaTime() );
     // --seek <seconds>: jump there once the song starts (the debug scrubber, from the command line).
     static const float kSeekTo = CommandLine::GetFloat( "--seek", -1.f );
@@ -1723,9 +2092,16 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         SeekTo( kSeekTo * 1000.0 );
     }
     GatherHits( hits );
-    for( const Hit& hit : hits )
+    if( m_calibrating )
     {
-        JudgeHit( hit );
+        CalibrationHits( hits );
+    }
+    else
+    {
+        for( const Hit& hit : hits )
+        {
+            JudgeHit( hit );
+        }
     }
     const double judgeTime = JudgeTimeMs();
     JudgeMisses( judgeTime );
@@ -1778,8 +2154,8 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     if( logClock && m_songTimeMs >= nextLogMs )
     {
         nextLogMs = std::floor( m_songTimeMs / 1000.0 ) * 1000.0 + 1000.0;
-        BRUH_FMT( "Highway: song %.1f ms, audio %u ms (stems %u ms apart), judged %d (missed %d) of %d, first note %.0f ms, %d gems and %d beat lines live",
-            m_songTimeMs, m_currentTrackPack.GetPositionMs(), m_currentTrackPack.StemSpreadMs(), m_perfect + m_great + m_good + m_missed, m_missed, m_totalNotes, m_firstNoteMs,
+        BRUH_FMT( "Highway: song %.1f ms, audio %u ms (stems %u ms apart, metronome %s), judged %d (missed %d) of %d, first note %.0f ms, %d gems and %d beat lines live",
+            m_songTimeMs, m_currentTrackPack.GetPositionMs(), m_currentTrackPack.StemSpreadMs(), !m_currentTrackPack.HasMetronome() ? "none" : m_currentTrackPack.IsMetronomePlaying() ? "playing" : "not playing", m_perfect + m_great + m_good + m_missed, m_missed, m_totalNotes, m_firstNoteMs,
             static_cast<int>( GetEntities().size() ), static_cast<int>( m_beatLive.End - m_beatLive.Begin ) );
     }
 }

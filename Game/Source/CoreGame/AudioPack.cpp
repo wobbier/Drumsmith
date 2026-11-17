@@ -86,6 +86,8 @@ AudioPack& AudioPack::operator=( AudioPack&& other ) noexcept
 
     m_sounds = std::move( other.m_sounds );
     m_drumTracks = std::move( other.m_drumTracks );
+    m_metronome = other.m_metronome;
+    other.m_metronome = -1;
     m_syncGroup = other.m_syncGroup;
 
     other.m_syncGroup = nullptr;
@@ -99,6 +101,7 @@ void AudioPack::Reset()
     Stop();
     m_sounds.clear();
     m_drumTracks.clear();
+    m_metronome = -1;
 
     if( m_syncGroup )
     {
@@ -205,6 +208,37 @@ void AudioPack::SetDrumVolume( float inVolumePercent )
 }
 
 
+bool AudioPack::AddMetronome( const std::string& inFile )
+{
+    if( m_metronome >= 0 || m_sounds.empty() )
+    {
+        return m_metronome >= 0;
+    }
+    if( !LoadStem( "", inFile.c_str() ) )
+    {
+        return false;
+    }
+    m_metronome = static_cast<int>( m_sounds.size() ) - 1;
+    return true;
+}
+
+
+bool AudioPack::IsMetronomePlaying() const
+{
+    bool playing = false;
+    return m_metronome >= 0 && m_sounds[m_metronome].ChannelHandle && m_sounds[m_metronome].ChannelHandle->isPlaying( &playing ) == FMOD_OK && playing;
+}
+
+
+void AudioPack::SetMetronomeVolume( float inVolumePercent )
+{
+    if( m_metronome >= 0 )
+    {
+        m_sounds[m_metronome].SetVolume( inVolumePercent );
+    }
+}
+
+
 void AudioPack::SetPlaybackSpeed( float inSpeed )
 {
     // On the group, so every stem changes on one mixer tick and stays in step.
@@ -226,7 +260,7 @@ float AudioPack::GetVolume()
 }
 
 
-void AudioPack::Seek( float inSeekPercent )
+void AudioPack::Seek( float inSeekPercent, float inFadeInSeconds )
 {
     if( m_sounds.empty() )
     {
@@ -238,6 +272,16 @@ void AudioPack::Seek( float inSeekPercent )
     const unsigned int target = static_cast<unsigned int>( static_cast<float>( m_sounds[0].GetLength() ) * std::clamp( inSeekPercent, 0.f, 1.f ) );
     for( auto& sound : m_sounds )
     {
+        // A stem added since the song started (the metronome, switched on mid-song) has no
+        // channel yet: it gets one here, held like the rest, and starts with them.
+        if( !sound.ChannelHandle && m_syncGroup && m_sounds[0].ChannelHandle && sound.IsLoaded() )
+        {
+            sound.Play( false, true );
+            if( sound.ChannelHandle )
+            {
+                sound.ChannelHandle->setChannelGroup( m_syncGroup );
+            }
+        }
         if( sound.ChannelHandle )
         {
             sound.ChannelHandle->setPaused( true );
@@ -245,6 +289,7 @@ void AudioPack::Seek( float inSeekPercent )
         }
     }
     m_seekTargetMs = target;
+    m_seekFadeSeconds = inFadeInSeconds;
     m_seekPending = true;
     m_seekStartClock = 0;
     m_seekStarted = std::chrono::steady_clock::now();
@@ -328,7 +373,7 @@ void AudioPack::FadeInAt( unsigned long long inGroupClock )
     m_syncGroup->removeFadePoints( parentClock, ~0ULL );
     m_syncGroup->addFadePoint( parentClock, 0.f );
     m_syncGroup->addFadePoint( from, 0.f );
-    m_syncGroup->addFadePoint( from + MixerSamples( kFadeInSeconds ), 1.f );
+    m_syncGroup->addFadePoint( from + MixerSamples( std::max( kFadeInSeconds, m_seekFadeSeconds ) ), 1.f );
 }
 
 
@@ -410,6 +455,10 @@ bool AudioPack::IsSeeking() const
 
 unsigned int AudioPack::GetPositionMs() const
 {
+    if( m_sounds.empty() )
+    {
+        return 0;
+    }
     if( IsSeeking() )
     {
         return m_seekTargetMs;
@@ -420,6 +469,11 @@ unsigned int AudioPack::GetPositionMs() const
 
 unsigned int AudioPack::GetLength() const
 {
+    // A pack with nothing loaded (the radio before its first song) has no length.
+    if( m_sounds.empty() )
+    {
+        return 0;
+    }
     return m_sounds[0].GetLength();
 }
 

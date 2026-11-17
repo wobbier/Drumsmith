@@ -1,0 +1,52 @@
+<rml>
+<head>
+    <title>Drumsmith — Practice</title>
+    <link type="text/rcss" href="Drumsmith.rcss"/>
+    <link type="text/rcss" href="Library.rcss"/>
+    <link type="text/rcss" href="Practice.rcss"/>
+</head>
+<body class="library-page" data-model="practice_menu">
+    <div class="library-backdrop"></div>
+    <div class="library-header">
+        <button id="practice-back" class="library-link" onclick="load-scene:Assets/MainMenu.lvl"><img src="img/Esc_Key_Light.png"/><span>Main Menu</span></button>
+        <span class="library-heading">PRACTICE</span>
+        <button id="practice-library" class="library-link" onclick="load-scene:Assets/TrackList.lvl"><span>Song library</span></button>
+    </div>
+    <div id="lesson-list" class="library-list">
+        <p class="empty-library" data-if="lesson_count == 0">No lessons found. They live in Assets/Practice/Lessons.json.</p>
+        <div data-for="lesson : lessons">
+            <h2 class="track-category" data-if="lesson.category != ''">{{lesson.category}}</h2>
+            <button class="lesson-row" data-class-selected="selected == lesson.index" data-event-click="select(lesson.index)" data-event-focus="select(lesson.index)">{{lesson.name}}</button>
+        </div>
+    </div>
+    <div class="library-details" data-if="selected >= 0">
+        <div class="detail-copy">
+            <h1 id="lesson-name">{{detail_name}}</h1>
+            <h2>{{detail_category}}</h2>
+            <p>{{detail_description}}</p>
+            <p class="lesson-pattern" data-if="detail_pattern != ''">{{detail_pattern}}</p>
+            <p class="lesson-key" data-if="detail_pattern != ''">R and L are strokes, r and l quiet taps, ' an accent, f a flam.</p>
+            <div class="lesson-lane" data-for="lane : lanes"><span class="lane-name">{{lane.name}}</span><span class="lane-steps">{{lane.steps}}</span></div>
+            <p class="lesson-key" data-if="detail_feel != ''">Counted in {{detail_feel}}.</p>
+            <div class="lesson-tempo">
+                <label>Tempo <span id="lesson-bpm">{{bpm}} BPM</span></label>
+                <input id="tempo-slider" type="range" min="40" max="220" step="1" data-value="bpm"/>
+                <button id="tempo-down" class="tempo-step" data-event-click="tempo(-5)">- 5</button>
+                <button id="tempo-up" class="tempo-step" data-event-click="tempo(5)">+ 5</button>
+            </div>
+            <div class="lesson-length">
+                <label>Length</label>
+                <button class="tempo-step" data-class-selected="bars == 8" data-event-click="bars(8)">8 bars</button>
+                <button class="tempo-step" data-class-selected="bars == 16" data-event-click="bars(16)">16 bars</button>
+                <button class="tempo-step" data-class-selected="bars == 32" data-event-click="bars(32)">32 bars</button>
+            </div>
+            <button id="lesson-start" class="detail-action green" data-event-click="start">START</button>
+            <p class="detail-state" data-if="status != ''">{{status}}</p>
+        </div>
+    </div>
+    <div class="library-footer">
+        <span>A bar of clicks counts you in. The results show whether you sit ahead of the beat or behind it.</span>
+        <span>{{lesson_count}} lessons</span>
+    </div>
+</body>
+</rml>

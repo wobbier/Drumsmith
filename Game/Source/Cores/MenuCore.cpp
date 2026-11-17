@@ -6,6 +6,9 @@
 #include "Components/MainMenuController.h"
 #include "Components/TrackListMenuController.h"
 #include "Components/TrackStatsMenuController.h"
+#include "Components/PracticeMenuController.h"
+#include "Midi/MidiDevice.h"
+#include "Global/TrackRadio.h"
 
 namespace
 {
@@ -29,6 +32,11 @@ MenuCore::MenuCore()
 void MenuCore::Update( const UpdateContext& inUpdateContext )
 {
     const float deltaTime = inUpdateContext.GetDeltaTime();
+    // Every scene has a page, so this is where MIDI devices coming and going are noticed.
+    MidiDevice::GetInstance().Poll();
+    // The radio ticks here, once, whatever page is up: a page without the radio widget (the
+    // library, the stats page) still fades, loads and finishes its songs.
+    TrackRadio::GetInstance().Update( deltaTime );
     for( Entity& entity : GetEntities() )
     {
         Tick<MainMenuController>( entity, deltaTime );
@@ -36,5 +44,6 @@ void MenuCore::Update( const UpdateContext& inUpdateContext )
         Tick<TrackListMenuController>( entity, deltaTime );
         Tick<InGameMenuController>( entity, deltaTime );
         Tick<TrackStatsMenuController>( entity, deltaTime );
+        Tick<PracticeMenuController>( entity, deltaTime );
     }
 }

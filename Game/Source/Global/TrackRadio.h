@@ -4,6 +4,7 @@
 #include "CoreGame/TrackList.h"
 #include "Pointers.h"
 #include "CoreGame/AudioPack.h"
+#include <memory>
 
 class TrackData;
 
@@ -30,6 +31,12 @@ public:
     TrackRadio() = default;
 
     void Play( RadioArgs inTrackArgs );
+    // Plays a song that isn't in the library (the DLC page's preview of a song not downloaded
+    // yet, from the files it fetched). The radio keeps its own copy of inTrack.
+    void PlayGuest( const TrackData& inTrack, bool inUsePreviewMarker );
+    bool IsGuest() const { return m_guest != nullptr; }
+    // TrackDatabase::RemoveTrack: the song at inIndex is going and later ones move down.
+    void OnTrackRemoved( int inIndex );
     bool IsPlaying() const;
     void Stop();
     void SetVolume( float inVolume );
@@ -40,8 +47,9 @@ public:
     bool CanPlayNextTrack() const;
     void Resume();
 
-    // The playing track, looked up by index each call: the database only appends, but an append
-    // (a finished DLC download) reallocates the vector, so a stored TrackData* would dangle.
+    // The playing track, looked up by index each call: a finished DLC download appends to the
+    // database and a removal shifts it, so a stored TrackData* would dangle. A guest is the
+    // radio's own copy.
     const TrackData* GetCurrentTrack() const;
     int GetCurrentTrackIndex() const { return m_currentTrackIndex; }
 
@@ -54,7 +62,11 @@ public:
 private:
 
     bool PlayStem( const char* inFileName, bool inUsePreviewMarker );
+    void Start( TrackData& inTrack, int inTrackIndex, bool inUsePreviewMarker );
     int m_currentTrackIndex = -1;
+    std::unique_ptr<TrackData> m_guest;
+    // How long the current song has been loading; one that never loads is given up on.
+    float m_loadingFor = 0.f;
     float m_delayTimer = 0.f;
     float m_previewPercent = 0.f;
     // The previous track, fading out instead of being cut off (a click), and how long it has left.

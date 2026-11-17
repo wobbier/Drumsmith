@@ -1,6 +1,8 @@
 # MIDI and Pads
 
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
+>
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): hot-plug, device matching, rebinding in the game and the caveats. The rest is as last verified.
 
 How drum hits get from hardware into the game: the `MidiDevice` RtMidi wrapper, the `PadId`/`PadMappingStorage` binding layer, and where each is consumed.
 
@@ -15,6 +17,7 @@ Drumsmith reads MIDI input through an **RtMidi callback**: RtMidi's thread stamp
 | `Game/Source/Midi/MidiDevice.h` | RtMidi singleton wrapper: enumerate/open/close/pump |
 | `Game/Source/Editor/PadBindings.h` | `PadId` enum, `PadUtils` mappings, `PadDefinition`, `PadMappingStorage` — **runtime code despite living under `Editor/`** |
 | `Game/Source/Editor/PadBindings.cpp` | `PadBindingWidget` (editor rebinding UI) + `PadMappingStorage` load |
+| `Game/Source/Components/MainMenuController.cpp` | The game's own rebinding page (Settings > Drum Kit) |
 | `Assets/Config/PadMappings.json` | Persisted bindings (`PadMap` array of `{ID, NAME, KB, MIDI}`) |
 | `ThirdParty/rtmidi/` | RtMidi library (ALSA/CoreMIDI/WinMM backends) |
 
@@ -22,7 +25,9 @@ Drumsmith reads MIDI input through an **RtMidi callback**: RtMidi's thread stamp
 
 ### MidiDevice
 
-The constructor creates an `RtMidiIn`, calls `RefreshDevices()` (port enumeration), sets `ignoreTypes(true, true, true)` (sysex, timing clock and active sensing are dropped) and registers the callback. `OpenMidiDevice(index)` closes any open port and opens the requested one; `OpenMidiDevice(name)` searches `m_devices` by exact name and falls back to the first device. Both return false when there is nothing to open, and every entry point tolerates a missing `RtMidiIn`.
+The constructor creates an `RtMidiIn`, calls `RefreshDevices()` (port enumeration), sets `ignoreTypes(true, true, true)` (sysex, timing clock and active sensing are dropped) and registers the callback. `OpenMidiDevice(index)` closes any open port and opens the requested one; `OpenMidiDevice(name)` finds the device by name (exactly, else by `SameDevice`, below) and falls back to the first device. Both return false when there is nothing to open, and every entry point tolerates a missing `RtMidiIn`.
+
+**Hot-plug.** Whatever was last asked for is the *wanted* device. `MidiDevice::Poll()`, called every frame by `MenuCore::Update` (every scene has a page), lists the ports again about once a second. When the list changed it bumps `GetGeneration()` (pages re-list their devices on a change), closes the port of an open device that has gone (`IsUnplugged()` is then true until the wanted device is open again), and opens the wanted device if it is there: when it is plugged in for the first time after the game started, plugged back in, or was standing in for by a fallback. With the wanted device absent and nothing open it opens the first device as a stand-in. `SameDevice(a, b)` compares names without the numbers the system appends (ALSA's client and port, "TD-17 MIDI 1 28:0"; WinMM's index), which change when a device is plugged in again. `InGameMenuController` pauses a song when `IsUnplugged()` turns true.
 
 The callback (`MidiDevice::OnMessage`) keeps 3-byte messages as `MidiMessageNew{ m_status, m_data1, m_data2, m_arrival }` (the queue is capped at 4096). `PumpMessages()` swaps the queue out under the lock and drops anything older than a second, so a reader that stopped pumping (an unfocused editor window) never gets a burst of old hits. `IsOnType()` excludes velocity-0 note-ons, which are note-offs by convention.
 
@@ -39,7 +44,7 @@ The callback (`MidiDevice::OnMessage`) keeps 3-byte messages as `MidiMessageNew{
 
 `PadMappingStorage` (singleton) holds `mappedPads` — one `PadDefinition{ padId, padName, keyboardBinding, midiBinding }` per `PadId` — loaded from `Assets/Config/PadMappings.json` at first use. Unbound pads read binding 0.
 
-### Rebinding (editor only)
+### Rebinding
 
 Pads: kick, snare, open and closed hi-hat, hi-hat pedal, two crashes, splash, china, ride, high/mid/floor tom (`PadId`; the pedal, splash and china were appended, so saved IDs are stable). Strokes (`Articulation`): normal, rim (a cymbal's edge), cross-stick, bell.
 
@@ -56,7 +61,9 @@ Each pad has a main MIDI note (a plain stroke) and any number of extra notes, ea
 
 Splash and china have no standard notes (theirs clash with crash edges) and need binding by hand. Loading a mapping file without `MIDIExtra` keeps its main notes and adds the standard extras; pads missing from it get standard main notes.
 
-`PadBindingWidget` (Havana widget, `ME_EDITOR` builds) lists all pads with a keyboard-capture button (binds `Input::GetLastKeyPressed` from the editor input context) and a MIDI-capture button (pumps messages while focused and binds the first note-on's note number; it pre-pumps once when capture starts to discard stale queued hits). "Save Pad Mappings" serializes to `Assets/Config/PadMappings.json`. **There is no in-game rebinding UI** — game builds can only consume a shipped/previously saved mapping file.
+**In the game:** Settings > Drum Kit (`MainMenuController`, `Docs/UI-and-Menus.md`) lists every pad with a Key and a MIDI button; press one, then press the key or hit the pad. It sets a pad's key and main note, clears a pad, applies the standard e-kit notes and shows what each incoming note is bound to; the extra notes (rims, bells, edges) are listed but only editable in the editor widget or the file. The mapping is saved with the settings.
+
+**In the editor:** `PadBindingWidget` (Havana widget, `ME_EDITOR` builds) lists all pads with a keyboard-capture button (binds `Input::GetLastKeyPressed` from the editor input context) and a MIDI-capture button (pumps messages while focused and binds the first note-on's note number; it pre-pumps once when capture starts to discard stale queued hits). "Save Pad Mappings" serializes to `Assets/Config/PadMappings.json`.
 
 ### Consumption points
 
@@ -65,9 +72,9 @@ Splash and china have no standard notes (theirs clash with crash edges) and need
 | `NoteHighwayCore::Update` (gameplay) | Every frame, before judging; while paused or idle too, to discard | none: every platform |
 | `TrackEditor::Render` (charting/audition) | Once per UI frame, only while the editor window is focused | editor builds |
 | `PadBindingWidget::Render` (capture) | While the capture button is armed | editor builds |
-| `MainMenuController::GetMIDIDevices_Internal` | Never pumps — enumerates devices for the settings UI | — |
+| `MainMenuController::UpdateKitBinding` (Settings) | Every frame while the settings panel is open: the kit page's capture and its Last hit line | none |
 
-The device is opened for gameplay in `NoteHighwayCore::OnAddedToWorld` using `GameSettings::PreferredMidiDevice`. `rtmidi` links on **all** platforms (`Game.sharpmake.cs` adds it for Win64, UWP, macOS, and Linux, with ALSA via `libasound.so` on Linux). Gameplay judges each note-on at its arrival time (`Docs/Gameplay-Note-Highway.md`).
+The device is opened for gameplay in `NoteHighwayCore::OnAddedToWorld` using `GameSettings::PreferredMidiDevice`, and by the settings panel when it opens or a device is chosen. `rtmidi` links on **all** platforms (`Game.sharpmake.cs` adds it for Win64, UWP, macOS, and Linux, with ALSA via `libasound.so` on Linux). Gameplay judges each note-on at its arrival time (`Docs/Gameplay-Note-Highway.md`).
 
 ## How to Extend
 
@@ -78,10 +85,10 @@ The device is opened for gameplay in `NoteHighwayCore::OnAddedToWorld` using `Ga
 ## Caveats & Fragility
 
 - **One queue, several readers.** Gameplay, `TrackEditor` and `PadBindingWidget` all pump the same queue; whoever pumps first gets the messages. In the editor, a focused Track Editor and a playing game would split the hits.
-- **`OpenMidiDevice(name)` falls back to device 0 through a failed assert.** An unknown/empty preferred-device name (the default `GameSettings::PreferredMidiDevice` is `""`) trips `ME_ASSERT_MSG(false, ...)` and then opens port 0 — in asserts-off builds this is a silent wrong-device open, and with **zero** devices attached, `OpenMidiDevice(0)` indexes an empty vector.
-- **`RefreshDevices` still dereferences `m_midiIn` unconditionally**; the open/close/pump paths check it.
-- **The device is never closed on scene exit.** `NoteHighwayCore::OnAddedToWorld` opens it; `OnRemovedFromWorld` only deregisters events. `MidiDeviceInfo::IsOpen` is set but never cleared, so reopen logic can skip a real reopen.
-- **Device hot-plug is unsupported**: `RefreshDevices` runs once in the constructor; devices attached later don't appear until restart (the settings UI enumerates the cached list).
+- **Devices are matched by name.** Two devices with the same name can't be told apart, and `SameDevice` treats names that differ only in a trailing number as one device (two kits of one model on WinMM).
+- **The device stays open across scenes.** Nothing closes it on leaving a song; `MidiDevice::Poll` is what closes a port, when its device goes.
+- **Hot-plug is polled, once a second**, and has been exercised on Linux (ALSA) with a virtual device only. On macOS RtMidi's port list only refreshes while the main thread's run loop runs.
+- **A stand-in device is opened when the wanted one is absent** (the first port, often "Midi Through" on Linux). It is replaced when the wanted device appears.
 - **`PadBindings.h` lives under `Editor/` but is required at runtime** by `NoteHighwayCore`, `TrackList`, and `Drumset` — only the `PadBindingWidget` half is actually editor-only.
 - **`MidiDevice::IsPaused` is dead state** (all uses commented out).
 

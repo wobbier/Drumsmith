@@ -9,6 +9,7 @@
 #include "Midi/MidiDevice.h"
 #include "Venue/VenueShow.h"
 #include "CoreGame/Lyrics.h"
+#include "CoreGame/ChartAdvice.h"
 #include <array>
 #include <chrono>
 #include <map>
@@ -33,6 +34,10 @@ public:
 	static constexpr double kLeadInMs = 2000.0;
 	// The countdown shows the last this-many ms before the first note (ms).
 	static constexpr double kCountdownMs = 3000.0;
+	// Resuming from a pause pulls the song back this far and fades it in over kResumeFadeSeconds,
+	// so the player gets a run-up instead of the next note at once.
+	static constexpr double kResumeRewindMs = 2000.0;
+	static constexpr float kResumeFadeSeconds = 1.5f;
 
 	NoteHighwayCore();
 	~NoteHighwayCore();
@@ -80,6 +85,7 @@ private:
 #endif
 
 	enum class Judgement { None, Perfect, Great, Good, Miss };
+	using KickFoot = KickFeet::Foot;
 
 	// A piece drawn on a gem to show its technique (the rim strip, the open hi-hat's hole, the
 	// bell dot), placed relative to the gem in its lane.
@@ -87,6 +93,7 @@ private:
 	{
 		EntityHandle Piece;
 		Vector3 Offset;
+		Vector3 Color;
 	};
 
 	struct NoteState
@@ -94,6 +101,16 @@ private:
 		double TimeMs = 0.0;
 		EntityHandle Note;
 		bool Judged = false;
+		// A note judged before a pause, inside the stretch the resume plays again: it shows as a
+		// grey gem and isn't judged twice.
+		bool Passed = false;
+		// Past the Perfect window and not hit yet: its gem is dimmed, but it can still be hit
+		// until the Good window closes.
+		bool Late = false;
+		// The gem's own colour, to dim it from.
+		Vector3 Color;
+		// Which foot a double bass kick is for (the bar is drawn on that half of the highway).
+		KickFoot Foot = KickFoot::Either;
 		PadId Pad = PadId::Invalid;
 		Articulation Technique = Articulation::Normal;
 		std::vector<Decoration> Decorations;
@@ -160,6 +177,14 @@ private:
 	void SpawnNote( const NoteData& inNote, NoteState& outState );
 	void AddDecoration( NoteState& ioState, Transform* inLane, const Vector3& inGemPosition, const Vector3& inOffset, const Vector3& inScale, const Vector3& inColor );
 	void HideNote( NoteState& ioNote );
+	// A missed or already-played note: grey. inGlow lifts it off the black highway (the scene has
+	// no lights), for the notes a resume replays.
+	void GreyOut( NoteState& ioNote, float inGlow = 0.f );
+	void DimLate( NoteState& ioNote );
+	// Splits double bass between the feet (NoteState::Foot); call once the kick lane is built.
+	void AssignKickFeet();
+	// Pulls a paused song back kResumeRewindMs and starts it again, fading in.
+	void ResumeWithRunUp();
 	// One hit per lane among an input's meanings (a MIDI note or key can mean several pads).
 	void AddHits( const std::vector<std::pair<PadId, Articulation>>& inMeanings, double inTimeMs, bool inInputKnowsTechnique, std::vector<Hit>& outHits );
 	static std::string TechniqueName( PadId inPad, Articulation inTechnique );
@@ -186,6 +211,11 @@ private:
 	void GatherHits( std::vector<Hit>& outHits );
 	void JudgeHit( const Hit& inHit );
 	void JudgeMisses( double inJudgeTimeMs );
+	// The delay calibration (CoreGame/Calibration.h): hits are measured against the beat, not judged.
+	void CalibrationHits( const std::vector<Hit>& inHits );
+	// The Metronome setting: a click stem written from the chart's beat lines, added to the
+	// song's stems the first time it is wanted and silenced when it isn't.
+	void UpdateMetronome();
 	void ApplyJudgement( Judgement inJudgement, double inOffsetMs );
 	void LayoutLanes();
 	// A lane's width at the strike bar: the lane spacing, slimmer for toms.
@@ -219,6 +249,9 @@ private:
 	std::chrono::steady_clock::time_point m_songClockStamp{};
 	double m_lastNoteMs = 0.0;
 	double m_firstNoteMs = 0.0;
+	// What the countdown counts in to: the first note, or the chart's start marker when that
+	// comes first (TrackData::m_startTime).
+	double m_countInMs = 0.0;
 
 	std::array<LaneNotes, PadId::COUNT> m_laneNotes;
 	float m_laneSpacing = 1.8f;
@@ -255,6 +288,9 @@ private:
 	int m_missed = 0;
 	int m_wrongTechnique = 0;
 	int m_totalNotes = 0;
+	// The hits' offsets from their notes (ms, late positive), for the results' average timing.
+	double m_offsetSumMs = 0.0;
+	int m_offsetCount = 0;
 	std::string m_lastJudgement;
 	std::string m_lastTiming;
 	std::string m_lastHint;
@@ -266,6 +302,12 @@ private:
 	std::unique_ptr<EventSubscription> m_seekTrackSubscription;
 	// Debug no-fail (the F8 panel, or --no-fail): misses count but cost nothing.
 	bool m_noFail = false;
+	// Playing the calibration's chart: the latency settings are left out (they are what is being
+	// measured), and hits go to Calibration instead of the judge.
+	bool m_calibrating = false;
+	double m_lastTapMs = -1e9;
+	double m_autoTapsToMs = -1e9;
+	bool m_metronomeTried = false;
 	// Debug autoplay (the F8 panel, or --highway-autoplay): 0 off, 1 perfect, 2 sloppy. Plain:
 	// as a kit that only sends plain strokes and one hi-hat note would.
 	int m_autoplay = 0;

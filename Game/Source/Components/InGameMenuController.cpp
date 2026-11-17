@@ -2,6 +2,9 @@
 #include "Config/GameSettings.h"
 #include "Events/GameEvents.h"
 #include "UI/UIModelUtils.h"
+#include "Midi/MidiDevice.h"
+#include "CoreGame/Practice.h"
+#include "CoreGame/Calibration.h"
 #include "Core/CommandLine.h"
 #include <Cores/UI/RmlUiCore.h>
 #include <Engine/Engine.h>
@@ -71,7 +74,7 @@ void InGameMenuController::Update( float inDeltaTime )
     if( !m_modelReady )
     {
         ui->ModelEnsure( "in_game" );
-        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek", "master_volume" } )
+        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek", "master_volume", "cal_apply", "metronome" } )
             ui->ModelRegisterEvent( "in_game", event );
         ui->ModelSetString( "in_game", "status", "" );
         ui->ModelSetString( "in_game", "pause_hint", kPauseHint );
@@ -90,6 +93,7 @@ void InGameMenuController::Update( float inDeltaTime )
         ui->ModelSetString( "in_game", "lyric_sung", "" );
         ui->ModelSetString( "in_game", "lyric_rest", "" );
         ui->ModelSetString( "in_game", "lyric_next", "" );
+        ui->ModelSetString( "in_game", "midi_notice", "" );
         m_modelReady = true;
     }
 
@@ -109,13 +113,46 @@ void InGameMenuController::Update( float inDeltaTime )
     }
     // On the results screen Escape leaves for the library instead of pausing.
     const bool finished = ui->ModelGetNumber( "in_game", "finished" ) != 0;
+    // The kit was unplugged mid-song (MidiDevice::Poll): pause rather than let the notes go by.
+    // It is opened again by itself when it comes back; the pause menu says which.
+    const bool unplugged = MidiDevice::GetInstance().IsUnplugged();
+    if( unplugged != m_midiUnplugged )
+    {
+        m_midiUnplugged = unplugged;
+        if( unplugged )
+        {
+            ui->ModelSetString( "in_game", "midi_notice", "Your MIDI device was unplugged. Plug it back in to carry on." );
+            if( !finished && ui->ModelGetNumber( "in_game", "playing" ) != 0 )
+            {
+                SetPaused( true );
+            }
+        }
+        else
+        {
+            ui->ModelSetString( "in_game", "midi_notice", m_paused ? "MIDI device reconnected: " + MidiDevice::GetInstance().GetOpenDeviceName() : std::string() );
+        }
+    }
+    else if( !m_paused && !unplugged )
+    {
+        ui->ModelSetString( "in_game", "midi_notice", "" );
+    }
     const bool menuKey = MenuKeyPressed( GetEngine().GetInput() );
+    const bool calibration = ui->ModelGetNumber( "in_game", "calibration" ) != 0;
     if( finished && menuKey )
     {
         LoadSceneEvent load;
-        load.Level = "Assets/TrackList.lvl";
+        load.Level = calibration ? "Assets/MainMenu.lvl" : ui->ModelGetNumber( "in_game", "practice" ) != 0 ? "Assets/Practice.lvl" : "Assets/TrackList.lvl";
         load.Queue();
     }
+#if USING( ME_EDITOR )
+    else if( GetEngine().GetInput().WasKeyPressed( KeyCode::F4 ) )
+    {
+        // F4 pulls up the Track Editor on the song being played.
+        EditTrackEvent edit;
+        edit.FileName = ui->ModelGetString( "in_game", "track_title" );
+        edit.Fire();
+    }
+#endif
     else if( GetEngine().GetInput().WasKeyPressed( KeyCode::F8 ) )
     {
         ui->ModelSetNumber( "in_game", "debug", ui->ModelGetNumber( "in_game", "debug" ) == 0 );
@@ -154,10 +191,25 @@ void InGameMenuController::Update( float inDeltaTime )
             const int trackIndex = static_cast<int>( ui->ModelGetNumber( "in_game", "track_index" ) );
             LoadSceneEvent load;
             load.Level = "Assets/Example.lvl";
-            load.Callback = [trackIndex]()
+            // A practice lesson has no library index: its chart is still the session's.
+            const bool practice = ui->ModelGetNumber( "in_game", "practice" ) != 0;
+            // The calibration starts over: a new session, with none of this one's hits.
+            if( calibration && !Calibration::GetInstance().Begin() )
+            {
+                continue;
+            }
+            load.Callback = [trackIndex, practice, calibration]()
             {
                 LaunchPlayTrackEvent play;
                 play.TrackIndex = trackIndex;
+                if( calibration )
+                {
+                    play.TrackID = Calibration::kTrackId;
+                }
+                else if( practice )
+                {
+                    play.TrackID = Practice::kTrackId;
+                }
                 play.Fire();
             };
             load.Queue();
@@ -165,7 +217,18 @@ void InGameMenuController::Update( float inDeltaTime )
         else if( event == "exit" )
         {
             LoadSceneEvent load;
-            load.Level = "Assets/TrackList.lvl";
+            load.Level = calibration ? "Assets/MainMenu.lvl" : ui->ModelGetNumber( "in_game", "practice" ) != 0 ? "Assets/Practice.lvl" : "Assets/TrackList.lvl";
+            load.Queue();
+        }
+        else if( event == "cal_apply" )
+        {
+            // The calibration's results become the two delay settings, and that's the session done.
+            if( Calibration::GetInstance().Apply( settings ) )
+            {
+                settings.Save();
+            }
+            LoadSceneEvent load;
+            load.Level = "Assets/MainMenu.lvl";
             load.Queue();
         }
         else if( event == "debug_nofail" )
@@ -200,6 +263,12 @@ void InGameMenuController::Update( float inDeltaTime )
             if( percent >= 0.0 )
                 PlayerSettings::Get().SetValue( "Audio.Master", std::clamp( percent, 0.0, 100.0 ) / 100.0 );
         }
+        else if( event == "metronome" )
+        {
+            // NoteHighwayCore::UpdateMetronome picks it up: mid-song, the click joins on resume.
+            settings.Metronome = !settings.Metronome;
+            ui->ModelSetString( "in_game", "status", "" );
+        }
         else if( event == "highway_speed" )
         {
             const json args = json::parse( ui->ModelLastEventArgs( "in_game" ), nullptr, false );
@@ -214,7 +283,7 @@ void InGameMenuController::Update( float inDeltaTime )
             const json args = json::parse( ui->ModelLastEventArgs( "in_game" ), nullptr, false );
             if( !args.is_array() || args.empty() ) continue;
             const int value = std::clamp( args[0].is_number() ? args[0].get<int>() :
-                std::atoi( args[0].is_string() ? args[0].get<std::string>().c_str() : "0" ), 0, 100 );
+                std::atoi( args[0].is_string() ? args[0].get<std::string>().c_str() : "0" ), 0, GameSettings::kMaxLatencyMs );
             if( event == "audio_delay" ) settings.AudioLatency = value;
             else settings.VideoLatency = value;
             ui->ModelSetString( "in_game", "status", "" );
@@ -224,6 +293,7 @@ void InGameMenuController::Update( float inDeltaTime )
     ui->ModelSetNumber( "in_game", "options", m_options );
     ui->ModelSetNumber( "in_game", "audio_delay", settings.AudioLatency );
     ui->ModelSetNumber( "in_game", "video_delay", settings.VideoLatency );
+    ui->ModelSetNumber( "in_game", "metronome", settings.Metronome );
     const json master = PlayerSettings::Get().GetValue( "Audio.Master" );
     ui->ModelSetNumber( "in_game", "master_volume", std::round( ( master.is_number() ? master.get<double>() : 1.0 ) * 100.0 ) );
     ui->ModelSetNumber( "in_game", "highway_speed", std::round( settings.HighwaySpeed * 100.f ) );

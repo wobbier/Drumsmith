@@ -4,14 +4,20 @@
 #include "Path.h"
 #include "Mathf.h"
 #include "Config/GameSettings.h"
+#include "CLog.h"
 
 namespace
 {
     constexpr float kHandOverFadeSeconds = 0.03f;
+    constexpr float kLoadTimeoutSeconds = 10.f;
 }
 
 const TrackData* TrackRadio::GetCurrentTrack() const
 {
+    if( m_guest )
+    {
+        return m_guest.get();
+    }
     const auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
     if( m_currentTrackIndex < 0 || m_currentTrackIndex >= static_cast<int>( tracks.size() ) )
     {
@@ -23,35 +29,60 @@ const TrackData* TrackRadio::GetCurrentTrack() const
 
 void TrackRadio::Play( RadioArgs inTrackArgs )
 {
-    if( !inTrackArgs.CurrentTrack || inTrackArgs.CurrentTrackIndex == m_currentTrackIndex )
+    if( !inTrackArgs.CurrentTrack || ( !m_guest && inTrackArgs.CurrentTrackIndex == m_currentTrackIndex ) )
     {
         return;
     }
+    m_guest.reset();
+    Start( *inTrackArgs.CurrentTrack, inTrackArgs.CurrentTrackIndex, inTrackArgs.UsePreviewMarker );
+}
+
+
+void TrackRadio::PlayGuest( const TrackData& inTrack, bool inUsePreviewMarker )
+{
+    m_guest = std::make_unique<TrackData>( inTrack );
+    Start( *m_guest, -1, inUsePreviewMarker );
+}
+
+
+void TrackRadio::Start( TrackData& inTrack, int inTrackIndex, bool inUsePreviewMarker )
+{
     // Fade the old song out under the new one's load rather than cutting it off.
     m_audioPack.FadeOut( kHandOverFadeSeconds );
     m_fadingPack = std::move( m_audioPack );
     m_fadingTimer = kHandOverFadeSeconds + 0.05f;
-    m_radioState = RadioState::None;
-    m_radioArgs = inTrackArgs;
-    m_radioArgs.CurrentTrack = nullptr; // only valid for this call; see GetCurrentTrack
-    bool isAsync = true;
+    m_radioArgs = RadioArgs();
+    m_radioArgs.CurrentTrackIndex = inTrackIndex;
+    m_radioArgs.UsePreviewMarker = inUsePreviewMarker;
 
-    m_currentTrackIndex = inTrackArgs.CurrentTrackIndex;
-    m_previewPercent = 0.f;
-    if( inTrackArgs.UsePreviewMarker )
-    {
-        m_previewPercent = inTrackArgs.CurrentTrack->m_previewPercent;
-    }
-    m_audioPack = AudioPack( *inTrackArgs.CurrentTrack );
-
-    // Audio streams are pretty quick, why even have a preview audio file?
-    //Path previewPath = Path( Path( m_currentTrack->m_trackSourcePath ).GetDirectoryString() + "preview.ogg" );
-    //
-    //if( !previewPath.Exists )
-    //{
-    //}
-
+    m_currentTrackIndex = inTrackIndex;
+    m_previewPercent = inUsePreviewMarker ? inTrack.m_previewPercent : 0.f;
+    // The stems are non-blocking streams: this opens them and returns; Update waits for them.
+    m_audioPack = AudioPack( inTrack );
+    m_loadingFor = 0.f;
     m_radioState = RadioState::Loading;
+}
+
+
+void TrackRadio::OnTrackRemoved( int inIndex )
+{
+    if( m_guest )
+    {
+        return;
+    }
+    if( inIndex == m_currentTrackIndex )
+    {
+        // Let go of its files before they are deleted.
+        m_audioPack = AudioPack();
+        m_fadingPack = AudioPack();
+        m_fadingTimer = 0.f;
+        m_currentTrackIndex = -1;
+        m_radioState = RadioState::None;
+    }
+    else if( inIndex < m_currentTrackIndex )
+    {
+        --m_currentTrackIndex;
+    }
 }
 
 
@@ -106,28 +137,30 @@ void TrackRadio::Update( float dt )
     m_audioPack.Update();
     if( m_radioState == RadioState::Loading )
     {
+        // Streams open on FMOD's loader thread; nothing is started until every stem is in.
         if( !m_audioPack.IsReady() )
         {
-            // this feels weird, but okay??
-            m_audioPack.Play();
+            m_loadingFor += dt;
+            if( m_loadingFor > kLoadTimeoutSeconds )
+            {
+                // A file that won't open (a broken download): give up so the next song can play.
+                YIKES( "TrackRadio: a song didn't load; skipping it" );
+                Stop();
+            }
             return;
+        }
+        m_audioPack.Play();
+        m_audioPack.SetVolume( GameSettings::GetInstance().RadioVolume );
+        if( m_radioArgs.UsePreviewMarker )
+        {
+            m_audioPack.Seek( m_previewPercent );
+            m_radioState = RadioState::Seeking;
         }
         else
         {
-            m_audioPack.Play();
-            m_audioPack.SetVolume( GameSettings::GetInstance().RadioVolume );
-            if( m_radioArgs.UsePreviewMarker )
-            {
-                m_audioPack.Seek( m_previewPercent );
-                m_delayTimer = 1;
-                m_radioState = RadioState::Seeking;
-            }
-            else
-            {
-                m_radioState = RadioState::Playing;
-            }
-            return;
+            m_radioState = RadioState::Playing;
         }
+        return;
     }
 
     if( m_radioState == RadioState::Seeking )

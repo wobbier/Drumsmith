@@ -27,6 +27,14 @@ public:
 
     void SetVolume( float inVolumePercent );
     void SetDrumVolume( float inVolumePercent );
+    // A click track laid over the song as one more stem (ClickTrack::MetronomeFile), so it
+    // starts, pauses and seeks with the rest. Added after the song has started, it joins at the
+    // next Seek. False when the file isn't there.
+    bool AddMetronome( const std::string& inFile );
+    bool HasMetronome() const { return m_metronome >= 0; }
+    void SetMetronomeVolume( float inVolumePercent );
+    // The metronome's stem has a channel and it is playing (--highway-log).
+    bool IsMetronomePlaying() const;
     // The song came with its drums on stems of their own.
     bool HasDrumStems() const { return !m_drumTracks.empty(); }
     // Plays every stem faster or slower (pitch follows); 1 is normal. For the Track Editor.
@@ -34,7 +42,8 @@ public:
     float GetVolume();
     // Seeks every stem and restarts them together (see Update). Asynchronous: the stems are
     // non-blocking streams, so each seek completes on FMOD's loader thread in its own time.
-    void Seek( float inSeekPercent );
+    // inFadeInSeconds: how long the stems take to come back up (0: the short anti-click ramp).
+    void Seek( float inSeekPercent, float inFadeInSeconds = 0.f );
     // Starts the stems of a finished seek on one shared DSP tick. Call every frame.
     void Update();
     // A seek hasn't been heard yet (a stem is still seeking, or the shared start is still
@@ -63,6 +72,7 @@ private:
     bool LoadURL( const char* inURL, bool isDrumTrack = false );
     std::vector<AudioSource> m_sounds;
     std::vector<int> m_drumTracks;
+    int m_metronome = -1;
 
 #if USING( ME_FMOD )
     // Add a channel group
@@ -71,5 +81,6 @@ private:
     bool m_seekPending = false;
     unsigned long long m_seekStartClock = 0;   // the group DSP tick the stems restart on
     unsigned int m_seekTargetMs = 0;
+    float m_seekFadeSeconds = 0.f;
     std::chrono::steady_clock::time_point m_seekStarted;
 };
