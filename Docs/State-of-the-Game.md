@@ -27,6 +27,7 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 | Latency compensation | **Usable** | Audio and video offsets applied, and a calibration on the highway measures both (2026-11-17; not yet run by a person on real hardware); positive offsets only | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) |
 | Vocals mode | **Experimental** | FFT spike printing to stdout; not gameplay | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 | Venue, band and crowd | **Experimental** | Built 2026-11-08 and only judged from headless software-rendered captures: every chart venue event is used, three rooms with a live swap, with eight characters shared out between the band and crowd (2026-11-12), no real-GPU or frame-pacing check yet | [Venue-and-Band.md](Venue-and-Band.md) |
+| Venue scenes (a venue as a `.lvl`) | **Experimental** | Built 2026-11-17: `VenuePlan`, six marker components, a loader, a registry (folders, per-song venue, Settings pick), a Python generator and checker, and greybox Template and Backyard venues; verified only headless (lavapipe), nothing on a real GPU, in motion at speed, or on Win64/macOS | [Venue-Authoring.md](Venue-Authoring.md) |
 
 ## 2. Platform Matrix
 
@@ -140,6 +141,7 @@ The big list. **Consequence** is what bites you; **Verdict** is what I'd do. Ite
 6. **Confetti and smoke.** The engine has particles (`Engine/Docs/Rendering-Pipeline.md`); pyro is a capsule and a point light today.
 7. **The `sepia` look renders plain grey.** The tonemapper's white balance runs before saturation, so `Director::GradeFor`'s saturation-0 + temperature looks lose their tint. The fix is a toning LUT like the concert look's (`Assets/Textures/LUTs/ConcertScreen.cube`).
 8. **Concert look follow-ups.** The foliage double exposure the real screens had is ME-356. The concert look auto-fills whole quiet sections, so a long bridge (The Kill's is 51 s) stays at 12 fps throughout; cap it if that drags.
+9. **Venue scene gaps** (`Docs/Venue-Authoring.md` → Known gaps). Scene crowds are instanced mob figures only (no posed front rows or surfer, and `--crowd-size` doesn't scale them); the lyrics screen ignores yaw; shot offsets for non-drummer members don't turn with their yaw; directed shots of non-drummer members are under-lit in the Backyard; exposure is fixed; effects can only be the built-in set (no emitter markers); venue packs can't come from the DLC server yet; the real Backyard art is still to be built (`Docs/Venues/Backyard-GPT-Go.md`).
 
 ## 5. Responsiveness Roadmap
 

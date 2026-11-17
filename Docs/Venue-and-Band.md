@@ -1,5 +1,6 @@
 # Venue and Band
 
+> Venue plans and scene venues against 6840e53 (headless only), 2026-11-17.
 > The stage dressing, effects, hype and camera pass against 278f82b plus those changes, 2026-11-12.
 > Verified against game commit 5973499 plus the venue change, 2026-11-08; the concert look against 35a9edd plus the concert look change, 2026-11-09. Engine submodule at 0c32daef. The rigged band and the crowd's character pieces against 278f82b plus those changes, 2026-11-12, engine at 78e47156 plus the FBX skin repair. The crowd's packed atlas (ME-365) against 278f82b plus that change, engine at 78e47156 plus per-instance data, 2026-11-12.
 
@@ -7,6 +8,7 @@ The concert under the note highway: a stage with a band playing the song, a crow
 
 ## Overview
 
+- **Rooms are data.** A room is a `VenuePlan` (`Game/Source/Venue/VenuePlan.h`): where each member stands, the stage's size, the crowd's rectangles, the screens, the lyric band, the director's camera spots and the room's look. The three built-in rooms are `VenuePlan::ForStyle(0..2)` (Arena, Club, Festival), exactly the layouts that used to be hard-coded. A **scene venue** is a `.lvl` a modder or artist authors (`Assets/Venues/<Id>/`): `VenueScene` loads it under the venue root, reads its marker components (`Game/Source/Components/Venue/VenueMarkers.h`) into a plan, and the same show code builds the band, crowd, lights and cameras from that plan. See `Docs/Venue-Authoring.md`.
 - **Layers.** The venue is built 500 m from the highway (`VenueLayout::kVenueOrigin`), past either world's far plane, so neither camera ever sees the other's world. It used to be 4 km out, where world positions only resolve to half a millimetre and close-ups showed vertices crawling; under 512 m it's 30 microns. The venue's camera becomes the main camera; the highway's camera (`Main Camera` under `TrackMover` in `Assets/Example.lvl`) becomes an engine **overlay camera** (`Camera::Overlay`, `Engine/Docs/Rendering-Pipeline.md` → Overlay cameras) composited on top. Its far end fades into the venue (`OverlayFadeStart` / `OverlayFadeEnd`) and its dark board lets the stage show through (`OverlayDarkOpacity`); its own fog is turned off while the venue runs.
 - **Procedural set and performers.** The architecture and auxiliary instruments use the engine's primitives with `DiffuseMaterial`s (`VenueKit`); pieces sharing a colour instance into one draw. The band members are a rigged, skinned character (`Performer`); the crowd's figures are the same character cut into five rigid pieces that instance (`Puppet`). Both are posed procedurally every frame, with no animation clips. Arena wings and front of house also use selected Synty speaker and equipment-case models, packaged locally under `Assets/Models/Venue` with their texture atlases and provenance. Lead and backing vocal mic stands use `Assets/Models/Instruments/Runtime/MicStand.obj` through `VenueKit::Prop`, retaining each performer's placement/yaw and scaling only Y from the authored 1.47 m shaft height. Guitar and bass use the runtime OBJ exports at their original body pivots/neck lengths. The drumkit uses separate shell/cymbal exports at the strike targets, with stationary hardware and existing hit reactions. The keyboard uses `Runtime/Keyboard.obj`, including the stand and sustain pedal, with the keys at the original hand-target height. These runtime exports compensate for Assimp's Z reflection.
 - **Data first, fallbacks second.** Charts converted from Rock Band `notes.mid` carry camera cuts, post-processing looks, band animation states, drum limb notes, strums and sung notes (see *What is imported*). Charts without them (`.chart` songs, sparse MIDI) get the same show built from their sections, tempo and drum notes.
@@ -94,7 +96,7 @@ The room around it is a `VenueShow::Style`:
 
 ### The band
 
-`Band` places each member at `VenueLayout::kMemberSpots`, facing the crowd. Keys only appear when the chart has a keys part.
+`Band` places each member at the spot in the room's `VenuePlan` (for the built-in rooms the old `VenueLayout::kMemberSpots`; for a scene venue its `VenueSpot` markers), facing the way the spot says (yaw 180 faces the crowd). Keys only appear when the chart has a keys part.
 
 **The cast.** `People::kPeople` lists every rigged character in `Assets/Models/People` (the tool writes it). `Band::Build` gives each member on stage a different one, and a different atlas variant, stepping through both lists from a seed of the song, so a song always has the same band; the characters left over are the crowd's (`Band::SpareModels`, `Crowd::SetModels`). With fewer characters than members they repeat, and the crowd then draws on all of them.
 
@@ -200,11 +202,12 @@ Two render-texture cameras feed the screens, each every other frame (when a look
 ## Settings and flags
 
 - **Venue** (`Venue` in `Settings.json`): Band and crowd (2) / Band only (1) / Off (0: the highway on black, no light show — the rig lives in the venue).
-- **Room** (`VenueStyle`): Arena (0) / Club (1) / Festival (2) / Random (3). F7 swaps it mid-song.
+- **Room** (`VenueStyle`): Arena (0) / Club (1) / Festival (2) / Random (3). F7 swaps it mid-song: Arena, Club, Festival, then each non-hidden scene venue, then Arena again.
+- **Venue** (`VenueId`, a string, empty = use `VenueStyle`) and **Song Venues** (`SongVenues`, default on): the Settings menu's Venue tab lists the scene venues after the three rooms and Random. A song may name its own venue (`Venue` in `TrackData.txt`, or a `Venue/` folder in the song's folder).
 - **Venue Camera** (`VenueCamera`): Live show (0) / Music video (1).
 - **Lyrics** (`Lyrics`): Both (3) / HUD (1) / Venue (2) / Off (0).
 - `VenueShow::SetPresentation` chooses what reaches the screen: `Both` (a play), `HighwayOnly` (the highway's camera takes the screen back and the venue stops updating) or `VenueOnly` (the highway overlay fades out, as `--venue-only`). The Track Editor's preview switches between them; it is kept across `Build` and `Clear`.
-- `--no-venue` skips the venue; `--venue-only` fades the highway out entirely to frame the venue; `--venue-shot <name>` holds one shot (any cut name, or `debug_wall`); `--venue-look <name>` holds one post look; `--venue-time <seconds>` shows the venue that far into the song; `--venue-style N`; `--venue-swap-every <seconds>` swaps the room on a timer like F7; `--venue-moment <seconds>` fires a peak that often; `--venue-eye "x,y,z,tx,ty,tz[,fov]"` puts the main camera anywhere in venue space, to inspect the set; `--highway-log` also logs each cut and big moment; `--crowd-size N`; `--band-debug` logs where the drummer's strokes came from and how many go to each crash, then their stick tips, hands and body lean twice a second, any frame a hand falls more than 3 cm short of its stick, and any frame one arm's forearm or stick comes within 9 cm of the other's. The engine's `--screenshot-every N` saves a numbered frame every N frames, to check motion headless.
+- `--no-venue` skips the venue; `--venue-only` fades the highway out entirely to frame the venue; `--venue-shot <name>` holds one shot (any cut name, or `debug_wall`); `--venue-look <name>` holds one post look; `--venue-time <seconds>` shows the venue that far into the song; `--venue-style N`; `--venue <registry id | Arena | Club | Festival | path.lvl>` picks the room outright (it beats every other rule; see `Docs/Venue-Authoring.md` for the order); `--venue-plan-test` is a dev flag that moves the drummer to the bass spot turned 215 degrees and drops the bass and keys, to exercise the plan; `--venue-swap-every <seconds>` swaps the room on a timer like F7; `--venue-moment <seconds>` fires a peak that often; `--venue-eye "x,y,z,tx,ty,tz[,fov]"` puts the main camera anywhere in venue space, to inspect the set; `--highway-log` also logs each cut and big moment; `--crowd-size N`; `--band-debug` logs where the drummer's strokes came from and how many go to each crash, then their stick tips, hands and body lean twice a second, any frame a hand falls more than 3 cm short of its stick, and any frame one arm's forearm or stick comes within 9 cm of the other's. The engine's `--screenshot-every N` saves a numbered frame every N frames, to check motion headless.
 
 ```bash
 # Frame a shot of Boston (track 2) a minute in, without the highway.
@@ -232,6 +235,7 @@ Two render-texture cameras feed the screens, each every other frame (when a look
 
 ## Related Docs
 
+- `Docs/Venue-Authoring.md`: making a scene venue (markers, loader, tools)
 - `Docs/Stage-Lighting.md`: the light rig and its cues
 - `Docs/Gameplay-Note-Highway.md`: the highway drawn over the venue
 - `Docs/Songs-and-DLC.md`: the converter that writes `NoteData.txt`

@@ -9,6 +9,7 @@ Technical documentation for the game side of Drumsmith — a drum rhythm game fo
 | [Game-Architecture.md](Game-Architecture.md) | `GameApp` lifecycle, component/core registration, game events, singletons, settings, game-side build wiring |
 | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) | `NoteHighwayCore` end to end: track setup, note spawning, hit detection, note lifecycle, pause/resume; the vocals experiment |
 | [Venue-and-Band.md](Venue-and-Band.md) | The concert under the highway: the overlay layering, the set, the procedurally animated band and crowd, camera cuts and post looks from the chart, the LED wall feed |
+| [Venue-Authoring.md](Venue-Authoring.md) | Making a venue as a scene: where venues live and how one is chosen, the marker components and their fields, light roles, what the loader strips, the Python generator and checker, headless preview, cooking, known gaps |
 | [Stage-Lighting.md](Stage-Lighting.md) | The light show: VENUE cues imported from Rock Band charts, the spot-light rig in volumetric haze, cue looks, the fallback show, hit pulses |
 | [Songs-and-DLC.md](Songs-and-DLC.md) | On-disk song format, chart parsing (`notes.mid` / `song.ini` / `.chart`), `TrackDatabase`, the DLC index/download flow, the in-editor track editor |
 | [Audio.md](Audio.md) | `AudioPack` stem playback and sync, `TrackRadio` menu music, `Drumset` hit sounds, FMOD threading facts |
@@ -17,6 +18,7 @@ Technical documentation for the game side of Drumsmith — a drum rhythm game fo
 | [UI-and-Menus.md](UI-and-Menus.md) | The RmlUi menu pages, their view models and the controller components that drive them (radio widget, DLC catalogue, the way into the delay calibration) |
 | [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) | **The latency budget**: every millisecond from drum pad to feedback, the clock inventory, engine constraints on fixes |
 | [State-of-the-Game.md](State-of-the-Game.md) | **Opinions live here**: maturity scorecard, gotchas catalog, half-finished inventory, responsiveness roadmap |
+| [Venues/Backyard-GPT-Go.md](Venues/Backyard-GPT-Go.md) | A hand-off prompt for building the real Backyard scene from the art package in `Art/Venues/Backyard/` |
 | [SharpmakeDependencies.md](SharpmakeDependencies.md) | Sharpmake project graph, binary names, per-project third-party dependencies |
 
 **Suggested reading order:** start with [Game-Architecture.md](Game-Architecture.md), then [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) and [Songs-and-DLC.md](Songs-and-DLC.md) for the core loop and its data. [Latency-and-Responsiveness.md](Latency-and-Responsiveness.md) is the synthesis doc for anyone working on input feel; [State-of-the-Game.md](State-of-the-Game.md) is the executive summary of where things stand. Engine prerequisites: `Engine/Docs/Architecture.md`, `Engine/Docs/ECS.md`, `Engine/Docs/Jobs-and-Events.md`.
