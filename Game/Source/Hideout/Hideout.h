@@ -142,10 +142,12 @@ private:
     // New items' tour: after the notice, the camera visits each item just unlocked.
     struct Reveal
     {
-        std::string Name;
+        std::string Label;      // "NEW: Practice pad", "SOON: Neon sign"
+        std::string How;        // a second line: how to get it
         Vector3 Centre;
         float Size = 0.f;       // how far its pieces reach from the centre, metres
         Vector3 View;           // HideoutItemSlot::ViewOffset (zero: worked out)
+        float Seconds = 2.6f;
     };
     std::vector<Reveal> m_reveals;
     int m_reveal = -1;          // the one being shown; -1 before the tour or after it
@@ -158,14 +160,18 @@ private:
     static constexpr float kIntroSeconds = 4.5f;
     // The first visit after moving into this room (PlayerProfile::SeenTier): the boxes are out.
     bool m_movingIn = false;
-    // The slots' entities (not the stand-ins), for the tour, and where each is best seen from.
+    // Every item slot in the room (not the stand-ins), the locked ones' too: where its pieces
+    // are, how big, and where it's best seen from. The tour and the wishlist's SHOW ME use them.
     struct SlotView
     {
         std::string Slot;
-        EntityHandle Entity;
+        Vector3 Centre;
+        float Size = 0.f;
         Vector3 View;
     };
     std::vector<SlotView> m_slots;
+    // The wishlist's SHOW ME: the camera to where the item is (or will be), with how to get it.
+    void ShowItem( int inItem );
 
     // A prop's motion and how the scene left it.
     struct Motion

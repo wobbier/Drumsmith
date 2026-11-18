@@ -246,3 +246,11 @@ body.studio #hideout-reveal span { color: #f3e3bf; letter-spacing: 2dp; }
 body.studio #hideout-focus { background-color: #160f0ae8; border-right: 3dp #c9a55a; }
 body.studio #hideout-focus h1 { letter-spacing: 3dp; color: #f3e3bf; }
 body.studio #hideout-corner .corner-link { decorator: vertical-gradient( #e2c27ce0 #a8823ee0 ); background-color: transparent; color: #2a1d0a; letter-spacing: 1dp; }
+/* The wishlist's SHOW ME, and the second line of a shown item (how to get it). */
+.wish-row .wish-name { display: block; flex: 1; }
+.wish-row .wish-show { display: block; width: auto; padding: 3dp 9dp; font-size: 13dp; font-weight: bold; letter-spacing: 1dp; color: #1a1408; background-color: #ffd166; }
+.wish-row .wish-show:hover, .wish-row .wish-show:focus { background-color: #ff9933; }
+#hideout-reveal .reveal-how { margin: 6dp 0 0; font-size: 17dp; color: #ffffffd0; }
+body.basement #hideout-reveal .reveal-how, body.garage #hideout-reveal .reveal-how { font-family: Gochi Hand; font-size: 21dp; color: #2a2218; }
+body.rehearsal #hideout-reveal .reveal-how { font-family: Gochi Hand; font-size: 21dp; color: #f2f2ec; }
+body.studio #hideout-reveal .reveal-how { color: #e2c27c; }

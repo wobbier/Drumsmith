@@ -36,7 +36,7 @@
             </div>
             <div id="hideout-wishlist" class="hideout-panel" data-if="hideout_panel == 'wishlist'">
                 <div class="wish-row" data-for="wish : wishes" data-class-got="wish.got > 0">
-                    <div class="wish-title"><span class="wish-box">{{wish.got > 0 ? 'X' : ''}}</span><span class="wish-name">{{wish.name}}</span></div>
+                    <div class="wish-title"><span class="wish-box">{{wish.got > 0 ? 'X' : ''}}</span><span class="wish-name">{{wish.name}}</span><button class="wish-show" data-event-click="wish_show(wish.item)">SHOW ME</button></div>
                     <p class="wish-how" data-if="wish.how != ''">{{wish.how}}</p>
                     <p class="wish-description">{{wish.description}}</p>
                 </div>
@@ -58,7 +58,7 @@
             <button id="hideout-exit" class="corner-link" onclick="quit">Exit</button>
             <button id="hideout-debug-link" class="corner-link" data-if="debug_allowed > 0" data-event-click="debug_toggle">Debug (F2)</button>
         </div>
-        <div id="hideout-reveal" data-if="hideout_reveal != ''"><span>{{hideout_reveal}}</span></div>
+        <div id="hideout-reveal" data-if="hideout_reveal != ''"><span>{{hideout_reveal}}</span><p class="reveal-how" data-if="hideout_reveal_how != ''">{{hideout_reveal_how}}</p></div>
         <div id="hideout-notice" data-if="hideout_notice != ''">
             <h2>{{hideout_notice_title}}</h2>
             <p>{{hideout_notice}}</p>

@@ -618,7 +618,7 @@ const std::vector<const char*>& Hideout::Events()
     static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play", "band_name_edit",
         "band_name_save", "band_name_cancel", "debug_toggle", "debug_room", "debug_move_in", "debug_item", "debug_items", "debug_gig", "debug_step",
         "debug_time", "debug_evaluate", "debug_intro", "debug_tour", "debug_overlay", "debug_name", "debug_restore", "debug_reset", "debug_reload",
-        "debug_freelook" };
+        "debug_freelook", "wish_show" };
     return kEvents;
 }
 
@@ -628,7 +628,7 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetNumber( inModel, "hideout", 0 );
     inUi.ModelSetNumber( inModel, "hideout_tier", 0 );
     inUi.ModelSetNumber( inModel, "hideout_focus", -1 );
-    for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_notice_title", "hideout_title", "hideout_hint", "hideout_status", "hideout_reveal" } )
+    for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_notice_title", "hideout_title", "hideout_hint", "hideout_status", "hideout_reveal", "hideout_reveal_how" } )
     {
         inUi.ModelSetString( inModel, key, "" );
     }
@@ -845,13 +845,49 @@ bool Hideout::Load( bool inEvaluate )
             station.FieldOfView = marker->FieldOfView;
             m_stations.push_back( station );
         }
-        if( HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>() )
+    }
+    // Every slot, the locked ones' too (their entities go at the end of the frame, so they're
+    // still here to measure): the middle of the pieces, how far they reach, the view.
+    for( Entity* entity : entities )
+    {
+        HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>();
+        if( !slot || slot->WhenLocked )
         {
-            if( !slot->WhenLocked )
-            {
-                m_slots.push_back( { slot->Slot, transform->Parent, slot->ViewOffset } );
-            }
+            continue;
         }
+        Transform& transform = entity->GetComponent<Transform>();
+        Vector3 sum;
+        int count = 0;
+        const std::function<void( Transform& )> gather = [&]( Transform& inTransform ) {
+            for( Transform* child : inTransform.GetChildren() )
+            {
+                if( !child ) continue;
+                sum = sum + child->GetWorldPosition();
+                ++count;
+                gather( *child );
+            }
+        };
+        gather( transform );
+        const Vector3 centre = count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : transform.GetWorldPosition();
+        // The farthest reach of a piece from the middle, its own half-size included (a rug, a
+        // wall of foam, a console; a primitive's scale is its half-size).
+        float size = 0.f;
+        const std::function<void( Transform& )> reach = [&]( Transform& inTransform ) {
+            for( Transform* child : inTransform.GetChildren() )
+            {
+                if( !child ) continue;
+                float half = 0.f;
+                if( child->Parent && child->Parent->TryGetComponent<Mesh>() )
+                {
+                    const Vector3 scale = child->GetScale();
+                    half = std::max( { std::abs( scale.x ), std::abs( scale.y ), std::abs( scale.z ) } );
+                }
+                size = std::max( size, Distance( child->GetWorldPosition(), centre ) + half );
+                reach( *child );
+            }
+        };
+        reach( transform );
+        m_slots.push_back( { slot->Slot, centre, size, slot->ViewOffset } );
     }
     // The items just unlocked (PlayerProfile::NewItems), each where its slot's pieces are.
     Tour( profile.NewItems );
@@ -1002,6 +1038,19 @@ bool Hideout::Load( bool inEvaluate )
         profile.Save();
     }
     m_ready = true;
+    // --hideout-show <item id>: the wishlist's SHOW ME for that item, once (captures).
+    static bool shown = false;
+    static const std::string kShow = CommandLine::GetString( "--hideout-show" );
+    if( !shown && !kShow.empty() )
+    {
+        shown = true;
+        const auto& all = progression.Items();
+        const auto item = std::find_if( all.begin(), all.end(), []( const ProgressionItem& inItem ) { return inItem.Id == kShow; } );
+        if( item != all.end() )
+        {
+            ShowItem( static_cast<int>( item - all.begin() ) );
+        }
+    }
     // --hideout-debug-open: the debug menu open from the start (captures of it).
     static bool debugOpened = false;
     if( !debugOpened && DebugAllowed() && CommandLine::Has( "--hideout-debug-open" ) )
@@ -1095,50 +1144,37 @@ void Hideout::Tour( const std::vector<std::string>& inItems )
         {
             continue;
         }
-        for( const SlotView& slotView : m_slots )
+        const auto slot = std::find_if( m_slots.begin(), m_slots.end(), [item]( const SlotView& inSlot ) { return inSlot.Slot == item->Slot; } );
+        if( slot != m_slots.end() )
         {
-            const EntityHandle& entity = slotView.Entity;
-            if( slotView.Slot != item->Slot || !entity )
-            {
-                continue;
-            }
-            // The middle of its pieces (a slot's own position is usually the room's origin).
-            Vector3 sum;
-            int count = 0;
-            const std::function<void( Transform& )> gather = [&]( Transform& inTransform ) {
-                for( Transform* child : inTransform.GetChildren() )
-                {
-                    if( !child ) continue;
-                    sum = sum + child->GetWorldPosition();
-                    ++count;
-                    gather( *child );
-                }
-            };
-            Transform& transform = entity->GetComponent<Transform>();
-            gather( transform );
-            const Vector3 centre = count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : transform.GetWorldPosition();
-            // How big it is: the farthest reach of a piece from the middle, its own half-size
-            // included (a rug, a wall of foam, a console; a primitive's scale is its half-size).
-            float size = 0.f;
-            const std::function<void( Transform& )> reach = [&]( Transform& inTransform ) {
-                for( Transform* child : inTransform.GetChildren() )
-                {
-                    if( !child ) continue;
-                    float half = 0.f;
-                    if( child->Parent && child->Parent->TryGetComponent<Mesh>() )
-                    {
-                        const Vector3 scale = child->GetScale();
-                        half = std::max( { std::abs( scale.x ), std::abs( scale.y ), std::abs( scale.z ) } );
-                    }
-                    size = std::max( size, Distance( child->GetWorldPosition(), centre ) + half );
-                    reach( *child );
-                }
-            };
-            reach( transform );
-            m_reveals.push_back( { item->Name, centre, size, slotView.View } );
-            break;
+            m_reveals.push_back( { "NEW: " + item->Name, std::string(), slot->Centre, slot->Size, slot->View, 2.6f } );
         }
     }
+    m_reveal = -1;
+    m_revealAge = 0.f;
+}
+
+
+void Hideout::ShowItem( int inItem )
+{
+    const Progression& progression = Progression::GetInstance();
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
+    if( inItem < 0 || inItem >= static_cast<int>( progression.Items().size() ) )
+    {
+        return;
+    }
+    const ProgressionItem& item = progression.Items()[inItem];
+    const auto slot = std::find_if( m_slots.begin(), m_slots.end(), [&item]( const SlotView& inSlot ) { return inSlot.Slot == item.Slot; } );
+    if( slot == m_slots.end() )
+    {
+        m_status = item.Name + " has no place in this room.";
+        return;
+    }
+    const bool in = profile.UnlockedItems.count( "item:" + item.Id ) > 0 || progression.UnlockAll;
+    Choose( -1 );
+    m_noticeShown = false;
+    m_reveals = { { ( in ? "" : "SOON: " ) + item.Name, in ? item.Description : progression.HowToUnlock( item.Id, profile ), slot->Centre, slot->Size,
+        slot->View, 4.f } };
     m_reveal = -1;
     m_revealAge = 0.f;
 }
@@ -1664,6 +1700,7 @@ void Hideout::FillWishlist( RmlUiCore& inUi, const char* inModel ) const
         inUi.ModelSetItemString( inModel, "wishes", i, "description", item.Description );
         inUi.ModelSetItemString( inModel, "wishes", i, "how", in ? std::string() : progression.HowToUnlock( item.Id, profile ) );
         inUi.ModelSetItemNumber( inModel, "wishes", i, "got", in ? 1 : 0 );
+        inUi.ModelSetItemNumber( inModel, "wishes", i, "item", static_cast<int>( items[i] - progression.Items().data() ) );
     }
 }
 
@@ -1826,14 +1863,15 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     if( touring )
     {
         m_revealAge += inDeltaTime;
-        if( m_revealAge > 2.6f )
+        if( m_revealAge > m_reveals[m_reveal].Seconds )
         {
             ++m_reveal;
             m_revealAge = 0.f;
         }
     }
     const bool showing = m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() );
-    inUi.ModelSetString( inModel, "hideout_reveal", showing ? "NEW: " + m_reveals[m_reveal].Name : std::string() );
+    inUi.ModelSetString( inModel, "hideout_reveal", showing ? m_reveals[m_reveal].Label : std::string() );
+    inUi.ModelSetString( inModel, "hideout_reveal_how", showing ? m_reveals[m_reveal].How : std::string() );
     // The hover light eases up over the pointed-at station (a little above it, toward the camera),
     // or over the new item being shown.
     if( m_highlight )
@@ -1969,6 +2007,11 @@ bool Hideout::HandleEvent( const std::string& inEvent, const json& inArgs, RmlUi
             ApplyBandName();
         }
         m_naming = false;
+        return true;
+    }
+    if( inEvent == "wish_show" )
+    {
+        ShowItem( static_cast<int>( UIModel::ArgNumber( inArgs, 0, -1.0 ) ) );
         return true;
     }
     if( inEvent == "station_hover" )
