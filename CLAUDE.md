@@ -29,6 +29,9 @@ make -f Drumsmith.make Havana config=editor_debug -j$(nproc)
 # Build the game executable
 make -f Drumsmith.make Game_EntryPoint config=game_linux_debug -j$(nproc)
 
+# Build the Profile game: Retail optimization with the F3 frame profiler and F9 captures
+make -f Drumsmith.make Game_EntryPoint config=game_linux_profile -j$(nproc)
+
 # Run the editor
 ./.build/Editor_Debug/Havana
 
@@ -142,12 +145,13 @@ Composite features use `USE_IF(expr)` which takes a boolean expression of `USING
 | `ME_PLATFORM_WIN64` / `ME_PLATFORM_MACOS` / `ME_PLATFORM_LINUX` | Target platform |
 | `ME_PLATFORM_WINDOWS` | Win64 or UWP |
 | `ME_DEBUG` / `ME_RELEASE` / `ME_RETAIL` | Build configuration |
+| `ME_PROFILE` | The Profile game build: Retail plus profiling (`ME_RETAIL` is in use too) |
 | `ME_HEADLESS` | No window / no rendering |
 | `ME_PHYSICS_3D` | Bullet3D physics enabled |
 | `ME_DOTNET` / `ME_SCRIPTING` | C# scripting via .NET 8 (`ME_SCRIPTING` is `USE_IF(USING(ME_DOTNET))`) |
 | `ME_RMLUI` | RmlUi HTML UI (always on) |
 | `ME_FMOD` | FMOD audio (disabled in headless) |
-| `ME_OPTICK` / `ME_PROFILING` | Profiling support |
+| `ME_OPTICK` / `ME_PROFILING` | Profiling support (`ME_PROFILING`: Debug, Release or Profile) |
 | `ME_IMGUI` | ImGui (editor, tools, or profiling builds) |
 | `ME_TOOLS` / `ME_GAME_TOOLS` | Non-editor tool builds |
 
@@ -205,7 +209,9 @@ void Foo::Baz()
 
 ## Optick Profiling
 
-Captures are triggered at runtime with **F9** (toggle start/stop/save). `startup.opt` is saved automatically after the first 10 frames. Files land in the working directory.
+Captures are triggered at runtime with **F9**, in the editor and in Debug, Release and Profile game builds (`Engine/Source/Profiling/FrameCapture.h`). Each press records 10 frames into `.tmp/Captures/capture_<date>_<time>` and keeps the newest 5. Win64 writes Optick `.opt`; Linux writes Chrome trace `.json` (the ChromeTrace shim; open it in Perfetto). The editor's `--capture-startup` saves `startup.opt` after the first 10 frames. **F3** toggles the frame-profiler bar in game builds.
+
+For numbers that match what players get, measure on the **Profile** build (`config=game_linux_profile`): Retail's optimization with the profilers and symbols, no tools code. Release carries the tools code, so it is not representative.
 
 ### Parsing `.opt` files with Python
 

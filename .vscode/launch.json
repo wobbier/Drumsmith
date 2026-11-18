@@ -206,6 +206,40 @@
       }
     },
     {
+      "name": "Game (Profile, Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/.build/Game_linux_Profile/Game_EntryPoint_x64",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/Engine/Tools/NixGdb.sh",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Skip all files under /nix/store (stdlib, libc, etc.)",
+          "text": "-interpreter-exec console \"skip -rfi /nix/store/.*\"",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set pagination off",
+          "text": "-interpreter-exec console \"set pagination off\"",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-game-profile",
+      "miDebuggerArgs": "--project \"${workspaceFolder}\"",
+      "presentation": {
+        "group": "Game"
+      }
+    },
+    {
       "name": "Server (Debug, Linux)",
       "type": "cppdbg",
       "request": "launch",

@@ -104,7 +104,7 @@ The input delay is in both numbers, which is what makes them right together: the
 
 - `System::getDSPBufferSize` / `getSoftwareFormat` at runtime for the actual mixer block/count and sample rate.
 - `--highway-log` prints the song clock against FMOD's position once a second; the HUD shows each hit's offset in ms.
-- Optick captures (F9; parsing recipe in `CLAUDE.md`) for frame-time distribution and update-phase costs.
+- Optick captures (F9; parsing recipe in `CLAUDE.md`) for frame-time distribution and update-phase costs. Take them on the Profile build (`config=game_linux_profile`: Retail optimization with the profilers), not Release, which carries the tools code.
 - Ground truth requires a physical loopback: record pad strike audio and game audio output on one device and measure the gap (the standard rhythm-game calibration method).
 
 ## Caveats & Fragility

@@ -101,6 +101,22 @@
       ]
     },
     {
+      "label": "build-game-profile",
+      "type": "process",
+      "command": "${workspaceFolder}/Engine/Tools/BuildProject.sh",
+      "args": [
+        "Game_EntryPoint",
+        "game_linux_profile"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
       "label": "build-server-debug",
       "type": "process",
       "command": "${workspaceFolder}/Engine/Tools/BuildProject.sh",
