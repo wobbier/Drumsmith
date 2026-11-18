@@ -396,7 +396,7 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetNumber( inModel, "hideout", 0 );
     inUi.ModelSetNumber( inModel, "hideout_tier", 0 );
     inUi.ModelSetNumber( inModel, "hideout_focus", -1 );
-    for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_title", "hideout_hint", "hideout_status" } )
+    for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_title", "hideout_hint", "hideout_status", "hideout_reveal" } )
     {
         inUi.ModelSetString( inModel, key, "" );
     }
@@ -535,6 +535,40 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
             }
         }
     }
+    // The items just unlocked (PlayerProfile::NewItems), each where its slot's pieces are.
+    m_reveals.clear();
+    for( const std::string& id : profile.NewItems )
+    {
+        const ProgressionItem* item = progression.FindItem( id );
+        if( !item )
+        {
+            continue;
+        }
+        for( Entity* entity : entities )
+        {
+            HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>();
+            if( !slot || slot->Slot != item->Slot )
+            {
+                continue;
+            }
+            // The middle of its pieces (a slot's own position is usually the room's origin).
+            Vector3 sum;
+            int count = 0;
+            const std::function<void( Transform& )> gather = [&]( Transform& inTransform ) {
+                for( Transform* child : inTransform.GetChildren() )
+                {
+                    if( !child ) continue;
+                    sum = sum + child->GetWorldPosition();
+                    ++count;
+                    gather( *child );
+                }
+            };
+            gather( entity->GetComponent<Transform>() );
+            m_reveals.push_back( { item->Name, count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : entity->GetComponent<Transform>().GetWorldPosition() } );
+            break;
+        }
+    }
+    m_reveal = -1;
     m_motions.clear();
     for( Entity* entity : entities )
     {
@@ -610,6 +644,11 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
     {
         m_overview.Eye = Vector3( 0.f, 1.7f, -3.f );
         m_overview.Target = Vector3( 0.f, 1.f, 2.f );
+    }
+    if( !profile.NewItems.empty() )
+    {
+        profile.NewItems.clear();
+        profile.Save();
     }
     m_notices = profile.Notices;
     m_noticeShown = !m_notices.empty();
@@ -713,6 +752,22 @@ Hideout::Pose Hideout::PoseOf( int inStation ) const
 }
 
 
+Hideout::Pose Hideout::PoseOfReveal( const Reveal& inReveal ) const
+{
+    // From the middle of the room's side of it (most things are on a wall), a metre and a half
+    // away and a little above.
+    Pose pose;
+    pose.Target = inReveal.Centre;
+    Vector3 away = m_overview.Target - inReveal.Centre;
+    away.y = 0.f;
+    const float length = std::sqrt( away.x * away.x + away.z * away.z );
+    away = length > 0.01f ? away * ( 1.f / length ) : Vector3( 0.f, 0.f, -1.f );
+    pose.Eye = inReveal.Centre + away * 1.5f + Vector3( 0.f, 0.3f, 0.f );
+    pose.FieldOfView = 42.f;
+    return pose;
+}
+
+
 void Hideout::Choose( int inStation )
 {
     m_chosen = inStation;
@@ -734,6 +789,11 @@ bool Hideout::Back()
         m_noticeShown = false;
         return true;
     }
+    if( m_reveal >= 0 )
+    {
+        m_reveal = static_cast<int>( m_reveals.size() );
+        return true;
+    }
     if( m_chosen >= 0 )
     {
         Choose( -1 );
@@ -749,7 +809,7 @@ void Hideout::ApplyCamera( float inDeltaTime )
     {
         return;
     }
-    const Pose goal = PoseOf( m_chosen );
+    const Pose goal = m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() ) && m_chosen < 0 ? PoseOfReveal( m_reveals[m_reveal] ) : PoseOf( m_chosen );
     if( !m_hasCurrent )
     {
         m_current = goal;
@@ -834,7 +894,8 @@ void Hideout::UpdateLabels( RmlUiCore& inUi, const char* inModel )
         const glm::vec4 clip = viewProjection * glm::vec4( station.Position.x, station.Position.y, station.Position.z, 1.f );
         Spot& spot = spots[i];
         // Not during the intro: the labels come up once the camera is in the room.
-        spot.Shown = clip.w > 0.05f && m_chosen < 0 && !m_noticeShown && m_intro < 0.f;
+        const bool touring = m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() );
+        spot.Shown = clip.w > 0.05f && m_chosen < 0 && !m_noticeShown && m_intro < 0.f && !touring;
         if( spot.Shown )
         {
             const float x = clip.x / clip.w;
@@ -1003,14 +1064,34 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     UpdateMotions( inDeltaTime );
     UpdateDrummer( inDeltaTime );
     UpdateFocus( inDeltaTime );
-    // The hover light eases up over the pointed-at station (a little above it, toward the camera).
+    // The new items' tour: once the notice is read and the camera is in, each new thing in turn.
+    if( m_reveal < 0 && !m_reveals.empty() && !m_noticeShown && m_intro < 0.f && m_chosen < 0 )
+    {
+        m_reveal = 0;
+        m_revealAge = 0.f;
+    }
+    const bool touring = m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() );
+    if( touring )
+    {
+        m_revealAge += inDeltaTime;
+        if( m_revealAge > 2.6f )
+        {
+            ++m_reveal;
+            m_revealAge = 0.f;
+        }
+    }
+    const bool showing = m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() );
+    inUi.ModelSetString( inModel, "hideout_reveal", showing ? "NEW: " + m_reveals[m_reveal].Name : std::string() );
+    // The hover light eases up over the pointed-at station (a little above it, toward the camera),
+    // or over the new item being shown.
     if( m_highlight )
     {
-        const bool lit = m_hover >= 0 && m_hover < static_cast<int>( m_stations.size() ) && m_chosen < 0 && !m_noticeShown;
+        const bool hovering = m_hover >= 0 && m_hover < static_cast<int>( m_stations.size() ) && m_chosen < 0 && !m_noticeShown;
+        const bool lit = hovering || showing;
         m_highlightLevel += ( ( lit ? 1.f : 0.f ) - m_highlightLevel ) * ( 1.f - std::exp( -inDeltaTime * 8.f ) );
         if( lit )
         {
-            const Vector3 at = m_stations[m_hover].Position;
+            const Vector3 at = showing ? m_reveals[m_reveal].Centre : m_stations[m_hover].Position;
             const Vector3 toward = m_current.Eye - at;
             const float length = std::max( 0.01f, Distance( m_current.Eye, at ) );
             m_highlight->GetComponent<Transform>().SetPosition( at + toward * ( 0.7f / length ) + Vector3( 0.f, 0.35f, 0.f ) );

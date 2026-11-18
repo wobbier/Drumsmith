@@ -76,6 +76,8 @@ public:
     std::set<std::string> UnlockedItems;
     // Unlocks not shown yet: the hideout shows them on its next visit and clears them.
     std::vector<std::string> Notices;
+    // Items unlocked but not shown yet: the hideout's camera visits each once, then clears them.
+    std::vector<std::string> NewItems;
     // Counts over the songs, for the progression rules.
     int SongsPlayed() const { return static_cast<int>( m_songs.size() ); }
     int FullCombos() const;

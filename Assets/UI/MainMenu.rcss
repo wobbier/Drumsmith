@@ -126,3 +126,8 @@ body.basement #hideout-notice .menu-link { color: #2a2218; }
 body.basement #hideout-focus { background-color: #160f0ae0; border-right: 3dp #6e5236; }
 body.basement #hideout-corner .corner-link { background-color: #e9dfbfd0; color: #231c16; }
 body.basement #hideout-corner .corner-link:hover, body.basement #hideout-corner .corner-link:focus { background-color: #fff3a8; }
+/* The new items' tour: what the camera is showing. */
+#hideout-reveal { position: absolute; left: 50%; top: 26vh; width: 520dp; margin-left: -260dp; padding: 14dp 18dp; text-align: center; background-color: #101010e6; border-bottom: 3dp #ffd166; }
+#hideout-reveal span { font-size: 30dp; font-weight: bold; color: #ffd166; }
+body.basement #hideout-reveal { background-color: #f5e27aee; border-bottom: 0; transform: rotate(-1.5deg); }
+body.basement #hideout-reveal span { color: #2a2218; }

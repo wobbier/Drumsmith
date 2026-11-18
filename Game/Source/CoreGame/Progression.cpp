@@ -400,7 +400,10 @@ std::vector<ProgressionUnlock> Progression::Evaluate( PlayerProfile& ioProfile )
         for( const std::string& id : inRewards )
         {
             const ProgressionItem* item = FindItem( id );
-            unlock( "item", id, "New for the hideout: " + ( item ? item->Name : id ) );
+            if( unlock( "item", id, "New for the hideout: " + ( item ? item->Name : id ) ) )
+            {
+                ioProfile.NewItems.push_back( id );
+            }
         }
     };
     // Each pass can open something the next one needs (a tier opens a gig's venue...), so go

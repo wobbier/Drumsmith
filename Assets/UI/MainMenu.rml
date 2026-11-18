@@ -39,6 +39,7 @@
             <button id="hideout-vocals" class="corner-link" onclick="load-scene:Assets/Vocals.lvl">Vocal Test</button>
             <button id="hideout-exit" class="corner-link" onclick="quit">Exit</button>
         </div>
+        <div id="hideout-reveal" data-if="hideout_reveal != ''"><span>{{hideout_reveal}}</span></div>
         <div id="hideout-notice" data-if="hideout_notice != ''">
             <h2>While you were out</h2>
             <p>{{hideout_notice}}</p>

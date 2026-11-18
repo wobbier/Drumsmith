@@ -111,6 +111,16 @@ private:
     EntityHandle m_highlight;
     float m_highlightLevel = 0.f;
     Vector3 m_parallax;
+    // New items' tour: after the notice, the camera visits each item just unlocked.
+    struct Reveal
+    {
+        std::string Name;
+        Vector3 Centre;
+    };
+    std::vector<Reveal> m_reveals;
+    int m_reveal = -1;          // the one being shown; -1 before the tour or after it
+    float m_revealAge = 0.f;
+    Pose PoseOfReveal( const Reveal& inReveal ) const;
     // The first visit's camera move (HideoutView's IntroEye): seconds into it, < 0 when there's none.
     float m_intro = -1.f;
     Pose m_introFrom;

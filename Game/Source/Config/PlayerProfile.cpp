@@ -139,6 +139,7 @@ json PlayerProfile::ToJson() const
     root["CompletedGigs"] = CompletedGigs;
     root["UnlockedItems"] = UnlockedItems;
     root["Notices"] = Notices;
+    root["NewItems"] = NewItems;
     return root;
 }
 
@@ -150,6 +151,7 @@ void PlayerProfile::FromJson( const json& inRoot )
     CompletedGigs.clear();
     UnlockedItems.clear();
     Notices.clear();
+    NewItems.clear();
     HideoutTier = 0;
     if( !inRoot.is_object() )
     {
@@ -201,6 +203,16 @@ void PlayerProfile::FromJson( const json& inRoot )
     };
     readSet( "CompletedGigs", CompletedGigs );
     readSet( "UnlockedItems", UnlockedItems );
+    if( inRoot.contains( "NewItems" ) && inRoot["NewItems"].is_array() )
+    {
+        for( const json& value : inRoot["NewItems"] )
+        {
+            if( value.is_string() )
+            {
+                NewItems.push_back( value.get<std::string>() );
+            }
+        }
+    }
     if( inRoot.contains( "Notices" ) && inRoot["Notices"].is_array() )
     {
         for( const json& value : inRoot["Notices"] )
