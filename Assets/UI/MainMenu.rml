@@ -26,6 +26,7 @@
             <button id="tab-game" class="settings-tab" data-class-selected="settings_tab == 0" data-event-click="settings_tab(0)">Game</button>
             <button id="tab-sound" class="settings-tab" data-class-selected="settings_tab == 1" data-event-click="settings_tab(1)">Sound &amp; Timing</button>
             <button id="tab-venue" class="settings-tab" data-class-selected="settings_tab == 2" data-event-click="settings_tab(2)">Venue</button>
+            <button id="tab-graphics" class="settings-tab" data-class-selected="settings_tab == 5" data-event-click="settings_tab(5)">Graphics</button>
             <button id="tab-kit" class="settings-tab" data-class-selected="settings_tab == 3" data-event-click="settings_tab(3)">Drum Kit</button>
             <button id="tab-songs" class="settings-tab" data-class-selected="settings_tab == 4" data-event-click="settings_tab(4)">Songs</button>
         </div>
@@ -144,6 +145,63 @@
             <div class="setting-row">
                 <label>Custom Songs <span>Rock Band and Clone Hero folders in Assets/DLC</span></label>
                 <button id="convert-dlc" class="small-action pink" data-event-click="convert_dlc">Convert Custom DLC</button>
+            </div>
+        </div>
+        <div class="settings-page" data-if="settings_tab == 5">
+            <p class="settings-note">Graphics settings apply and save as you change them.</p>
+            <div class="setting-row">
+                <label>Quality <span>shadows, lighting and effects</span></label>
+                <div class="choice-row">
+                    <button id="quality-auto" class="device-choice" onclick="setting:Graphics.Quality|&quot;&quot;" data-setting-selected="Graphics.Quality|&quot;&quot;">Auto</button>
+                    <div class="choice-row" data-options="quality"></div>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label>Display <span>Alt+Enter also switches</span></label>
+                <div class="choice-row">
+                    <button id="window-windowed" class="device-choice" onclick="window-mode:windowed" data-window-mode="windowed">Windowed</button>
+                    <button id="window-borderless" class="device-choice" onclick="window-mode:borderless" data-window-mode="borderless">Borderless</button>
+                    <button id="window-fullscreen" class="device-choice" onclick="window-mode:fullscreen" data-window-mode="fullscreen">Fullscreen</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label>VSync <span>off lets frames through sooner, with tearing</span></label>
+                <div class="choice-row">
+                    <button id="vsync-on" class="device-choice" onclick="setting:Graphics.VSync|true" data-setting-selected="Graphics.VSync|true">On</button>
+                    <button id="vsync-off" class="device-choice" onclick="setting:Graphics.VSync|false" data-setting-selected="Graphics.VSync|false">Off</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label>Frame Rate Limit <span>frames a second</span></label>
+                <div class="choice-row">
+                    <button id="max-fps-0" class="device-choice" onclick="setting:Graphics.MaxFrameRate|0" data-setting-selected="Graphics.MaxFrameRate|0">None</button>
+                    <button id="max-fps-60" class="device-choice" onclick="setting:Graphics.MaxFrameRate|60" data-setting-selected="Graphics.MaxFrameRate|60">60</button>
+                    <button id="max-fps-120" class="device-choice" onclick="setting:Graphics.MaxFrameRate|120" data-setting-selected="Graphics.MaxFrameRate|120">120</button>
+                    <button id="max-fps-144" class="device-choice" onclick="setting:Graphics.MaxFrameRate|144" data-setting-selected="Graphics.MaxFrameRate|144">144</button>
+                    <button id="max-fps-240" class="device-choice" onclick="setting:Graphics.MaxFrameRate|240" data-setting-selected="Graphics.MaxFrameRate|240">240</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label>Render Scale <span id="render-scale-value" data-setting-text="Graphics.RenderScale" data-format="percent"></span></label>
+                <div class="choice-row">
+                    <button id="render-scale-down" class="device-choice" onclick="setting-step:Graphics.RenderScale|-0.1">Lower</button>
+                    <button id="render-scale-up" class="device-choice" onclick="setting-step:Graphics.RenderScale|0.1">Higher</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label>Upscaling <span>how a lower render scale is stretched to the screen</span></label>
+                <div class="choice-row">
+                    <button id="upscale-default" class="device-choice" onclick="setting:Graphics.Upscale|&quot;&quot;" data-setting-selected="Graphics.Upscale|&quot;&quot;">Default</button>
+                    <button id="upscale-smooth" class="device-choice" onclick="setting:Graphics.Upscale|Bilinear" data-setting-selected="Graphics.Upscale|Bilinear">Smooth</button>
+                    <button id="upscale-sharp" class="device-choice" onclick="setting:Graphics.Upscale|Sharp" data-setting-selected="Graphics.Upscale|Sharp">Sharp</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label>Dynamic Resolution <span>lowers the render scale when frames run long</span></label>
+                <div class="choice-row">
+                    <button id="dynamic-resolution-on" class="device-choice" onclick="setting:Graphics.DynamicResolution|true" data-setting-selected="Graphics.DynamicResolution|true">On</button>
+                    <button id="dynamic-resolution-off" class="device-choice" onclick="setting:Graphics.DynamicResolution|false" data-setting-selected="Graphics.DynamicResolution|false">Off</button>
+                </div>
             </div>
         </div>
         <button id="save-settings" class="menu-link green" data-event-click="save_settings">Save Settings<span class="underline"></span></button>

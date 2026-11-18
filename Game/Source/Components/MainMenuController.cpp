@@ -621,7 +621,7 @@ void MainMenuController::Update( float dt )
         else if( event == "settings_tab" )
         {
             StopBinding();
-            ui->ModelSetNumber( kModel, "settings_tab", std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 0.0 ) ), 0, 4 ) );
+            ui->ModelSetNumber( kModel, "settings_tab", std::clamp( static_cast<int>( UIModel::ArgNumber( args, 0, 0.0 ) ), 0, 5 ) );
         }
         else if( event == "server_add" )
         {
