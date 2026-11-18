@@ -5,6 +5,7 @@
 #include "Midi/MidiDevice.h"
 #include "CoreGame/Practice.h"
 #include "CoreGame/Calibration.h"
+#include "CoreGame/GigSession.h"
 #include "Core/CommandLine.h"
 #include <Cores/UI/RmlUiCore.h>
 #include <Engine/Engine.h>
@@ -66,6 +67,15 @@ void InGameMenuController::SetPaused( bool inPaused )
 }
 
 
+void InGameMenuController::LeaveGig()
+{
+    GigSession::GetInstance().End();
+    LoadSceneEvent load;
+    load.Level = "Assets/MainMenu.lvl";
+    load.Queue();
+}
+
+
 void InGameMenuController::Update( float inDeltaTime )
 {
     RmlUiCore* ui = GetEngine().RmlUi;
@@ -74,7 +84,7 @@ void InGameMenuController::Update( float inDeltaTime )
     if( !m_modelReady )
     {
         ui->ModelEnsure( "in_game" );
-        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek", "master_volume", "cal_apply", "metronome" } )
+        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek", "master_volume", "cal_apply", "metronome", "gig_next", "gig_leave" } )
             ui->ModelRegisterEvent( "in_game", event );
         ui->ModelSetString( "in_game", "status", "" );
         ui->ModelSetString( "in_game", "pause_hint", kPauseHint );
@@ -138,7 +148,16 @@ void InGameMenuController::Update( float inDeltaTime )
     }
     const bool menuKey = MenuKeyPressed( GetEngine().GetInput() );
     const bool calibration = ui->ModelGetNumber( "in_game", "calibration" ) != 0;
-    if( finished && menuKey )
+    const bool gig = GigSession::GetInstance().IsActive() && ui->ModelGetNumber( "in_game", "gig" ) != 0;
+    if( finished && menuKey && gig )
+    {
+        // A gig's results: on to the next song, or home after the last.
+        if( !GigSession::GetInstance().LaunchNext() )
+        {
+            LeaveGig();
+        }
+    }
+    else if( finished && menuKey )
     {
         LoadSceneEvent load;
         load.Level = calibration ? "Assets/MainMenu.lvl" : ui->ModelGetNumber( "in_game", "practice" ) != 0 ? "Assets/Practice.lvl" : "Assets/TrackList.lvl";
@@ -213,6 +232,18 @@ void InGameMenuController::Update( float inDeltaTime )
                 play.Fire();
             };
             load.Queue();
+        }
+        else if( event == "gig_next" )
+        {
+            if( !GigSession::GetInstance().LaunchNext() )
+            {
+                LeaveGig();
+            }
+        }
+        else if( event == "gig_leave" || ( event == "exit" && gig ) )
+        {
+            // Leaving mid-set abandons the gig.
+            LeaveGig();
         }
         else if( event == "exit" )
         {

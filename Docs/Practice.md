@@ -17,6 +17,7 @@ A lesson is a short pattern in a data file. Starting one turns it into an ordina
 | `Game/Source/Components/PracticeMenuController.h/.cpp` | The practice page's controller |
 | `Assets/Practice.lvl`, `Assets/UI/Practice.rml`, `Assets/UI/Practice.rcss` | The page |
 | `Game/Tests/Source/GameHelperTests.cpp` | Chart building: paradiddle, flams, a groove |
+| `Game/Tests/Source/PlayerProfileTests.cpp` | Passing a lesson, and the profile's records |
 
 ## How It Works
 
@@ -47,6 +48,10 @@ A pattern is rounded up to whole bars and repeats. A lesson with no name or no n
 
 The results' *Average timing* line (every song has it) says how far ahead of or behind the beat the hits were on average.
 
+### Passing
+
+A lesson passes at `PassAccuracy` percent (default 90) or better, at `PassBpm` or faster (0, or left out, means the lesson's `Bpm`): `PracticeLesson::Passes`. Every lesson in `Lessons.json` sets a `PassBpm` 10 to 30 BPM above where it starts. A finished lesson is recorded in `PlayerProfile` (`Docs/Game-Architecture.md` → Player profile): its best accuracy, the fastest tempo played at the pass accuracy, and whether it has passed. The results screen says *Lesson passed!* the first time, and until then what passing takes.
+
 ### The page
 
 `Docs/UI-and-Menus.md` → Practice. Tempo is 40 to 220 BPM (`Practice::kMinBpm` / `kMaxBpm`), remembered per lesson in `GameSettings::PracticeTempos`; length is 8, 16 or 32 bars.
@@ -54,6 +59,7 @@ The results' *Average timing* line (every song has it) says how far ahead of or 
 ## How to Extend
 
 **Add a lesson:** add an entry to `Assets/Practice/Lessons.json`. No code. `--practice <index> --practice-bpm <bpm> --highway-autoplay` under `Engine/Tools/Headless.sh` plays it without a kit.
+Add `--record-autoplay` to record that run in `Profile.json` (and back up or delete a real profile first).
 
 **Add a notation mark:** `PatternSteps` in `Practice.cpp` reads both notations into `Step`s.
 
@@ -64,7 +70,7 @@ The results' *Average timing* line (every song has it) says how far ahead of or 
 - **The click is the only sound.** There are no hit sounds (`Docs/Audio.md`), so the player hears their own kit against the click.
 - **Click files accumulate** under `.tmp/Practice/` (about 90 KB a second of lesson), one per tempo and length used.
 - **A flam is two notes in one lane 35 ms apart**, judged like any two notes; a single hit takes the closer one and the other is a miss.
-- **Nothing is recorded** between sessions except the tempo.
+- **Passing is judged on accuracy and tempo only**: the length (8, 16 or 32 bars) doesn't matter, and nothing on the practice page shows a lesson's results yet.
 
 ## Related Docs
 

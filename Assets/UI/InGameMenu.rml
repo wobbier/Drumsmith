@@ -58,8 +58,13 @@
     <div id="results" data-if="finished && !calibration">
         <h2>{{track_title}}</h2>
         <p class="results-artist">{{track_artist}}</p>
+        <p class="results-gig" data-if="gig > 0">{{gig_name}}: {{gig_progress}}</p>
         <p class="results-autoplay" data-if="debug_autoplay > 0">Autoplayed ({{debug_autoplay_label}})</p>
         <div id="results-score">{{score}}</div>
+        <p class="results-news" data-if="result_news != ''">{{result_news}}</p>
+        <p class="results-bests" data-if="result_bests != ''">{{result_bests}}</p>
+        <p class="results-gig-result" data-if="gig_result != ''">{{gig_result}}</p>
+        <p class="results-unlocks" data-if="result_unlocks != ''">{{result_unlocks}}</p>
         <div class="results-grid">
             <div class="results-row"><span>Accuracy</span><span>{{accuracy}}</span></div>
             <div class="results-row"><span>Perfect</span><span>{{hits_perfect}}</span></div>
@@ -71,7 +76,9 @@
             <div class="results-row"><span>Best combo</span><span>{{max_combo}} / {{total_notes}}</span></div>
         </div>
         <div><button id="results-retry" class="menu-link orange" data-event-click="retry">RETRY<span class="underline"></span></button></div>
-        <div data-if="!practice"><button id="results-continue" class="menu-link green" onclick="load-scene:Assets/TrackList.lvl">CONTINUE<span class="underline"></span></button></div>
+        <div data-if="gig > 0 && gig_next > 0"><button id="results-gig-next" class="menu-link green" data-event-click="gig_next">NEXT SONG<span class="underline"></span></button></div>
+        <div data-if="gig > 0"><button id="results-gig-leave" class="menu-link blue" data-event-click="gig_leave">BACK TO THE HIDEOUT<span class="underline"></span></button></div>
+        <div data-if="!practice && gig == 0"><button id="results-continue" class="menu-link green" onclick="load-scene:Assets/TrackList.lvl">CONTINUE<span class="underline"></span></button></div>
         <div data-if="practice"><button id="results-lessons" class="menu-link green" onclick="load-scene:Assets/Practice.lvl">LESSONS<span class="underline"></span></button></div>
     </div>
     <div id="pause-overlay" data-if="paused">

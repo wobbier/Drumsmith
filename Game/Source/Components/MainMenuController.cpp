@@ -9,6 +9,10 @@
 #include "Events/GameEvents.h"
 #include <Events/SceneEvents.h>
 #include "Global/TrackRadio.h"
+#include "Hideout/Hideout.h"
+#include "Config/PlayerProfile.h"
+#include "CoreGame/Progression.h"
+#include "Engine/World.h"
 #include "Midi/MidiDevice.h"
 #include "Editor/PadBindings.h"
 #include "UI/TrackRadioUtils.h"
@@ -70,6 +74,7 @@ namespace
 MainMenuController::MainMenuController()
     : Component( "MainMenuController" )
     , m_radioUtils( std::make_unique<TrackRadioUtils>( kModel ) )
+    , m_hideout( std::make_unique<Hideout>() )
 {
 }
 
@@ -197,6 +202,11 @@ void MainMenuController::PopulateModel()
         ui->ModelRegisterEvent( kModel, event );
     }
     m_radioUtils->RegisterEvents( *ui );
+    for( const char* event : Hideout::Events() )
+    {
+        ui->ModelRegisterEvent( kModel, event );
+    }
+    Hideout::RegisterModel( *ui, kModel );
     ui->ModelSetNumber( kModel, "settings_open", 0 );
     ui->ModelSetNumber( kModel, "settings_tab", 0 );
     ui->ModelSetNumber( kModel, "radio_volume", std::round( settings.RadioVolume * 100.f ) );
@@ -250,7 +260,14 @@ void MainMenuController::RefreshVenues()
     {
         ui->ModelSetItemString( kModel, "venues", i, "id", venues[i]->Id );
         ui->ModelSetItemString( kModel, "venues", i, "name", venues[i]->Name );
+        ui->ModelSetItemNumber( kModel, "venues", i, "locked", Progression::GetInstance().VenueOpen( venues[i]->Id, PlayerProfile::GetInstance() ) ? 0 : 1 );
     }
+    // Free play only uses venues it has earned (Docs/Hideout-and-Progression.md); the rooms say which aren't yet.
+    const Progression& progression = Progression::GetInstance();
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
+    ui->ModelSetNumber( kModel, "venue_locked_arena", progression.VenueOpen( "Arena", profile ) ? 0 : 1 );
+    ui->ModelSetNumber( kModel, "venue_locked_club", progression.VenueOpen( "Club", profile ) ? 0 : 1 );
+    ui->ModelSetNumber( kModel, "venue_locked_festival", progression.VenueOpen( "Festival", profile ) ? 0 : 1 );
 }
 
 
@@ -451,6 +468,11 @@ void MainMenuController::OpenSettings( bool inOpen )
         ApplySettings( true );
     }
     ui->ModelSetNumber( kModel, "settings_open", inOpen );
+    if( !inOpen )
+    {
+        // Back from the mixer to the room.
+        m_hideout->ReturnToOverview();
+    }
 }
 
 
@@ -466,7 +488,20 @@ void MainMenuController::Update( float dt )
     {
         return;
     }
+    // The room loads once the model is up (its labels are model values).
+    if( !m_hideoutTried && Parent )
+    {
+        m_hideoutTried = true;
+        if( std::shared_ptr<World> world = GetEngine().GetWorld().lock() )
+        {
+            m_hideout->Start( *world, Parent );
+        }
+    }
     const bool settingsOpen = ui->ModelGetNumber( kModel, "settings_open" ) != 0;
+    if( !settingsOpen && GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
+    {
+        m_hideout->Back();
+    }
     if( settingsOpen && GetEngine().GetInput().WasKeyPressed( KeyCode::Escape ) )
     {
         // Escape first cancels a pad being bound, then closes the panel.
@@ -487,7 +522,7 @@ void MainMenuController::Update( float dt )
     for( std::string event; !( event = ui->ModelPollEvent( kModel ) ).empty(); )
     {
         const json args = UIModel::LastEventArgs( *ui, kModel );
-        if( m_radioUtils->HandleEvent( event, args ) )
+        if( m_radioUtils->HandleEvent( event, args ) || m_hideout->HandleEvent( event, args, *ui, kModel ) )
         {
             continue;
         }
@@ -700,6 +735,22 @@ void MainMenuController::Update( float dt )
             TrackDatabase::GetInstance().ExportMidiTrackMetaData();
             ui->ModelSetString( kModel, "settings_status", "Custom DLC metadata exported" );
         }
+    }
+    switch( m_hideout->Update( dt, *ui, kModel ) )
+    {
+    case Hideout::Action::OpenSettings:
+        OpenSettings( true );
+        break;
+    case Hideout::Action::ShowRadio:
+        m_radioUtils->HandleEvent( "radio_show", json::array() );
+        break;
+    case Hideout::Action::Quit:
+#if !USING( ME_EDITOR )
+        GetEngine().Quit();
+#endif
+        break;
+    case Hideout::Action::None:
+        break;
     }
     PumpServerChecks();
     if( settingsOpen )

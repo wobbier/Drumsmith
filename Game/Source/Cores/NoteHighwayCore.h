@@ -222,6 +222,12 @@ private:
 	// Whether a kit column is drawn: it has notes (toms come as a set of three).
 	bool ShowsColumn( PadId inPad ) const;
 	void ResetScore();
+	// Accuracy so far, 0 to 100: perfect counts whole, great 3/4, good half, a miss nothing.
+	double Accuracy() const;
+	// The song or lesson is over: writes its result to PlayerProfile, and what it changed to the
+	// results screen. Calibration, autoplay, no-fail and skipped-ahead runs aren't recorded (--record-autoplay
+	// records autoplay, for headless checks).
+	void RecordResult();
 	void UpdateHud( float inDeltaTime );
 	void SetDrumsAudible( bool inAudible );
 	// The debug scrubber: the song, the clock and the notes to inTimeMs (notes before it are
@@ -291,6 +297,16 @@ private:
 	double m_offsetSumMs = 0.0;
 	int m_offsetCount = 0;
 	std::string m_lastJudgement;
+	// The results screen's line about the profile: a new best, a full combo, a lesson passed, or
+	// the standing bests; empty when nothing was recorded.
+	std::string m_resultNews;
+	std::string m_resultBests;
+	// What the run unlocked (Progression::Evaluate), a line each.
+	std::string m_resultUnlocks;
+	// A gig's last song: how the set went.
+	std::string m_resultGig;
+	// The player seeked forward this run (the debug scrubber, --seek): its result isn't recorded.
+	bool m_skippedAhead = false;
 	std::string m_lastTiming;
 	std::string m_lastHint;
 	float m_judgementAge = 10.f;

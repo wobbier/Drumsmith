@@ -25,6 +25,7 @@ Navigation between menus and gameplay is done by loading whole scenes; the hando
 | `Game/Source/ComponentRegistry.h` | Umbrella header whose includes pull in every `ME_REGISTER_*` macro |
 | `Game/Source/Events/GameEvents.h` | The four game events (see below) |
 | `Game/Source/Config/GameSettings.h` | Settings singleton persisted to `Settings.json` at the working directory |
+| `Game/Source/Config/PlayerProfile.h` | The player's record (song bests, lesson results, hideout progress) persisted to `Profile.json` |
 | `Game.sharpmake.cs` | Game project + solution definition; rtmidi/midifile linkage, FMOD/dotnet paths |
 | `Assets/Config/Engine.cfg` | Engine window/scene config (see `Engine/Docs/Platform-Window-Input-Config.md`) |
 
@@ -82,6 +83,7 @@ All are `ME_SINGLETON_DEFINITION`, lazily constructed on first `GetInstance()`, 
 | Singleton | Location | Owns |
 |-----------|----------|------|
 | `GameSettings` | `Game/Source/Config/GameSettings.h` | User settings, `Settings.json` persistence |
+| `PlayerProfile` | `Game/Source/Config/PlayerProfile.h` | What the player has done, `Profile.json` persistence |
 | `TrackDatabase` | `Game/Source/CoreGame/TrackList.h` | The scanned track list, sort/filter state — see `Docs/Songs-and-DLC.md` |
 | `CustomTrackDefineTest` | `Game/Source/CoreGame/CustomTrackDefineTest.h` | `song.ini` / `.chart` / `notes.mid` parsing — see `Docs/Songs-and-DLC.md` |
 | `PadMappingStorage` | `Game/Source/Editor/PadBindings.h` | Keyboard/MIDI pad bindings — see `Docs/MIDI-and-Pads.md` |
@@ -103,6 +105,12 @@ All are `ME_SINGLETON_DEFINITION`, lazily constructed on first `GetInstance()`, 
 | `VideoLatency` | `VideoLatency` | `MainMenuController::ApplySettings` (slider), `InGameMenuController` (slider, or the calibration's result) | `NoteHighwayCore::VisualTimeMs` |
 
 Persistence is explicit: nothing auto-saves; Save Settings, Back and Escape on the settings panel (and Back in the pause options) call `GameSettings::Save()`. Hit-detection timing uses a hardcoded offset instead of these fields — see `Docs/Latency-and-Responsiveness.md`.
+
+### Player profile
+
+`PlayerProfile` keeps the player's record, apart from the settings: each song's bests by song folder (`TrackDatabase::FavoriteKey`), each practice lesson's results by lesson id, and the hideout's progress (`HideoutTier`, `CompletedGigs`, `UnlockedItems`, which nothing fills yet). It reads `Profile.json` from the working directory in its constructor and writes it on every `RecordSong` / `RecordLesson`, through a `.tmp` file renamed over the old one, so a crash mid-write keeps the old file. A file that isn't valid JSON is copied to `Profile.json.bad` and the profile starts empty. `Profile.json` is gitignored.
+
+`NoteHighwayCore::RecordResult` records a run when the song finishes (`SongState::Finished`). A song keeps its plays, best score, best accuracy, best combo and whether it was ever full-comboed (no misses, combo over every note); each best is kept on its own. A lesson keeps its plays, best accuracy, the fastest tempo it was played at the pass accuracy, and whether it passed (`Docs/Practice.md` → Passing). These runs aren't recorded: the calibration, autoplay (unless `--record-autoplay`), no-fail, and a run that seeked forward more than a second (`m_skippedAhead`). What was recorded shows on the results screen as two lines, `result_news` (a full combo, a new best, a lesson passed, or what passing takes) and `result_bests`.
 
 ### Build wiring (game side)
 

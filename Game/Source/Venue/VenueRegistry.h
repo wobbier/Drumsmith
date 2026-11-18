@@ -2,6 +2,7 @@
 #include "Singleton.h"
 #include "JSON.h"
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -56,10 +57,19 @@ struct VenueChoiceInputs
     int VenueStyle = 0;             // GameSettings::VenueStyle, 0..2 a room, 3 random
     uint32_t SongHash = 0;          // VenueSongHash( track name ), for Random
     const std::vector<VenueEntry>* Registry = nullptr;
+    // A gig's venue (CoreGame/Progression.h): after --venue and --venue-style, over everything else.
+    std::string GigVenue;
+    // Whether free play has earned a venue (a registry id or a room name); empty means all are.
+    // The player's VenueId and VenueStyle (and Random) only pick open venues; when the room they
+    // name is locked, another open room is used, else the first open scene. Gigs, the song's own
+    // venue and the command line aren't gated.
+    std::function<bool( const std::string& )> VenueOpen;
 };
 
 // The rooms VenueShow builds in code, by name (any case): "Arena" 0, "Club" 1, "Festival" 2; -1 otherwise.
 int VenueStyleFromName( const std::string& inName );
+// The name of room inStyle ("Arena", "Club", "Festival"), empty past them.
+std::string VenueStyleName( int inStyle );
 // Repeatable per song: the hash VenueShow's Random uses (FNV-1a over the track name).
 uint32_t VenueSongHash( const std::string& inTrackName );
 // Order: --venue, --venue-style, then (if SongVenues) the song's Venue field and its own folder,
@@ -95,6 +105,13 @@ public:
     // The same pick with no scenes in it (a scene that can't be a venue falls back to this room):
     // --venue or the song's Venue only when they name a room, --venue-style, the VenueStyle setting.
     VenueChoice ChooseRoomForSong( const TrackData& inTrack ) const;
+
+    // The venue the gig being played forces on its songs (empty: none), set by GigSession.
+    static std::string& GigVenue()
+    {
+        static std::string venue;
+        return venue;
+    }
 
 private:
     std::vector<VenueEntry> m_venues;

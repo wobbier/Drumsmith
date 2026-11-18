@@ -15,6 +15,9 @@
 #include "Materials/StandardMaterial.h"
 #include "CoreGame/CustomTrackDefineTest.h"
 #include "Config/GameSettings.h"
+#include "Config/PlayerProfile.h"
+#include "CoreGame/Progression.h"
+#include "CoreGame/GigSession.h"
 #include "CoreGame/Practice.h"
 #include "CoreGame/Calibration.h"
 #include "CoreGame/ClickTrack.h"
@@ -1850,6 +1853,9 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
         return;
     }
     const double target = std::clamp( inTimeMs, 0.0, std::max( 0.0, lengthMs - 500.0 ) );
+    // Skipping ahead leaves notes unjudged, so the run's result isn't a fair one to keep. Going
+    // back (a resume's run-up, a retry of a passage) is fine.
+    m_skippedAhead = m_skippedAhead || target > m_songTimeMs + 1000.0;
     if( m_songState == SongState::LeadIn )
     {
         m_currentTrackPack.Play();
@@ -1906,12 +1912,137 @@ void NoteHighwayCore::SeekTo( double inTimeMs )
 }
 
 
+double NoteHighwayCore::Accuracy() const
+{
+    const int judged = m_perfect + m_great + m_good + m_missed;
+    return judged > 0 ? ( m_perfect + m_great * 0.75 + m_good * 0.5 ) * 100.0 / judged : 100.0;
+}
+
+
+void NoteHighwayCore::RecordResult()
+{
+    m_resultNews.clear();
+    m_resultBests.clear();
+    m_resultUnlocks.clear();
+    m_resultGig.clear();
+    static const bool recordAutoplay = CommandLine::Has( "--record-autoplay" );
+    if( !m_trackData || m_trackData->m_calibration || m_noFail || m_skippedAhead || ( m_autoplay != 0 && !recordAutoplay ) )
+    {
+        return;
+    }
+    PlayerProfile& profile = PlayerProfile::GetInstance();
+    const double accuracy = Accuracy();
+    char text[128];
+    if( m_trackData->m_practice )
+    {
+        const Practice& practice = Practice::GetInstance();
+        const PracticeLesson* lesson = practice.CurrentLesson();
+        if( !lesson )
+        {
+            return;
+        }
+        const PlayerProfile::Outcome outcome = profile.RecordLesson( *lesson, practice.Tempo(), accuracy );
+        const PlayerProfile::LessonRecord* record = profile.FindLesson( lesson->Id );
+        if( outcome.LessonPassed )
+        {
+            m_resultNews = "Lesson passed!";
+        }
+        else if( record && !record->Passed )
+        {
+            std::snprintf( text, sizeof( text ), "To pass: %.0f%% at %d BPM or faster", lesson->PassAccuracy, lesson->PassTempo() );
+            m_resultNews = text;
+        }
+        if( record )
+        {
+            if( record->BestBpm > 0 )
+            {
+                std::snprintf( text, sizeof( text ), "Best %.1f%%, fastest clean tempo %d BPM", record->BestAccuracy, record->BestBpm );
+            }
+            else
+            {
+                std::snprintf( text, sizeof( text ), "Best %.1f%%", record->BestAccuracy );
+            }
+            m_resultBests = text;
+        }
+    }
+    else
+    {
+        const std::string key = TrackDatabase::FavoriteKey( *m_trackData );
+        PlayerProfile::SongResult result;
+        result.Score = m_score;
+        result.Accuracy = accuracy;
+        result.MaxCombo = m_maxCombo;
+        result.Missed = m_missed;
+        result.TotalNotes = m_totalNotes;
+        const PlayerProfile::SongRecord* before = profile.FindSong( key );
+        const bool firstPlay = !before || before->Plays == 0;
+        const PlayerProfile::Outcome outcome = profile.RecordSong( key, result );
+        if( outcome.FirstFullCombo )
+        {
+            m_resultNews = "Full combo!";
+        }
+        else if( outcome.NewBestScore && !firstPlay )
+        {
+            m_resultNews = "New best score!";
+        }
+        else if( outcome.NewBestAccuracy && !firstPlay )
+        {
+            m_resultNews = "New best accuracy!";
+        }
+        if( const PlayerProfile::SongRecord* record = profile.FindSong( key ) )
+        {
+            std::snprintf( text, sizeof( text ), "Best %d, %.1f%%, played %d time%s", record->BestScore, record->BestAccuracy, record->Plays, record->Plays == 1 ? "" : "s" );
+            m_resultBests = text;
+        }
+        // A gig's song: the set's tally, and the gig completed when its last song passes it.
+        GigSession& gig = GigSession::GetInstance();
+        if( gig.IsActive() && gig.RecordSong( m_trackIndex, accuracy ) )
+        {
+            if( gig.Passed() )
+            {
+                gig.Complete( profile );
+                std::snprintf( text, sizeof( text ), "%s played! The set averaged %.0f%% (%.0f%% needed).", gig.GigName().c_str(), gig.AverageAccuracy(), gig.PassAccuracy() );
+            }
+            else
+            {
+                std::snprintf( text, sizeof( text ), "Not this time: the set averaged %.0f%%, %.0f%% needed. Retry a song to raise it.", gig.AverageAccuracy(), gig.PassAccuracy() );
+            }
+            m_resultGig = text;
+            profile.Save();
+        }
+    }
+    // What it opened: a new room, items, lessons, venues. The hideout shows them again (Notices).
+    const std::vector<ProgressionUnlock> unlocks = Progression::GetInstance().Evaluate( profile );
+    for( const ProgressionUnlock& unlock : unlocks )
+    {
+        m_resultUnlocks += ( m_resultUnlocks.empty() ? "" : "\n" ) + unlock.Text;
+    }
+    if( !unlocks.empty() )
+    {
+        profile.Save();
+    }
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Highway: recorded the result: '%s' / '%s', %d unlocks", m_resultNews.c_str(), m_resultBests.c_str(), static_cast<int>( unlocks.size() ) );
+        for( const ProgressionUnlock& unlock : unlocks )
+        {
+            BRUH_FMT( "Highway: unlocked %s:%s (%s)", unlock.Kind.c_str(), unlock.Id.c_str(), unlock.Text.c_str() );
+        }
+    }
+}
+
+
 void NoteHighwayCore::ResetScore()
 {
     m_score = m_combo = m_maxCombo = m_perfect = m_great = m_good = m_missed = m_wrongTechnique = 0;
     m_offsetSumMs = 0.0;
     m_offsetCount = 0;
+    m_skippedAhead = false;
     m_lastJudgement.clear();
+    m_resultNews.clear();
+    m_resultBests.clear();
+    m_resultUnlocks.clear();
+    m_resultGig.clear();
     m_lastHint.clear();
     m_lastTiming.clear();
     m_judgementAge = 10.f;
@@ -1982,10 +2113,8 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
         return;
     }
     m_judgementAge += inDeltaTime;
-    const int judged = m_perfect + m_great + m_good + m_missed;
-    const double accuracy = judged > 0 ? ( m_perfect + m_great * 0.75 + m_good * 0.5 ) * 100.0 / judged : 100.0;
     char accuracyText[16];
-    std::snprintf( accuracyText, sizeof( accuracyText ), "%.1f%%", accuracy );
+    std::snprintf( accuracyText, sizeof( accuracyText ), "%.1f%%", Accuracy() );
     // The judgement holds for a moment, then fades.
     const float opacity = std::clamp( 1.f - ( m_judgementAge - 0.35f ) / 0.3f, 0.f, 1.f );
 
@@ -2032,6 +2161,19 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
         averageTiming = average == 0 ? std::string( "On the beat" ) : std::to_string( std::abs( average ) ) + ( average < 0 ? " ms early" : " ms late" );
     }
     ui->ModelSetString( kModel, "avg_timing", averageTiming );
+    ui->ModelSetString( kModel, "result_news", m_resultNews );
+    ui->ModelSetString( kModel, "result_bests", m_resultBests );
+    ui->ModelSetString( kModel, "result_unlocks", m_resultUnlocks );
+    // A gig in progress (CoreGame/GigSession.h): which song of the set, and what comes after.
+    {
+        const GigSession& gig = GigSession::GetInstance();
+        const bool inGig = gig.IsActive() && m_trackData && !m_trackData->m_practice && !m_trackData->m_calibration;
+        ui->ModelSetNumber( kModel, "gig", inGig ? 1 : 0 );
+        ui->ModelSetString( kModel, "gig_name", inGig ? gig.GigName() : std::string() );
+        ui->ModelSetString( kModel, "gig_progress", inGig ? "Song " + std::to_string( gig.SongIndex() + 1 ) + " of " + std::to_string( gig.SongCount() ) : std::string() );
+        ui->ModelSetNumber( kModel, "gig_next", inGig && !gig.IsLastSong() ? 1 : 0 );
+        ui->ModelSetString( kModel, "gig_result", m_resultGig );
+    }
     // The delay calibration: what to do now, how far along, and what it found.
     ui->ModelSetNumber( kModel, "calibration", m_calibrating );
     if( m_calibrating )
@@ -2170,6 +2312,7 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         if( !m_currentTrackPack.IsPlaying() || m_songTimeMs > lengthMs + 2000.0 )
         {
             m_songState = SongState::Finished;
+            RecordResult();
             if( CommandLine::Has( "--highway-log" ) )
             {
                 BRUH_FMT( "Highway: finished, score %d, perfect %d great %d good %d missed %d, best combo %d", m_score, m_perfect, m_great, m_good, m_missed, m_maxCombo );

@@ -16,7 +16,7 @@
         <p class="empty-library" data-if="lesson_count == 0">No lessons found. They live in Assets/Practice/Lessons.json.</p>
         <div data-for="lesson : lessons">
             <h2 class="track-category" data-if="lesson.category != ''">{{lesson.category}}</h2>
-            <button class="lesson-row" data-class-selected="selected == lesson.index" data-event-click="select(lesson.index)" data-event-focus="select(lesson.index)">{{lesson.name}}</button>
+            <button class="lesson-row" data-class-selected="selected == lesson.index" data-event-click="select(lesson.index)" data-event-focus="select(lesson.index)" data-class-locked="lesson.state == 'LOCKED'"><span class="lesson-name">{{lesson.name}}</span><span class="lesson-state" data-if="lesson.state != ''">{{lesson.state}}</span></button>
         </div>
     </div>
     <div class="library-details" data-if="selected >= 0">
@@ -40,7 +40,8 @@
                 <button class="tempo-step" data-class-selected="bars == 16" data-event-click="bars(16)">16 bars</button>
                 <button class="tempo-step" data-class-selected="bars == 32" data-event-click="bars(32)">32 bars</button>
             </div>
-            <button id="lesson-start" class="detail-action green" data-event-click="start">START</button>
+            <p class="lesson-progress" data-class-passed="detail_passed > 0" data-if="detail_progress != ''">{{detail_progress}}</p>
+            <button id="lesson-start" class="detail-action green" data-if="detail_locked == 0" data-event-click="start">START</button>
             <p class="detail-state" data-if="status != ''">{{status}}</p>
         </div>
     </div>

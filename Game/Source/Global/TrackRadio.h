@@ -44,6 +44,9 @@ public:
     float GetPositionMS() const;
     void Seek( float inPercent );
     void Update( float dt );
+    // Where the radio plays from (AudioPack::SetSpeaker), kept across songs until set back to
+    // 1, 0, 1. The hideout's radio sets it every frame; leaving the main menu takes it off.
+    void SetSpeaker( float inOpen, float inPan, float inLevel );
     bool CanPlayNextTrack() const;
     void Resume();
 
@@ -71,5 +74,8 @@ private:
     float m_previewPercent = 0.f;
     // The previous track, fading out instead of being cut off (a click), and how long it has left.
     AudioPack m_fadingPack;
+    float m_speakerOpen = 1.f;
+    float m_speakerPan = 0.f;
+    float m_speakerLevel = 1.f;
     float m_fadingTimer = 0.f;
 };

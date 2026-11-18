@@ -5,7 +5,7 @@
 #include <chrono>
 
 #if USING( ME_FMOD )
-namespace FMOD { class ChannelGroup; }
+namespace FMOD { class ChannelGroup; class DSP; }
 #endif
 
 class AudioPack
@@ -60,6 +60,10 @@ public:
 
     bool IsReady() const;
     bool IsPlaying() const;
+    // The song as a speaker somewhere in a room plays it (the hideout's radio): inOpen 0 is a
+    // small speaker across the room (no lows, no highs), 1 the song as it is; inPan -1 left to 1
+    // right; inLevel 0 to 1 on top of the volume. 1, 0, 1 takes the effect off.
+    void SetSpeaker( float inOpen, float inPan, float inLevel );
 
 private:
     void Reset();
@@ -77,6 +81,8 @@ private:
 #if USING( ME_FMOD )
     // Add a channel group
     FMOD::ChannelGroup* m_syncGroup = nullptr;
+    // SetSpeaker's band limit, made on first use.
+    FMOD::DSP* m_speakerEq = nullptr;
 #endif
     bool m_seekPending = false;
     unsigned long long m_seekStartClock = 0;   // the group DSP tick the stems restart on

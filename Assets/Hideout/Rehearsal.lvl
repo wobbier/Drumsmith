@@ -1,0 +1,5071 @@
+{
+ "Version": 2,
+ "Cores": [],
+ "Entities": [
+  {
+   "GUID": "4911df90091750d6",
+   "Name": "Hideout Rehearsal",
+   "DestroyOnLoad": true,
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0deda36567c8ba5b",
+   "Name": "Room",
+   "DestroyOnLoad": true,
+   "Parent": "4911df90091750d6",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "307c4167ca65a8d9",
+   "Name": "Stations",
+   "DestroyOnLoad": true,
+   "Parent": "4911df90091750d6",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "4b27a5c6c756f969",
+   "Name": "Items",
+   "DestroyOnLoad": true,
+   "Parent": "4911df90091750d6",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "45fa0efe9f1a0924",
+   "Name": "Markers",
+   "DestroyOnLoad": true,
+   "Parent": "4911df90091750d6",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0ed9a8ed50fb000e",
+   "Name": "Floor",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -0.05,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      4.2,
+      0.05,
+      4.65
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.18,
+       0.16,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.95
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "574f9d799f48f2a0",
+   "Name": "Ceiling",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.05,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      4.2,
+      0.05,
+      4.65
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.12,
+       0.14
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.95
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0af747644818386a",
+   "Name": "Back Wall",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.5,
+      7.85
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      4.2,
+      1.5,
+      0.05
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.16,
+       0.15,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7b1119e2f1f29ef5",
+   "Name": "Left Wall",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.25,
+      1.5,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.05,
+      1.5,
+      4.65
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.16,
+       0.15,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "44d84c69da6fe282",
+   "Name": "Right Wall",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.25,
+      1.5,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.05,
+      1.5,
+      4.65
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.16,
+       0.15,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6753e3b287ce30df",
+   "Name": "Front Wall Left",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.4,
+      1.5,
+      -1.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.5,
+      0.05
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.16,
+       0.15,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2f05282457799890",
+   "Name": "Front Wall Right",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.4,
+      1.5,
+      -1.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.5,
+      0.05
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.16,
+       0.15,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0e0bc25e1137f18b",
+   "Name": "Main Light",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      2.75,
+      4.836
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.75,
+      0.55
+     ],
+     "Intensity": 38.0,
+     "Range": 12.0,
+     "CastShadows": true
+    }
+   ]
+  },
+  {
+   "GUID": "555f786be7fc2c33",
+   "Name": "Fill Light",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      2.7,
+      0.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.75,
+      0.55
+     ],
+     "Intensity": 22.8,
+     "Range": 9.0
+    }
+   ]
+  },
+  {
+   "GUID": "5502cecb291c0f10",
+   "Name": "Side Light",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.6,
+      2.6,
+      3.12
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.75,
+      0.55
+     ],
+     "Intensity": 13.3,
+     "Range": 7.0
+    }
+   ]
+  },
+  {
+   "GUID": "7b7e5411d332a18d",
+   "Name": "Starter Kit",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Kit"
+    }
+   ]
+  },
+  {
+   "GUID": "0c0a93756c814f35",
+   "Name": "Kick",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.28,
+      6.7
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.28,
+      0.21,
+      0.28
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.05,
+       0.05,
+       0.05
+      ],
+      "Metallic": 0.2,
+      "Roughness": 0.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0dfefa649950fc75",
+   "Name": "Kick Head",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.28,
+      6.487
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2688,
+      0.003,
+      0.2688
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.9,
+       0.88
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6c13798ff50cc80f",
+   "Name": "Snare",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.38,
+      0.62,
+      6.42
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.18,
+      0.07,
+      0.18
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.2,
+      "Roughness": 0.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "782e3d25e4bc9bc7",
+   "Name": "Snare Head",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.38,
+      0.693,
+      6.42
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.1728,
+      0.003,
+      0.1728
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.9,
+       0.88
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7baa3c131cea91e6",
+   "Name": "Rack Tom",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.14,
+      0.78,
+      6.72
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.135,
+      0.1,
+      0.135
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.05,
+       0.05,
+       0.05
+      ],
+      "Metallic": 0.2,
+      "Roughness": 0.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "05dd074df81cb6ca",
+   "Name": "Rack Tom Head",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.14,
+      0.883,
+      6.72
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.1296,
+      0.003,
+      0.1296
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.9,
+       0.88
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1ffd7d96c59968ee",
+   "Name": "Floor Tom",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.5,
+      0.42,
+      6.58
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.2,
+      0.2
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.05,
+       0.05,
+       0.05
+      ],
+      "Metallic": 0.2,
+      "Roughness": 0.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2908b5c8f5d4e65d",
+   "Name": "Floor Tom Head",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.5,
+      0.623,
+      6.58
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.192,
+      0.003,
+      0.192
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.9,
+       0.88
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "31b7e1646c95eb17",
+   "Name": "Snare Stand",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.38,
+      0.27,
+      6.42
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.275,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2ada1e03daec85a7",
+   "Name": "Hi-Hat Stand",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.72,
+      0.425,
+      6.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.0125,
+      0.425,
+      0.0125
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "16863dc5f17d2358",
+   "Name": "Hi-Hat",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.72,
+      0.85,
+      6.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.18,
+      0.006,
+      0.18
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.78,
+       0.6,
+       0.25
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.25
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2e80946292d93dcd",
+   "Name": "Crash Stand",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.55,
+      0.65,
+      6.85
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.0125,
+      0.65,
+      0.0125
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1b4e399f1a118f57",
+   "Name": "Crash",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.55,
+      1.3,
+      6.85
+     ],
+     "Rotation": [
+      -12.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.225,
+      0.006,
+      0.225
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.78,
+       0.6,
+       0.25
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.25
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2684c2af7351bc6b",
+   "Name": "Ride Stand",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.7,
+      0.575,
+      6.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.0125,
+      0.575,
+      0.0125
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "326b5dd7ab722a3e",
+   "Name": "Ride",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.7,
+      1.15,
+      6.9
+     ],
+     "Rotation": [
+      -10.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.006,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.78,
+       0.6,
+       0.25
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.25
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2013eb8c913c5e0c",
+   "Name": "Throne",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.05,
+      0.5,
+      7.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.18,
+      0.04,
+      0.18
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.04,
+       0.04,
+       0.045
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.8
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6e43197eb5d53075",
+   "Name": "Throne Post",
+   "DestroyOnLoad": true,
+   "Parent": "7b7e5411d332a18d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.05,
+      0.24,
+      7.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.02,
+      0.24,
+      0.02
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "16b473172af69a8c",
+   "Name": "Kit",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.9,
+      6.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "Kit",
+     "ViewOffset": [
+      0.35,
+      0.75,
+      -2.1
+     ],
+     "FieldOfView": 42
+    }
+   ]
+  },
+  {
+   "GUID": "46035e2cb24391a6",
+   "Name": "Workbench",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.9,
+      0.425,
+      5.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.425,
+      0.7
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.3,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2a0fcbd6a0c78010",
+   "Name": "Practice Pad",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.9,
+      0.95,
+      5.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "PracticePad",
+     "ViewOffset": [
+      1.45,
+      0.65,
+      -0.55
+     ],
+     "FieldOfView": 40
+    }
+   ]
+  },
+  {
+   "GUID": "3cf9fe84b7cead75",
+   "Name": "Practice Pad",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "PracticePad"
+    }
+   ]
+  },
+  {
+   "GUID": "1be1b62f7506cfd0",
+   "Name": "Pad",
+   "DestroyOnLoad": true,
+   "Parent": "3cf9fe84b7cead75",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.9,
+      0.88,
+      5.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.15,
+      0.015,
+      0.15
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.12,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "03d4f0d1e09ca793",
+   "Name": "Sticks",
+   "DestroyOnLoad": true,
+   "Parent": "3cf9fe84b7cead75",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.78,
+      0.87,
+      5.8
+     ],
+     "Rotation": [
+      0.0,
+      20.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.0075,
+      0.0075
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.85,
+       0.7,
+       0.45
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "788558f64826d396",
+   "Name": "Metronome",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Metronome"
+    }
+   ]
+  },
+  {
+   "GUID": "7a077055af3289de",
+   "Name": "Metronome",
+   "DestroyOnLoad": true,
+   "Parent": "788558f64826d396",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.9,
+      0.95,
+      5.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.05,
+      0.09,
+      0.04
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.5,
+       0.15,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4176c6de776fd399",
+   "Name": "Gig Board",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.185,
+      1.55,
+      6.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.45,
+      0.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.62,
+       0.45,
+       0.28
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.95
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "067483fa7ae5706e",
+   "Name": "Gig Board",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.15,
+      1.55,
+      6.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "GigBoard",
+     "ViewOffset": [
+      1.7,
+      0.05,
+      -0.9
+     ],
+     "FieldOfView": 45
+    }
+   ]
+  },
+  {
+   "GUID": "4e093bfd189b09aa",
+   "Name": "Flyer A",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "FlyerA"
+    }
+   ]
+  },
+  {
+   "GUID": "5286d8c459c8522d",
+   "Name": "Flyer",
+   "DestroyOnLoad": true,
+   "Parent": "4e093bfd189b09aa",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.155,
+      1.6,
+      6.45
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.19,
+      0.135
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.85,
+       0.3
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.85,
+       0.3
+      ],
+      "EmissiveIntensity": 0.15
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2553a46e1c6bbd1d",
+   "Name": "Flyer B",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "FlyerB"
+    }
+   ]
+  },
+  {
+   "GUID": "4de8cb03670cc615",
+   "Name": "Flyer",
+   "DestroyOnLoad": true,
+   "Parent": "2553a46e1c6bbd1d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.155,
+      1.35,
+      6.87
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.19,
+      0.135
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.95,
+       0.3,
+       0.5
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.95,
+       0.3,
+       0.5
+      ],
+      "EmissiveIntensity": 0.15
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1f350945570e74b1",
+   "Name": "Flyer C",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "FlyerC"
+    }
+   ]
+  },
+  {
+   "GUID": "45d7787de05eb0a4",
+   "Name": "Flyer",
+   "DestroyOnLoad": true,
+   "Parent": "1f350945570e74b1",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.155,
+      1.6,
+      7.29
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.19,
+      0.135
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.3,
+       0.75,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       0.75,
+       1.0
+      ],
+      "EmissiveIntensity": 0.15
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2581e43711daec25",
+   "Name": "Trophy Wall",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.15,
+      2.0,
+      6.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "TrophyWall",
+     "ViewOffset": [
+      -2.2,
+      -0.35,
+      -0.6
+     ],
+     "FieldOfView": 55
+    }
+   ]
+  },
+  {
+   "GUID": "4927af2c422c9722",
+   "Name": "Band Poster",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "PosterA"
+    }
+   ]
+  },
+  {
+   "GUID": "493d236a2c4e0f2b",
+   "Name": "Poster",
+   "DestroyOnLoad": true,
+   "Parent": "4927af2c422c9722",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.18,
+      1.65,
+      5.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.4,
+      0.28
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.1,
+       0.35
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.5,
+       0.2,
+       0.8
+      ],
+      "EmissiveIntensity": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "253453dac8b44bd4",
+   "Name": "PlaqueA",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "PlaqueA"
+    }
+   ]
+  },
+  {
+   "GUID": "3415958217ee766c",
+   "Name": "Plaque",
+   "DestroyOnLoad": true,
+   "Parent": "253453dac8b44bd4",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.17,
+      1.75,
+      6.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.15,
+      0.12
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.3,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7fe91a31bd721639",
+   "Name": "Plate",
+   "DestroyOnLoad": true,
+   "Parent": "253453dac8b44bd4",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.15,
+      1.75,
+      6.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.08,
+      0.08
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.78,
+       0.3
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.25
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "76d7719451c9066a",
+   "Name": "PlaqueB",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "PlaqueB"
+    }
+   ]
+  },
+  {
+   "GUID": "578908acdfa42cc1",
+   "Name": "Plaque",
+   "DestroyOnLoad": true,
+   "Parent": "76d7719451c9066a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.17,
+      1.75,
+      6.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.15,
+      0.12
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.3,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3e4067af6c903b1d",
+   "Name": "Plate",
+   "DestroyOnLoad": true,
+   "Parent": "76d7719451c9066a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.15,
+      1.75,
+      6.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.08,
+      0.08
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.78,
+       0.3
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.25
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5c25851c7fd8b6d4",
+   "Name": "Gold Record",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "GoldRecord"
+    }
+   ]
+  },
+  {
+   "GUID": "1bc1603fcba2863a",
+   "Name": "Frame",
+   "DestroyOnLoad": true,
+   "Parent": "5c25851c7fd8b6d4",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.17,
+      1.6,
+      7.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.3,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.04,
+       0.04,
+       0.045
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.5
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5f176ed9b02a5b4a",
+   "Name": "Record",
+   "DestroyOnLoad": true,
+   "Parent": "5c25851c7fd8b6d4",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.15,
+      1.62,
+      7.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      90.0
+     ],
+     "Scale": [
+      0.19,
+      0.005,
+      0.19
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.78,
+       0.3
+      ],
+      "Metallic": 1.0,
+      "Roughness": 0.15
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7115f25cfceb2f36",
+   "Name": "Vinyl Shelf",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Shelf"
+    }
+   ]
+  },
+  {
+   "GUID": "7f2267d865832ada",
+   "Name": "Shelf",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.35,
+      6.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.15,
+      0.35,
+      0.6
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.3,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.8
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "37d1cf6f6fe3fe97",
+   "Name": "Sleeve 0",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      5.8
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.8,
+       0.2,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5c2a995127c40795",
+   "Name": "Sleeve 1",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      5.92
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.2,
+       0.5,
+       0.8
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "32238a5b7024a6ae",
+   "Name": "Sleeve 2",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.04
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.8,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6abbfa57c2cf3e61",
+   "Name": "Sleeve 3",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.16
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7dca0ae251d12ccd",
+   "Name": "Sleeve 4",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.28
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.8,
+       0.2,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "565612b38765e524",
+   "Name": "Sleeve 5",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.2,
+       0.5,
+       0.8
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "60272cebc7f3e754",
+   "Name": "Sleeve 6",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.52
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.8,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3430bb72dab10b04",
+   "Name": "Sleeve 7",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "38b2e62eba8552a0",
+   "Name": "Sleeve 8",
+   "DestroyOnLoad": true,
+   "Parent": "7115f25cfceb2f36",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.05,
+      0.5,
+      6.76
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.125,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.8,
+       0.2,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6734fe51434a06ec",
+   "Name": "Signed Snare Head",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "WallLeft"
+    }
+   ]
+  },
+  {
+   "GUID": "03fd55b097f377b2",
+   "Name": "Signed Head",
+   "DestroyOnLoad": true,
+   "Parent": "6734fe51434a06ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.17,
+      2.05,
+      6.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      90.0
+     ],
+     "Scale": [
+      0.16,
+      0.005,
+      0.16
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.9,
+       0.88
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3592108057963c51",
+   "Name": "Crate",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.3,
+      0.31,
+      1.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.35,
+      0.31,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.3,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1f90d3f37595f984",
+   "Name": "Laptop Base",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.35,
+      0.635,
+      1.85
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.18,
+      0.01,
+      0.125
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.2,
+       0.2,
+       0.22
+      ],
+      "Metallic": 0.6,
+      "Roughness": 0.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "56788ee3b0aff183",
+   "Name": "Laptop Screen",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.35,
+      0.77,
+      1.97
+     ],
+     "Rotation": [
+      -15.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.18,
+      0.12,
+      0.0075
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.05,
+       0.1,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.2,
+      "EmissiveColor": [
+       0.3,
+       0.55,
+       1.0
+      ],
+      "EmissiveIntensity": 1.5
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "750cede7f8ca5132",
+   "Name": "Laptop",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.35,
+      0.75,
+      1.85
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "Laptop",
+     "ViewOffset": [
+      0.35,
+      0.5,
+      -0.95
+     ],
+     "FieldOfView": 40
+    }
+   ]
+  },
+  {
+   "GUID": "58594d2a7153a24e",
+   "Name": "Radio Shelf",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.0,
+      0.97,
+      4.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.02,
+      0.35
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.3,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.8
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4216646260249c89",
+   "Name": "Radio",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Radio"
+    }
+   ]
+  },
+  {
+   "GUID": "24554fa01d0a3ac0",
+   "Name": "Radio Body",
+   "DestroyOnLoad": true,
+   "Parent": "4216646260249c89",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.95,
+      1.1,
+      4.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.09,
+      0.1,
+      0.21
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.35,
+       0.12,
+       0.08
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.5
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1939dc9af5236a12",
+   "Name": "Radio Dial",
+   "DestroyOnLoad": true,
+   "Parent": "4216646260249c89",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.855,
+      1.13,
+      4.78
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.005,
+      0.03,
+      0.08
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.6,
+       0.2
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.6,
+       0.2
+      ],
+      "EmissiveIntensity": 2.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "113f47426bc5fec7",
+   "Name": "Radio Grille",
+   "DestroyOnLoad": true,
+   "Parent": "4216646260249c89",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.855,
+      1.08,
+      4.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      90.0
+     ],
+     "Scale": [
+      0.065,
+      0.005,
+      0.065
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5ed4507de3b3ca43",
+   "Name": "Radio",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.95,
+      1.1,
+      4.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "Radio",
+     "ViewOffset": [
+      -1.3,
+      0.15,
+      -0.5
+     ],
+     "FieldOfView": 40
+    }
+   ]
+  },
+  {
+   "GUID": "283006cac0bfba09",
+   "Name": "Amp",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.45,
+      0.32,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.32,
+      0.16
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.08,
+       0.08,
+       0.08
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4d2611ac7207826f",
+   "Name": "Amp Grille",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.45,
+      0.28,
+      6.435
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.275,
+      0.225,
+      0.005
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.18,
+       0.16,
+       0.14
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.95
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "037c3c79a3df7bb6",
+   "Name": "Amp Panel",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.45,
+      0.57,
+      6.435
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.275,
+      0.03,
+      0.005
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.6,
+       0.4
+      ],
+      "Metallic": 0.6,
+      "Roughness": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5036dde7303e8b45",
+   "Name": "Mixer",
+   "DestroyOnLoad": true,
+   "Parent": "307c4167ca65a8d9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.45,
+      0.45,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutStation",
+     "Station": "Mixer",
+     "ViewOffset": [
+      -0.5,
+      0.65,
+      -1.4
+     ],
+     "FieldOfView": 45,
+     "Label": "SETTINGS"
+    }
+   ]
+  },
+  {
+   "GUID": "10ce814d7fc29f0d",
+   "Name": "Rug",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Rug"
+    }
+   ]
+  },
+  {
+   "GUID": "4f4d84b0633b13d3",
+   "Name": "Rug",
+   "DestroyOnLoad": true,
+   "Parent": "10ce814d7fc29f0d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.005,
+      6.75
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.1,
+      0.005,
+      0.9
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.45,
+       0.12,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2266d0eec1e6c9df",
+   "Name": "Stick Bag",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "StickBag"
+    }
+   ]
+  },
+  {
+   "GUID": "785c7bc165d80382",
+   "Name": "Bag",
+   "DestroyOnLoad": true,
+   "Parent": "2266d0eec1e6c9df",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.78,
+      0.45,
+      6.58
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.2,
+      0.07
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3b962013ff66076e",
+   "Name": "Spare Cymbal",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "CymbalStand"
+    }
+   ]
+  },
+  {
+   "GUID": "01e20f3c19826faa",
+   "Name": "Spare Cymbal Stand",
+   "DestroyOnLoad": true,
+   "Parent": "3b962013ff66076e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.1,
+      0.6,
+      7.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.0125,
+      0.6,
+      0.0125
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "08132a3113c9e59a",
+   "Name": "Spare Cymbal",
+   "DestroyOnLoad": true,
+   "Parent": "3b962013ff66076e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.1,
+      1.2,
+      7.0
+     ],
+     "Rotation": [
+      -15.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.21,
+      0.006,
+      0.21
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.78,
+       0.6,
+       0.25
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.25
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "763f5698d96c2a94",
+   "Name": "Lava Lamp",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Lamp"
+    }
+   ]
+  },
+  {
+   "GUID": "1e71a0b802f93333",
+   "Name": "Lamp",
+   "DestroyOnLoad": true,
+   "Parent": "763f5698d96c2a94",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.9,
+      1.05,
+      6.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.05,
+      0.16,
+      0.05
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Capsule",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.3,
+       0.6
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.3,
+       0.6
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2280ba0688e31aa9",
+   "Name": "Lamp Glow",
+   "DestroyOnLoad": true,
+   "Parent": "763f5698d96c2a94",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.75,
+      1.1,
+      6.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.35,
+      0.6
+     ],
+     "Intensity": 4.0,
+     "Range": 3.0
+    }
+   ]
+  },
+  {
+   "GUID": "439750eb12a9532d",
+   "Name": "Neon Sign",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Neon"
+    }
+   ]
+  },
+  {
+   "GUID": "48128b91e571434c",
+   "Name": "Neon",
+   "DestroyOnLoad": true,
+   "Parent": "439750eb12a9532d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      2.05,
+      7.77
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.7,
+      0.15,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.2,
+       0.05,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.15,
+       0.55
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2344d4991cff0c73",
+   "Name": "Neon Glow",
+   "DestroyOnLoad": true,
+   "Parent": "439750eb12a9532d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.9,
+      7.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.2,
+      0.6
+     ],
+     "Intensity": 6.0,
+     "Range": 4.0
+    }
+   ]
+  },
+  {
+   "GUID": "21292922ba5c0479",
+   "Name": "Acoustic Foam",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Foam"
+    }
+   ]
+  },
+  {
+   "GUID": "3606364c9b3063f3",
+   "Name": "Foam 0.0",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      0.9,
+      1.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "35c2b92b0189f78d",
+   "Name": "Foam 0.1",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      1.45,
+      1.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6ea9829e34d186b1",
+   "Name": "Foam 0.2",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      2.0,
+      1.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6dabd0ed61feebf1",
+   "Name": "Foam 1.0",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      0.9,
+      1.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1e9fca132d2c0202",
+   "Name": "Foam 1.1",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      1.45,
+      1.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "155399026803540a",
+   "Name": "Foam 1.2",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      2.0,
+      1.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "04cd4faf80d83e56",
+   "Name": "Foam 2.0",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      0.9,
+      2.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5c94dacb3a70e98a",
+   "Name": "Foam 2.1",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      1.45,
+      2.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7833cddf9cf68c55",
+   "Name": "Foam 2.2",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      2.0,
+      2.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2bd5f3ccb1a88eed",
+   "Name": "Foam 3.0",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      0.9,
+      2.65
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "53045321faec1a77",
+   "Name": "Foam 3.1",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      1.45,
+      2.65
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1a0212ee4aceed92",
+   "Name": "Foam 3.2",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      2.0,
+      2.65
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "67b6c059fdecd217",
+   "Name": "Foam 4.0",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      0.9,
+      3.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "278656552502a9c7",
+   "Name": "Foam 4.1",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      1.45,
+      3.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1e76cc275ab7c787",
+   "Name": "Foam 4.2",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      2.0,
+      3.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "242169fac19d0e56",
+   "Name": "Foam 5.0",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      0.9,
+      3.75
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6a02001c903721f3",
+   "Name": "Foam 5.1",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      1.45,
+      3.75
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0d967002135c4803",
+   "Name": "Foam 5.2",
+   "DestroyOnLoad": true,
+   "Parent": "21292922ba5c0479",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.16,
+      2.0,
+      3.75
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.25,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.12
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1d3676063bde7b54",
+   "Name": "Mixing Desk",
+   "DestroyOnLoad": true,
+   "Parent": "4b27a5c6c756f969",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutItemSlot",
+     "Slot": "Desk"
+    }
+   ]
+  },
+  {
+   "GUID": "7805db3c3d37f534",
+   "Name": "Desk",
+   "DestroyOnLoad": true,
+   "Parent": "1d3676063bde7b54",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.5,
+      0.8,
+      1.7
+     ],
+     "Rotation": [
+      -10.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.7,
+      0.05,
+      0.35
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.15,
+       0.16
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "58ad60dbdf683d7d",
+   "Name": "Desk Faders",
+   "DestroyOnLoad": true,
+   "Parent": "1d3676063bde7b54",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.5,
+      0.86,
+      1.7
+     ],
+     "Rotation": [
+      -10.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.65,
+      0.01,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.1,
+       0.1,
+       0.1
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.2,
+       0.9,
+       0.4
+      ],
+      "EmissiveIntensity": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "10a7b5eb86a348fc",
+   "Name": "PA -1",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.7,
+      0.75,
+      7.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.275,
+      0.75,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.04,
+       0.04,
+       0.045
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "642c0c42203a49f5",
+   "Name": "PA Cone -1",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.7,
+      0.6,
+      7.04
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.01,
+      0.2
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.15,
+       0.15
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "22ec6ecfab1eb82f",
+   "Name": "PA 1",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.7,
+      0.75,
+      7.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.275,
+      0.75,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.04,
+       0.04,
+       0.045
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2031a39a16943a70",
+   "Name": "PA Cone 1",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.7,
+      0.6,
+      7.04
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.01,
+      0.2
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.15,
+       0.15
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "20d464f00a93327e",
+   "Name": "Mic Stand",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.8,
+      5.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.8,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.75,
+       0.78
+      ],
+      "Metallic": 0.9,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3cfd5b97ba151c3b",
+   "Name": "Mic",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.62,
+      5.35
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.025,
+      0.08,
+      0.025
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Capsule",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.04,
+       0.04,
+       0.045
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6e5bf14039ce5758",
+   "Name": "Carpet",
+   "DestroyOnLoad": true,
+   "Parent": "0deda36567c8ba5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.003,
+      3.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      4.0,
+      0.0025,
+      3.65
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.18,
+       0.16,
+       0.22
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "72a1e018e1543f39",
+   "Name": "Overview",
+   "DestroyOnLoad": true,
+   "Parent": "45fa0efe9f1a0924",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.75,
+      -1.4
+     ],
+     "Rotation": [
+      7.3083,
+      1.3779,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "HideoutView",
+     "FieldOfView": 70.0
+    }
+   ]
+  }
+ ]
+}

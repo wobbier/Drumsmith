@@ -1,0 +1,132 @@
+{
+    "Tiers": [
+        {
+            "Id": "basement", "Name": "the Basement", "Scene": "Assets/Hideout/Basement.lvl",
+            "Description": "A kit wedged between the boiler and the washing machine. Everybody starts somewhere.",
+            "Rewards": [ "starter-kit", "radio" ]
+        },
+        {
+            "Id": "garage", "Name": "the Garage", "Scene": "Assets/Hideout/Garage.lvl",
+            "Description": "Room to swing a stick, and a door the neighbours can hear through.",
+            "Requires": { "Gigs": [ "backyard-party" ] },
+            "Rewards": [ "rug" ]
+        },
+        {
+            "Id": "rehearsal", "Name": "the Rehearsal Space", "Scene": "Assets/Hideout/Rehearsal.lvl",
+            "Description": "A rented room with foam on the walls and a real PA.",
+            "Requires": { "Gigs": [ "club-night" ] },
+            "Rewards": [ "acoustic-foam" ]
+        },
+        {
+            "Id": "studio", "Name": "the Studio", "Scene": "Assets/Hideout/Studio.lvl",
+            "Description": "Glass, a desk full of faders and a kit that has been on records.",
+            "Requires": { "Gigs": [ "festival-slot" ] },
+            "Rewards": [ "mixing-desk" ]
+        }
+    ],
+
+    "Gigs": [
+        {
+            "Id": "backyard-party", "Name": "Backyard Party", "Venue": "Backyard",
+            "Description": "A friend's birthday. Three songs, nobody's judging. Much.",
+            "Songs": 3, "MaxNotesPerSecond": 4.0, "PassAccuracy": 60,
+            "Rewards": [ "flyer-backyard" ]
+        },
+        {
+            "Id": "club-night", "Name": "Club Night", "Venue": "Club",
+            "Description": "Your first booking with a door charge. Tight set, sticky floor.",
+            "Songs": 3, "MinNotesPerSecond": 3.0, "MaxNotesPerSecond": 6.0, "PassAccuracy": 70,
+            "Requires": { "Tier": 1, "LessonSteps": [ "rudiments-1" ] },
+            "Rewards": [ "flyer-club" ]
+        },
+        {
+            "Id": "festival-slot", "Name": "Festival Slot", "Venue": "Festival",
+            "Description": "Second stage, mid-afternoon, a crowd that came for someone else. Win them over.",
+            "Songs": 4, "MinNotesPerSecond": 4.0, "MaxNotesPerSecond": 8.0, "PassAccuracy": 75,
+            "Requires": { "Tier": 2, "LessonSteps": [ "grooves-1", "rudiments-2" ] },
+            "Rewards": [ "flyer-festival" ]
+        },
+        {
+            "Id": "arena-headline", "Name": "Arena Headline", "Venue": "Arena",
+            "Description": "Your name at the top of the ticket.",
+            "Songs": 5, "MinNotesPerSecond": 5.0, "PassAccuracy": 80,
+            "Requires": { "Tier": 3, "LessonSteps": [ "grooves-2" ] },
+            "Rewards": [ "gold-record" ]
+        }
+    ],
+
+    "LessonSteps": [
+        {
+            "Id": "rudiments-1", "Name": "Rudiments I",
+            "Lessons": [ "single-stroke-roll", "double-stroke-roll" ],
+            "Rewards": [ "practice-pad" ]
+        },
+        {
+            "Id": "grooves-1", "Name": "Grooves I",
+            "Lessons": [ "rock-beat", "rock-beat-kicks", "four-on-the-floor" ],
+            "Requires": { "LessonSteps": [ "rudiments-1" ] },
+            "Rewards": [ "metronome" ]
+        },
+        {
+            "Id": "rudiments-2", "Name": "Rudiments II",
+            "Lessons": [ "single-paradiddle", "five-stroke-roll", "flam" ],
+            "Requires": { "LessonSteps": [ "grooves-1" ] },
+            "Rewards": [ "stick-bag" ]
+        },
+        {
+            "Id": "grooves-2", "Name": "Grooves II",
+            "Lessons": [ "sixteenth-hats", "ghost-notes", "shuffle" ],
+            "Requires": { "LessonSteps": [ "rudiments-2" ] },
+            "Rewards": [ "neon-sign" ]
+        },
+        {
+            "Id": "rudiments-3", "Name": "Rudiments III",
+            "Lessons": [ "double-paradiddle", "paradiddle-diddle", "single-stroke-triplets", "flam-tap" ],
+            "Requires": { "LessonSteps": [ "rudiments-2" ] },
+            "Rewards": [ "signed-snare-head" ]
+        },
+        {
+            "Id": "fills-1", "Name": "Fills I",
+            "Lessons": [ "tom-fill" ],
+            "Requires": { "LessonSteps": [ "grooves-2" ] },
+            "Rewards": [ "spare-cymbal" ]
+        }
+    ],
+
+    "Milestones": [
+        { "Id": "first-song", "Name": "First song in the books", "Requires": { "SongsPlayed": 1 }, "Rewards": [ "band-poster" ] },
+        { "Id": "ten-songs", "Name": "Ten songs played", "Requires": { "SongsPlayed": 10 }, "Rewards": [ "vinyl-shelf" ] },
+        { "Id": "first-full-combo", "Name": "First full combo", "Requires": { "FullCombos": 1 }, "Rewards": [ "fc-plaque" ] },
+        { "Id": "five-at-90", "Name": "Five songs at 90%", "Requires": { "SongsAtAccuracy": 5, "Accuracy": 90 }, "Rewards": [ "lava-lamp" ] },
+        { "Id": "all-lessons", "Name": "Every lesson passed", "Requires": { "LessonsPassed": 16 }, "Rewards": [ "teacher-certificate" ] }
+    ],
+
+    "Items": [
+        { "Id": "starter-kit", "Name": "Starter kit", "Slot": "Kit", "Description": "Five pieces, two cymbals, one of them cracked." },
+        { "Id": "radio", "Name": "Radio", "Slot": "Radio", "Description": "Plays your library, badly." },
+        { "Id": "rug", "Name": "Drum rug", "Slot": "Rug", "Description": "Stops the kick drum walking off." },
+        { "Id": "acoustic-foam", "Name": "Acoustic foam", "Slot": "Foam", "Description": "The neighbours say thank you." },
+        { "Id": "mixing-desk", "Name": "Mixing desk", "Slot": "Desk", "Description": "Forty-eight faders. You need two." },
+        { "Id": "practice-pad", "Name": "Practice pad", "Slot": "PracticePad", "Description": "For Rudiments I." },
+        { "Id": "metronome", "Name": "Metronome", "Slot": "Metronome", "Description": "For Grooves I." },
+        { "Id": "stick-bag", "Name": "Stick bag", "Slot": "StickBag", "Description": "For Rudiments II." },
+        { "Id": "neon-sign", "Name": "Neon sign", "Slot": "Neon", "Description": "For Grooves II." },
+        { "Id": "signed-snare-head", "Name": "Signed snare head", "Slot": "WallLeft", "Description": "For Rudiments III." },
+        { "Id": "spare-cymbal", "Name": "Spare cymbal", "Slot": "CymbalStand", "Description": "For Fills I." },
+        { "Id": "band-poster", "Name": "Band poster", "Slot": "PosterA", "Description": "For your first song." },
+        { "Id": "vinyl-shelf", "Name": "Vinyl shelf", "Slot": "Shelf", "Description": "For ten songs played." },
+        { "Id": "fc-plaque", "Name": "Full combo plaque", "Slot": "PlaqueA", "Description": "For your first full combo." },
+        { "Id": "lava-lamp", "Name": "Lava lamp", "Slot": "Lamp", "Description": "For five songs at 90%." },
+        { "Id": "teacher-certificate", "Name": "Teacher's certificate", "Slot": "PlaqueB", "Description": "For passing every lesson." },
+        { "Id": "flyer-backyard", "Name": "Backyard Party flyer", "Slot": "FlyerA", "Description": "Your first gig." },
+        { "Id": "flyer-club", "Name": "Club Night flyer", "Slot": "FlyerB", "Description": "Your first paid gig." },
+        { "Id": "flyer-festival", "Name": "Festival lanyard", "Slot": "FlyerC", "Description": "Access all areas (stage two)." },
+        { "Id": "gold-record", "Name": "Gold record", "Slot": "GoldRecord", "Description": "Headlined the arena." }
+    ],
+
+    "Venues": [
+        { "Id": "Club", "Name": "the Club", "Requires": { "Gigs": [ "club-night" ] } },
+        { "Id": "Festival", "Name": "the Festival", "Requires": { "Gigs": [ "festival-slot" ] } },
+        { "Id": "Arena", "Name": "the Arena", "Requires": { "Gigs": [ "arena-headline" ] } }
+    ]
+}

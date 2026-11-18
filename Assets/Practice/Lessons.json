@@ -1,88 +1,88 @@
 {
     "Lessons": [
         {
-            "Id": "single-stroke-roll", "Name": "Single Stroke Roll", "Category": "Rudiments", "Bpm": 70,
+            "Id": "single-stroke-roll", "Name": "Single Stroke Roll", "Category": "Rudiments", "Bpm": 70, "PassBpm": 90,
             "Description": "Alternate hands, every stroke the same height and volume. Start slow enough that it is even, then add ten BPM at a time.",
             "StepsPerBeat": 4, "Sticking": "RLRL RLRL RLRL RLRL"
         },
         {
-            "Id": "double-stroke-roll", "Name": "Double Stroke Roll", "Category": "Rudiments", "Bpm": 60,
+            "Id": "double-stroke-roll", "Name": "Double Stroke Roll", "Category": "Rudiments", "Bpm": 60, "PassBpm": 80,
             "Description": "Two strokes a hand. Let the stick bounce for the second one, and make it as loud as the first.",
             "StepsPerBeat": 4, "Sticking": "RRLL RRLL RRLL RRLL"
         },
         {
-            "Id": "single-paradiddle", "Name": "Single Paradiddle", "Category": "Rudiments", "Bpm": 60,
+            "Id": "single-paradiddle", "Name": "Single Paradiddle", "Category": "Rudiments", "Bpm": 60, "PassBpm": 80,
             "Description": "Right left right right, left right left left. Accent the first stroke of each group and keep the others low.",
             "StepsPerBeat": 4, "Sticking": ">Rlrr >Lrll >Rlrr >Lrll"
         },
         {
-            "Id": "double-paradiddle", "Name": "Double Paradiddle", "Category": "Rudiments", "Bpm": 60,
+            "Id": "double-paradiddle", "Name": "Double Paradiddle", "Category": "Rudiments", "Bpm": 60, "PassBpm": 80,
             "Description": "A paradiddle with two more singles in front, in groups of six: count it as triplets.",
             "StepsPerBeat": 3, "Sticking": ">Rlrlrr >Lrlrll"
         },
         {
-            "Id": "paradiddle-diddle", "Name": "Paradiddle-diddle", "Category": "Rudiments", "Bpm": 60,
+            "Id": "paradiddle-diddle", "Name": "Paradiddle-diddle", "Category": "Rudiments", "Bpm": 60, "PassBpm": 80,
             "Description": "Right left right right left left. It never swaps hands, so practise it leading with the left as well.",
             "StepsPerBeat": 3, "Sticking": ">Rlrrll >Rlrrll"
         },
         {
-            "Id": "five-stroke-roll", "Name": "Five Stroke Roll", "Category": "Rudiments", "Bpm": 60,
+            "Id": "five-stroke-roll", "Name": "Five Stroke Roll", "Category": "Rudiments", "Bpm": 60, "PassBpm": 80,
             "Description": "Two doubles and an accent, then the same from the other hand.",
             "StepsPerBeat": 4, "Sticking": "rrll>R--- llrr>L---"
         },
         {
-            "Id": "single-stroke-triplets", "Name": "Single Stroke Triplets", "Category": "Rudiments", "Bpm": 70,
+            "Id": "single-stroke-triplets", "Name": "Single Stroke Triplets", "Category": "Rudiments", "Bpm": 70, "PassBpm": 90,
             "Description": "Three even strokes a beat. The hand that starts each beat alternates, so accent the first of every three.",
             "StepsPerBeat": 3, "Sticking": ">Rlr >Lrl >Rlr >Lrl"
         },
         {
-            "Id": "flam", "Name": "Flams", "Category": "Rudiments", "Bpm": 60,
+            "Id": "flam", "Name": "Flams", "Category": "Rudiments", "Bpm": 60, "PassBpm": 80,
             "Description": "A quiet grace note just before the main stroke, from the other hand. One low stick, one high; they should sound like one fat note, not two.",
             "StepsPerBeat": 1, "Sticking": "^R ^L ^R ^L"
         },
         {
-            "Id": "flam-tap", "Name": "Flam Tap", "Category": "Rudiments", "Bpm": 50,
+            "Id": "flam-tap", "Name": "Flam Tap", "Category": "Rudiments", "Bpm": 50, "PassBpm": 70,
             "Description": "A flam and a tap from the same hand, then the other side.",
             "StepsPerBeat": 4, "Sticking": "^Rr^Ll ^Rr^Ll ^Rr^Ll ^Rr^Ll"
         },
         {
-            "Id": "rock-beat", "Name": "Basic Rock Beat", "Category": "Grooves", "Bpm": 80,
+            "Id": "rock-beat", "Name": "Basic Rock Beat", "Category": "Grooves", "Bpm": 80, "PassBpm": 100,
             "Description": "Eighth notes on the hi-hat, kick on one and three, snare on two and four. The beat under half the songs in the library.",
             "StepsPerBeat": 2,
             "Lanes": { "closed_hh": "xxxx xxxx", "snare1": "--x- --x-", "bass1": "x--- x---" }
         },
         {
-            "Id": "rock-beat-kicks", "Name": "Rock Beat, Busier Kick", "Category": "Grooves", "Bpm": 80,
+            "Id": "rock-beat-kicks", "Name": "Rock Beat, Busier Kick", "Category": "Grooves", "Bpm": 80, "PassBpm": 100,
             "Description": "The same hands with an extra kick on the and of three. Keep the hi-hat steady while the foot moves.",
             "StepsPerBeat": 2,
             "Lanes": { "closed_hh": "xxxx xxxx", "snare1": "--x- --x-", "bass1": "x--- xx--" }
         },
         {
-            "Id": "four-on-the-floor", "Name": "Four on the Floor", "Category": "Grooves", "Bpm": 100,
+            "Id": "four-on-the-floor", "Name": "Four on the Floor", "Category": "Grooves", "Bpm": 100, "PassBpm": 120,
             "Description": "Kick on every beat, snare on two and four, hi-hat open on the off-beats. Disco, dance and a lot of rock choruses.",
             "StepsPerBeat": 2,
             "Lanes": { "closed_hh": "x-x- x-x-", "open_hh": "-x-x -x-x", "snare1": "--x- --x-", "bass1": "x-x- x-x-" }
         },
         {
-            "Id": "sixteenth-hats", "Name": "Sixteenth Note Hi-hat", "Category": "Grooves", "Bpm": 60,
+            "Id": "sixteenth-hats", "Name": "Sixteenth Note Hi-hat", "Category": "Grooves", "Bpm": 60, "PassBpm": 80,
             "Description": "Sixteenths on the hi-hat with alternating hands; the right hand comes across for the snare on two and four.",
             "StepsPerBeat": 4,
             "Lanes": { "closed_hh": "xxxx -xxx xxxx -xxx", "snare1": "---- x--- ---- x---", "bass1": "x--- ---- x-x- ----" }
         },
         {
-            "Id": "ghost-notes", "Name": "Ghost Note Groove", "Category": "Grooves", "Bpm": 70,
+            "Id": "ghost-notes", "Name": "Ghost Note Groove", "Category": "Grooves", "Bpm": 70, "PassBpm": 90,
             "Description": "A rock beat with quiet snare taps between the backbeats. The ghosts should be felt more than heard.",
             "StepsPerBeat": 4,
             "Lanes": { "closed_hh": "x-x- x-x- x-x- x-x-", "snare1": "---o X--o -o-- X--o", "bass1": "x--- ---- x-x- ----" }
         },
         {
-            "Id": "shuffle", "Name": "Shuffle", "Category": "Grooves", "Bpm": 80,
+            "Id": "shuffle", "Name": "Shuffle", "Category": "Grooves", "Bpm": 80, "PassBpm": 100,
             "Description": "Triplets with the middle one left out: the long-short lilt of blues and swing. Snare on two and four.",
             "StepsPerBeat": 3,
             "Lanes": { "ride1": "x-xx-x x-xx-x", "snare1": "---x-- ---x--", "bass1": "x----- x-----" }
         },
         {
-            "Id": "tom-fill", "Name": "Round the Kit Fill", "Category": "Fills", "Bpm": 70,
+            "Id": "tom-fill", "Name": "Round the Kit Fill", "Category": "Fills", "Bpm": 70, "PassBpm": 90,
             "Description": "Three bars of a rock beat, then a bar of sixteenths down the drums: snare, high tom, mid tom, floor tom. Land the crash on one.",
             "StepsPerBeat": 4,
             "Lanes": {

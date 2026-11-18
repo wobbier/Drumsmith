@@ -1,4 +1,6 @@
 #include "Components/TrackListMenuController.h"
+#include "Config/PlayerProfile.h"
+#include <cstdio>
 #include <Cores/UI/RmlUiCore.h>
 #include <Engine/Engine.h>
 #include <Engine/Input.h>
@@ -86,6 +88,7 @@ void TrackListMenuController::PopulateModel()
         ui->ModelSetString( "song_library", "search", m_search );
         ui->ModelSetListCount( "song_library", "advice", 0 );
         ui->ModelSetString( "song_library", "detail_badge", "" );
+        ui->ModelSetString( "song_library", "detail_best", "" );
         ui->ModelSetNumber( "song_library", "detail_ds_ready", 0 );
         ui->ModelSetNumber( "song_library", "detail_confirm_remove", 0 );
         // The Track Editor lives in the editor: its button and F4 only show there.
@@ -171,6 +174,15 @@ void TrackListMenuController::SelectTrack( int inTrackIndex )
     ui->ModelSetString( "song_library", "detail_badge", TrackDatabase::SourceBadge( TrackDatabase::FilterForSource( track.m_dlcSource ) ) );
     ui->ModelSetNumber( "song_library", "detail_ds_ready", track.m_adviceKnown && track.m_authored );
     ui->ModelSetNumber( "song_library", "detail_confirm_remove", 0 );
+    // The player's record of it (PlayerProfile).
+    std::string best;
+    if( const PlayerProfile::SongRecord* record = PlayerProfile::GetInstance().FindSong( TrackDatabase::FavoriteKey( track ) ) )
+    {
+        char text[112];
+        std::snprintf( text, sizeof( text ), "Your best: %d, %.1f%%%s (played %d time%s)", record->BestScore, record->BestAccuracy, record->FullCombo ? ", full combo" : "", record->Plays, record->Plays == 1 ? "" : "s" );
+        best = text;
+    }
+    ui->ModelSetString( "song_library", "detail_best", best );
     // What the chart recommends is read from its notes once the selection has settled (Update).
     ui->ModelSetListCount( "song_library", "advice", 0 );
     m_adviceTrack = inTrackIndex;

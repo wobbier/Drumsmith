@@ -80,3 +80,5 @@ body.library-page { background-color: #121212; font-family: Inter; }
     .library-page .song-action { font-size: 12dp; padding: 4dp 6dp; }
     .library-page .song-description.has-actions { padding-right: 170dp; }
 }
+/* The player's record of the song (PlayerProfile). */
+.library-details .detail-best { margin: 6dp 0; font-size: 16dp; color: #ffd166; }

@@ -12,7 +12,7 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 |--------|--------|----------------|-----|
 | Note highway (spawn/scroll) | **Usable** | Rewritten 2026-11-08: unsmoothed scroll on an audio-locked clock, per-chart lane layout, lead-in; every note still a live entity | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 | Hit detection | **Usable** | Per-lane cursors, chords, timestamped MIDI on every platform, graded windows; keyboard still frame-quantized | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
-| Scoring, combo, miss handling | **Usable** | Score, multiplier, combo, accuracy, misses mute the drums, results screen; nothing is saved | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
+| Scoring, combo, miss handling | **Usable** | Score, multiplier, combo, accuracy, misses mute the drums, results screen; bests and lesson passes saved to `Profile.json` (2026-11-18), shown only on the results screen so far | [Gameplay-Note-Highway.md](Gameplay-Note-Highway.md) |
 | Hit sounds (`Drumset`) | **Experimental** | Right design (`FMOD_CREATESAMPLE` one-shots), zero callers with loaded sounds — silent even in the editor | [Audio.md](Audio.md) |
 | Stem playback (`AudioPack`) | **Usable** | Sample-accurate start is genuinely good; pause/seek desync stems, judge clock conflates errors with 0 | [Audio.md](Audio.md) |
 | Menu radio (`TrackRadio`) | **Usable** | Ticked by `MenuCore` on every page; waits for its stems instead of re-playing each frame (2026-11-17) | [Audio.md](Audio.md) |
@@ -21,6 +21,7 @@ Ratings: **Solid** (rely on it) · **Usable** (works, know the sharp edges) · *
 | Chart parsing / conversion | **Usable** | Pro drums (8 voices), dynamics, tempo map, tolerant MIDI reading; `DISABLE_OPTIMIZATION` remains; RB data can't express hi-hat open/pedal or rims | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Track database / DLC | **Usable** | Several servers, hash-checked index, size-checked downloads, updates, previews and removal (2026-11-17), all tested against a local server only | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Practice | **Experimental** | Built 2026-11-17: 16 lessons as data, played over a generated click; judged only from autoplay, never with sticks | [Practice.md](Practice.md) |
+| Hideout and progression | **Experimental** | Built 2026-11-18 overnight: the main menu as a 3D room (basement to studio greyboxes), gigs, the lesson ladder, unlocks, venue gates, a muffled radio. Autoplay and screenshots only; never clicked through by a person or heard | [Hideout-and-Progression.md](Hideout-and-Progression.md) |
 | Track editor | **Usable** | The most complete tool in the project — windowed note iteration gameplay should copy | [Songs-and-DLC.md](Songs-and-DLC.md) |
 | Menus / UI | **Usable** | Ported to RmlUi (2026-11-08): sliders read back and apply, DLC catalogue with background downloads, the way into the delay calibration | [UI-and-Menus.md](UI-and-Menus.md) |
 | Settings (`GameSettings`) | **Usable** | Latency fields now consumed; save-on-button only | [Game-Architecture.md](Game-Architecture.md) |

@@ -41,6 +41,7 @@
             <p>{{detail_album}}</p>
             <p>{{detail_genre}}</p>
             <p>{{detail_year}}</p>
+            <p class="detail-best" data-if="detail_best != ''">{{detail_best}}</p>
             <p class="detail-badges"><span class="badge source" data-if="detail_badge != ''">{{detail_badge}}</span><span class="badge ds-ready" data-if="detail_ds_ready">DS READY</span></p>
             <p class="detail-notes">Note Count: {{detail_notes}}</p>
             <div class="detail-advice">

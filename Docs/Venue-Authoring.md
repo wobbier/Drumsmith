@@ -39,9 +39,12 @@ The three built-in rooms (Arena, Club, Festival) are not scenes: they are proced
 
 1. `--venue <value>`: a registry id, `Arena` / `Club` / `Festival`, or a path to a `.lvl`.
 2. `--venue-style N`: a built-in room.
+2a. The gig being played's venue (`Docs/Hideout-and-Progression.md` → Gigs).
 3. If the **Song Venues** setting (`SongVenues`, default on) is on: the song's `Venue` field in `TrackData.txt` (a venue id or a room name), then the song's own `Venue/` folder.
 4. The player's pick in Settings (`VenueId`, set from the menu's Venue tab).
 5. The `VenueStyle` setting (Arena / Club / Festival / Random), as before.
+
+Rules 4 and 5 only pick venues free play has unlocked (`Progression::VenueOpen`, `Docs/Hideout-and-Progression.md` → Venues in free play): a locked pick falls back to an open room, else the first open scene venue.
 
 F7 and `--venue-swap-every` cycle Arena, Club, Festival, then each non-hidden scene venue, then back to Arena; an F7 pick wins over `--venue-style`.
 

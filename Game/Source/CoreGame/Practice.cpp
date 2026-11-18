@@ -162,6 +162,8 @@ void Practice::Load()
         lesson.BeatsPerBar = std::clamp( entry.value( "BeatsPerBar", 4 ), 1, 12 );
         lesson.Sticking = entry.value( "Sticking", std::string() );
         lesson.Pad = entry.value( "Pad", std::string( "snare1" ) );
+        lesson.PassBpm = std::clamp( entry.value( "PassBpm", 0 ), 0, kMaxBpm );
+        lesson.PassAccuracy = std::clamp( entry.value( "PassAccuracy", 90.0 ), 0.0, 100.0 );
         if( entry.contains( "Lanes" ) && entry["Lanes"].is_object() )
         {
             for( const auto& [lane, steps] : entry["Lanes"].items() )

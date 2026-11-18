@@ -10,10 +10,12 @@
 #include <vector>
 
 class TrackRadioUtils;
+class Hideout;
 
 // Drives Assets/UI/MainMenu.rml through the "main_menu" view model: the settings panel in tabs
 // (game, sound and timing with the way into the delay calibration, venue, the drum kit's device and pad
-// bindings, the DLC servers with a check of each) and the radio widget.
+// bindings, the DLC servers with a check of each), the radio widget, and the hideout: the 3D room
+// behind it all with a label over each station (Docs/Hideout-and-Progression.md).
 class MainMenuController final
     : public Component<MainMenuController>
 {
@@ -59,6 +61,9 @@ private:
     std::vector<ServerResult> m_serverResults;
 
     std::unique_ptr<TrackRadioUtils> m_radioUtils;
+    // The room behind the menu (Hideout/Hideout.h); the flat menu shows when it has none.
+    std::unique_ptr<Hideout> m_hideout;
+    bool m_hideoutTried = false;
     bool m_modelReady = false;
 
     // The pad being bound and to what (0 nothing, 1 a key, 2 a MIDI note).

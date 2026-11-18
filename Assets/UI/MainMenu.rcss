@@ -73,3 +73,40 @@ body.main-menu-page {
     #main-menu { max-width: 80vw; }
     #settings-menu { max-width: 75vw; }
 }
+
+/* The hideout: the room behind the menu (Hideout/Hideout.h). */
+body.main-menu-page.hideout { decorator: none; }
+#hideout { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+#hideout-header { position: absolute; left: 3vw; top: 4vh; width: 520dp; max-width: 60vw; padding: 16dp 20dp; background-color: #0000008c; }
+#hideout-header .hideout-logo { display: block; width: 300dp; max-width: 100%; }
+#hideout-header .hideout-room { margin: 10dp 0 2dp; font-size: 30dp; color: #ffffff; }
+#hideout-header .hideout-goal { margin: 4dp 0 0; font-size: 18dp; color: #ffd166; }
+.station-label { position: absolute; display: block; width: 240dp; margin-left: -120dp; margin-top: -70dp; padding: 6dp 8dp; text-align: center; background-color: #000000a0; border-bottom: 3dp #ff9933; }
+.station-label:hover, .station-label:focus { background-color: #ff9933d0; }
+.station-label .station-name { display: block; font-size: 26dp; font-weight: bold; color: #ffffff; }
+.station-label .station-hint { display: block; font-size: 14dp; color: #ffffffb0; }
+#hideout-focus { position: absolute; left: 3vw; top: 4vh; bottom: 4vh; width: 560dp; max-width: 70vw; padding: 20dp 24dp; overflow-y: auto; background-color: #000000b8; }
+#hideout-focus h1 { font-size: 40dp; margin: 0 0 4dp; }
+#hideout-focus p { font-size: 18dp; color: #dddddd; margin: 4dp 0 12dp; }
+#hideout-focus .menu-link { width: auto; margin-top: 16dp; font-size: 32dp; text-align: left; }
+.hideout-panel { margin-top: 10dp; }
+.record-row { display: flex; justify-content: space-between; padding: 6dp 0; font-size: 20dp; border-bottom: 1dp #ffffff20; }
+.gig-card { margin-bottom: 14dp; padding: 12dp 14dp; background-color: #ffffff10; border-left: 3dp #ff9933; }
+.gig-card.locked { border-left-color: #ffffff40; color: #ffffff80; }
+.gig-card .gig-title { display: flex; justify-content: space-between; font-size: 24dp; font-weight: bold; }
+.gig-card .gig-state { font-size: 14dp; letter-spacing: 2dp; color: #66ff99; padding-top: 6dp; }
+.gig-card.locked .gig-state { color: #ffffff70; }
+#hideout-focus .gig-card p { margin: 4dp 0; font-size: 16dp; }
+#hideout-focus .gig-card .gig-detail { color: #ffd166; }
+#hideout-focus .gig-card .gig-songs { color: #ffffffa8; }
+.gig-card .gig-play { display: block; margin-top: 8dp; padding: 8dp 12dp; font-size: 20dp; font-weight: bold; text-align: center; color: #000000; background-color: #66ff99; }
+.gig-card .gig-play:hover, .gig-card .gig-play:focus { background-color: #a6ffc6; }
+#hideout-focus .hideout-status { color: #ff6666; }
+#hideout-corner { position: absolute; left: 3vw; bottom: 3vh; }
+#hideout-corner .corner-link { display: inline-block; margin-right: 18dp; padding: 6dp 12dp; font-size: 18dp; color: #ffffffc0; background-color: #00000080; }
+#hideout-corner .corner-link:hover, #hideout-corner .corner-link:focus { color: #ffffff; background-color: #ff9933c0; }
+#hideout-notice { position: absolute; left: 50%; top: 22vh; width: 560dp; margin-left: -280dp; padding: 24dp 28dp; text-align: center; background-color: #101010f0; border-top: 4dp #ffd166; }
+#hideout-notice h2 { font-size: 28dp; margin: 0 0 12dp; color: #ffd166; }
+#hideout-notice p { font-size: 20dp; white-space: pre-line; color: #ffffff; }
+#hideout-notice .menu-link { width: auto; margin: 16dp auto 0; font-size: 32dp; }
+#settings-menu .device-choice .venue-lock { color: #ffffff70; font-size: 15dp; }

@@ -9,6 +9,8 @@ public:
 
 private:
     void SetPaused( bool inPaused );
+    // Ends the gig being played (CoreGame/GigSession.h) and goes home to the hideout.
+    void LeaveGig();
     bool m_modelReady = false;
     bool m_paused = false;
     bool m_options = false;

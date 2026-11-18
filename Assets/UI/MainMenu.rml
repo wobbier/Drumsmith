@@ -5,9 +5,47 @@
     <link type="text/rcss" href="Radio.rcss"/>
     <link type="text/rcss" href="MainMenu.rcss"/>
 </head>
-<body class="main-menu-page" data-model="main_menu">
-    <div class="menu-shade"></div>
-    <div id="main-menu" data-if="!settings_open">
+<body class="main-menu-page" data-model="main_menu" data-class-hideout="hideout > 0">
+    <div class="menu-shade" data-if="hideout == 0 || settings_open"></div>
+    <!-- The hideout (Docs/Hideout-and-Progression.md): the room is the menu; a label over each station. -->
+    <div id="hideout" data-if="hideout > 0 && !settings_open">
+        <div id="hideout-header" data-if="hideout_focus < 0">
+            <img class="hideout-logo" src="img/2x/Asset 2@2x.png"/>
+            <p class="hideout-room">{{hideout_room}}</p>
+            <p class="hideout-goal">{{hideout_goal}}</p>
+        </div>
+        <div data-for="station : stations">
+            <button class="station-label" data-if="station.shown > 0" data-style-left="station.left" data-style-top="station.top" data-event-click="station(station.index)"><span class="station-name">{{station.label}}</span><span class="station-hint">{{station.hint}}</span></button>
+        </div>
+        <div id="hideout-focus" data-if="hideout_focus >= 0">
+            <h1>{{hideout_title}}</h1>
+            <p>{{hideout_hint}}</p>
+            <div id="hideout-records" class="hideout-panel" data-if="hideout_panel == 'records'">
+                <div class="record-row" data-for="record : records"><span>{{record.name}}</span><span>{{record.value}}</span></div>
+            </div>
+            <div id="hideout-gigs" class="hideout-panel" data-if="hideout_panel == 'gigs'">
+                <div class="gig-card" data-for="gig : gigs" data-class-locked="gig.state == 'LOCKED'">
+                    <div class="gig-title"><span>{{gig.name}}</span><span class="gig-state" data-if="gig.state != ''">{{gig.state}}</span></div>
+                    <p>{{gig.description}}</p>
+                    <p class="gig-detail">{{gig.detail}}</p>
+                    <p class="gig-songs" data-if="gig.songs != ''">{{gig.songs}}</p>
+                    <button class="gig-play" data-if="gig.open > 0" data-event-click="gig_play(gig.index)">PLAY THE GIG</button>
+                </div>
+            </div>
+            <p class="hideout-status" data-if="hideout_status != ''">{{hideout_status}}</p>
+            <button id="hideout-back" class="menu-link blue" data-event-click="hideout_back">&lt; Back<span class="underline"></span></button>
+        </div>
+        <div id="hideout-corner" data-if="hideout_focus < 0">
+            <button id="hideout-vocals" class="corner-link" onclick="load-scene:Assets/Vocals.lvl">Vocal Test</button>
+            <button id="hideout-exit" class="corner-link" onclick="quit">Exit</button>
+        </div>
+        <div id="hideout-notice" data-if="hideout_notice != ''">
+            <h2>While you were out</h2>
+            <p>{{hideout_notice}}</p>
+            <button id="hideout-notice-ok" class="menu-link green" autofocus data-event-click="dismiss_notice">OK<span class="underline"></span></button>
+        </div>
+    </div>
+    <div id="main-menu" data-if="!settings_open && hideout == 0">
         <img class="brand-logo" src="img/2x/Asset 2@2x.png"/>
         <img class="brand-underline" src="img/Underline.png"/>
         <div class="main-menu-items">
@@ -88,11 +126,11 @@
             </div>
             <div class="setting-row">
                 <label>Room <span>where the band plays (F7 swaps it mid-song)</span></label>
-                <button id="venue-style-arena" class="device-choice" data-class-selected="venue_id == '' && venue_style == 0" data-event-click="venue_style(0)">Arena</button>
-                <button id="venue-style-club" class="device-choice" data-class-selected="venue_id == '' && venue_style == 1" data-event-click="venue_style(1)">Club</button>
-                <button id="venue-style-festival" class="device-choice" data-class-selected="venue_id == '' && venue_style == 2" data-event-click="venue_style(2)">Festival</button>
+                <button id="venue-style-arena" class="device-choice" data-class-selected="venue_id == '' && venue_style == 0" data-event-click="venue_style(0)">Arena<span class="venue-lock" data-if="venue_locked_arena > 0"> (locked: play its gig first)</span></button>
+                <button id="venue-style-club" class="device-choice" data-class-selected="venue_id == '' && venue_style == 1" data-event-click="venue_style(1)">Club<span class="venue-lock" data-if="venue_locked_club > 0"> (locked: play its gig first)</span></button>
+                <button id="venue-style-festival" class="device-choice" data-class-selected="venue_id == '' && venue_style == 2" data-event-click="venue_style(2)">Festival<span class="venue-lock" data-if="venue_locked_festival > 0"> (locked: play its gig first)</span></button>
                 <button id="venue-style-random" class="device-choice" data-class-selected="venue_id == '' && venue_style == 3" data-event-click="venue_style(3)">Random</button>
-                <button class="device-choice" data-for="place : venues" data-class-selected="venue_id == place.id" data-event-click="venue_pick(place.id)">{{place.name}}</button>
+                <button class="device-choice" data-for="place : venues" data-class-selected="venue_id == place.id" data-event-click="venue_pick(place.id)">{{place.name}}<span class="venue-lock" data-if="place.locked > 0"> (locked)</span></button>
             </div>
             <div class="setting-row">
                 <label>Song Venues <span>let a song bring its own venue</span></label>

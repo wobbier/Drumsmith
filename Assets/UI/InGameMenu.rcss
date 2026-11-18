@@ -40,6 +40,12 @@
 #results .results-artist { font-size: 24dp; color: #ffffffb0; margin: 6dp 0 18dp; }
 #results .results-autoplay { font-size: 20dp; color: #ff9933; margin: -10dp 0 14dp; }
 #results-score { font-size: 72dp; font-weight: bold; color: #ff9933; margin-bottom: 18dp; }
+/* What the profile made of this run (PlayerProfile): a new best or a lesson passed, then the standing bests. */
+#results .results-news { font-size: 26dp; font-weight: bold; color: #66ff99; margin: -8dp 0 4dp; }
+#results .results-bests { font-size: 18dp; color: #ffffffa0; margin: 0 0 12dp; }
+#results .results-gig { font-size: 18dp; letter-spacing: 2dp; color: #ff9933; margin: -8dp 0 10dp; }
+#results .results-gig-result { font-size: 22dp; color: #ffffff; margin: -4dp 0 10dp; }
+#results .results-unlocks { font-size: 20dp; color: #ffd166; white-space: pre-line; margin: -4dp 0 12dp; }
 .results-grid { width: 360dp; margin: 0 auto 10dp; }
 .results-row { display: flex; justify-content: space-between; font-size: 22dp; padding: 4dp 0; border-bottom: 1dp #ffffff20; }
 #results .menu-link { font-size: 36dp; margin-top: 14dp; }

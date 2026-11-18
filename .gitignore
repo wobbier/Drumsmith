@@ -220,3 +220,8 @@ Assets/UI/**/*.meta
 # The DLC page: downloaded catalogue index and its album-art cache
 Assets/DLC/.catalogue/
 Assets/DLC/dlc_index.download
+
+# The player's record (Config/PlayerProfile.h): song bests, lesson results, hideout progress
+/Profile.json
+/Profile.json.tmp
+/Profile.json.bad

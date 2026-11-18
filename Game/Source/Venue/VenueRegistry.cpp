@@ -3,6 +3,8 @@
 #include "Core/CommandLine.h"
 #include "CoreGame/TrackList.h"
 #include "Config/GameSettings.h"
+#include "Config/PlayerProfile.h"
+#include "CoreGame/Progression.h"
 #include "File.h"
 #include "Path.h"
 #include "VFS/VFS.h"
@@ -109,6 +111,22 @@ namespace
 }
 
 
+std::string VenueStyleName( int inStyle )
+{
+    switch( inStyle )
+    {
+    case 0:
+        return "Arena";
+    case 1:
+        return "Club";
+    case 2:
+        return "Festival";
+    default:
+        return {};
+    }
+}
+
+
 int VenueStyleFromName( const std::string& inName )
 {
     const std::string lower = Lower( inName );
@@ -161,6 +179,11 @@ VenueChoice ChooseVenue( const VenueChoiceInputs& inInputs )
         choice.Reason = inInputs.CommandStyle >= VenueRegistry::kStyleCount ? "--venue-style (random for the song)" : "--venue-style";
         return choice;
     }
+    if( ResolveName( inInputs, inInputs.GigVenue, choice ) )
+    {
+        choice.Reason = "the gig's venue";
+        return choice;
+    }
     if( inInputs.SongVenues )
     {
         if( ResolveName( inInputs, inInputs.SongVenue, choice ) )
@@ -175,14 +198,50 @@ VenueChoice ChooseVenue( const VenueChoiceInputs& inInputs )
             return choice;
         }
     }
+    const auto open = [&inInputs]( const std::string& inId ) { return !inInputs.VenueOpen || inInputs.VenueOpen( inId ); };
     if( const VenueEntry* entry = FindIn( inInputs.Registry, inInputs.VenueId ) )
     {
-        choice = SceneChoice( *entry );
-        choice.Reason = "the player's venue (VenueId)";
+        if( open( entry->Id ) )
+        {
+            choice = SceneChoice( *entry );
+            choice.Reason = "the player's venue (VenueId)";
+            return choice;
+        }
+    }
+    const bool random = inInputs.VenueStyle >= VenueRegistry::kStyleCount;
+    choice = StyleChoice( inInputs.VenueStyle, inInputs.SongHash );
+    choice.Reason = random ? "the VenueStyle setting (random for the song)" : "the VenueStyle setting";
+    if( open( VenueStyleName( choice.Style ) ) )
+    {
         return choice;
     }
-    choice = StyleChoice( inInputs.VenueStyle, inInputs.SongHash );
-    choice.Reason = inInputs.VenueStyle >= VenueRegistry::kStyleCount ? "the VenueStyle setting (random for the song)" : "the VenueStyle setting";
+    // Not earned yet: another room that is (Random picks among those), else the first open scene.
+    std::vector<int> openStyles;
+    for( int style = 0; style < VenueRegistry::kStyleCount; ++style )
+    {
+        if( open( VenueStyleName( style ) ) )
+        {
+            openStyles.push_back( style );
+        }
+    }
+    if( !openStyles.empty() )
+    {
+        choice = StyleChoice( openStyles[inInputs.SongHash % static_cast<uint32_t>( openStyles.size() )], inInputs.SongHash );
+        choice.Reason = "an open room (the VenueStyle setting's isn't unlocked yet)";
+        return choice;
+    }
+    if( inInputs.Registry )
+    {
+        for( const VenueEntry& entry : *inInputs.Registry )
+        {
+            if( !entry.Hidden && !entry.SongLocal && open( entry.Id ) )
+            {
+                choice = SceneChoice( entry );
+                choice.Reason = "the first open venue (no room is unlocked yet)";
+                return choice;
+            }
+        }
+    }
     return choice;
 }
 
@@ -365,6 +424,14 @@ VenueChoice VenueRegistry::ChooseForSong( const TrackData& inTrack ) const
     inputs.VenueStyle = settings.VenueStyle;
     inputs.SongHash = VenueSongHash( inTrack.m_trackName );
     inputs.Registry = &m_venues;
+    inputs.GigVenue = GigVenue();
+    // Free play's venue gates; a run started from the command line (--play-track: headless
+    // captures, tests) keeps the setting's venue as before.
+    static const bool kCommandLineRun = CommandLine::Has( "--play-track" );
+    if( !kCommandLineRun )
+    {
+        inputs.VenueOpen = []( const std::string& inId ) { return Progression::GetInstance().VenueOpen( inId, PlayerProfile::GetInstance() ); };
+    }
     if( inputs.SongVenues )
     {
         inputs.HasSongLocal = ForSong( inTrack, inputs.SongLocal );

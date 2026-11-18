@@ -12,3 +12,10 @@
 .lesson-tempo input { display: block; width: 100%; margin-bottom: 8dp; }
 .library-page .tempo-step { display: inline-block; width: auto; margin: 0 6dp 0 0; padding: 6dp 12dp; font-size: 16dp; background-color: #ffffff14; }
 .library-page .tempo-step.selected { color: #101010; background-color: #ffb347; }
+/* The lesson ladder (CoreGame/Progression.h): a lesson's row says PASSED or LOCKED, and its details what passing takes. */
+.library-page .lesson-row { display: flex; justify-content: space-between; }
+.library-page .lesson-row .lesson-state { font-size: 14dp; letter-spacing: 2dp; color: #66ff99; padding-top: 6dp; }
+.library-page .lesson-row.locked { color: #ffffff60; }
+.library-page .lesson-row.locked .lesson-state { color: #ffffff60; }
+.library-details .lesson-progress { margin: 14dp 0 4dp; font-size: 18dp; color: #ffd166; }
+.library-details .lesson-progress.passed { color: #66ff99; }

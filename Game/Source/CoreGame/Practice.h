@@ -24,6 +24,12 @@ struct PracticeLesson
     // A groove: lane name ("closed_hh", "snare1", "bass1", ...) and its steps: x a stroke, X an
     // accent, o a ghost note, - a rest.
     std::vector<std::pair<std::string, std::string>> Lanes;
+    // Passing (Docs/Practice.md → Passing): at least PassAccuracy percent at PassBpm or faster.
+    // PassBpm 0 means the lesson's own Bpm.
+    int PassBpm = 0;
+    double PassAccuracy = 90.0;
+    int PassTempo() const { return PassBpm > 0 ? PassBpm : Bpm; }
+    bool Passes( int inBpm, double inAccuracy ) const { return inBpm >= PassTempo() && inAccuracy >= PassAccuracy; }
 };
 
 // The lessons, and the session being played: a lesson turned into a chart the highway plays like
@@ -55,6 +61,8 @@ public:
     bool IsActive() const { return m_active; }
     TrackData& Chart() { return m_chart; }
     int LessonIndex() const { return m_lesson; }
+    const PracticeLesson* CurrentLesson() const { return m_lesson >= 0 && m_lesson < static_cast<int>( m_lessons.size() ) ? &m_lessons[m_lesson] : nullptr; }
+    int Tempo() const { return m_chart.m_bpm; }
 
 private:
     void Load();

@@ -5,6 +5,8 @@
 #include <Engine/Input.h>
 #include <Events/SceneEvents.h>
 #include "Config/GameSettings.h"
+#include "Config/PlayerProfile.h"
+#include "CoreGame/Progression.h"
 #include "CoreGame/Practice.h"
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
@@ -58,10 +60,14 @@ void PracticeMenuController::PopulateModel()
     ui->ModelSetNumber( kModel, "bpm", 80 );
     ui->ModelSetNumber( kModel, "bars", m_bars );
     ui->ModelSetNumber( kModel, "lesson_count", static_cast<int>( lessons.size() ) );
-    for( const char* key : { "detail_name", "detail_category", "detail_description", "detail_pattern", "detail_feel", "status" } )
+    for( const char* key : { "detail_name", "detail_category", "detail_description", "detail_pattern", "detail_feel", "detail_progress", "status" } )
     {
         ui->ModelSetString( kModel, key, "" );
     }
+    ui->ModelSetNumber( kModel, "detail_locked", 0 );
+    ui->ModelSetNumber( kModel, "detail_passed", 0 );
+    const Progression& progression = Progression::GetInstance();
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
     ui->ModelSetListCount( kModel, "lanes", 0 );
     ui->ModelSetListCount( kModel, "lessons", static_cast<int>( lessons.size() ) );
     std::string previousCategory;
@@ -70,6 +76,7 @@ void PracticeMenuController::PopulateModel()
         ui->ModelSetItemNumber( kModel, "lessons", i, "index", i );
         ui->ModelSetItemString( kModel, "lessons", i, "name", lessons[i].Name );
         ui->ModelSetItemString( kModel, "lessons", i, "category", lessons[i].Category != previousCategory ? lessons[i].Category : "" );
+        ui->ModelSetItemString( kModel, "lessons", i, "state", profile.LessonPassed( lessons[i].Id ) ? "PASSED" : !progression.LessonOpen( lessons[i].Id, profile ) ? "LOCKED" : "" );
         previousCategory = lessons[i].Category;
     }
     m_modelReady = true;
@@ -101,6 +108,40 @@ void PracticeMenuController::SelectLesson( int inLesson )
     ui->ModelSetString( kModel, "detail_pattern", PatternText( lesson ) );
     ui->ModelSetString( kModel, "detail_feel", lesson.StepsPerBeat >= 1 && lesson.StepsPerBeat <= 4 ? kFeel[lesson.StepsPerBeat] : "" );
     ui->ModelSetString( kModel, "status", "" );
+    // The ladder: passed, what passing takes, or what opens it.
+    const Progression& progression = Progression::GetInstance();
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
+    const PlayerProfile::LessonRecord* record = profile.FindLesson( lesson.Id );
+    const bool locked = !progression.LessonOpen( lesson.Id, profile );
+    std::string progress;
+    if( record && record->Passed )
+    {
+        progress = "Passed. Fastest clean tempo: " + std::to_string( record->BestBpm ) + " BPM";
+    }
+    else if( locked )
+    {
+        progress = "Locked.";
+        if( const ProgressionLessonStep* step = progression.StepOf( lesson.Id ) )
+        {
+            for( const std::string& before : step->Requires.LessonSteps )
+            {
+                const auto& steps = progression.LessonSteps();
+                const auto it = std::find_if( steps.begin(), steps.end(), [&before]( const ProgressionLessonStep& inStep ) { return inStep.Id == before; } );
+                progress += " Pass every lesson in " + ( it != steps.end() ? it->Name : before ) + " to open " + step->Name + ".";
+            }
+        }
+    }
+    else
+    {
+        progress = "To pass: " + std::to_string( static_cast<int>( lesson.PassAccuracy ) ) + "% at " + std::to_string( lesson.PassTempo() ) + " BPM or faster.";
+        if( record && record->Plays > 0 )
+        {
+            progress += " Your best: " + std::to_string( static_cast<int>( record->BestAccuracy ) ) + "%" + ( record->BestBpm > 0 ? " (clean at " + std::to_string( record->BestBpm ) + " BPM)" : std::string() ) + ".";
+        }
+    }
+    ui->ModelSetString( kModel, "detail_progress", progress );
+    ui->ModelSetNumber( kModel, "detail_locked", locked ? 1 : 0 );
+    ui->ModelSetNumber( kModel, "detail_passed", record && record->Passed ? 1 : 0 );
     ui->ModelSetListCount( kModel, "lanes", static_cast<int>( lesson.Lanes.size() ) );
     for( int i = 0; i < static_cast<int>( lesson.Lanes.size() ); ++i )
     {
@@ -117,6 +158,11 @@ void PracticeMenuController::StartLesson()
     const auto& lessons = Practice::GetInstance().Lessons();
     if( !ui || m_selected < 0 || m_selected >= static_cast<int>( lessons.size() ) )
     {
+        return;
+    }
+    if( !Progression::GetInstance().LessonOpen( lessons[m_selected].Id, PlayerProfile::GetInstance() ) )
+    {
+        ui->ModelSetString( kModel, "status", "This lesson isn't open yet." );
         return;
     }
     const int bpm = std::clamp( static_cast<int>( std::lround( ui->ModelGetNumber( kModel, "bpm" ) ) ), Practice::kMinBpm, Practice::kMaxBpm );
