@@ -72,6 +72,24 @@ namespace
     }
 
 
+    // A vertical field of view framed for 16:9, widened for a narrower window so the room is as
+    // wide as it was meant to be (a tall window shows more floor and ceiling instead of less room).
+    float FitToWindow( float inVerticalDegrees )
+    {
+        IWindow* window = GetEngine().GetWindow();
+        const Vector2 size = window ? window->GetSize() : Vector2( 16.f, 9.f );
+        const float aspect = size.y > 1.f ? size.x / size.y : 16.f / 9.f;
+        constexpr float kDesigned = 16.f / 9.f;
+        if( aspect >= kDesigned )
+        {
+            return inVerticalDegrees;
+        }
+        constexpr float kRadians = 0.01745329f;
+        const float halfWide = std::atan( std::tan( inVerticalDegrees * 0.5f * kRadians ) * kDesigned );
+        return std::min( 100.f, 2.f * std::atan( std::tan( halfWide ) / aspect ) / kRadians );
+    }
+
+
     std::string Percent( float inValue )
     {
         char text[24];
@@ -519,7 +537,7 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
                 m_intro = 0.f;
                 m_introFrom.Eye = view->IntroEye;
                 m_introFrom.Target = view->IntroTarget;
-                m_introFrom.FieldOfView = view->FieldOfView + 8.f;
+                m_introFrom.FieldOfView = FitToWindow( view->FieldOfView + 8.f );
                 m_current = m_introFrom;
                 m_hasCurrent = true;
             }
@@ -776,7 +794,9 @@ Hideout::Pose Hideout::PoseOf( int inStation ) const
 {
     if( inStation < 0 || inStation >= static_cast<int>( m_stations.size() ) )
     {
-        return m_overview;
+        Pose overview = m_overview;
+        overview.FieldOfView = FitToWindow( m_overview.FieldOfView );
+        return overview;
     }
     const Station& station = m_stations[inStation];
     Pose pose;
