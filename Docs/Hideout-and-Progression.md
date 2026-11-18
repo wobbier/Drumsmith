@@ -141,7 +141,7 @@ Each acts on the entity's `Light`, on its own mesh's emissive (a `StandardMateri
 - Fog and volumetric fog (for the window's beam). Lights opt in with `VolumetricMultiplier`.
 - Depth of field. `Hideout::UpdateFocus` keeps `DoFFocusDistance` on what the camera is looking at.
 
-The labels are pushed apart where they would overlap (`Hideout::UpdateLabels`, about 19% by 7% of the screen each), and each is tilted a few degrees (`tilt`). In the basement (`hideout_tier` 0, the page's `basement` class) they are strips of masking tape, the header a piece of cardboard and the notice a sticky note.
+The overview is framed for 16:9; a narrower window widens its vertical field of view (`FitToWindow`, up to 100 degrees) so the stations at the sides stay in the picture. The labels are pushed apart where they would overlap (`Hideout::UpdateLabels`, about 19% by 7% of the screen each), and each is tilted a few degrees (`tilt`). In the basement (`hideout_tier` 0, the page's `basement` class) they are strips of masking tape, the header a piece of cardboard and the notice a sticky note.
 
 ### The radio in the room
 
