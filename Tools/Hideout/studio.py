@@ -441,7 +441,7 @@ def practice_corner(s, items, stations):
     bare = stand_in(s, items, "No Pad Yet", "PracticePad")
     s.box("Bare Basket", bare, (px, 0.71, pz), (0.3, 0.02, 0.3), CHROME, shape="Cylinder", metallic=0.9)
     s.prop("Practice Stool", items, "Assets/Models/Venue/Stool.obj", (px + 0.45, 0.0, pz - 0.1), scale=0.8)
-    light(s, stations, "Practice Corner", (px + 0.3, 1.9, pz - 0.3), color=(1.0, 0.82, 0.6), intensity=2.5, range_=3.0)
+    light(s, stations, "Practice Corner", (px + 0.4, 1.9, pz - 0.4), color=(1.0, 0.88, 0.72), intensity=6.0, range_=3.5)
     met = slot(s, items, "Metronome", "Metronome")
     s.box("Metronome Table", met, (px - 0.5, 0.6, pz + 0.1), (0.35, 0.03, 0.35), WALNUT)
     rod(s, met, "Metronome Table Leg", (px - 0.5, 0.0, pz + 0.1), (px - 0.5, 0.6, pz + 0.1), 0.03, BLACK)

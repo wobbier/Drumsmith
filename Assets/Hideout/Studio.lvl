@@ -38456,9 +38456,9 @@
     {
      "Type": "Transform",
      "Position": [
-      -2.3,
+      -2.2,
       1.9,
-      2.0
+      1.9
      ],
      "Rotation": [
       0.0,
@@ -38476,11 +38476,11 @@
      "LightType": "Point",
      "Color": [
       1.0,
-      0.82,
-      0.6
+      0.88,
+      0.72
      ],
-     "Intensity": 2.5,
-     "Range": 3.0,
+     "Intensity": 6.0,
+     "Range": 3.5,
      "VolumetricMultiplier": 0.0
     }
    ]

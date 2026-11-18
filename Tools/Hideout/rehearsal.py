@@ -237,6 +237,13 @@ def amps(s, geo, items, stations, lights):
         meter = s.box(f"Meter {i}", desk, (-0.26 + i * 0.075, 0.11, -0.14), (0.012, 0.004, 0.08), (0.2, 1.0, 0.3), emissive=(0.2, 1.0, 0.3),
                       emissive_intensity=4.0, shadows=False)
         motion(meter, "Pulse", amount=0.9, speed=0.4, phase=((i % 4) + 0.5) / 4.0, music=True)
+    # A gooseneck lamp on the desk, as on any live mixer.
+    neck = (mx + 0.2, 0.8, mz + 0.15)
+    head = (mx + 0.05, 1.08, mz - 0.02)
+    rod(s, items, "Gooseneck", neck, head, 0.012, BLACK, metallic=0.6, shadows=False)
+    s.box("Gooseneck Head", items, head, (0.05, 0.04, 0.08), BLACK, metallic=0.5)
+    light(s, lights, "Gooseneck Light", (head[0], head[1] - 0.03, head[2]), kind="Spot", color=(1.0, 0.88, 0.7), intensity=6.0, range_=2.0,
+          rot=look_rotation(head, (mx, 0.7, mz)), inner=30.0, outer=60.0)
     station(s, stations, "Mixer", "Mixer", (mx, 0.85, mz), (-0.75, 0.6, -1.35), 45, label="SETTINGS")
     # The vocal mic in front of the riser, its cable away across the floor.
     s.prop("Vocal Mic", items, "Assets/Models/Instruments/Runtime/MicStand.obj", (0.4, 0.0, 4.4), yaw=200.0)
@@ -400,7 +407,7 @@ def lounge(s, geo, items, stations, lights):
         motion(cone, "Bob", amount=0.012, speed=2.0, axis=(-1, 0, 0), music=True)
         s.box("Cone", cone, (0.0, 0.0, 0.0), (0.2, 0.012, 0.2), (0.06, 0.06, 0.06), rot=(0, 0, 90), shape="Cylinder", rough=0.7)
         s.box("Dust Cap", cone, (-0.008, 0.0, 0.0), (0.07, 0.012, 0.07), CHROME, rot=(0, 0, 90), shape="Cylinder", metallic=0.9)
-    station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.45, 0.1, -0.35), 40)
+    station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.25, 0.4, -0.3), 40)
     # The whiteboard: the week, with the band's nights in it; the gear list taped to its corner.
     wz = 4.05
     textured(s.box("Whiteboard", items, (H - 0.025, 1.55, wz), (0.03, 1.0, 1.6), (1, 1, 1), rough=0.25, metallic=0.05), "Whiteboard")
