@@ -18,7 +18,7 @@ to the back wall.
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display,
+from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
                         stand_in, station, tally, tape_outline, textured, view, when)
 
@@ -308,12 +308,19 @@ def left_wall(s, geo, items, stations, lights):
     rod(s, pad, "Pad Stick L", (px - 0.15, 0.77, pz - 0.05), (px + 0.2, 0.77, pz - 0.15), 0.014, (0.86, 0.72, 0.46))
     stand = stand_in(s, items, "No Pad Yet", "PracticePad")
     s.box("Bare Stand Basket", stand, (px, 0.71, pz), (0.3, 0.02, 0.3), CHROME, shape="Cylinder", metallic=0.9)
-    scrawl(s, stand, "Pad Note", (px, 0.725, pz), "PAD?", 0.08, PAINT_PEN, facing="up", spin=90.0, font=MARKER)
+    scrawl(s, stand, "Pad Note", (px, 0.725, pz), "PAD?", 0.08, PAINT_PEN, facing="up", spin=-90.0, font=MARKER)
     s.prop("Practice Stool", items, "Assets/Models/Venue/Stool.obj", (px + 0.45, 0.0, pz - 0.1), yaw=0.0, scale=0.8)
     ms = (px - 0.1, 0.0, pz + 0.55)
     rod(s, items, "Music Stand Pole", ms, (ms[0], 1.1, ms[2]), 0.015, BLACK, metallic=0.5)
     s.box("Music Stand Desk", items, (ms[0], 1.15, ms[2]), (0.5, 0.32, 0.01), BLACK, rot=(-20, 0, 0), metallic=0.4)
     poster(s, items, "Rudiments On The Stand", "PosterRudiments", (ms[0], 1.17, ms[2] - 0.015), 0.28, 0.42, "-z", tilt=0.0).components[0]["Rotation"] = [-20.0, 0.0, 0.0]
+    # A stand light clipped to the top of the music stand, on the rudiments.
+    lamp = (ms[0], 1.36, ms[2] - 0.08)
+    rod(s, items, "Stand Light Neck", (ms[0], 1.31, ms[2] + 0.02), lamp, 0.008, BLACK, shadows=False)
+    s.box("Stand Light Head", items, lamp, (0.1, 0.025, 0.04), BLACK, metallic=0.5)
+    light(s, lights, "Stand Light", (lamp[0], lamp[1] - 0.02, lamp[2]), kind="Spot", color=(1.0, 0.86, 0.66), intensity=3.5, range_=1.8,
+          rot=look_rotation(lamp, (ms[0], 1.0, ms[2] + 0.05)), inner=30.0, outer=55.0)
+    light(s, lights, "Practice Corner", (px + 0.3, 1.9, pz - 0.3), color=(1.0, 0.8, 0.6), intensity=2.0, range_=2.8)
     met = slot(s, items, "Metronome", "Metronome")
     s.box("Metronome", met, (ms[0] + 0.32, 0.9, ms[2] - 0.05), (0.1, 0.18, 0.08), (0.45, 0.12, 0.08), rough=0.6)
     s.box("Metronome Shelf", met, (ms[0] + 0.32, 0.8, ms[2] - 0.05), (0.2, 0.02, 0.16), BLACK)
@@ -345,6 +352,8 @@ def lounge(s, geo, items, stations, lights):
     s.prop("Couch", items, "Assets/Venues/Backyard/Models/Sofa.obj", (3.4, 0.0, 1.45), yaw=-90.0)
     textured(s.box("Lounge Rug", items, (2.3, 0.006, 1.45), (1.6, 0.01, 2.2), (1, 1, 1), rough=1.0, shadows=False), "RugBlue")
     s.box("Couch Tape", items, (3.05, 0.47, 1.1), (0.05, 0.004, 0.32), (0.55, 0.55, 0.55), rot=(0, 20, 0), metallic=0.4, rough=0.4)
+    # The cat came too. It has opinions about the band next door.
+    cat(s, items, (3.25, 0.5, 2.0), yaw=160.0)
     # The road case coffee table: the laptop, cans, a pizza box, the lava lamp once it's earned.
     tx, tz = 2.25, 1.45
     road_case(s, items, "Coffee Case", (tx, 0.0, tz), (0.9, 0.44, 0.5), yaw=90.0)
@@ -362,6 +371,8 @@ def lounge(s, geo, items, stations, lights):
                      emissive_intensity=9.0, shadows=False)
         if i % 4 == 2:
             glow_light(bulb, color=(1.0, 0.78, 0.5), intensity=1.4, range_=2.4)
+        else:
+            motion(bulb, "Pulse", amount=0.5, speed=0.07 + 0.013 * (i % 5), phase=(i * 0.37) % 1.0)
         if prev:
             rod(s, lights, f"Fairy Wire {i}", prev, p, 0.004, (0.1, 0.1, 0.1), shadows=False)
         prev = p

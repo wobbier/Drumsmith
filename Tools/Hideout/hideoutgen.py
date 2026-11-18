@@ -337,3 +337,21 @@ def tally(s, parent, centre, facing="-x", ink=(0.12, 0.16, 0.42)):
         p = (off[0], 0.06 - i * 0.058, off[2])
         readout(scrawl(s, group, f"Tally {source}", p, "", 0.04, ink, facing=facing, align="Left", tilt=-2.0, font=MARKER), source, prefix=prefix)
     return group
+
+
+def cat(s, parent, pos, yaw=0.0, fur=(0.85, 0.48, 0.2), stripes=(0.6, 0.3, 0.1)):
+    """The cat, asleep (breathing, its tail flicking). It moves with the band from room to room.
+    pos: where it lies; yaw turns it (0: its head toward -z)."""
+    group = s.group("Cat", parent, pos)
+    group.components[0]["Rotation"] = [0.0, yaw, 0.0]
+    body = s.box("Cat Body", group, (0.0, 0.08, 0.0), (0.3, 0.17, 0.44), fur, shape="Sphere", rough=0.95)
+    motion(body, "Breathe", amount=0.07, speed=0.22, axis=(0.3, 1.0, 0.0))
+    s.box("Cat Head", group, (0.02, 0.1, -0.24), (0.17, 0.14, 0.15), fur, shape="Sphere", rough=0.95)
+    for side in (-1, 1):
+        s.box(f"Cat Ear {side}", group, (0.02 + side * 0.05, 0.18, -0.25), (0.05, 0.05, 0.02), tuple(c * 0.94 for c in fur), rot=(0, 0, 45),
+              rough=0.95)
+    tail = s.entity("Cat Tail Root", group, (-0.05, 0.03, 0.2))
+    motion(tail, "Sway", amount=14.0, speed=0.13, axis=(0, 1, 0))
+    rod(s, tail, "Cat Tail", (0.0, 0.0, 0.0), (0.17, -0.01, 0.12), 0.04, tuple(c * 0.94 for c in fur))
+    s.box("Cat Stripes", group, (0.0, 0.15, 0.05), (0.2, 0.04, 0.3), stripes, shape="Sphere", rough=0.95, shadows=False)
+    return group

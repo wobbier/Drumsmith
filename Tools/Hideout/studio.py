@@ -16,7 +16,7 @@ to the back wall.
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display,
+from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
                         stand_in, station, tally, tape_outline, textured, view, when)
 
@@ -305,6 +305,8 @@ def lounge(s, geo, items, stations, lights):
     light(s, day, "Sky Fill", (H - 0.6, 2.0, wz), color=(0.75, 0.85, 1.0), intensity=3.0, range_=5.0)
     # The couch under it, the rug, the coffee table with the laptop (and the lava lamp, once earned).
     s.prop("Couch", items, "Assets/Venues/Backyard/Models/Sofa.obj", (H - 0.5, 0.0, wz), yaw=-90.0)
+    # The cat made it to the big time too: the studio's couch is the best spot in the building.
+    cat(s, items, (H - 0.62, 0.5, wz + 0.55), yaw=200.0)
     textured(s.box("Lounge Rug", items, (H - 1.5, 0.006, wz), (1.8, 0.01, 2.6), (1, 1, 1), rough=1.0, shadows=False), "RugBlue")
     tx, tz = H - 1.55, wz
     s.box("Coffee Table", items, (tx, 0.4, tz), (0.6, 0.05, 1.1), WALNUT, rough=0.4)
@@ -438,6 +440,7 @@ def practice_corner(s, items, stations):
     bare = stand_in(s, items, "No Pad Yet", "PracticePad")
     s.box("Bare Basket", bare, (px, 0.71, pz), (0.3, 0.02, 0.3), CHROME, shape="Cylinder", metallic=0.9)
     s.prop("Practice Stool", items, "Assets/Models/Venue/Stool.obj", (px + 0.45, 0.0, pz - 0.1), scale=0.8)
+    light(s, stations, "Practice Corner", (px + 0.3, 1.9, pz - 0.3), color=(1.0, 0.82, 0.6), intensity=2.5, range_=3.0)
     met = slot(s, items, "Metronome", "Metronome")
     s.box("Metronome Table", met, (px - 0.5, 0.6, pz + 0.1), (0.35, 0.03, 0.35), WALNUT)
     rod(s, met, "Metronome Table Leg", (px - 0.5, 0.0, pz + 0.1), (px - 0.5, 0.6, pz + 0.1), 0.03, BLACK)
