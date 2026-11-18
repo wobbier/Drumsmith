@@ -16,7 +16,7 @@ to the back wall.
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
+from hideoutgen import (flyer_name, band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
                         stand_in, station, tally, tape_outline, textured, view, when)
 
@@ -278,6 +278,7 @@ def booth(s, geo, items, stations, lights):
     for slot_name, texture, dx, y, tilt in flyers:
         f = slot(s, items, f"Flyer {slot_name[-1]}", slot_name)
         poster(s, f, "Flyer", texture, (gx + dx, y, bz0 - 0.158), 0.27, 0.36, "-z", tilt=tilt)
+        flyer_name(s, f, (gx + dx, y, bz0 - 0.158), "-z", tilt)
         card = stand_in(s, items, f"{slot_name} Card", slot_name)
         s.box("Index Card", card, (gx + dx, y, bz0 - 0.158), (0.16, 0.11, 0.003), (0.97, 0.96, 0.9), rot=(0, 0, tilt), shadows=False)
         scrawl(s, card, "Card Text", (gx + dx, y, bz0 - 0.161), "TBA", 0.04, INK, font=MARKER, tilt=tilt)

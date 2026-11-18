@@ -16,7 +16,7 @@ Room space: x across (+x the couch side), y up, z from the stairs (the camera) t
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, PEN, STEEL, WHITE, WOOD, Scene,
+from hideoutgen import (flyer_name, band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, PEN, STEEL, WHITE, WOOD, Scene,
                         boombox_display, clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl,
                         setlist, slot, stand_in, station, tally, tape_outline, textured, view, when)
 
@@ -407,6 +407,7 @@ def gig_board(s, geo, items, stations):
     for slot_name, texture, y, dz, tilt in flyers:
         f = slot(s, items, f"Flyer {slot_name[-1]}", slot_name)
         poster(s, f, "Flyer", texture, (-H + 0.038, y, gz + dz), 0.27, 0.36, "+x", tilt=tilt)
+        flyer_name(s, f, (-H + 0.038, y, gz + dz), "+x", tilt)
         s.box("Pin", f, (-H + 0.046, y + 0.16, gz + dz), (0.018, 0.018, 0.018), (0.85, 0.12, 0.1), shape="Sphere", shadows=False)
 
 

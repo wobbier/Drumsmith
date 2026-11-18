@@ -355,3 +355,12 @@ def cat(s, parent, pos, yaw=0.0, fur=(0.85, 0.48, 0.2), stripes=(0.6, 0.3, 0.1))
     rod(s, tail, "Cat Tail", (0.0, 0.0, 0.0), (0.17, -0.01, 0.12), 0.04, tuple(c * 0.94 for c in fur))
     s.box("Cat Stripes", group, (0.0, 0.15, 0.05), (0.2, 0.04, 0.3), stripes, shape="Sphere", rough=0.95, shadows=False)
     return group
+
+
+def flyer_name(s, parent, centre, facing, tilt=0.0, ink=(0.7, 0.06, 0.08)):
+    """The band's name scrawled along the bottom of a gig's flyer once it's been played
+    ("feat. THE RIMSHOTS"): centre is the flyer's (0.27 x 0.36 m, as gig_board makes them)."""
+    out = {"+x": (0.004, 0.0, 0.0), "-x": (-0.004, 0.0, 0.0), "-z": (0.0, 0.0, -0.004)}[facing]
+    p = (centre[0] + out[0], centre[1] - 0.135, centre[2] + out[2])
+    readout(scrawl(s, parent, "Band On The Flyer", p, "", 0.02, ink, facing=facing, font=MARKER, tilt=tilt - 4.0), "BandName", prefix="feat. ",
+            max_letters=16, upper=True)

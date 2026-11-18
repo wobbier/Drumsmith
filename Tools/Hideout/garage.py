@@ -15,7 +15,7 @@ Room space as the basement: x across (+x the couch side), y up, z from the camer
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display,
+from hideoutgen import (flyer_name, band_name, band_name_text, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
                         stand_in, station, tally, tape_outline, textured, view, when)
 
@@ -240,6 +240,7 @@ def left_side(s, geo, items, stations):
     for slot_name, texture, y, dz, tilt in flyers:
         f = slot(s, items, f"Flyer {slot_name[-1]}", slot_name)
         poster(s, f, "Flyer", texture, (-H + 0.038, y, gz + dz), 0.27, 0.36, "+x", tilt=tilt)
+        flyer_name(s, f, (-H + 0.038, y, gz + dz), "+x", tilt)
     # A bike leaning on the back wall by the mower.
     bike = s.group("Bike", items, (-2.75, 0.0, D - 0.18))
     for w in (-0.52, 0.52):

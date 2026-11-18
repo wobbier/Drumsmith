@@ -18,7 +18,7 @@ to the back wall.
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
+from hideoutgen import (flyer_name, band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
                         stand_in, station, tally, tape_outline, textured, view, when)
 
@@ -291,6 +291,7 @@ def left_wall(s, geo, items, stations, lights):
     for slot_name, texture, y, dz, tilt in flyers:
         f = slot(s, items, f"Flyer {slot_name[-1]}", slot_name)
         poster(s, f, "Flyer", texture, (-H + 0.038, y, gz + dz), 0.27, 0.36, "+x", tilt=tilt)
+        flyer_name(s, f, (-H + 0.038, y, gz + dz), "+x", tilt)
     for slot_name, y, dz, text in (("FlyerA", 1.62, -0.12, "GIG #1\n???"), ("FlyerB", 1.48, 0.15, "a REAL\ngig"), ("FlyerC", 1.72, 0.08, "FEST\n(lol)")):
         card = stand_in(s, items, f"{slot_name} Card", slot_name)
         s.box("Index Card", card, (-H + 0.036, y, gz + dz), (0.003, 0.11, 0.16), (0.97, 0.96, 0.9), rot=(-3, 0, 0), shadows=False)
