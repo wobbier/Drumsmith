@@ -110,6 +110,27 @@ public:
 ME_REGISTER_COMPONENT_FOLDER( HideoutDrummer, "Hideout" )
 
 
+// Part of the band's name in the room (the bedsheet, the kick head): shown only while the band has
+// no name (Unnamed: the "BAND NAME TBD" pictures) or only once it has one (Named: a blank sheet,
+// and a TextRenderer, whose Text becomes the name). PlayerProfile::BandName.
+class HideoutBandName
+    : public Component<HideoutBandName>
+{
+    ME_REFLECTABLE( HideoutBandName )
+public:
+    enum class When : int { Unnamed = 0, Named };
+
+    HideoutBandName();
+
+    virtual void Init() final;
+
+    When Show = When::Named;
+    // A TextRenderer's size is cut down so a name this many letters long (or longer) still fits.
+    int FitLetters = 9;
+};
+ME_REGISTER_COMPONENT_FOLDER( HideoutBandName, "Hideout" )
+
+
 // The room's overview: where the camera stands when no station is chosen. It looks along the
 // entity's local +Z. One per room.
 class HideoutView

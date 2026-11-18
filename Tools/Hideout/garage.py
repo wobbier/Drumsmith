@@ -13,7 +13,7 @@ Room space as the basement: x across (+x the couch side), y up, z from the camer
 import math
 import random
 
-from hideoutgen import (BLACK, BRASS, CHROME, CORK, GOLD, OFFWHITE, STEEL, WHITE, WOOD, Scene, drummer, dust, glow_light,
+from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, CORK, GOLD, OFFWHITE, STEEL, WHITE, WOOD, Scene, drummer, dust, glow_light,
                         light, look_rotation, motion, poster, rod, slot, sound, station, textured, view)
 
 H = 3.8        # half the width
@@ -85,7 +85,10 @@ def door(s, geo, lights, items):
                   rot=look_rotation(car, (0.0, 0.2, D - 2.0)), inner=10.0, outer=20.0, volumetric=4.0)
     motion(sweep, "Pass", amount=4.0, speed=1.0 / 19.0, axis=(1, 0, 0), phase=0.3)
     # The bedsheet came too, hung off the door tracks.
-    poster(s, items, "Banner", "Banner", (0.0, 2.05, D - 0.25), 2.6, 1.1, "-z", tilt=1.0, thick=0.006)
+    band_name(poster(s, items, "Banner", "Banner", (0.0, 2.05, D - 0.25), 2.6, 1.1, "-z", tilt=1.0, thick=0.006), "Unnamed")
+    band_name(poster(s, items, "Banner Blank", "BannerBlank", (0.0, 2.05, D - 0.252), 2.6, 1.1, "-z", tilt=1.0, thick=0.006), "Named")
+    sheet = band_name_text(s, items, "Band Name On The Sheet", (0.0, 2.15, D - 0.27), 0.32, (0.6, 0.05, 0.07), fit=12)
+    sheet.components[0]["Rotation"] = [0.0, 0.0, 1.0]
 
 
 def kit_area(s, geo, items, stations, lights):
@@ -93,6 +96,12 @@ def kit_area(s, geo, items, stations, lights):
     head = textured(s.box("Kick Logo", items, (0.0, 0.31, 4.098), (0.56, 0.56, 0.004), (1, 1, 1), rough=0.7, shadows=False),
                     "KickHead", emissive=True, emissive_intensity=0.25)
     head.components[-1]["Material"]["AlphaCutoff"] = 0.5
+    band_name(head, "Unnamed")
+    blank = textured(s.box("Kick Logo Blank", items, (0.0, 0.31, 4.097), (0.56, 0.56, 0.004), (1, 1, 1), rough=0.7, shadows=False),
+                     "KickHeadBlank", emissive=True, emissive_intensity=0.25)
+    blank.components[-1]["Material"]["AlphaCutoff"] = 0.5
+    band_name(blank, "Named")
+    band_name_text(s, items, "Band Name On The Kick", (0.0, 0.34, 4.09), 0.07, (0.08, 0.08, 0.1), fit=9)
     station(s, stations, "Kit", "Kit", (0.0, 0.95, 4.5), (0.3, 0.7, -2.1), 42)
     # The amp, a real PA wedge now, the mic stand the singer never uses.
     amp = (1.6, 0.0, 4.75)

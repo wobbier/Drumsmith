@@ -3403,11 +3403,236 @@
        1.0
       ]
      }
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Unnamed",
+     "FitLetters": 9
     }
    ]
   },
   {
-   "GUID": "24c9b8ab2ab97dcf",
+   "GUID": "53690c342d2182a5",
+   "Name": "Banner Blank",
+   "DestroyOnLoad": true,
+   "Parent": "28cd3980cb877d4b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.62,
+      5.987
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      -1.5
+     ],
+     "Scale": [
+      1.15,
+      0.575,
+      0.002
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85,
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Hideout/Textures/BannerBlank.png"
+       }
+      },
+      "Tiling": [
+       1.0,
+       -1.0
+      ],
+      "Offset": [
+       0.0,
+       1.0
+      ]
+     }
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 9
+    }
+   ]
+  },
+  {
+   "GUID": "56cefddda761f0f7",
+   "Name": "Band Name On The Sheet",
+   "DestroyOnLoad": true,
+   "Parent": "28cd3980cb877d4b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.74,
+      5.97
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      -1.5
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "49ce52ecaa908aba",
+   "Name": "Band Name On The Sheet 0",
+   "DestroyOnLoad": true,
+   "Parent": "56cefddda761f0f7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "TextRenderer",
+     "Text": "",
+     "Size": 0.3,
+     "Alignment": "Center",
+     "Anchor": "Middle",
+     "Color": [
+      0.6,
+      0.05,
+      0.07
+     ],
+     "Opacity": 1.0,
+     "Lit": true
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 11
+    }
+   ]
+  },
+  {
+   "GUID": "24c6915d0e9949f2",
+   "Name": "Band Name On The Sheet 1",
+   "DestroyOnLoad": true,
+   "Parent": "56cefddda761f0f7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0036,
+      0.0,
+      -0.0005
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "TextRenderer",
+     "Text": "",
+     "Size": 0.3,
+     "Alignment": "Center",
+     "Anchor": "Middle",
+     "Color": [
+      0.6,
+      0.05,
+      0.07
+     ],
+     "Opacity": 1.0,
+     "Lit": true
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 11
+    }
+   ]
+  },
+  {
+   "GUID": "62ce79437c416c97",
+   "Name": "Band Name On The Sheet 2",
+   "DestroyOnLoad": true,
+   "Parent": "56cefddda761f0f7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.0018,
+      0.0031,
+      -0.001
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "TextRenderer",
+     "Text": "",
+     "Size": 0.3,
+     "Alignment": "Center",
+     "Anchor": "Middle",
+     "Color": [
+      0.6,
+      0.05,
+      0.07
+     ],
+     "Opacity": 1.0,
+     "Lit": true
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 11
+    }
+   ]
+  },
+  {
+   "GUID": "465e27ce7a2a1fd1",
    "Name": "Thumbtack -1.12",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3448,7 +3673,7 @@
    ]
   },
   {
-   "GUID": "2ef78f6870f18f41",
+   "GUID": "172a1997a00c991f",
    "Name": "Thumbtack 1.1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3489,7 +3714,7 @@
    ]
   },
   {
-   "GUID": "0066a6b70b93a4f3",
+   "GUID": "03bd04bde9338ecc",
    "Name": "Egg Carton -2.12 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3543,7 +3768,7 @@
    ]
   },
   {
-   "GUID": "00778a068cf541ee",
+   "GUID": "264cd8b22af20dab",
    "Name": "Egg Carton -1.81 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3597,7 +3822,7 @@
    ]
   },
   {
-   "GUID": "6f984a284f501819",
+   "GUID": "66637f61299abb9f",
    "Name": "Egg Carton -1.50 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3651,7 +3876,7 @@
    ]
   },
   {
-   "GUID": "2df4c4beae58a9e7",
+   "GUID": "4b7f26296c019516",
    "Name": "Egg Carton -1.19 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3705,7 +3930,7 @@
    ]
   },
   {
-   "GUID": "04506e0748a360af",
+   "GUID": "3eec258c4823893e",
    "Name": "Egg Carton -0.57 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3759,7 +3984,7 @@
    ]
   },
   {
-   "GUID": "67bb30e1d66daa21",
+   "GUID": "4ed6ad61fa3d3188",
    "Name": "Egg Carton -0.26 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3813,7 +4038,7 @@
    ]
   },
   {
-   "GUID": "482e17e15eeb993f",
+   "GUID": "472489620f7a480d",
    "Name": "Egg Carton 0.36 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3867,7 +4092,7 @@
    ]
   },
   {
-   "GUID": "4570a5f959e1256a",
+   "GUID": "3e098bb72501cff8",
    "Name": "Egg Carton 0.67 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3921,7 +4146,7 @@
    ]
   },
   {
-   "GUID": "12ed836bdce2aa6b",
+   "GUID": "3d75209a16e9fa74",
    "Name": "Egg Carton 0.98 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -3975,7 +4200,7 @@
    ]
   },
   {
-   "GUID": "2007a14244e7577f",
+   "GUID": "436e11e8ba47497f",
    "Name": "Egg Carton 1.29 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4029,7 +4254,7 @@
    ]
   },
   {
-   "GUID": "44ff4f0c9ad35f23",
+   "GUID": "30573516d12143cd",
    "Name": "Egg Carton 1.60 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4083,7 +4308,7 @@
    ]
   },
   {
-   "GUID": "3f29f7ea2e2a5851",
+   "GUID": "0118c7569b295325",
    "Name": "Egg Carton 1.91 0.72",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4137,7 +4362,7 @@
    ]
   },
   {
-   "GUID": "594c2a39abde811c",
+   "GUID": "78edfb37524688da",
    "Name": "Egg Carton -2.12 1.03",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4191,7 +4416,7 @@
    ]
   },
   {
-   "GUID": "0542ef84be8c96aa",
+   "GUID": "24fefa67c97aa1a9",
    "Name": "Egg Carton -1.81 1.03",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4245,7 +4470,7 @@
    ]
   },
   {
-   "GUID": "4ad201c5b1860ac8",
+   "GUID": "3f3ebf063c8b91ad",
    "Name": "Egg Carton 1.29 1.03",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4299,7 +4524,7 @@
    ]
   },
   {
-   "GUID": "5f6ffa67b355f20e",
+   "GUID": "278e0a5c45936e86",
    "Name": "Egg Carton 1.60 1.03",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4353,7 +4578,7 @@
    ]
   },
   {
-   "GUID": "07627df01ed07278",
+   "GUID": "5ac1f0ffc23c5eb8",
    "Name": "Egg Carton 1.91 1.03",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4407,7 +4632,7 @@
    ]
   },
   {
-   "GUID": "3d2615040052b88a",
+   "GUID": "74f29b859f163665",
    "Name": "Egg Carton -2.12 1.34",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4461,7 +4686,7 @@
    ]
   },
   {
-   "GUID": "49bf84d7011be52f",
+   "GUID": "148b194628dae21c",
    "Name": "Egg Carton -1.81 1.34",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4515,7 +4740,7 @@
    ]
   },
   {
-   "GUID": "10790811ba4ac856",
+   "GUID": "10b2d0d53e4c16f7",
    "Name": "Egg Carton -1.50 1.34",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4569,7 +4794,7 @@
    ]
   },
   {
-   "GUID": "4a6c7a14144d8ba0",
+   "GUID": "6745f78dbef43cb1",
    "Name": "Egg Carton 1.29 1.34",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4623,7 +4848,7 @@
    ]
   },
   {
-   "GUID": "6e91d8a61114a76b",
+   "GUID": "2920a9f6a9825501",
    "Name": "Egg Carton 1.91 1.34",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4677,7 +4902,7 @@
    ]
   },
   {
-   "GUID": "4371d61017f5c0fe",
+   "GUID": "6515bb833504563a",
    "Name": "Egg Carton -2.12 1.65",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4731,7 +4956,7 @@
    ]
   },
   {
-   "GUID": "6bfed15c0b329767",
+   "GUID": "14c03b381ce2694c",
    "Name": "Egg Carton -1.81 1.65",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4785,7 +5010,7 @@
    ]
   },
   {
-   "GUID": "5c02836f776278eb",
+   "GUID": "2233df017be734f6",
    "Name": "Egg Carton -1.50 1.65",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4839,7 +5064,7 @@
    ]
   },
   {
-   "GUID": "23951ccdbfd75fde",
+   "GUID": "5065f968a9694b30",
    "Name": "Egg Carton 1.29 1.65",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4893,7 +5118,7 @@
    ]
   },
   {
-   "GUID": "2440ebff9f7c6551",
+   "GUID": "74c08ab5d6c1663d",
    "Name": "Egg Carton 1.91 1.65",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -4947,7 +5172,7 @@
    ]
   },
   {
-   "GUID": "3b99b128b6c01d47",
+   "GUID": "3d59ffbf5131535a",
    "Name": "Egg Carton -2.12 1.96",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -5001,7 +5226,7 @@
    ]
   },
   {
-   "GUID": "3787eab9c65cf992",
+   "GUID": "3ae81b2d25218dd4",
    "Name": "Egg Carton -1.81 1.96",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -5055,7 +5280,7 @@
    ]
   },
   {
-   "GUID": "5fe124b281a6aac8",
+   "GUID": "4666639e880a0dde",
    "Name": "Egg Carton -1.50 1.96",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -5109,7 +5334,7 @@
    ]
   },
   {
-   "GUID": "107f53194e8e5cfe",
+   "GUID": "3478814102b4fcb1",
    "Name": "Egg Carton 1.29 1.96",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -5163,7 +5388,7 @@
    ]
   },
   {
-   "GUID": "1025aa696daddf80",
+   "GUID": "5d95e64dc32638d5",
    "Name": "Egg Carton 1.60 1.96",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -5217,7 +5442,7 @@
    ]
   },
   {
-   "GUID": "7a9e6189eff4e6b7",
+   "GUID": "646f9b219a32611e",
    "Name": "Egg Carton 1.91 1.96",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -5271,7 +5496,7 @@
    ]
   },
   {
-   "GUID": "752ce40e0a3ac595",
+   "GUID": "2ad6cc99a10cb473",
    "Name": "Christmas Lights",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -5297,10 +5522,10 @@
    ]
   },
   {
-   "GUID": "5d2f322c508b101f",
+   "GUID": "683bc147cfc5294a",
    "Name": "Bulb 0",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5369,10 +5594,10 @@
    ]
   },
   {
-   "GUID": "77ddc66c520b1b1f",
+   "GUID": "3fa6df9da9570e95",
    "Name": "Bulb 1",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5429,10 +5654,10 @@
    ]
   },
   {
-   "GUID": "436c51ead29e186c",
+   "GUID": "32d025de67ce0d98",
    "Name": "Wire 1",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5470,10 +5695,10 @@
    ]
   },
   {
-   "GUID": "10a90a387afbbfa8",
+   "GUID": "5ebe3ad3682b249d",
    "Name": "Bulb 2",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5530,10 +5755,10 @@
    ]
   },
   {
-   "GUID": "4194917e32113106",
+   "GUID": "012d82ba804b4285",
    "Name": "Wire 2",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5571,10 +5796,10 @@
    ]
   },
   {
-   "GUID": "7de65f4e4274d11f",
+   "GUID": "1d5cb50d812fd6f4",
    "Name": "Bulb 3",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5643,10 +5868,10 @@
    ]
   },
   {
-   "GUID": "7f4ed521cf7223cc",
+   "GUID": "46aacee2594dcba5",
    "Name": "Wire 3",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5684,10 +5909,10 @@
    ]
   },
   {
-   "GUID": "5b8bb61087ec435a",
+   "GUID": "2faead01b959a731",
    "Name": "Bulb 4",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5744,10 +5969,10 @@
    ]
   },
   {
-   "GUID": "6982f41779fa87db",
+   "GUID": "02e091f2c3b77165",
    "Name": "Wire 4",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5785,10 +6010,10 @@
    ]
   },
   {
-   "GUID": "4f98e08c1aea351a",
+   "GUID": "0ae921e9565d6e0c",
    "Name": "Bulb 5",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5845,10 +6070,10 @@
    ]
   },
   {
-   "GUID": "15b9a7ddf36da5fe",
+   "GUID": "2ff81fdd26642378",
    "Name": "Wire 5",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5886,10 +6111,10 @@
    ]
   },
   {
-   "GUID": "1169e16961d18cdc",
+   "GUID": "59394050e90b3f6a",
    "Name": "Bulb 6",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5958,10 +6183,10 @@
    ]
   },
   {
-   "GUID": "636689438d2c863a",
+   "GUID": "3037a608f1bfa43e",
    "Name": "Wire 6",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -5999,10 +6224,10 @@
    ]
   },
   {
-   "GUID": "0f2b95549181eb5d",
+   "GUID": "10207828bfadbcfd",
    "Name": "Bulb 7",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6059,10 +6284,10 @@
    ]
   },
   {
-   "GUID": "22417b7bc6781187",
+   "GUID": "19b7c00878840431",
    "Name": "Wire 7",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6100,10 +6325,10 @@
    ]
   },
   {
-   "GUID": "01ebdc640a36d7ef",
+   "GUID": "5dbd0a2cb12a694b",
    "Name": "Bulb 8",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6160,10 +6385,10 @@
    ]
   },
   {
-   "GUID": "61bfe9d9ee5eda4a",
+   "GUID": "7b80d0820dc2e268",
    "Name": "Wire 8",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6201,10 +6426,10 @@
    ]
   },
   {
-   "GUID": "65e7d4a472aa91b6",
+   "GUID": "72316c55c947cdbf",
    "Name": "Bulb 9",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6273,10 +6498,10 @@
    ]
   },
   {
-   "GUID": "33e999ec695c7147",
+   "GUID": "22b5731222059058",
    "Name": "Wire 9",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6314,10 +6539,10 @@
    ]
   },
   {
-   "GUID": "3a8be4c185371dec",
+   "GUID": "047e351a25b40fd3",
    "Name": "Bulb 10",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6374,10 +6599,10 @@
    ]
   },
   {
-   "GUID": "351165168dab6656",
+   "GUID": "176ab5e54267826b",
    "Name": "Wire 10",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6415,10 +6640,10 @@
    ]
   },
   {
-   "GUID": "2c30e65b8bc9ef1b",
+   "GUID": "7b01a633fa910b31",
    "Name": "Bulb 11",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6475,10 +6700,10 @@
    ]
   },
   {
-   "GUID": "6f2564e49be3b507",
+   "GUID": "4a786ffb2c218c86",
    "Name": "Wire 11",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6516,10 +6741,10 @@
    ]
   },
   {
-   "GUID": "0bad3a2d40f4e028",
+   "GUID": "2911743fb63c3c8c",
    "Name": "Bulb 12",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6588,10 +6813,10 @@
    ]
   },
   {
-   "GUID": "5c839bbe13787798",
+   "GUID": "694254d6a3bd926a",
    "Name": "Wire 12",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6629,10 +6854,10 @@
    ]
   },
   {
-   "GUID": "07df916d95ad9045",
+   "GUID": "6ebba8437168520c",
    "Name": "Bulb 13",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6689,10 +6914,10 @@
    ]
   },
   {
-   "GUID": "6a52ad588543998d",
+   "GUID": "2efd408980fc2024",
    "Name": "Wire 13",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6730,10 +6955,10 @@
    ]
   },
   {
-   "GUID": "2e446c606b71498d",
+   "GUID": "51638ce64cdb2410",
    "Name": "Bulb 14",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6790,10 +7015,10 @@
    ]
   },
   {
-   "GUID": "7116fba9bcde7cf2",
+   "GUID": "324c1dfb08ffa82c",
    "Name": "Wire 14",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6831,10 +7056,10 @@
    ]
   },
   {
-   "GUID": "2efda56500a1c1b9",
+   "GUID": "4227a2d509800a45",
    "Name": "Bulb 15",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6903,10 +7128,10 @@
    ]
   },
   {
-   "GUID": "7a96603e02d061df",
+   "GUID": "59948b32159da169",
    "Name": "Wire 15",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -6944,10 +7169,10 @@
    ]
   },
   {
-   "GUID": "5ab8761a2497ffa5",
+   "GUID": "5f98bd914b4544c9",
    "Name": "Bulb 16",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7004,10 +7229,10 @@
    ]
   },
   {
-   "GUID": "6677df0f249216cd",
+   "GUID": "1806b2919416484a",
    "Name": "Wire 16",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7045,10 +7270,10 @@
    ]
   },
   {
-   "GUID": "4f4e86261d914aaa",
+   "GUID": "6ec121fc71b37515",
    "Name": "Bulb 17",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7105,10 +7330,10 @@
    ]
   },
   {
-   "GUID": "4c6172a83940b989",
+   "GUID": "50f425347e0228ab",
    "Name": "Wire 17",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7146,10 +7371,10 @@
    ]
   },
   {
-   "GUID": "5105be0657e33a68",
+   "GUID": "7477de67cfd24f8f",
    "Name": "Bulb 18",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7218,10 +7443,10 @@
    ]
   },
   {
-   "GUID": "1d5fe155eae95d4d",
+   "GUID": "3896d3cce44ca565",
    "Name": "Wire 18",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7259,10 +7484,10 @@
    ]
   },
   {
-   "GUID": "657c0ac612311854",
+   "GUID": "2441cd27303b3be3",
    "Name": "Bulb 19",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7319,10 +7544,10 @@
    ]
   },
   {
-   "GUID": "1b74128a420edf16",
+   "GUID": "4dddf426445bea85",
    "Name": "Wire 19",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7360,10 +7585,10 @@
    ]
   },
   {
-   "GUID": "048a3a68f844f88f",
+   "GUID": "285861d9aa323b8e",
    "Name": "Bulb 20",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7420,10 +7645,10 @@
    ]
   },
   {
-   "GUID": "7d688b4c7a46d0bf",
+   "GUID": "7139b10debcdd8b3",
    "Name": "Wire 20",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7461,10 +7686,10 @@
    ]
   },
   {
-   "GUID": "0d5a9d8a864b940e",
+   "GUID": "6bf940bb08fbba14",
    "Name": "Bulb 21",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7533,10 +7758,10 @@
    ]
   },
   {
-   "GUID": "6d4da0d061c01d88",
+   "GUID": "44468de4ad6c642b",
    "Name": "Wire 21",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7574,10 +7799,10 @@
    ]
   },
   {
-   "GUID": "2671f20a58c43ef8",
+   "GUID": "43bd73a8228e515d",
    "Name": "Bulb 22",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7634,10 +7859,10 @@
    ]
   },
   {
-   "GUID": "2a5e5ded1b8bb411",
+   "GUID": "6fae3e718aafc38c",
    "Name": "Wire 22",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7675,10 +7900,10 @@
    ]
   },
   {
-   "GUID": "06ef4d393cbfdc95",
+   "GUID": "56639967b3179bc4",
    "Name": "Bulb 23",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7735,10 +7960,10 @@
    ]
   },
   {
-   "GUID": "2ab9b62015b39314",
+   "GUID": "167496377d48ab24",
    "Name": "Wire 23",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7776,10 +8001,10 @@
    ]
   },
   {
-   "GUID": "16a927eab7437b3b",
+   "GUID": "7d399e47f4de6004",
    "Name": "Bulb 24",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7848,10 +8073,10 @@
    ]
   },
   {
-   "GUID": "194fab8e7294a753",
+   "GUID": "4603d219044a9bdf",
    "Name": "Wire 24",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7889,10 +8114,10 @@
    ]
   },
   {
-   "GUID": "464f9165021b062c",
+   "GUID": "6470de12a8095039",
    "Name": "Bulb 25",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7949,10 +8174,10 @@
    ]
   },
   {
-   "GUID": "6539f2071d6c375d",
+   "GUID": "5f8dd1991c8bf4a2",
    "Name": "Wire 25",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -7990,10 +8215,10 @@
    ]
   },
   {
-   "GUID": "720e32ee7ac0f5ea",
+   "GUID": "7198cd49ceecb860",
    "Name": "Bulb 26",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -8050,10 +8275,10 @@
    ]
   },
   {
-   "GUID": "1322e2ca0ea6ac59",
+   "GUID": "72782eeb3ad43990",
    "Name": "Wire 26",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -8091,10 +8316,10 @@
    ]
   },
   {
-   "GUID": "5b222f16784fae5d",
+   "GUID": "6d9a202782e875c7",
    "Name": "Bulb 27",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -8163,10 +8388,10 @@
    ]
   },
   {
-   "GUID": "0ac4cce89c020764",
+   "GUID": "1cda64857324f48a",
    "Name": "Wire 27",
    "DestroyOnLoad": true,
-   "Parent": "752ce40e0a3ac595",
+   "Parent": "2ad6cc99a10cb473",
    "Components": [
     {
      "Type": "Transform",
@@ -8204,7 +8429,7 @@
    ]
   },
   {
-   "GUID": "4f3dd5cc22db649f",
+   "GUID": "07dd04fc2e718b59",
    "Name": "Window Frame",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -8245,7 +8470,7 @@
    ]
   },
   {
-   "GUID": "72cd0a44d2abb0a5",
+   "GUID": "19e87438ce7d7a8b",
    "Name": "Window Glass",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -8308,7 +8533,7 @@
    ]
   },
   {
-   "GUID": "0467235f345e5d33",
+   "GUID": "1d6ac54ca2fa458e",
    "Name": "Window Bar",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -8349,7 +8574,7 @@
    ]
   },
   {
-   "GUID": "1ac91b96672248e7",
+   "GUID": "38c9f2febec89907",
    "Name": "Streetlight Through The Window",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -8390,7 +8615,7 @@
    ]
   },
   {
-   "GUID": "60fc6b0546e370dd",
+   "GUID": "2c2196f38783290a",
    "Name": "Dust",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -8463,7 +8688,7 @@
    ]
   },
   {
-   "GUID": "3bff7bee855003ac",
+   "GUID": "1a8e408d75fbc4d9",
    "Name": "Passing Car",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -8516,7 +8741,7 @@
    ]
   },
   {
-   "GUID": "0839355ac0ef95f1",
+   "GUID": "4ddfa77e8f3103a0",
    "Name": "Outlet",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -8557,7 +8782,7 @@
    ]
   },
   {
-   "GUID": "3b6f4af02b33cfb6",
+   "GUID": "7180636d8444d917",
    "Name": "Power Strip",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8598,7 +8823,7 @@
    ]
   },
   {
-   "GUID": "6774e0ee1a8d6da6",
+   "GUID": "71073234d090907c",
    "Name": "Power Strip 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8639,7 +8864,7 @@
    ]
   },
   {
-   "GUID": "4cff208c603320b8",
+   "GUID": "667fb8258b85a165",
    "Name": "Cord Wall",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8680,7 +8905,7 @@
    ]
   },
   {
-   "GUID": "3bb24bd15f0bb456",
+   "GUID": "614ba0bbe761c3ba",
    "Name": "Cord Amp",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8721,7 +8946,7 @@
    ]
   },
   {
-   "GUID": "5eba8ea7df651cf1",
+   "GUID": "7f5399ea0acb0834",
    "Name": "Cord Fan",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8762,7 +8987,7 @@
    ]
   },
   {
-   "GUID": "04c8a1d0aa76c532",
+   "GUID": "29793bb79f4ec8ac",
    "Name": "Poster Kick Drum Kids",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8816,7 +9041,7 @@
    ]
   },
   {
-   "GUID": "013049663ef5d961",
+   "GUID": "1b8ef977c36a3e5c",
    "Name": "Calendar",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8870,7 +9095,7 @@
    ]
   },
   {
-   "GUID": "7c8430236f6b6aea",
+   "GUID": "4b25ebf70ae159f9",
    "Name": "Drummer",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8902,7 +9127,7 @@
    ]
   },
   {
-   "GUID": "27c0066b624d972a",
+   "GUID": "6aaea9342734c4ad",
    "Name": "Kick Logo",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8962,11 +9187,246 @@
       ],
       "AlphaCutoff": 0.5
      }
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Unnamed",
+     "FitLetters": 9
     }
    ]
   },
   {
-   "GUID": "13b8b47c43319279",
+   "GUID": "7a808ed88e1c1eef",
+   "Name": "Kick Logo Blank",
+   "DestroyOnLoad": true,
+   "Parent": "28cd3980cb877d4b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.31,
+      4.147
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.28,
+      0.28,
+      0.002
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.7,
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Hideout/Textures/KickHeadBlank.png"
+       },
+       "Emissive": {
+        "Path": "Assets/Hideout/Textures/KickHeadBlank.png"
+       }
+      },
+      "EmissiveColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "EmissiveIntensity": 0.25,
+      "Tiling": [
+       1.0,
+       -1.0
+      ],
+      "Offset": [
+       0.0,
+       1.0
+      ],
+      "AlphaCutoff": 0.5
+     }
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 9
+    }
+   ]
+  },
+  {
+   "GUID": "72f353584a68c5b9",
+   "Name": "Band Name On The Kick",
+   "DestroyOnLoad": true,
+   "Parent": "28cd3980cb877d4b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.34,
+      4.14
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "7f67dd48ff4c6d79",
+   "Name": "Band Name On The Kick 0",
+   "DestroyOnLoad": true,
+   "Parent": "72f353584a68c5b9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "TextRenderer",
+     "Text": "",
+     "Size": 0.07,
+     "Alignment": "Center",
+     "Anchor": "Middle",
+     "Color": [
+      0.08,
+      0.08,
+      0.1
+     ],
+     "Opacity": 1.0,
+     "Lit": true
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 9
+    }
+   ]
+  },
+  {
+   "GUID": "49c3b30b8a9f0048",
+   "Name": "Band Name On The Kick 1",
+   "DestroyOnLoad": true,
+   "Parent": "72f353584a68c5b9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0008,
+      0.0,
+      -0.0005
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "TextRenderer",
+     "Text": "",
+     "Size": 0.07,
+     "Alignment": "Center",
+     "Anchor": "Middle",
+     "Color": [
+      0.08,
+      0.08,
+      0.1
+     ],
+     "Opacity": 1.0,
+     "Lit": true
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 9
+    }
+   ]
+  },
+  {
+   "GUID": "4c9c9db8dc8dda39",
+   "Name": "Band Name On The Kick 2",
+   "DestroyOnLoad": true,
+   "Parent": "72f353584a68c5b9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.0004,
+      0.0007,
+      -0.001
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "TextRenderer",
+     "Text": "",
+     "Size": 0.07,
+     "Alignment": "Center",
+     "Anchor": "Middle",
+     "Color": [
+      0.08,
+      0.08,
+      0.1
+     ],
+     "Opacity": 1.0,
+     "Lit": true
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Named",
+     "FitLetters": 9
+    }
+   ]
+  },
+  {
+   "GUID": "7b6f013d1b0236b1",
    "Name": "Guitar",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -8996,7 +9456,7 @@
    ]
   },
   {
-   "GUID": "70ec6c9de01939bc",
+   "GUID": "70f1c60415d259e5",
    "Name": "Kit",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -9032,7 +9492,7 @@
    ]
   },
   {
-   "GUID": "597a747fb9578493",
+   "GUID": "19f327bb14c92b5d",
    "Name": "Box Fan",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9058,10 +9518,10 @@
    ]
   },
   {
-   "GUID": "7b2ca09ce7458348",
+   "GUID": "06bfdd6c3a01f319",
    "Name": "Fan Crate",
    "DestroyOnLoad": true,
-   "Parent": "597a747fb9578493",
+   "Parent": "19f327bb14c92b5d",
    "Components": [
     {
      "Type": "Transform",
@@ -9099,10 +9559,10 @@
    ]
   },
   {
-   "GUID": "4108dafb45c59a9b",
+   "GUID": "5974541c12cb1514",
    "Name": "Fan Frame",
    "DestroyOnLoad": true,
-   "Parent": "597a747fb9578493",
+   "Parent": "19f327bb14c92b5d",
    "Components": [
     {
      "Type": "Transform",
@@ -9140,10 +9600,10 @@
    ]
   },
   {
-   "GUID": "3aeb9183e96c47ab",
+   "GUID": "4c60960cadb70a80",
    "Name": "Fan Blades",
    "DestroyOnLoad": true,
-   "Parent": "597a747fb9578493",
+   "Parent": "19f327bb14c92b5d",
    "Components": [
     {
      "Type": "Transform",
@@ -9179,10 +9639,10 @@
    ]
   },
   {
-   "GUID": "3c285355cd0c4232",
+   "GUID": "31da774d917035dd",
    "Name": "Blade 0",
    "DestroyOnLoad": true,
-   "Parent": "3aeb9183e96c47ab",
+   "Parent": "4c60960cadb70a80",
    "Components": [
     {
      "Type": "Transform",
@@ -9220,10 +9680,10 @@
    ]
   },
   {
-   "GUID": "680a99108d420ff9",
+   "GUID": "64b82d3f710df701",
    "Name": "Blade 1",
    "DestroyOnLoad": true,
-   "Parent": "3aeb9183e96c47ab",
+   "Parent": "4c60960cadb70a80",
    "Components": [
     {
      "Type": "Transform",
@@ -9261,10 +9721,10 @@
    ]
   },
   {
-   "GUID": "52c1011d3863a8e8",
+   "GUID": "5c2972939ba72e78",
    "Name": "Blade 2",
    "DestroyOnLoad": true,
-   "Parent": "3aeb9183e96c47ab",
+   "Parent": "4c60960cadb70a80",
    "Components": [
     {
      "Type": "Transform",
@@ -9302,10 +9762,10 @@
    ]
   },
   {
-   "GUID": "461c31701712fe68",
+   "GUID": "2f46a41af9cfbe65",
    "Name": "Fan Grille",
    "DestroyOnLoad": true,
-   "Parent": "597a747fb9578493",
+   "Parent": "19f327bb14c92b5d",
    "Components": [
     {
      "Type": "Transform",
@@ -9343,7 +9803,7 @@
    ]
   },
   {
-   "GUID": "0a0912bc5ab7620c",
+   "GUID": "4a702d22fd90804e",
    "Name": "Bucket 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9384,7 +9844,7 @@
    ]
   },
   {
-   "GUID": "2368dcebe5fe6f20",
+   "GUID": "6a01b71e9f09f267",
    "Name": "Bucket Rim 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9425,7 +9885,7 @@
    ]
   },
   {
-   "GUID": "050d74caca2294ac",
+   "GUID": "401b2d4750869b91",
    "Name": "Bucket 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9466,7 +9926,7 @@
    ]
   },
   {
-   "GUID": "23ebc98060edf8ff",
+   "GUID": "39a8e68cbbec4840",
    "Name": "Bucket Rim 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9507,7 +9967,7 @@
    ]
   },
   {
-   "GUID": "5da49554de20fb4a",
+   "GUID": "2787602a0f4131d1",
    "Name": "Bucket 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9548,7 +10008,7 @@
    ]
   },
   {
-   "GUID": "275838b128aca552",
+   "GUID": "6af05df7fab0946b",
    "Name": "Bucket Rim 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9589,7 +10049,7 @@
    ]
   },
   {
-   "GUID": "47657b77c5f3b9b1",
+   "GUID": "51bbd3d343b47182",
    "Name": "Bucket Stick L",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9630,7 +10090,7 @@
    ]
   },
   {
-   "GUID": "05da7eb168b3cbc5",
+   "GUID": "5a25812db7377f96",
    "Name": "Bucket Stick R",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9671,7 +10131,7 @@
    ]
   },
   {
-   "GUID": "2509aa73af294c2b",
+   "GUID": "579bbaa0f504d729",
    "Name": "Setlist",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -9725,7 +10185,7 @@
    ]
   },
   {
-   "GUID": "2cd052afaf787320",
+   "GUID": "583a7da9c8eb37be",
    "Name": "Amp",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -9766,7 +10226,7 @@
    ]
   },
   {
-   "GUID": "7af3e078e8caba2c",
+   "GUID": "5fcd78c4142d4d61",
    "Name": "Amp Grille",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -9807,7 +10267,7 @@
    ]
   },
   {
-   "GUID": "72bfb42a2f0fe90e",
+   "GUID": "0cab35f5a40ccd8e",
    "Name": "Amp Panel",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -9848,7 +10308,7 @@
    ]
   },
   {
-   "GUID": "20e4e4b5064e7dfd",
+   "GUID": "48530a1e04d098a9",
    "Name": "Amp Light",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -9895,7 +10355,7 @@
    ]
   },
   {
-   "GUID": "5461c8b17aa8f8ce",
+   "GUID": "4705aaa1ffa81ba6",
    "Name": "Mixer",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -9932,7 +10392,7 @@
    ]
   },
   {
-   "GUID": "1b54b82b775cc484",
+   "GUID": "03c9084b54c37bb0",
    "Name": "Bulb Pivot",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -9971,10 +10431,10 @@
    ]
   },
   {
-   "GUID": "0d6ef1df82468aca",
+   "GUID": "59978a5d7cab73ba",
    "Name": "Bulb Cord",
    "DestroyOnLoad": true,
-   "Parent": "1b54b82b775cc484",
+   "Parent": "03c9084b54c37bb0",
    "Components": [
     {
      "Type": "Transform",
@@ -10012,10 +10472,10 @@
    ]
   },
   {
-   "GUID": "25a3c19de9945364",
+   "GUID": "2bd0905cd2556344",
    "Name": "Bulb Socket",
    "DestroyOnLoad": true,
-   "Parent": "1b54b82b775cc484",
+   "Parent": "03c9084b54c37bb0",
    "Components": [
     {
      "Type": "Transform",
@@ -10053,10 +10513,10 @@
    ]
   },
   {
-   "GUID": "3760a5364c58ba67",
+   "GUID": "3982200ede39ae4b",
    "Name": "Bare Bulb",
    "DestroyOnLoad": true,
-   "Parent": "1b54b82b775cc484",
+   "Parent": "03c9084b54c37bb0",
    "Components": [
     {
      "Type": "Transform",
@@ -10113,10 +10573,10 @@
    ]
   },
   {
-   "GUID": "3314c25994fca6f7",
+   "GUID": "1f0c791d1b5e5ee8",
    "Name": "Pull Chain",
    "DestroyOnLoad": true,
-   "Parent": "1b54b82b775cc484",
+   "Parent": "03c9084b54c37bb0",
    "Components": [
     {
      "Type": "Transform",
@@ -10154,7 +10614,7 @@
    ]
   },
   {
-   "GUID": "5d12610d13a60f1e",
+   "GUID": "7d7535cf3260dd8d",
    "Name": "Couch",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -10184,7 +10644,7 @@
    ]
   },
   {
-   "GUID": "446b677a2a1ff9ac",
+   "GUID": "62ab0aa8b0f2a51a",
    "Name": "Cat",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -10210,10 +10670,10 @@
    ]
   },
   {
-   "GUID": "4fd0524724e721af",
+   "GUID": "1ac4095a6497ce9b",
    "Name": "Cat Body",
    "DestroyOnLoad": true,
-   "Parent": "446b677a2a1ff9ac",
+   "Parent": "62ab0aa8b0f2a51a",
    "Components": [
     {
      "Type": "Transform",
@@ -10264,10 +10724,10 @@
    ]
   },
   {
-   "GUID": "51657e1b117e4184",
+   "GUID": "165a536e68984ab5",
    "Name": "Cat Head",
    "DestroyOnLoad": true,
-   "Parent": "446b677a2a1ff9ac",
+   "Parent": "62ab0aa8b0f2a51a",
    "Components": [
     {
      "Type": "Transform",
@@ -10305,10 +10765,10 @@
    ]
   },
   {
-   "GUID": "28c050009210cf09",
+   "GUID": "068a4a4172697e3d",
    "Name": "Cat Ear -1",
    "DestroyOnLoad": true,
-   "Parent": "446b677a2a1ff9ac",
+   "Parent": "62ab0aa8b0f2a51a",
    "Components": [
     {
      "Type": "Transform",
@@ -10346,10 +10806,10 @@
    ]
   },
   {
-   "GUID": "63ff23fcec15e91e",
+   "GUID": "16dbd62229746bdb",
    "Name": "Cat Ear 1",
    "DestroyOnLoad": true,
-   "Parent": "446b677a2a1ff9ac",
+   "Parent": "62ab0aa8b0f2a51a",
    "Components": [
     {
      "Type": "Transform",
@@ -10387,10 +10847,10 @@
    ]
   },
   {
-   "GUID": "66c1b5816d6c2d45",
+   "GUID": "5e61cacdc09fbd09",
    "Name": "Cat Tail Root",
    "DestroyOnLoad": true,
-   "Parent": "446b677a2a1ff9ac",
+   "Parent": "62ab0aa8b0f2a51a",
    "Components": [
     {
      "Type": "Transform",
@@ -10426,10 +10886,10 @@
    ]
   },
   {
-   "GUID": "3358028f143ffbd8",
+   "GUID": "2da43af3703a8160",
    "Name": "Cat Tail",
    "DestroyOnLoad": true,
-   "Parent": "66c1b5816d6c2d45",
+   "Parent": "5e61cacdc09fbd09",
    "Components": [
     {
      "Type": "Transform",
@@ -10467,10 +10927,10 @@
    ]
   },
   {
-   "GUID": "28617c3c33b40f7a",
+   "GUID": "0044bafd930812cf",
    "Name": "Cat Stripes",
    "DestroyOnLoad": true,
-   "Parent": "446b677a2a1ff9ac",
+   "Parent": "62ab0aa8b0f2a51a",
    "Components": [
     {
      "Type": "Transform",
@@ -10508,7 +10968,7 @@
    ]
   },
   {
-   "GUID": "14518dc66f63aaf0",
+   "GUID": "1ca9e51052770a88",
    "Name": "Blanket",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -10549,7 +11009,7 @@
    ]
   },
   {
-   "GUID": "2f555c763876a2c5",
+   "GUID": "7b514257a617c00e",
    "Name": "Radio Shelf",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -10590,7 +11050,7 @@
    ]
   },
   {
-   "GUID": "6e923e7385340c7d",
+   "GUID": "732b575ef59ad98d",
    "Name": "Shelf Bracket 2.42",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -10631,7 +11091,7 @@
    ]
   },
   {
-   "GUID": "48c2dd35da937530",
+   "GUID": "39bae7ca7b2d307e",
    "Name": "Shelf Bracket 3.18",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -10672,7 +11132,7 @@
    ]
   },
   {
-   "GUID": "785004519c45972d",
+   "GUID": "202b243f0a4aec8c",
    "Name": "Radio",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -10702,10 +11162,10 @@
    ]
   },
   {
-   "GUID": "27182b2a017c0457",
+   "GUID": "1b66f7dea88a4614",
    "Name": "Boombox",
    "DestroyOnLoad": true,
-   "Parent": "785004519c45972d",
+   "Parent": "202b243f0a4aec8c",
    "Components": [
     {
      "Type": "Transform",
@@ -10743,10 +11203,10 @@
    ]
   },
   {
-   "GUID": "673102e50f519195",
+   "GUID": "5136f4b1b9724952",
    "Name": "Boombox Deck",
    "DestroyOnLoad": true,
-   "Parent": "785004519c45972d",
+   "Parent": "202b243f0a4aec8c",
    "Components": [
     {
      "Type": "Transform",
@@ -10784,10 +11244,10 @@
    ]
   },
   {
-   "GUID": "499b3ee38fa8a971",
+   "GUID": "4c12273e3342a7a7",
    "Name": "Boombox Dial",
    "DestroyOnLoad": true,
-   "Parent": "785004519c45972d",
+   "Parent": "202b243f0a4aec8c",
    "Components": [
     {
      "Type": "Transform",
@@ -10831,10 +11291,10 @@
    ]
   },
   {
-   "GUID": "65c2b8b902d91a64",
+   "GUID": "46436c3b66ca75fd",
    "Name": "Boombox Handle",
    "DestroyOnLoad": true,
-   "Parent": "785004519c45972d",
+   "Parent": "202b243f0a4aec8c",
    "Components": [
     {
      "Type": "Transform",
@@ -10872,10 +11332,10 @@
    ]
   },
   {
-   "GUID": "000986c548e57262",
+   "GUID": "6d50e75dc5d0ebb6",
    "Name": "Speaker 0",
    "DestroyOnLoad": true,
-   "Parent": "785004519c45972d",
+   "Parent": "202b243f0a4aec8c",
    "Components": [
     {
      "Type": "Transform",
@@ -10911,10 +11371,10 @@
    ]
   },
   {
-   "GUID": "6896a20c545c91ed",
+   "GUID": "23f8e4ca45ed66e9",
    "Name": "Cone",
    "DestroyOnLoad": true,
-   "Parent": "000986c548e57262",
+   "Parent": "6d50e75dc5d0ebb6",
    "Components": [
     {
      "Type": "Transform",
@@ -10952,10 +11412,10 @@
    ]
   },
   {
-   "GUID": "01d5de901d10aee0",
+   "GUID": "1db78551550a9e91",
    "Name": "Dust Cap",
    "DestroyOnLoad": true,
-   "Parent": "000986c548e57262",
+   "Parent": "6d50e75dc5d0ebb6",
    "Components": [
     {
      "Type": "Transform",
@@ -10993,10 +11453,10 @@
    ]
   },
   {
-   "GUID": "4b570e86a5ca0738",
+   "GUID": "33a3bae940045c7b",
    "Name": "Speaker 1",
    "DestroyOnLoad": true,
-   "Parent": "785004519c45972d",
+   "Parent": "202b243f0a4aec8c",
    "Components": [
     {
      "Type": "Transform",
@@ -11032,10 +11492,10 @@
    ]
   },
   {
-   "GUID": "0d451d4a6bf17a5b",
+   "GUID": "787099f9aef1ede3",
    "Name": "Cone",
    "DestroyOnLoad": true,
-   "Parent": "4b570e86a5ca0738",
+   "Parent": "33a3bae940045c7b",
    "Components": [
     {
      "Type": "Transform",
@@ -11073,10 +11533,10 @@
    ]
   },
   {
-   "GUID": "041fbd800aa28a33",
+   "GUID": "03e35fc9c40bdd25",
    "Name": "Dust Cap",
    "DestroyOnLoad": true,
-   "Parent": "4b570e86a5ca0738",
+   "Parent": "33a3bae940045c7b",
    "Components": [
     {
      "Type": "Transform",
@@ -11114,7 +11574,7 @@
    ]
   },
   {
-   "GUID": "622910119e26c221",
+   "GUID": "574fbfe20920326c",
    "Name": "Radio",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -11150,7 +11610,7 @@
    ]
   },
   {
-   "GUID": "40d958d8b4940748",
+   "GUID": "45aa6598a89d0c30",
    "Name": "Poster Death Squad",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11204,7 +11664,7 @@
    ]
   },
   {
-   "GUID": "19d5f7fe8c950f41",
+   "GUID": "2b45894c283a777d",
    "Name": "Poster Magazine",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11258,7 +11718,7 @@
    ]
   },
   {
-   "GUID": "7d200a113d7e8368",
+   "GUID": "78b0e93d22e6b10e",
    "Name": "TV",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11284,10 +11744,10 @@
    ]
   },
   {
-   "GUID": "79131d9a4a11dcda",
+   "GUID": "7dbb121f62f4916c",
    "Name": "TV Crate",
    "DestroyOnLoad": true,
-   "Parent": "7d200a113d7e8368",
+   "Parent": "78b0e93d22e6b10e",
    "Components": [
     {
      "Type": "Transform",
@@ -11325,10 +11785,10 @@
    ]
   },
   {
-   "GUID": "4a41825711a25b96",
+   "GUID": "2f0eca98265345d5",
    "Name": "Console",
    "DestroyOnLoad": true,
-   "Parent": "7d200a113d7e8368",
+   "Parent": "78b0e93d22e6b10e",
    "Components": [
     {
      "Type": "Transform",
@@ -11366,10 +11826,10 @@
    ]
   },
   {
-   "GUID": "2c0be1c01d3692a7",
+   "GUID": "2d3734f3baaee726",
    "Name": "TV Body",
    "DestroyOnLoad": true,
-   "Parent": "7d200a113d7e8368",
+   "Parent": "78b0e93d22e6b10e",
    "Components": [
     {
      "Type": "Transform",
@@ -11392,10 +11852,10 @@
    ]
   },
   {
-   "GUID": "29f92cd9770cbd77",
+   "GUID": "675c3de4d797e06c",
    "Name": "Tube",
    "DestroyOnLoad": true,
-   "Parent": "2c0be1c01d3692a7",
+   "Parent": "2d3734f3baaee726",
    "Components": [
     {
      "Type": "Transform",
@@ -11433,10 +11893,10 @@
    ]
   },
   {
-   "GUID": "6a4c523e6a277498",
+   "GUID": "79c2623b9511dd00",
    "Name": "Screen",
    "DestroyOnLoad": true,
-   "Parent": "2c0be1c01d3692a7",
+   "Parent": "2d3734f3baaee726",
    "Components": [
     {
      "Type": "Transform",
@@ -11509,10 +11969,10 @@
    ]
   },
   {
-   "GUID": "37a6fd916cd8c0ac",
+   "GUID": "33884bf4822aafca",
    "Name": "Rabbit Ear -1",
    "DestroyOnLoad": true,
-   "Parent": "2c0be1c01d3692a7",
+   "Parent": "2d3734f3baaee726",
    "Components": [
     {
      "Type": "Transform",
@@ -11550,10 +12010,10 @@
    ]
   },
   {
-   "GUID": "520624928214f1a3",
+   "GUID": "47a6e0c42746ff7e",
    "Name": "Rabbit Ear 1",
    "DestroyOnLoad": true,
-   "Parent": "2c0be1c01d3692a7",
+   "Parent": "2d3734f3baaee726",
    "Components": [
     {
      "Type": "Transform",
@@ -11591,7 +12051,7 @@
    ]
   },
   {
-   "GUID": "2623a675004976da",
+   "GUID": "4dbfae9b8d3aded5",
    "Name": "TV Glow",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -11642,7 +12102,7 @@
    ]
   },
   {
-   "GUID": "48f9dd476f8b32ad",
+   "GUID": "2bd7f07ce2e56eab",
    "Name": "Heater",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11683,7 +12143,7 @@
    ]
   },
   {
-   "GUID": "10403df1558a8e9d",
+   "GUID": "266b40e7c8e3ebd1",
    "Name": "Heater Coils",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11755,7 +12215,7 @@
    ]
   },
   {
-   "GUID": "1542463136a6592a",
+   "GUID": "708d7eb115e93b90",
    "Name": "Tripod",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11785,7 +12245,7 @@
    ]
   },
   {
-   "GUID": "2c23663acd8a1da9",
+   "GUID": "588bb402efecb89d",
    "Name": "Camcorder",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -11811,10 +12271,10 @@
    ]
   },
   {
-   "GUID": "71074c07a0e63d0a",
+   "GUID": "7c7481256bf59f19",
    "Name": "Camcorder Body",
    "DestroyOnLoad": true,
-   "Parent": "2c23663acd8a1da9",
+   "Parent": "588bb402efecb89d",
    "Components": [
     {
      "Type": "Transform",
@@ -11852,10 +12312,10 @@
    ]
   },
   {
-   "GUID": "3d9622c183cbd1e3",
+   "GUID": "4cdc55c6c90b59e9",
    "Name": "Camcorder Lens",
    "DestroyOnLoad": true,
-   "Parent": "2c23663acd8a1da9",
+   "Parent": "588bb402efecb89d",
    "Components": [
     {
      "Type": "Transform",
@@ -11893,10 +12353,10 @@
    ]
   },
   {
-   "GUID": "27cea58570d05005",
+   "GUID": "26bdbce681a0fbf6",
    "Name": "Rec Light",
    "DestroyOnLoad": true,
-   "Parent": "2c23663acd8a1da9",
+   "Parent": "588bb402efecb89d",
    "Components": [
     {
      "Type": "Transform",
@@ -11953,7 +12413,7 @@
    ]
   },
   {
-   "GUID": "6821f922756bf96e",
+   "GUID": "651e36755d1f92c4",
    "Name": "Camcorder View",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -11997,7 +12457,7 @@
    ]
   },
   {
-   "GUID": "23e05cba3168da14",
+   "GUID": "65e34f5fa40e98f5",
    "Name": "Furnace",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12038,7 +12498,7 @@
    ]
   },
   {
-   "GUID": "2ed9da33d429e46f",
+   "GUID": "126680cab9b92b8d",
    "Name": "Furnace Panel",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12079,7 +12539,7 @@
    ]
   },
   {
-   "GUID": "0891467770053b42",
+   "GUID": "1632ee6c1b86f3b1",
    "Name": "Pilot Light",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -12151,7 +12611,7 @@
    ]
   },
   {
-   "GUID": "1885f9efad809494",
+   "GUID": "2206e3de2481693d",
    "Name": "Furnace Flue",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12192,7 +12652,7 @@
    ]
   },
   {
-   "GUID": "43cfc0cee00ba484",
+   "GUID": "01a5c070060016de",
    "Name": "Water Heater",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12233,7 +12693,7 @@
    ]
   },
   {
-   "GUID": "2fb7e511c8bc9787",
+   "GUID": "2b5e6121fc8ea536",
    "Name": "Heater Pipe 0",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12274,7 +12734,7 @@
    ]
   },
   {
-   "GUID": "3ea455e14a7e6be8",
+   "GUID": "4c94432e217a2e6b",
    "Name": "Heater Pipe 1",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12315,7 +12775,7 @@
    ]
   },
   {
-   "GUID": "4faba7d0752b6c62",
+   "GUID": "5e40201fd945d540",
    "Name": "Bench Top",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12369,7 +12829,7 @@
    ]
   },
   {
-   "GUID": "7c6351cc205acc9d",
+   "GUID": "69c8da44f7aab16d",
    "Name": "Bench Leg -0.66",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12410,7 +12870,7 @@
    ]
   },
   {
-   "GUID": "489e71e9bfe2ea2a",
+   "GUID": "22c1dd065cb308a1",
    "Name": "Bench Leg 0.66",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12451,7 +12911,7 @@
    ]
   },
   {
-   "GUID": "4c835fd8454ff186",
+   "GUID": "7f47a2af68029670",
    "Name": "Bench Shelf",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12505,7 +12965,7 @@
    ]
   },
   {
-   "GUID": "3662f1355b6e0319",
+   "GUID": "7b3a4b54e164be4d",
    "Name": "Toolbox",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12535,7 +12995,7 @@
    ]
   },
   {
-   "GUID": "773a452d410f9073",
+   "GUID": "23b028f04eb59fde",
    "Name": "Pegboard",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -12589,7 +13049,7 @@
    ]
   },
   {
-   "GUID": "73c69f80024d0fdb",
+   "GUID": "4082a69a5e510623",
    "Name": "Hammer Handle",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12630,7 +13090,7 @@
    ]
   },
   {
-   "GUID": "3cceccc31045e2ad",
+   "GUID": "3cb1a76bf8724194",
    "Name": "Hammer Head",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12671,7 +13131,7 @@
    ]
   },
   {
-   "GUID": "2005d78dfde86335",
+   "GUID": "7f1d5453222e389b",
    "Name": "Wrench",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12712,7 +13172,7 @@
    ]
   },
   {
-   "GUID": "3393a49d78f32867",
+   "GUID": "0be540172d65deb1",
    "Name": "Spare Stick 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12753,7 +13213,7 @@
    ]
   },
   {
-   "GUID": "04803178cfab4dd9",
+   "GUID": "2426f91a43c5d413",
    "Name": "Spare Stick 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12794,7 +13254,7 @@
    ]
   },
   {
-   "GUID": "78d88a7d05669037",
+   "GUID": "7e298fa9167dc7de",
    "Name": "Spare Stick 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12835,7 +13295,7 @@
    ]
   },
   {
-   "GUID": "26f10d2c4587e272",
+   "GUID": "72bebe4343d606ab",
    "Name": "Sticky Practice",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12889,7 +13349,7 @@
    ]
   },
   {
-   "GUID": "482d1272c3284aa0",
+   "GUID": "11c65f36a5b22b23",
    "Name": "Sticky Rent",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12943,7 +13403,7 @@
    ]
   },
   {
-   "GUID": "10bf614c95a38bc6",
+   "GUID": "54dc1af3874ecfa3",
    "Name": "Rudiment Chart",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -12997,7 +13457,7 @@
    ]
   },
   {
-   "GUID": "13a269ceac6efde2",
+   "GUID": "61f70ad45a215da2",
    "Name": "Stick Can",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13038,7 +13498,7 @@
    ]
   },
   {
-   "GUID": "4ab64ce19cd00ef9",
+   "GUID": "2068d8df4827be48",
    "Name": "Can Stick 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13079,7 +13539,7 @@
    ]
   },
   {
-   "GUID": "1dc3f856fcef7f20",
+   "GUID": "543706b85cfbd64b",
    "Name": "Can Stick 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13120,7 +13580,7 @@
    ]
   },
   {
-   "GUID": "298a60fae7997fd0",
+   "GUID": "4d1db357c6abdb59",
    "Name": "Can Stick 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13161,7 +13621,7 @@
    ]
   },
   {
-   "GUID": "27e18e1815702110",
+   "GUID": "4c90e56d38590016",
    "Name": "Can Stick 3",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13202,7 +13662,7 @@
    ]
   },
   {
-   "GUID": "23628d5b0ed763ff",
+   "GUID": "08b1efa9f4293007",
    "Name": "Phone Book",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13243,7 +13703,7 @@
    ]
   },
   {
-   "GUID": "77cbb39b515dddc9",
+   "GUID": "2f9cfdd4e3c761d9",
    "Name": "Gaffer Tape",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13284,7 +13744,7 @@
    ]
   },
   {
-   "GUID": "1e04db4e86982b20",
+   "GUID": "380eee82d7369bf2",
    "Name": "Magazine 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13325,7 +13785,7 @@
    ]
   },
   {
-   "GUID": "6e4f16a4bf86bd0a",
+   "GUID": "7ebc5f5c5ef55684",
    "Name": "Magazine 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13366,7 +13826,7 @@
    ]
   },
   {
-   "GUID": "51ae6c096d6a1d8f",
+   "GUID": "184bf56f1a2ab33c",
    "Name": "Magazine 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13407,7 +13867,7 @@
    ]
   },
   {
-   "GUID": "1f979cc57a6729f1",
+   "GUID": "3b0eae8992982852",
    "Name": "Magazine 3",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13448,7 +13908,7 @@
    ]
   },
   {
-   "GUID": "7923b2d39f32da69",
+   "GUID": "6cfd896e06328de7",
    "Name": "Practice Pad",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -13484,7 +13944,7 @@
    ]
   },
   {
-   "GUID": "7875120a2e7b9b8a",
+   "GUID": "439e504d63af8ec4",
    "Name": "Practice Pad",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13514,10 +13974,10 @@
    ]
   },
   {
-   "GUID": "7c8465fd60536d7d",
+   "GUID": "040aa3886e1cb6a9",
    "Name": "Pad",
    "DestroyOnLoad": true,
-   "Parent": "7875120a2e7b9b8a",
+   "Parent": "439e504d63af8ec4",
    "Components": [
     {
      "Type": "Transform",
@@ -13555,10 +14015,10 @@
    ]
   },
   {
-   "GUID": "0e00e3df0750e9da",
+   "GUID": "1f2047d72c47ad63",
    "Name": "Pad Rim",
    "DestroyOnLoad": true,
-   "Parent": "7875120a2e7b9b8a",
+   "Parent": "439e504d63af8ec4",
    "Components": [
     {
      "Type": "Transform",
@@ -13596,10 +14056,10 @@
    ]
   },
   {
-   "GUID": "6d9bec8ece6674dd",
+   "GUID": "3f8d2281fd82ee74",
    "Name": "Pad Stick L",
    "DestroyOnLoad": true,
-   "Parent": "7875120a2e7b9b8a",
+   "Parent": "439e504d63af8ec4",
    "Components": [
     {
      "Type": "Transform",
@@ -13637,10 +14097,10 @@
    ]
   },
   {
-   "GUID": "264dfb33a42446ad",
+   "GUID": "280c46b240b3d8cc",
    "Name": "Pad Stick R",
    "DestroyOnLoad": true,
-   "Parent": "7875120a2e7b9b8a",
+   "Parent": "439e504d63af8ec4",
    "Components": [
     {
      "Type": "Transform",
@@ -13678,7 +14138,7 @@
    ]
   },
   {
-   "GUID": "69baae22803f3ffd",
+   "GUID": "65d63c9dbf6231e7",
    "Name": "Metronome",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13708,10 +14168,10 @@
    ]
   },
   {
-   "GUID": "60c7512a29cecd18",
+   "GUID": "783d0d977dd116c3",
    "Name": "Metronome",
    "DestroyOnLoad": true,
-   "Parent": "69baae22803f3ffd",
+   "Parent": "65d63c9dbf6231e7",
    "Components": [
     {
      "Type": "Transform",
@@ -13749,10 +14209,10 @@
    ]
   },
   {
-   "GUID": "3b16d3cab32697af",
+   "GUID": "2d6cafe2faa24e60",
    "Name": "Metronome Arm",
    "DestroyOnLoad": true,
-   "Parent": "69baae22803f3ffd",
+   "Parent": "65d63c9dbf6231e7",
    "Components": [
     {
      "Type": "Transform",
@@ -13788,10 +14248,10 @@
    ]
   },
   {
-   "GUID": "330631b5f735a996",
+   "GUID": "5c4df57d3bfb05e5",
    "Name": "Arm",
    "DestroyOnLoad": true,
-   "Parent": "3b16d3cab32697af",
+   "Parent": "2d6cafe2faa24e60",
    "Components": [
     {
      "Type": "Transform",
@@ -13829,7 +14289,7 @@
    ]
   },
   {
-   "GUID": "0a74b085a3a0a827",
+   "GUID": "50a6dee12b63ba98",
    "Name": "Lava Lamp",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13859,10 +14319,10 @@
    ]
   },
   {
-   "GUID": "7e00cc847c24bf80",
+   "GUID": "4c8003b37e6057f1",
    "Name": "Lava",
    "DestroyOnLoad": true,
-   "Parent": "0a74b085a3a0a827",
+   "Parent": "50a6dee12b63ba98",
    "Components": [
     {
      "Type": "Transform",
@@ -13931,7 +14391,7 @@
    ]
   },
   {
-   "GUID": "72b33bc4e05c45eb",
+   "GUID": "03facf9d20adbeb3",
    "Name": "Lamp Arm 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -13972,7 +14432,7 @@
    ]
   },
   {
-   "GUID": "2c902f9d24169702",
+   "GUID": "17a6d2bd8389bd78",
    "Name": "Lamp Arm 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14013,7 +14473,7 @@
    ]
   },
   {
-   "GUID": "31db4fe3a8a22ba5",
+   "GUID": "76a7bd7882d145a7",
    "Name": "Lamp Shade",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14054,7 +14514,7 @@
    ]
   },
   {
-   "GUID": "307fded92974b06a",
+   "GUID": "10f55f5fc7463dc4",
    "Name": "Desk Lamp",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -14095,7 +14555,7 @@
    ]
   },
   {
-   "GUID": "39e1562e7ee16965",
+   "GUID": "44d4e6ab08c66573",
    "Name": "Shop Light Chain A",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14136,7 +14596,7 @@
    ]
   },
   {
-   "GUID": "0a78ea337dcdb6f6",
+   "GUID": "598b87f6e41a7649",
    "Name": "Shop Light Chain B",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14177,7 +14637,7 @@
    ]
   },
   {
-   "GUID": "40345b7fec516093",
+   "GUID": "5138d3da527d9a5c",
    "Name": "Shop Light",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14218,7 +14678,7 @@
    ]
   },
   {
-   "GUID": "585b50d35d289140",
+   "GUID": "6812a182586d062e",
    "Name": "Tube",
    "DestroyOnLoad": true,
    "Parent": "0827a5dbe9f600d6",
@@ -14290,7 +14750,7 @@
    ]
   },
   {
-   "GUID": "11497f99b751b983",
+   "GUID": "21c2cf7b99f1a185",
    "Name": "Fridge",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14331,7 +14791,7 @@
    ]
   },
   {
-   "GUID": "7b03d58e3399807d",
+   "GUID": "48c8d5d26a2732b6",
    "Name": "Fridge Handle",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14372,7 +14832,7 @@
    ]
   },
   {
-   "GUID": "30ac17407121cdd5",
+   "GUID": "464fb04b950b4031",
    "Name": "Sticky Dinner",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14426,7 +14886,7 @@
    ]
   },
   {
-   "GUID": "1ad05fe715b35be6",
+   "GUID": "3e7112f6583ad749",
    "Name": "Paper Ball 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14467,7 +14927,7 @@
    ]
   },
   {
-   "GUID": "69e660853e01101a",
+   "GUID": "458e1305775a1727",
    "Name": "Paper Ball 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14508,7 +14968,7 @@
    ]
   },
   {
-   "GUID": "3b18c016356e7271",
+   "GUID": "5898fccecc97ecc1",
    "Name": "Paper Ball 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14549,7 +15009,7 @@
    ]
   },
   {
-   "GUID": "42d7a3d93e53a159",
+   "GUID": "5e17b2013b627f46",
    "Name": "Gig Board",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -14603,7 +15063,7 @@
    ]
   },
   {
-   "GUID": "5554fb7ac41ea6b8",
+   "GUID": "66a273c6f2a15a6b",
    "Name": "Board Frame Top",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -14644,7 +15104,7 @@
    ]
   },
   {
-   "GUID": "4d83e8a8a8b6bbc2",
+   "GUID": "24b6a63745d4da75",
    "Name": "Board Frame Bottom",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -14685,7 +15145,7 @@
    ]
   },
   {
-   "GUID": "18c4e5f0a923b3c1",
+   "GUID": "29f503c1259893e6",
    "Name": "Gig Board",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -14721,7 +15181,7 @@
    ]
   },
   {
-   "GUID": "241365b6faf6b540",
+   "GUID": "588d09f2d92e4167",
    "Name": "Bassist Wanted",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14775,7 +15235,7 @@
    ]
   },
   {
-   "GUID": "5092eba906da90d7",
+   "GUID": "0115c6fc13f2c632",
    "Name": "Lawns Mowed",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14829,7 +15289,7 @@
    ]
   },
   {
-   "GUID": "76dd14c456f64011",
+   "GUID": "5a008b5036e97fa4",
    "Name": "Pin 4.619999999999999",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14870,7 +15330,7 @@
    ]
   },
   {
-   "GUID": "708bdeda86ddb512",
+   "GUID": "57317aaec4daf5f1",
    "Name": "Pin 5.6",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14911,7 +15371,7 @@
    ]
   },
   {
-   "GUID": "0b7a6d18711ad27c",
+   "GUID": "119dd1e2f7a31af4",
    "Name": "Flyer A",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -14941,10 +15401,10 @@
    ]
   },
   {
-   "GUID": "0c180b771921d3ec",
+   "GUID": "4ee7d2dea09a80b7",
    "Name": "Flyer",
    "DestroyOnLoad": true,
-   "Parent": "0b7a6d18711ad27c",
+   "Parent": "119dd1e2f7a31af4",
    "Components": [
     {
      "Type": "Transform",
@@ -14995,10 +15455,10 @@
    ]
   },
   {
-   "GUID": "60b38c4d8da7e207",
+   "GUID": "13bae84f19ec352b",
    "Name": "Pin",
    "DestroyOnLoad": true,
-   "Parent": "0b7a6d18711ad27c",
+   "Parent": "119dd1e2f7a31af4",
    "Components": [
     {
      "Type": "Transform",
@@ -15036,7 +15496,7 @@
    ]
   },
   {
-   "GUID": "52acfc302600dd32",
+   "GUID": "1418948cef14f781",
    "Name": "Flyer B",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15066,10 +15526,10 @@
    ]
   },
   {
-   "GUID": "1363b28fb9cbad4c",
+   "GUID": "09860cca1056b061",
    "Name": "Flyer",
    "DestroyOnLoad": true,
-   "Parent": "52acfc302600dd32",
+   "Parent": "1418948cef14f781",
    "Components": [
     {
      "Type": "Transform",
@@ -15120,10 +15580,10 @@
    ]
   },
   {
-   "GUID": "4dd35696a1911a18",
+   "GUID": "6770e6989232cef9",
    "Name": "Pin",
    "DestroyOnLoad": true,
-   "Parent": "52acfc302600dd32",
+   "Parent": "1418948cef14f781",
    "Components": [
     {
      "Type": "Transform",
@@ -15161,7 +15621,7 @@
    ]
   },
   {
-   "GUID": "662deb026b705b63",
+   "GUID": "0a1cc2291d29f566",
    "Name": "Flyer C",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15191,10 +15651,10 @@
    ]
   },
   {
-   "GUID": "1e7dca3536a4ee4b",
+   "GUID": "07e0b97e09c44f75",
    "Name": "Flyer",
    "DestroyOnLoad": true,
-   "Parent": "662deb026b705b63",
+   "Parent": "0a1cc2291d29f566",
    "Components": [
     {
      "Type": "Transform",
@@ -15245,10 +15705,10 @@
    ]
   },
   {
-   "GUID": "434ab9bb67b4087d",
+   "GUID": "38e87568cf2a47ee",
    "Name": "Pin",
    "DestroyOnLoad": true,
-   "Parent": "662deb026b705b63",
+   "Parent": "0a1cc2291d29f566",
    "Components": [
     {
      "Type": "Transform",
@@ -15286,7 +15746,7 @@
    ]
   },
   {
-   "GUID": "1d19894e9adfcb62",
+   "GUID": "4a8ec609bc38f21b",
    "Name": "Trophy Wall",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -15322,7 +15782,7 @@
    ]
   },
   {
-   "GUID": "156a512eba5fc23c",
+   "GUID": "59f28f9db7022348",
    "Name": "Certificate",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15376,7 +15836,7 @@
    ]
   },
   {
-   "GUID": "3da912ffc7b686ae",
+   "GUID": "05fc2e37e42c33db",
    "Name": "Ribbon",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15402,10 +15862,10 @@
    ]
   },
   {
-   "GUID": "3677afb96394c7b1",
+   "GUID": "0445f5211384aadb",
    "Name": "Rosette",
    "DestroyOnLoad": true,
-   "Parent": "3da912ffc7b686ae",
+   "Parent": "05fc2e37e42c33db",
    "Components": [
     {
      "Type": "Transform",
@@ -15443,10 +15903,10 @@
    ]
   },
   {
-   "GUID": "04e1889f3e588d11",
+   "GUID": "7f4e51d6aaf14aea",
    "Name": "Rosette Middle",
    "DestroyOnLoad": true,
-   "Parent": "3da912ffc7b686ae",
+   "Parent": "05fc2e37e42c33db",
    "Components": [
     {
      "Type": "Transform",
@@ -15484,10 +15944,10 @@
    ]
   },
   {
-   "GUID": "289cd5850d0d1586",
+   "GUID": "607d16988ec7c220",
    "Name": "Tail -1",
    "DestroyOnLoad": true,
-   "Parent": "3da912ffc7b686ae",
+   "Parent": "05fc2e37e42c33db",
    "Components": [
     {
      "Type": "Transform",
@@ -15525,10 +15985,10 @@
    ]
   },
   {
-   "GUID": "7c30c5dd526f929a",
+   "GUID": "7ca705f698d5a006",
    "Name": "Tail 1",
    "DestroyOnLoad": true,
-   "Parent": "3da912ffc7b686ae",
+   "Parent": "05fc2e37e42c33db",
    "Components": [
     {
      "Type": "Transform",
@@ -15566,7 +16026,7 @@
    ]
   },
   {
-   "GUID": "5a564becd6dcfa84",
+   "GUID": "207ab9ac91099b2d",
    "Name": "Band Poster",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15596,10 +16056,10 @@
    ]
   },
   {
-   "GUID": "7a16f44f919dfa1f",
+   "GUID": "6405ce78daadd66d",
    "Name": "Poster",
    "DestroyOnLoad": true,
-   "Parent": "5a564becd6dcfa84",
+   "Parent": "207ab9ac91099b2d",
    "Components": [
     {
      "Type": "Transform",
@@ -15650,7 +16110,7 @@
    ]
   },
   {
-   "GUID": "1f78d766cf38c780",
+   "GUID": "6b604dbb58c32b39",
    "Name": "PlaqueA",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15680,10 +16140,10 @@
    ]
   },
   {
-   "GUID": "6ef7ff16af86fc4b",
+   "GUID": "34376ecc8b3ea4f5",
    "Name": "Plaque",
    "DestroyOnLoad": true,
-   "Parent": "1f78d766cf38c780",
+   "Parent": "6b604dbb58c32b39",
    "Components": [
     {
      "Type": "Transform",
@@ -15721,10 +16181,10 @@
    ]
   },
   {
-   "GUID": "5de81bc9f1c122f8",
+   "GUID": "5ce790afe35e48e7",
    "Name": "Plate",
    "DestroyOnLoad": true,
-   "Parent": "1f78d766cf38c780",
+   "Parent": "6b604dbb58c32b39",
    "Components": [
     {
      "Type": "Transform",
@@ -15762,7 +16222,7 @@
    ]
   },
   {
-   "GUID": "52011a3341809fe5",
+   "GUID": "64ed4845bac9990e",
    "Name": "PlaqueB",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15792,10 +16252,10 @@
    ]
   },
   {
-   "GUID": "71eb9108e1fd5d73",
+   "GUID": "5b015152fb0df606",
    "Name": "Plaque",
    "DestroyOnLoad": true,
-   "Parent": "52011a3341809fe5",
+   "Parent": "64ed4845bac9990e",
    "Components": [
     {
      "Type": "Transform",
@@ -15833,10 +16293,10 @@
    ]
   },
   {
-   "GUID": "4b2e8d2c8bb60fa1",
+   "GUID": "2052f9000302baa4",
    "Name": "Plate",
    "DestroyOnLoad": true,
-   "Parent": "52011a3341809fe5",
+   "Parent": "64ed4845bac9990e",
    "Components": [
     {
      "Type": "Transform",
@@ -15874,7 +16334,7 @@
    ]
   },
   {
-   "GUID": "6bd94fa3f8d40d77",
+   "GUID": "2cbad6fd20a2e0d4",
    "Name": "Gold Record",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -15904,10 +16364,10 @@
    ]
   },
   {
-   "GUID": "04c877e4a0b25e97",
+   "GUID": "450aed3c97167173",
    "Name": "Frame",
    "DestroyOnLoad": true,
-   "Parent": "6bd94fa3f8d40d77",
+   "Parent": "2cbad6fd20a2e0d4",
    "Components": [
     {
      "Type": "Transform",
@@ -15945,10 +16405,10 @@
    ]
   },
   {
-   "GUID": "698a62857a5e9c3e",
+   "GUID": "4e7ea6f28c864e2c",
    "Name": "Record",
    "DestroyOnLoad": true,
-   "Parent": "6bd94fa3f8d40d77",
+   "Parent": "2cbad6fd20a2e0d4",
    "Components": [
     {
      "Type": "Transform",
@@ -15986,7 +16446,7 @@
    ]
   },
   {
-   "GUID": "222147ff17d1d29d",
+   "GUID": "18876e77ee155edc",
    "Name": "Signed Snare Head",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16016,10 +16476,10 @@
    ]
   },
   {
-   "GUID": "397a8f42aa7ffb8b",
+   "GUID": "5e0353ce01a3c894",
    "Name": "Signed Head",
    "DestroyOnLoad": true,
-   "Parent": "222147ff17d1d29d",
+   "Parent": "18876e77ee155edc",
    "Components": [
     {
      "Type": "Transform",
@@ -16057,7 +16517,7 @@
    ]
   },
   {
-   "GUID": "0cbde109bd003fcd",
+   "GUID": "21c21b8880566c32",
    "Name": "Vinyl Shelf",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16087,10 +16547,10 @@
    ]
   },
   {
-   "GUID": "5acb86a175cbd25d",
+   "GUID": "2d566fa4811cb5cd",
    "Name": "Shelf",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16128,10 +16588,10 @@
    ]
   },
   {
-   "GUID": "3f404df30ca7060b",
+   "GUID": "173603fa7da8e55e",
    "Name": "Sleeve 0",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16169,10 +16629,10 @@
    ]
   },
   {
-   "GUID": "0529e13e253537af",
+   "GUID": "618064d4be65b539",
    "Name": "Sleeve 1",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16210,10 +16670,10 @@
    ]
   },
   {
-   "GUID": "1f97ecb076284444",
+   "GUID": "1c341e9f4ab3c867",
    "Name": "Sleeve 2",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16251,10 +16711,10 @@
    ]
   },
   {
-   "GUID": "476ccce951c5cc45",
+   "GUID": "6e92bd889bcc48a7",
    "Name": "Sleeve 3",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16292,10 +16752,10 @@
    ]
   },
   {
-   "GUID": "282b48af9dd703d7",
+   "GUID": "132e2a714de2e8fe",
    "Name": "Sleeve 4",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16333,10 +16793,10 @@
    ]
   },
   {
-   "GUID": "16a0228c59e4ab97",
+   "GUID": "3563381274d716b2",
    "Name": "Sleeve 5",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16374,10 +16834,10 @@
    ]
   },
   {
-   "GUID": "157796c8f95401e0",
+   "GUID": "57d9df7f564021f8",
    "Name": "Sleeve 6",
    "DestroyOnLoad": true,
-   "Parent": "0cbde109bd003fcd",
+   "Parent": "21c21b8880566c32",
    "Components": [
     {
      "Type": "Transform",
@@ -16415,7 +16875,7 @@
    ]
   },
   {
-   "GUID": "233e22283160d9c1",
+   "GUID": "01a1b8f8b902a57c",
    "Name": "Laptop Crate",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16456,7 +16916,7 @@
    ]
   },
   {
-   "GUID": "680422d420b02005",
+   "GUID": "782fed3bdcdf4fd4",
    "Name": "Crate Inside",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16497,7 +16957,7 @@
    ]
   },
   {
-   "GUID": "7eb30c4d3a8145ee",
+   "GUID": "3b351fd87fe6ebbc",
    "Name": "Laptop Base",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -16538,7 +16998,7 @@
    ]
   },
   {
-   "GUID": "47b240e7f43f3e9a",
+   "GUID": "457e679bb4cb42e1",
    "Name": "Laptop Screen",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -16601,7 +17061,7 @@
    ]
   },
   {
-   "GUID": "6860794a4aa62ece",
+   "GUID": "22751432be2ee431",
    "Name": "Laptop",
    "DestroyOnLoad": true,
    "Parent": "4edbe78f8f894411",
@@ -16637,7 +17097,7 @@
    ]
   },
   {
-   "GUID": "74fc5258c4a75fe2",
+   "GUID": "31c6ecd3d2cb1db6",
    "Name": "Can 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16678,7 +17138,7 @@
    ]
   },
   {
-   "GUID": "66e85915dd92a0cf",
+   "GUID": "4cd5102808bae291",
    "Name": "Can 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16719,7 +17179,7 @@
    ]
   },
   {
-   "GUID": "193f93663289917a",
+   "GUID": "5b4532ddff07f281",
    "Name": "Can 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16760,7 +17220,7 @@
    ]
   },
   {
-   "GUID": "530ac13aa51670b4",
+   "GUID": "0c82c8bf1409531b",
    "Name": "Can 3",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16801,7 +17261,7 @@
    ]
   },
   {
-   "GUID": "1fc298e23be1f887",
+   "GUID": "4ec4a19d2f052c14",
    "Name": "Can 4",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16842,7 +17302,7 @@
    ]
   },
   {
-   "GUID": "3435d4fae01784b0",
+   "GUID": "28f98181c6913b5b",
    "Name": "Beanbag",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16883,7 +17343,7 @@
    ]
   },
   {
-   "GUID": "20716f26a4ccd4f9",
+   "GUID": "2496946f15f7c303",
    "Name": "Pizza Box 0",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16937,7 +17397,7 @@
    ]
   },
   {
-   "GUID": "72bbc725888889bd",
+   "GUID": "4a157c326e047e5d",
    "Name": "Pizza Box 1",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -16991,7 +17451,7 @@
    ]
   },
   {
-   "GUID": "53f46ef737f33def",
+   "GUID": "319b2ffeb5f4d138",
    "Name": "Pizza Box 2",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17045,7 +17505,7 @@
    ]
   },
   {
-   "GUID": "5c1f1339d29bdcdd",
+   "GUID": "4ad77c71574aec4b",
    "Name": "Smoke Detector",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17086,7 +17546,7 @@
    ]
   },
   {
-   "GUID": "710d208fe1045a3c",
+   "GUID": "04b0ebe14e6e39bb",
    "Name": "Smoke Detector Light",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17146,7 +17606,7 @@
    ]
   },
   {
-   "GUID": "5065602d1e6149e0",
+   "GUID": "76df9dea2616de1a",
    "Name": "Clothesline",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17187,7 +17647,7 @@
    ]
   },
   {
-   "GUID": "523a9e8509a056d1",
+   "GUID": "342d2e1948e4b8b6",
    "Name": "Sock Peg",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17226,10 +17686,10 @@
    ]
   },
   {
-   "GUID": "092db553279b26ee",
+   "GUID": "4d11767cf7baa444",
    "Name": "Sock",
    "DestroyOnLoad": true,
-   "Parent": "523a9e8509a056d1",
+   "Parent": "342d2e1948e4b8b6",
    "Components": [
     {
      "Type": "Transform",
@@ -17267,7 +17727,7 @@
    ]
   },
   {
-   "GUID": "0e302b3cdc1ee54c",
+   "GUID": "40f654a04b37636a",
    "Name": "Sock 2 Peg",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17306,10 +17766,10 @@
    ]
   },
   {
-   "GUID": "2e13b1b11afd8140",
+   "GUID": "1b7e2331f7059862",
    "Name": "Sock 2",
    "DestroyOnLoad": true,
-   "Parent": "0e302b3cdc1ee54c",
+   "Parent": "40f654a04b37636a",
    "Components": [
     {
      "Type": "Transform",
@@ -17347,7 +17807,7 @@
    ]
   },
   {
-   "GUID": "69f077fc78325a3a",
+   "GUID": "207aebf2bbc62d04",
    "Name": "Band Tee Peg",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17386,10 +17846,10 @@
    ]
   },
   {
-   "GUID": "63b65625a94d2994",
+   "GUID": "78b6f5d4caf35e5c",
    "Name": "Band Tee",
    "DestroyOnLoad": true,
-   "Parent": "69f077fc78325a3a",
+   "Parent": "207aebf2bbc62d04",
    "Components": [
     {
      "Type": "Transform",
@@ -17427,10 +17887,10 @@
    ]
   },
   {
-   "GUID": "75cb7f3e0f5b55a0",
+   "GUID": "265ae50bae89a80b",
    "Name": "Tee Print",
    "DestroyOnLoad": true,
-   "Parent": "69f077fc78325a3a",
+   "Parent": "207aebf2bbc62d04",
    "Components": [
     {
      "Type": "Transform",
@@ -17477,11 +17937,16 @@
        1.0
       ]
      }
+    },
+    {
+     "Type": "HideoutBandName",
+     "Show": "Unnamed",
+     "FitLetters": 9
     }
    ]
   },
   {
-   "GUID": "024118eb0a8a1023",
+   "GUID": "2ad6b31786572e4f",
    "Name": "Towel Peg",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17520,10 +17985,10 @@
    ]
   },
   {
-   "GUID": "161728260b799676",
+   "GUID": "1603d1d25f43f8b3",
    "Name": "Towel",
    "DestroyOnLoad": true,
-   "Parent": "024118eb0a8a1023",
+   "Parent": "2ad6b31786572e4f",
    "Components": [
     {
      "Type": "Transform",
@@ -17561,7 +18026,7 @@
    ]
   },
   {
-   "GUID": "50bb99962308b225",
+   "GUID": "2adaa921c8dd61ff",
    "Name": "Boxers Peg",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17600,10 +18065,10 @@
    ]
   },
   {
-   "GUID": "1f7cfc1efaa81f0a",
+   "GUID": "15a56ecb806f7006",
    "Name": "Boxers",
    "DestroyOnLoad": true,
-   "Parent": "50bb99962308b225",
+   "Parent": "2adaa921c8dd61ff",
    "Components": [
     {
      "Type": "Transform",
@@ -17641,7 +18106,7 @@
    ]
   },
   {
-   "GUID": "768c1227afcb3172",
+   "GUID": "7cc75652a6e4579c",
    "Name": "Clock",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17682,7 +18147,7 @@
    ]
   },
   {
-   "GUID": "7e7e8da22785440e",
+   "GUID": "2c878772539d8f9a",
    "Name": "Clock Rim",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17723,7 +18188,7 @@
    ]
   },
   {
-   "GUID": "44c5c11abe9427ef",
+   "GUID": "2007808ab365d12c",
    "Name": "Hour Hand",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17764,7 +18229,7 @@
    ]
   },
   {
-   "GUID": "199cf8962cf5c779",
+   "GUID": "461cb04aa96c8612",
    "Name": "Minute Hand",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17805,7 +18270,7 @@
    ]
   },
   {
-   "GUID": "06822fb4f9091a86",
+   "GUID": "18d7761dcdc38af9",
    "Name": "Offcut",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17846,7 +18311,7 @@
    ]
   },
   {
-   "GUID": "00cf0377d76a9261",
+   "GUID": "62af3673ecbda835",
    "Name": "Fill",
    "DestroyOnLoad": true,
    "Parent": "62f8b07a6cbc4ffe",
@@ -17884,7 +18349,7 @@
    ]
   },
   {
-   "GUID": "2b445a527de64d8c",
+   "GUID": "1f8cccd3fbef9132",
    "Name": "Rug",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17914,10 +18379,10 @@
    ]
   },
   {
-   "GUID": "5353d1fd333318d8",
+   "GUID": "0a274b75e04367e0",
    "Name": "Rug",
    "DestroyOnLoad": true,
-   "Parent": "2b445a527de64d8c",
+   "Parent": "1f8cccd3fbef9132",
    "Components": [
     {
      "Type": "Transform",
@@ -17955,7 +18420,7 @@
    ]
   },
   {
-   "GUID": "3b5792ca05a74eae",
+   "GUID": "28e0526c714d8628",
    "Name": "Stick Bag",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -17985,10 +18450,10 @@
    ]
   },
   {
-   "GUID": "7ecc28439a402919",
+   "GUID": "5cd732b1c069aea0",
    "Name": "Bag",
    "DestroyOnLoad": true,
-   "Parent": "3b5792ca05a74eae",
+   "Parent": "28e0526c714d8628",
    "Components": [
     {
      "Type": "Transform",
@@ -18026,7 +18491,7 @@
    ]
   },
   {
-   "GUID": "50d8b0dc23b0d5a6",
+   "GUID": "2ee5b53c65f34a46",
    "Name": "Spare Cymbal",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -18056,10 +18521,10 @@
    ]
   },
   {
-   "GUID": "40e4c3f26b3f00f4",
+   "GUID": "5964149d101d394d",
    "Name": "Stand",
    "DestroyOnLoad": true,
-   "Parent": "50d8b0dc23b0d5a6",
+   "Parent": "2ee5b53c65f34a46",
    "Components": [
     {
      "Type": "Transform",
@@ -18097,10 +18562,10 @@
    ]
   },
   {
-   "GUID": "711956768798dd7c",
+   "GUID": "7f1d6fc91f6793d7",
    "Name": "Cymbal",
    "DestroyOnLoad": true,
-   "Parent": "50d8b0dc23b0d5a6",
+   "Parent": "2ee5b53c65f34a46",
    "Components": [
     {
      "Type": "Transform",
@@ -18138,7 +18603,7 @@
    ]
   },
   {
-   "GUID": "2bcd54a6ec9df58b",
+   "GUID": "591784120d6f43be",
    "Name": "Neon Sign",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -18168,10 +18633,10 @@
    ]
   },
   {
-   "GUID": "740ed10132be9ac1",
+   "GUID": "5a710f69986d5773",
    "Name": "Neon",
    "DestroyOnLoad": true,
-   "Parent": "2bcd54a6ec9df58b",
+   "Parent": "591784120d6f43be",
    "Components": [
     {
      "Type": "Transform",
@@ -18227,7 +18692,7 @@
    ]
   },
   {
-   "GUID": "2b2e13fb90030c3d",
+   "GUID": "52d2728460f3be21",
    "Name": "Acoustic Foam",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -18257,10 +18722,10 @@
    ]
   },
   {
-   "GUID": "62e4e11de5b72b22",
+   "GUID": "05448513176c580b",
    "Name": "Foam 0.0",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18298,10 +18763,10 @@
    ]
   },
   {
-   "GUID": "33817b37e7deb83d",
+   "GUID": "744a25e65e3cbb68",
    "Name": "Foam 0.1",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18339,10 +18804,10 @@
    ]
   },
   {
-   "GUID": "58d051e13432db24",
+   "GUID": "6d049d7952a3240c",
    "Name": "Foam 0.2",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18380,10 +18845,10 @@
    ]
   },
   {
-   "GUID": "072189460f8566c9",
+   "GUID": "4af8167b73e05958",
    "Name": "Foam 1.0",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18421,10 +18886,10 @@
    ]
   },
   {
-   "GUID": "6901009c0817f581",
+   "GUID": "57dfbaf857b179e8",
    "Name": "Foam 1.1",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18462,10 +18927,10 @@
    ]
   },
   {
-   "GUID": "7d40270539677cab",
+   "GUID": "237a554f4ee581d7",
    "Name": "Foam 1.2",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18503,10 +18968,10 @@
    ]
   },
   {
-   "GUID": "6cd383c2cd812231",
+   "GUID": "00532b4baf6b9388",
    "Name": "Foam 2.0",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18544,10 +19009,10 @@
    ]
   },
   {
-   "GUID": "520e715d84a3f78c",
+   "GUID": "6ed43a3040355d25",
    "Name": "Foam 2.1",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18585,10 +19050,10 @@
    ]
   },
   {
-   "GUID": "0597a8bdef4394f1",
+   "GUID": "1fd42ff837fe959a",
    "Name": "Foam 2.2",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18626,10 +19091,10 @@
    ]
   },
   {
-   "GUID": "0c756ea97e78e6a0",
+   "GUID": "1be4b4eb1e549969",
    "Name": "Foam 3.0",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18667,10 +19132,10 @@
    ]
   },
   {
-   "GUID": "4571ec1a80777b1b",
+   "GUID": "1065b28d9b6a801d",
    "Name": "Foam 3.1",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18708,10 +19173,10 @@
    ]
   },
   {
-   "GUID": "1c8f07c61d94c7d5",
+   "GUID": "504f9d6bb7f30bdd",
    "Name": "Foam 3.2",
    "DestroyOnLoad": true,
-   "Parent": "2b2e13fb90030c3d",
+   "Parent": "52d2728460f3be21",
    "Components": [
     {
      "Type": "Transform",
@@ -18749,7 +19214,7 @@
    ]
   },
   {
-   "GUID": "02fc046de42251c0",
+   "GUID": "7f8bbb942fefad92",
    "Name": "Mixing Desk",
    "DestroyOnLoad": true,
    "Parent": "28cd3980cb877d4b",
@@ -18779,10 +19244,10 @@
    ]
   },
   {
-   "GUID": "32aa0f5882c13721",
+   "GUID": "7a081060895dc88d",
    "Name": "Desk",
    "DestroyOnLoad": true,
-   "Parent": "02fc046de42251c0",
+   "Parent": "7f8bbb942fefad92",
    "Components": [
     {
      "Type": "Transform",
@@ -18820,7 +19285,7 @@
    ]
   },
   {
-   "GUID": "48d0bc057a208552",
+   "GUID": "15c36f58dd9b6d14",
    "Name": "Room Tone",
    "DestroyOnLoad": true,
    "Parent": "685384958d002869",
@@ -18846,10 +19311,10 @@
    ]
   },
   {
-   "GUID": "4375a6620879fd2b",
+   "GUID": "5520d72af0e3b8d3",
    "Name": "Furnace Hum",
    "DestroyOnLoad": true,
-   "Parent": "48d0bc057a208552",
+   "Parent": "15c36f58dd9b6d14",
    "Components": [
     {
      "Type": "Transform",
@@ -18886,10 +19351,10 @@
    ]
   },
   {
-   "GUID": "69520cac1144f242",
+   "GUID": "01d33369ad977145",
    "Name": "Tube Buzz",
    "DestroyOnLoad": true,
-   "Parent": "48d0bc057a208552",
+   "Parent": "15c36f58dd9b6d14",
    "Components": [
     {
      "Type": "Transform",
@@ -18926,10 +19391,10 @@
    ]
   },
   {
-   "GUID": "2615ed3ca18bbdee",
+   "GUID": "03f4feaffb7d252f",
    "Name": "Fan Whir",
    "DestroyOnLoad": true,
-   "Parent": "48d0bc057a208552",
+   "Parent": "15c36f58dd9b6d14",
    "Components": [
     {
      "Type": "Transform",
@@ -18966,10 +19431,10 @@
    ]
   },
   {
-   "GUID": "22d178b0cd2700e7",
+   "GUID": "607682980a162c1d",
    "Name": "Drip",
    "DestroyOnLoad": true,
-   "Parent": "48d0bc057a208552",
+   "Parent": "15c36f58dd9b6d14",
    "Components": [
     {
      "Type": "Transform",
@@ -19006,7 +19471,7 @@
    ]
   },
   {
-   "GUID": "4e3567ab26de4475",
+   "GUID": "57a7284d75e886e7",
    "Name": "Overview",
    "DestroyOnLoad": true,
    "Parent": "7604a179c9c3ec3f",

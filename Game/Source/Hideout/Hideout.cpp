@@ -4,6 +4,7 @@
 #include "Components/Lighting/Light.h"
 #include "Components/Graphics/Mesh.h"
 #include "Components/Graphics/PostProcess.h"
+#include "Components/Graphics/TextRenderer.h"
 #include "Materials/StandardMaterial.h"
 #include "Venue/VenuePlan.h"
 #include "Components/Hideout/HideoutMarkers.h"
@@ -174,6 +175,29 @@ void Hideout::UpdateFocus( float inDeltaTime )
     const float distance = Distance( m_current.Eye, m_current.Target );
     m_focus += ( distance - m_focus ) * ( 1.f - std::exp( -inDeltaTime * 5.f ) );
     post->DoFFocusDistance = m_focus;
+}
+
+
+void Hideout::ApplyBandName()
+{
+    std::string name = PlayerProfile::GetInstance().BandName;
+    std::transform( name.begin(), name.end(), name.begin(), []( unsigned char c ) { return static_cast<char>( std::toupper( c ) ); } );
+    const bool named = !name.empty();
+    for( BandNamePart& part : m_bandNameParts )
+    {
+        if( !part.Entity )
+        {
+            continue;
+        }
+        const bool shown = part.Named == named;
+        part.Entity->GetComponent<Transform>().SetScale( shown ? part.Scale : part.Scale * 0.0001f );
+        if( TextRenderer* text = part.Entity->TryGetComponent<TextRenderer>() )
+        {
+            text->Text = name;
+            const size_t letters = std::max<size_t>( 1, name.size() );
+            text->Size = part.TextSize * std::min( 1.f, static_cast<float>( part.FitLetters ) / static_cast<float>( letters ) );
+        }
+    }
 }
 
 
@@ -386,7 +410,8 @@ void Hideout::ApplyRadio( float inDeltaTime )
 
 const std::vector<const char*>& Hideout::Events()
 {
-    static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play" };
+    static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play", "band_name_edit",
+        "band_name_save", "band_name_cancel" };
     return kEvents;
 }
 
@@ -401,6 +426,9 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
         inUi.ModelSetString( inModel, key, "" );
     }
     inUi.ModelSetListCount( inModel, "stations", 0 );
+    inUi.ModelSetNumber( inModel, "band_naming", 0 );
+    inUi.ModelSetString( inModel, "band_label", "" );
+    inUi.ModelSetString( inModel, "band_name_input", "" );
     inUi.ModelSetListCount( inModel, "records", 0 );
     inUi.ModelSetListCount( inModel, "gigs", 0 );
 }
@@ -614,6 +642,25 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         motion.Random = 0x9E3779B9u ^ static_cast<uint32_t>( m_motions.size() * 2654435761u );
         m_motions.push_back( motion );
     }
+    // The band's name, wherever the room shows it.
+    m_bandNameParts.clear();
+    for( Entity* entity : entities )
+    {
+        if( HideoutBandName* marker = entity->TryGetComponent<HideoutBandName>() )
+        {
+            BandNamePart part;
+            part.Entity = entity->GetComponent<Transform>().Parent;
+            part.Named = marker->Show == HideoutBandName::When::Named;
+            part.FitLetters = std::max( 1, marker->FitLetters );
+            part.Scale = entity->GetComponent<Transform>().GetScale();
+            if( TextRenderer* text = entity->TryGetComponent<TextRenderer>() )
+            {
+                part.TextSize = text->Size;
+            }
+            m_bandNameParts.push_back( part );
+        }
+    }
+    ApplyBandName();
     // The hover light: off until a label is pointed at.
     m_highlight = inWorld.CreateEntity( "Hideout Hover Light" );
     if( m_highlight )
@@ -787,6 +834,11 @@ bool Hideout::Back()
     if( m_noticeShown )
     {
         m_noticeShown = false;
+        return true;
+    }
+    if( m_naming )
+    {
+        m_naming = false;
         return true;
     }
     if( m_reveal >= 0 )
@@ -1109,6 +1161,8 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     inUi.ModelSetString( inModel, "hideout_goal", NextGoal() );
     inUi.ModelSetString( inModel, "hideout_panel", m_panel );
     inUi.ModelSetString( inModel, "hideout_status", m_status );
+    inUi.ModelSetNumber( inModel, "band_naming", m_naming ? 1 : 0 );
+    inUi.ModelSetString( inModel, "band_label", profile.BandName.empty() ? "Name the band" : "The band: " + profile.BandName + " (rename)" );
     std::string notice;
     if( m_noticeShown )
     {
@@ -1179,6 +1233,32 @@ bool Hideout::HandleEvent( const std::string& inEvent, const json& inArgs, RmlUi
         {
             Choose( station );
         }
+        return true;
+    }
+    if( inEvent == "band_name_edit" )
+    {
+        m_naming = true;
+        inUi.ModelSetString( inModel, "band_name_input", PlayerProfile::GetInstance().BandName );
+        return true;
+    }
+    if( inEvent == "band_name_save" || inEvent == "band_name_cancel" )
+    {
+        if( inEvent == "band_name_save" )
+        {
+            // Trimmed, and short enough for a bedsheet.
+            std::string name = inUi.ModelGetString( inModel, "band_name_input" );
+            const size_t first = name.find_first_not_of( " \t" );
+            name = first == std::string::npos ? std::string() : name.substr( first, name.find_last_not_of( " \t" ) - first + 1 );
+            if( name.size() > 28 )
+            {
+                name.resize( 28 );
+            }
+            PlayerProfile& profile = PlayerProfile::GetInstance();
+            profile.BandName = name;
+            profile.Save();
+            ApplyBandName();
+        }
+        m_naming = false;
         return true;
     }
     if( inEvent == "station_hover" )

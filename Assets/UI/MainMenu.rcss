@@ -131,3 +131,21 @@ body.basement #hideout-corner .corner-link:hover, body.basement #hideout-corner 
 #hideout-reveal span { font-size: 30dp; font-weight: bold; color: #ffd166; }
 body.basement #hideout-reveal { background-color: #f5e27aee; border-bottom: 0; transform: rotate(-1.5deg); }
 body.basement #hideout-reveal span { color: #2a2218; }
+/* Naming the band (Hideout::ApplyBandName): a link under the goal, and the panel it opens. */
+#hideout-header .band-link { display: block; margin-top: 8dp; padding: 0; font-size: 15dp; color: #ffffffa8; text-align: left; }
+#hideout-header .band-link:hover, #hideout-header .band-link:focus { color: #ffd166; }
+#band-name-panel { position: absolute; left: 50%; top: 24vh; width: 520dp; margin-left: -260dp; padding: 22dp 26dp; background-color: #101010f0; border-top: 4dp #ffd166; text-align: center; }
+#band-name-panel h2 { margin: 0 0 8dp; font-size: 28dp; color: #ffd166; }
+#band-name-panel p { margin: 0 0 14dp; font-size: 16dp; color: #ffffffb0; }
+#band-name-panel input { box-sizing: border-box; width: 100%; height: 46dp; padding: 10dp 12dp; font-size: 22dp; color: #ffffff; background-color: #ffffff18; border: 1dp #888888; text-align: center; tab-index: auto; }
+#band-name-panel input:focus { border-color: #ff9933; }
+.band-name-buttons { margin-top: 16dp; }
+.band-button { display: inline-block; margin: 0 8dp; padding: 8dp 16dp; font-size: 18dp; color: #ffffffc0; background-color: #ffffff14; }
+.band-button.save { font-weight: bold; color: #1a1408; background-color: #ffd166; }
+.band-button:hover, .band-button:focus { background-color: #ff9933; color: #1a1408; }
+body.basement #band-name-panel { background-color: #f5e27af2; border-top: 0; transform: rotate(-1deg); }
+body.basement #band-name-panel h2 { color: #9b2c1c; }
+body.basement #band-name-panel p { color: #2a2218c0; }
+body.basement #band-name-panel input { color: #9b1c1c; background-color: #ffffff80; border-color: #8a7a50; font-weight: bold; }
+body.basement .band-button { color: #2a2218; background-color: #00000018; }
+body.basement .band-button.save { color: #fff8e0; background-color: #9b2c1c; }

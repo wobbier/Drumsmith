@@ -31,6 +31,13 @@ ME_REFLECT_BEGIN( HideoutDrummer )
     ME_FIELD( Energy ).Range( 0.f, 1.f ).Tooltip( "How hard the drummer goes at it" );
 ME_REFLECT_END()
 
+ME_REFLECT_ENUM( HideoutBandName::When, { { "Unnamed", HideoutBandName::When::Unnamed }, { "Named", HideoutBandName::When::Named } } )
+
+ME_REFLECT_BEGIN( HideoutBandName )
+    ME_FIELD( Show ).Tooltip( "Unnamed: shown while the band has no name. Named: shown once it has one (a TextRenderer here shows it)" );
+    ME_FIELD( FitLetters ).Range( 1, 64 ).Tooltip( "A longer name shrinks the text to keep it this wide" );
+ME_REFLECT_END()
+
 ME_REFLECT_BEGIN( HideoutView )
     ME_FIELD( FieldOfView ).Unit( Reflection::Unit::Degrees ).Range( 10.f, 120.f ).Tooltip( "The overview's vertical field of view. The camera looks along local +Z" );
     ME_FIELD( IntroEye ).Unit( Reflection::Unit::Meters ).Tooltip( "The first time the menu opens in a session, the camera starts here and comes to the overview. All zero: no intro" );
@@ -78,6 +85,17 @@ HideoutDrummer::HideoutDrummer()
 
 
 void HideoutDrummer::Init()
+{
+}
+
+
+HideoutBandName::HideoutBandName()
+    : Component( "HideoutBandName" )
+{
+}
+
+
+void HideoutBandName::Init()
 {
 }
 

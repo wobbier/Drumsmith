@@ -178,3 +178,23 @@ def sound(s, parent, name, pos, clip, volume=0.5, near=0.5, far=6.0):
            "PlayOnAwake": True, "Loop": True, "SpatialBlend": 1.0, "MinDistance": _r(near), "MaxDistance": _r(far),
            "Rolloff": "Linear", "Occlusion": False, "DopplerLevel": 0.0})
     return e
+
+
+def band_name(e, when, fit=9):
+    """HideoutBandName: shown only while the band is Unnamed, or only once it's Named."""
+    e.add({"Type": "HideoutBandName", "Show": when, "FitLetters": int(fit)})
+    return e
+
+
+def band_name_text(s, parent, name, pos, size, colour, fit=9, weight=3):
+    """The band's name as world text (TextRenderers facing -z), shown once the band has one. The
+    only font is the engine's Inter regular, so `weight` copies a hair apart make the strokes
+    heavier (a marker's, a spray can's). Returns the group: rotate it to tilt the lot."""
+    group = s.entity(name, parent, pos)
+    offsets = [(0.0, 0.0)] + [(size * 0.012 * math.cos(k * 2.1), size * 0.012 * math.sin(k * 2.1)) for k in range(weight - 1)]
+    for i, (dx, dy) in enumerate(offsets):
+        e = s.entity(f"{name} {i}", group, (dx, dy, -0.0005 * i))
+        e.add({"Type": "TextRenderer", "Text": "", "Size": _r(size), "Alignment": "Center", "Anchor": "Middle", "Color": vec(colour),
+               "Opacity": 1.0, "Lit": True})
+        band_name(e, "Named", fit)
+    return group

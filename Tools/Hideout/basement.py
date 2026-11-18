@@ -13,7 +13,7 @@ Room space: x across (+x the couch side), y up, z from the stairs (the camera) t
 import math
 import random
 
-from hideoutgen import (sound, BLACK, BRASS, CHROME, CORK, GOLD, OFFWHITE, STEEL, WHITE, WOOD, Scene, drummer, dust, glow_light,
+from hideoutgen import (band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, OFFWHITE, STEEL, WHITE, WOOD, Scene, drummer, dust, glow_light,
                         light, motion, poster, rod, slot, station, textured, view)
 
 H = 3.2        # half the width
@@ -86,7 +86,11 @@ def stairs(s, geo, items):
 
 def back_wall(s, geo, items, lights):
     # The bedsheet, and egg cartons stapled up round it (a few missing, one hanging off).
-    poster(s, items, "Banner", "Banner", (0.0, 1.62, D - 0.012), 2.3, 1.15, "-z", tilt=-1.5)
+    # "BAND NAME TBD" until the player names the band; then a blank sheet with the name over it.
+    band_name(poster(s, items, "Banner", "Banner", (0.0, 1.62, D - 0.012), 2.3, 1.15, "-z", tilt=-1.5), "Unnamed")
+    band_name(poster(s, items, "Banner Blank", "BannerBlank", (0.0, 1.62, D - 0.013), 2.3, 1.15, "-z", tilt=-1.5), "Named")
+    sheet = band_name_text(s, items, "Band Name On The Sheet", (0.0, 1.74, D - 0.03), 0.3, (0.6, 0.05, 0.07), fit=11)
+    sheet.components[0]["Rotation"] = [0.0, 0.0, -1.5]
     for x in (-1.12, 1.1):
         s.box(f"Thumbtack {x}", items, (x, 2.17, D - 0.016), (0.02, 0.02, 0.01), (0.8, 0.1, 0.1), shape="Sphere", shadows=False)
     rnd = random.Random(23)
@@ -155,6 +159,12 @@ def kit_corner(s, geo, items, stations, lights):
     head = textured(s.box("Kick Logo", items, (0.0, 0.31, 4.148), (0.56, 0.56, 0.004), (1, 1, 1), rough=0.7, shadows=False),
                     "KickHead", emissive=True, emissive_intensity=0.25)
     head.components[-1]["Material"]["AlphaCutoff"] = 0.5
+    band_name(head, "Unnamed")
+    blank = textured(s.box("Kick Logo Blank", items, (0.0, 0.31, 4.147), (0.56, 0.56, 0.004), (1, 1, 1), rough=0.7, shadows=False),
+                     "KickHeadBlank", emissive=True, emissive_intensity=0.25)
+    blank.components[-1]["Material"]["AlphaCutoff"] = 0.5
+    band_name(blank, "Named")
+    band_name_text(s, items, "Band Name On The Kick", (0.0, 0.34, 4.14), 0.07, (0.08, 0.08, 0.1), fit=9)
     # Somebody's guitar, leaning on the amp.
     guitar = s.entity("Guitar", items, (1.9, 0.31, 4.45), (0.0, -25.0, -78.0))
     guitar.add({"Type": "Model", "ModelPath": "Assets/Models/Instruments/Runtime/Guitar.obj"})
@@ -456,7 +466,7 @@ def front(s, geo, items, stations):
         yaw = math.degrees(math.atan2(b[0] - a[0], b[2] - a[2])) - 90.0
         cloth = s.box(name, pin, (0.0, -size[1] / 2 - 0.01, 0.0), size, colour, rot=(0, yaw, 0), rough=1.0)
         if name == "Band Tee":
-            poster(s, pin, "Tee Print", "KickHead", (0.0, -0.22, 0.0), 0.22, 0.22, "-z", glow=0.0, thick=0.026)
+            band_name(poster(s, pin, "Tee Print", "KickHead", (0.0, -0.22, 0.0), 0.22, 0.22, "-z", glow=0.0, thick=0.026), "Unnamed")
     # The clock over the stairs, five minutes fast since forever.
     s.box("Clock", geo, (-H + 0.02, 1.95, 0.6), (0.3, 0.03, 0.3), OFFWHITE, rot=(0, 0, 90), shape="Cylinder", rough=0.5)
     s.box("Clock Rim", geo, (-H + 0.015, 1.95, 0.6), (0.33, 0.02, 0.33), BLACK, rot=(0, 0, 90), shape="Cylinder", rough=0.5)

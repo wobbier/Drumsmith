@@ -13,6 +13,16 @@
             <img class="hideout-logo" src="img/2x/Asset 2@2x.png"/>
             <p class="hideout-room">{{hideout_room}}</p>
             <p class="hideout-goal">{{hideout_goal}}</p>
+            <button id="band-name-link" class="band-link" data-event-click="band_name_edit">{{band_label}}</button>
+        </div>
+        <div id="band-name-panel" data-if="band_naming > 0">
+            <h2>Name the band</h2>
+            <p>It goes on the bedsheet and the kick drum. You can change it later.</p>
+            <input id="band-name-input" type="text" maxlength="28" placeholder="BAND NAME TBD" data-value="band_name_input"/>
+            <div class="band-name-buttons">
+                <button id="band-name-save" class="band-button save" data-event-click="band_name_save">PAINT IT</button>
+                <button id="band-name-cancel" class="band-button" data-event-click="band_name_cancel">Never mind</button>
+            </div>
         </div>
         <div data-for="station : stations">
             <button class="station-label" data-if="station.shown > 0" data-style-left="station.left" data-style-top="station.top" data-style-transform="station.tilt" data-event-click="station(station.index)" data-event-mouseover="station_hover(station.index)" data-event-mouseout="station_hover(-1)" data-event-focus="station_hover(station.index)" data-event-blur="station_hover(-1)"><span class="station-name">{{station.label}}</span><span class="station-hint">{{station.hint}}</span></button>

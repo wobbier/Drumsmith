@@ -136,6 +136,7 @@ json PlayerProfile::ToJson() const
     }
     root["Lessons"] = lessons;
     root["HideoutTier"] = HideoutTier;
+    root["BandName"] = BandName;
     root["CompletedGigs"] = CompletedGigs;
     root["UnlockedItems"] = UnlockedItems;
     root["Notices"] = Notices;
@@ -189,6 +190,7 @@ void PlayerProfile::FromJson( const json& inRoot )
         }
     }
     HideoutTier = std::max( 0, inRoot.value( "HideoutTier", 0 ) );
+    BandName = inRoot.value( "BandName", std::string() );
     const auto readSet = [&inRoot]( const char* inKey, std::set<std::string>& outSet ) {
         if( inRoot.contains( inKey ) && inRoot[inKey].is_array() )
         {

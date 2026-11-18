@@ -177,6 +177,21 @@ def banner():
     finish("Banner")
 
 
+def banner_blank():
+    """The bedsheet with nothing sprayed on it yet but the tagline and a few drips (the band's
+    name is drawn over it in the game: HideoutBandName)."""
+    w, h = 1024, 512
+    magick("-size", f"{w}x{h}", "xc:rgb(228,224,212)", "(", "-size", "128x512", "-seed", 51, "plasma:fractal",
+           "-colorspace", "gray", "-resize", f"{w}x{h}!", "-motion-blur", "0x30+80", "-auto-level", "+level", "82%,100%", ")",
+           "-compose", "multiply", "-composite", out("BannerBlank"))
+    magick(out("BannerBlank"), "(", "-size", f"{w}x{h}", "xc:none", "-fill", "rgba(190,20,26,0.18)", "-draw", "ellipse 512,230 420,120 0,360",
+           "-blur", "0x40", ")", "-compose", "over", "-composite", out("BannerBlank"))
+    magick(out("BannerBlank"), "-gravity", "southeast", "-font", MARKER, "-pointsize", 30, "-fill", "rgb(30,30,30)",
+           "-annotate", "-6x-6+40+26", "est. in mom's basement", out("BannerBlank"))
+    grain(out("BannerBlank"), 0.3, 54)
+    finish("BannerBlank")
+
+
 def photocopy(path, seed):
     """A gig flyer's life: photocopied, slightly crooked, grainy."""
     magick(path, "-colorspace", "gray", "-contrast-stretch", "2%x2%", path)
@@ -446,6 +461,16 @@ def kick_head():
     finish(n)
 
 
+def kick_head_blank():
+    n = "KickHeadBlank"
+    magick("-size", "512x512", "xc:none", "-fill", "rgb(236,232,222)", "-draw", "circle 256,256 256,6",
+           "-fill", "none", "-stroke", "rgb(30,30,30)", "-strokewidth", 5, "-draw", "circle 256,256 256,40",
+           "-stroke", "rgb(200,30,30)", "-strokewidth", 6, "-draw", "polyline 150,380 175,330 200,380 150,348 200,348 150,380",
+           "-stroke", "rgb(24,24,28)", "-strokewidth", 4, "-draw", "circle 360,365 360,395", "-draw", "point 350,358",
+           "-draw", "point 370,358", "-draw", "arc 345,365 375,385 20,160", out(n))
+    finish(n)
+
+
 # ---------------------------------------------------------------------------------------------
 # Light
 
@@ -509,6 +534,8 @@ ALL = {
     "LaptopScreen": laptop_screen,
     "KickHead": kick_head,
     "Drywall": drywall,
+    "BannerBlank": banner_blank,
+    "KickHeadBlank": kick_head_blank,
     "Dartboard": dartboard,
     "TvStatic": tv_static,
     "WindowNight": window_night,

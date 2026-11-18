@@ -70,6 +70,8 @@ public:
 
     // The hideout's progress (filled in by the progression rules, Phase 1).
     int HideoutTier = 0;
+    // What the player called the band (the bedsheet, the kick head); empty: "BAND NAME TBD".
+    std::string BandName;
     std::set<std::string> CompletedGigs;
     // Every unlock so far, by kind and id ("item:practice-pad", "venue:club", "tier:garage"...;
     // CoreGame/Progression.h). An id in here was already announced.

@@ -72,6 +72,8 @@ private:
     // The menu music as the radio in the room plays it: muffled and off to its side from across
     // the room, the whole song once the camera is at it (TrackRadio::SetSpeaker).
     void ApplyRadio( float inDeltaTime );
+    // The band's name on the bedsheet and the kick (HideoutBandName), from PlayerProfile::BandName.
+    void ApplyBandName();
     // The radio's beat and loudness (m_music), then every HideoutMotion in the room.
     void UpdateMusic( float inDeltaTime );
     void UpdateMotions( float inDeltaTime );
@@ -168,6 +170,17 @@ private:
         float Level = 0.f;                // smoothed loudness, 0..1
     };
     MusicClock m_music;
+
+    struct BandNamePart
+    {
+        EntityHandle Entity;
+        bool Named = true;
+        int FitLetters = 9;
+        Vector3 Scale;
+        float TextSize = 0.f;
+    };
+    std::vector<BandNamePart> m_bandNameParts;
+    bool m_naming = false;
 
     // The drummer: where, who, and the chart of the song they're playing along with.
     bool m_hasDrummer = false;

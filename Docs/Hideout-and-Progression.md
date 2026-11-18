@@ -109,7 +109,15 @@ The first room is dressed in full (`Tools/Hideout/basement.py`): an unfinished b
 - There are posters for bands that don't exist, a rudiment chart typed from `Lessons.json`, a calendar, a clock, laundry on a line, a beanbag, pizza boxes and cans.
 - The room tone is the furnace's rumble, the tube's buzz, the fan and a drip, all looping 3D `AudioSource`s.
 
-Every item slot of `Progression.json` has a place in it too. The other three rooms are still the greybox of `make_hideout.py`'s `build_room`, with the drummer in place of their primitive kit.
+Every item slot of `Progression.json` has a place in it too.
+
+### The garage
+
+The second room (`Tools/Hideout/garage.py`) is the same story a step on: the kit has moved into the parents' garage after the first gig. It has painted drywall and the roll-up door propped open a foot behind the drummer, with the streetlight coming in under it into the haze and a car's lights now and then. There are the opener's light, party lights chasing the beat and two shop lights. It also holds the bench with a vise and the real practice pad's place, the lawnmower that paid for the cymbals, a bike, the paint shelves, the couch and the cat, the boombox, the CRT on a cooler with mom's camcorder still filming, a dartboard, a soda fridge, and the house door open on the kitchen light. The bedsheet hangs off the door tracks. The rehearsal space and the studio are still the greybox of `make_hideout.py`'s `build_room`, with the drummer in place of their primitive kit.
+
+### The band's name
+
+`PlayerProfile::BandName` is empty until the player names the band from the link under the hideout's goal (`band_name_edit`; the panel's input is `band_name_input`, saved with `band_name_save`, up to 28 characters). `HideoutBandName` marks what shows it: `Unnamed` parts (the "BAND NAME TBD" bedsheet and kick head) show while it's empty, and `Named` parts (a blank sheet and head, and `TextRenderer`s whose `Text` becomes the name in capitals, shrunk past `FitLetters` letters) show once it isn't. Parts are hidden by scale, so a rename applies at once (`Hideout::ApplyBandName`). The text is the engine's Inter, drawn three times a hair apart for a heavier stroke.
 
 **Motion (`HideoutMotion`).** A prop moves around how the scene left it, every frame (`Hideout::UpdateMotions`). The kinds:
 - `Sway` swings about `Axis` (a hanging bulb, the laundry, the metronome's arm).
