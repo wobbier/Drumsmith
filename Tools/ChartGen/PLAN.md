@@ -40,6 +40,12 @@ What execution changed or settled in this plan:
   - Fine-tuning the layers ADTOF finds hits with made it find fewer (five-class F1 0.878 to 0.852), so that part is left exactly as it was.
   - The charts label toms twice, as gems and as the stage drummer's animation, and the two agree on only 55% of strokes. Three-way tom accuracy much above that is not available from this data.
   - Still to do in step 3: velocity (needs E-GMD or STAR Drums), the fully free candidate, and the ONNX export of the new output.
+- **The hi-hat pedal (2026-11-17).** Mitch asked for the left foot (*far_from_here* has it almost throughout, and its chart had none). Rock Band charts cannot teach it, so a third output on ADTOF's convolution blocks is trained on E-GMD (now in `data/e-gmd`), mixed under the DLC songs' backing. Its notes are a ninth lane, written as note 102 of `PART DRUMS`, which the converter now reads as the hi-hat pedal's pad (section 2).
+  - On MDB Drums (real kits, hand-annotated, never trained on) the Expert chart from the full mix finds 279 of 523 pedal strokes with 214 false notes (F1 0.549). Before, the lane did not exist.
+  - Where the pedal and ADTOF's hi-hat fire on one sound, the pedal takes it only in a passage where it fires under most hi-hat hits; on dev no other score changes.
+  - *far_from_here*: 142 pedal notes, 118 on a beat; converted, played to the results screen and installed.
+  - The other 17 generated songs were charted again with it on 2026-11-18 (263 pedal notes between them). `./setup.sh` in the ChartGen repository downloads what a fresh clone needs.
+  - It is a first version: on real kits a little under half of its notes are false, and that needs real pedal labels (a kit recorded with its MIDI) to move. `STATUS.md` in the ChartGen repository has the rest.
 
 ## 1. Summary
 
@@ -73,11 +79,11 @@ Verified in `Game/Source/CoreGame/CustomTrackDefineTest.cpp` (`readSongMetaData`
 | `album.png` | Always written, re-encoded as a plain PNG (the UI decodes it directly). |
 | `song.ini` | LF line endings and a first line of exactly `[song]`. The parser matches that line exactly, so a CRLF file reads as empty on Linux and macOS. Always write `name`, `artist`, `album`, `genre`, a numeric `year` (`std::stoi`, uncaught), `song_length` and `preview_start_time` in ms, and `pro_drums = True` spelled exactly so. |
 | `notes.mid` | Format 1, 480 ticks per quarter note. Track 0 holds every tempo and time-signature event, with a tempo at tick 0. The first tempo event becomes the song's stored BPM, which paces the fallback light show, so the opening bar must stay near the song's tempo. End the file after the song ends; beat lines stop at the last event. |
-| `PART DRUMS` | Track name matched exactly. Read: 95 and 96 kick, 97 snare, 98/99/100 yellow/blue/green, which are hi-hat, ride and crash unless a tom marker (110/111/112) covers the note, making them high, mid and floor tom. A marker must span its gem and stop before the next cymbal of that colour. A tom and a cymbal of one colour cannot share a tick. |
+| `PART DRUMS` | Track name matched exactly. Read: 95 and 96 kick, 97 snare, 98/99/100 yellow/blue/green, which are hi-hat, ride and crash unless a tom marker (110/111/112) covers the note, making them high, mid and floor tom. A marker must span its gem and stop before the next cymbal of that colour. A tom and a cymbal of one colour cannot share a tick. 102 is the hi-hat pedal: Drumsmith's own note (since 2026-11-17), unused by Rock Band and by every bundled chart, and skipped by other games. |
 | Dynamics | With an `[ENABLE_CHART_DYNAMICS]` text event in the drum track, velocity 1 is a ghost and 127 an accent. Normal gems use 100. |
 | The folder | ASCII name, built elsewhere and moved into `Assets/DLC` whole, since the game waits on every stem it sees. Always a fresh folder: re-converting an existing one rewrites only the notes and leaves duration, BPM and note count stale. |
 
-Through `notes.mid` the game shows eight pads: kick, snare, closed hi-hat, ride, one crash, three toms. Open hi-hat, hi-hat pedal, second crash, splash, china and the rim, cross-stick and bell strokes exist in the game but cannot be reached from a Rock Band chart today (§9, open question 2).
+Through `notes.mid` the game shows nine pads: kick, snare, closed hi-hat, ride, one crash, three toms and, through note 102, the hi-hat pedal. Open hi-hat, second crash, splash, china and the rim, cross-stick and bell strokes exist in the game but cannot be reached from a Rock Band chart today (§9, open question 2).
 
 What the 129 DLC charts look like (measured):
 

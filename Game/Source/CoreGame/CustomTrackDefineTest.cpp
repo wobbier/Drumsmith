@@ -383,7 +383,36 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
     {
         return false;
     }
-    auto& drumTrack = midifile[drumTrackIndex];
+    ReadMidiDrumNotes( midifile, drumTrackIndex, inLegacyData.m_proDrums, outTrackData );
+    if( outTrackData.m_noteData.empty() )
+    {
+        return false;
+    }
+
+    // Tempo: the first tempo event, and the beat grid for the highway.
+    for( int event = 0; event < midifile[0].size(); ++event )
+    {
+        if( midifile[0][event].isTempo() )
+        {
+            outTrackData.m_bpm = static_cast<int>( std::lround( midifile[0][event].getTempoBPM() ) );
+            break;
+        }
+    }
+    double lastNote = 0.0;
+    for( const NoteData& note : outTrackData.m_noteData )
+    {
+        lastNote = std::max( lastNote, static_cast<double>( note.m_triggerTime ) );
+    }
+    outTrackData.m_beats = ReadMidiBeats( midifile, lastNote + 4.0 );
+    outTrackData.m_venue = ReadMidiVenue( midifile );
+    ReadMidiDrumPhrases( midifile, drumTrackIndex, outTrackData );
+    return true;
+}
+
+
+void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrumTrack, bool inProDrums, TrackData& outTrackData )
+{
+    auto& drumTrack = inMidi[inDrumTrack];
 
     // Rock Band pro drums: yellow, blue and green gems are cymbals unless a tom marker (110, 111,
     // 112) covers them. Collect those spans, and whether the chart marks dynamics (velocity 1 is a
@@ -414,7 +443,7 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
             openMarker.erase( key );
         }
     }
-    const bool pro = inLegacyData.m_proDrums || !tomMarkers.empty();
+    const bool pro = inProDrums || !tomMarkers.empty();
     const auto underTomMarker = [&tomMarkers]( int inMarker, int inTick ) {
         for( const Span& span : tomMarkers[inMarker] )
         {
@@ -426,7 +455,9 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
         return false;
     };
 
-    // Expert notes: 95 double-kick, 96 kick, 97 snare, 98 yellow, 99 blue, 100 green.
+    // Expert notes: 95 double-kick, 96 kick, 97 snare, 98 yellow, 99 blue, 100 green. 102 is
+    // Drumsmith's own: the hi-hat pedal, which Rock Band has no note for (101 is a five-lane
+    // chart's orange gem; nothing else uses 102, and other games skip it).
     for( int event = 0; event < drumTrack.size(); ++event )
     {
         const smf::MidiEvent& message = drumTrack[event];
@@ -444,6 +475,7 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
         case 98: pad = !pro || underTomMarker( 110, message.tick ) ? PadId::HighTom : PadId::ClosedHiHat; break;
         case 99: pad = !pro || underTomMarker( 111, message.tick ) ? PadId::MidTom : PadId::Ride; break;
         case 100: pad = !pro || underTomMarker( 112, message.tick ) ? PadId::FloorTom : PadId::Crash1; break;
+        case 102: pad = PadId::HiHatPedal; break;
         default: break;
         }
         if( pad == PadId::Invalid )
@@ -461,29 +493,6 @@ bool CustomTrackDefineTest::ParseMidi( Path& inFilePath, TrackData& outTrackData
         outTrackData.m_noteData.push_back( note );
         ++outTrackData.m_noteCount;
     }
-    if( outTrackData.m_noteData.empty() )
-    {
-        return false;
-    }
-
-    // Tempo: the first tempo event, and the beat grid for the highway.
-    for( int event = 0; event < midifile[0].size(); ++event )
-    {
-        if( midifile[0][event].isTempo() )
-        {
-            outTrackData.m_bpm = static_cast<int>( std::lround( midifile[0][event].getTempoBPM() ) );
-            break;
-        }
-    }
-    double lastNote = 0.0;
-    for( const NoteData& note : outTrackData.m_noteData )
-    {
-        lastNote = std::max( lastNote, static_cast<double>( note.m_triggerTime ) );
-    }
-    outTrackData.m_beats = ReadMidiBeats( midifile, lastNote + 4.0 );
-    outTrackData.m_venue = ReadMidiVenue( midifile );
-    ReadMidiDrumPhrases( midifile, drumTrackIndex, outTrackData );
-    return true;
 }
 
 

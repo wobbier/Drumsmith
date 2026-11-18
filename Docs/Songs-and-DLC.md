@@ -3,6 +3,8 @@
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
 >
 > Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the track database's tag table, removal and chart advice, the whole DLC distribution section, the start marker and F4. The rest is as last verified.
+>
+> Updated 2026-11-17 on game commit 69fadb1: note 102 in `PART DRUMS` is the hi-hat pedal (`ReadMidiDrumNotes`).
 
 Everything about song content: the on-disk format, how charts are parsed out of Rock Band-style `notes.mid` files, the `TrackDatabase` that feeds the menus, the DLC download flow, and the in-editor track editor used to author/record charts.
 
@@ -62,7 +64,7 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 Triggered by the settings-menu "Convert Custom DLC" button (or `--convert-dlc` at startup) → `TrackDatabase::ExportMidiTrackMetaData`, which walks `Assets/DLC/` for folders containing `notes.mid`. A folder that already has a `TrackData.txt` is **re-charted**: only `NoteData.txt` is rewritten from `notes.mid` (`TrackData::SaveNoteData`), keeping the metadata. A chart saved from the Track Editor (`"Authored"`) is left alone unless the conversion is forced (`--convert-dlc-force`). A new folder runs:
 
 1. `ConvertFromLegacy` — parses `song.ini` via `CustomTrackDefineTest::readSongMetaData` (handles UTF-8 BOM; reads `name`, `artist`, `album`, `genre`, `year`, `icon`, `pro_drums`, `song_length` (ms), `preview_start_time`), requires `album.png`/`album.jpg` (`ME_ASSERT`), requires `song.ogg` (Opus is explicitly unsupported — commented out pending FMOD transcoding), and **hardcodes** `m_bpm = 180` and `m_noteSpeed = 10` (the sync-track derivation is commented out). Saves `TrackData.txt`.
-2. `CustomTrackDefineTest::ParseMidi` — reads `notes.mid` with `smf::MidiFile` (`doTimeAnalysis` gives absolute seconds per event), finds the track whose name meta-event is exactly `PART DRUMS`, and converts every note-on with pitch 96–100 into a `NoteData`:
+2. `CustomTrackDefineTest::ParseMidi` — reads `notes.mid` with `smf::MidiFile` (`doTimeAnalysis` gives absolute seconds per event), finds the track whose name meta-event is exactly `PART DRUMS`, and converts every note-on with pitch 95–100 or 102 into a `NoteData` (`ReadMidiDrumNotes`):
 
 | MIDI pitch | `PadId` (via `GetNoteIdFromLegacy`) |
 |------------|-------------------------------------|
@@ -71,8 +73,9 @@ Triggered by the settings-menu "Convert Custom DLC" button (or `--convert-dlc` a
 | 98 | `ClosedHiHat`, or `HighTom` under a 110 tom marker |
 | 99 | `Ride`, or `MidTom` under a 111 tom marker |
 | 100 | `Crash1`, or `FloorTom` under a 112 tom marker |
+| 102 | `HiHatPedal`. Drumsmith's own note: Rock Band has none for the left foot on the hi-hat. 101 is a five-lane chart's orange gem and is not read; no bundled chart uses 102, and other games skip it. ChartGen writes it (`~/Projects/Python/ChartGen`) |
 
-   Rock Band pro drums make yellow, blue and green cymbals unless a tom marker covers the note; a chart with no markers and no `pro_drums` in `song.ini` is read as all toms. With an `[ENABLE_CHART_DYNAMICS]` text event, velocity 1 is a ghost note and 127 an accent. The tempo map becomes the stored beat grid (`ReadMidiBeats`), and the first tempo event the BPM. Rock Band data has no hi-hat open/closed/pedal, rimshots, splash or china; those come from charting in the Track Editor. Returns `false` (folder skipped) when no `PART DRUMS` track exists.
+   Rock Band pro drums make yellow, blue and green cymbals unless a tom marker covers the note; a chart with no markers and no `pro_drums` in `song.ini` is read as all toms. With an `[ENABLE_CHART_DYNAMICS]` text event, velocity 1 is a ghost note and 127 an accent. The tempo map becomes the stored beat grid (`ReadMidiBeats`), and the first tempo event the BPM. Rock Band data has no hi-hat open/closed/pedal, rimshots, splash or china; those come from charting in the Track Editor, and the pedal also from note 102. Returns `false` (folder skipped) when no `PART DRUMS` track exists.
 
    Files are read through `CustomTrackDefineTest::ReadMidi`, which rewrites running status that continues after a meta event (common in Rock Band exports, rejected by `smf::MidiFile`: it dropped all but two notes of one bundled chart) before parsing.
 
@@ -152,7 +155,7 @@ An index from the old script (no `FileSizes`, `Version` or hash file) still work
 
 **Drum phrases.** `TrackData::m_starPower`, `m_drumFills` and `m_drumSolos` are spans saved as `"StarPower"`, `"DrumFills"` and `"DrumSolos"` (`[[start, end], ...]`, omitted when empty) beside `"Beats"`. `ReadMidiDrumPhrases` imports them from PART DRUMS notes 116, 120-124 and 103. They are charted and editable only: gameplay has no star power meter, activation or solo bonus yet.
 
-**Tests.** `Game/Tests/Source/` builds into `MitchEngine_Tests`: chart save/load round trips, the MIDI phrase import, `BeatGrid`, and `ChartDocument` (move, undo, clipboard, duplicate, cancel). `Assets/Scenes/Tests/TrackEditorFlows.edscript` drives the editor on a copy of `Assets/Scenes/Tests/TrackEditorFixture/`, including a preview session in each mode:
+**Tests.** `Game/Tests/Source/` builds into `MitchEngine_Tests`: chart save/load round trips, the MIDI note and phrase import, `BeatGrid`, and `ChartDocument` (move, undo, clipboard, duplicate, cancel). `Assets/Scenes/Tests/TrackEditorFlows.edscript` drives the editor on a copy of `Assets/Scenes/Tests/TrackEditorFixture/`, including a preview session in each mode:
 
 ```bash
 Engine/Tools/RunEditorFlows.py --editor .build/Editor_Debug/Havana --wrapper Engine/Tools/Headless.sh --only TrackEditor

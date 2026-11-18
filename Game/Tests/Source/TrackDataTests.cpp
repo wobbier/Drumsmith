@@ -4,6 +4,7 @@
 #include "CoreGame/TrackList.h"
 #include "JSON.h"
 #include "MidiFile.h"
+#include <algorithm>
 #include <sstream>
 
 namespace
@@ -166,6 +167,62 @@ TEST_CASE( "MIDI import: star power, drum solos and fills come from PART DRUMS" 
     REQUIRE( chart.m_drumFills.size() == 1 );
     CHECK( chart.m_drumFills[0].m_start == doctest::Approx( 5.0 ) );
     CHECK( chart.m_drumFills[0].m_end == doctest::Approx( 6.0 ) );
+}
+
+
+TEST_CASE( "MIDI import: note 102 in PART DRUMS is the hi-hat pedal, beside Rock Band's gems" )
+{
+    smf::MidiFile midi;
+    midi.absoluteTicks();
+    midi.setTicksPerQuarterNote( 480 );
+    const int track = midi.addTrack();
+    midi.addTempo( 0, 0, 120.0 );
+    midi.addTrackName( track, 0, "PART DRUMS" );
+    // 120 BPM: 480 ticks is half a second. A crash with the foot under it, the foot alone, then
+    // a five-lane chart's orange gem (101), which is not a pad here.
+    const std::vector<std::pair<int, int>> notes = { { 960, 100 }, { 960, 102 }, { 1440, 102 }, { 1920, 101 }, { 1920, 97 } };
+    for( const auto& [tick, key] : notes )
+    {
+        midi.addNoteOn( track, tick, 0, key, 100 );
+        midi.addNoteOff( track, tick + 60, 0, key );
+    }
+    midi.sortTracks();
+    std::stringstream file;
+    midi.write( file );
+    smf::MidiFile read;
+    REQUIRE( read.read( file ) );
+    read.doTimeAnalysis();
+
+    TrackData chart;
+    CustomTrackDefineTest::ReadMidiDrumNotes( read, track, true, chart );
+
+    std::vector<std::pair<float, PadId>> found;
+    for( const NoteData& note : chart.m_noteData )
+    {
+        found.push_back( { note.m_triggerTime, note.m_editorLane } );
+    }
+    std::sort( found.begin(), found.end() );
+    REQUIRE( found.size() == 4 );
+    CHECK( chart.m_noteCount == 4 );
+    CHECK( found[0].first == doctest::Approx( 1.0 ) );
+    CHECK( found[0].second == PadId::Crash1 );
+    CHECK( found[1].first == doctest::Approx( 1.0 ) );
+    CHECK( found[1].second == PadId::HiHatPedal );
+    CHECK( found[2].first == doctest::Approx( 1.5 ) );
+    CHECK( found[2].second == PadId::HiHatPedal );
+    CHECK( found[3].second == PadId::Snare );
+
+    // The pedal's notes survive the chart's own files.
+    json saved;
+    chart.OnSaveNoteData( saved );
+    TrackData loaded;
+    loaded.OnLoadNoteData( saved );
+    int pedals = 0;
+    for( const NoteData& note : loaded.m_noteData )
+    {
+        pedals += note.m_editorLane == PadId::HiHatPedal ? 1 : 0;
+    }
+    CHECK( pedals == 2 );
 }
 
 
