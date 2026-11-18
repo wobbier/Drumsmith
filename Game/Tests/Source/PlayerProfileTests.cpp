@@ -126,3 +126,48 @@ TEST_CASE( "Profile: it round-trips through its file, and a broken file starts f
     std::filesystem::remove( file );
     std::filesystem::remove( file.string() + ".bad" );
 }
+
+
+TEST_CASE( "Profile: the recent songs are the latest first, each once, and SeenTier round-trips" )
+{
+    PlayerProfile profile( "" );
+    for( const char* song : { "A", "B", "C", "A" } )
+    {
+        profile.RecordSong( song, Result( 10, 50.0, 1, 1, 2 ) );
+    }
+    REQUIRE( profile.RecentSongs.size() == 3 );
+    CHECK( profile.RecentSongs[0] == "A" );
+    CHECK( profile.RecentSongs[1] == "C" );
+    CHECK( profile.RecentSongs[2] == "B" );
+    for( int i = 0; i < 20; ++i )
+    {
+        profile.RecordSong( "Song " + std::to_string( i ), Result( 10, 50.0, 1, 1, 2 ) );
+    }
+    CHECK( profile.RecentSongs.size() == PlayerProfile::kRecentSongs );
+    CHECK( profile.RecentSongs[0] == "Song 19" );
+
+    // A new profile hasn't seen a room; one from before SeenTier existed has seen its own.
+    PlayerProfile fresh( "" );
+    CHECK( fresh.SeenTier == -1 );
+    PlayerProfile old( "" );
+    old.FromJson( json::parse( R"({ "HideoutTier": 1 })" ) );
+    CHECK( old.SeenTier == 1 );
+    old.SeenTier = 0;
+    PlayerProfile copy( "" );
+    copy.FromJson( old.ToJson() );
+    CHECK( copy.SeenTier == 0 );
+    CHECK( copy.RecentSongs.empty() );
+}
+
+
+TEST_CASE( "Profile: a lesson can be marked passed and unpassed without playing it" )
+{
+    PlayerProfile profile( "" );
+    profile.SetLessonPassed( "flam", true );
+    CHECK( profile.LessonPassed( "flam" ) );
+    CHECK( profile.LessonsPassed() == 1 );
+    profile.SetLessonPassed( "flam", false );
+    CHECK_FALSE( profile.LessonPassed( "flam" ) );
+    profile.SetLessonPassed( "", true );
+    CHECK( profile.LessonsPassed() == 0 );
+}

@@ -1,5 +1,6 @@
 #include "Hideout/Hideout.h"
 #include "CLog.h"
+#include "Dementia.h"
 #include "Components/Camera.h"
 #include "Components/Lighting/Light.h"
 #include "Components/Graphics/Mesh.h"
@@ -26,15 +27,17 @@
 #include "World/SceneSerializer.h"
 #include "World/SceneStreaming.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <ctime>
 #include <functional>
 
 namespace
 {
     const char* KindName( int inKind )
     {
-        static const char* kNames[] = { "PLAY", "PRACTICE", "RADIO", "DLC", "RECORDS", "SETTINGS", "GIGS", "EXIT" };
+        static const char* kNames[] = { "PLAY", "PRACTICE", "RADIO", "DLC", "RECORDS", "SETTINGS", "GIGS", "EXIT", "WISHLIST" };
         return inKind >= 0 && inKind < static_cast<int>( std::size( kNames ) ) ? kNames[inKind] : "";
     }
 
@@ -43,7 +46,7 @@ namespace
     const char* KindHint( int inKind )
     {
         static const char* kHints[] = { "The kit: play a song", "The practice pad: lessons", "The radio", "The laptop: more songs",
-            "The wall: your records", "The mixer: settings", "The board: gigs", "Leave" };
+            "The wall: your records", "The mixer: settings", "The board: gigs", "Leave", "The gear still to come" };
         return inKind >= 0 && inKind < static_cast<int>( std::size( kHints ) ) ? kHints[inKind] : "";
     }
 
@@ -96,6 +99,110 @@ namespace
         std::snprintf( text, sizeof( text ), "%.2f%%", inValue );
         return text;
     }
+
+
+    // Seconds since midnight on the player's own clock.
+    double LocalSeconds()
+    {
+        const auto now = std::chrono::system_clock::now();
+        const std::time_t seconds = std::chrono::system_clock::to_time_t( now );
+        std::tm local{};
+#if USING( ME_PLATFORM_WINDOWS )
+        localtime_s( &local, &seconds );
+#else
+        localtime_r( &seconds, &local );
+#endif
+        const double fraction = std::chrono::duration<double>( now.time_since_epoch() ).count();
+        return local.tm_hour * 3600.0 + local.tm_min * 60.0 + local.tm_sec + ( fraction - std::floor( fraction ) );
+    }
+
+
+    // UTF-8 text by letters rather than bytes: how many, and a run of them.
+    size_t Letters( const std::string& inText )
+    {
+        size_t count = 0;
+        for( const unsigned char c : inText )
+        {
+            count += ( c & 0xC0 ) != 0x80 ? 1 : 0;
+        }
+        return count;
+    }
+
+
+    std::string LetterRun( const std::string& inText, size_t inFirst, size_t inCount )
+    {
+        size_t letter = 0;
+        size_t begin = std::string::npos;
+        size_t end = inText.size();
+        for( size_t i = 0; i < inText.size(); ++i )
+        {
+            if( ( static_cast<unsigned char>( inText[i] ) & 0xC0 ) == 0x80 )
+            {
+                continue;
+            }
+            if( letter == inFirst )
+            {
+                begin = i;
+            }
+            if( letter == inFirst + inCount )
+            {
+                end = i;
+                break;
+            }
+            ++letter;
+        }
+        return begin == std::string::npos ? std::string() : inText.substr( begin, end - begin );
+    }
+
+
+    std::string Capitals( std::string inText )
+    {
+        std::transform( inText.begin(), inText.end(), inText.begin(), []( unsigned char c ) { return static_cast<char>( c < 0x80 ? std::toupper( c ) : c ); } );
+        return inText;
+    }
+}
+
+
+Hideout::TimeOfDay& Hideout::TimeOverride()
+{
+    // --hideout-time day|night, until the debug menu changes it.
+    static TimeOfDay time = [] {
+        const std::string option = CommandLine::GetString( "--hideout-time" );
+        return option == "day" ? TimeOfDay::Day : option == "night" ? TimeOfDay::Night : TimeOfDay::Auto;
+    }();
+    return time;
+}
+
+
+double Hideout::ClockSeconds()
+{
+    const double real = LocalSeconds();
+    // An overridden time of day keeps the real minutes on a mid-afternoon or late-night hour.
+    switch( TimeOverride() )
+    {
+    case TimeOfDay::Day: return 14.0 * 3600.0 + std::fmod( real, 3600.0 );
+    case TimeOfDay::Night: return 23.0 * 3600.0 + std::fmod( real, 3600.0 );
+    case TimeOfDay::Auto: break;
+    }
+    return real;
+}
+
+
+bool Hideout::IsDay()
+{
+    const double hour = ClockSeconds() / 3600.0;
+    return hour >= 7.0 && hour < 19.0;
+}
+
+
+bool Hideout::DebugAllowed()
+{
+#if USING( ME_RETAIL )
+    static const bool allowed = CommandLine::Has( "--hideout-debug" );
+    return allowed;
+#else
+    return true;
+#endif
 }
 
 
@@ -106,6 +213,7 @@ Hideout::~Hideout()
         TrackRadio::GetInstance().SetSpeaker( 1.f, 0.f, 1.f );
     }
     m_band.Clear();
+    m_bandKit.Clear();
     m_kit.Clear();
 }
 
@@ -144,11 +252,13 @@ void Hideout::BuildBand( const TrackData* inTrack )
     static const std::vector<BeatData> kNoBeats;
     const bool chart = !m_chart.m_noteData.empty();
     Transform* stage = m_stage ? m_stage->TryGetComponent<Transform>() : nullptr;
-    if( !stage )
+    if( !stage || !m_world )
     {
         return;
     }
-    m_band.Build( m_kit, stage, plan, m_chart.m_venue, chart ? m_chart.m_noteData : kNoNotes, chart ? m_chart.m_beats : kNoBeats, static_cast<float>( m_chart.m_bpm ) );
+    // The last song's drummer and kit go (Begin clears what the kit made before).
+    m_bandKit.Begin( *m_world );
+    m_band.Build( m_bandKit, stage, plan, m_chart.m_venue, chart ? m_chart.m_noteData : kNoNotes, chart ? m_chart.m_beats : kNoBeats, static_cast<float>( m_chart.m_bpm ) );
 }
 
 
@@ -393,6 +503,19 @@ void Hideout::UpdateMotions( float inDeltaTime )
             transform->SetPosition( motion.BasePosition + motion.Axis * ( motion.Amount * bob ) );
             break;
         }
+        case HideoutMotion::Kind::Hour:
+        case HideoutMotion::Kind::Minute:
+        case HideoutMotion::Kind::Second:
+        {
+            // A full turn: twelve hours, an hour, a minute. The second hand ticks.
+            const double clock = ClockSeconds();
+            const auto kind = static_cast<HideoutMotion::Kind>( motion.Kind );
+            const double turn = kind == HideoutMotion::Kind::Hour ? std::fmod( clock, 43200.0 ) / 43200.0
+                : kind == HideoutMotion::Kind::Minute ? std::fmod( clock, 3600.0 ) / 3600.0
+                : std::floor( std::fmod( clock, 60.0 ) ) / 60.0;
+            transform->SetRotation( motion.BaseEuler + motion.Axis * static_cast<float>( turn * 360.0 ) );
+            break;
+        }
         }
     }
 }
@@ -429,7 +552,8 @@ void Hideout::ApplyRadio( float inDeltaTime )
 const std::vector<const char*>& Hideout::Events()
 {
     static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play", "band_name_edit",
-        "band_name_save", "band_name_cancel" };
+        "band_name_save", "band_name_cancel", "debug_toggle", "debug_room", "debug_move_in", "debug_item", "debug_items", "debug_gig", "debug_step",
+        "debug_time", "debug_evaluate", "debug_intro", "debug_tour", "debug_overlay", "debug_name", "debug_restore", "debug_reset", "debug_reload" };
     return kEvents;
 }
 
@@ -439,7 +563,7 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetNumber( inModel, "hideout", 0 );
     inUi.ModelSetNumber( inModel, "hideout_tier", 0 );
     inUi.ModelSetNumber( inModel, "hideout_focus", -1 );
-    for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_title", "hideout_hint", "hideout_status", "hideout_reveal" } )
+    for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_notice_title", "hideout_title", "hideout_hint", "hideout_status", "hideout_reveal" } )
     {
         inUi.ModelSetString( inModel, key, "" );
     }
@@ -449,6 +573,19 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetString( inModel, "band_name_input", "" );
     inUi.ModelSetListCount( inModel, "records", 0 );
     inUi.ModelSetListCount( inModel, "gigs", 0 );
+    inUi.ModelSetListCount( inModel, "wishes", 0 );
+    // The debug menu (HideoutDebug.cpp).
+    inUi.ModelSetNumber( inModel, "debug_allowed", DebugAllowed() ? 1 : 0 );
+    inUi.ModelSetNumber( inModel, "debug_open", 0 );
+    inUi.ModelSetNumber( inModel, "debug_overlay_hidden", 0 );
+    inUi.ModelSetNumber( inModel, "debug_time", 0 );
+    inUi.ModelSetNumber( inModel, "debug_backup", 0 );
+    inUi.ModelSetString( inModel, "debug_status", "" );
+    inUi.ModelSetString( inModel, "debug_clock", "" );
+    for( const char* list : { "debug_rooms", "debug_items", "debug_gigs", "debug_steps" } )
+    {
+        inUi.ModelSetListCount( inModel, list, 0 );
+    }
 }
 
 
@@ -459,10 +596,37 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
     GigSession::GetInstance().End();
     m_world = &inWorld;
     m_camera = inCamera;
+    return Load( true );
+}
+
+
+bool Hideout::Reload( bool inEvaluate )
+{
+    if( !m_world || !m_camera )
+    {
+        return false;
+    }
+    // The camera stays where it is and eases to the new room's overview.
+    const Pose current = m_current;
+    const bool hadCurrent = m_hasCurrent;
+    Clear();
+    const bool loaded = Load( inEvaluate );
+    if( hadCurrent && m_intro < 0.f && m_chosen < 0 )
+    {
+        m_current = current;
+        m_hasCurrent = true;
+    }
+    return loaded;
+}
+
+
+bool Hideout::Load( bool inEvaluate )
+{
+    World& inWorld = *m_world;
     PlayerProfile& profile = PlayerProfile::GetInstance();
     const Progression& progression = Progression::GetInstance();
     // A first visit gets the first room's things; anything a rules change opened shows too.
-    if( !progression.Evaluate( profile ).empty() )
+    if( inEvaluate && !progression.Evaluate( profile ).empty() )
     {
         profile.Save();
     }
@@ -493,6 +657,13 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         YIKES( "Hideout: " + scenePath + " has no entities" );
         return false;
     }
+    // Moving in: the first visit to a room above the last one shown (PlayerProfile::SeenTier).
+    m_movingIn = profile.HideoutTier > profile.SeenTier;
+    if( m_movingIn )
+    {
+        profile.SeenTier = profile.HideoutTier;
+        profile.Save();
+    }
 
     // Every entity under the roots, parents first.
     std::vector<Entity*> entities;
@@ -508,12 +679,70 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         if( root && root->TryGetComponent<Transform>() ) walk( root->GetComponent<Transform>() );
     }
 
-    bool hasView = false;
+    // What isn't in the room this visit: items not unlocked yet (or the stand-ins of those that
+    // are), the other time of day's things, the boxes once they're unpacked.
+    const auto unlocked = [&]( const std::string& inSlot, bool& outNamed ) {
+        outNamed = false;
+        for( const ProgressionItem& item : progression.Items() )
+        {
+            if( item.Slot == inSlot )
+            {
+                outNamed = true;
+                if( profile.UnlockedItems.count( "item:" + item.Id ) > 0 || progression.UnlockAll )
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    const bool day = IsDay();
+    std::vector<Entity*> removed;
     int hidden = 0;
     for( Entity* entity : entities )
     {
+        bool remove = false;
+        if( HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>() )
+        {
+            bool named = false;
+            const bool in = unlocked( slot->Slot, named );
+            remove = named && ( slot->WhenLocked ? in : !in );
+            hidden += remove && !slot->WhenLocked ? 1 : 0;
+        }
+        if( HideoutWhen* when = entity->TryGetComponent<HideoutWhen>() )
+        {
+            switch( when->Show )
+            {
+            case HideoutWhen::When::Day: remove = remove || !day; break;
+            case HideoutWhen::When::Night: remove = remove || day; break;
+            case HideoutWhen::When::MovingIn: remove = remove || !m_movingIn; break;
+            case HideoutWhen::When::Settled: remove = remove || m_movingIn; break;
+            }
+        }
+        if( remove )
+        {
+            entity->MarkForDelete();
+            removed.push_back( entity );
+        }
+    }
+    // Under something taken out (its children go with it).
+    const auto gone = [&removed]( Transform* inTransform ) {
+        for( Transform* up = inTransform; up; up = up->GetParentTransform() )
+        {
+            if( std::find( removed.begin(), removed.end(), up->Parent.Get() ) != removed.end() )
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    bool hasView = false;
+    m_hasIntro = false;
+    for( Entity* entity : entities )
+    {
         Transform* transform = entity->TryGetComponent<Transform>();
-        if( !transform )
+        if( !transform || gone( transform ) )
         {
             continue;
         }
@@ -527,19 +756,17 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
             m_overview.Target = m_overview.Eye + Vector3( std::sin( yaw ) * std::cos( pitch ), -std::sin( pitch ), std::cos( yaw ) * std::cos( pitch ) ) * 10.f;
             m_overview.FieldOfView = view->FieldOfView;
             hasView = true;
-            // Once a session, and not when a capture asks for a station.
+            m_hasIntro = view->IntroEye.x != 0.f || view->IntroEye.y != 0.f || view->IntroEye.z != 0.f;
+            m_introFrom.Eye = view->IntroEye;
+            m_introFrom.Target = view->IntroTarget;
+            m_introFrom.FieldOfView = view->FieldOfView + 8.f;
+            // Once a session (and on moving in), not when a capture asks for a station.
             static bool introPlayed = false;
             const bool capture = CommandLine::Has( "--hideout-look" ) || CommandLine::Has( "--hideout-station" ) || CommandLine::Has( "--gig" );
-            const bool hasIntro = view->IntroEye.x != 0.f || view->IntroEye.y != 0.f || view->IntroEye.z != 0.f;
-            if( hasIntro && !introPlayed && !capture && !CommandLine::Has( "--no-hideout-intro" ) )
+            if( m_hasIntro && ( !introPlayed || m_movingIn ) && !capture && !CommandLine::Has( "--no-hideout-intro" ) )
             {
                 introPlayed = true;
-                m_intro = 0.f;
-                m_introFrom.Eye = view->IntroEye;
-                m_introFrom.Target = view->IntroTarget;
-                m_introFrom.FieldOfView = FitToWindow( view->FieldOfView + 8.f );
-                m_current = m_introFrom;
-                m_hasCurrent = true;
+                ReplayIntro();
             }
         }
         if( HideoutStation* marker = entity->TryGetComponent<HideoutStation>() )
@@ -554,82 +781,24 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         }
         if( HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>() )
         {
-            // The slot's item, when one names it: away until it's unlocked.
-            for( const ProgressionItem& item : progression.Items() )
+            if( !slot->WhenLocked )
             {
-                if( item.Slot == slot->Slot && profile.UnlockedItems.count( "item:" + item.Id ) == 0 && !progression.UnlockAll )
-                {
-                    entity->MarkForDelete();
-                    ++hidden;
-                    break;
-                }
-            }
-        }
-    }
-    // The props' motions, but not under an item slot that was just taken away.
-    std::vector<Entity*> hiddenSlots;
-    for( Entity* entity : entities )
-    {
-        if( HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>() )
-        {
-            for( const ProgressionItem& item : progression.Items() )
-            {
-                if( item.Slot == slot->Slot && profile.UnlockedItems.count( "item:" + item.Id ) == 0 && !progression.UnlockAll )
-                {
-                    hiddenSlots.push_back( entity );
-                }
+                m_slots.emplace_back( slot->Slot, transform->Parent );
             }
         }
     }
     // The items just unlocked (PlayerProfile::NewItems), each where its slot's pieces are.
-    m_reveals.clear();
-    for( const std::string& id : profile.NewItems )
+    Tour( profile.NewItems );
+    if( m_reveals.empty() )
     {
-        const ProgressionItem* item = progression.FindItem( id );
-        if( !item )
-        {
-            continue;
-        }
-        for( Entity* entity : entities )
-        {
-            HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>();
-            if( !slot || slot->Slot != item->Slot )
-            {
-                continue;
-            }
-            // The middle of its pieces (a slot's own position is usually the room's origin).
-            Vector3 sum;
-            int count = 0;
-            const std::function<void( Transform& )> gather = [&]( Transform& inTransform ) {
-                for( Transform* child : inTransform.GetChildren() )
-                {
-                    if( !child ) continue;
-                    sum = sum + child->GetWorldPosition();
-                    ++count;
-                    gather( *child );
-                }
-            };
-            gather( entity->GetComponent<Transform>() );
-            m_reveals.push_back( { item->Name, count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : entity->GetComponent<Transform>().GetWorldPosition() } );
-            break;
-        }
+        m_reveal = -1;
     }
-    m_reveal = -1;
     m_motions.clear();
     for( Entity* entity : entities )
     {
         HideoutMotion* marker = entity->TryGetComponent<HideoutMotion>();
         Transform* transform = entity->TryGetComponent<Transform>();
-        if( !marker || !transform )
-        {
-            continue;
-        }
-        bool hidden = false;
-        for( Transform* up = transform; up && !hidden; up = up->GetParentTransform() )
-        {
-            hidden = std::find( hiddenSlots.begin(), hiddenSlots.end(), up->Parent.Get() ) != hiddenSlots.end();
-        }
-        if( hidden )
+        if( !marker || !transform || gone( transform ) )
         {
             continue;
         }
@@ -660,25 +829,48 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         motion.Random = 0x9E3779B9u ^ static_cast<uint32_t>( m_motions.size() * 2654435761u );
         m_motions.push_back( motion );
     }
-    // The band's name, wherever the room shows it.
+    // The band's name, wherever the room shows it, and the other words that come from the player.
     m_bandNameParts.clear();
+    m_readouts.clear();
     for( Entity* entity : entities )
     {
+        Transform* transform = entity->TryGetComponent<Transform>();
+        if( !transform || gone( transform ) )
+        {
+            continue;
+        }
         if( HideoutBandName* marker = entity->TryGetComponent<HideoutBandName>() )
         {
             BandNamePart part;
-            part.Entity = entity->GetComponent<Transform>().Parent;
+            part.Entity = transform->Parent;
             part.Named = marker->Show == HideoutBandName::When::Named;
             part.FitLetters = std::max( 1, marker->FitLetters );
-            part.Scale = entity->GetComponent<Transform>().GetScale();
+            part.Scale = transform->GetScale();
             if( TextRenderer* text = entity->TryGetComponent<TextRenderer>() )
             {
                 part.TextSize = text->Size;
             }
             m_bandNameParts.push_back( part );
         }
+        if( HideoutReadout* marker = entity->TryGetComponent<HideoutReadout>() )
+        {
+            if( entity->TryGetComponent<TextRenderer>() )
+            {
+                Readout readout;
+                readout.Entity = transform->Parent;
+                readout.Source = static_cast<int>( marker->Show );
+                readout.Line = marker->Line;
+                readout.Item = marker->Item;
+                readout.Prefix = marker->Prefix;
+                readout.MaxLetters = marker->MaxLetters;
+                readout.Upper = marker->Upper;
+                readout.Scroll = marker->Scroll;
+                m_readouts.push_back( readout );
+            }
+        }
     }
     ApplyBandName();
+    UpdateReadouts( 0.f );
     // The hover light: off until a label is pointed at.
     m_highlight = inWorld.CreateEntity( "Hideout Hover Light" );
     if( m_highlight )
@@ -692,7 +884,8 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
     // The drummer, at the first HideoutDrummer (built on the first update, once the radio is known).
     for( Entity* entity : entities )
     {
-        if( HideoutDrummer* drummer = entity->TryGetComponent<HideoutDrummer>() )
+        HideoutDrummer* drummer = entity->TryGetComponent<HideoutDrummer>();
+        if( drummer && !gone( &entity->GetComponent<Transform>() ) )
         {
             Transform& transform = entity->GetComponent<Transform>();
             m_hasDrummer = true;
@@ -710,6 +903,23 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         m_overview.Eye = Vector3( 0.f, 1.7f, -3.f );
         m_overview.Target = Vector3( 0.f, 1.f, 2.f );
     }
+    // --hideout-eye x,y,z --hideout-target x,y,z [--hideout-fov deg]: the overview from anywhere
+    // (captures of something that isn't a station).
+    const auto point = []( const char* inOption, Vector3& outPoint ) {
+        float x = 0.f, y = 0.f, z = 0.f;
+        const std::string text = CommandLine::GetString( inOption );
+        if( !text.empty() && std::sscanf( text.c_str(), "%f,%f,%f", &x, &y, &z ) == 3 )
+        {
+            outPoint = Vector3( x, y, z );
+            return true;
+        }
+        return false;
+    };
+    if( point( "--hideout-eye", m_overview.Eye ) && point( "--hideout-target", m_overview.Target ) )
+    {
+        m_overview.FieldOfView = static_cast<float>( CommandLine::GetInt( "--hideout-fov", static_cast<int>( m_overview.FieldOfView ) ) );
+        m_intro = -1.f;
+    }
     if( !profile.NewItems.empty() )
     {
         profile.NewItems.clear();
@@ -723,7 +933,15 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         profile.Save();
     }
     m_ready = true;
-    INFO_FMT( "[Hideout]", "%s: %d stations, %d locked items hidden, %d notices", scenePath.c_str(), static_cast<int>( m_stations.size() ), hidden, static_cast<int>( m_notices.size() ) );
+    // --hideout-debug-open: the debug menu open from the start (captures of it).
+    static bool debugOpened = false;
+    if( !debugOpened && DebugAllowed() && CommandLine::Has( "--hideout-debug-open" ) )
+    {
+        debugOpened = true;
+        m_debugOpen = true;
+    }
+    INFO_FMT( "[Hideout]", "%s: %d stations, %d locked items hidden, %d notices, %s%s", scenePath.c_str(), static_cast<int>( m_stations.size() ), hidden,
+        static_cast<int>( m_notices.size() ), day ? "day" : "night", m_movingIn ? ", moving in" : "" );
     // --gig <id> [--gig-songs N] plays a gig straight away, once (for headless checks).
     static bool gigStarted = false;
     static const std::string kGig = CommandLine::GetString( "--gig" );
@@ -770,6 +988,73 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
 }
 
 
+void Hideout::ReplayIntro()
+{
+    if( !m_hasIntro )
+    {
+        return;
+    }
+    m_intro = 0.f;
+    m_chosen = -1;
+    m_introFrom.FieldOfView = FitToWindow( m_overview.FieldOfView + 8.f );
+    m_current = m_introFrom;
+    m_hasCurrent = true;
+}
+
+
+void Hideout::Tour( const std::vector<std::string>& inItems )
+{
+    const Progression& progression = Progression::GetInstance();
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
+    std::vector<std::string> ids = inItems;
+    if( ids.empty() && !m_slots.empty() && m_ready )
+    {
+        // Everything that's in the room, in the order the journey gives it.
+        for( const ProgressionItem& item : progression.Items() )
+        {
+            if( profile.UnlockedItems.count( "item:" + item.Id ) > 0 || progression.UnlockAll )
+            {
+                ids.push_back( item.Id );
+            }
+        }
+    }
+    m_reveals.clear();
+    for( const std::string& id : ids )
+    {
+        const ProgressionItem* item = progression.FindItem( id );
+        if( !item )
+        {
+            continue;
+        }
+        for( const auto& [slotName, entity] : m_slots )
+        {
+            if( slotName != item->Slot || !entity )
+            {
+                continue;
+            }
+            // The middle of its pieces (a slot's own position is usually the room's origin).
+            Vector3 sum;
+            int count = 0;
+            const std::function<void( Transform& )> gather = [&]( Transform& inTransform ) {
+                for( Transform* child : inTransform.GetChildren() )
+                {
+                    if( !child ) continue;
+                    sum = sum + child->GetWorldPosition();
+                    ++count;
+                    gather( *child );
+                }
+            };
+            Transform& transform = entity->GetComponent<Transform>();
+            gather( transform );
+            m_reveals.push_back( { item->Name, count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : transform.GetWorldPosition() } );
+            break;
+        }
+    }
+    m_reveal = -1;
+    m_revealAge = 0.f;
+}
+
+
 void Hideout::Clear()
 {
     for( EntityHandle& root : m_roots )
@@ -782,11 +1067,28 @@ void Hideout::Clear()
         m_highlight->MarkForDelete();
     }
     m_highlight = EntityHandle();
+    m_band.Clear();
+    m_bandKit.Clear();
+    m_kit.Clear();
+    m_stage = EntityHandle();
+    m_hasDrummer = false;
+    m_bandTrack = reinterpret_cast<const void*>( 1 );
+    m_bandShown = true;
     m_stations.clear();
+    m_slots.clear();
+    m_motions.clear();
+    m_readouts.clear();
+    m_bandNameParts.clear();
+    m_reveals.clear();
+    m_reveal = -1;
+    m_intro = -1.f;
+    m_hasIntro = false;
     m_ready = false;
     m_chosen = -1;
     m_panel.clear();
     m_hasCurrent = false;
+    m_hover = -1;
+    m_highlightLevel = 0.f;
 }
 
 
@@ -850,6 +1152,11 @@ bool Hideout::Back()
     if( !m_ready )
     {
         return false;
+    }
+    if( m_debugOpen )
+    {
+        m_debugOpen = false;
+        return true;
     }
     if( m_noticeShown )
     {
@@ -984,7 +1291,7 @@ void Hideout::UpdateLabels( RmlUiCore& inUi, const char* inModel )
     }
     std::sort( order.begin(), order.end(), [&spots]( int a, int b ) { return spots[a].Y < spots[b].Y; } );
     constexpr float kLabelWidth = 19.f;
-    constexpr float kLabelHeight = 7.f;
+    constexpr float kLabelHeight = 8.5f;
     for( size_t a = 0; a < order.size(); ++a )
     {
         for( size_t b = 0; b < a; ++b )
@@ -1011,6 +1318,167 @@ void Hideout::UpdateLabels( RmlUiCore& inUi, const char* inModel )
         // Kept clear of the screen's edges (above), so a label at the side of the room isn't cut off.
         inUi.ModelSetItemString( inModel, "stations", i, "left", Percent( spots[i].X ) );
         inUi.ModelSetItemString( inModel, "stations", i, "top", Percent( std::min( spots[i].Y, 92.f ) ) );
+    }
+}
+
+
+void Hideout::UpdateReadouts( float inDeltaTime )
+{
+    m_readoutTime += inDeltaTime;
+    if( m_readouts.empty() )
+    {
+        return;
+    }
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
+    const Progression& progression = Progression::GetInstance();
+    if( profile.RecentSongs != m_recentKeys )
+    {
+        m_recentKeys = profile.RecentSongs;
+        m_recentNames.clear();
+        const std::vector<TrackData>& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+        for( const std::string& key : m_recentKeys )
+        {
+            const auto track = std::find_if( tracks.begin(), tracks.end(), [&key]( const TrackData& inTrack ) { return TrackDatabase::FavoriteKey( inTrack ) == key; } );
+            m_recentNames.push_back( track != tracks.end() && !track->m_trackName.empty() ? track->m_trackName : key );
+        }
+    }
+    const TrackData* playing = TrackRadio::GetInstance().GetCurrentTrack();
+    // The wishlist: what the journey gives, leaving out what the first room comes with.
+    std::vector<const ProgressionItem*> wishes;
+    const ProgressionTier* first = progression.TierAt( 0 );
+    for( const ProgressionItem& item : progression.Items() )
+    {
+        if( !first || std::find( first->Rewards.begin(), first->Rewards.end(), item.Id ) == first->Rewards.end() )
+        {
+            wishes.push_back( &item );
+        }
+    }
+    for( Readout& readout : m_readouts )
+    {
+        std::string text;
+        switch( static_cast<HideoutReadout::Source>( readout.Source ) )
+        {
+        case HideoutReadout::Source::NowPlaying:
+            if( playing )
+            {
+                text = playing->m_trackName + ( playing->m_artistName.empty() ? std::string() : " - " + playing->m_artistName );
+            }
+            break;
+        case HideoutReadout::Source::RecentSong:
+            if( readout.Line >= 0 && readout.Line < static_cast<int>( m_recentNames.size() ) )
+            {
+                text = m_recentNames[readout.Line];
+            }
+            else if( readout.Line == static_cast<int>( m_recentNames.size() ) && playing )
+            {
+                // Nothing played yet: the setlist starts with whatever's on the radio.
+                text = playing->m_trackName;
+            }
+            break;
+        case HideoutReadout::Source::SongsPlayed: text = std::to_string( profile.SongsPlayed() ); break;
+        case HideoutReadout::Source::FullCombos: text = std::to_string( profile.FullCombos() ); break;
+        case HideoutReadout::Source::GigsPlayed: text = std::to_string( profile.CompletedGigs.size() ); break;
+        case HideoutReadout::Source::LessonsPassed: text = std::to_string( profile.LessonsPassed() ); break;
+        case HideoutReadout::Source::Wishlist:
+        {
+            const ProgressionItem* item = !readout.Item.empty() ? progression.FindItem( readout.Item )
+                : readout.Line >= 0 && readout.Line < static_cast<int>( wishes.size() ) ? wishes[readout.Line] : nullptr;
+            if( item )
+            {
+                const bool in = profile.UnlockedItems.count( "item:" + item->Id ) > 0 || progression.UnlockAll;
+                text = std::string( in ? "[x] " : "[  ] " ) + item->Name;
+            }
+            break;
+        }
+        case HideoutReadout::Source::NextGoal: text = NextGoal(); break;
+        case HideoutReadout::Source::BandName: text = profile.BandName.empty() ? std::string( "BAND NAME TBD" ) : profile.BandName; break;
+        case HideoutReadout::Source::Clock:
+        {
+            const int minutes = static_cast<int>( ClockSeconds() / 60.0 ) % ( 24 * 60 );
+            char clock[8];
+            std::snprintf( clock, sizeof( clock ), "%02d:%02d", minutes / 60, minutes % 60 );
+            text = clock;
+            break;
+        }
+        }
+        if( readout.Upper )
+        {
+            text = Capitals( text );
+        }
+        const size_t letters = Letters( text );
+        const size_t room = readout.MaxLetters > 0 ? static_cast<size_t>( readout.MaxLetters ) : 0;
+        if( room > 0 && letters > room )
+        {
+            if( readout.Scroll > 0.f )
+            {
+                // Round and round: the title, a gap, the title again.
+                const std::string loop = text + "     ";
+                const size_t length = Letters( loop );
+                const size_t first = static_cast<size_t>( m_readoutTime / readout.Scroll ) % length;
+                text = LetterRun( loop + loop, first, room );
+            }
+            else
+            {
+                text = LetterRun( text, 0, room > 3 ? room - 3 : room ) + "...";
+            }
+        }
+        if( !text.empty() )
+        {
+            text = readout.Prefix + text;
+        }
+        if( text != readout.Shown && readout.Entity )
+        {
+            readout.Shown = text;
+            if( TextRenderer* renderer = readout.Entity->TryGetComponent<TextRenderer>() )
+            {
+                renderer->Text = text;
+            }
+        }
+    }
+}
+
+
+void Hideout::FillWishlist( RmlUiCore& inUi, const char* inModel ) const
+{
+    const PlayerProfile& profile = PlayerProfile::GetInstance();
+    const Progression& progression = Progression::GetInstance();
+    // What's still to come first, the nearest first (what can be worked on now, then what needs
+    // something else first, then a later room's), then what's already in.
+    const auto gives = []( const std::vector<std::string>& inRewards, const std::string& inId ) { return std::find( inRewards.begin(), inRewards.end(), inId ) != inRewards.end(); };
+    const auto rank = [&]( const ProgressionItem& inItem ) {
+        if( profile.UnlockedItems.count( "item:" + inItem.Id ) > 0 || progression.UnlockAll )
+        {
+            return 3;
+        }
+        for( const ProgressionTier& tier : progression.Tiers() )
+        {
+            if( gives( tier.Rewards, inItem.Id ) ) return 2;
+        }
+        for( const ProgressionGig& gig : progression.Gigs() )
+        {
+            if( gives( gig.Rewards, inItem.Id ) ) return progression.GigOpen( gig, profile ) ? 0 : 1;
+        }
+        for( const ProgressionLessonStep& step : progression.LessonSteps() )
+        {
+            if( gives( step.Rewards, inItem.Id ) ) return progression.StepOpen( step, profile ) ? 0 : 1;
+        }
+        return 0;
+    };
+    std::vector<const ProgressionItem*> items;
+    for( const ProgressionItem& item : progression.Items() )
+    {
+        items.push_back( &item );
+    }
+    std::stable_sort( items.begin(), items.end(), [&rank]( const ProgressionItem* a, const ProgressionItem* b ) { return rank( *a ) < rank( *b ); } );
+    inUi.ModelSetListCount( inModel, "wishes", static_cast<int>( items.size() ) );
+    for( int i = 0; i < static_cast<int>( items.size() ); ++i )
+    {
+        const ProgressionItem& item = *items[i];
+        const bool in = profile.UnlockedItems.count( "item:" + item.Id ) > 0 || progression.UnlockAll;
+        inUi.ModelSetItemString( inModel, "wishes", i, "name", item.Name );
+        inUi.ModelSetItemString( inModel, "wishes", i, "description", item.Description );
+        inUi.ModelSetItemString( inModel, "wishes", i, "how", in ? std::string() : progression.HowToUnlock( item.Id, profile ) );
+        inUi.ModelSetItemNumber( inModel, "wishes", i, "got", in ? 1 : 0 );
     }
 }
 
@@ -1136,6 +1604,12 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     UpdateMotions( inDeltaTime );
     UpdateDrummer( inDeltaTime );
     UpdateFocus( inDeltaTime );
+    UpdateReadouts( inDeltaTime );
+    if( DebugAllowed() && GetEngine().GetInput().WasKeyPressed( KeyCode::F2 ) )
+    {
+        m_debugOpen = !m_debugOpen;
+    }
+    DebugUpdate( inUi, inModel );
     // The new items' tour: once the notice is read and the camera is in, each new thing in turn.
     if( m_reveal < 0 && !m_reveals.empty() && !m_noticeShown && m_intro < 0.f && m_chosen < 0 )
     {
@@ -1174,6 +1648,7 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     const PlayerProfile& profile = PlayerProfile::GetInstance();
     const ProgressionTier* tier = Progression::GetInstance().TierAt( profile.HideoutTier );
     inUi.ModelSetNumber( inModel, "hideout", 1 );
+    inUi.ModelSetNumber( inModel, "debug_overlay_hidden", m_overlayHidden ? 1 : 0 );
     inUi.ModelSetNumber( inModel, "hideout_tier", profile.HideoutTier );
     inUi.ModelSetNumber( inModel, "hideout_focus", m_chosen );
     inUi.ModelSetString( inModel, "hideout_room", tier ? tier->Name : std::string() );
@@ -1192,6 +1667,7 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
         }
     }
     inUi.ModelSetString( inModel, "hideout_notice", notice );
+    inUi.ModelSetString( inModel, "hideout_notice_title", m_movingIn && tier ? "Welcome to " + tier->Name : std::string( "While you were out" ) );
     const bool chosen = m_chosen >= 0 && m_chosen < static_cast<int>( m_stations.size() );
     inUi.ModelSetString( inModel, "hideout_title", chosen ? m_stations[m_chosen].Label : std::string() );
     inUi.ModelSetString( inModel, "hideout_hint", chosen ? KindHint( m_stations[m_chosen].Kind ) : std::string() );
@@ -1237,6 +1713,10 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
         FillGigs( inUi, inModel );
         m_panel = "gigs";
         return Action::None;
+    case HideoutStation::Kind::Wishlist:
+        FillWishlist( inUi, inModel );
+        m_panel = "wishlist";
+        return Action::None;
     case HideoutStation::Kind::Door:
         return Action::Quit;
     }
@@ -1246,6 +1726,10 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
 
 bool Hideout::HandleEvent( const std::string& inEvent, const json& inArgs, RmlUiCore& inUi, const char* inModel )
 {
+    if( inEvent.rfind( "debug_", 0 ) == 0 )
+    {
+        return DebugEvent( inEvent, inArgs, inUi, inModel );
+    }
     if( inEvent == "station" )
     {
         const int station = static_cast<int>( UIModel::ArgNumber( inArgs, 0, -1.0 ) );

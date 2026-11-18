@@ -5,9 +5,10 @@
 
 Everything is drawn here: concrete block and floor, wood, cardboard, egg cartons, the bedsheet
 banner, the fake bands' posters, the rudiment chart, the gig flyers, the calendar, the setlist, TV
-static, the night outside the window well, sticky notes. Deterministic (fixed noise seeds), so a
-rerun gives the same pictures. Fonts are the system's DejaVu, Liberation, Free and Noto faces (all
-free licences); the band names are made up.
+static, the night (and the day) outside the window well, sticky notes, the wishlist's notebook
+page. Deterministic (fixed noise seeds), so a rerun gives the same pictures. Fonts are the
+system's DejaVu, Liberation, Free and Noto faces, and for anything written by hand the game's own
+Permanent Marker (Apache 2.0) and Gochi Hand (OFL) in Assets/Fonts; the band names are made up.
 """
 import json
 import os
@@ -25,8 +26,8 @@ SERIF = "Noto-Serif-Display-Black"
 SERIF_ITALIC = "Noto-Serif-Display-Black-Italic"
 MONO = "Liberation-Mono-Bold"
 TYPE = "FreeMono-Bold"
-MARKER = "DejaVu-Sans-Bold-Oblique"
-HAND = "Noto-Sans-Italic"
+MARKER = os.path.join(ROOT, "Assets", "Fonts", "PermanentMarker-Regular.ttf")
+HAND = os.path.join(ROOT, "Assets", "Fonts", "GochiHand-Regular.ttf")
 
 
 def magick(*args):
@@ -160,8 +161,8 @@ def banner():
            "-colorspace", "gray", "-resize", f"{w}x{h}!", "-motion-blur", "0x30+80", "-auto-level", "+level", "82%,100%", ")",
            "-compose", "multiply", "-composite", out("Banner"))
     # Overspray first, then the letters, then drips.
-    text = ["-gravity", "center", "-font", HEAVY, "-pointsize", 150, "-annotate", "-4x-4+0-40", "BAND NAME"]
-    text2 = ["-gravity", "center", "-font", HEAVY, "-pointsize", 170, "-annotate", "-2x-2+10+120", "TBD"]
+    text = ["-gravity", "center", "-font", MARKER, "-pointsize", 150, "-annotate", "-4x-4+0-60", "BAND NAME"]
+    text2 = ["-gravity", "center", "-font", MARKER, "-pointsize", 190, "-annotate", "-2x-2+10+110", "TBD"]
     magick(out("Banner"), "(", "-size", f"{w}x{h}", "xc:none", "-fill", "rgba(190,20,26,0.45)", *text, *text2, "-blur", "0x9", ")",
            "-compose", "over", "-composite", "-fill", "rgb(178,14,22)", *text, *text2, out("Banner"))
     rnd = random.Random(52)
@@ -483,6 +484,52 @@ def tv_static():
     finish(n)
 
 
+def window_day():
+    """Through the same glass by day: grass in the sun against a bright sky."""
+    n = "WindowDay"
+    rnd = random.Random(93)
+    blades = []
+    for _ in range(170):
+        x = rnd.randint(0, 512)
+        g = rnd.randint(70, 140)
+        blades += ["-stroke", f"rgb({g // 3},{g},{g // 4})", "-draw", f"line {x},256 {x + rnd.randint(-16, 16)},{rnd.randint(110, 215)}"]
+    magick("-size", "512x256", "gradient:rgb(196,226,255)-rgb(120,170,230)", "(", "-size", "380x380", "radial-gradient:rgb(255,250,220)-black",
+           "-background", "black", "-gravity", "center", "-extent", "512x256", "-roll", "-110-70", ")", "-compose", "screen", "-composite",
+           "-fill", "rgb(70,120,40)", "-draw", "rectangle 0,205 512,256", "-strokewidth", 3, *blades, out(n))
+    magick(out(n), "(", "-size", "512x256", "-seed", 94, "plasma:fractal", "-colorspace", "gray", "-blur", "0x4", "-auto-level", "+level", "62%,100%", ")",
+           "-compose", "multiply", "-composite", out(n))
+    finish(n)
+
+
+def notebook(name, title, seed):
+    """A page torn out of a spiral notebook: blue lines, the red margin, ragged holes, a title in
+    marker (what's written on the lines is the game's: HideoutReadout)."""
+    w, h = 400, 520
+    lines = []
+    for i in range(14):
+        y = 92 + i * 30
+        lines += ["-draw", f"line 0,{y} {w},{y}"]
+    holes = []
+    for i in range(9):
+        y = 30 + i * 56
+        holes += ["-draw", f"circle 14,{y} 14,{y + 7}"]
+    magick("-size", f"{w}x{h}", "xc:rgb(250,250,244)", "-stroke", "rgb(150,185,225)", "-strokewidth", 2, *lines,
+           "-stroke", "rgb(230,120,120)", "-draw", f"line 52,0 52,{h}", "-stroke", "none", "-fill", "rgb(70,62,52)", *holes,
+           "-gravity", "northwest", "-font", MARKER, "-pointsize", 40, "-fill", "rgb(160,24,24)", "-annotate", "-3x-3+70+22", title, out(name))
+    grain(out(name), 0.3, seed)
+    finish(name)
+
+
+def setlist_blank():
+    """The setlist with its title only (the songs on it are the game's: the last ones played)."""
+    n = "SetlistBlank"
+    magick("-size", "320x448", "xc:rgb(252,252,248)", "-gravity", "northwest", "-font", MARKER, "-pointsize", 40,
+           "-fill", "black", "-annotate", "-3x-3+24+16", "SETLIST", "-stroke", "black", "-strokewidth", 3, "-draw", "line 24,76 210,70",
+           out(n))
+    grain(out(n), 0.3, 73)
+    finish(n)
+
+
 def window_night():
     """Through the window well's grimy glass: grass against a streetlit night."""
     n = "WindowNight"
@@ -509,6 +556,9 @@ ALL = {
     "BoxXmas": lambda: cardboard("BoxXmas", "XMAS", seed=112, size=110, color="rgb(170,20,20)"),
     "BoxMoms": lambda: cardboard("BoxMoms", "MOM'S STUFF\nDO NOT TOUCH", seed=113, size=50),
     "BoxCables": lambda: cardboard("BoxCables", "CABLES (??)", seed=114, size=60),
+    "BoxDrums": lambda: cardboard("BoxDrums", "DRUMS\n(MINE)", seed=115, size=80),
+    "BoxStuff": lambda: cardboard("BoxStuff", "MY ROOM\nSTUFF", seed=116, size=64),
+    "BoxFragile": lambda: cardboard("BoxFragile", "FRAGILE!!\ncymbals", seed=117, size=60, color="rgb(170,20,20)"),
     "EggCarton": egg_carton,
     "Pegboard": pegboard,
     "Banner": banner,
@@ -539,6 +589,10 @@ ALL = {
     "Dartboard": dartboard,
     "TvStatic": tv_static,
     "WindowNight": window_night,
+    "WindowDay": window_day,
+    "Notebook": lambda: notebook("Notebook", "GEAR I NEED", 141),
+    "NotebookRehearsal": lambda: notebook("NotebookRehearsal", "GEAR LIST", 142),
+    "SetlistBlank": setlist_blank,
 }
 
 

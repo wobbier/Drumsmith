@@ -186,15 +186,108 @@ def band_name(e, when, fit=9):
     return e
 
 
-def band_name_text(s, parent, name, pos, size, colour, fit=9, weight=3):
-    """The band's name as world text (TextRenderers facing -z), shown once the band has one. The
-    only font is the engine's Inter regular, so `weight` copies a hair apart make the strokes
-    heavier (a marker's, a spray can's). Returns the group: rotate it to tilt the lot."""
+def band_name_text(s, parent, name, pos, size, colour, fit=9, weight=1, font=None):
+    """The band's name as world text (TextRenderers facing -z), shown once the band has one, in
+    marker (Permanent Marker); `weight` copies a hair apart make the strokes heavier still (a
+    spray can's). Returns the group: rotate it to tilt the lot."""
     group = s.entity(name, parent, pos)
     offsets = [(0.0, 0.0)] + [(size * 0.012 * math.cos(k * 2.1), size * 0.012 * math.sin(k * 2.1)) for k in range(weight - 1)]
     for i, (dx, dy) in enumerate(offsets):
         e = s.entity(f"{name} {i}", group, (dx, dy, -0.0005 * i))
         e.add({"Type": "TextRenderer", "Text": "", "Size": _r(size), "Alignment": "Center", "Anchor": "Middle", "Color": vec(colour),
-               "Opacity": 1.0, "Lit": True})
+               "Opacity": 1.0, "Lit": True, "Font": font or MARKER})
         band_name(e, "Named", fit)
     return group
+
+
+# ---- words in the room ------------------------------------------------------------------------
+
+MARKER = "Assets/Fonts/PermanentMarker-Regular.ttf"     # a fat marker, spray paint, tape labels
+PEN = "Assets/Fonts/GochiHand-Regular.ttf"              # a ballpoint: notes, lists, the setlist
+FACING = {"-z": (0.0, 0.0), "+z": (0.0, 180.0), "+x": (0.0, -90.0), "-x": (0.0, 90.0), "up": (90.0, 0.0)}
+
+
+def scrawl(s, parent, name, pos, text, size, colour, facing="-z", font=PEN, lit=True, align="Center", anchor="Middle",
+           tilt=0.0, spin=0.0, spacing=1.0):
+    """Writing in the room (a TextRenderer): facing is the way the words look ('-z' at the camera
+    from the back wall, '+x' off the left wall, 'up' off the floor); tilt turns them on the
+    surface, degrees; spin turns floor text about the vertical."""
+    pitch, yaw = FACING[facing]
+    if facing == "up":
+        yaw = spin
+    e = s.entity(name, parent, pos, (pitch, yaw, tilt))
+    comp = {"Type": "TextRenderer", "Text": text, "Size": _r(size), "Alignment": align, "Anchor": anchor, "Color": vec(colour),
+            "Opacity": 1.0, "Lit": bool(lit)}
+    if font:
+        comp["Font"] = font
+    if spacing != 1.0:
+        comp["LineSpacing"] = _r(spacing)
+    e.add(comp)
+    return e
+
+
+def readout(e, show, line=0, item="", prefix="", max_letters=0, upper=False, scroll=0.0):
+    """HideoutReadout on a scrawl: its words come from the player (the radio's song, the recent
+    songs, a wishlist item, a count, the time)."""
+    comp = {"Type": "HideoutReadout", "Show": show, "Line": int(line), "Prefix": prefix, "MaxLetters": int(max_letters),
+            "Upper": bool(upper), "Scroll": _r(scroll)}
+    if item:
+        comp["Item"] = item
+    e.add(comp)
+    return e
+
+
+def when(e, show):
+    """HideoutWhen: only by Day or Night (the player's clock), only MovingIn (the first visit
+    after moving into the room) or only once Settled."""
+    e.add({"Type": "HideoutWhen", "Show": show})
+    return e
+
+
+def stand_in(s, parent, name, slot_name, pos=(0, 0, 0)):
+    """What's there until a slot's item is unlocked (an outline in tape, a note): the slot's
+    WhenLocked side."""
+    e = s.entity(name, parent, pos)
+    e.add({"Type": "HideoutItemSlot", "Slot": slot_name, "WhenLocked": True})
+    return e
+
+
+def tape_outline(s, parent, name, centre, width, depth, facing="up", colour=(0.86, 0.8, 0.62), tape=0.024):
+    """A rectangle of masking tape (where something will go): on a floor or bench ('up'), or on a
+    wall facing '-z', '+x' or '-x'."""
+    x, y, z = centre
+    pieces = []
+    if facing == "up":
+        for dz in (-depth / 2, depth / 2):
+            pieces.append(((x, y, z + dz), (width + tape, 0.002, tape)))
+        for dx in (-width / 2, width / 2):
+            pieces.append(((x + dx, y, z), (tape, 0.002, depth)))
+    elif facing == "-z":
+        for dy in (-depth / 2, depth / 2):
+            pieces.append(((x, y + dy, z), (width + tape, tape, 0.002)))
+        for dx in (-width / 2, width / 2):
+            pieces.append(((x + dx, y, z), (tape, depth, 0.002)))
+    else:
+        for dy in (-depth / 2, depth / 2):
+            pieces.append(((x, y + dy, z), (0.002, tape, width + tape)))
+        for dz in (-width / 2, width / 2):
+            pieces.append(((x, y, z + dz), (0.002, depth, tape)))
+    for i, (p, size) in enumerate(pieces):
+        s.box(f"{name} {i}", parent, p, size, colour, rough=0.9, shadows=False)
+
+
+def clock_hands(s, parent, centre, facing, radius, colour=(0.05, 0.05, 0.05), second=True):
+    """A clock's hands on the player's time (HideoutMotion Hour / Minute / Second), turning about
+    the face's normal. facing: '-z', '+x' or '-x' (the way the face looks)."""
+    normal = {"-z": (0, 0, -1), "+x": (1, 0, 0), "-x": (-1, 0, 0)}[facing]
+    # Clockwise to someone looking at the face (the engine turns a positive angle clockwise
+    # looking down its axis, so the axis is the face's own normal).
+    axis = normal
+    out = 0.004
+    hands = (("Hour", 0.55, 0.012, 0), ("Minute", 0.85, 0.008, 1)) + ((("Second", 0.9, 0.003, 2),) if second else ())
+    for kind, length, width, layer in hands:
+        pivot = s.entity(f"{kind} Hand", parent, tuple(centre[k] + normal[k] * (out + 0.003 * layer) for k in range(3)))
+        motion(pivot, kind, axis=axis)
+        hand_colour = (0.75, 0.08, 0.06) if kind == "Second" else colour
+        size = (width, radius * length, 0.003) if facing == "-z" else (0.003, radius * length, width)
+        s.box(f"{kind} Hand Bar", pivot, (0.0, radius * length * 0.4, 0.0), size, hand_colour, shadows=False)

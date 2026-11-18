@@ -149,3 +149,48 @@ body.basement #band-name-panel p { color: #2a2218c0; }
 body.basement #band-name-panel input { color: #9b1c1c; background-color: #ffffff80; border-color: #8a7a50; font-weight: bold; }
 body.basement .band-button { color: #2a2218; background-color: #00000018; }
 body.basement .band-button.save { color: #fff8e0; background-color: #9b2c1c; }
+/* The wishlist (the Wishlist station): what's still to come and how to get it, then what's in. */
+.wish-row { margin-bottom: 10dp; padding: 10dp 12dp; background-color: #ffffff10; border-left: 3dp #ffd166; }
+.wish-row.got { border-left-color: #66ff99; color: #ffffff90; }
+.wish-row .wish-title { display: flex; align-items: center; font-size: 22dp; font-weight: bold; }
+.wish-row .wish-box { display: block; width: 22dp; height: 22dp; margin-right: 10dp; font-size: 18dp; line-height: 22dp; text-align: center; color: #66ff99; border: 2dp #ffffff80; }
+#hideout-focus .wish-row p { margin: 3dp 0 0 32dp; font-size: 15dp; }
+#hideout-focus .wish-row .wish-how { color: #ffd166; }
+#hideout-focus .wish-row .wish-description { color: #ffffff90; }
+body.basement .wish-row { background-color: #f3ead2; color: #2a2218; border-left-color: #9b2c1c; }
+body.basement .wish-row.got { background-color: #f3ead2a0; border-left-color: #3d7a3a; }
+body.basement .wish-row .wish-box { color: #9b2c1c; border-color: #2a2218a0; }
+body.basement #hideout-focus .wish-row .wish-how { color: #9b2c1c; }
+body.basement #hideout-focus .wish-row .wish-description { color: #2a2218b0; }
+/* The hideout debug menu (F2). */
+#hideout-debug { position: absolute; right: 1.5vw; top: 3vh; bottom: 3vh; width: 470dp; max-width: 46vw; padding: 14dp 16dp; overflow-y: auto; background-color: #07090ced; border: 1dp #3a4a5a; font-size: 15dp; color: #d8e2ec; }
+#hideout-debug .debug-head { display: flex; justify-content: space-between; align-items: center; }
+#hideout-debug .debug-title { font-size: 20dp; font-weight: bold; letter-spacing: 2dp; color: #7fd3ff; }
+#hideout-debug .debug-note { margin: 6dp 0 8dp; font-size: 13dp; color: #8fa3b5; }
+#hideout-debug h3 { margin: 14dp 0 6dp; font-size: 15dp; letter-spacing: 1dp; color: #7fd3ff; border-bottom: 1dp #ffffff18; }
+#hideout-debug h3 span { font-size: 12dp; letter-spacing: 0; color: #8fa3b5; font-weight: normal; }
+#hideout-debug .debug-row { display: flex; flex-wrap: wrap; }
+#hideout-debug .debug-grid { display: flex; flex-wrap: wrap; }
+#hideout-debug .debug-chip { display: block; width: auto; margin: 3dp 6dp 3dp 0; padding: 5dp 10dp; font-size: 14dp; color: #d8e2ec; background-color: #ffffff12; border: 1dp #ffffff26; }
+#hideout-debug .debug-toggle { display: block; box-sizing: border-box; width: 48%; margin: 3dp 2% 3dp 0; padding: 5dp 8dp; font-size: 13dp; text-align: left; color: #9aaabb; background-color: #ffffff08; border: 1dp #ffffff1a; }
+#hideout-debug .debug-toggle span { color: #8fa3b5; font-size: 12dp; }
+#hideout-debug .debug-chip.on, #hideout-debug .debug-toggle.on { color: #ffffff; background-color: #1f6f4ad0; border-color: #66ff99; }
+#hideout-debug .debug-chip:hover, #hideout-debug .debug-toggle:hover, #hideout-debug .debug-chip:focus, #hideout-debug .debug-toggle:focus { border-color: #7fd3ff; color: #ffffff; }
+#hideout-debug .debug-wide { display: block; width: 100%; margin: 8dp 0 2dp; padding: 7dp 10dp; font-size: 15dp; font-weight: bold; text-align: center; color: #07090c; background-color: #7fd3ff; }
+#hideout-debug .debug-wide.warn { color: #ffffff; background-color: #8a2b2b; }
+#hideout-debug .debug-wide:hover, #hideout-debug .debug-wide:focus { background-color: #ffd166; color: #07090c; }
+#hideout-debug .debug-status { margin-top: 10dp; min-height: 18dp; font-size: 14dp; color: #66ff99; }
+/* The basement's writing is in marker and pen (Assets/Fonts: Permanent Marker, Gochi Hand). */
+body.basement .station-label .station-name { font-family: Permanent Marker; font-weight: normal; font-size: 27dp; letter-spacing: 0; }
+body.basement .station-label .station-hint { font-family: Gochi Hand; font-size: 16dp; }
+body.basement #hideout-header .hideout-room { font-family: Permanent Marker; font-size: 32dp; }
+body.basement #hideout-header .hideout-goal { font-family: Gochi Hand; font-size: 21dp; }
+body.basement #hideout-header .band-link { font-family: Gochi Hand; font-size: 18dp; }
+body.basement #hideout-notice h2, body.basement #band-name-panel h2 { font-family: Permanent Marker; font-weight: normal; }
+body.basement #hideout-notice p { font-family: Gochi Hand; font-size: 24dp; }
+body.basement #hideout-reveal span { font-family: Permanent Marker; font-weight: normal; }
+body.basement #band-name-panel input { font-family: Permanent Marker; font-weight: normal; }
+body.basement #hideout-focus h1 { font-family: Permanent Marker; font-weight: normal; }
+body.basement .wish-row .wish-title, body.basement .gig-card .gig-title { font-family: Permanent Marker; font-weight: normal; }
+body.basement #hideout-focus .wish-row p { font-family: Gochi Hand; font-size: 17dp; }
+body.basement #hideout-corner .corner-link { font-family: Permanent Marker; }

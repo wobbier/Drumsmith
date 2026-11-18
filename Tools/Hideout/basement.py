@@ -4,17 +4,21 @@ Unfinished concrete block, open joists with pink insulation, a duct and copper p
 up to the kitchen, a window well with the streetlight coming through it and dust in the beam.
 The kit (and the player's drummer, playing along with the radio) on a carpet offcut in front of
 egg cartons and a spray-painted bedsheet; Christmas lights chasing the beat along the back wall.
-A couch with the cat asleep on it, the boombox above it pumping, a CRT showing static, the
-furnace with its pilot light. The workbench with a dying fluorescent tube and a desk lamp, the
-gig board, posters for bands that don't exist. Bucket drums from before there was a kit.
+A couch with the cat asleep on it, the boombox above it pumping (its display scrolling the song),
+a CRT showing mom's camcorder, the furnace with its pilot light. The workbench with a dying
+fluorescent tube and a desk lamp, the gig board, posters for bands that don't exist. Bucket drums
+from before there was a kit, the setlist taped to the floor (the last songs played), the gear
+wishlist taped to the post, masking tape marking where the gear will go, the clock on the
+player's time. By day the sun comes down through the window well instead of the streetlight.
 
 Room space: x across (+x the couch side), y up, z from the stairs (the camera) to the back wall.
 """
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, OFFWHITE, STEEL, WHITE, WOOD, Scene, drummer, dust, glow_light,
-                        light, motion, poster, rod, slot, station, textured, view)
+from hideoutgen import (band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, PEN, STEEL, WHITE, WOOD, Scene,
+                        clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, slot, stand_in,
+                        station, tape_outline, textured, view, when)
 
 H = 3.2        # half the width
 D = 6.0        # the back wall's face
@@ -123,23 +127,31 @@ def back_wall(s, geo, items, lights):
         if prev:
             rod(s, string, f"Wire {i}", prev, (p[0], p[1] + 0.02, p[2]), 0.006, (0.05, 0.18, 0.06), shadows=False)
         prev = (p[0], p[1] + 0.02, p[2])
-    # The window well: the night outside, the streetlight through grimy glass, dust in the beam.
+    # The window well: the night outside, the streetlight through grimy glass, dust in the beam;
+    # by day the sun comes straight down it.
     wx, wy = 1.9, 2.0
     s.box("Window Frame", geo, (wx, wy, D - 0.03), (0.98, 0.44, 0.06), (0.32, 0.22, 0.14), rough=0.8)
-    textured(s.box("Window Glass", geo, (wx, wy, D - 0.064), (0.86, 0.32, 0.01), (1, 1, 1), rough=0.15, shadows=False),
-             "WindowNight", emissive=True, emissive_intensity=1.6)
     s.box("Window Bar", geo, (wx, wy, D - 0.07), (0.03, 0.32, 0.012), (0.3, 0.2, 0.12))
+    night = when(s.group("Night", lights), "Night")
+    textured(s.box("Window Glass", night, (wx, wy, D - 0.064), (0.86, 0.32, 0.01), (1, 1, 1), rough=0.15, shadows=False),
+             "WindowNight", emissive=True, emissive_intensity=1.6)
     eye = (wx, wy - 0.05, D - 0.18)
     target = (0.3, 0.0, 3.9)
-    from hideoutgen import look_rotation
-    light(s, lights, "Streetlight Through The Window", eye, kind="Spot", color=(0.6, 0.72, 1.0), intensity=40.0, range_=8.0,
+    light(s, night, "Streetlight Through The Window", eye, kind="Spot", color=(0.6, 0.72, 1.0), intensity=40.0, range_=8.0,
           rot=look_rotation(eye, target), inner=12.0, outer=24.0, shadows=True, volumetric=7.0)
-    dust(s, lights, "Dust", (0.9, 1.15, 4.4), (2.6, 2.1, 2.6), count=260, rate=36.0)
     # Now and then a car goes by up on the street: its headlights sweep the ceiling through the glass.
     car = (wx, wy + 0.05, D - 0.25)
-    sweep = light(s, lights, "Passing Car", car, kind="Spot", color=(1.0, 0.95, 0.82), intensity=26.0, range_=7.0,
+    sweep = light(s, night, "Passing Car", car, kind="Spot", color=(1.0, 0.95, 0.82), intensity=26.0, range_=7.0,
                   rot=look_rotation(car, (wx - 1.2, TOP, 2.6)), inner=10.0, outer=22.0, volumetric=5.0)
     motion(sweep, "Pass", amount=0.45, speed=1.0 / 23.0, axis=(1, 0, 0), phase=0.6)
+    day = when(s.group("Day", lights), "Day")
+    textured(s.box("Window Glass Day", day, (wx, wy, D - 0.064), (0.86, 0.32, 0.01), (1, 1, 1), rough=0.15, shadows=False),
+             "WindowDay", emissive=True, emissive_intensity=2.6)
+    sun = (wx + 0.1, wy + 0.08, D - 0.12)
+    light(s, day, "Sun Down The Window Well", sun, kind="Spot", color=(1.0, 0.9, 0.72), intensity=90.0, range_=9.0,
+          rot=look_rotation(sun, (1.05, 0.0, 3.85)), inner=10.0, outer=18.0, shadows=True, volumetric=12.0)
+    light(s, day, "Sky Through The Glass", (wx, wy - 0.2, D - 0.5), color=(0.7, 0.82, 1.0), intensity=2.2, range_=4.5)
+    dust(s, lights, "Dust", (0.9, 1.15, 4.4), (2.6, 2.1, 2.6), count=260, rate=36.0)
     # The power strip that powers everything (and one more strip plugged into it).
     s.box("Outlet", geo, (-2.2, 0.35, D - 0.01), (0.08, 0.12, 0.02), OFFWHITE)
     s.box("Power Strip", items, (-2.0, 0.03, 5.75), (0.36, 0.04, 0.07), WHITE)
@@ -184,8 +196,8 @@ def kit_corner(s, geo, items, stations, lights):
         s.box(f"Bucket Rim {i}", items, (x, 0.012, z), (0.32, 0.024, 0.32), (0.85, 0.35, 0.06), shape="Cylinder")
     rod(s, items, "Bucket Stick L", (-1.1, 0.385, 3.65), (-0.78, 0.385, 3.85), 0.014, (0.86, 0.72, 0.46))
     rod(s, items, "Bucket Stick R", (-1.05, 0.39, 3.62), (-0.74, 0.4, 3.8), 0.014, (0.86, 0.72, 0.46))
-    # The setlist, taped to the floor.
-    textured(s.box("Setlist", items, (0.62, 0.003, 3.72), (0.24, 0.002, 0.34), (1, 1, 1), rot=(0, -12, 0), shadows=False), "Setlist")
+    # The setlist, taped to the floor: the last songs played (the radio's, before there are any).
+    setlist(s, items, (0.66, 0.003, 3.55), -12.0)
     # The amp the settings live in, its power light on.
     amp = (1.45, 0.0, 4.65)
     s.box("Amp", stations, (amp[0], 0.32, amp[2]), (0.62, 0.64, 0.32), (0.07, 0.07, 0.07), rough=0.6)
@@ -207,7 +219,6 @@ def kit_corner(s, geo, items, stations, lights):
 
 def camcorder(s, items, lights):
     """Mom's camcorder on its tripod at the front of the kit, filming practice for the TV."""
-    from hideoutgen import look_rotation
     base = (-0.95, 0.0, 3.05)
     s.prop("Tripod", items, "Assets/Models/Venue/CameraTripod.obj", base, yaw=30.0, scale=0.82)
     lens = (base[0] + 0.02, 1.32, base[2] + 0.05)
@@ -248,8 +259,11 @@ def couch_corner(s, geo, items, stations, lights):
     rx, ry, rz = shelf_x, 1.52, 2.8
     s.box("Boombox", radio, (rx, ry, rz), (0.22, 0.26, 0.66), (0.14, 0.14, 0.15), rough=0.45, metallic=0.2)
     s.box("Boombox Deck", radio, (rx - 0.111, ry + 0.02, rz), (0.005, 0.1, 0.16), (0.05, 0.05, 0.06), rough=0.2)
-    s.box("Boombox Dial", radio, (rx - 0.112, ry + 0.095, rz), (0.004, 0.025, 0.2), (0.9, 0.6, 0.2), emissive=(1.0, 0.55, 0.15),
-          emissive_intensity=4.0, shadows=False)
+    # The display: the song the radio's playing, scrolling by.
+    s.box("Boombox Display", radio, (rx - 0.112, ry + 0.095, rz), (0.004, 0.034, 0.24), (0.02, 0.05, 0.03), emissive=(0.05, 0.25, 0.12),
+          emissive_intensity=1.0, shadows=False)
+    readout(scrawl(s, radio, "Now Playing", (rx - 0.116, ry + 0.095, rz), "", 0.024, (0.55, 1.0, 0.7), facing="-x",
+                   font="Assets/Fonts/JetBrainsMono-Regular.ttf", lit=False), "NowPlaying", max_letters=14, upper=True, scroll=0.22)
     rod(s, radio, "Boombox Handle", (rx, ry + 0.17, rz - 0.22), (rx, ry + 0.17, rz + 0.22), 0.02, CHROME, metallic=0.9)
     for i, z in enumerate((rz - 0.2, rz + 0.2)):
         cone = s.entity(f"Speaker {i}", radio, (rx - 0.112, ry - 0.01, z))
@@ -354,7 +368,6 @@ def workbench(s, geo, items, stations, lights):
     glow_light(blob, color=(1.0, 0.3, 0.6), intensity=1.5, range_=2.0)
     motion(blob, "Pulse", amount=0.3, speed=0.08)
     # The desk lamp clamped to the bench, pooled on the pad.
-    from hideoutgen import look_rotation
     base = (-H + 0.12, 0.87, bz + 0.55)
     elbow = (-H + 0.2, 1.38, bz + 0.4)
     head = (-H + 0.32, 1.32, bz + 0.12)
@@ -470,12 +483,100 @@ def front(s, geo, items, stations):
     # The clock over the stairs, five minutes fast since forever.
     s.box("Clock", geo, (-H + 0.02, 1.95, 0.6), (0.3, 0.03, 0.3), OFFWHITE, rot=(0, 0, 90), shape="Cylinder", rough=0.5)
     s.box("Clock Rim", geo, (-H + 0.015, 1.95, 0.6), (0.33, 0.02, 0.33), BLACK, rot=(0, 0, 90), shape="Cylinder", rough=0.5)
-    s.box("Hour Hand", geo, (-H + 0.04, 1.98, 0.62), (0.006, 0.08, 0.012), BLACK, rot=(-30, 0, 0))
-    s.box("Minute Hand", geo, (-H + 0.042, 1.95, 0.55), (0.006, 0.012, 0.11), BLACK, rot=(15, 0, 0))
+    for k in range(12):
+        a = math.radians(k * 30)
+        tick = 0.02 if k % 3 == 0 else 0.01
+        s.box(f"Clock Tick {k}", geo, (-H + 0.036, 1.95 + 0.125 * math.cos(a), 0.6 - 0.125 * math.sin(a)), (0.003, tick, 0.006), BLACK,
+              rot=(-k * 30, 0, 0), shadows=False)
+    clock_hands(s, geo, (-H + 0.036, 1.95, 0.6), "+x", 0.14)
     # A carpet offcut where the laptop lives.
     s.box("Offcut", items, (-1.05, 0.006, 1.6), (1.5, 0.012, 1.1), (0.3, 0.32, 0.26), rot=(0, 9, 0), rough=1.0, shadows=False)
     # A dim fill from the stairs side, so the near things read.
     light(s, geo, "Fill", (0.3, 1.3, 0.3), color=(1.0, 0.82, 0.62), intensity=1.4, range_=4.0)
+
+
+def setlist(s, parent, centre, yaw, songs=5):
+    """A setlist taped down (SetlistBlank, title only) with the last songs played written on it."""
+    textured(s.box("Setlist", parent, centre, (0.24, 0.002, 0.34), (1, 1, 1), rot=(0, yaw, 0), shadows=False), "SetlistBlank")
+    c, si = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    for i in range(songs):
+        dx, dz = -0.1, 0.075 - i * 0.05
+        p = (centre[0] + dx * c + dz * si, centre[1] + 0.002, centre[2] - dx * si + dz * c)
+        readout(scrawl(s, parent, f"Setlist Song {i}", p, "", 0.034, (0.1, 0.1, 0.14), facing="up", spin=yaw, align="Left", font=MARKER),
+                "RecentSong", line=i, prefix=f"{i + 1}. ", max_letters=13)
+    for k, (dx, dz) in enumerate(((-0.1, 0.16), (0.1, 0.16), (-0.1, -0.16), (0.1, -0.16))):
+        s.box(f"Setlist Tape {k}", parent, (centre[0] + dx * c + dz * si, centre[1] + 0.001, centre[2] - dx * si + dz * c), (0.07, 0.002, 0.025),
+              (0.86, 0.8, 0.62), rot=(0, yaw + 40 * (1 if k % 3 else -1), 0), shadows=False)
+
+
+def wishlist(s, items, stations):
+    """The gear wishlist, a notebook page taped to the steel post where it can't be missed: each
+    thing ticked off once it's in (HideoutReadout Wishlist). The Wishlist station opens the whole
+    list, with how to get each one."""
+    x, y, z = -1.65, 1.44, 2.6
+    page = s.group("Wishlist", items, (x, y, z))
+    textured(s.box("Wishlist Page", page, (0.0, 0.0, 0.0), (0.27, 0.35, 0.003), (1, 1, 1), rot=(0, 0, 2.0), rough=0.9, shadows=False),
+             "Notebook", emissive=True, emissive_intensity=0.4)
+    for k, dx in enumerate((-0.09, 0.09)):
+        s.box(f"Wishlist Tape {k}", page, (dx, 0.17, -0.002), (0.08, 0.025, 0.002), (0.86, 0.8, 0.62), rot=(0, 0, 18 - 36 * k), shadows=False)
+    wishes = ("practice-pad", "metronome", "stick-bag", "band-poster", "lava-lamp", "vinyl-shelf", "spare-cymbal", "neon-sign", "gold-record")
+    for i, item in enumerate(wishes):
+        p = (-0.098, 0.104 - i * 0.0202, -0.003)
+        readout(scrawl(s, page, f"Wish {i}", p, "", 0.017, (0.12, 0.16, 0.42), align="Left", anchor="Bottom", tilt=2.0), "Wishlist", item=item)
+    scrawl(s, page, "Wishlist Footnote", (0.03, -0.165, -0.003), "(ask for xmas??)", 0.014, (0.55, 0.08, 0.08), tilt=4.0)
+    station(s, stations, "Wishlist", "Wishlist", (x, y, z), (0.35, 0.1, -0.8), 38)
+
+
+def stand_ins(s, items):
+    """Where the gear will go, until it comes: masking tape and notes in pen."""
+    bz = 3.8
+    tape = (0.86, 0.8, 0.62)
+    ink = (0.12, 0.16, 0.42)
+    red = (0.62, 0.08, 0.08)
+    pad = stand_in(s, items, "Practice Pad Goes Here", "PracticePad")
+    tape_outline(s, pad, "Pad Tape", (-H + 0.32, 0.8715, bz - 0.25), 0.3, 0.3)
+    scrawl(s, pad, "Pad Note", (-H + 0.32, 0.873, bz - 0.25), "PAD\nhere", 0.075, (0.05, 0.05, 0.06), facing="up", spin=-90.0, font=MARKER)
+    met = stand_in(s, items, "Metronome Note", "Metronome")
+    s.box("Sticky", met, (-H + 0.026, 1.3, bz + 0.3), (0.003, 0.09, 0.09), (0.98, 0.9, 0.36), rot=(5, 0, 0), shadows=False)
+    scrawl(s, met, "Sticky Text", (-H + 0.029, 1.3, bz + 0.3), "buy a\nMETRONOME", 0.016, ink, facing="+x", tilt=5.0)
+    neon = stand_in(s, items, "Neon Goes Here", "Neon")
+    tape_outline(s, neon, "Neon Tape", (-1.55, 2.0, D - 0.04), 0.74, 0.2, facing="-z", colour=tape)
+    scrawl(s, neon, "Neon Note", (-1.55, 2.0, D - 0.045), "NEON SIGN (SOMEDAY)", 0.06, (0.98, 0.95, 0.85), font=MARKER, tilt=-2.0)
+    wz = 4.35
+    record = stand_in(s, items, "Gold Record Goes Here", "GoldRecord")
+    tape_outline(s, record, "Record Tape", (H - 0.012, 1.78, wz + 0.25), 0.34, 0.4, facing="-x", colour=tape)
+    scrawl(s, record, "Record Note", (H - 0.015, 1.79, wz + 0.25), "GOLD\nRECORD\nhere", 0.075, red, facing="-x", font=MARKER, tilt=3.0)
+    for slot_name, z, text in (("PlaqueA", wz + 0.62, "FC\nplaque"), ("PlaqueB", wz + 0.92, "teacher\ncert.")):
+        p = stand_in(s, items, f"{slot_name} Goes Here", slot_name)
+        tape_outline(s, p, f"{slot_name} Tape", (H - 0.012, 1.82, z), 0.24, 0.3, facing="-x", colour=tape, tape=0.018)
+        scrawl(s, p, f"{slot_name} Note", (H - 0.015, 1.82, z), text, 0.05, ink, facing="-x", font=MARKER)
+    band = stand_in(s, items, "Band Poster Goes Here", "PosterA")
+    tape_outline(s, band, "Poster Tape", (H - 0.012, 1.55, wz - 0.42), 0.4, 0.6, facing="-x", colour=tape)
+    scrawl(s, band, "Poster Note", (H - 0.015, 1.58, wz - 0.42), "OUR\nPOSTER\nHERE", 0.1, red, facing="-x", font=MARKER, tilt=-4.0)
+    crate = stand_in(s, items, "Records In A Crate", "Shelf")
+    s.box("Record Crate", crate, (H - 0.22, 0.165, 3.5), (0.34, 0.33, 0.34), PLASTIC_RED, rough=0.6)
+    for i in range(3):
+        s.box(f"Crate Record {i}", crate, (H - 0.22, 0.3, 3.4 + i * 0.07), (0.3, 0.3, 0.012), [(0.9, 0.8, 0.2), (0.1, 0.1, 0.1), (0.2, 0.5, 0.8)][i],
+              rot=(8 - i * 6, 0, 0), rough=0.7)
+    gz = 5.1
+    for slot_name, y, dz, text in (("FlyerA", 1.62, -0.08, "GIG #1\n???"), ("FlyerB", 1.45, 0.18, "a REAL\ngig"), ("FlyerC", 1.7, 0.05, "FEST\n(lol)")):
+        card = stand_in(s, items, f"{slot_name} Card", slot_name)
+        s.box("Index Card", card, (-H + 0.036, y, gz + dz), (0.003, 0.11, 0.16), (0.97, 0.96, 0.9), rot=(-3, 0, 0), shadows=False)
+        scrawl(s, card, "Card Text", (-H + 0.039, y, gz + dz), text, 0.034, ink, facing="+x", tilt=-3.0, font=MARKER)
+    # The counts, on a scrap under the certificate.
+    tally = s.group("Tally", items, (H - 0.012, 1.12, wz + 0.62))
+    s.box("Tally Paper", tally, (0.0, 0.0, 0.0), (0.003, 0.22, 0.3), (0.98, 0.97, 0.92), rot=(-2, 0, 0), rough=0.9, shadows=False)
+    for i, (source, prefix) in enumerate((("SongsPlayed", "songs: "), ("FullCombos", "full combos: "), ("GigsPlayed", "gigs: "))):
+        readout(scrawl(s, tally, f"Tally {source}", (-0.003, 0.06 - i * 0.058, 0.13), "", 0.04, ink, facing="-x", align="Left", tilt=-2.0,
+                       font=MARKER), source, prefix=prefix)
+
+
+def moving_in(s, items):
+    """The first visit: the boxes from upstairs not unpacked yet (HideoutWhen MovingIn)."""
+    boxes = when(s.group("Moving Boxes", items), "MovingIn")
+    textured(s.box("Box Drums", boxes, (-1.75, 0.24, 1.15), (0.6, 0.48, 0.48), (1, 1, 1), rot=(0, 12, 0), rough=0.9), "BoxDrums")
+    textured(s.box("Box Stuff", boxes, (-1.7, 0.66, 1.18), (0.44, 0.36, 0.4), (1, 1, 1), rot=(0, -8, 0), rough=0.9), "BoxStuff")
+    textured(s.box("Box Fragile", boxes, (0.15, 0.2, 2.2), (0.5, 0.4, 0.42), (1, 1, 1), rot=(0, 25, 0), rough=0.9), "BoxFragile")
 
 
 def unlocked_extras(s, items):
@@ -520,6 +621,9 @@ def build_basement():
     trophies(s, items, stations)
     front(s, geo, items, stations)
     unlocked_extras(s, items)
+    wishlist(s, items, stations)
+    stand_ins(s, items)
+    moving_in(s, items)
     # Room tone: the furnace, the tube, the fan, the drip (Tools/Hideout/make_sounds.py).
     tone = s.group("Room Tone", root)
     sound(s, tone, "Furnace Hum", (2.75, 0.6, 5.4), "Furnace", volume=0.55, near=1.0, far=9.0)

@@ -225,3 +225,6 @@ Assets/DLC/dlc_index.download
 /Profile.json
 /Profile.json.tmp
 /Profile.json.bad
+
+# Python bytecode from the hideout generators
+/Tools/Hideout/__pycache__/

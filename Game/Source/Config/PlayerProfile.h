@@ -55,7 +55,8 @@ public:
         bool LessonPassed = false;  // Passed for the first time
     };
 
-    // The game's profile: Profile.json in the working folder, as Settings.json is.
+    // The game's profile: Profile.json in the working folder, as Settings.json is (--profile <file>
+    // names another, for tests and captures).
     PlayerProfile();
     // A profile kept in inFile (tests): read when it exists, written by Save. Empty keeps it in memory only.
     explicit PlayerProfile( const std::string& inFile );
@@ -80,6 +81,13 @@ public:
     std::vector<std::string> Notices;
     // Items unlocked but not shown yet: the hideout's camera visits each once, then clears them.
     std::vector<std::string> NewItems;
+    // The highest room the hideout has shown: a room above it is being moved into (its first
+    // visit plays the way in and leaves the boxes out). -1 before the first visit.
+    int SeenTier = -1;
+    // The songs finished most recently, by song key, the latest first (the setlist taped to the
+    // hideout's floor reads them).
+    std::vector<std::string> RecentSongs;
+    static constexpr size_t kRecentSongs = 12;
     // Counts over the songs, for the progression rules.
     int SongsPlayed() const { return static_cast<int>( m_songs.size() ); }
     int FullCombos() const;
@@ -87,9 +95,14 @@ public:
     int LessonsPassed() const;
     bool LessonPassed( const std::string& inLessonId ) const;
 
+    // Marks a lesson passed (or not) without playing it: the hideout's debug menu.
+    void SetLessonPassed( const std::string& inLessonId, bool inPassed );
+
     json ToJson() const;
     void FromJson( const json& inRoot );
     void Save() const;
+    // Where Save writes; empty for a profile kept in memory.
+    const std::string& File() const { return m_file; }
 
 private:
     void Load();

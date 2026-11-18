@@ -31,6 +31,20 @@ public:
     bool Start( World& inWorld, const EntityHandle& inCamera );
     void Clear();
     bool IsReady() const { return m_ready; }
+    // The room again, from the profile as it is now (the debug menu's changes). inEvaluate runs
+    // the progression rules first, as coming back to the menu does.
+    bool Reload( bool inEvaluate );
+    // The camera's way in again (HideoutView::IntroEye), when the room has one.
+    void ReplayIntro();
+    // The new items' tour through these items (ids), or every unlocked item in the room.
+    void Tour( const std::vector<std::string>& inItems );
+
+    // Day or night in the room (HideoutWhen): the player's clock unless overridden.
+    enum class TimeOfDay : int { Auto = 0, Day, Night };
+    static TimeOfDay& TimeOverride();
+    static bool IsDay();
+    // Seconds since midnight on the room's clock (the player's, or a time of day the override picked).
+    static double ClockSeconds();
 
     // Event names Update may hand to HandleEvent.
     static const std::vector<const char*>& Events();
@@ -46,6 +60,8 @@ public:
     void Hover( int inStation ) { m_hover = inStation; }
     // Escape: closes a panel or leaves a station. False when there was nothing to leave.
     bool Back();
+    // The hideout debug menu (F2; Hideout/HideoutDebug.cpp): non-Retail builds, or --hideout-debug.
+    static bool DebugAllowed();
     // Back to the overview (the settings panel closed).
     void ReturnToOverview() { Choose( -1 ); }
 
@@ -66,6 +82,8 @@ private:
         float FieldOfView = 55.f;
     };
 
+    // Start's work, and Reload's: the room's scene, its markers, the drummer.
+    bool Load( bool inEvaluate );
     void Choose( int inStation );
     Pose PoseOf( int inStation ) const;
     void ApplyCamera( float inDeltaTime );
@@ -84,9 +102,16 @@ private:
     // Depth of field on the menu camera: focused on whatever the camera is looking at.
     void UpdateFocus( float inDeltaTime );
     void UpdateLabels( RmlUiCore& inUi, const char* inModel );
+    // The words in the room that come from the player (HideoutReadout).
+    void UpdateReadouts( float inDeltaTime );
     void FillRecords( RmlUiCore& inUi, const char* inModel ) const;
     void FillGigs( RmlUiCore& inUi, const char* inModel );
+    // The wishlist: every item, whether it's in, and how to get the ones that aren't.
+    void FillWishlist( RmlUiCore& inUi, const char* inModel ) const;
     std::string NextGoal() const;
+    // The debug menu (HideoutDebug.cpp): its rows, and what its buttons do.
+    void DebugUpdate( RmlUiCore& inUi, const char* inModel );
+    bool DebugEvent( const std::string& inEvent, const json& inArgs, RmlUiCore& inUi, const char* inModel );
 
     bool m_ready = false;
     World* m_world = nullptr;
@@ -126,7 +151,12 @@ private:
     // The first visit's camera move (HideoutView's IntroEye): seconds into it, < 0 when there's none.
     float m_intro = -1.f;
     Pose m_introFrom;
+    bool m_hasIntro = false;
     static constexpr float kIntroSeconds = 4.5f;
+    // The first visit after moving into this room (PlayerProfile::SeenTier): the boxes are out.
+    bool m_movingIn = false;
+    // The slots' entities (not the stand-ins), for the tour.
+    std::vector<std::pair<std::string, EntityHandle>> m_slots;
 
     // A prop's motion and how the scene left it.
     struct Motion
@@ -171,6 +201,32 @@ private:
     };
     MusicClock m_music;
 
+    struct Readout
+    {
+        EntityHandle Entity;
+        int Source = 0;
+        int Line = 0;
+        std::string Item;
+        std::string Prefix;
+        int MaxLetters = 0;
+        bool Upper = false;
+        float Scroll = 0.f;
+        std::string Shown;
+    };
+    std::vector<Readout> m_readouts;
+    float m_readoutTime = 0.f;
+    // PlayerProfile::RecentSongs as the songs' names (looked up when the list changes).
+    std::vector<std::string> m_recentKeys;
+    std::vector<std::string> m_recentNames;
+
+    // The debug menu: open, the overlay hidden for a clean look at the room, the player's own
+    // profile as it was before the menu changed anything (put back by its Restore button).
+    bool m_debugOpen = false;
+    bool m_overlayHidden = false;
+    bool m_debugHasBackup = false;
+    json m_debugBackup;
+    std::string m_debugStatus;
+
     struct BandNamePart
     {
         EntityHandle Entity;
@@ -191,6 +247,9 @@ private:
     VenueKit m_kit;
     // The band's stage: an empty group at the room's origin (Band needs one to update).
     EntityHandle m_stage;
+    // What the band is built from, cleared before each song's build: the drummer and kit of the
+    // song before go with it.
+    VenueKit m_bandKit;
     Band m_band;
     TrackData m_chart;
     const void* m_bandTrack = reinterpret_cast<const void*>( 1 );   // nothing built yet

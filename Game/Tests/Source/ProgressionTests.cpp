@@ -150,6 +150,35 @@ TEST_CASE( "Progression: milestones read the songs, and --unlock-all opens every
 }
 
 
+TEST_CASE( "Progression: an item says how it's got, with what's still missing" )
+{
+    Progression progression( Journey() );
+    PlayerProfile profile( "" );
+    CHECK( progression.HowToUnlock( "radio", profile ) == "Comes with the Basement" );
+    CHECK( progression.HowToUnlock( "rug", profile ) == "Move into the Garage: play Backyard" );
+    CHECK( progression.HowToUnlock( "pad", profile ) == "Pass Rudiments I on the practice pad (0 of 2 lessons)" );
+    profile.SetLessonPassed( "singles", true );
+    CHECK( progression.HowToUnlock( "pad", profile ) == "Pass Rudiments I on the practice pad (1 of 2 lessons)" );
+    CHECK( progression.HowToUnlock( "flyer", profile ) == "Play Backyard (the gig board)" );
+    CHECK( progression.HowToUnlock( "plaque", profile ) == "1 full combo (0 so far)" );
+    CHECK( progression.HowToUnlock( "nothing", profile ).empty() );
+
+    // A requirement in words: only what's still missing, joined up.
+    ProgressionRequirement need;
+    need.Tier = 1;
+    need.Gigs = { "backyard" };
+    need.LessonSteps = { "r1" };
+    need.SongsPlayed = 3;
+    CHECK( progression.Describe( need, profile ) == "move into the Garage, play Backyard, pass Rudiments I (1 of 2 lessons) and 3 songs played (0 so far)" );
+    profile.HideoutTier = 1;
+    profile.CompletedGigs.insert( "backyard" );
+    profile.SetLessonPassed( "doubles", true );
+    CHECK( progression.Describe( need, profile ) == "3 songs played (0 so far)" );
+    need.SongsPlayed = 0;
+    CHECK( progression.Describe( need, profile ).empty() );
+}
+
+
 TEST_CASE( "Progression: a setlist takes the named songs, then the range, the same every time" )
 {
     const Progression progression( Journey() );

@@ -9,6 +9,7 @@
     <div class="menu-shade" data-if="hideout == 0 || settings_open"></div>
     <!-- The hideout (Docs/Hideout-and-Progression.md): the room is the menu; a label over each station. -->
     <div id="hideout" data-if="hideout > 0 && !settings_open">
+        <div id="hideout-overlay" data-if="debug_overlay_hidden == 0">
         <div id="hideout-header" data-if="hideout_focus < 0">
             <img class="hideout-logo" src="img/2x/Asset 2@2x.png"/>
             <p class="hideout-room">{{hideout_room}}</p>
@@ -33,6 +34,13 @@
             <div id="hideout-records" class="hideout-panel" data-if="hideout_panel == 'records'">
                 <div class="record-row" data-for="record : records"><span>{{record.name}}</span><span>{{record.value}}</span></div>
             </div>
+            <div id="hideout-wishlist" class="hideout-panel" data-if="hideout_panel == 'wishlist'">
+                <div class="wish-row" data-for="wish : wishes" data-class-got="wish.got > 0">
+                    <div class="wish-title"><span class="wish-box">{{wish.got > 0 ? 'X' : ''}}</span><span class="wish-name">{{wish.name}}</span></div>
+                    <p class="wish-how" data-if="wish.how != ''">{{wish.how}}</p>
+                    <p class="wish-description">{{wish.description}}</p>
+                </div>
+            </div>
             <div id="hideout-gigs" class="hideout-panel" data-if="hideout_panel == 'gigs'">
                 <div class="gig-card" data-for="gig : gigs" data-class-locked="gig.state == 'LOCKED'">
                     <div class="gig-title"><span>{{gig.name}}</span><span class="gig-state" data-if="gig.state != ''">{{gig.state}}</span></div>
@@ -48,12 +56,52 @@
         <div id="hideout-corner" data-if="hideout_focus < 0">
             <button id="hideout-vocals" class="corner-link" onclick="load-scene:Assets/Vocals.lvl">Vocal Test</button>
             <button id="hideout-exit" class="corner-link" onclick="quit">Exit</button>
+            <button id="hideout-debug-link" class="corner-link" data-if="debug_allowed > 0" data-event-click="debug_toggle">Debug (F2)</button>
         </div>
         <div id="hideout-reveal" data-if="hideout_reveal != ''"><span>{{hideout_reveal}}</span></div>
         <div id="hideout-notice" data-if="hideout_notice != ''">
-            <h2>While you were out</h2>
+            <h2>{{hideout_notice_title}}</h2>
             <p>{{hideout_notice}}</p>
             <button id="hideout-notice-ok" class="menu-link green" autofocus data-event-click="dismiss_notice">OK<span class="underline"></span></button>
+        </div>
+        </div>
+        <!-- The debug menu (F2; Hideout/HideoutDebug.cpp): every stage of the journey on the spot. -->
+        <div id="hideout-debug" data-if="debug_open > 0">
+            <div class="debug-head"><span class="debug-title">HIDEOUT DEBUG</span><button id="debug-close" class="debug-chip" data-event-click="debug_toggle">Close (F2)</button></div>
+            <p class="debug-note">These change your profile and save it. The first change copies yours aside; Restore puts it back.</p>
+            <button id="debug-restore" class="debug-wide warn" data-if="debug_backup > 0" data-event-click="debug_restore">Restore my own profile</button>
+            <h3>Room</h3>
+            <div id="debug-rooms" class="debug-row"><button class="debug-chip" data-for="room : debug_rooms" data-class-on="room.on > 0" data-event-click="debug_room(room.index)">{{room.name}}</button></div>
+            <div class="debug-row">
+                <button id="debug-move-in" class="debug-chip" data-event-click="debug_move_in">Move in again</button>
+                <button id="debug-intro" class="debug-chip" data-event-click="debug_intro">The way in</button>
+                <button id="debug-tour" class="debug-chip" data-event-click="debug_tour">Tour the items</button>
+                <button id="debug-reload" class="debug-chip" data-event-click="debug_reload">Reload</button>
+            </div>
+            <h3>Time <span>{{debug_clock}}</span></h3>
+            <div class="debug-row">
+                <button id="debug-time-auto" class="debug-chip" data-class-on="debug_time == 0" data-event-click="debug_time(0)">My clock</button>
+                <button id="debug-time-day" class="debug-chip" data-class-on="debug_time == 1" data-event-click="debug_time(1)">Day</button>
+                <button id="debug-time-night" class="debug-chip" data-class-on="debug_time == 2" data-event-click="debug_time(2)">Night</button>
+            </div>
+            <h3>Items <span>in the room or not; turning one on shows it off</span></h3>
+            <div class="debug-row">
+                <button id="debug-items-all" class="debug-chip" data-event-click="debug_items(1)">All in</button>
+                <button id="debug-items-none" class="debug-chip" data-event-click="debug_items(0)">All out</button>
+            </div>
+            <div id="debug-items" class="debug-grid"><button class="debug-toggle" data-for="item : debug_items" data-class-on="item.on > 0" data-event-click="debug_item(item.index)">{{item.name}}</button></div>
+            <h3>Gigs played</h3>
+            <div id="debug-gigs" class="debug-grid"><button class="debug-toggle" data-for="gig : debug_gigs" data-class-on="gig.on > 0" data-event-click="debug_gig(gig.index)">{{gig.name}}</button></div>
+            <h3>Lessons passed</h3>
+            <div id="debug-steps" class="debug-grid"><button class="debug-toggle" data-for="step : debug_steps" data-class-on="step.on > 0" data-event-click="debug_step(step.index)">{{step.name}} <span>{{step.count}}</span></button></div>
+            <button id="debug-evaluate" class="debug-wide" data-event-click="debug_evaluate">Apply the rules: move up, give rewards</button>
+            <h3>Band and view</h3>
+            <div class="debug-row">
+                <button id="debug-name" class="debug-chip" data-event-click="debug_name">Next band name</button>
+                <button id="debug-overlay" class="debug-chip" data-event-click="debug_overlay">{{debug_overlay_hidden > 0 ? 'Show the menu' : 'Hide the menu'}}</button>
+            </div>
+            <button id="debug-reset" class="debug-wide warn" data-event-click="debug_reset">Start over as a new player</button>
+            <p id="debug-status" class="debug-status">{{debug_status}}</p>
         </div>
     </div>
     <div id="main-menu" data-if="!settings_open && hideout == 0">

@@ -16,7 +16,7 @@ class HideoutStation
 {
     ME_REFLECTABLE( HideoutStation )
 public:
-    enum class Kind : int { Kit = 0, PracticePad, Radio, Laptop, TrophyWall, Mixer, GigBoard, Door };
+    enum class Kind : int { Kit = 0, PracticePad, Radio, Laptop, TrophyWall, Mixer, GigBoard, Door, Wishlist };
 
     HideoutStation();
 
@@ -33,7 +33,8 @@ ME_REGISTER_COMPONENT_FOLDER( HideoutStation, "Hideout" )
 
 // Where an unlockable item stands (CoreGame/Progression.h: an item's Slot). The entity and its
 // children are the item: they are taken out of the room until the item is unlocked. A slot that
-// no item names stays.
+// no item names stays. WhenLocked turns it around: a stand-in for the item (an outline in tape on
+// the bench, a note saying what goes there) shown only until the item is unlocked.
 class HideoutItemSlot
     : public Component<HideoutItemSlot>
 {
@@ -44,6 +45,7 @@ public:
     virtual void Init() final;
 
     std::string Slot;
+    bool WhenLocked = false;
 };
 ME_REGISTER_COMPONENT_FOLDER( HideoutItemSlot, "Hideout" )
 
@@ -65,12 +67,14 @@ ME_REGISTER_COMPONENT_FOLDER( HideoutItemSlot, "Hideout" )
 //   Pass     every 1 / Speed seconds (Phase: how far into that wait it starts), sweeps Amount
 //            metres either way along Axis in 2.5 s while its Light swells and fades: a car's
 //            headlights going past the window.
+//   Hour, Minute, Second  a clock's hands: turned about Axis to the player's own clock (a full
+//            turn is 12 hours, an hour, a minute). Put the entity at the clock's middle.
 class HideoutMotion
     : public Component<HideoutMotion>
 {
     ME_REFLECTABLE( HideoutMotion )
 public:
-    enum class Kind : int { Sway = 0, Flicker, Pulse, Spin, Breathe, Blink, Bob, Pass };
+    enum class Kind : int { Sway = 0, Flicker, Pulse, Spin, Breathe, Blink, Bob, Pass, Hour, Minute, Second };
 
     HideoutMotion();
 
@@ -149,3 +153,60 @@ public:
     Vector3 IntroTarget{ 0.f, 0.f, 0.f };
 };
 ME_REGISTER_COMPONENT_FOLDER( HideoutView, "Hideout" )
+
+
+// Part of the room that is only there sometimes. Day and Night follow the player's clock (day is
+// 7:00 to 19:00; the hideout debug menu and --hideout-time day|night override it): the sun through
+// the window by day, the streetlight by night. MovingIn is the first visit after moving into the
+// room (boxes not unpacked yet), Settled every visit after.
+class HideoutWhen
+    : public Component<HideoutWhen>
+{
+    ME_REFLECTABLE( HideoutWhen )
+public:
+    enum class When : int { Day = 0, Night, MovingIn, Settled };
+
+    HideoutWhen();
+
+    virtual void Init() final;
+
+    When Show = When::Night;
+};
+ME_REGISTER_COMPONENT_FOLDER( HideoutWhen, "Hideout" )
+
+
+// Words in the room that come from the player (a TextRenderer on the same entity; Hideout keeps
+// its Text up to date): the song on the radio's display, the songs on the setlist taped to the
+// floor, the wishlist on the wall with what's been ticked off.
+//   NowPlaying   the radio's song: "TITLE - ARTIST"
+//   RecentSong   the Line-th song played most recently (0 the latest), else what the radio played
+//   SongsPlayed, FullCombos, GigsPlayed, LessonsPassed   a count
+//   Wishlist     the item named by Item (or the Line-th unlockable one): "[x] Practice pad" once
+//                it's in, "[ ] ..." before
+//   NextGoal     what to do next, as the header says it
+//   BandName     the band's name, or "BAND NAME TBD"
+//   Clock        the time, "21:47"
+class HideoutReadout
+    : public Component<HideoutReadout>
+{
+    ME_REFLECTABLE( HideoutReadout )
+public:
+    enum class Source : int { NowPlaying = 0, RecentSong, SongsPlayed, FullCombos, GigsPlayed, LessonsPassed, Wishlist, NextGoal, BandName, Clock };
+
+    HideoutReadout();
+
+    virtual void Init() final;
+
+    Source Show = Source::NowPlaying;
+    int Line = 0;
+    // Wishlist: the item's id (Assets/Progression/Progression.json).
+    std::string Item;
+    // Put before the value ("SONGS: ").
+    std::string Prefix;
+    // Longer text is cut to this many letters (with "..."), 0 for no limit.
+    int MaxLetters = 0;
+    bool Upper = false;
+    // NowPlaying: scrolls through a longer title instead of cutting it, a letter every this many seconds.
+    float Scroll = 0.f;
+};
+ME_REGISTER_COMPONENT_FOLDER( HideoutReadout, "Hideout" )

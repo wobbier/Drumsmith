@@ -145,6 +145,14 @@ public:
     std::vector<int> Setlist( const ProgressionGig& inGig, const std::vector<TrackData>& inTracks ) const;
     static double NotesPerSecond( const TrackData& inTrack );
 
+    // What a requirement still asks of the player, in words with progress ("play Club Night",
+    // "pass Rudiments II (1 of 3 lessons)", "10 songs played (4 so far)"), joined by "and";
+    // empty when it holds.
+    std::string Describe( const ProgressionRequirement& inRequirement, const PlayerProfile& inProfile ) const;
+    // How an item is got: "Comes with the Basement", "Play Backyard Party", "Pass Rudiments I on
+    // the practice pad (1 of 2 lessons)", "Ten songs played (4 of 10)". Empty for no such item.
+    std::string HowToUnlock( const std::string& inItemId, const PlayerProfile& inProfile ) const;
+
     // Moves the hideout up, grants rewards and records new unlocks in the profile until nothing
     // more changes. Returns what was new; their texts are also queued on the profile's Notices.
     // Doesn't save the profile.

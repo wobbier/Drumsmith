@@ -6,6 +6,7 @@
 #include "File.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <cstdint>
 #include <set>
 
@@ -251,6 +252,107 @@ bool Progression::Holds( const ProgressionRequirement& inRequirement, const Play
         && inProfile.SongsPlayed() >= inRequirement.SongsPlayed
         && inProfile.FullCombos() >= inRequirement.FullCombos
         && ( inRequirement.SongsAtAccuracy <= 0 || inProfile.SongsAtAccuracy( inRequirement.Accuracy ) >= inRequirement.SongsAtAccuracy );
+}
+
+
+std::string Progression::Describe( const ProgressionRequirement& inRequirement, const PlayerProfile& inProfile ) const
+{
+    std::vector<std::string> parts;
+    if( inProfile.HideoutTier < inRequirement.Tier )
+    {
+        const ProgressionTier* tier = TierAt( inRequirement.Tier );
+        parts.push_back( "move into " + ( tier ? tier->Name : "the next room" ) );
+    }
+    for( const std::string& id : inRequirement.Gigs )
+    {
+        if( inProfile.CompletedGigs.count( id ) == 0 )
+        {
+            const ProgressionGig* gig = FindGig( id );
+            parts.push_back( "play " + ( gig ? gig->Name : id ) );
+        }
+    }
+    for( const std::string& id : inRequirement.LessonSteps )
+    {
+        const auto step = std::find_if( m_steps.begin(), m_steps.end(), [&id]( const ProgressionLessonStep& inStep ) { return inStep.Id == id; } );
+        if( step != m_steps.end() && !StepDone( *step, inProfile ) )
+        {
+            const auto passed = std::count_if( step->Lessons.begin(), step->Lessons.end(), [&inProfile]( const std::string& inLesson ) { return inProfile.LessonPassed( inLesson ); } );
+            parts.push_back( "pass " + step->Name + " (" + std::to_string( passed ) + " of " + std::to_string( step->Lessons.size() ) + " lessons)" );
+        }
+    }
+    const auto count = [&parts]( int inHave, int inNeed, const char* inWhat ) {
+        if( inHave < inNeed )
+        {
+            parts.push_back( std::to_string( inNeed ) + " " + inWhat + " (" + std::to_string( inHave ) + " so far)" );
+        }
+    };
+    count( inProfile.LessonsPassed(), inRequirement.LessonsPassed, "lessons passed" );
+    count( inProfile.SongsPlayed(), inRequirement.SongsPlayed, inRequirement.SongsPlayed == 1 ? "song played" : "songs played" );
+    count( inProfile.FullCombos(), inRequirement.FullCombos, inRequirement.FullCombos == 1 ? "full combo" : "full combos" );
+    if( inRequirement.SongsAtAccuracy > 0 )
+    {
+        char what[48];
+        std::snprintf( what, sizeof( what ), "songs at %.0f%%", inRequirement.Accuracy );
+        count( inProfile.SongsAtAccuracy( inRequirement.Accuracy ), inRequirement.SongsAtAccuracy, what );
+    }
+    std::string text;
+    for( size_t i = 0; i < parts.size(); ++i )
+    {
+        text += ( i == 0 ? "" : i + 1 == parts.size() ? " and " : ", " ) + parts[i];
+    }
+    return text;
+}
+
+
+std::string Progression::HowToUnlock( const std::string& inItemId, const PlayerProfile& inProfile ) const
+{
+    const auto gives = [&inItemId]( const std::vector<std::string>& inRewards ) { return std::find( inRewards.begin(), inRewards.end(), inItemId ) != inRewards.end(); };
+    const auto capital = []( std::string inText ) {
+        if( !inText.empty() && inText[0] >= 'a' && inText[0] <= 'z' )
+        {
+            inText[0] = static_cast<char>( inText[0] - 'a' + 'A' );
+        }
+        return inText;
+    };
+    for( size_t tier = 0; tier < m_tiers.size(); ++tier )
+    {
+        if( gives( m_tiers[tier].Rewards ) )
+        {
+            if( tier == 0 )
+            {
+                return "Comes with " + m_tiers[tier].Name;
+            }
+            const std::string need = Describe( m_tiers[tier].Requires, inProfile );
+            return "Move into " + m_tiers[tier].Name + ( need.empty() ? std::string() : ": " + need );
+        }
+    }
+    for( const ProgressionGig& gig : m_gigs )
+    {
+        if( gives( gig.Rewards ) )
+        {
+            const std::string need = Describe( gig.Requires, inProfile );
+            return "Play " + gig.Name + " (the gig board)" + ( need.empty() ? std::string() : "; to get booked: " + need );
+        }
+    }
+    for( const ProgressionLessonStep& step : m_steps )
+    {
+        if( gives( step.Rewards ) )
+        {
+            const auto passed = std::count_if( step.Lessons.begin(), step.Lessons.end(), [&inProfile]( const std::string& inLesson ) { return inProfile.LessonPassed( inLesson ); } );
+            std::string text = "Pass " + step.Name + " on the practice pad (" + std::to_string( passed ) + " of " + std::to_string( step.Lessons.size() ) + " lessons)";
+            const std::string open = StepOpen( step, inProfile ) ? std::string() : Describe( step.Requires, inProfile );
+            return open.empty() ? text : text + "; it opens once you " + open;
+        }
+    }
+    for( const ProgressionMilestone& milestone : m_milestones )
+    {
+        if( gives( milestone.Rewards ) )
+        {
+            const std::string need = Describe( milestone.Requires, inProfile );
+            return need.empty() ? milestone.Name : capital( need );
+        }
+    }
+    return FindItem( inItemId ) ? "Not given by anything yet" : std::string();
 }
 
 

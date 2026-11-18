@@ -1,5 +1,6 @@
 #include "PlayerProfile.h"
 #include "CLog.h"
+#include "Core/CommandLine.h"
 #include "CoreGame/Practice.h"
 #include "Path.h"
 #include <algorithm>
@@ -8,7 +9,8 @@
 #include <sstream>
 
 PlayerProfile::PlayerProfile()
-    : PlayerProfile( Path( "Profile.json" ).FullPath )
+    // --profile <file>: another profile for this run (tests and captures, which shouldn't touch the player's).
+    : PlayerProfile( CommandLine::Has( "--profile" ) ? CommandLine::GetString( "--profile" ) : Path( "Profile.json" ).FullPath )
 {
 }
 
@@ -39,6 +41,12 @@ PlayerProfile::Outcome PlayerProfile::RecordSong( const std::string& inSongKey, 
     record.BestAccuracy = std::max( record.BestAccuracy, inResult.Accuracy );
     record.BestCombo = std::max( record.BestCombo, inResult.MaxCombo );
     record.FullCombo = record.FullCombo || fullCombo;
+    RecentSongs.erase( std::remove( RecentSongs.begin(), RecentSongs.end(), inSongKey ), RecentSongs.end() );
+    RecentSongs.insert( RecentSongs.begin(), inSongKey );
+    if( RecentSongs.size() > kRecentSongs )
+    {
+        RecentSongs.resize( kRecentSongs );
+    }
     Save();
     return outcome;
 }
@@ -108,6 +116,17 @@ bool PlayerProfile::LessonPassed( const std::string& inLessonId ) const
 }
 
 
+void PlayerProfile::SetLessonPassed( const std::string& inLessonId, bool inPassed )
+{
+    if( inLessonId.empty() )
+    {
+        return;
+    }
+    LessonRecord& record = m_lessons[inLessonId];
+    record.Passed = inPassed;
+}
+
+
 json PlayerProfile::ToJson() const
 {
     json root;
@@ -141,6 +160,8 @@ json PlayerProfile::ToJson() const
     root["UnlockedItems"] = UnlockedItems;
     root["Notices"] = Notices;
     root["NewItems"] = NewItems;
+    root["SeenTier"] = SeenTier;
+    root["RecentSongs"] = RecentSongs;
     return root;
 }
 
@@ -153,7 +174,10 @@ void PlayerProfile::FromJson( const json& inRoot )
     UnlockedItems.clear();
     Notices.clear();
     NewItems.clear();
+    RecentSongs.clear();
     HideoutTier = 0;
+    SeenTier = -1;
+    BandName.clear();
     if( !inRoot.is_object() )
     {
         return;
@@ -222,6 +246,18 @@ void PlayerProfile::FromJson( const json& inRoot )
             if( value.is_string() )
             {
                 Notices.push_back( value.get<std::string>() );
+            }
+        }
+    }
+    // A profile from before SeenTier: its room has been seen (no moving-in on the next visit).
+    SeenTier = inRoot.contains( "SeenTier" ) ? std::max( -1, inRoot.value( "SeenTier", -1 ) ) : HideoutTier;
+    if( inRoot.contains( "RecentSongs" ) && inRoot["RecentSongs"].is_array() )
+    {
+        for( const json& value : inRoot["RecentSongs"] )
+        {
+            if( value.is_string() && RecentSongs.size() < kRecentSongs )
+            {
+                RecentSongs.push_back( value.get<std::string>() );
             }
         }
     }
