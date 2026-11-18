@@ -109,7 +109,8 @@ def riser_and_kit(s, geo, items, stations, lights):
     s.slab("Riser Edge", geo, -1.52, 1.52, 0.0, RISER, rz0 - 0.02, rz0, (0.1, 0.1, 0.11), rough=0.9)
     s.box("Riser Gaffer", geo, (0.0, RISER + 0.001, rz0 + 0.03), (2.9, 0.002, 0.05), (0.9, 0.85, 0.2), rough=0.8, shadows=False)
     throne = 6.35
-    drummer(s, items, (0.0, RISER, throne), yaw=180.0)
+    # The kit everyone in the complex borrows: black, glossy.
+    drummer(s, items, (0.0, RISER, throne), yaw=180.0, finish=(0.012, 0.012, 0.014), metallic=0.2, roughness=0.15)
     station(s, stations, "Kit", "Kit", (0.0, 0.78, 5.3), (0.3, 1.05, -2.1), 42)
     # The kick head: the band's name, as in the basement.
     kz = throne - 1.152

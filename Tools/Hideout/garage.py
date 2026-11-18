@@ -114,7 +114,8 @@ def door(s, geo, lights, items):
 
 
 def kit_area(s, geo, items, stations, lights):
-    drummer(s, items, (0.0, 0.0, 5.25), yaw=180.0)
+    # A used kit off the classifieds: blue sparkle.
+    drummer(s, items, (0.0, 0.0, 5.25), yaw=180.0, finish=(0.05, 0.16, 0.55), metallic=0.25, roughness=0.25)
     head = textured(s.box("Kick Logo", items, (0.0, 0.31, 4.098), (0.56, 0.56, 0.004), (1, 1, 1), rough=0.7, shadows=False),
                     "KickHead", emissive=True, emissive_intensity=0.25)
     head.components[-1]["Material"]["AlphaCutoff"] = 0.5

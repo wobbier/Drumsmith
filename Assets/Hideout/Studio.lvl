@@ -14314,7 +14314,14 @@
      "Type": "HideoutDrummer",
      "Cast": 0,
      "Yaw": 180.0,
-     "Energy": 0.55
+     "Energy": 0.55,
+     "Finish": [
+      0.5,
+      0.29,
+      0.12
+     ],
+     "FinishMetallic": 0.0,
+     "FinishRoughness": 0.35
     }
    ]
   },

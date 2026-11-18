@@ -42,10 +42,14 @@ def slot(s, parent, name, slot_name, pos=(0, 0, 0)):
     return e
 
 
-def drummer(s, parent, pos, yaw=180.0, cast=0, energy=0.55):
-    """The player's drummer and kit (Band): pos is the throne, the kit is in front, yaw 180 faces -z."""
+def drummer(s, parent, pos, yaw=180.0, cast=0, energy=0.55, finish=None, metallic=0.0, roughness=0.4):
+    """The player's drummer and kit (Band): pos is the throne, the kit is in front, yaw 180 faces -z.
+    finish: the drum shells' lacquer (None keeps the kit's oxblood); the kit gets better with the room."""
     e = s.entity("Drummer", parent, pos)
-    e.add({"Type": "HideoutDrummer", "Cast": int(cast), "Yaw": _r(yaw), "Energy": _r(energy)})
+    comp = {"Type": "HideoutDrummer", "Cast": int(cast), "Yaw": _r(yaw), "Energy": _r(energy)}
+    if finish:
+        comp.update({"Finish": vec(finish), "FinishMetallic": _r(metallic), "FinishRoughness": _r(roughness)})
+    e.add(comp)
     return e
 
 

@@ -106,7 +106,8 @@ def kit(s, geo, items, stations, lights):
     kx = 0.4
     rug = slot(s, items, "Rug", "Rug")
     textured(s.box("Persian Rug", rug, (kx, 0.006, 6.0), (3.4, 0.01, 2.9), (1, 1, 1), rot=(0, 90, 0), rough=1.0, shadows=False), "RugRed")
-    drummer(s, items, (kx, 0.0, throne), yaw=180.0)
+    # A kit that has been on records: natural maple under satin.
+    drummer(s, items, (kx, 0.0, throne), yaw=180.0, finish=(0.5, 0.29, 0.12), metallic=0.0, roughness=0.35)
     station(s, stations, "Kit", "Kit", (kx, 1.15, 5.35), (0.3, 0.8, -2.4), 42)
     kz = throne - 1.152
     head = textured(s.box("Kick Logo", items, (kx, 0.31, kz), (0.56, 0.56, 0.004), (1, 1, 1), rough=0.7, shadows=False), "KickHead", emissive=True,

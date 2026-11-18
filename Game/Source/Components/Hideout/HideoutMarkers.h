@@ -110,6 +110,11 @@ public:
     float Yaw = 180.f;
     // How hard they go at it, 0 to 1 (Band::Update's energy).
     float Energy = 0.55f;
+    // The kit gets better with the room: the drum shells' lacquer (the kick, snare and toms),
+    // its metallic and roughness. All zero keeps the kit's own oxblood.
+    Vector3 Finish{ 0.f, 0.f, 0.f };
+    float FinishMetallic = 0.f;
+    float FinishRoughness = 0.4f;
 };
 ME_REGISTER_COMPONENT_FOLDER( HideoutDrummer, "Hideout" )
 

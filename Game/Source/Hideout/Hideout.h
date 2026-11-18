@@ -244,6 +244,13 @@ private:
     float m_drummerYaw = 180.f;
     int m_drummerCast = 0;
     float m_drummerEnergy = 0.55f;
+    // The kit's finish (HideoutDrummer::Finish), put on each song's kit once its drums have loaded.
+    Vector3 m_finish;
+    float m_finishMetallic = 0.f;
+    float m_finishRoughness = 0.4f;
+    bool m_finishDone = true;
+    float m_finishWait = 0.f;
+    void ApplyFinish( float inDeltaTime );
     VenueKit m_kit;
     // The band's stage: an empty group at the room's origin (Band needs one to update).
     EntityHandle m_stage;

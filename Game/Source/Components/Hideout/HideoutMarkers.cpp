@@ -30,6 +30,9 @@ ME_REFLECT_BEGIN( HideoutDrummer )
     ME_FIELD( Cast ).Range( 0, 1000 ).Tooltip( "Which character plays; the same one whatever the song" );
     ME_FIELD( Yaw ).Unit( Reflection::Unit::Degrees ).Tooltip( "Which way the drummer faces (180: -z); the kit is in front of them" );
     ME_FIELD( Energy ).Range( 0.f, 1.f ).Tooltip( "How hard the drummer goes at it" );
+    ME_FIELD( Finish ).Color().Tooltip( "The drum shells' lacquer; black (all zero) keeps the kit's own oxblood" );
+    ME_FIELD( FinishMetallic ).Range( 0.f, 1.f ).Tooltip( "The lacquer's metal flake" );
+    ME_FIELD( FinishRoughness ).Range( 0.f, 1.f ).Tooltip( "How glossy the lacquer is (low: glossy)" );
 ME_REFLECT_END()
 
 ME_REFLECT_ENUM( HideoutBandName::When, { { "Unnamed", HideoutBandName::When::Unnamed }, { "Named", HideoutBandName::When::Named } } )

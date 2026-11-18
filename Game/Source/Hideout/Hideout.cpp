@@ -4,6 +4,7 @@
 #include "Components/Camera.h"
 #include "Components/Lighting/Light.h"
 #include "Components/Graphics/Mesh.h"
+#include "Components/Graphics/Model.h"
 #include "Components/Graphics/PostProcess.h"
 #include "Components/Graphics/TextRenderer.h"
 #include "Materials/StandardMaterial.h"
@@ -259,6 +260,68 @@ void Hideout::BuildBand( const TrackData* inTrack )
     // The last song's drummer and kit go (Begin clears what the kit made before).
     m_bandKit.Begin( *m_world );
     m_band.Build( m_bandKit, stage, plan, m_chart.m_venue, chart ? m_chart.m_noteData : kNoNotes, chart ? m_chart.m_beats : kNoBeats, static_cast<float>( m_chart.m_bpm ) );
+    // This kit's drums need the room's finish once their models have loaded.
+    m_finishDone = m_finish.x <= 0.f && m_finish.y <= 0.f && m_finish.z <= 0.f;
+    m_finishWait = 0.f;
+}
+
+
+void Hideout::ApplyFinish( float inDeltaTime )
+{
+    if( m_finishDone || !m_stage )
+    {
+        return;
+    }
+    // The drums' lacquer is the one dark red material in the kit's models (Kick, Snare, Tom1,
+    // Tom2, FloorTom: Oxblood_lacquer, Kd 0.19 0.008 0.016); everything else keeps its own.
+    int painted = 0;
+    const auto paintMesh = [&]( Mesh* inMesh ) {
+        if( !inMesh || !inMesh->MeshMaterial )
+        {
+            return;
+        }
+        Moonlight::Material& material = *inMesh->MeshMaterial;
+        const Vector3 colour = material.DiffuseColor;
+        const bool lacquer = colour.x > 0.14f && colour.x < 0.24f && colour.y < 0.04f && colour.z < 0.05f;
+        const bool already = std::abs( colour.x - m_finish.x ) < 0.001f && std::abs( colour.y - m_finish.y ) < 0.001f && std::abs( colour.z - m_finish.z ) < 0.001f;
+        if( lacquer || already )
+        {
+            material.SetDiffuseColor( m_finish );
+            if( StandardMaterial* standard = dynamic_cast<StandardMaterial*>( &material ) )
+            {
+                standard->SetMetallic( m_finishMetallic );
+                standard->SetRoughness( m_finishRoughness );
+            }
+            ++painted;
+        }
+    };
+    const std::function<void( Transform& )> paint = [&]( Transform& inTransform ) {
+        if( Entity* entity = inTransform.Parent.Get() )
+        {
+            paintMesh( entity->TryGetComponent<Mesh>() );
+            // A compact model keeps its meshes in its render parts, not in child entities.
+            Model* model = entity->TryGetComponent<Model>();
+            if( model && model->IsReady() )
+            {
+                for( Model::RenderPart& part : model->GetRenderParts() )
+                {
+                    paintMesh( part.Renderer.get() );
+                }
+            }
+        }
+        for( Transform* child : inTransform.GetChildren() )
+        {
+            if( child ) paint( *child );
+        }
+    };
+    paint( m_stage->GetComponent<Transform>() );
+    // Five drums; the models load on their own time, so keep at it for a while.
+    m_finishWait += inDeltaTime;
+    m_finishDone = painted >= 5 || m_finishWait > 10.f;
+    if( m_finishDone )
+    {
+        INFO_FMT( "[Hideout]", "the kit's finish on %d drums", painted );
+    }
 }
 
 
@@ -280,6 +343,7 @@ void Hideout::UpdateDrummer( float inDeltaTime )
         m_bandSeconds = radio.GetPositionMS() / 1000.0;
     }
     m_band.Update( m_bandSeconds, inDeltaTime, m_drummerEnergy );
+    ApplyFinish( inDeltaTime );
     // Out of sight (under the floor) until the drummer's body has loaded: no T-pose on the way in.
     if( Transform* stage = m_stage ? m_stage->TryGetComponent<Transform>() : nullptr )
     {
@@ -893,6 +957,9 @@ bool Hideout::Load( bool inEvaluate )
             m_drummerYaw = drummer->Yaw;
             m_drummerCast = drummer->Cast;
             m_drummerEnergy = drummer->Energy;
+            m_finish = drummer->Finish;
+            m_finishMetallic = drummer->FinishMetallic;
+            m_finishRoughness = drummer->FinishRoughness;
             m_kit.Begin( inWorld );
             m_stage = m_kit.Group( "Hideout Stage", nullptr );
             break;
