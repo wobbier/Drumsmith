@@ -65,3 +65,12 @@
 .debug-toggle:hover { background-color: #ffffff20; }
 .debug-toggle.on { color: #000000; background-color: #66ff66; border-color: #66ff66; }
 #debug-seek { display: block; width: 100%; }
+/* Options tabs (the engine's tab: action) and the Graphics page (the engine's player-settings actions). */
+#pause-tabs { display: flex; justify-content: center; margin: 12dp 0 4dp; border-bottom: 1dp #ffffff30; }
+#pause-options .tab { display: block; width: auto; margin: 0 4dp; padding: 9dp 16dp; font-size: 22dp; color: #c5c5c5; border-bottom: 3dp #ffffff00; }
+#pause-options .tab:hover, #pause-options .tab:focus { color: #ffffff; }
+#pause-options .tab.selected { color: #ffffff; border-bottom-color: #ff9933; }
+#pause-options .choice-row { display: flex; flex-wrap: wrap; justify-content: center; }
+#pause-options .choice-row .device-choice, #pause-options .choice-row .choice { display: block; width: auto; margin: 4dp; padding: 8dp 14dp; font-size: 18dp; border: 1dp #ffffff30; background-color: #ffffff08; }
+#pause-options .choice-row .device-choice:hover, #pause-options .choice-row .choice:hover { border-color: #ffffff80; }
+#pause-options .choice-row .device-choice.selected, #pause-options .choice-row .choice.selected { border-color: #66ff66; background-color: #66ff6618; }

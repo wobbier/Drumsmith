@@ -80,22 +80,72 @@
             <img class="pause-underline" src="img/Underline.png"/>
             <p id="midi-notice" class="muted" data-if="midi_notice != ''">{{midi_notice}}</p>
             <div><button id="resume" class="menu-link green" data-event-click="resume">RESUME<span class="underline"></span></button></div>
+            <div><button id="restart" class="menu-link pink" data-event-click="retry">RESTART<span class="underline"></span></button></div>
             <div><button id="options" class="menu-link orange" data-event-click="options">OPTIONS<span class="underline"></span></button></div>
             <div><button class="menu-link red" data-event-click="exit">EXIT<span class="underline"></span></button></div>
         </div>
         <div id="pause-options" data-if="options">
             <button id="options-back" class="menu-link green" data-event-click="back">Back<span class="underline"></span></button>
             <h2>OPTIONS</h2>
-            <label for="pause-master-volume">Master Volume ({{master_volume}}%)</label>
-            <input id="pause-master-volume" class="range" type="range" min="0" max="100" step="1" data-value="master_volume" data-event-change="master_volume(ev.value)"/>
-            <label for="pause-audio-delay">Audio Delay ({{audio_delay}} ms)</label>
-            <input id="pause-audio-delay" class="range" type="range" min="0" max="250" step="1" data-value="audio_delay" data-event-change="audio_delay(ev.value)"/>
-            <label for="pause-video-delay">Visual Delay ({{video_delay}} ms)</label>
-            <input id="pause-video-delay" class="range" type="range" min="0" max="250" step="1" data-value="video_delay" data-event-change="video_delay(ev.value)"/>
-            <label>Metronome</label>
-            <button id="pause-metronome" class="debug-toggle" data-class-on="metronome" data-event-click="metronome">{{metronome ? 'ON' : 'OFF'}}</button>
-            <label for="pause-highway-speed">Highway Speed ({{highway_speed}}%)</label>
-            <input id="pause-highway-speed" class="range" type="range" min="50" max="200" step="5" data-value="highway_speed" data-event-change="highway_speed(ev.value)"/>
+            <div id="pause-tabs">
+                <button id="pause-tab-game" class="tab selected" onclick="tab:pause-page-game">Game</button>
+                <button id="pause-tab-graphics" class="tab" onclick="tab:pause-page-graphics">Graphics</button>
+            </div>
+            <div class="tab-page" id="pause-page-game">
+                <label for="pause-master-volume">Master Volume ({{master_volume}}%)</label>
+                <input id="pause-master-volume" class="range" type="range" min="0" max="100" step="1" data-value="master_volume" data-event-change="master_volume(ev.value)"/>
+                <label for="pause-audio-delay">Audio Delay ({{audio_delay}} ms)</label>
+                <input id="pause-audio-delay" class="range" type="range" min="0" max="250" step="1" data-value="audio_delay" data-event-change="audio_delay(ev.value)"/>
+                <label for="pause-video-delay">Visual Delay ({{video_delay}} ms)</label>
+                <input id="pause-video-delay" class="range" type="range" min="0" max="250" step="1" data-value="video_delay" data-event-change="video_delay(ev.value)"/>
+                <label>Metronome</label>
+                <button id="pause-metronome" class="debug-toggle" data-class-on="metronome" data-event-click="metronome">{{metronome ? 'ON' : 'OFF'}}</button>
+                <label for="pause-highway-speed">Highway Speed ({{highway_speed}}%)</label>
+                <input id="pause-highway-speed" class="range" type="range" min="50" max="200" step="5" data-value="highway_speed" data-event-change="highway_speed(ev.value)"/>
+            </div>
+            <div class="tab-page" id="pause-page-graphics" style="display: none;">
+                <p class="muted">These apply and save as you change them.</p>
+                <label>Quality</label>
+                <div class="choice-row">
+                    <button id="pause-quality-auto" class="device-choice" onclick="setting:Graphics.Quality|&quot;&quot;" data-setting-selected="Graphics.Quality|&quot;&quot;">Auto</button>
+                    <div class="choice-row" data-options="quality"></div>
+                </div>
+                <label>Display</label>
+                <div class="choice-row">
+                    <button id="pause-window-windowed" class="device-choice" onclick="window-mode:windowed" data-window-mode="windowed">Windowed</button>
+                    <button id="pause-window-borderless" class="device-choice" onclick="window-mode:borderless" data-window-mode="borderless">Borderless</button>
+                    <button id="pause-window-fullscreen" class="device-choice" onclick="window-mode:fullscreen" data-window-mode="fullscreen">Fullscreen</button>
+                </div>
+                <label>VSync</label>
+                <div class="choice-row">
+                    <button id="pause-vsync-on" class="device-choice" onclick="setting:Graphics.VSync|true" data-setting-selected="Graphics.VSync|true">On</button>
+                    <button id="pause-vsync-off" class="device-choice" onclick="setting:Graphics.VSync|false" data-setting-selected="Graphics.VSync|false">Off</button>
+                </div>
+                <label>Frame Rate Limit</label>
+                <div class="choice-row">
+                    <button id="pause-max-fps-0" class="device-choice" onclick="setting:Graphics.MaxFrameRate|0" data-setting-selected="Graphics.MaxFrameRate|0">None</button>
+                    <button id="pause-max-fps-60" class="device-choice" onclick="setting:Graphics.MaxFrameRate|60" data-setting-selected="Graphics.MaxFrameRate|60">60</button>
+                    <button id="pause-max-fps-120" class="device-choice" onclick="setting:Graphics.MaxFrameRate|120" data-setting-selected="Graphics.MaxFrameRate|120">120</button>
+                    <button id="pause-max-fps-144" class="device-choice" onclick="setting:Graphics.MaxFrameRate|144" data-setting-selected="Graphics.MaxFrameRate|144">144</button>
+                    <button id="pause-max-fps-240" class="device-choice" onclick="setting:Graphics.MaxFrameRate|240" data-setting-selected="Graphics.MaxFrameRate|240">240</button>
+                </div>
+                <label>Render Scale (<span data-setting-text="Graphics.RenderScale" data-format="percent"></span>)</label>
+                <div class="choice-row">
+                    <button id="pause-render-scale-down" class="device-choice" onclick="setting-step:Graphics.RenderScale|-0.1">Lower</button>
+                    <button id="pause-render-scale-up" class="device-choice" onclick="setting-step:Graphics.RenderScale|0.1">Higher</button>
+                </div>
+                <label>Upscaling</label>
+                <div class="choice-row">
+                    <button id="pause-upscale-default" class="device-choice" onclick="setting:Graphics.Upscale|&quot;&quot;" data-setting-selected="Graphics.Upscale|&quot;&quot;">Default</button>
+                    <button id="pause-upscale-smooth" class="device-choice" onclick="setting:Graphics.Upscale|Bilinear" data-setting-selected="Graphics.Upscale|Bilinear">Smooth</button>
+                    <button id="pause-upscale-sharp" class="device-choice" onclick="setting:Graphics.Upscale|Sharp" data-setting-selected="Graphics.Upscale|Sharp">Sharp</button>
+                </div>
+                <label>Dynamic Resolution</label>
+                <div class="choice-row">
+                    <button id="pause-dynamic-resolution-on" class="device-choice" onclick="setting:Graphics.DynamicResolution|true" data-setting-selected="Graphics.DynamicResolution|true">On</button>
+                    <button id="pause-dynamic-resolution-off" class="device-choice" onclick="setting:Graphics.DynamicResolution|false" data-setting-selected="Graphics.DynamicResolution|false">Off</button>
+                </div>
+            </div>
             <button class="menu-link green" data-event-click="save">Save Settings<span class="underline"></span></button>
             <p class="muted">{{status}}</p>
         </div>
