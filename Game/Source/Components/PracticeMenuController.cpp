@@ -276,14 +276,15 @@ void PracticeMenuController::Update( float inDeltaTime )
         PlayerProfile& profile = PlayerProfile::GetInstance();
         if( !Progression::GetInstance().Evaluate( profile ).empty() )
         {
+            // The rows' LOCKED marks again, and the lesson the player had chosen kept.
             profile.Save();
+            const int chosen = m_selected;
             m_modelReady = false;
             PopulateModel();
-            if( m_selected >= 0 )
+            if( chosen >= 0 )
             {
-                const int selected = m_selected;
                 m_selected = -1;
-                SelectLesson( selected );
+                SelectLesson( chosen );
             }
         }
         FillSongs();
