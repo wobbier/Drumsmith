@@ -617,7 +617,8 @@ const std::vector<const char*>& Hideout::Events()
 {
     static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play", "band_name_edit",
         "band_name_save", "band_name_cancel", "debug_toggle", "debug_room", "debug_move_in", "debug_item", "debug_items", "debug_gig", "debug_step",
-        "debug_time", "debug_evaluate", "debug_intro", "debug_tour", "debug_overlay", "debug_name", "debug_restore", "debug_reset", "debug_reload" };
+        "debug_time", "debug_evaluate", "debug_intro", "debug_tour", "debug_overlay", "debug_name", "debug_restore", "debug_reset", "debug_reload",
+        "debug_freelook" };
     return kEvents;
 }
 
@@ -642,6 +643,7 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetNumber( inModel, "debug_allowed", DebugAllowed() ? 1 : 0 );
     inUi.ModelSetNumber( inModel, "debug_open", 0 );
     inUi.ModelSetNumber( inModel, "debug_overlay_hidden", 0 );
+    inUi.ModelSetNumber( inModel, "debug_freelook", 0 );
     inUi.ModelSetNumber( inModel, "debug_time", 0 );
     inUi.ModelSetNumber( inModel, "debug_backup", 0 );
     inUi.ModelSetString( inModel, "debug_status", "" );
@@ -1176,6 +1178,7 @@ void Hideout::Clear()
     m_hasCurrent = false;
     m_hover = -1;
     m_highlightLevel = 0.f;
+    m_freeLook = false;
 }
 
 
@@ -1246,6 +1249,11 @@ bool Hideout::Back()
     {
         return false;
     }
+    if( m_freeLook )
+    {
+        SetFreeLook( false );
+        return true;
+    }
     if( m_debugOpen )
     {
         m_debugOpen = false;
@@ -1275,10 +1283,94 @@ bool Hideout::Back()
 }
 
 
+void Hideout::SetFreeLook( bool inOn )
+{
+    if( inOn == m_freeLook )
+    {
+        return;
+    }
+    m_freeLook = inOn;
+    m_overlayHidden = inOn;
+    m_freeDragging = false;
+    if( inOn )
+    {
+        // From wherever the camera is now.
+        Choose( -1 );
+        m_intro = -1.f;
+        m_reveal = static_cast<int>( m_reveals.size() );
+        m_freeEye = m_current.Eye;
+        const Vector3 look = LookRotation( m_current.Eye, m_current.Target );
+        m_freePitch = look.x;
+        m_freeYaw = look.y;
+        m_freeFov = m_current.FieldOfView;
+    }
+    else
+    {
+        // Ease back to the overview from where free look left the camera.
+        constexpr float kRadians = 0.01745329f;
+        const float pitch = m_freePitch * kRadians, yaw = m_freeYaw * kRadians;
+        m_current.Eye = m_freeEye;
+        m_current.Target = m_freeEye + Vector3( std::sin( yaw ) * std::cos( pitch ), -std::sin( pitch ), std::cos( yaw ) * std::cos( pitch ) ) * 3.f;
+        m_current.FieldOfView = m_freeFov;
+    }
+}
+
+
+void Hideout::UpdateFreeLook( float inDeltaTime )
+{
+    Input& input = GetEngine().GetInput();
+    const Vector2 mouse = input.GetMousePosition();
+    if( input.IsMouseButtonDown( MouseButton::Right ) )
+    {
+        if( m_freeDragging )
+        {
+            const Vector2 delta = mouse - m_freeMouse;
+            m_freeYaw += delta.x * 0.15f;
+            m_freePitch = std::clamp( m_freePitch + delta.y * 0.15f, -85.f, 85.f );
+        }
+        m_freeDragging = true;
+    }
+    else
+    {
+        m_freeDragging = false;
+    }
+    m_freeMouse = mouse;
+    m_freeFov = std::clamp( m_freeFov - input.GetMouseScrollDelta().y * 3.f, 15.f, 100.f );
+    constexpr float kRadians = 0.01745329f;
+    const float pitch = m_freePitch * kRadians, yaw = m_freeYaw * kRadians;
+    const Vector3 forward( std::sin( yaw ) * std::cos( pitch ), -std::sin( pitch ), std::cos( yaw ) * std::cos( pitch ) );
+    const Vector3 right( std::cos( yaw ), 0.f, -std::sin( yaw ) );
+    Vector3 move;
+    if( input.IsKeyDown( KeyCode::W ) ) move = move + forward;
+    if( input.IsKeyDown( KeyCode::S ) ) move = move - forward;
+    if( input.IsKeyDown( KeyCode::D ) ) move = move + right;
+    if( input.IsKeyDown( KeyCode::A ) ) move = move - right;
+    if( input.IsKeyDown( KeyCode::E ) ) move = move + Vector3( 0.f, 1.f, 0.f );
+    if( input.IsKeyDown( KeyCode::Q ) ) move = move - Vector3( 0.f, 1.f, 0.f );
+    const float speed = input.IsKeyDown( KeyCode::LeftShift ) ? 4.5f : 1.5f;
+    m_freeEye = m_freeEye + move * ( speed * inDeltaTime );
+    m_current.Eye = m_freeEye;
+    m_current.Target = m_freeEye + forward;
+    m_current.FieldOfView = m_freeFov;
+    Transform& transform = m_camera->GetComponent<Transform>();
+    transform.SetPosition( m_freeEye );
+    transform.SetRotation( Vector3( m_freePitch, m_freeYaw, 0.f ) );
+    if( Camera* camera = m_camera->TryGetComponent<Camera>() )
+    {
+        camera->SetFOV( m_freeFov );
+    }
+}
+
+
 void Hideout::ApplyCamera( float inDeltaTime )
 {
     if( !m_camera )
     {
+        return;
+    }
+    if( m_freeLook )
+    {
+        UpdateFreeLook( inDeltaTime );
         return;
     }
     const Pose goal = m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() ) && m_chosen < 0 ? PoseOfReveal( m_reveals[m_reveal] ) : PoseOf( m_chosen );

@@ -4,6 +4,7 @@
 #include "JSON.h"
 #include "Venue/Band.h"
 #include "Venue/VenueKit.h"
+#include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include <string>
 #include <vector>
@@ -231,6 +232,17 @@ private:
     // profile as it was before the menu changed anything (put back by its Restore button).
     bool m_debugOpen = false;
     bool m_overlayHidden = false;
+    // Free look (the debug menu): the camera flown by hand. Right-drag looks, WASD moves, Q/E
+    // down and up, Shift faster, the wheel zooms; Escape leaves it.
+    bool m_freeLook = false;
+    Vector3 m_freeEye;
+    float m_freeYaw = 0.f;
+    float m_freePitch = 0.f;
+    float m_freeFov = 60.f;
+    Vector2 m_freeMouse;
+    bool m_freeDragging = false;
+    void SetFreeLook( bool inOn );
+    void UpdateFreeLook( float inDeltaTime );
     bool m_debugHasBackup = false;
     json m_debugBackup;
     std::string m_debugStatus;

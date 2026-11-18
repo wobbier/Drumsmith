@@ -99,6 +99,7 @@
             <div class="debug-row">
                 <button id="debug-name" class="debug-chip" data-event-click="debug_name">Next band name</button>
                 <button id="debug-overlay" class="debug-chip" data-event-click="debug_overlay">{{debug_overlay_hidden > 0 ? 'Show the menu' : 'Hide the menu'}}</button>
+                <button id="debug-freelook" class="debug-chip" data-class-on="debug_freelook > 0" data-event-click="debug_freelook">Free look</button>
             </div>
             <button id="debug-reset" class="debug-wide warn" data-event-click="debug_reset">Start over as a new player</button>
             <p id="debug-status" class="debug-status">{{debug_status}}</p>

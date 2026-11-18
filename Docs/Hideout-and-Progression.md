@@ -133,6 +133,7 @@ Every item slot of `Progression.json` has a place in it too.
 - Each item, in or out. Turning one on shows it off as a new item would.
 - Each gig played or not, and each lesson step passed or not (`PlayerProfile::SetLessonPassed`). *Apply the rules* runs `Progression::Evaluate`, so the notices and tour come as they would after a real gig.
 - The next band name, hiding the menu for a clean look at the room, and starting over as a new player.
+- *Free look*: the camera by hand. Right-drag looks, WASD moves, Q/E go down and up, Shift is faster, and the wheel zooms. The menu hides meanwhile, the radio's filter follows the camera, and Escape (or the button again) eases back to the overview.
 
 Every change saves the profile. Before the first, the player's own is copied to `Profile.debug-backup.json` beside it, and *Restore my own profile* puts it back and deletes the copy. A room reload skips `Evaluate` (it would undo a removed reward), and the room's own reload keeps the camera where it was. `--hideout-debug-open` opens the panel at start, for captures.
 

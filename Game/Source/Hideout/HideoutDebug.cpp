@@ -120,6 +120,7 @@ void Hideout::DebugUpdate( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetString( inModel, "debug_clock", clock );
     inUi.ModelSetNumber( inModel, "debug_time", static_cast<int>( TimeOverride() ) );
     inUi.ModelSetNumber( inModel, "debug_backup", HasBackup() ? 1 : 0 );
+    inUi.ModelSetNumber( inModel, "debug_freelook", m_freeLook ? 1 : 0 );
     inUi.ModelSetString( inModel, "debug_status", m_debugStatus );
 }
 
@@ -250,6 +251,12 @@ bool Hideout::DebugEvent( const std::string& inEvent, const json& inArgs, RmlUiC
     if( inEvent == "debug_overlay" )
     {
         m_overlayHidden = !m_overlayHidden;
+        return true;
+    }
+    if( inEvent == "debug_freelook" )
+    {
+        SetFreeLook( !m_freeLook );
+        m_debugStatus = m_freeLook ? "Free look: right-drag to look, WASD to move, Q/E down/up, Shift faster, wheel zooms, Esc leaves" : "Free look off";
         return true;
     }
     if( inEvent == "debug_name" )
