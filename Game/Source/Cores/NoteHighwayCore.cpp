@@ -293,6 +293,8 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     {
         BuildBeatLines();
     }
+    // A play: the venue's ambience (a crowd waiting) runs through the load and count-in.
+    m_venueShow.SetAmbienceWanted( true );
     BuildVenue();
 
     m_currentTrackPack = AudioPack( inTrackData );
@@ -449,6 +451,8 @@ void NoteHighwayCore::BeginPreview( TrackData& inTrackData )
     BuildNotes();
     BuildHighway();
     BuildBeatLines();
+    // The Track Editor has the clock: no crowd noise over the charter's playback.
+    m_venueShow.SetAmbienceWanted( false );
     BuildVenue();
     ResetScore();
     m_songState = SongState::Preview;
@@ -1000,12 +1004,14 @@ void NoteHighwayCore::Pause()
 {
     m_isPaused = true;
     m_currentTrackPack.Pause();
+    m_venueShow.SetAmbiencePaused( true );
 }
 
 
 void NoteHighwayCore::Resume()
 {
     m_isPaused = false;
+    m_venueShow.SetAmbiencePaused( false );
     ResumeWithRunUp();
     m_songClockStamp = std::chrono::steady_clock::now();
 }

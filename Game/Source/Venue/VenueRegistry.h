@@ -7,8 +7,17 @@
 
 class TrackData;
 
-// A venue scene found on disk: a folder holding venue.json (Name, Author, Scene, Preview, Version)
-// and the .lvl it names. Paths are logical (VFS), so mod overlays and paks are seen.
+// The sound a venue plays while the song loads and counts in (a crowd waiting for the band), faded
+// out over the song's first seconds (VenueShow). venue.json: Ambience, AmbienceVolume, AmbienceFade.
+struct VenueAmbience
+{
+    std::string SoundPath;      // logical; empty when the venue has none
+    float Volume = 1.f;         // 0..1
+    float FadeSeconds = 8.f;    // from the song's start to silence
+};
+
+// A venue scene found on disk: a folder holding venue.json (Name, Author, Scene, Preview, Version,
+// Ambience) and the .lvl it names. Paths are logical (VFS), so mod overlays and paks are seen.
 struct VenueEntry
 {
     std::string Id;          // the folder name ("song:<folder>" for a song's own venue)
@@ -17,6 +26,7 @@ struct VenueEntry
     std::string Folder;      // logical, "Assets/Venues/X"
     std::string ScenePath;   // logical path to the .lvl
     std::string PreviewPath; // logical path to the preview image; empty when there is none
+    VenueAmbience Ambience;
     int Version = 1;
     bool SongLocal = false;
     bool Hidden = false;     // "Hidden": true in venue.json: usable (--venue) but not listed in the menu
@@ -30,6 +40,7 @@ struct VenueChoice
     std::string ScenePath;   // when IsScene
     std::string Id;          // the registry id, "song:<folder>", or the path given to --venue
     std::string Reason;      // the rule that picked it, for the log ("--venue", "the VenueStyle setting"...)
+    VenueAmbience Ambience;  // the venue's, when IsScene and it came from a venue.json
 };
 
 // Everything the pick reads, so ChooseVenue stays free of globals.

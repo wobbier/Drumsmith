@@ -85,13 +85,32 @@ public:
 
     virtual void Init() final;
 
+    // Who stands here. Mob: the cheap instanced figures that bob, jump and put their hands up, for
+    // the back of a crowd. Posed: the full figures of the built-in rooms' front rows, each with its
+    // own moves, cheers, phones and lighters, and the crowd surfer (from the first posed area);
+    // they cost more, so keep them to the people near the stage.
+    enum class Kind : int { Mob = 0, Posed };
+    Kind Figures = Kind::Mob;
+    bool DanceFloor = false;
     // How many people stand in the rectangle at a full house.
     int HeadCount = 60;
     // Spread of each person from their grid position, as a fraction of the grid spacing (0 is a
-    // neat grid, 1 is a loose mob).
+    // neat grid, 1 is a loose mob). Mob only: posed rows have their own looseness.
     float Jitter = 0.5f;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueCrowdArea, "Venue" )
+
+class VenueAccent : public Component<VenueAccent>
+{
+    ME_REFLECTABLE( VenueAccent )
+public:
+    VenueAccent() : Component( "VenueAccent" ) {}
+    void Init() final {}
+    float Beats = 12.f;
+    int Particles = 0;
+    bool FullLightingOnly = false;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueAccent, "Venue" )
 
 
 // A camera position the director can cut to. Position is the eye and the camera looks along the

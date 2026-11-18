@@ -158,10 +158,15 @@ class Scene:
         e.add({"Type": "VenueSpot", "Member": member})
         return e
 
-    def crowd(self, name, parent, center, width, depth, heads, jitter=0.5, yaw=0.0):
-        """A crowd rectangle: centre, full width (x) and depth (z) in metres."""
+    def crowd(self, name, parent, center, width, depth, heads, jitter=0.5, yaw=0.0, figures="Mob"):
+        """A crowd rectangle: centre, full width (x) and depth (z) in metres. figures: Mob (cheap
+        instanced figures) | Posed (the full front-row figures; fill from the +Z edge back)."""
         e = self.entity(name, parent, center, yaw_rotation(yaw), (width, 1.0, depth))
-        e.add({"Type": "VenueCrowdArea", "HeadCount": int(heads), "Jitter": _r(jitter)})
+        c = {"Type": "VenueCrowdArea"}
+        if figures != "Mob":
+            c["Figures"] = figures
+        c.update({"HeadCount": int(heads), "Jitter": _r(jitter)})
+        e.add(c)
         return e
 
     def camera_spot(self, name, parent, eye, target, shot="Wide", fov=55.0, tag=""):
@@ -199,10 +204,12 @@ def transform(pos=(0, 0, 0), rot=(0, 0, 0), scale=(1, 1, 1)):
     return {"Type": "Transform", "Position": vec(pos), "Rotation": vec(rot), "Scale": vec(scale)}
 
 
-def write_venue_json(folder, name, scene_file, author="Drumsmith", preview=None, version=1):
+def write_venue_json(folder, name, scene_file, author="Drumsmith", preview=None, version=1, ambience=None):
     d = {"Name": name, "Author": author, "Scene": scene_file}
     if preview:
         d["Preview"] = preview
+    if ambience:
+        d["Ambience"] = ambience
     d["Version"] = version
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "venue.json"), "w", newline="\n") as f:

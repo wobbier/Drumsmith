@@ -66,6 +66,13 @@ TEST_CASE( "Venue registry: the player's venue id beats the style, an unknown on
     CHECK( choice.IsScene );
     CHECK( choice.Id == "Garage" );
     CHECK( choice.ScenePath == "Assets/Venues/Garage/Garage.lvl" );
+    CHECK( choice.Ambience.SoundPath.empty() );
+    // A scene pick carries its venue's ambience.
+    f.Registry[1].Ambience.SoundPath = "Assets/Sounds/crowd.mp3";
+    f.Registry[1].Ambience.Volume = 0.5f;
+    choice = ChooseVenue( f.In );
+    CHECK( choice.Ambience.SoundPath == "Assets/Sounds/crowd.mp3" );
+    CHECK( choice.Ambience.Volume == 0.5f );
     f.In.VenueId = "Gone";
     choice = ChooseVenue( f.In );
     CHECK( !choice.IsScene );
@@ -211,9 +218,9 @@ TEST_CASE( "Venue registry: Reload reads a mounted folder, skips bad venues and 
         fs::create_directories( ( base / inRelative ).parent_path() );
         std::ofstream( base / inRelative, std::ios::binary ) << inText;
     };
-    write( "Venues/Zed/venue.json", R"({"Name":"Alpha","Author":"Me","Scene":"Zed.lvl","Preview":"p.png","Version":2})" );
+    write( "Venues/Zed/venue.json", R"({"Name":"Alpha","Author":"Me","Scene":"Zed.lvl","Preview":"p.png","Ambience":"crowd.ogg","AmbienceVolume":3,"AmbienceFade":4.5,"Version":2})" );
     write( "Venues/Zed/Zed.lvl", "{}" );
-    write( "Venues/Beta/venue.json", R"({"Name":"Beta","Scene":"Beta.lvl"})" );
+    write( "Venues/Beta/venue.json", R"({"Name":"Beta","Scene":"Beta.lvl","Ambience":"Assets\\Sounds\\crowd.mp3"})" );
     write( "Venues/Beta/Beta.lvl", "{}" );
     write( "Venues/NoScene/venue.json", R"({"Name":"Missing","Scene":"Nope.lvl"})" );
     write( "Venues/BadJson/venue.json", "{ not json" );
@@ -233,6 +240,12 @@ TEST_CASE( "Venue registry: Reload reads a mounted folder, skips bad venues and 
     CHECK( venues[0].PreviewPath == "VenueTest/Venues/Zed/p.png" );
     CHECK( venues[1].Id == "Beta" );
     CHECK( venues[1].PreviewPath.empty() );
+    // Ambience: a file in the venue's folder, or an Assets/ path; the volume is clamped to 0..1.
+    CHECK( venues[0].Ambience.SoundPath == "VenueTest/Venues/Zed/crowd.ogg" );
+    CHECK( venues[0].Ambience.Volume == 1.f );
+    CHECK( venues[0].Ambience.FadeSeconds == 4.5f );
+    CHECK( venues[1].Ambience.SoundPath == "Assets/Sounds/crowd.mp3" );
+    CHECK( venues[1].Ambience.FadeSeconds == 8.f );
     CHECK( registry.Find( "Beta" ) != nullptr );
     CHECK( registry.Find( "NoScene" ) == nullptr );
     CHECK( registry.Find( "BadJson" ) == nullptr );

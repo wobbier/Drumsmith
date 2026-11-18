@@ -3,6 +3,7 @@
 
 ME_REFLECT_ENUM( VenueSpot::Role, { { "Drummer", VenueSpot::Role::Drummer }, { "Guitar", VenueSpot::Role::Guitar }, { "Bass", VenueSpot::Role::Bass }, { "Vocals", VenueSpot::Role::Vocals }, { "Keys", VenueSpot::Role::Keys } } )
 ME_REFLECT_ENUM( VenueCameraSpot::Kind, { { "Wide", VenueCameraSpot::Kind::Wide }, { "Desk", VenueCameraSpot::Kind::Desk }, { "Crane", VenueCameraSpot::Kind::Crane }, { "Close", VenueCameraSpot::Kind::Close }, { "Custom", VenueCameraSpot::Kind::Custom } } )
+ME_REFLECT_ENUM( VenueCrowdArea::Kind, { { "Mob", VenueCrowdArea::Kind::Mob }, { "Posed", VenueCrowdArea::Kind::Posed } } )
 ME_REFLECT_ENUM( VenueScreen::Feed, { { "Stage", VenueScreen::Feed::Stage }, { "Program", VenueScreen::Feed::Program }, { "Lyrics", VenueScreen::Feed::Lyrics } } )
 ME_REFLECT_ENUM( VenueShowLight::Role, { { "Wash", VenueShowLight::Role::Wash }, { "Beam", VenueShowLight::Role::Beam }, { "Spot", VenueShowLight::Role::Spot }, { "Blinder", VenueShowLight::Role::Blinder }, { "Strobe", VenueShowLight::Role::Strobe }, { "Static", VenueShowLight::Role::Static } } )
 
@@ -30,8 +31,16 @@ ME_REFLECT_BEGIN( VenueSpot )
 ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( VenueCrowdArea )
+    ME_FIELD( DanceFloor ).Tooltip( "Posed figures trade jumps from side to side during loud passages" );
+    ME_FIELD( Figures ).Tooltip( "Mob: cheap instanced figures, for the back. Posed: the full figures of the built-in rooms' front rows (cheers, phones, the crowd surfer), filled in rows from the area's +Z edge back, so face the area at the stage" );
     ME_FIELD( HeadCount ).Range( 0, 5000 ).Tooltip( "People in the rectangle at a full house. Position is the centre, scale x/z the full width/depth in metres, local +Z the way the crowd faces" );
     ME_FIELD( Jitter ).Range( 0.f, 1.f ).Tooltip( "How far each person strays from their grid slot (0 is a neat grid)" );
+ME_REFLECT_END()
+
+ME_REFLECT_BEGIN( VenueAccent )
+    ME_FIELD( FullLightingOnly ).Tooltip( "Hold the first sequence key with gentle or disabled stage lighting." );
+    ME_FIELD( Beats ).Range( 1.f, 32.f ).Tooltip( "Length of the attached Sequence on the song clock. Use the same resting pose at both ends." );
+    ME_FIELD( Particles ).Range( 0, 512 ).Tooltip( "Burst on the attached ParticleSystem at a peak. Ordinary lifts get half." );
 ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( VenueCameraSpot )

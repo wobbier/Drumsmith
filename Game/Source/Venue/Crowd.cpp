@@ -5,10 +5,22 @@
 #include "Components/Transform.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace
 {
     constexpr float kPi = 3.14159265f;
+
+    struct DanceMove
+    {
+        float BaseLeft, TopLeft, BaseRight, TopRight, Spread, Hop;
+    };
+    constexpr DanceMove kDanceMoves[] = {
+        { 38, 171, 46, 177, 25, 1.00f }, // both hands reaching for the ball
+        { 12,  43, 68, 175, 19, 0.90f }, // one fist punching up
+        { 28,  81, 17,  68, 73, 0.43f }, // elbows out, dancing low
+        { 83, 169, 29,  71, 38, 0.76f }, // leading with the opposite shoulder
+    };
 
     float Pulse( double inBeat, double inPower = 2.0 )
     {
@@ -57,6 +69,7 @@ void Crowd::Clear()
     m_beats.clear();
     m_sections.clear();
     m_energy = 0.5f;
+    m_dance = 0.f;
     m_missDip = 0.f;
     m_cheer = 0.f;
     m_surfer = Puppet();
@@ -90,10 +103,17 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenuePlan& inPlan,
 
     // The posed figures, shared between the Posed areas by their head counts.
     int heads = 0;
+    float danceMinX = std::numeric_limits<float>::max();
+    float danceMaxX = std::numeric_limits<float>::lowest();
     std::vector<const VenuePlan::CrowdArea*> posed;
     for( const VenuePlan::CrowdArea& area : inPlan.Crowd )
     {
         if( area.Type != VenuePlan::CrowdArea::Kind::Posed ) continue;
+        if( area.DanceFloor )
+        {
+            danceMinX = std::min( danceMinX, area.MinX );
+            danceMaxX = std::max( danceMaxX, area.MaxX );
+        }
         posed.push_back( &area );
         heads += std::max( area.Heads, 0 );
     }
@@ -105,6 +125,14 @@ void Crowd::Build( VenueKit& inKit, Transform* inFloor, const VenuePlan& inPlan,
             : heads > 0 ? static_cast<int>( std::lround( static_cast<double>( inCount ) * std::max( posed[i]->Heads, 0 ) / heads ) ) : 0;
         given += count;
         BuildRows( inKit, inFloor, *posed[i], static_cast<int>( m_people.size() ) + count, seed );
+    }
+    for( Person& person : m_people )
+    {
+        if( person.DanceLane >= 0.f )
+        {
+            const float x = person.Body.Root()->GetPosition().x;
+            person.DanceLane = std::clamp( ( x - danceMinX ) / std::max( 0.1f, danceMaxX - danceMinX ), 0.f, 1.f );
+        }
     }
     if( !m_people.empty() )
     {
@@ -146,7 +174,7 @@ void Crowd::BuildRows( VenueKit& inKit, Transform* inFloor, const VenuePlan::Cro
                 continue;
             }
             Person person;
-            const Vector3 feet( centre + x + ( VenueTiming::Noise( seed, 2u ) - 0.5f ) * 0.36f, 0.f, z + ( VenueTiming::Noise( seed, 3u ) - 0.5f ) * 0.3f );
+            const Vector3 feet( centre + x + ( VenueTiming::Noise( seed, 2u ) - 0.5f ) * 0.36f, inArea.FloorY, z + ( VenueTiming::Noise( seed, 3u ) - 0.5f ) * 0.3f );
             // Facing the stage, the singer's spot for those off to the side.
             const float yaw = FacingIn( inArea, feet.x, feet.z ) + ( VenueTiming::Noise( seed, 4u ) - 0.5f ) * 16.f;
             Puppet::Look look;
@@ -162,6 +190,7 @@ void Crowd::BuildRows( VenueKit& inKit, Transform* inFloor, const VenuePlan::Cro
             person.Enthusiasm = std::clamp( 0.25f + 0.75f * VenueTiming::Noise( seed, 13u ) + ( depth < 5.f ? 0.25f : 0.f ) - depth * 0.012f, 0.1f, 1.f );
             person.Kind = static_cast<int>( VenueTiming::Noise( seed, 14u ) * 4.f ) % 4;
             person.Depth = depth;
+            if( inArea.DanceFloor ) person.DanceLane = 0.f;
             const float item = VenueTiming::Noise( seed, 15u );
             person.Item = item < 0.07f ? 1 : item < 0.2f ? 2 : 0;
             if( person.Item != 0 )
@@ -230,7 +259,7 @@ void Crowd::OnCheer( float inAmount )
 }
 
 
-void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
+void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance, bool inLift )
 {
     // (A scene venue's crowd can be all mob, with no posed figures.)
     if( m_people.empty() && m_mob.empty() )
@@ -256,6 +285,8 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
     target = std::clamp( target + 0.6f * std::max( bonus, m_cheer ) - 0.5f * m_missDip, 0.f, 1.2f );
     m_energy += ( target - m_energy ) * ( 1.f - std::exp( -inDeltaTime * 1.5f ) );
     const bool lightersUp = mood == "mellow";
+    const float danceTarget = inLift || mood == "intense" || ( mood == "realtime" && inPerformance > 0.8f ) ? 1.f : 0.f;
+    m_dance += ( danceTarget - m_dance ) * ( 1.f - std::exp( -std::max( 0.f, inDeltaTime ) * 5.f ) );
 
     double beat = 0.0;
     int measureBeat = 0;
@@ -416,6 +447,31 @@ void Crowd::Update( double inSeconds, float inDeltaTime, float inPerformance )
             left.Elbow = right.Elbow = person.Kind == 3 ? 100.f : 15.f;
             left.Raise = right.Raise = person.Kind == 3 ? 25.f : 4.f;
             pose.Side = 4.f * wobble;
+        }
+        if( person.DanceLane >= 0.f && m_dance > 0.01f && !carrying )
+        {
+            // One side answers the other on alternate beats; every fourth bar both jump together.
+            const DanceMove& move = kDanceMoves[person.Kind];
+            const float lane = person.DanceLane;
+            const bool together = ( static_cast<int>( std::floor( std::max( 0., beat ) / 4. ) ) % 4 ) == 3;
+            const double count = ( myBeat - ( together ? 0. : ( lane < 0.5f ? 0. : 1. ) + 0.30 * lane ) ) / ( together ? 1. : 2. );
+            const float p = static_cast<float>( count - std::floor( count ) );
+            const float air = std::clamp( p / ( together ? 0.72f : 0.39f ), 0.f, 1.f );
+            const float jump = 4.f * air * ( 1.f - air );
+            const float wind = std::max( 0.f, 1.f - std::abs( p - 0.86f ) / 0.14f );
+            const float lean = lane < 0.5f ? 1.f : -1.f;
+            const auto mix = [this]( float base, float hot ) { return base + m_dance * ( hot - base ); };
+            pose.Offset.y = mix( pose.Offset.y, jump * ( 0.28f + 0.28f * person.Enthusiasm ) * ( together ? 1.f : move.Hop ) );
+            pose.Crouch = mix( pose.Crouch, 0.17f * wind );
+            pose.Side = mix( pose.Side, lean * ( 5.f + 12.f * jump ) );
+            pose.Offset.x += m_dance * lean * jump * 0.11f;
+            pose.Lean = mix( pose.Lean, 18.f * wind - 9.f * jump );
+            pose.Turn = mix( pose.Turn, lean * ( 6.f + move.Spread * 0.35f * jump ) );
+            const float thrust = jump * ( 0.86f + 0.14f * person.Enthusiasm );
+            left.Raise = mix( left.Raise, move.BaseLeft + ( move.TopLeft - move.BaseLeft ) * thrust - 10.f * wind );
+            right.Raise = mix( right.Raise, move.BaseRight + ( move.TopRight - move.BaseRight ) * thrust - 10.f * wind );
+            left.Spread = mix( left.Spread, move.Spread * ( 1.f - 0.35f * jump ) );
+            right.Spread = mix( right.Spread, move.Spread * ( 0.8f - 0.3f * jump ) );
         }
         person.Body.Apply( pose );
         if( person.ItemPiece )

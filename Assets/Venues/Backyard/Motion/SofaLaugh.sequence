@@ -1,0 +1,316 @@
+{
+ "Version": 1,
+ "Name": "SofaLaugh",
+ "FrameRate": 30,
+ "DurationFrames": 159,
+ "Tracks": [
+  {
+   "Binding": "Spine",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.1086197,
+      -0.0837542,
+      0.0429696,
+      0.9896164
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 37,
+     "Value": [
+      -0.0706014,
+      0.0329777,
+      0.0285309,
+      0.996551
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 67,
+     "Value": [
+      -0.1866126,
+      0.0541138,
+      0.0896303,
+      0.9768387
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 80,
+     "Value": [
+      -0.1422591,
+      0.0617169,
+      0.0613953,
+      0.9859939
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 94,
+     "Value": [
+      -0.1766713,
+      0.0494277,
+      0.0705901,
+      0.9804903
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 127,
+     "Value": [
+      -0.0864826,
+      -0.0204166,
+      0.0332412,
+      0.9954893
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 159,
+     "Value": [
+      -0.1086197,
+      -0.0837542,
+      0.0429696,
+      0.9896164
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Head",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0405486,
+      0.1111644,
+      -0.0559132,
+      0.991399
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 37,
+     "Value": [
+      0.0584072,
+      0.2057137,
+      -0.0449647,
+      0.9758323
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 67,
+     "Value": [
+      -0.1807991,
+      0.170226,
+      0.1325208,
+      0.9595692
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 80,
+     "Value": [
+      -0.0793096,
+      0.2120522,
+      0.0660483,
+      0.9717929
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 94,
+     "Value": [
+      -0.1325498,
+      0.1805804,
+      0.0911616,
+      0.9703148
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 127,
+     "Value": [
+      0.0848504,
+      0.1344877,
+      -0.0625713,
+      0.985291
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 159,
+     "Value": [
+      0.0405486,
+      0.1111644,
+      -0.0559132,
+      0.991399
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Left",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.1755764,
+      0.059328,
+      -0.1304612,
+      0.9739779
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 37,
+     "Value": [
+      -0.2821946,
+      0.033088,
+      -0.0810944,
+      0.9553508
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 67,
+     "Value": [
+      -0.423088,
+      0.1457192,
+      -0.1974134,
+      0.872233
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 80,
+     "Value": [
+      -0.3762491,
+      0.109332,
+      -0.1700448,
+      0.9041946
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 94,
+     "Value": [
+      -0.3977432,
+      0.1207058,
+      -0.1827022,
+      0.8909828
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 127,
+     "Value": [
+      -0.1437311,
+      0.0485155,
+      -0.0896005,
+      0.9843573
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 159,
+     "Value": [
+      -0.1755764,
+      0.059328,
+      -0.1304612,
+      0.9739779
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Right",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.1427823,
+      0.0123762,
+      0.159615,
+      0.9767206
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 37,
+     "Value": [
+      -0.199343,
+      0.0343816,
+      0.1831505,
+      0.9620479
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 67,
+     "Value": [
+      -0.1050652,
+      0.0511834,
+      0.2803153,
+      0.952767
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 80,
+     "Value": [
+      -0.1347111,
+      0.0377689,
+      0.2477824,
+      0.9586607
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 94,
+     "Value": [
+      -0.1186762,
+      0.0400224,
+      0.2638173,
+      0.9564071
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 127,
+     "Value": [
+      -0.1767163,
+      0.0083406,
+      0.1514688,
+      0.9725014
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 159,
+     "Value": [
+      -0.1427823,
+      0.0123762,
+      0.159615,
+      0.9767206
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

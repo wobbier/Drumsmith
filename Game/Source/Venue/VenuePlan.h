@@ -60,6 +60,7 @@ struct VenuePlan
         float Spacing = 0.62f;         // Mob
         float Density = 0.8f;          // Mob
         float FrontHalfWidth = 7.5f;   // Posed
+        bool DanceFloor = false;
         float Widen = 0.35f;           // Posed
         // Which way they face: Yaw (degrees, 0 faces +z), then turned Turn of the way toward
         // Focus (venue xz), the singer's spot for those off to the side.

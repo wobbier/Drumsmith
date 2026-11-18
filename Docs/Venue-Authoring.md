@@ -8,8 +8,18 @@ A venue is the room the band plays in: the stage, the crowd's floor, the lights 
 
 A venue is a folder with two files:
 
-- `venue.json`: the catalogue entry. Keys: `Name` (shown in the menu), `Author`, `Scene` (the `.lvl` file name in the same folder), `Version`, and optionally `Preview` (an image in the folder) and `Hidden` (true keeps it in the registry but out of the menu; the Template is hidden).
+- `venue.json`: the catalogue entry. Keys: `Name` (shown in the menu), `Author`, `Scene` (the `.lvl` file name in the same folder), `Version`, and optionally `Preview` (an image in the folder), `Hidden` (true keeps it in the registry but out of the menu; the Template is hidden) and the ambience keys below.
 - the scene `.lvl`: the geometry, lights and markers.
+
+**Ambience.** A venue can play a sound while a song loads and counts in, a crowd waiting for the band, which eases out over the song's first seconds:
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `Ambience` | none | The sound: a file in the venue's folder, or an `Assets/` path for one venues share (the Backyard's is `Assets/Sounds/crowd.mp3`). Streamed and looped, and started from a random point each play, so a long recording gives variety. |
+| `AmbienceVolume` | 1 | 0 to 1. |
+| `AmbienceFade` | 8 | Seconds from the song's start to silence. |
+
+It plays in a game (and Play in Havana), not in the Track Editor's preview, and pauses with the pause menu. Only scene venues have one; the three built-in rooms have none. `check_venue.py` checks the file exists. Code: `VenueAmbience` (`VenueRegistry.h`), `VenueShow::StartAmbience` / `UpdateAmbience`, and `Docs/Audio.md` → Venue ambience.
 
 The three built-in rooms (Arena, Club, Festival) are not scenes: they are procedural, built from `VenuePlan::ForStyle(0..2)` (`Game/Source/Venue/VenuePlan.h`). A scene venue goes through the same pipeline: the loader (`VenueScene`) reads the markers into a `VenuePlan`, and the show code builds the band, crowd, lights and screens from that plan, so a scene venue is not a second code path for the show.
 
@@ -78,7 +88,7 @@ Names the venue and describes the room the director and lights work in (the numb
 | `RoomCeiling` | 1000 | y of the ceiling. The default means none. |
 | `RoomHalfWidth` | 30 | Half the room's width. |
 | `DeskZ` | -22 | z of the sound desk: where the crowd's far edge and the Desk camera sit. |
-| `BuildStage`, `BuildSet`, `BuildRig`, `BuildFx` | false | Also add the built-in stage deck, set dressing, light rig, or effects. Off by default because a scene brings its own geometry; the effects (flames, jets, sparks, confetti) only exist as the built-in set, so `BuildFx` is the way to get them. |
+| `BuildStage`, `BuildSet`, `BuildRig`, `BuildFx` | false | Also add the built-in stage deck, set dressing, light rig, or effects. Each switch defaults to false. `BuildFx` adds the stock effects at their standard positions. For an authored burst at a specific prop, add a `VenueAccent`. |
 | `AmbientColor` | black | Indoors: the colour the camera clears to; also lights the room a little (black leaves a faint grey base). |
 | `FogColor` | (0.01, 0.01, 0.015) | The light the haze scatters; lifts whatever is far off. |
 | `Haze` | 1 | How thick the haze hangs (1 the usual; outdoors it is already under half that). |
@@ -95,10 +105,12 @@ A floor rectangle the crowd fills. Position is the centre and its y is the floor
 
 | Field | Default | Meaning |
 |-------|---------|---------|
+| `Figures` | Mob | `Mob`: the cheap instanced figures (bob, jump, hands and lights up), for the back. `Posed`: the full figures the built-in rooms put in their front rows, each with its own moves, cheers, phones and lighters, and the crowd surfer (behind the first posed area's front rows). Posed figures cost more: keep them to the people near the stage (the Backyard's three front knots are 85). |
 | `HeadCount` | 60 | People at a full house. |
+| `DanceFloor` | false | On posed areas, alternate beat-timed jumps across the combined dance floor during loud sections and crowd lifts. Every fourth four-beat bar brings both sides up together. |
 | `Jitter` | 0.5 | Spread from the grid position as a fraction of the spacing: 0 a neat grid, 1 a loose mob, 0.5 normal. |
 
-Scene crowds are instanced Mob figures only (see Known gaps). A rotated area uses its axis-aligned bounds. Rectangles cannot have holes: lay several rectangles around a pool or a prop instead of excluding it.
+A posed area fills the whole rectangle in rows from its +Z edge back (in venue space), so face posed areas at the stage; `Jitter` is for mobs only. A rotated area uses its axis-aligned bounds. Rectangles cannot have holes: lay several rectangles around a pool or a prop instead of excluding it.
 
 ### VenueCameraSpot
 
@@ -108,7 +120,19 @@ A position the director can cut to. Position is the eye; it looks along local +Z
 |-------|---------|---------|
 | `Shot` | Wide | `Wide` replaces the director's band-wide shot, `Crane` its crane move, `Desk` its long-lens shot. `Close` and `Custom` become extra cuts (about 25% of the time) of the member they point at. |
 | `FieldOfView` | 55 | Vertical degrees. |
-| `Tag` | | Free text to tell Custom shots apart. |
+| `Tag` | | Free text to tell Custom shots apart. `arrival/01`, `arrival/02`, ... on `Custom` spots make the venue's intro instead: at the start of a song, a handheld fisheye walk through the marks in tag order (1.05 s apart), then the operator stops and crash-zooms onto the band (overshoot, pull back, hold) before the director takes over. A seek past the start skips it. |
+
+Custom shots tagged `peak/01`, `peak/02` and so on share a venue accent in tag order. With two shots the director switches halfway through. The intro, guitar-neck and crowd-surfer shots retain their usual priority.
+
+### VenueAccent
+
+Attach this marker to a `Sequence`, a `ParticleSystem`, or both. The show starts these cues together on a chorus, a qualifying player streak, or sustained high crowd energy. A long intense passage can start another performance after 32 beats.
+
+| Field | Default | Meaning |
+|-------|---------|---------|
+| `Beats` | 12 | Duration on the chart tempo map, from 1 to 32 beats. The longest cue determines how long the peak cameras cover the event. Use matching rest poses at the first and last keys and turn off sequence autoplay and looping. |
+| `Particles` | 0 | Number of particles on a major peak, up to 512. An ordinary lift uses half this count. Set the particle system’s automatic emission and startup burst to zero for isolated hits. |
+| `FullLightingOnly` | false | Holds this sequence at its first key with gentle or disabled stage lighting. Keep lamp tracks on a separate marked entity when people or props should animate at every lighting setting. |
 
 ### VenueScreen
 
@@ -232,6 +256,8 @@ Two ways, both in the editor build (`.build/Editor_Debug/Havana`):
 
 Editor flows drive both: `track-preview-venue <id|room|path|song>`, `track-preview-reload-venue`, `track-assert-preview-venue <text>` and `track-assert-venue-play <0|1>`; see `Assets/Scenes/Tests/TrackEditorVenueFlows.edscript` and `VenuePlayFlows.edscript` (run with `Engine/Tools/RunEditorFlows.py --editor .build/Editor_Debug/Havana --wrapper Engine/Tools/Headless.sh --only TrackEditor` or `--only VenuePlay`).
 
+A fixed-step venue reel can use `--venue-only --venue-capture-from 38.8 --frame-time .04`. The venue starts at that chart time and advances one simulation step per frame, including when software rendering runs slower than audio playback.
+
 ## Shipping: cooking
 
 Retail builds never cook assets. A shipped venue, and any mod, must carry the compiled twins next to its sources: `.dds` for textures and `.assbin` for models. Run a tools build or Havana's Build Assets once and ship the results. Without them a venue works in a development build and renders without its models or textures in a Retail one. See `Engine/Docs/Cooking.md` and `Engine/Docs/Modding.md`. Models that are shared between venues belong in `Assets/Models/Venue/`, with a provenance README like that folder's (source pack, original file, licence).
@@ -240,11 +266,10 @@ Retail builds never cook assets. A shipped venue, and any mod, must carry the co
 
 As of 6840e53:
 
-- Scene crowds are instanced Mob figures only: no posed front rows, no crowd surfer, and `--crowd-size` does not scale them.
+- `--crowd-size` does not scale a scene's mob areas, and a posed area always fills from its +Z edge, whichever way it faces.
 - The Lyrics screen ignores yaw. Director shot offsets for non-drummer members do not turn with the member's yaw, and the scene stage's shot offset is translation only. Exposure is fixed.
 - Directed shots of non-drummer members in the Backyard are under-lit.
 - The riser dressing (when `BuildSet` is on) stays at x = 0.
-- There are no effect-emitter markers: flames, jets, sparks and confetti come only from `BuildFx` at the built-in positions.
 - No marker sets the sky's colours, fog density in absolute terms, or lyrics screens beyond one band.
 - Nothing has been seen on a real GPU or in motion at speed, and Win64 and macOS have not been built.
 - Venue packs cannot come from the DLC server (it needs an index type and an install path).

@@ -19,6 +19,16 @@
 namespace
 {
     constexpr float kPi = 3.14159265f;
+    constexpr float kArrivalInterval = 1.05f;
+    // The end of the arrival walk, a documentary operator spotting the band: they stop, whip the
+    // camera round onto the band and crash-zoom in, overshooting and hunting back, then hold it.
+    constexpr float kArrivalSettle = 0.2f;  // stopped, still looking where they were walking
+    constexpr float kArrivalWhip = 0.35f;   // the pan onto the band
+    constexpr float kArrivalZoomStart = kArrivalSettle + kArrivalWhip * 0.55f;  // from partway through the pan
+    constexpr float kArrivalZoomPeak = 0.4f;   // the zoom's overshoot, from its start
+    constexpr float kArrivalOvershoot = 0.12f; // how far past (of the zoom, in log space)
+    constexpr float kArrivalHold = 1.5f;       // after the peak: the pull back, the hunt, the hold
+    constexpr float kArrivalTail = kArrivalZoomStart + kArrivalZoomPeak + kArrivalHold;
 
     bool StartsWith( const std::string& inText, const char* inPrefix )
     {
@@ -101,6 +111,10 @@ void Director::Clear()
     m_world = nullptr;
     m_band = nullptr;
     m_plan = VenuePlan();
+    m_arrival.clear();
+    m_peakSpots.clear();
+    m_accentPhase = -1.f;
+    m_arrivalElapsed = -1.f;
     m_shotName.clear();
     m_lookName.clear();
     m_rateCue = -2;
@@ -137,6 +151,16 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
     m_world = &inWorld;
     m_band = inBand;
     m_plan = inPlan;
+    auto& cameras = m_plan.Cameras;
+    auto firstArrival = std::stable_partition( cameras.begin(), cameras.end(), []( const VenuePlan::CameraSpot& s ) {
+        return s.Shot != VenuePlan::CameraSpot::Kind::Custom || !StartsWith( s.Tag, "arrival/" );
+    } );
+    m_arrival.assign( firstArrival, cameras.end() );
+    cameras.erase( firstArrival, cameras.end() );
+    for( size_t i = 0; i < cameras.size(); ++i )
+        if( cameras[i].Shot == VenuePlan::CameraSpot::Kind::Custom && StartsWith( cameras[i].Tag, "peak/" ) ) m_peakSpots.push_back( static_cast<int>( i ) );
+    std::sort( m_peakSpots.begin(), m_peakSpots.end(), [&]( int a, int b ) { return cameras[a].Tag < cameras[b].Tag; } );
+    std::stable_sort( m_arrival.begin(), m_arrival.end(), []( const auto& a, const auto& b ) { return a.Tag < b.Tag; } );
     m_beats = inBeats;
     m_bpm = inBpm;
     const bool mv = inMusicVideo && !inVenue.m_mvCameras.empty();
@@ -544,6 +568,7 @@ const char* Director::FramingName( Framing inFraming )
     case Framing::Push: return "push";
     case Framing::PitRun: return "run";
     case Framing::Spot: return "spot";
+    case Framing::Arrival: return "arrival";
     }
     return "";
 }
@@ -916,6 +941,7 @@ void Director::AddSpotCuts()
     {
         const VenuePlan::CameraSpot& spot = m_plan.Cameras[i];
         if( spot.Shot != VenuePlan::CameraSpot::Kind::Close && spot.Shot != VenuePlan::CameraSpot::Kind::Custom ) continue;
+        if( spot.Shot == VenuePlan::CameraSpot::Kind::Custom && StartsWith( spot.Tag, "peak/" ) ) continue;
         int nearest = -1;
         float best = 0.35f;
         for( int member = 0; member < VenueData::MemberCount; ++member )
@@ -1048,6 +1074,68 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     const Vector3 drums = m_plan.SpotOf( VenueData::Drums ).Feet;
     switch( inPlan.Frame )
     {
+    case Framing::Arrival:
+    {
+        const int last = static_cast<int>( m_arrival.size() ) - 1;
+        const float phase = std::clamp( held / kArrivalInterval, 0.f, static_cast<float>( last ) );
+        const int i = std::min( static_cast<int>( phase ), last - 1 );
+        const float u = phase - i;
+        const auto& a = m_arrival[std::max( i - 1, 0 )];
+        const auto& b = m_arrival[i];
+        const auto& c = m_arrival[i + 1];
+        const auto& d = m_arrival[std::min( i + 2, last )];
+        const auto walk = [u]( const Vector3& a, const Vector3& b, const Vector3& c, const Vector3& d ) {
+            const float u2 = u * u, u3 = u2 * u;
+            return b * ( 2.f*u3 - 3.f*u2 + 1.f ) + ( c-a ) * ( 0.5f*(u3 - 2.f*u2 + u) )
+                 + c * ( 3.f*u2 - 2.f*u3 ) + ( d-b ) * ( 0.5f*(u3-u2) );
+        };
+        outEye = walk( a.Eye, b.Eye, c.Eye, d.Eye );
+        const Vector3 ahead = walk( a.Forward, b.Forward, c.Forward, d.Forward );
+        const float step = held * ( 1.72f * 2.f * kPi );
+        const float gain = std::min( phase, 1.f ) * std::min( last - phase, 1.f );
+        outEye.y += gain * 0.025f * std::sin( step );
+        const Vector3 walking = ahead.Length() > 0.01f ? ahead.Normalized() : b.Forward;
+        outTarget = outEye + walking * 10.f;
+        if( outUp ) *outUp = ( Vector3::Up + b.Forward.Cross( Vector3::Up ) * ( gain * 0.012f * std::sin( step * 0.5f ) ) ).Normalized();
+        outFov = b.FieldOfView + ( c.FieldOfView - b.FieldOfView ) * VenueTiming::Smooth( u );
+        const float tail = held - static_cast<float>( last ) * kArrivalInterval;
+        const bool anyone = std::any_of( m_plan.Members.begin(), m_plan.Members.end(), []( const VenuePlan::Spot& s ) { return s.Present; } );
+        if( tail <= 0.f || !anyone )
+        {
+            return;
+        }
+        // Stopped at the last mark: whip round onto the band, landing a little off them, and
+        // crash-zoom in, overshooting, then pull back and nudge the framing onto them.
+        const Vector3 centre = m_plan.MemberCentre();
+        const Vector3 band = centre + Vector3( 0.f, 1.3f, 0.f );
+        const float distance = std::max( ( band - outEye ).Length(), 1.f );
+        const Vector3 toBand = ( band - outEye ) * ( 1.f / distance );
+        const Vector3 across = toBand.Cross( Vector3::Up ).Length() > 1e-3f ? toBand.Cross( Vector3::Up ).Normalized() : Vector3( 1.f, 0.f, 0.f );
+        const float whip = VenueTiming::Smooth( ( tail - kArrivalSettle ) / kArrivalWhip );
+        const float zoomTime = tail - kArrivalZoomStart;
+        const float reframe = VenueTiming::Smooth( ( zoomTime - kArrivalZoomPeak * 0.7f ) / 0.5f );
+        const Vector3 miss = ( across * 0.35f + Vector3( 0.f, 0.25f, 0.f ) ) * ( distance * 0.035f * ( 1.f - reframe ) );
+        const Vector3 aim = Lerp( walking, ( band + miss - outEye ).Normalized(), whip );
+        outTarget = outEye + ( aim.Length() > 1e-3f ? aim.Normalized() : toBand ) * distance;
+        // Zoomed in to the band's width plus a little room (assuming a 16:9 picture), in log space
+        // so the push reads even. The zoom is a spring let go from rest: it builds up like a
+        // zoom rocker, overshoots, pulls back and hunts once before it settles.
+        float spread = 0.f;
+        for( const VenuePlan::Spot& spot : m_plan.Members )
+        {
+            if( !spot.Present ) continue;
+            spread = std::max( spread, Vector3( spot.Feet.x - centre.x, 0.f, spot.Feet.z - centre.z ).Length() );
+        }
+        const float halfWidth = spread * 0.85f + 1.f;
+        const float wide = std::tan( outFov * 0.5f * kPi / 180.f );
+        const float tight = std::min( wide, halfWidth / distance / ( 16.f / 9.f ) );
+        const float ring = kPi / kArrivalZoomPeak;
+        const float damping = ring * std::log( 1.f / kArrivalOvershoot ) / kPi;
+        const float s = std::max( zoomTime, 0.f );
+        const float push = 1.f - std::exp( -damping * s ) * ( std::cos( ring * s ) + damping / ring * std::sin( ring * s ) );
+        outFov = 2.f * std::atan( wide * std::pow( tight / wide, push ) ) * 180.f / kPi;
+        return;
+    }
     case Framing::Far:
         if( subject >= 0 )
         {
@@ -1655,6 +1743,8 @@ float Director::LensFor( const Plan& inPlan )
     case Framing::PitRun: return 0.8f;
     case Framing::Neck: return 0.6f;
     case Framing::CrowdPov: return 0.8f;
+    // The arrival is shot on a handycam with a wide-angle adapter.
+    case Framing::Arrival: return 0.6f;
     default: return 0.f;
     }
 }
@@ -1718,6 +1808,18 @@ void Director::Update( double inSeconds, float inDeltaTime )
     if( !forcedShot.empty() )
     {
         plan = PlanFor( forcedShot, 0 );
+        if( StartsWith( forcedShot, "spot:" ) )
+        {
+            const auto& spots = m_plan.Cameras;
+            const auto it = std::find_if( spots.begin(), spots.end(), [&]( const auto& s ) { return s.Tag == forcedShot.substr( 5 ); } );
+            if( it != spots.end() )
+            {
+                plan = Plan();
+                plan.Frame = Framing::Spot;
+                plan.Variant = static_cast<int>( it - spots.begin() );
+                plan.Static = true;
+            }
+        }
         DropAbsent( plan );
         held = static_cast<float>( inSeconds );
         m_shotName = forcedShot;
@@ -1752,6 +1854,17 @@ void Director::Update( double inSeconds, float inDeltaTime )
             held = static_cast<float>( inSeconds - m_bigStart );
             m_shotName = pick == 0 ? "big_moment_crane" : pick == 1 ? "big_moment_push" : "big_moment_reverse";
         }
+        if( m_accentPhase >= 0.f && m_accentPhase < 1.f && HasPeakShots() && plan.Frame != Framing::Neck )
+        {
+            const size_t pick = std::min( static_cast<size_t>( m_accentPhase * m_peakSpots.size() ), m_peakSpots.size() - 1 );
+            plan = Plan();
+            plan.Frame = Framing::Spot;
+            plan.Handheld = true;
+            plan.Variant = m_peakSpots[pick];
+            m_shotName = m_plan.Cameras[plan.Variant].Tag;
+            index = -4;
+            held = 0.f;
+        }
         // A crowd surfer takes the shot until they reach the barricade.
         if( m_surferUp )
         {
@@ -1761,6 +1874,22 @@ void Director::Update( double inSeconds, float inDeltaTime )
             index = -3;
             held = 0.f;
             m_shotName = "follow_surfer";
+        }
+    }
+    if( forcedShot.empty() && m_arrival.size() >= 2 )
+    {
+        const float duration = static_cast<float>( m_arrival.size() - 1 ) * kArrivalInterval + kArrivalTail;
+        if( m_arrivalElapsed < 0.f ) m_arrivalElapsed = inSeconds <= 0.5 ? 0.f : duration;
+        else if( std::abs( inSeconds - m_arrivalLastSongTime ) > std::max( 3., 4. * inDeltaTime ) ) m_arrivalElapsed = duration;
+        else m_arrivalElapsed = std::min( duration, m_arrivalElapsed + std::max( inDeltaTime, 0.f ) );
+        m_arrivalLastSongTime = inSeconds;
+        if( m_arrivalElapsed < duration )
+        {
+            index = -5;
+            plan = Plan();
+            plan.Frame = Framing::Arrival;
+            plan.Handheld = true;
+            m_shotName = "venue_arrival";
         }
     }
     // The shot's move runs on its own clock, a little faster when the show is worked up: started
@@ -1785,19 +1914,29 @@ void Director::Update( double inSeconds, float inDeltaTime )
     Vector3 target;
     float fov = 45.f;
     Vector3 up = Vector3::Up;
-    Frame( plan, m_moveTime, eye, target, fov, &up );
+    Frame( plan, plan.Frame == Framing::Arrival ? m_arrivalElapsed : m_moveTime, eye, target, fov, &up );
     // A fisheye swells the middle of the picture: the shot is taken that much wider, so what it
     // framed is still what's in the middle. The lens changes with the cut.
-    const float lens = LensFor( plan );
+    const float lensLook = LensFor( plan );
+    float lens = lensLook;
     if( lens > 0.f )
     {
+        // The bend is a fixed angle over the picture's diagonal (Tonemap.frag), but a zoom lens
+        // straightens out as it zooms in: bent past the picture's own field of view, a zoomed shot
+        // swells like a magnifying glass. So the lens never bends more than the diagonal the shot
+        // sees, which leaves a wide shot as it was and eases the bend off down a zoom (a crash
+        // zoom ends near straight). At that bend the middle keeps the framed scale exactly.
+        const float aspect = m_main->HasComponent<Camera>() ? m_main->GetComponent<Camera>().GetAspectRatio() : 16.f / 9.f;
+        const float diagonal = std::tan( fov * 0.5f * kPi / 180.f ) * std::sqrt( aspect * aspect + 1.f );
+        lens = std::min( lens, diagonal / Moonlight::PostProcessSettings::LensDistortionAngle( 1.f ) );
         fov = 2.f * std::atan( std::tan( fov * 0.5f * kPi / 180.f ) * Moonlight::PostProcessSettings::LensDistortionZoom( lens ) ) * 180.f / kPi;
     }
     if( m_main->HasComponent<PostProcess>() )
     {
         PostProcess& post = m_main->GetComponent<PostProcess>();
         post.LensDistortion = lens;
-        post.LensFringe = lens > 0.f ? 0.6f : 0.f;
+        // The colour fringe is the cheap glass's edge: it eases off with the bend.
+        post.LensFringe = lensLook > 0.f ? 0.6f * lens / lensLook : 0.f;
     }
     // What the lens is focused on: the subject, before the aim is turned off it for lead room.
     const Vector3 subject = target;
@@ -1824,7 +1963,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
         m_up = up;
         m_fov = fov;
     }
-    else if( plan.Frame == Framing::Neck )
+    else if( plan.Frame == Framing::Neck || plan.Frame == Framing::Arrival )
     {
         // The neck camera is bolted to the guitar, like a GoPro on the headstock: no easing, it
         // moves exactly as the guitar does. The guitar floats on its strap (Band::SwingInstrument),

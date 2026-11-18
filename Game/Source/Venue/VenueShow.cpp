@@ -2,6 +2,9 @@
 #include "Venue/VenueLayout.h"
 #include "Venue/VenueRegistry.h"
 #include "Venue/VenueTiming.h"
+#include "Components/Audio/AudioSource.h"
+#include "Components/Animation/Sequence.h"
+#include "Components/Effects/ParticleSystem.h"
 #include "Components/Camera.h"
 #include "Components/Graphics/PostProcess.h"
 #include "Components/Lighting/Light.h"
@@ -17,6 +20,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <random>
 
 namespace
 {
@@ -103,15 +107,21 @@ void VenueShow::Clear()
     m_savedHighway = false;
     m_highwayCamera = {};
     m_fromOverride = false;
+    if( m_accentPlaying ) SampleAccents( m_accentBeat );
     m_lights.Clear();
     m_director.Clear();
     m_crowd.Clear();
     m_band.Clear();
     m_lyricBoard.Clear();
     m_lyrics.Clear();
+    m_accentPlaying = false;
+    m_accentBeat = -10000.;
+    m_captureElapsed = 0.;
     m_scene.Clear();
     m_kit.Clear();
     m_root = {};
+    m_ambience = {};
+    m_ambienceSettings = VenueAmbience();
     m_sceneId.clear();
     m_set.Clear();
     m_fx.Clear();
@@ -265,6 +275,10 @@ void VenueShow::BuildChoice( World& inWorld, const TrackData& inTrack, const Ent
             }
             INFO_FMT( "[Venues]", "Venue: scene \"%s\" (%s), chosen by %s; %d entities in the world before the show", m_scene.GetMarkers().Plan.Name.c_str(), choice.ScenePath.c_str(),
                 choice.Reason.c_str(), static_cast<int>( inWorld.GetEntityCount() ) );
+            if( m_ambienceWanted )
+            {
+                StartAmbience( choice.Ambience );
+            }
             BuildShow( inWorld, inTrack, inHighwayCamera, m_scene.GetMarkers().Plan );
             return;
         }
@@ -923,6 +937,7 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     {
         return;
     }
+    UpdateAmbience( inSongTimeMs );
     if( m_presentation == Presentation::HighwayOnly )
     {
         // Nothing of the venue is on screen.
@@ -933,6 +948,14 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     // playing up to it).
     static const double kPreviewOffset = CommandLine::GetFloat( "--venue-time", 0.f );
     inSongTimeMs += kPreviewOffset * 1000.0;
+    // Offline venue reels may render more slowly than the silent audio device plays.
+    // Start on the requested chart time and advance by the capture step for every image.
+    static const float kCaptureFrom = CommandLine::Has( "--venue-only" ) ? CommandLine::GetFloat( "--venue-capture-from", -1.f ) : -1.f;
+    if( kCaptureFrom >= 0.f )
+    {
+        inSongTimeMs = ( kCaptureFrom + m_captureElapsed ) * 1000.0;
+        m_captureElapsed += inDeltaTime;
+    }
     double seconds = inSongTimeMs / 1000.0;
     // A look with a frame rate steps the venue: update it on each step's time with the time since
     // the last step, and hold it (skip the update) in between.
@@ -975,7 +998,8 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     const std::string& shot = m_director.CurrentShot();
     const bool surfShot = shot.find( "crowdsurf" ) != std::string::npos || shot.find( "stagedive" ) != std::string::npos;
     m_crowd.SetSurfing( surfShot || ( m_crowd.Mood( seconds ) == "intense" && std::fmod( seconds, 53.0 ) < 1.0 ) );
-    m_crowd.Update( seconds, inDeltaTime, m_performance );
+    const double sinceLift = seconds - m_lastMoment;
+    m_crowd.Update( seconds, inDeltaTime, m_performance, sinceLift >= 0. && sinceLift < 12. * 60. / std::max( m_bpm, 1.f ) );
     Vector3 surfer;
     const bool surferUp = m_crowd.SurferUp( surfer );
     m_director.FollowSurfer( surferUp, surfer );
@@ -1024,6 +1048,95 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
 }
 
 
+void VenueShow::StartAmbience( const VenueAmbience& inAmbience )
+{
+    m_ambienceSettings = inAmbience;
+    if( inAmbience.SoundPath.empty() || !m_root )
+    {
+        return;
+    }
+    m_ambience = m_kit.Group( "Venue ambience", &m_root->GetComponent<Transform>() );
+    if( !m_ambience )
+    {
+        return;
+    }
+    // Streamed (a long loop shouldn't be decoded whole) and 2D. AudioCore opens the stream in
+    // the background; UpdateAmbience starts it once it has, well inside the load and lead-in.
+    AudioSource& source = m_ambience->AddComponent<AudioSource>( inAmbience.SoundPath );
+    source.Stream = true;
+    source.Loop = true;
+    source.Volume = inAmbience.Volume;
+    m_ambienceStarted = false;
+    INFO_FMT( "[Venues]", "Venue ambience: %s at %.0f%%, fading over the song's first %.1f s", inAmbience.SoundPath.c_str(), inAmbience.Volume * 100.f, inAmbience.FadeSeconds );
+}
+
+
+void VenueShow::UpdateAmbience( double inSongTimeMs )
+{
+    if( !m_ambience || !m_ambience->HasComponent<AudioSource>() )
+    {
+        return;
+    }
+    AudioSource& source = m_ambience->GetComponent<AudioSource>();
+    // Full through the load and the count-in (the song clock is negative until the song starts),
+    // then an ease down to nothing over FadeSeconds.
+    const double fadeMs = static_cast<double>( m_ambienceSettings.FadeSeconds ) * 1000.0;
+    float gain = 1.f;
+    if( inSongTimeMs > 0.0 )
+    {
+        if( inSongTimeMs >= fadeMs )
+        {
+            source.Stop();
+            m_ambience = {};
+            return;
+        }
+        const double pi = 3.14159265358979323846;
+        gain = static_cast<float>( 0.5 * ( 1.0 + std::cos( pi * inSongTimeMs / fadeMs ) ) );
+    }
+    source.SetVolume( m_ambienceSettings.Volume * gain );
+    if( !m_ambienceStarted && source.SoundInstance )
+    {
+        if( source.SoundInstance->HasFailed() )
+        {
+            YIKES_FMT( "[Venues] Venue ambience %s couldn't be opened", m_ambienceSettings.SoundPath.c_str() );
+            m_ambience = {};
+            return;
+        }
+        if( source.IsLoaded() )
+        {
+            // From a random point in the loop, so the crowd isn't the same few seconds every
+            // song: started paused, moved there, then let go.
+            static std::mt19937 random( std::random_device{}() );
+            source.Play( true, true );
+            if( const unsigned int lengthMs = source.GetLength() )
+            {
+                source.SetPositionMs( std::uniform_int_distribution<unsigned int>( 0, lengthMs - 1 )( random ) );
+            }
+            source.Resume();
+            m_ambienceStarted = true;
+        }
+    }
+}
+
+
+void VenueShow::SetAmbiencePaused( bool inPaused )
+{
+    if( !m_ambience || !m_ambience->HasComponent<AudioSource>() )
+    {
+        return;
+    }
+    AudioSource& source = m_ambience->GetComponent<AudioSource>();
+    if( inPaused )
+    {
+        source.Pause();
+    }
+    else
+    {
+        source.Resume();
+    }
+}
+
+
 void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
 {
     // How hot the show runs: the chart's mood, lifted by the player's streak, with a kick after
@@ -1037,6 +1150,13 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
     // The big moments. The chart's: each chorus or intense passage as it starts (the finale
     // biggest of all) and the song's end. The player's: asked for by OnStreak.
     const bool playing = inSeconds > m_lastSeconds && inSeconds - m_lastSeconds < 1.0;
+    if( !m_scene.GetMarkers().Accents.empty() && ( inSeconds < m_lastSeconds || inSeconds - m_lastSeconds >= 1.0 ) )
+    {
+        if( m_accentPlaying ) SampleAccents( m_accentBeat );
+        m_accentPlaying = false;
+        m_director.SetAccentPhase( -1.f );
+        m_accentBeat = -10000.;
+    }
     if( playing )
     {
         for( float peak : m_peaks )
@@ -1067,6 +1187,14 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
         m_lastMoment = -1000.0;
         BigMoment( inSeconds, 2 );
     }
+    if( !m_scene.GetMarkers().Accents.empty() )
+    {
+        double beat; int barBeat;
+        VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, barBeat );
+        const bool loud = mood == "intense" || ( mood == "realtime" && m_performance > 0.8f );
+        if( playing && loud && inSeconds >= 0. && beat - m_accentBeat >= 32. ) StartAccent( inSeconds, 1 );
+        if( m_accentPlaying ) SampleAccents( beat );
+    }
     m_lastSeconds = inSeconds;
 
     const bool gentle = GameSettings::GetInstance().StageLighting == 1;
@@ -1079,15 +1207,61 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
 }
 
 
+void VenueShow::StartAccent( double inSeconds, int inLevel )
+{
+    const auto& cues = m_scene.GetMarkers().Accents;
+    if( cues.empty() || inSeconds < 0. ) return;
+    double beat; int barBeat;
+    VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, barBeat );
+    // A major hit during an ordinary rally adds the remaining paper while the ball stays in flight.
+    const bool upgrade = m_accentPlaying;
+    if( upgrade ? inLevel <= m_accentLevel : beat - m_accentBeat < 8. ) return;
+    if( !upgrade ) m_accentBeat = beat;
+    m_accentLevel = inLevel;
+    m_accentPlaying = true;
+    for( const auto& e : cues )
+    {
+        if( !e ) continue;
+        auto* cue = e->TryGetComponent<VenueAccent>();
+        auto* particles = e->TryGetComponent<ParticleSystem>();
+        if( !cue || !particles ) continue;
+        const int full = std::clamp( cue->Particles, 0, 512 );
+        const int count = inLevel >= 2 ? full : full / 2;
+        particles->Burst( count - ( upgrade ? full / 2 : 0 ) );
+    }
+    if( CommandLine::Has( "--highway-log" ) ) BRUH_FMT( "Venue: scene accent level %d at beat %.2f", inLevel, beat );
+}
+
+
+void VenueShow::SampleAccents( double inBeat )
+{
+    const bool fullLighting = CommandLine::GetInt( "--stage-lights", GameSettings::GetInstance().StageLighting ) >= 2;
+    float progress = 1.f;
+    for( const auto& e : m_scene.GetMarkers().Accents )
+    {
+        if( !e ) continue;
+        const auto* cue = e->TryGetComponent<VenueAccent>();
+        auto* seq = e->TryGetComponent<Sequence>();
+        if( !cue ) continue;
+        const float fraction = std::clamp( static_cast<float>( inBeat - m_accentBeat ) / std::clamp( cue->Beats, 1.f, 32.f ), 0.f, 1.f );
+        if( seq ) seq->Seek( cue->FullLightingOnly && !fullLighting ? 0.f : fraction * seq->GetDuration() );
+        progress = std::min( progress, fraction );
+    }
+    m_director.SetAccentPhase( progress );
+    m_accentPlaying = progress < 1.f;
+}
+
+
 void VenueShow::BigMoment( double inSeconds, int inLevel )
 {
     // Not while the last one is still ringing (a peak may still top a lift).
     const double since = inSeconds - m_lastMoment;
-    if( since < ( inLevel >= 2 ? 3.0 : 12.0 ) )
+    if( since >= 0. && since < ( inLevel >= 2 ? 3.0 : 12.0 ) )
     {
         return;
     }
     m_lastMoment = inSeconds;
+    StartAccent( inSeconds, inLevel );
     if( CommandLine::Has( "--highway-log" ) )
     {
         BRUH_FMT( "Venue: big moment (level %d) at %.2f s, hype %.2f", inLevel, inSeconds, m_hype );
@@ -1101,7 +1275,7 @@ void VenueShow::BigMoment( double inSeconds, int inLevel )
         m_fx.Flames();
         m_fx.Fireworks( 4 );
         m_lights.Accent( 1.f );
-        m_director.OnBigMoment( inSeconds, 8.f * 60.f / m_bpm );
+        if( !m_director.HasPeakShots() || m_scene.GetMarkers().Accents.empty() ) m_director.OnBigMoment( inSeconds, 8.f * 60.f / m_bpm );
         m_director.Kick( 1.f );
         m_crowd.OnCheer( 1.f );
     }

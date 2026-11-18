@@ -71,6 +71,7 @@ namespace
         choice.IsScene = true;
         choice.ScenePath = inEntry.ScenePath;
         choice.Id = inEntry.Id;
+        choice.Ambience = inEntry.Ambience;
         return choice;
     }
 
@@ -300,6 +301,21 @@ bool VenueRegistry::LoadFolder( const std::string& inFolder, const std::string& 
     if( root.contains( "Preview" ) && root["Preview"].is_string() && !root["Preview"].get<std::string>().empty() )
     {
         entry.PreviewPath = folder + "/" + root["Preview"].get<std::string>();
+    }
+    if( root.contains( "Ambience" ) && root["Ambience"].is_string() && !root["Ambience"].get<std::string>().empty() )
+    {
+        // A file in the venue's folder, or an Assets/ path to a sound venues share.
+        std::string sound = root["Ambience"].get<std::string>();
+        std::replace( sound.begin(), sound.end(), '\\', '/' );
+        entry.Ambience.SoundPath = sound.rfind( "Assets/", 0 ) == 0 ? sound : folder + "/" + sound;
+        if( root.contains( "AmbienceVolume" ) && root["AmbienceVolume"].is_number() )
+        {
+            entry.Ambience.Volume = std::clamp( root["AmbienceVolume"].get<float>(), 0.f, 1.f );
+        }
+        if( root.contains( "AmbienceFade" ) && root["AmbienceFade"].is_number() )
+        {
+            entry.Ambience.FadeSeconds = std::max( root["AmbienceFade"].get<float>(), 0.f );
+        }
     }
     outEntry = std::move( entry );
     return true;

@@ -1,0 +1,142 @@
+{
+ "Version": 1,
+ "Name": "PoolDrift",
+ "FrameRate": 30,
+ "DurationFrames": 185,
+ "Tracks": [
+  {
+   "Binding": "Float",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 36,
+     "Value": [
+      0.02,
+      0.012,
+      0.009,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 74,
+     "Value": [
+      -0.009,
+      -0.01,
+      0.014,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 115,
+     "Value": [
+      -0.018,
+      0.009,
+      -0.008,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 152,
+     "Value": [
+      0.006,
+      -0.006,
+      -0.012,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 185,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Float",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 36,
+     "Value": [
+      0.0122748,
+      0.0095236,
+      -0.0062251,
+      0.9998599
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 74,
+     "Value": [
+      -0.0070536,
+      0.0051379,
+      0.0139982,
+      0.9998639
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 115,
+     "Value": [
+      0.0052036,
+      -0.0122305,
+      -0.0025538,
+      0.9999084
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 152,
+     "Value": [
+      -0.0087897,
+      -0.0051288,
+      -0.0122621,
+      0.999873
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 185,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

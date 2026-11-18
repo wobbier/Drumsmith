@@ -2,9 +2,9 @@
 
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
 >
-> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the `TrackRadio` section and its caveats. The rest is as last verified.
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the `TrackRadio` section and its caveats; later that day, Venue ambience (game commit 44f9469 plus the working tree). The rest is as last verified.
 
-The game's three audio systems — `AudioPack` (synchronized stem playback for gameplay and radio), `TrackRadio` (menu background music), and `Drumset` (pad hit sounds, currently dormant) — and the FMOD facts underneath them.
+The game's three audio systems — `AudioPack` (synchronized stem playback for gameplay and radio), `TrackRadio` (menu background music), and `Drumset` (pad hit sounds, currently dormant) — plus a venue's ambience before the song, and the FMOD facts underneath them.
 
 ## Overview
 
@@ -20,6 +20,7 @@ All game audio goes through FMOD Core via the engine's `AudioCore` (`Engine/Sour
 | `Game/Source/Global/TrackRadio.h` | Menu music singleton state machine |
 | `Game/Source/UI/TrackRadioUtils.cpp` | Starts the next random song and fills the radio widget's view-model values |
 | `Game/Source/CoreGame/Drumset.h` | Pad→sample hit-sound player (unused at runtime) |
+| `Game/Source/Venue/VenueShow.cpp` | A venue's ambience: `StartAmbience`, `UpdateAmbience` |
 | `Engine/Source/Cores/AudioCore.cpp` | FMOD system init/update (engine) |
 | `Engine/Source/Components/Audio/AudioSource.cpp` | Per-sound channel wrapper: play/pause/seek/position (engine) |
 
@@ -66,6 +67,12 @@ A singleton state machine (`None → Loading → Seeking → Playing`) that owns
 - `Playing`: when playback ends, returns to `None`, which lets `TrackRadioUtils` auto-play the next random track.
 
 `TrackRadioUtils` also fills the radio widget's model values (title, art, position/duration, visibility) and handles its `skip`/`seek` events — see `Docs/UI-and-Menus.md`.
+
+### Venue ambience
+
+A venue scene's `venue.json` can name a sound to play before the song (`Ambience`, `AmbienceVolume`, `AmbienceFade`; `Docs/Venue-Authoring.md`). The Backyard's is `Assets/Sounds/crowd.mp3`. `VenueRegistry::LoadFolder` reads it into the entry's `VenueAmbience` and the pick carries it (`VenueChoice::Ambience`). When `VenueShow` builds a scene venue for a play (`NoteHighwayCore::SetupTrack` sets `SetAmbienceWanted( true )`; `BeginPreview`, the Track Editor's, sets it false), `StartAmbience` makes a "Venue ambience" entity under the venue root with an engine `AudioSource`: `Stream`, `Loop`, 2D, on the SFX bus, not part of the `AudioPack`. `AudioCore` opens the stream in the background; once it is ready, `UpdateAmbience` starts the voice paused, moves it to a random point in the clip (a fresh one each play, so a long crowd recording doesn't open on the same few seconds every song) and unpauses it. In practice that is inside the load and the 2 s lead-in.
+
+`VenueShow::Update` sets its volume from the song clock: full while the clock is negative (loading, lead-in), then a cosine ease to zero over `AmbienceFade` seconds from the song's start, when it is stopped. `NoteHighwayCore::Pause` / `Resume` pause it with the song. It goes with the venue (`VenueKit::Clear`), so a Restart or F7 starts it again; past the fade, F7's rebuild stops it on the next update. Headless on the Backyard (2026-11-17): playing from the first frame of the lead-in (two runs started 4:23 and 6:15 into the 10:14 clip), 0.92 at 1.5 s, 0.55 at 3.8 s, 0.12 at 6.2 s, stopped at 8.2 s.
 
 ### Drumset — hit sounds (dormant)
 

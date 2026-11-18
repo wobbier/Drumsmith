@@ -53,6 +53,7 @@ TEST_CASE( "Venue markers: defaults match the room the director assumes" )
     CHECK( info.MoonBrightness == doctest::Approx( rooms.MoonBrightness ) );
     CHECK( info.Haze == doctest::Approx( 1.f ) );
     CHECK( VenueCrowdArea().HeadCount == 60 );
+    CHECK( VenueCrowdArea().Figures == VenueCrowdArea::Kind::Mob );
     CHECK( VenueCameraSpot().FieldOfView == doctest::Approx( 55.f ) );
     CHECK( VenueShowLight().Group == 0 );
 }
@@ -90,6 +91,7 @@ TEST_CASE( "Venue markers: fields survive a scene round trip" )
     Transform& crowdTransform = crowd->AddComponent<Transform>();
     crowdTransform.SetParent( root->GetComponent<Transform>() );
     VenueCrowdArea& area = crowd->AddComponent<VenueCrowdArea>();
+    area.Figures = VenueCrowdArea::Kind::Posed;
     area.HeadCount = 123;
     area.Jitter = 0.25f;
 
@@ -156,6 +158,7 @@ TEST_CASE( "Venue markers: fields survive a scene round trip" )
         if( entity->HasComponent<VenueCrowdArea>() )
         {
             VenueCrowdArea& c = entity->GetComponent<VenueCrowdArea>();
+            CHECK( c.Figures == VenueCrowdArea::Kind::Posed );
             CHECK( c.HeadCount == 123 );
             CHECK( c.Jitter == doctest::Approx( 0.25f ) );
             ++found;
@@ -234,6 +237,10 @@ TEST_CASE( "Venue scene: markers become a plan in venue space" )
     VenueCrowdArea& area = AddMarker( *world, sceneRoot, "Crowd", Vector3( 0.f, 0.3f, -9.f ), Vector3( 0.f, 90.f, 0.f ), Vector3( 10.f, 1.f, 4.f ) )->AddComponent<VenueCrowdArea>();
     area.HeadCount = 80;
     area.Jitter = 0.25f;
+    // A posed knot behind it, on a 1 m rise.
+    VenueCrowdArea& posedArea = AddMarker( *world, sceneRoot, "Front rows", Vector3( 1.f, 1.f, -16.f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 6.f, 1.f, 2.f ) )->AddComponent<VenueCrowdArea>();
+    posedArea.Figures = VenueCrowdArea::Kind::Posed;
+    posedArea.HeadCount = 20;
     VenueScreen& tv = AddMarker( *world, sceneRoot, "TV", Vector3( 4.f, 2.f, 8.f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 3.f, 1.5f, 1.f ) )->AddComponent<VenueScreen>();
     tv.Source = VenueScreen::Feed::Program;
     tv.Emissive = 3.f;
@@ -278,7 +285,7 @@ TEST_CASE( "Venue scene: markers become a plan in venue space" )
     CHECK( plan.Stage.RiserHeight == doctest::Approx( 0.3f ) );
 
     // The crowd: a mob on the turned rectangle's bounds, facing +x, standing at its height.
-    REQUIRE( plan.Crowd.size() == 1 );
+    REQUIRE( plan.Crowd.size() == 2 );
     const VenuePlan::CrowdArea& mob = plan.Crowd[0];
     CHECK( mob.Type == VenuePlan::CrowdArea::Kind::Mob );
     CHECK( mob.MinX == doctest::Approx( -2.f ).epsilon( 0.001 ) );
@@ -291,6 +298,13 @@ TEST_CASE( "Venue scene: markers become a plan in venue space" )
     CHECK( mob.Scatter == doctest::Approx( 0.5f ) );
     CHECK( mob.Spacing > 0.2f );
     CHECK( plan.BuildCrowd );
+    // Posed: rows over the whole rectangle (not the rooms' widening wedge), at its height.
+    const VenuePlan::CrowdArea& posed = plan.Crowd[1];
+    CHECK( posed.Type == VenuePlan::CrowdArea::Kind::Posed );
+    CHECK( posed.Heads == 20 );
+    CHECK( posed.FrontHalfWidth == doctest::Approx( 3.f ).epsilon( 0.001 ) );
+    CHECK( posed.Widen == 0.f );
+    CHECK( posed.FloorY == doctest::Approx( 1.f ) );
     // The barricade runs in front of the crowd, behind the band.
     CHECK( plan.Stage.BarricadeZ > mob.MaxZ );
     CHECK( plan.Stage.BarricadeZ < plan.Members[VenueData::Guitar].Feet.z );

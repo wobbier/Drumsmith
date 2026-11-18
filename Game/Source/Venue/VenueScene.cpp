@@ -210,6 +210,7 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
                 YIKES_FMT( "[Venues] A second spot for the same member (%s) is ignored", entity->GetName().c_str() );
             }
         }
+        if( entity->HasComponent<VenueAccent>() ) outMarkers.Accents.push_back( transform->Parent );
         if( VenueCrowdArea* area = entity->TryGetComponent<VenueCrowdArea>() )
         {
             areas.push_back( { area, transform } );
@@ -316,7 +317,8 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
     plan.Stage.HalfWidth = std::max( wide + 2.2f, 4.f );
     plan.Stage.TrussHeight = info->RoomCeiling < 900.f ? std::max( std::min( deck + 8.3f, info->RoomCeiling - 0.6f ), deck + 2.5f ) : deck + 8.3f;
 
-    // The crowd: a Mob of cheap figures on each area, on a grid spaced to hold its head count.
+    // The crowd: each area's figures, posed or a Mob of cheap ones on a grid spaced to hold its
+    // head count.
     float crowdFront = -1e9f;
     const Vector3 focus = plan.HasMember( VenueData::Vocals ) ? plan.Members[VenueData::Vocals].Feet : drums.Feet;
     for( const Area& area : areas )
@@ -338,26 +340,31 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
                 maxZ = std::max( maxZ, corner.z );
             }
         }
-        VenuePlan::CrowdArea mob;
-        mob.Type = VenuePlan::CrowdArea::Kind::Mob;
-        mob.MinX = minX;
-        mob.MaxX = std::max( maxX, minX + 0.5f );
-        mob.MinZ = minZ;
-        mob.MaxZ = std::max( maxZ, minZ + 0.5f );
-        mob.FloorY = PointIn( inVenueRoot, *area.Where, Vector3( 0.f, 0.f, 0.f ) ).y;
-        mob.Heads = area.Marker->HeadCount;
-        mob.Density = 0.85f;
+        VenuePlan::CrowdArea crowd;
+        crowd.DanceFloor = area.Marker->DanceFloor;
+        crowd.Type = area.Marker->Figures == VenueCrowdArea::Kind::Posed ? VenuePlan::CrowdArea::Kind::Posed : VenuePlan::CrowdArea::Kind::Mob;
+        crowd.MinX = minX;
+        crowd.MaxX = std::max( maxX, minX + 0.5f );
+        crowd.MinZ = minZ;
+        crowd.MaxZ = std::max( maxZ, minZ + 0.5f );
+        crowd.FloorY = PointIn( inVenueRoot, *area.Where, Vector3( 0.f, 0.f, 0.f ) ).y;
+        crowd.Heads = area.Marker->HeadCount;
+        crowd.Density = 0.85f;
         // A grid with a quarter more spots taken than heads, so thinning to the count leaves it
         // even rather than short at the back.
-        const float size = ( mob.MaxX - mob.MinX ) * ( mob.MaxZ - mob.MinZ );
-        mob.Spacing = std::clamp( std::sqrt( size * mob.Density / ( 1.1f * 1.25f * static_cast<float>( mob.Heads ) ) ), 0.4f, 3.f );
+        const float size = ( crowd.MaxX - crowd.MinX ) * ( crowd.MaxZ - crowd.MinZ );
+        crowd.Spacing = std::clamp( std::sqrt( size * crowd.Density / ( 1.1f * 1.25f * static_cast<float>( crowd.Heads ) ) ), 0.4f, 3.f );
         // Jitter 0.5 is the usual stray (Scatter 1).
-        mob.Scatter = std::clamp( area.Marker->Jitter, 0.f, 1.f ) * 2.f;
-        mob.Yaw = YawOf( AxisIn( inVenueRoot, *area.Where, Vector3( 0.f, 0.f, 1.f ) ) );
-        mob.Turn = 0.85f;
-        mob.Focus = focus;
-        crowdFront = std::max( crowdFront, mob.MaxZ );
-        plan.Crowd.push_back( mob );
+        crowd.Scatter = std::clamp( area.Marker->Jitter, 0.f, 1.f ) * 2.f;
+        crowd.Yaw = YawOf( AxisIn( inVenueRoot, *area.Where, Vector3( 0.f, 0.f, 1.f ) ) );
+        crowd.Turn = 0.85f;
+        crowd.Focus = focus;
+        // Posed rows fill the whole rectangle, front to back (Crowd::BuildRows), rather than
+        // the built-in rooms' wedge that widens away from the stage.
+        crowd.FrontHalfWidth = ( crowd.MaxX - crowd.MinX ) * 0.5f;
+        crowd.Widen = 0.f;
+        crowdFront = std::max( crowdFront, crowd.MaxZ );
+        plan.Crowd.push_back( crowd );
     }
     plan.BuildCrowd = !plan.Crowd.empty();
     plan.Stage.BarricadeZ = crowdFront > -1e8f ? std::min( crowdFront + 0.8f, front - 0.4f ) : front - 1.6f;

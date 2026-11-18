@@ -45,6 +45,7 @@ public:
     {
         VenuePlan Plan;
         std::vector<ShowLight> Lights;
+        std::vector<EntityHandle> Accents;
         // The scene lights itself with a directional (a sun or moon of its own).
         bool HasDirectional = false;
         int Spots = 0;

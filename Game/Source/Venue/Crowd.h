@@ -27,7 +27,7 @@ public:
     // using. Set before Build; empty means all of them.
     void SetModels( const std::vector<int>& inModels ) { m_models = inModels; }
     // inPerformance: 0 (the player's struggling) .. 1 (on a long streak).
-    void Update( double inSeconds, float inDeltaTime, float inPerformance );
+    void Update( double inSeconds, float inDeltaTime, float inPerformance, bool inLift = false );
 
     void OnMiss();
     void OnCheer( float inAmount );
@@ -67,6 +67,7 @@ private:
         int Item = 0;              // 0 nothing, 1 lighter, 2 phone
         EntityHandle ItemPiece;
         float Depth = 0.f;         // metres back from the barricade
+        float DanceLane = -1.f;
     };
 
     struct MobFigure
@@ -111,6 +112,7 @@ private:
     std::vector<TimedCueData> m_sections;
     float m_bpm = 120.f;
     float m_energy = 0.5f;
+    float m_dance = 0.f;
     float m_missDip = 0.f;
     float m_cheer = 0.f;
     uint32_t m_frame = 0;

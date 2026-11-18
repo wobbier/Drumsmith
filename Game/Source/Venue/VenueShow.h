@@ -83,6 +83,12 @@ public:
     void SetPresentation( Presentation inPresentation );
     Presentation GetPresentation() const { return m_presentation; }
 
+    // Whether a venue scene's ambience (venue.json's Ambience: a crowd waiting for the band) plays:
+    // on for a play, off for the Track Editor's preview. Kept across Build and Clear. It plays from
+    // the Build and fades out over the song's first seconds (Update); the pause menu holds it.
+    void SetAmbienceWanted( bool inWanted ) { m_ambienceWanted = inWanted; }
+    void SetAmbiencePaused( bool inPaused );
+
     bool IsActive() const { return static_cast<bool>( m_root ); }
     const Director& GetDirector() const { return m_director; }
 
@@ -108,12 +114,24 @@ private:
     // The show's hype (Docs/Venue-and-Band.md, Hype): how hot it's running now, and the big
     // moments that set off the effects.
     void UpdateHype( double inSeconds, float inDeltaTime );
+    void StartAccent( double inSeconds, int inLevel );
+    void SampleAccents( double inBeat );
     // inLevel 1: a lift (jets, a hit on the blinders). 2: a peak (confetti, sparks, flames, a
     // hero shot). Ignored while the last one is still ringing.
     void BigMoment( double inSeconds, int inLevel );
 
+    // The ambience's looping, streamed AudioSource under the venue root, faded on the song clock.
+    void StartAmbience( const VenueAmbience& inAmbience );
+    void UpdateAmbience( double inSongTimeMs );
+
     // This build is the override's (SetOverride): BuildChoice reports what it came to.
     bool m_fromOverride = false;
+    bool m_ambienceWanted = false;
+    // Until it has faded out (then it's stopped and let go; the kit deletes it with the venue).
+    EntityHandle m_ambience;
+    // Its voice is going (from a random point in the clip).
+    bool m_ambienceStarted = false;
+    VenueAmbience m_ambienceSettings;
     VenueKit m_kit;
     // The venue scene showing (none in a procedural room), and its registry id.
     VenueScene m_scene;
@@ -150,6 +168,10 @@ private:
     // Hype: eased 0 calm .. 1 peak, from the chart's energy and the player's streak.
     float m_hype = 0.f;
     double m_lastMoment = -1000.0;
+    double m_accentBeat = -10000.;
+    bool m_accentPlaying = false;
+    int m_accentLevel = 0;
+    double m_captureElapsed = 0.;
     double m_lastSeconds = -1000.0;
     double m_lastPlayerPeak = -1000.0;   // the last peak the player's streak set off
     int m_pendingMoment = 0;       // a big moment asked for off the song clock (OnStreak)

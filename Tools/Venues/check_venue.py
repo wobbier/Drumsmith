@@ -80,6 +80,16 @@ def check(folder):
             err(f"venue.json: missing {k}")
     if "Preview" in info and not os.path.isfile(os.path.join(folder, info["Preview"])):
         err(f"venue.json: Preview file {info['Preview']} missing")
+    if "Ambience" in info:
+        amb = str(info["Ambience"]).replace("\\", "/")
+        if not os.path.isfile(os.path.join(ROOT, amb) if amb.startswith("Assets/") else os.path.join(folder, amb)):
+            err(f"venue.json: Ambience file {info['Ambience']} missing")
+        vol = info.get("AmbienceVolume", 1)
+        if not isinstance(vol, (int, float)) or not 0 <= vol <= 1:
+            warnings.append(f"venue.json: AmbienceVolume {vol} is not a number from 0 to 1 (clamped)")
+        fade = info.get("AmbienceFade", 8)
+        if not isinstance(fade, (int, float)) or fade < 0:
+            warnings.append(f"venue.json: AmbienceFade {fade} is not a number of seconds")
     scene_path = os.path.join(folder, info.get("Scene", ""))
     if not os.path.isfile(scene_path):
         err(f"scene {info.get('Scene')} missing")

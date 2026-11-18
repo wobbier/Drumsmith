@@ -48,6 +48,8 @@ public:
     // band, or over the band at the crowd; the same one for the same moment) takes the scheduled
     // cut's place for inHoldSeconds. The neck camera and the crowd surfer's shot keep the screen.
     void OnBigMoment( double inSeconds, float inHoldSeconds );
+    void SetAccentPhase( float inPhase ) { m_accentPhase = inPhase; }
+    bool HasPeakShots() const { return !m_peakSpots.empty(); }
     const EntityHandle& FeedCamera() const { return m_feed; }
     const EntityHandle& ProgramCamera() const { return m_program; }
     // The shot the main camera holds now ("coop_g_near"), for logs and tests.
@@ -86,7 +88,7 @@ private:
         Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push, PitRun,
         // Spot: one of the venue's own close or custom camera positions (VenuePlan::Cameras), the
         // plan's Variant its index.
-        Spot };
+        Spot, Arrival };
 
     struct Plan
     {
@@ -169,6 +171,11 @@ private:
     World* m_world = nullptr;
     const Band* m_band = nullptr;
     VenuePlan m_plan;
+    std::vector<VenuePlan::CameraSpot> m_arrival;
+    std::vector<int> m_peakSpots;
+    float m_accentPhase = -1.f;
+    float m_arrivalElapsed = -1.f;
+    double m_arrivalLastSongTime = 0.;
     EntityHandle m_main;
     EntityHandle m_feed;
     EntityHandle m_program;
