@@ -64,6 +64,9 @@ public:
     // small speaker across the room (no lows, no highs), 1 the song as it is; inPan -1 left to 1
     // right; inLevel 0 to 1 on top of the volume. 1, 0, 1 takes the effect off.
     void SetSpeaker( float inOpen, float inPan, float inLevel );
+    // How loud the pack is coming out right now: the RMS of its group's output, 0 (silence) to
+    // about 1 (full scale), averaged over the channels. Turns FMOD's metering on at the first call.
+    float GetLevel();
 
 private:
     void Reset();
@@ -83,6 +86,8 @@ private:
     FMOD::ChannelGroup* m_syncGroup = nullptr;
     // SetSpeaker's band limit, made on first use.
     FMOD::DSP* m_speakerEq = nullptr;
+    // GetLevel's meter: the group's head DSP, metering its output.
+    bool m_metering = false;
 #endif
     bool m_seekPending = false;
     unsigned long long m_seekStartClock = 0;   // the group DSP tick the stems restart on

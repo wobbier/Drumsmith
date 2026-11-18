@@ -27,9 +27,9 @@
                 },
                 {
                     "ClearColor": [
-                        0.0,
-                        0.0,
-                        0.0
+                        0.015,
+                        0.012,
+                        0.01
                     ],
                     "ClearType": "Color",
                     "Far": 2000.0,
@@ -37,6 +37,46 @@
                     "Near": 0.10000000149011612,
                     "Type": "Camera",
                     "Zoom": 45.0
+                },
+                {
+                    "Type": "PostProcess",
+                    "Tonemapper": "AgX",
+                    "ExposureCompensation": 0.25,
+                    "Bloom": true,
+                    "BloomIntensity": 0.14,
+                    "BloomThreshold": 0.8,
+                    "BloomRadius": 1.2,
+                    "AmbientOcclusion": true,
+                    "AORadius": 0.45,
+                    "AOIntensity": 1.2,
+                    "DepthOfField": true,
+                    "DoFFocusDistance": 5.0,
+                    "DoFAperture": 2.0,
+                    "DoFMaxBlurRadius": 9.0,
+                    "Fog": true,
+                    "FogColor": [
+                        0.1,
+                        0.105,
+                        0.125
+                    ],
+                    "FogDensity": 0.035,
+                    "FogStartDistance": 0.6,
+                    "FogSunIntensity": 0.7,
+                    "FogAnisotropy": 0.55,
+                    "VolumetricFog": true,
+                    "VolumetricDistance": 14.0,
+                    "VolumetricSteps": 40,
+                    "VolumetricLightSamples": 8,
+                    "FogLocalAnisotropy": 0.35,
+                    "Saturation": 1.0,
+                    "Contrast": 1.1,
+                    "Lut": "Engine/Assets/Textures/LUTs/Warm.cube",
+                    "LutContribution": 0.15,
+                    "VignetteIntensity": 0.38,
+                    "VignetteSmoothness": 0.55,
+                    "FilmGrain": 0.06,
+                    "FilmGrainSize": 1.4,
+                    "LensFringe": 0.15
                 },
                 {
                     "Type": "MainMenuController"

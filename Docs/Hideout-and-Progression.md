@@ -35,7 +35,10 @@ flowchart LR
 | `Game/Source/Hideout/Hideout.h/.cpp` | The room behind the main menu |
 | `Game/Source/Components/Hideout/HideoutMarkers.h/.cpp` | `HideoutStation`, `HideoutItemSlot`, `HideoutView` |
 | `Assets/Hideout/Basement.lvl`, `Garage.lvl`, `Rehearsal.lvl`, `Studio.lvl` | The rooms (generated) |
-| `Tools/Hideout/make_hideout.py` | Writes the rooms with `Tools/Venues/venuegen.py` |
+| `Tools/Hideout/make_hideout.py` | Writes the rooms with `Tools/Venues/venuegen.py`; the basement comes from `Tools/Hideout/basement.py`, helpers from `Tools/Hideout/hideoutgen.py` |
+| `Tools/Hideout/make_textures.py` | Draws `Assets/Hideout/Textures/*.png` with ImageMagick: concrete, wood, cardboard, egg cartons, the banner, the posters, the flyers, the screens |
+| `Tools/Hideout/make_sounds.py` | Synthesises the room tone in `Assets/Hideout/Sounds/*.wav` with ffmpeg |
+| `Assets/MainMenu.lvl` | The menu camera, with the room's `PostProcess` |
 | `Game/Tests/Source/PlayerProfileTests.cpp`, `ProgressionTests.cpp` | The record, the rules, the shipped journey, setlists, gigs, venue gating |
 
 ## How It Works
@@ -91,7 +94,42 @@ Each frame `Hideout::Update` eases the camera toward the overview or the chosen 
 
 The page binds `hideout`, `hideout_focus`, `hideout_room`, `hideout_room_text`, `hideout_goal`, `hideout_panel`, `hideout_notice`, `hideout_title`, `hideout_hint`, `hideout_status` and the lists `stations`, `records` and `gigs`. `Hideout::RegisterModel` sets them all before the first update. Events: `station(i)`, `hideout_back`, `dismiss_notice`, `gig_play(i)`. With no room (no tier scene, or one that can't be read) `hideout` stays 0 and the old flat menu shows.
 
-`--hideout-station N` starts at station N, its action included, for headless captures. Stations are numbered in entity order. In the generated rooms that order is Kit 0, PracticePad 1, GigBoard 2, TrophyWall 3, Laptop 4, Radio 5, Mixer 6.
+`--hideout-station N` starts at station N, its action included; `--hideout-look N` only frames it. Both are for headless captures. Stations are numbered in entity order, which the log lists at start (`[Hideout] station N: LABEL`). `--width 1600 --height 900` captures at 16:9, as most players see it.
+
+### The basement
+
+The first room is dressed in full (`Tools/Hideout/basement.py`): an unfinished basement of painted concrete block with open joists, pink insulation, a duct and copper pipe, a lally column, the stairs up to the kitchen (its light spilling down), a window well with a streetlight spot shining through it into the haze, and dust in the beam. Its items:
+- The kit is Band's real kit with the player's drummer at it (below), and a "BAND NAME TBD" logo on the kick.
+- A spray-painted bedsheet hangs behind the kit, among egg cartons stapled up as soundproofing, with Christmas lights along the wall.
+- Bucket drums from before the kit, a box fan on a milk crate, a setlist taped to the floor, and a guitar leaning on the amp.
+- The couch has the cat asleep on it (breathing, its tail flicking), with the boombox over it, a CRT with rabbit ears and static on a milk crate, and a space heater.
+- The furnace (with its pilot light) and the water heater stand in the corner.
+- The workbench has a pegboard, a desk lamp, a dying fluorescent tube, a phone book taped up as a practice pad, magazines and a can of sticks. Next to it are the mini fridge and the gig board, carrying a "BASSIST WANTED" and a "LAWNS MOWED" flyer.
+- The trophy wall holds a 7th-grade certificate and a participation ribbon.
+- There are posters for bands that don't exist, a rudiment chart typed from `Lessons.json`, a calendar, a clock, laundry on a line, a beanbag, pizza boxes and cans.
+- The room tone is the furnace's rumble, the tube's buzz, the fan and a drip, all looping 3D `AudioSource`s.
+
+Every item slot of `Progression.json` has a place in it too. The other three rooms are still the greybox of `make_hideout.py`'s `build_room`, with the drummer in place of their primitive kit.
+
+**Motion (`HideoutMotion`).** A prop moves around how the scene left it, every frame (`Hideout::UpdateMotions`). The kinds:
+- `Sway` swings about `Axis` (a hanging bulb, the laundry, the metronome's arm).
+- `Flicker` dips the light at random (the dying tube, the TV, the pilot light).
+- `Pulse` swells and fades.
+- `Spin` turns (the fan).
+- `Breathe` scales (the cat).
+- `Blink` (the smoke detector).
+- `Bob` moves along `Axis` (the boombox's speaker cones).
+
+Each acts on the entity's `Light`, on its own mesh's emissive (a `StandardMaterial` set through its setters), or on its transform. With `Music`, `Sway`, `Pulse` and `Bob` follow the radio instead of a clock. The clock (`Hideout::UpdateMusic`) reads the playing song's beat grid from its `NoteData.txt` (the database's `TrackData` doesn't load notes until the song is played) at `TrackRadio::GetPositionMS`. An envelope peaks on each beat, harder on a bar's first and in a loud passage; loudness comes from `TrackRadio::GetLevel` (FMOD metering of the pack's group, `AudioPack::GetLevel`). A `Pulse` with `Phase` above 0 fires on one beat in four (`Phase * 4`): the Christmas lights chase along the string. Give an animated entity an identity rotation: its base rotation comes back from its quaternion as whichever Euler angles it likes, and the motion is added to those.
+
+**The drummer (`HideoutDrummer`).** At the marker (the throne; `Yaw` 180 faces -z, a field because the same Euler problem applies) the hideout builds a `Band` with only the drums present, through its own `VenueKit` and an empty stage group. It rebuilds it for each song the radio plays, from a copy of that song's `TrackData` with its notes loaded, and updates it with the radio's position. So the player's drummer plays along with the radio, and sits idle at the kit between songs. `Band::CastSeed` (the marker's `Cast`) keeps the same character whatever the song. The stage sits 50 m under the floor until `Band::BodiesReady` (the rigged model has loaded), so the drummer never shows in his T-pose.
+
+**The camera's look.** The menu camera (`Assets/MainMenu.lvl`) carries a `PostProcess`:
+- AgX tone mapping, bloom, SSAO, film grain, vignette, a little lens fringe, and a light share of the `Warm` LUT.
+- Fog and volumetric fog (for the window's beam). Lights opt in with `VolumetricMultiplier`.
+- Depth of field. `Hideout::UpdateFocus` keeps `DoFFocusDistance` on what the camera is looking at.
+
+The labels are pushed apart where they would overlap (`Hideout::UpdateLabels`, about 19% by 7% of the screen each), and each is tilted a few degrees (`tilt`). In the basement (`hideout_tier` 0, the page's `basement` class) they are strips of masking tape, the header a piece of cardboard and the notice a sticky note.
 
 ### The radio in the room
 
@@ -108,7 +146,10 @@ The page binds `hideout`, `hideout_focus`, `hideout_room`, `hideout_room_text`, 
 ## Caveats & Fragility
 
 - **Nothing has been played or heard.** Gig flow, lesson passing and the radio's filter were checked with autoplay and unit tests. Camera moves, label clicks and the sound of the radio need a person.
-- **The rooms are greyboxes** of primitives, and the lighting is tuned on lavapipe only.
+- **Only the basement is dressed**; the garage, rehearsal space and studio are greyboxes of primitives. All the lighting is tuned on lavapipe captures only.
+- **A room needs a shadow-casting ceiling.** A scene with no directional light gets the engine's sun. Through joists alone, with a subfloor that casts no shadows, it falls across the room in stripes. Every generated room's ceiling casts shadows now.
+- **The drummer is rebuilt for every radio song** (`Band::Build` loads the chart's notes on the main thread), so there may be a hitch at each change of song. Measure it on hardware.
+- **The room tone hasn't been heard**: headless runs play silently.
 - **Gig difficulty is notes per second**, which says little about how hard a chart is.
 - **Gating the venue changes free play for everyone with no profile**: a fresh profile gets the Backyard until Club Night, whatever the Venue setting says. `--unlock-all` lifts it. The Venue tab still lists every venue and doesn't mark locked ones.
 - **Autoplay, no-fail and skipped-ahead runs don't count**, so a gig can't be passed with autoplay unless `--record-autoplay` is given.

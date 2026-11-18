@@ -91,8 +91,10 @@ AudioPack& AudioPack::operator=( AudioPack&& other ) noexcept
     other.m_metronome = -1;
     m_syncGroup = other.m_syncGroup;
     m_speakerEq = other.m_speakerEq;
+    m_metering = other.m_metering;
 
     other.m_syncGroup = nullptr;
+    other.m_metering = false;
     other.m_speakerEq = nullptr;
 
     return *this;
@@ -120,7 +122,43 @@ void AudioPack::Reset()
         m_syncGroup->release();
         m_syncGroup = nullptr;
     }
+    m_metering = false;
 
+}
+
+
+float AudioPack::GetLevel()
+{
+#if USING( ME_FMOD )
+    if( !m_syncGroup )
+    {
+        return 0.f;
+    }
+    FMOD::DSP* head = nullptr;
+    if( m_syncGroup->getDSP( FMOD_CHANNELCONTROL_DSP_HEAD, &head ) != FMOD_OK || !head )
+    {
+        return 0.f;
+    }
+    if( !m_metering )
+    {
+        head->setMeteringEnabled( false, true );
+        m_metering = true;
+    }
+    FMOD_DSP_METERING_INFO info = {};
+    if( head->getMeteringInfo( nullptr, &info ) != FMOD_OK || info.numchannels <= 0 )
+    {
+        return 0.f;
+    }
+    float sum = 0.f;
+    const int channels = std::min<int>( info.numchannels, 32 );
+    for( int channel = 0; channel < channels; ++channel )
+    {
+        sum += info.rmslevel[channel];
+    }
+    return sum / static_cast<float>( channels );
+#else
+    return 0.f;
+#endif
 }
 
 

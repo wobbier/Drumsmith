@@ -21,6 +21,9 @@ public:
     // inPlan: where each member stands and faces, and who's there at all (VenuePlan::Spot).
     void Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, const VenueData& inVenue, const std::vector<NoteData>& inNotes, const std::vector<BeatData>& inBeats, float inBpm );
     void Clear();
+    // When 0 or more, the cast (each member's character and skin) is this one whatever the song,
+    // instead of a different cast every song. The hideout's drummer is always the player's.
+    int CastSeed = -1;
     // The characters (People::kPeople indices) no member on stage is: the crowd's.
     std::vector<int> SpareModels() const;
     void Update( double inSeconds, float inDeltaTime, float inCrowdEnergy );
@@ -37,6 +40,8 @@ public:
     // the middle of the body, the fretboard's facing and the neck's upper edge (toward the
     // player's head). False for anyone without one.
     bool NeckOf( int inMember, Vector3& outHeadstock, Vector3& outBody, Vector3& outFace, Vector3& outEdge ) const;
+    // Every member's body has loaded and can be posed (Performer::IsReady).
+    bool BodiesReady();
     bool HasMember( int inMember ) const { return inMember >= 0 && inMember < VenueData::MemberCount && m_members[inMember].Present; }
     // How busy a member is around a time (0 resting, 1 flat out), for the director's choices.
     float Activity( int inMember, double inSeconds ) const;

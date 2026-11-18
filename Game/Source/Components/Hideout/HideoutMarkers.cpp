@@ -14,6 +14,23 @@ ME_REFLECT_BEGIN( HideoutItemSlot )
     ME_FIELD( Slot ).Tooltip( "The slot an item names (Assets/Progression/Progression.json). This entity and its children are hidden until that item is unlocked" );
 ME_REFLECT_END()
 
+ME_REFLECT_ENUM( HideoutMotion::Kind, { { "Sway", HideoutMotion::Kind::Sway }, { "Flicker", HideoutMotion::Kind::Flicker }, { "Pulse", HideoutMotion::Kind::Pulse }, { "Spin", HideoutMotion::Kind::Spin }, { "Breathe", HideoutMotion::Kind::Breathe }, { "Blink", HideoutMotion::Kind::Blink }, { "Bob", HideoutMotion::Kind::Bob } } )
+
+ME_REFLECT_BEGIN( HideoutMotion )
+    ME_FIELD( Motion ).Tooltip( "Sway: swings about Axis. Flicker: the Light dips at random. Pulse: the Light (or scale) jumps on each beat. Spin: turns about Axis. Breathe: scales along Axis. Blink: on and off. Bob: moves along Axis on each beat" );
+    ME_FIELD( Amount ).Tooltip( "Degrees for Sway, 0..1 for Flicker/Pulse/Breathe/Blink (Blink: the share of each cycle it's on), metres for Bob" );
+    ME_FIELD( Speed ).Tooltip( "Cycles a second (Spin: degrees a second)" );
+    ME_FIELD( Axis ).Tooltip( "Local axis for Sway, Spin, Breathe and Bob" );
+    ME_FIELD( Phase ).Range( 0.f, 1.f ).Tooltip( "Where in its cycle it starts" );
+    ME_FIELD( Music ).Tooltip( "Follow the radio: its beat and how loud it is, instead of a clock" );
+ME_REFLECT_END()
+
+ME_REFLECT_BEGIN( HideoutDrummer )
+    ME_FIELD( Cast ).Range( 0, 1000 ).Tooltip( "Which character plays; the same one whatever the song" );
+    ME_FIELD( Yaw ).Unit( Reflection::Unit::Degrees ).Tooltip( "Which way the drummer faces (180: -z); the kit is in front of them" );
+    ME_FIELD( Energy ).Range( 0.f, 1.f ).Tooltip( "How hard the drummer goes at it" );
+ME_REFLECT_END()
+
 ME_REFLECT_BEGIN( HideoutView )
     ME_FIELD( FieldOfView ).Unit( Reflection::Unit::Degrees ).Range( 10.f, 120.f ).Tooltip( "The overview's vertical field of view. The camera looks along local +Z" );
 ME_REFLECT_END()
@@ -37,6 +54,28 @@ HideoutItemSlot::HideoutItemSlot()
 
 
 void HideoutItemSlot::Init()
+{
+}
+
+
+HideoutMotion::HideoutMotion()
+    : Component( "HideoutMotion" )
+{
+}
+
+
+void HideoutMotion::Init()
+{
+}
+
+
+HideoutDrummer::HideoutDrummer()
+    : Component( "HideoutDrummer" )
+{
+}
+
+
+void HideoutDrummer::Init()
 {
 }
 

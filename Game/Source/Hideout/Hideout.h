@@ -1,6 +1,9 @@
 #pragma once
+#include "CoreGame/TrackList.h"
 #include "ECS/EntityHandle.h"
 #include "JSON.h"
+#include "Venue/Band.h"
+#include "Venue/VenueKit.h"
 #include "Math/Vector3.h"
 #include <string>
 #include <vector>
@@ -67,6 +70,15 @@ private:
     // The menu music as the radio in the room plays it: muffled and off to its side from across
     // the room, the whole song once the camera is at it (TrackRadio::SetSpeaker).
     void ApplyRadio( float inDeltaTime );
+    // The radio's beat and loudness (m_music), then every HideoutMotion in the room.
+    void UpdateMusic( float inDeltaTime );
+    void UpdateMotions( float inDeltaTime );
+    // The player's drummer at the kit (HideoutDrummer): rebuilt for each song the radio plays,
+    // from that song's chart, and played along with the radio's position.
+    void UpdateDrummer( float inDeltaTime );
+    void BuildBand( const TrackData* inTrack );
+    // Depth of field on the menu camera: focused on whatever the camera is looking at.
+    void UpdateFocus( float inDeltaTime );
     void UpdateLabels( RmlUiCore& inUi, const char* inModel );
     void FillRecords( RmlUiCore& inUi, const char* inModel ) const;
     void FillGigs( RmlUiCore& inUi, const char* inModel );
@@ -92,4 +104,63 @@ private:
     std::vector<std::vector<int>> m_setlists;
     std::string m_status;
     float m_radioOpen = 0.f;
+
+    // A prop's motion and how the scene left it.
+    struct Motion
+    {
+        EntityHandle Entity;
+        int Kind = 0;
+        float Amount = 1.f;
+        float Speed = 1.f;
+        Vector3 Axis;
+        float Phase = 0.f;
+        bool Music = false;
+        Vector3 BaseEuler;
+        Vector3 BasePosition;
+        Vector3 BaseScale;
+        float BaseIntensity = 0.f;
+        bool HasLight = false;
+        // A glowing mesh on the same entity (StandardMaterial): its emissive follows the Light's
+        // motion, or is the motion when there's no Light.
+        float BaseEmissive = 0.f;
+        bool HasEmissive = false;
+        // Flicker: the current dip and how long it lasts.
+        float Dip = 0.f;
+        float DipLeft = 0.f;
+        uint32_t Random = 1;
+    };
+    std::vector<Motion> m_motions;
+    float m_time = 0.f;
+
+    // What the radio is playing, as the room hears it.
+    struct MusicClock
+    {
+        const void* Track = nullptr;      // the song the beats are for
+        std::vector<float> Beats;         // seconds
+        std::vector<bool> Measures;       // a bar starts on this beat
+        bool HasBeat = false;             // the song is playing and has a beat grid
+        int Beat = 0;                     // the beat it's in
+        float BeatPhase = 0.f;            // 0..1 through it
+        float SinceBeat = 10.f;           // seconds since it started
+        bool Downbeat = false;
+        float Envelope = 0.f;             // 1 on the beat, decaying (louder songs hit harder)
+        float Level = 0.f;                // smoothed loudness, 0..1
+    };
+    MusicClock m_music;
+
+    // The drummer: where, who, and the chart of the song they're playing along with.
+    bool m_hasDrummer = false;
+    Vector3 m_drummerFeet;
+    float m_drummerYaw = 180.f;
+    int m_drummerCast = 0;
+    float m_drummerEnergy = 0.55f;
+    VenueKit m_kit;
+    // The band's stage: an empty group at the room's origin (Band needs one to update).
+    EntityHandle m_stage;
+    Band m_band;
+    TrackData m_chart;
+    const void* m_bandTrack = reinterpret_cast<const void*>( 1 );   // nothing built yet
+    double m_bandSeconds = 0.0;
+    bool m_bandShown = true;
+    float m_focus = 3.f;
 };

@@ -86,6 +86,9 @@ public:
     // from where those are. An Apply of the same pose then has only the arms left to do.
     void Stand( const Pose& inPose );
     void Apply( const Pose& inPose );
+    // The model has loaded and its skeleton is bound, so Apply poses it (until then it stands in
+    // its bind pose).
+    bool IsReady() { return Ready(); }
 
     Transform* Root() const;
     // Performer-space points after Apply.

@@ -48,6 +48,65 @@ public:
 ME_REGISTER_COMPONENT_FOLDER( HideoutItemSlot, "Hideout" )
 
 
+// Life for a prop (Hideout::UpdateMotions): the entity's local rotation, scale or Light is moved
+// every frame around how the scene left it. Most kinds can follow the radio instead of a clock
+// (Music): the beat of the song it's playing (from the chart's beat grid) and how loud it is.
+//   Sway     swings Amount degrees about Axis, Speed swings a second (a hanging bulb: put the
+//            entity at the hook and the bulb below it). With Music, it nods on each beat instead.
+//   Flicker  the Light dips at random by up to Amount (0..1); Speed is how restless it is. A
+//            fluorescent tube: Amount 1 drops out completely now and then.
+//   Pulse    the Light (or, without one, the scale) jumps by Amount on each beat and decays; with
+//            no music, a slow glow at Speed.
+//   Spin     turns about Axis at Speed degrees a second (a record, a fan).
+//   Breathe  scales by Amount along Axis, Speed breaths a second (a sleeping cat).
+//   Blink    the Light (or the scale, to nothing) on for Amount of every 1 / Speed seconds.
+//   Bob      moves Amount metres along Axis on each beat (a speaker cone, a dancing toy), or
+//            Speed bobs a second without music.
+class HideoutMotion
+    : public Component<HideoutMotion>
+{
+    ME_REFLECTABLE( HideoutMotion )
+public:
+    enum class Kind : int { Sway = 0, Flicker, Pulse, Spin, Breathe, Blink, Bob };
+
+    HideoutMotion();
+
+    virtual void Init() final;
+
+    Kind Motion = Kind::Sway;
+    float Amount = 1.f;
+    float Speed = 1.f;
+    Vector3 Axis{ 0.f, 0.f, 1.f };
+    // 0..1: where in its cycle it starts, so a row of the same thing doesn't move as one.
+    float Phase = 0.f;
+    bool Music = false;
+};
+ME_REGISTER_COMPONENT_FOLDER( HideoutMotion, "Hideout" )
+
+
+// Where the player's drummer sits (the throne's position; the kit is built in front of them, the
+// way Yaw faces: 180 faces -z). The drummer plays along with whatever the radio is playing, from that
+// song's chart (Band), and sits idle at the kit between songs.
+class HideoutDrummer
+    : public Component<HideoutDrummer>
+{
+    ME_REFLECTABLE( HideoutDrummer )
+public:
+    HideoutDrummer();
+
+    virtual void Init() final;
+
+    // Which character plays (Band::CastSeed): the same one whatever the song.
+    int Cast = 0;
+    // Degrees about +y (Band: 180 faces -z). A field rather than the entity's rotation, which
+    // comes back from its quaternion as whichever Euler angles it likes.
+    float Yaw = 180.f;
+    // How hard they go at it, 0 to 1 (Band::Update's energy).
+    float Energy = 0.55f;
+};
+ME_REGISTER_COMPONENT_FOLDER( HideoutDrummer, "Hideout" )
+
+
 // The room's overview: where the camera stands when no station is chosen. It looks along the
 // entity's local +Z. One per room.
 class HideoutView

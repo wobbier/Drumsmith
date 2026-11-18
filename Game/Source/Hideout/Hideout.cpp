@@ -1,6 +1,11 @@
 #include "Hideout/Hideout.h"
 #include "CLog.h"
 #include "Components/Camera.h"
+#include "Components/Lighting/Light.h"
+#include "Components/Graphics/Mesh.h"
+#include "Components/Graphics/PostProcess.h"
+#include "Materials/StandardMaterial.h"
+#include "Venue/VenuePlan.h"
 #include "Components/Hideout/HideoutMarkers.h"
 #include "Components/Transform.h"
 #include "Config/PlayerProfile.h"
@@ -10,6 +15,7 @@
 #include "CoreGame/TrackList.h"
 #include "Cores/UI/RmlUiCore.h"
 #include "Engine/World.h"
+#include "File.h"
 #include "Global/TrackRadio.h"
 #include "Events/SceneEvents.h"
 #include "UI/UIModelUtils.h"
@@ -77,6 +83,262 @@ Hideout::~Hideout()
     {
         TrackRadio::GetInstance().SetSpeaker( 1.f, 0.f, 1.f );
     }
+    m_band.Clear();
+    m_kit.Clear();
+}
+
+
+namespace
+{
+    StandardMaterial* EmissiveOf( Entity& inEntity )
+    {
+        Mesh* mesh = inEntity.TryGetComponent<Mesh>();
+        return mesh ? dynamic_cast<StandardMaterial*>( mesh->MeshMaterial.get() ) : nullptr;
+    }
+}
+
+
+void Hideout::BuildBand( const TrackData* inTrack )
+{
+    m_band.Clear();
+    m_chart = TrackData();
+    if( inTrack )
+    {
+        m_chart = *inTrack;
+        m_chart.LoadNoteData();
+    }
+    VenuePlan plan;
+    for( auto& spot : plan.Members )
+    {
+        spot.Present = false;
+    }
+    auto& drums = plan.Members[VenueData::Drums];
+    drums.Feet = m_drummerFeet;
+    drums.Yaw = m_drummerYaw;
+    drums.Present = true;
+    m_band.CastSeed = m_drummerCast;
+    // No song (or one with no chart): the drummer sits at the kit, idle.
+    static const std::vector<NoteData> kNoNotes;
+    static const std::vector<BeatData> kNoBeats;
+    const bool chart = !m_chart.m_noteData.empty();
+    Transform* stage = m_stage ? m_stage->TryGetComponent<Transform>() : nullptr;
+    if( !stage )
+    {
+        return;
+    }
+    m_band.Build( m_kit, stage, plan, m_chart.m_venue, chart ? m_chart.m_noteData : kNoNotes, chart ? m_chart.m_beats : kNoBeats, static_cast<float>( m_chart.m_bpm ) );
+}
+
+
+void Hideout::UpdateDrummer( float inDeltaTime )
+{
+    if( !m_hasDrummer )
+    {
+        return;
+    }
+    TrackRadio& radio = TrackRadio::GetInstance();
+    const TrackData* track = radio.GetCurrentTrack();
+    if( track != m_bandTrack )
+    {
+        m_bandTrack = track;
+        BuildBand( track );
+    }
+    if( radio.IsPlaying() )
+    {
+        m_bandSeconds = radio.GetPositionMS() / 1000.0;
+    }
+    m_band.Update( m_bandSeconds, inDeltaTime, m_drummerEnergy );
+    // Out of sight (under the floor) until the drummer's body has loaded: no T-pose on the way in.
+    if( Transform* stage = m_stage ? m_stage->TryGetComponent<Transform>() : nullptr )
+    {
+        const bool ready = m_band.BodiesReady();
+        if( ready != m_bandShown )
+        {
+            m_bandShown = ready;
+            stage->SetPosition( Vector3( 0.f, ready ? 0.f : -50.f, 0.f ) );
+        }
+    }
+}
+
+
+void Hideout::UpdateFocus( float inDeltaTime )
+{
+    PostProcess* post = m_camera ? m_camera->TryGetComponent<PostProcess>() : nullptr;
+    if( !post || !post->DepthOfField )
+    {
+        return;
+    }
+    const float distance = Distance( m_current.Eye, m_current.Target );
+    m_focus += ( distance - m_focus ) * ( 1.f - std::exp( -inDeltaTime * 5.f ) );
+    post->DoFFocusDistance = m_focus;
+}
+
+
+void Hideout::UpdateMusic( float inDeltaTime )
+{
+    TrackRadio& radio = TrackRadio::GetInstance();
+    const TrackData* track = radio.GetCurrentTrack();
+    if( track != m_music.Track )
+    {
+        // A new song: its beat grid, read from the chart beside it (the database's TrackData
+        // doesn't load notes until the song is played).
+        m_music.Track = track;
+        m_music.Beats.clear();
+        m_music.Measures.clear();
+        if( track && !track->m_beats.empty() )
+        {
+            for( const BeatData& beat : track->m_beats )
+            {
+                m_music.Beats.push_back( beat.m_time );
+                m_music.Measures.push_back( beat.m_measure );
+            }
+        }
+        else if( track && !track->GetDirectory().empty() )
+        {
+            const Path file( track->GetDirectory() + "/NoteData.txt" );
+            if( file.Exists )
+            {
+                const json root = json::parse( File( file ).Read(), nullptr, false );
+                if( root.is_object() && root.contains( "Beats" ) && root["Beats"].is_array() )
+                {
+                    for( const json& beat : root["Beats"] )
+                    {
+                        if( beat.is_array() && beat.size() >= 2 && beat[0].is_number() )
+                        {
+                            m_music.Beats.push_back( beat[0].get<float>() );
+                            m_music.Measures.push_back( beat[1].is_number() && beat[1].get<int>() != 0 );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    const float level = radio.IsPlaying() ? radio.GetLevel() : 0.f;
+    m_music.Level += ( level - m_music.Level ) * ( 1.f - std::exp( -inDeltaTime * 10.f ) );
+    m_music.HasBeat = false;
+    if( radio.IsPlaying() && m_music.Beats.size() >= 2 )
+    {
+        const float now = radio.GetPositionMS() / 1000.f;
+        const auto next = std::upper_bound( m_music.Beats.begin(), m_music.Beats.end(), now );
+        if( next != m_music.Beats.begin() && next != m_music.Beats.end() )
+        {
+            const int beat = static_cast<int>( next - m_music.Beats.begin() ) - 1;
+            const float start = m_music.Beats[beat];
+            const float length = std::max( 0.05f, *next - start );
+            m_music.HasBeat = true;
+            m_music.Beat = beat;
+            m_music.BeatPhase = std::clamp( ( now - start ) / length, 0.f, 1.f );
+            m_music.SinceBeat = now - start;
+            m_music.Downbeat = m_music.Measures[beat];
+        }
+    }
+    // The hit: sharp on the beat and gone by the next, harder on a bar's first beat and in a loud
+    // passage. Without a beat grid, the loudness alone.
+    const float loud = std::clamp( m_music.Level * 3.f, 0.25f, 1.f );
+    m_music.Envelope = m_music.HasBeat ? std::exp( -m_music.SinceBeat * 7.f ) * loud * ( m_music.Downbeat ? 1.f : 0.75f ) : std::clamp( m_music.Level * 2.5f, 0.f, 1.f );
+}
+
+
+void Hideout::UpdateMotions( float inDeltaTime )
+{
+    m_time += inDeltaTime;
+    constexpr float kTau = 6.2831853f;
+    for( Motion& motion : m_motions )
+    {
+        if( !motion.Entity )
+        {
+            continue;
+        }
+        Transform* transform = motion.Entity->TryGetComponent<Transform>();
+        Light* light = motion.HasLight ? motion.Entity->TryGetComponent<Light>() : nullptr;
+        if( !transform )
+        {
+            continue;
+        }
+        const bool music = motion.Music && m_music.HasBeat;
+        StandardMaterial* glow = motion.HasEmissive ? EmissiveOf( *motion.Entity.Get() ) : nullptr;
+        // A share of how the scene left it, for the Light and the glow alike. False: neither is here.
+        const auto shine = [&]( float inFactor ) {
+            if( light )
+            {
+                light->Intensity = motion.BaseIntensity * inFactor;
+            }
+            if( glow )
+            {
+                glow->SetEmissiveIntensity( motion.BaseEmissive * inFactor );
+            }
+            return light || glow;
+        };
+        const float cycle = kTau * ( motion.Speed * m_time + motion.Phase );
+        switch( static_cast<HideoutMotion::Kind>( motion.Kind ) )
+        {
+        case HideoutMotion::Kind::Sway:
+        {
+            // On the music: one way on a beat, back the other on the next.
+            const float swing = music ? std::sin( 3.1415927f * ( static_cast<float>( m_music.Beat % 2 ) + m_music.BeatPhase ) ) : std::sin( cycle );
+            transform->SetRotation( motion.BaseEuler + motion.Axis * ( motion.Amount * swing ) );
+            break;
+        }
+        case HideoutMotion::Kind::Flicker:
+        {
+            // Restless hum, and now and then a dip (a dying tube drops right out).
+            motion.DipLeft -= inDeltaTime;
+            if( motion.DipLeft <= 0.f )
+            {
+                motion.Random = motion.Random * 1664525u + 1013904223u;
+                const float roll = static_cast<float>( motion.Random >> 8 ) / 16777216.f;
+                const bool dip = roll < 0.08f * motion.Speed;
+                motion.Dip = dip ? motion.Amount * ( 0.5f + 0.5f * static_cast<float>( ( motion.Random >> 4 ) & 255u ) / 255.f ) : 0.f;
+                motion.DipLeft = dip ? 0.04f + 0.12f * roll : 0.05f + 0.25f * roll;
+            }
+            const float hum = 1.f - 0.06f * motion.Amount * ( 0.5f + 0.5f * std::sin( m_time * 37.f + motion.Phase * 11.f ) );
+            shine( std::max( 0.f, hum - motion.Dip ) );
+            break;
+        }
+        case HideoutMotion::Kind::Pulse:
+        {
+            float pulse = 0.5f + 0.5f * std::sin( cycle );
+            if( motion.Music && ( m_music.HasBeat || m_music.Level > 0.01f ) )
+            {
+                // Phase > 0 picks one beat of four to fire on (a chase along a string of lights).
+                const int step = static_cast<int>( motion.Phase * 4.f ) % 4;
+                const bool mine = motion.Phase <= 0.f || !m_music.HasBeat || m_music.Beat % 4 == step;
+                pulse = mine ? m_music.Envelope : m_music.Envelope * 0.15f;
+            }
+            if( !shine( 1.f - motion.Amount + motion.Amount * pulse ) )
+            {
+                transform->SetScale( motion.BaseScale * ( 1.f + motion.Amount * pulse ) );
+            }
+            break;
+        }
+        case HideoutMotion::Kind::Spin:
+            transform->SetRotation( motion.BaseEuler + motion.Axis * ( motion.Speed * m_time + motion.Phase * 360.f ) );
+            break;
+        case HideoutMotion::Kind::Breathe:
+        {
+            const float breath = 0.5f + 0.5f * std::sin( cycle );
+            const Vector3 grow = motion.Axis * ( motion.Amount * breath );
+            transform->SetScale( Vector3( motion.BaseScale.x * ( 1.f + grow.x ), motion.BaseScale.y * ( 1.f + grow.y ), motion.BaseScale.z * ( 1.f + grow.z ) ) );
+            break;
+        }
+        case HideoutMotion::Kind::Blink:
+        {
+            const float position = motion.Speed * m_time + motion.Phase;
+            const bool on = position - std::floor( position ) < motion.Amount;
+            if( !shine( on ? 1.f : 0.f ) )
+            {
+                transform->SetScale( on ? motion.BaseScale : motion.BaseScale * 0.001f );
+            }
+            break;
+        }
+        case HideoutMotion::Kind::Bob:
+        {
+            const float bob = music ? m_music.Envelope : 0.5f + 0.5f * std::sin( cycle );
+            transform->SetPosition( motion.BasePosition + motion.Axis * ( motion.Amount * bob ) );
+            break;
+        }
+        }
+    }
 }
 
 
@@ -118,6 +380,7 @@ const std::vector<const char*>& Hideout::Events()
 void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
 {
     inUi.ModelSetNumber( inModel, "hideout", 0 );
+    inUi.ModelSetNumber( inModel, "hideout_tier", 0 );
     inUi.ModelSetNumber( inModel, "hideout_focus", -1 );
     for( const char* key : { "hideout_room", "hideout_room_text", "hideout_goal", "hideout_panel", "hideout_notice", "hideout_title", "hideout_hint", "hideout_status" } )
     {
@@ -229,6 +492,82 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
             }
         }
     }
+    // The props' motions, but not under an item slot that was just taken away.
+    std::vector<Entity*> hiddenSlots;
+    for( Entity* entity : entities )
+    {
+        if( HideoutItemSlot* slot = entity->TryGetComponent<HideoutItemSlot>() )
+        {
+            for( const ProgressionItem& item : progression.Items() )
+            {
+                if( item.Slot == slot->Slot && profile.UnlockedItems.count( "item:" + item.Id ) == 0 && !progression.UnlockAll )
+                {
+                    hiddenSlots.push_back( entity );
+                }
+            }
+        }
+    }
+    m_motions.clear();
+    for( Entity* entity : entities )
+    {
+        HideoutMotion* marker = entity->TryGetComponent<HideoutMotion>();
+        Transform* transform = entity->TryGetComponent<Transform>();
+        if( !marker || !transform )
+        {
+            continue;
+        }
+        bool hidden = false;
+        for( Transform* up = transform; up && !hidden; up = up->GetParentTransform() )
+        {
+            hidden = std::find( hiddenSlots.begin(), hiddenSlots.end(), up->Parent.Get() ) != hiddenSlots.end();
+        }
+        if( hidden )
+        {
+            continue;
+        }
+        Motion motion;
+        motion.Entity = transform->Parent;
+        motion.Kind = static_cast<int>( marker->Motion );
+        motion.Amount = marker->Amount;
+        motion.Speed = marker->Speed;
+        motion.Axis = marker->Axis;
+        motion.Phase = marker->Phase;
+        motion.Music = marker->Music;
+        motion.BaseEuler = transform->GetRotationEuler();
+        motion.BasePosition = transform->GetPosition();
+        motion.BaseScale = transform->GetScale();
+        if( Light* light = entity->TryGetComponent<Light>() )
+        {
+            motion.HasLight = true;
+            motion.BaseIntensity = light->Intensity;
+        }
+        if( StandardMaterial* material = EmissiveOf( *entity ) )
+        {
+            if( material->EmissiveIntensity > 0.f )
+            {
+                motion.HasEmissive = true;
+                motion.BaseEmissive = material->EmissiveIntensity;
+            }
+        }
+        motion.Random = 0x9E3779B9u ^ static_cast<uint32_t>( m_motions.size() * 2654435761u );
+        m_motions.push_back( motion );
+    }
+    // The drummer, at the first HideoutDrummer (built on the first update, once the radio is known).
+    for( Entity* entity : entities )
+    {
+        if( HideoutDrummer* drummer = entity->TryGetComponent<HideoutDrummer>() )
+        {
+            Transform& transform = entity->GetComponent<Transform>();
+            m_hasDrummer = true;
+            m_drummerFeet = transform.GetWorldPosition();
+            m_drummerYaw = drummer->Yaw;
+            m_drummerCast = drummer->Cast;
+            m_drummerEnergy = drummer->Energy;
+            m_kit.Begin( inWorld );
+            m_stage = m_kit.Group( "Hideout Stage", nullptr );
+            break;
+        }
+    }
     if( !hasView )
     {
         m_overview.Eye = Vector3( 0.f, 1.7f, -3.f );
@@ -269,14 +608,21 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         }
     }
     // --hideout-station N starts at a station (for headless captures).
+    // --hideout-look N only frames it (no action), for close-up captures.
     static const int kStartStation = CommandLine::GetInt( "--hideout-station", -1 );
-    if( kStartStation >= 0 && kStartStation < static_cast<int>( m_stations.size() ) )
+    static const int kLookStation = CommandLine::GetInt( "--hideout-look", -1 );
+    const int start = kLookStation >= 0 ? kLookStation : kStartStation;
+    if( start >= 0 && start < static_cast<int>( m_stations.size() ) )
     {
-        m_chosen = kStartStation;
+        m_chosen = start;
         m_chosenAge = 10.f;
-        m_actionDone = false;
-        m_current = PoseOf( kStartStation );
+        m_actionDone = kLookStation >= 0;
+        m_current = PoseOf( start );
         m_hasCurrent = true;
+    }
+    for( int i = 0; i < static_cast<int>( m_stations.size() ); ++i )
+    {
+        INFO_FMT( "[Hideout]", "station %d: %s", i, m_stations[i].Label.c_str() );
     }
     return true;
 }
@@ -398,25 +744,64 @@ void Hideout::UpdateLabels( RmlUiCore& inUi, const char* inModel )
         return;
     }
     const glm::mat4 viewProjection = camera->GetProjectionMatrix().GetInternalMatrix() * camera->WorldToCamera.GetInternalMatrix();
+    // Where each label goes (percent of the screen), pushed apart where two would overlap: the
+    // lower of the two moves down until they clear (a label is about 19% wide and 7% tall).
+    struct Spot
+    {
+        float X = 0.f;
+        float Y = 0.f;
+        bool Shown = false;
+    };
+    std::vector<Spot> spots( m_stations.size() );
     for( int i = 0; i < static_cast<int>( m_stations.size() ); ++i )
     {
         const Station& station = m_stations[i];
         const glm::vec4 clip = viewProjection * glm::vec4( station.Position.x, station.Position.y, station.Position.z, 1.f );
-        bool shown = clip.w > 0.05f && m_chosen < 0 && !m_noticeShown;
-        float x = 0.f, y = 0.f;
-        if( shown )
+        Spot& spot = spots[i];
+        spot.Shown = clip.w > 0.05f && m_chosen < 0 && !m_noticeShown;
+        if( spot.Shown )
         {
-            x = clip.x / clip.w;
-            y = clip.y / clip.w;
-            shown = std::abs( x ) < 1.05f && std::abs( y ) < 1.f;
+            const float x = clip.x / clip.w;
+            const float y = clip.y / clip.w;
+            spot.Shown = std::abs( x ) < 1.05f && std::abs( y ) < 1.f;
+            spot.X = std::clamp( ( x + 1.f ) * 50.f, 11.f, 89.f );
+            spot.Y = std::clamp( ( 1.f - y ) * 50.f, 12.f, 90.f );
         }
+    }
+    std::vector<int> order;
+    for( int i = 0; i < static_cast<int>( spots.size() ); ++i )
+    {
+        if( spots[i].Shown ) order.push_back( i );
+    }
+    std::sort( order.begin(), order.end(), [&spots]( int a, int b ) { return spots[a].Y < spots[b].Y; } );
+    constexpr float kLabelWidth = 19.f;
+    constexpr float kLabelHeight = 7.f;
+    for( size_t a = 0; a < order.size(); ++a )
+    {
+        for( size_t b = 0; b < a; ++b )
+        {
+            Spot& lower = spots[order[a]];
+            const Spot& upper = spots[order[b]];
+            if( std::abs( lower.X - upper.X ) < kLabelWidth && lower.Y - upper.Y < kLabelHeight )
+            {
+                lower.Y = upper.Y + kLabelHeight;
+            }
+        }
+    }
+    for( int i = 0; i < static_cast<int>( m_stations.size() ); ++i )
+    {
+        const Station& station = m_stations[i];
         inUi.ModelSetItemNumber( inModel, "stations", i, "index", i );
-        inUi.ModelSetItemNumber( inModel, "stations", i, "shown", shown ? 1 : 0 );
+        inUi.ModelSetItemNumber( inModel, "stations", i, "shown", spots[i].Shown ? 1 : 0 );
         inUi.ModelSetItemString( inModel, "stations", i, "label", station.Label );
         inUi.ModelSetItemString( inModel, "stations", i, "hint", KindHint( station.Kind ) );
-        // Kept clear of the screen's edges, so a label at the side of the room isn't cut off.
-        inUi.ModelSetItemString( inModel, "stations", i, "left", Percent( std::clamp( ( x + 1.f ) * 50.f, 11.f, 89.f ) ) );
-        inUi.ModelSetItemString( inModel, "stations", i, "top", Percent( std::clamp( ( 1.f - y ) * 50.f, 12.f, 90.f ) ) );
+        // Each label a little crooked, its own way (the basement's labels are strips of tape).
+        char tilt[32];
+        std::snprintf( tilt, sizeof( tilt ), "rotate(%ddeg)", ( i * 5 ) % 7 - 3 );
+        inUi.ModelSetItemString( inModel, "stations", i, "tilt", tilt );
+        // Kept clear of the screen's edges (above), so a label at the side of the room isn't cut off.
+        inUi.ModelSetItemString( inModel, "stations", i, "left", Percent( spots[i].X ) );
+        inUi.ModelSetItemString( inModel, "stations", i, "top", Percent( std::min( spots[i].Y, 92.f ) ) );
     }
 }
 
@@ -538,10 +923,15 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     }
     ApplyCamera( inDeltaTime );
     ApplyRadio( inDeltaTime );
+    UpdateMusic( inDeltaTime );
+    UpdateMotions( inDeltaTime );
+    UpdateDrummer( inDeltaTime );
+    UpdateFocus( inDeltaTime );
     UpdateLabels( inUi, inModel );
     const PlayerProfile& profile = PlayerProfile::GetInstance();
     const ProgressionTier* tier = Progression::GetInstance().TierAt( profile.HideoutTier );
     inUi.ModelSetNumber( inModel, "hideout", 1 );
+    inUi.ModelSetNumber( inModel, "hideout_tier", profile.HideoutTier );
     inUi.ModelSetNumber( inModel, "hideout_focus", m_chosen );
     inUi.ModelSetString( inModel, "hideout_room", tier ? tier->Name : std::string() );
     inUi.ModelSetString( inModel, "hideout_room_text", tier ? tier->Description : std::string() );

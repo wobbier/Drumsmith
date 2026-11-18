@@ -47,6 +47,8 @@ public:
     // Where the radio plays from (AudioPack::SetSpeaker), kept across songs until set back to
     // 1, 0, 1. The hideout's radio sets it every frame; leaving the main menu takes it off.
     void SetSpeaker( float inOpen, float inPan, float inLevel );
+    // How loud the radio is playing right now (AudioPack::GetLevel); 0 when it isn't.
+    float GetLevel();
     bool CanPlayNextTrack() const;
     void Resume();
 

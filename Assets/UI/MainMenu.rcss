@@ -110,3 +110,19 @@ body.main-menu-page.hideout { decorator: none; }
 #hideout-notice p { font-size: 20dp; white-space: pre-line; color: #ffffff; }
 #hideout-notice .menu-link { width: auto; margin: 16dp auto 0; font-size: 32dp; }
 #settings-menu .device-choice .venue-lock { color: #ffffff70; font-size: 15dp; }
+
+/* The basement (tier 0): masking-tape labels in marker, the header on a scrap of cardboard, the
+   notice a sticky note. Later rooms keep the sleek defaults above. */
+body.basement .station-label { width: 210dp; margin-left: -105dp; padding: 8dp 10dp 6dp; background-color: #e9dfbfec; border-bottom: 2dp #b9a77e; }
+body.basement .station-label:hover, body.basement .station-label:focus { background-color: #fff3a8; }
+body.basement .station-label .station-name { color: #231c16; font-size: 25dp; letter-spacing: 1dp; }
+body.basement .station-label .station-hint { color: #5d5144; font-size: 13dp; }
+body.basement #hideout-header { background-color: #6e5236ee; border: 2dp #4b3621; transform: rotate(-1deg); }
+body.basement #hideout-header .hideout-goal { color: #ffe08a; }
+body.basement #hideout-notice { background-color: #f5e27aee; border-top: 0; transform: rotate(1.2deg); color: #2a2218; }
+body.basement #hideout-notice h2 { color: #9b2c1c; }
+body.basement #hideout-notice p { color: #2a2218; }
+body.basement #hideout-notice .menu-link { color: #2a2218; }
+body.basement #hideout-focus { background-color: #160f0ae0; border-right: 3dp #6e5236; }
+body.basement #hideout-corner .corner-link { background-color: #e9dfbfd0; color: #231c16; }
+body.basement #hideout-corner .corner-link:hover, body.basement #hideout-corner .corner-link:focus { background-color: #fff3a8; }

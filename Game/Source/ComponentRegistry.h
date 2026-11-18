@@ -15,3 +15,4 @@
 #include "Editor/TrackEditor.h"
 #include "Editor/PadBindings.h"
 #include "Components/Venue/VenueMarkers.h"
+#include "Components/Hideout/HideoutMarkers.h"

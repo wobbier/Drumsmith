@@ -124,6 +124,12 @@ void TrackRadio::Seek( float inPercent )
 }
 
 
+float TrackRadio::GetLevel()
+{
+    return m_radioState == RadioState::Playing ? m_audioPack.GetLevel() : 0.f;
+}
+
+
 void TrackRadio::SetSpeaker( float inOpen, float inPan, float inLevel )
 {
     m_speakerOpen = inOpen;

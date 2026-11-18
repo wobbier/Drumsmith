@@ -296,7 +296,7 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, 
         // (the same every time it's played): a step through each list that visits all of it
         // before repeating.
         Performer::Look look;
-        const uint32_t song = static_cast<uint32_t>( m_drumTimes.size() ) + static_cast<uint32_t>( m_bpm );
+        const uint32_t song = CastSeed >= 0 ? static_cast<uint32_t>( CastSeed ) : static_cast<uint32_t>( m_drumTimes.size() ) + static_cast<uint32_t>( m_bpm );
         const auto pick = [song, index]( uint32_t inCount, uint32_t inSalt ) {
             uint32_t step = 1 + ( song + inSalt ) % inCount;
             while( std::gcd( step, inCount ) != 1 ) ++step;
@@ -319,6 +319,19 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, 
     }
     // Backing vocals from the harmony parts, once it's known who's on stage.
     DeriveHarmonies( inVenue );
+}
+
+
+bool Band::BodiesReady()
+{
+    for( Member& member : m_members )
+    {
+        if( member.Present && !member.Body.IsReady() )
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 

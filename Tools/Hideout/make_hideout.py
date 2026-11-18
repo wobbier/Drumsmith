@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Writes the hideout's rooms, Assets/Hideout/{Basement,Garage,Rehearsal,Studio}.lvl: greybox scenes
-of primitives with the hideout markers (Game/Source/Components/Hideout/HideoutMarkers.h).
+"""Writes the hideout's rooms, Assets/Hideout/{Basement,Garage,Rehearsal,Studio}.lvl, with the hideout
+markers (Game/Source/Components/Hideout/HideoutMarkers.h). The basement is dressed in full
+(Tools/Hideout/basement.py); the garage, rehearsal space and studio are still greyboxes of
+primitives. Textures come from Tools/Hideout/make_textures.py.
 
     python3 Tools/Hideout/make_hideout.py
 
@@ -14,8 +16,11 @@ end, the kit against the +z wall. Cameras look along local +Z.
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "Venues"))
 from venuegen import Scene, look_rotation, repo_root  # noqa: E402
+from hideoutgen import drummer, slot, station  # noqa: E402
+from basement import build_basement  # noqa: E402
 
 BLACK = (0.04, 0.04, 0.045)
 CHROME = (0.75, 0.75, 0.78)
@@ -39,22 +44,6 @@ class Room:
         self.light = light
         self.light_power = light_power
         self.shell = shell      # the drum shells' colour: the kit gets better with the room
-
-
-def station(s, parent, name, kind, pos, view_offset, fov=45.0, label=""):
-    e = s.entity(name, parent, pos)
-    comp = {"Type": "HideoutStation", "Station": kind, "ViewOffset": [round(v, 4) for v in view_offset],
-            "FieldOfView": fov}
-    if label:
-        comp["Label"] = label
-    e.add(comp)
-    return e
-
-
-def slot(s, parent, name, slot_name, pos=(0, 0, 0)):
-    e = s.entity(name, parent, pos)
-    e.add({"Type": "HideoutItemSlot", "Slot": slot_name})
-    return e
 
 
 def drum(s, parent, name, pos, diameter, depth, color, axis="y"):
@@ -100,7 +89,8 @@ def build_room(room, extras):
 
     # The shell: floor, ceiling, three walls (the doorway end stays open behind the camera).
     s.slab("Floor", geo, -h, h, -0.1, 0.0, -1.5, d, room.floor, rough=0.95)
-    s.slab("Ceiling", geo, -h, h, top, top + 0.1, -1.5, d, room.ceiling, rough=0.95, shadows=False)
+    # The ceiling casts shadows: it keeps the engine's sun (a scene with no directional gets one) out.
+    s.slab("Ceiling", geo, -h, h, top, top + 0.1, -1.5, d, room.ceiling, rough=0.95)
     s.slab("Back Wall", geo, -h, h, 0, top, d, d + 0.1, room.walls)
     s.slab("Left Wall", geo, -h - 0.1, -h, 0, top, -1.5, d, room.walls)
     s.slab("Right Wall", geo, h, h + 0.1, 0, top, -1.5, d, room.walls)
@@ -113,7 +103,8 @@ def build_room(room, extras):
     s.light("Side Light", geo, (h - 0.6, top - 0.4, d * 0.4), "Point", room.light, room.light_power * 0.35, 7)
 
     kit_at = (0.0, d - 1.1)
-    kit(s, items, room, kit_at)
+    # The player's drummer at the kit (Band), playing along with the radio.
+    drummer(s, items, (kit_at[0], 0.0, kit_at[1] + 0.25))
     station(s, stuff, "Kit", "Kit", (kit_at[0], 0.9, kit_at[1]), (0.35, 0.75, -2.1), 42)
 
     # Left wall: the workbench with the practice pad, and the gig board.
@@ -276,7 +267,8 @@ ROOMS = [
 def main():
     folder = os.path.join(repo_root(), "Assets", "Hideout")
     for room, extras in ROOMS:
-        build_room(room, extras).write(os.path.join(folder, f"{room.name}.lvl"))
+        scene = build_basement() if room.name == "Basement" else build_room(room, extras)
+        scene.write(os.path.join(folder, f"{room.name}.lvl"))
     print("wrote", folder)
 
 
