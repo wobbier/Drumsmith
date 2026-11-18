@@ -5,9 +5,12 @@
 #include <Engine/Input.h>
 #include <Events/SceneEvents.h>
 #include "Config/GameSettings.h"
+#include "Core/CommandLine.h"
 #include "Config/PlayerProfile.h"
+#include "CoreGame/LessonPatterns.h"
 #include "CoreGame/Progression.h"
 #include "CoreGame/Practice.h"
+#include "UI/TrackRadioUtils.h"
 #include "Events/GameEvents.h"
 #include "Global/TrackRadio.h"
 #include "UI/UIModelUtils.h"
@@ -51,7 +54,7 @@ void PracticeMenuController::PopulateModel()
         return;
     }
     ui->ModelEnsure( kModel );
-    for( const char* event : { "select", "start", "bars", "tempo" } )
+    for( const char* event : { "select", "start", "bars", "tempo", "play_song" } )
     {
         ui->ModelRegisterEvent( kModel, event );
     }
@@ -60,7 +63,8 @@ void PracticeMenuController::PopulateModel()
     ui->ModelSetNumber( kModel, "bpm", 80 );
     ui->ModelSetNumber( kModel, "bars", m_bars );
     ui->ModelSetNumber( kModel, "lesson_count", static_cast<int>( lessons.size() ) );
-    for( const char* key : { "detail_name", "detail_category", "detail_description", "detail_pattern", "detail_feel", "detail_progress", "status" } )
+    for( const char* key : { "detail_name", "detail_category", "detail_description", "detail_pattern", "detail_feel", "detail_progress", "status", "songs_heading",
+        "songs_state" } )
     {
         ui->ModelSetString( kModel, key, "" );
     }
@@ -69,6 +73,9 @@ void PracticeMenuController::PopulateModel()
     const Progression& progression = Progression::GetInstance();
     const PlayerProfile& profile = PlayerProfile::GetInstance();
     ui->ModelSetListCount( kModel, "lanes", 0 );
+    ui->ModelSetListCount( kModel, "songs", 0 );
+    // The library's patterns, read on a worker thread the first time this session.
+    LessonPatternIndex::GetInstance().Request();
     ui->ModelSetListCount( kModel, "lessons", static_cast<int>( lessons.size() ) );
     std::string previousCategory;
     for( int i = 0; i < static_cast<int>( lessons.size() ); ++i )
@@ -149,6 +156,49 @@ void PracticeMenuController::SelectLesson( int inLesson )
         ui->ModelSetItemString( kModel, "lanes", i, "name", pad >= 0 && pad < PadId::COUNT ? PadUtils::GetPadName( pad ) : lesson.Lanes[i].first.c_str() );
         ui->ModelSetItemString( kModel, "lanes", i, "steps", lesson.Lanes[i].second );
     }
+    FillSongs();
+}
+
+
+void PracticeMenuController::FillSongs()
+{
+    RmlUiCore* ui = GetEngine().RmlUi;
+    const auto& lessons = Practice::GetInstance().Lessons();
+    if( !ui || m_selected < 0 || m_selected >= static_cast<int>( lessons.size() ) )
+    {
+        return;
+    }
+    const PracticeLesson& lesson = lessons[m_selected];
+    const LessonPatternIndex& index = LessonPatternIndex::GetInstance();
+    const bool rudiment = lesson.Lanes.empty();
+    ui->ModelSetString( kModel, "songs_heading", rudiment ? "Songs with its rhythm" : "Songs with this groove" );
+    std::vector<LessonPatternIndex::Use> uses;
+    if( index.Ready() )
+    {
+        uses = index.SongsFor( lesson.Id );
+    }
+    if( uses.size() > 6 )
+    {
+        uses.resize( 6 );
+    }
+    const bool locked = !Progression::GetInstance().LessonOpen( lesson.Id, PlayerProfile::GetInstance() );
+    const char* state = !index.Ready() ? "Looking through your songs..."
+        : !uses.empty() ? ( rudiment ? "Found by rhythm: a chart says which drum, not which hand, so try the sticking over these."
+            : locked ? "Play one of these and the lesson opens." : "" )
+        : lesson.Sticking.find( '^' ) != std::string::npos ? "Flams aren't in the charts, so no song shows them."
+        : "None of your songs has it yet.";
+    ui->ModelSetString( kModel, "songs_state", state );
+    ui->ModelSetListCount( kModel, "songs", static_cast<int>( uses.size() ) );
+    for( int i = 0; i < static_cast<int>( uses.size() ); ++i )
+    {
+        const LessonPatternIndex::Use& use = uses[i];
+        const int seconds = static_cast<int>( use.Section.Start );
+        char detail[96];
+        std::snprintf( detail, sizeof( detail ), "%d bar%s, from %d:%02d", use.TotalBars, use.TotalBars == 1 ? "" : "s", seconds / 60, seconds % 60 );
+        ui->ModelSetItemNumber( kModel, "songs", i, "track", use.Track );
+        ui->ModelSetItemString( kModel, "songs", i, "name", use.Name );
+        ui->ModelSetItemString( kModel, "songs", i, "detail", detail );
+    }
 }
 
 
@@ -210,6 +260,34 @@ void PracticeMenuController::Update( float inDeltaTime )
         load.Queue();
         return;
     }
+    // --practice-select N: lesson N chosen a second in, after the page's own first focus (captures).
+    static float selectIn = 1.f;
+    if( selectIn > 0.f && ( selectIn -= inDeltaTime ) <= 0.f )
+    {
+        const int select = CommandLine::GetInt( "--practice-select", -1 );
+        if( select >= 0 && select < static_cast<int>( Practice::GetInstance().Lessons().size() ) )
+        {
+            SelectLesson( select );
+        }
+    }
+    // The library's patterns arrive: the chosen lesson's songs, and any lesson a played song opens.
+    if( LessonPatternIndex::GetInstance().Poll() )
+    {
+        PlayerProfile& profile = PlayerProfile::GetInstance();
+        if( !Progression::GetInstance().Evaluate( profile ).empty() )
+        {
+            profile.Save();
+            m_modelReady = false;
+            PopulateModel();
+            if( m_selected >= 0 )
+            {
+                const int selected = m_selected;
+                m_selected = -1;
+                SelectLesson( selected );
+            }
+        }
+        FillSongs();
+    }
     for( std::string event; !( event = ui->ModelPollEvent( kModel ) ).empty(); )
     {
         const json args = UIModel::LastEventArgs( *ui, kModel );
@@ -235,6 +313,11 @@ void PracticeMenuController::Update( float inDeltaTime )
         else if( event == "start" )
         {
             StartLesson();
+            return;
+        }
+        else if( event == "play_song" && value >= 0 )
+        {
+            TrackRadioUtils::LaunchTrack( value );
             return;
         }
     }

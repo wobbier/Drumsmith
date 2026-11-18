@@ -19,3 +19,12 @@
 .library-page .lesson-row.locked .lesson-state { color: #ffffff60; }
 .library-details .lesson-progress { margin: 14dp 0 4dp; font-size: 18dp; color: #ffd166; }
 .library-details .lesson-progress.passed { color: #66ff99; }
+/* The songs that play the lesson (CoreGame/LessonPatterns.h), each a click from playing. */
+.lesson-songs { margin-top: 22dp; padding-top: 10dp; border-top: 1dp #ffffff20; }
+.lesson-songs h3 { margin: 0 0 8dp; font-size: 18dp; letter-spacing: 1dp; color: #ffffff; }
+.lesson-song { display: flex; align-items: center; margin: 3dp 0; padding: 6dp 10dp; background-color: #00000040; }
+.lesson-song .song-copy { display: block; flex: 1; }
+.lesson-song .song-name { display: block; font-size: 16dp; color: #ffffffe0; }
+.lesson-song .song-detail { display: block; font-size: 13dp; color: #ffb347; }
+.library-page .lesson-song .song-play { display: block; width: auto; padding: 5dp 12dp; font-size: 14dp; font-weight: bold; color: #101010; background-color: #66ff99; }
+.library-page .lesson-song .song-play:hover, .library-page .lesson-song .song-play:focus { background-color: #a6ffc6; }

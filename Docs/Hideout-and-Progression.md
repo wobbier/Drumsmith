@@ -220,7 +220,7 @@ The overview is framed for 16:9; a narrower window widens its vertical field of 
 - **Gating the venue changes free play for everyone with no profile**: a fresh profile gets the Backyard until Club Night, whatever the Venue setting says. `--unlock-all` lifts it. The Venue tab still lists every venue and doesn't mark locked ones.
 - **Autoplay, no-fail and skipped-ahead runs don't count**, so a gig can't be passed with autoplay unless `--record-autoplay` is given.
 - **Labels can overlap** when two stations line up from the camera. Picking either still works.
-- **Lesson ↔ song pattern links** (unlocking a lesson from a song that has its pattern, showing the sticking on the song's highway) are not built. Only the `lesson:<id>` unlock key is ready for them.
+- **Lesson ↔ song links are half built** (`Docs/Practice.md` → Songs that use a lesson). The practice page lists the songs that play each lesson, and a groove played in a song opens its lesson (`Progression::SongLessons`). Showing a lesson's sticking on a song's highway isn't built.
 
 ## Related Docs
 

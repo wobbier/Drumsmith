@@ -14,6 +14,7 @@
 #include "Config/PlayerProfile.h"
 #include "Core/CommandLine.h"
 #include "CoreGame/GigSession.h"
+#include "CoreGame/LessonPatterns.h"
 #include "CoreGame/Progression.h"
 #include "CoreGame/TrackList.h"
 #include "Cores/UI/RmlUiCore.h"
@@ -662,6 +663,8 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
     GigSession::GetInstance().End();
     m_world = &inWorld;
     m_camera = inCamera;
+    // The library's patterns (which songs play which lesson), read in the background.
+    LessonPatternIndex::GetInstance().Request();
     return Load( true );
 }
 
@@ -1840,6 +1843,18 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     {
         inUi.ModelSetNumber( inModel, "hideout", 0 );
         return Action::None;
+    }
+    // The library's patterns arrive: a groove the player has played in a song opens its lesson.
+    if( LessonPatternIndex::GetInstance().Poll() )
+    {
+        PlayerProfile& profile = PlayerProfile::GetInstance();
+        if( !Progression::GetInstance().Evaluate( profile ).empty() )
+        {
+            m_notices = profile.Notices;
+            m_noticeShown = !m_notices.empty();
+            profile.Notices.clear();
+            profile.Save();
+        }
     }
     ApplyCamera( inDeltaTime );
     ApplyRadio( inDeltaTime );

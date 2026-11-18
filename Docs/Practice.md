@@ -1,6 +1,6 @@
 # Practice
 
-> Verified against the working tree on 2026-11-17 (game commit 4f29840 plus the uncommitted Linear ticket pass). Engine submodule at c5bb6135.
+> Verified against the working tree on 2026-11-18 (game commit 35983a4 plus the uncommitted lesson-song links). Engine submodule at f401189d.
 
 The practice page and its lessons: rudiments and grooves played on the note highway over a click, at a tempo the player chooses.
 
@@ -18,6 +18,9 @@ A lesson is a short pattern in a data file. Starting one turns it into an ordina
 | `Assets/Practice.lvl`, `Assets/UI/Practice.rml`, `Assets/UI/Practice.rcss` | The page |
 | `Game/Tests/Source/GameHelperTests.cpp` | Chart building: paradiddle, flams, a groove |
 | `Game/Tests/Source/PlayerProfileTests.cpp` | Passing a lesson, and the profile's records |
+| `Game/Source/CoreGame/LessonPatterns.h/.cpp` | Which songs play which lesson: the matcher and `LessonPatternIndex` |
+| `Game/Tests/Source/LessonPatternsTests.cpp` | The matcher on made-up charts, and a song opening a lesson |
+| `Tools/Patterns/lesson_patterns.py` | The matcher's Python prototype, for looking over a whole library from the command line |
 
 ## How It Works
 
@@ -56,6 +59,18 @@ A lesson passes at `PassAccuracy` percent (default 90) or better, at `PassBpm` o
 
 `Docs/UI-and-Menus.md` → Practice. Tempo is 40 to 220 BPM (`Practice::kMinBpm` / `kMaxBpm`), remembered per lesson in `GameSettings::PracticeTempos`; length is 8, 16 or 32 bars.
 
+### Songs that use a lesson
+
+`LessonPatterns::Find` looks for each lesson in a chart. It puts the chart's notes on the chart's own beat grid at the lesson's subdivision (a note more than 0.22 of a step off the grid spoils its beat), then goes bar by bar:
+- **A groove** (`Lanes`) matches a bar when, on its lanes plus the kick and the snare, every step has exactly its strokes. Accents and ghosts count as strokes.
+- **A rudiment** (`Sticking`) can only match by rhythm, because a chart says which drum and not which hand. The hand drums (the snare and the toms) must hit exactly the steps the sticking strokes, tiled over the bar, with no cymbal on a rest. Singles, doubles and the paradiddle are all "every sixteenth", so they find the same bars. Flams aren't charted, so the flam lessons find nothing.
+
+A one-bar pattern needs two matched bars in a row to make a section.
+
+`LessonPatternIndex` runs it over the library on a worker thread, once a session, from each song's `NoteData.txt`. The practice page and the hideout start it; it takes a second or two for a hundred songs. `Poll` (main thread) takes the results. The practice page then lists up to six songs under each lesson, *Songs with this groove* or *Songs with its rhythm*: each with its bars and where the longest run starts, and a PLAY that launches the song (`TrackRadioUtils::LaunchTrack`).
+
+The grooves a song plays (at least two bars, not rhythm-only) go to `Progression::SongLessons`. `Progression::Evaluate` then opens such a lesson for a player who has finished the song (`lesson:<id>`, "New lesson: Rock beat (you played it in Enter Sandman)"), whatever the ladder says. A locked groove's song list says so. On the development library (2026-11-18) it found 25 songs that play a lesson, and 12 song and groove pairs that can open one (`[Patterns]` in the log).
+
 ## How to Extend
 
 **Add a lesson:** add an entry to `Assets/Practice/Lessons.json`. No code. `--practice <index> --practice-bpm <bpm> --highway-autoplay` under `Engine/Tools/Headless.sh` plays it without a kit.
@@ -65,7 +80,8 @@ Add `--record-autoplay` to record that run in `Profile.json` (and back up or del
 
 ## Caveats & Fragility
 
-- **The highway doesn't show which hand.** Sticking is only the lyric line; gems look the same for both hands, and nothing judges which hand played.
+- **The highway doesn't show which hand.** Sticking is only the lyric line; gems look the same for both hands, and nothing judges which hand played. The songs that use a lesson don't show its sticking on their highway either (only the practice session does).
+- **A song's rudiments are guesses by rhythm**, so they never open a lesson; grooves match exactly but only as written (a groove with one extra kick doesn't count).
 - **Lowercase `l` reads like `I`** in the HUD font.
 - **The click is the only sound.** There are no hit sounds (`Docs/Audio.md`), so the player hears their own kit against the click.
 - **Click files accumulate** under `.tmp/Practice/` (about 90 KB a second of lesson), one per tempo and length used.

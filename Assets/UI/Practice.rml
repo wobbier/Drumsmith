@@ -43,6 +43,11 @@
             <p class="lesson-progress" data-class-passed="detail_passed > 0" data-if="detail_progress != ''">{{detail_progress}}</p>
             <button id="lesson-start" class="detail-action green" data-if="detail_locked == 0" data-event-click="start">START</button>
             <p class="detail-state" data-if="status != ''">{{status}}</p>
+            <div class="lesson-songs">
+                <h3>{{songs_heading}}</h3>
+                <div class="lesson-song" data-for="song : songs"><div class="song-copy"><span class="song-name">{{song.name}}</span><span class="song-detail">{{song.detail}}</span></div><button class="song-play" data-event-click="play_song(song.track)">PLAY</button></div>
+                <p class="lesson-key" data-if="songs_state != ''">{{songs_state}}</p>
+            </div>
         </div>
     </div>
     <div class="library-footer">

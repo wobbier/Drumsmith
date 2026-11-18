@@ -1,6 +1,7 @@
 #pragma once
 #include "Singleton.h"
 #include "JSON.h"
+#include <map>
 #include <string>
 #include <vector>
 
@@ -95,6 +96,15 @@ struct ProgressionVenue
     ProgressionRequirement Requires;
 };
 
+// A groove a song plays (LessonPatternIndex): a player who has finished the song gets the lesson
+// opened, whatever the ladder says.
+struct ProgressionSongLesson
+{
+    std::string Lesson;         // PracticeLesson::Id
+    std::string LessonName;
+    std::string SongName;
+};
+
 // One thing a call to Evaluate unlocked.
 struct ProgressionUnlock
 {
@@ -159,6 +169,9 @@ public:
     std::vector<ProgressionUnlock> Evaluate( PlayerProfile& ioProfile ) const;
 
     bool UnlockAll = false;
+    // The grooves each song plays, by song key (TrackDatabase::FavoriteKey); LessonPatternIndex
+    // fills it once it has read the library. A song in the profile opens its lessons.
+    std::map<std::string, std::vector<ProgressionSongLesson>> SongLessons;
 
 private:
     std::vector<ProgressionTier> m_tiers;

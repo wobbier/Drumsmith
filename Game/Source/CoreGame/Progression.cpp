@@ -549,6 +549,22 @@ std::vector<ProgressionUnlock> Progression::Evaluate( PlayerProfile& ioProfile )
                 }
             }
         }
+        // A groove the player has already played in a song opens its lesson.
+        for( const auto& [song, record] : ioProfile.Songs() )
+        {
+            const auto uses = SongLessons.find( song );
+            if( uses == SongLessons.end() || record.Plays <= 0 )
+            {
+                continue;
+            }
+            for( const ProgressionSongLesson& use : uses->second )
+            {
+                if( !LessonOpen( use.Lesson, ioProfile ) )
+                {
+                    unlock( "lesson", use.Lesson, "New lesson: " + use.LessonName + " (you played it in " + use.SongName + ")" );
+                }
+            }
+        }
         for( const ProgressionMilestone& milestone : m_milestones )
         {
             if( Holds( milestone.Requires, ioProfile ) && unlock( "milestone", milestone.Id, milestone.Name ) )
