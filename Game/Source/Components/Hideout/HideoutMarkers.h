@@ -46,6 +46,9 @@ public:
 
     std::string Slot;
     bool WhenLocked = false;
+    // Where the new items' tour stands to show it, from the middle of its pieces. All zero: back
+    // from it toward the doorway, as far as its size needs.
+    Vector3 ViewOffset{ 0.f, 0.f, 0.f };
 };
 ME_REGISTER_COMPONENT_FOLDER( HideoutItemSlot, "Hideout" )
 

@@ -67,7 +67,7 @@ def shell(s, geo):
 
 def side_walls(s, geo, items, lights):
     """Fabric absorbers (the foam, grown up) and skyline diffusers down both sides; uplights."""
-    foam = slot(s, items, "Acoustic Panels", "Foam")
+    foam = slot(s, items, "Acoustic Panels", "Foam", view=(0.0, 0.4, -4.0))
     panels = (("-x", 0.6, "FabricCharcoal"), ("-x", 6.6, "FabricTeal"), ("+x", 7.0, "FabricTeal"), ("+x", 0.2, "FabricCharcoal"))
     for facing, z, texture in panels:
         x = -H + 0.05 if facing == "-x" else H - 0.05
@@ -104,7 +104,7 @@ def kit(s, geo, items, stations, lights):
     """The rug, the drummer, the mics round the kit, the gobos, the bulbs, the neon name."""
     throne = 6.55
     kx = 0.4
-    rug = slot(s, items, "Rug", "Rug")
+    rug = slot(s, items, "Rug", "Rug", view=(1.0, 2.2, -3.0))
     textured(s.box("Persian Rug", rug, (kx, 0.006, 6.0), (3.4, 0.01, 2.9), (1, 1, 1), rot=(0, 90, 0), rough=1.0, shadows=False), "RugRed")
     # A kit that has been on records: natural maple under satin.
     drummer(s, items, (kx, 0.0, throne), yaw=180.0, finish=(0.5, 0.29, 0.12), metallic=0.0, roughness=0.35)
@@ -185,7 +185,7 @@ def control_room(s, geo, items, stations, lights):
     s.slab("CR Front", geo, xb, x0, 0.0, TOP, z0 - 0.12, z0, (0.12, 0.12, 0.13), rough=0.9)
     s.slab("CR Back", geo, xb, x0, 0.0, TOP, z1, z1 + 0.12, (0.12, 0.12, 0.13), rough=0.9)
     # The console (the room's own reward: the mixing desk), facing the big screen.
-    desk = slot(s, items, "Console", "Desk")
+    desk = slot(s, items, "Console", "Desk", view=(2.9, 1.0, -1.1))
     cx, cz0, cz1 = x0 - 1.5, 3.3, 5.9
     s.box("Console Body", desk, (cx, 0.42, (cz0 + cz1) / 2), (1.1, 0.84, cz1 - cz0), WALNUT, rough=0.5)
     s.box("Console Surface", desk, (cx - 0.05, 0.9, (cz0 + cz1) / 2), (1.0, 0.06, cz1 - cz0 - 0.1), (0.14, 0.14, 0.16), rot=(0, 0, -8), metallic=0.3,

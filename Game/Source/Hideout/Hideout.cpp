@@ -847,7 +847,7 @@ bool Hideout::Load( bool inEvaluate )
         {
             if( !slot->WhenLocked )
             {
-                m_slots.emplace_back( slot->Slot, transform->Parent );
+                m_slots.push_back( { slot->Slot, transform->Parent, slot->ViewOffset } );
             }
         }
     }
@@ -1093,9 +1093,10 @@ void Hideout::Tour( const std::vector<std::string>& inItems )
         {
             continue;
         }
-        for( const auto& [slotName, entity] : m_slots )
+        for( const SlotView& slotView : m_slots )
         {
-            if( slotName != item->Slot || !entity )
+            const EntityHandle& entity = slotView.Entity;
+            if( slotView.Slot != item->Slot || !entity )
             {
                 continue;
             }
@@ -1113,7 +1114,26 @@ void Hideout::Tour( const std::vector<std::string>& inItems )
             };
             Transform& transform = entity->GetComponent<Transform>();
             gather( transform );
-            m_reveals.push_back( { item->Name, count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : transform.GetWorldPosition() } );
+            const Vector3 centre = count > 0 ? sum * ( 1.f / static_cast<float>( count ) ) : transform.GetWorldPosition();
+            // How big it is: the farthest reach of a piece from the middle, its own half-size
+            // included (a rug, a wall of foam, a console; a primitive's scale is its half-size).
+            float size = 0.f;
+            const std::function<void( Transform& )> reach = [&]( Transform& inTransform ) {
+                for( Transform* child : inTransform.GetChildren() )
+                {
+                    if( !child ) continue;
+                    float half = 0.f;
+                    if( child->Parent && child->Parent->TryGetComponent<Mesh>() )
+                    {
+                        const Vector3 scale = child->GetScale();
+                        half = std::max( { std::abs( scale.x ), std::abs( scale.y ), std::abs( scale.z ) } );
+                    }
+                    size = std::max( size, Distance( child->GetWorldPosition(), centre ) + half );
+                    reach( *child );
+                }
+            };
+            reach( transform );
+            m_reveals.push_back( { item->Name, centre, size, slotView.View } );
             break;
         }
     }
@@ -1190,16 +1210,22 @@ Hideout::Pose Hideout::PoseOf( int inStation ) const
 
 Hideout::Pose Hideout::PoseOfReveal( const Reveal& inReveal ) const
 {
-    // From the middle of the room's side of it (most things are on a wall), a metre and a half
-    // away and a little above.
+    // From the doorway's side of it (most things are on a wall, and the way to it is clear from
+    // there), far enough back for the whole thing, never below head height.
     Pose pose;
     pose.Target = inReveal.Centre;
-    Vector3 away = m_overview.Target - inReveal.Centre;
+    Vector3 away = m_overview.Eye - inReveal.Centre;
     away.y = 0.f;
     const float length = std::sqrt( away.x * away.x + away.z * away.z );
     away = length > 0.01f ? away * ( 1.f / length ) : Vector3( 0.f, 0.f, -1.f );
-    pose.Eye = inReveal.Centre + away * 1.5f + Vector3( 0.f, 0.3f, 0.f );
-    pose.FieldOfView = 42.f;
+    const float distance = std::clamp( 0.9f + inReveal.Size * 1.4f, 1.4f, 4.2f );
+    pose.Eye = inReveal.Centre + away * distance + Vector3( 0.f, 0.3f + inReveal.Size * 0.25f, 0.f );
+    pose.Eye.y = std::max( pose.Eye.y, 1.15f );
+    if( inReveal.View.x != 0.f || inReveal.View.y != 0.f || inReveal.View.z != 0.f )
+    {
+        pose.Eye = inReveal.Centre + inReveal.View;
+    }
+    pose.FieldOfView = 44.f;
     return pose;
 }
 

@@ -4568,7 +4568,12 @@
     },
     {
      "Type": "HideoutItemSlot",
-     "Slot": "Rug"
+     "Slot": "Rug",
+     "ViewOffset": [
+      0.8,
+      1.9,
+      -2.6
+     ]
     }
    ]
   },
@@ -24365,7 +24370,12 @@
     },
     {
      "Type": "HideoutItemSlot",
-     "Slot": "Foam"
+     "Slot": "Foam",
+     "ViewOffset": [
+      3.0,
+      0.2,
+      -1.6
+     ]
     }
    ]
   },

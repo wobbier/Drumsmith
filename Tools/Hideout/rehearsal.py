@@ -144,7 +144,7 @@ def riser_and_kit(s, geo, items, stations, lights):
     spare = slot(s, items, "Spare Cymbal", "CymbalStand")
     rod(s, spare, "Stand", (-1.15, RISER, 6.9), (-1.15, RISER + 1.3, 6.9), 0.025, CHROME, metallic=0.9)
     s.box("Cymbal", spare, (-1.15, RISER + 1.32, 6.9), (0.46, 0.012, 0.46), BRASS, rot=(-16, 0, 0), shape="Cylinder", metallic=0.9, rough=0.25)
-    rug = slot(s, items, "Rug", "Rug")
+    rug = slot(s, items, "Rug", "Rug", view=(0.8, 1.9, -2.6))
     textured(s.box("Drum Rug", rug, (0.0, RISER + 0.012, 6.2), (2.5, 0.01, 2.0), (1, 1, 1), rough=1.0, shadows=False), "RugRed")
     # The PAR cans on a T-bar either side, gelled red and blue, hitting on the beat.
     for side, colour, phase in ((-1, (1.0, 0.12, 0.08), 0.125), (1, (0.15, 0.3, 1.0), 0.625)):
@@ -526,7 +526,7 @@ def build_rehearsal():
     walls_dressed(s, items)
     moving_in(s, items)
     # Acoustic foam: the room's own reward, the left wall's back half covered (blankets till then).
-    foam = slot(s, items, "Acoustic Foam", "Foam")
+    foam = slot(s, items, "Acoustic Foam", "Foam", view=(3.0, 0.2, -1.6))
     for i in range(4):
         for j in range(4):
             textured(s.box(f"Foam {i}.{j}", foam, (-H + 0.04, 0.55 + j * 0.6, 4.55 + i * 0.6), (0.07, 0.58, 0.58), (1, 1, 1), rough=1.0,

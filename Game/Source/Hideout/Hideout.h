@@ -143,6 +143,8 @@ private:
     {
         std::string Name;
         Vector3 Centre;
+        float Size = 0.f;       // how far its pieces reach from the centre, metres
+        Vector3 View;           // HideoutItemSlot::ViewOffset (zero: worked out)
     };
     std::vector<Reveal> m_reveals;
     int m_reveal = -1;          // the one being shown; -1 before the tour or after it
@@ -155,8 +157,14 @@ private:
     static constexpr float kIntroSeconds = 4.5f;
     // The first visit after moving into this room (PlayerProfile::SeenTier): the boxes are out.
     bool m_movingIn = false;
-    // The slots' entities (not the stand-ins), for the tour.
-    std::vector<std::pair<std::string, EntityHandle>> m_slots;
+    // The slots' entities (not the stand-ins), for the tour, and where each is best seen from.
+    struct SlotView
+    {
+        std::string Slot;
+        EntityHandle Entity;
+        Vector3 View;
+    };
+    std::vector<SlotView> m_slots;
 
     // A prop's motion and how the scene left it.
     struct Motion

@@ -1601,7 +1601,12 @@
     },
     {
      "Type": "HideoutItemSlot",
-     "Slot": "Foam"
+     "Slot": "Foam",
+     "ViewOffset": [
+      0.0,
+      0.4,
+      -4.0
+     ]
     }
    ]
   },
@@ -14228,7 +14233,12 @@
     },
     {
      "Type": "HideoutItemSlot",
-     "Slot": "Rug"
+     "Slot": "Rug",
+     "ViewOffset": [
+      1.0,
+      2.2,
+      -3.0
+     ]
     }
    ]
   },
@@ -17405,7 +17415,12 @@
     },
     {
      "Type": "HideoutItemSlot",
-     "Slot": "Desk"
+     "Slot": "Desk",
+     "ViewOffset": [
+      2.9,
+      1.0,
+      -1.1
+     ]
     }
    ]
   },

@@ -13,6 +13,7 @@ ME_REFLECT_END()
 ME_REFLECT_BEGIN( HideoutItemSlot )
     ME_FIELD( Slot ).Tooltip( "The slot an item names (Assets/Progression/Progression.json). This entity and its children are hidden until that item is unlocked" );
     ME_FIELD( WhenLocked ).Tooltip( "A stand-in instead: shown only until the slot's item is unlocked" );
+    ME_FIELD( ViewOffset ).Unit( Reflection::Unit::Meters ).Tooltip( "Where the new items' tour camera stands, from the middle of the item's pieces; all zero picks a spot toward the doorway" );
 ME_REFLECT_END()
 
 ME_REFLECT_ENUM( HideoutMotion::Kind, { { "Sway", HideoutMotion::Kind::Sway }, { "Flicker", HideoutMotion::Kind::Flicker }, { "Pulse", HideoutMotion::Kind::Pulse }, { "Spin", HideoutMotion::Kind::Spin }, { "Breathe", HideoutMotion::Kind::Breathe }, { "Blink", HideoutMotion::Kind::Blink }, { "Bob", HideoutMotion::Kind::Bob }, { "Pass", HideoutMotion::Kind::Pass }, { "Hour", HideoutMotion::Kind::Hour }, { "Minute", HideoutMotion::Kind::Minute }, { "Second", HideoutMotion::Kind::Second } } )

@@ -559,7 +559,7 @@ def moving_in(s, items):
 
 def unlocked_extras(s, items):
     """The rest of the items' slots, so they appear here too once earned."""
-    rug = slot(s, items, "Rug", "Rug")
+    rug = slot(s, items, "Rug", "Rug", view=(0.8, 1.9, -2.4))
     s.box("Rug", rug, (0.0, 0.013, 4.75), (2.5, 0.01, 2.2), (0.35, 0.18, 0.12), rough=1.0, shadows=False)
     bag = slot(s, items, "Stick Bag", "StickBag")
     s.box("Bag", bag, (0.72, 0.45, 4.55), (0.06, 0.4, 0.14), (0.1, 0.1, 0.12), rough=0.9)

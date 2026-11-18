@@ -36,9 +36,14 @@ def station(s, parent, name, kind, pos, view_offset, fov=45.0, label=""):
     return e
 
 
-def slot(s, parent, name, slot_name, pos=(0, 0, 0)):
+def slot(s, parent, name, slot_name, pos=(0, 0, 0), view=None):
+    """An item's place. view: where the new items' tour camera stands, from the middle of the
+    item's pieces (None: worked out, back toward the doorway)."""
     e = s.entity(name, parent, pos)
-    e.add({"Type": "HideoutItemSlot", "Slot": slot_name})
+    comp = {"Type": "HideoutItemSlot", "Slot": slot_name}
+    if view:
+        comp["ViewOffset"] = [round(v, 4) for v in view]
+    e.add(comp)
     return e
 
 

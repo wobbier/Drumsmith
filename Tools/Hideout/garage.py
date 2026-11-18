@@ -447,7 +447,7 @@ def front(s, geo, items, lights):
     s.box("Door", door, (0.42, 1.03, 0.0), (0.84, 2.05, 0.04), (0.72, 0.68, 0.6), rough=0.6)
     light(s, lights, "Kitchen", (-2.75, 1.8, -2.1), color=(1.0, 0.82, 0.58), intensity=6.0, range_=4.5)
     light(s, geo, "Fill", (0.3, 1.4, 0.4), color=(1.0, 0.85, 0.66), intensity=1.6, range_=4.5)
-    rug = slot(s, items, "Rug", "Rug")
+    rug = slot(s, items, "Rug", "Rug", view=(0.9, 2.1, -2.6))
     s.box("Rug", rug, (0.0, 0.013, 4.7), (2.6, 0.01, 2.3), (0.35, 0.18, 0.12), rough=1.0, shadows=False)
     bag = slot(s, items, "Stick Bag", "StickBag")
     s.box("Bag", bag, (0.72, 0.45, 4.5), (0.06, 0.4, 0.14), (0.1, 0.1, 0.12), rough=0.9)
