@@ -15,6 +15,9 @@
 #include "CoreGame/TrackList.h"
 #include "Cores/UI/RmlUiCore.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
+#include "Engine/Input.h"
+#include "Window/IWindow.h"
 #include "File.h"
 #include "Global/TrackRadio.h"
 #include "Events/SceneEvents.h"
@@ -331,6 +334,17 @@ void Hideout::UpdateMotions( float inDeltaTime )
             }
             break;
         }
+        case HideoutMotion::Kind::Pass:
+        {
+            // Every 1 / Speed seconds a pass of 2.5 s: across and back to dark.
+            const float period = 1.f / std::max( 0.001f, motion.Speed );
+            const float into = std::fmod( m_time + motion.Phase * period, period );
+            const float u = std::clamp( into / 2.5f, 0.f, 1.f );
+            const bool passing = into < 2.5f;
+            transform->SetPosition( motion.BasePosition + motion.Axis * ( motion.Amount * ( 2.f * u - 1.f ) ) );
+            shine( passing ? std::sin( 3.1415927f * u ) : 0.f );
+            break;
+        }
         case HideoutMotion::Kind::Bob:
         {
             const float bob = music ? m_music.Envelope : 0.5f + 0.5f * std::sin( cycle );
@@ -372,7 +386,7 @@ void Hideout::ApplyRadio( float inDeltaTime )
 
 const std::vector<const char*>& Hideout::Events()
 {
-    static const std::vector<const char*> kEvents = { "station", "hideout_back", "dismiss_notice", "gig_play" };
+    static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play" };
     return kEvents;
 }
 
@@ -467,6 +481,20 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
             m_overview.Target = m_overview.Eye + Vector3( std::sin( yaw ) * std::cos( pitch ), -std::sin( pitch ), std::cos( yaw ) * std::cos( pitch ) ) * 10.f;
             m_overview.FieldOfView = view->FieldOfView;
             hasView = true;
+            // Once a session, and not when a capture asks for a station.
+            static bool introPlayed = false;
+            const bool capture = CommandLine::Has( "--hideout-look" ) || CommandLine::Has( "--hideout-station" ) || CommandLine::Has( "--gig" );
+            const bool hasIntro = view->IntroEye.x != 0.f || view->IntroEye.y != 0.f || view->IntroEye.z != 0.f;
+            if( hasIntro && !introPlayed && !capture && !CommandLine::Has( "--no-hideout-intro" ) )
+            {
+                introPlayed = true;
+                m_intro = 0.f;
+                m_introFrom.Eye = view->IntroEye;
+                m_introFrom.Target = view->IntroTarget;
+                m_introFrom.FieldOfView = view->FieldOfView + 8.f;
+                m_current = m_introFrom;
+                m_hasCurrent = true;
+            }
         }
         if( HideoutStation* marker = entity->TryGetComponent<HideoutStation>() )
         {
@@ -552,6 +580,16 @@ bool Hideout::Start( World& inWorld, const EntityHandle& inCamera )
         motion.Random = 0x9E3779B9u ^ static_cast<uint32_t>( m_motions.size() * 2654435761u );
         m_motions.push_back( motion );
     }
+    // The hover light: off until a label is pointed at.
+    m_highlight = inWorld.CreateEntity( "Hideout Hover Light" );
+    if( m_highlight )
+    {
+        m_highlight->AddComponent<Transform>( "Hideout Hover Light" );
+        Light& glow = m_highlight->AddComponent<Light>();
+        glow.Color = Vector3( 1.f, 0.88f, 0.7f );
+        glow.Intensity = 0.f;
+        glow.Range = 2.2f;
+    }
     // The drummer, at the first HideoutDrummer (built on the first update, once the radio is known).
     for( Entity* entity : entities )
     {
@@ -635,6 +673,11 @@ void Hideout::Clear()
         if( root ) root->MarkForDelete();
     }
     m_roots.clear();
+    if( m_highlight )
+    {
+        m_highlight->MarkForDelete();
+    }
+    m_highlight = EntityHandle();
     m_stations.clear();
     m_ready = false;
     m_chosen = -1;
@@ -712,11 +755,29 @@ void Hideout::ApplyCamera( float inDeltaTime )
         m_current = goal;
         m_hasCurrent = true;
     }
-    // Eased: most of the way in about half a second.
-    const float t = 1.f - std::exp( -inDeltaTime * 6.f );
-    m_current.Eye = Lerp( m_current.Eye, goal.Eye, t );
-    m_current.Target = Lerp( m_current.Target, goal.Target, t );
-    m_current.FieldOfView += ( goal.FieldOfView - m_current.FieldOfView ) * t;
+    if( m_intro >= 0.f && m_chosen < 0 )
+    {
+        // The intro: down the stairs and into the room, eased in and out over kIntroSeconds.
+        m_intro += inDeltaTime;
+        const float u = std::clamp( m_intro / kIntroSeconds, 0.f, 1.f );
+        const float e = u * u * u * ( u * ( u * 6.f - 15.f ) + 10.f );
+        m_current.Eye = Lerp( m_introFrom.Eye, goal.Eye, e );
+        m_current.Target = Lerp( m_introFrom.Target, goal.Target, e );
+        m_current.FieldOfView = m_introFrom.FieldOfView + ( goal.FieldOfView - m_introFrom.FieldOfView ) * e;
+        if( u >= 1.f )
+        {
+            m_intro = -1.f;
+        }
+    }
+    else
+    {
+        // Eased: most of the way in about half a second.
+        m_intro = -1.f;
+        const float t = 1.f - std::exp( -inDeltaTime * 6.f );
+        m_current.Eye = Lerp( m_current.Eye, goal.Eye, t );
+        m_current.Target = Lerp( m_current.Target, goal.Target, t );
+        m_current.FieldOfView += ( goal.FieldOfView - m_current.FieldOfView ) * t;
+    }
     // A slow sway in the overview, so the room doesn't look like a still.
     static float sway = 0.f;
     sway += inDeltaTime;
@@ -724,6 +785,20 @@ void Hideout::ApplyCamera( float inDeltaTime )
     if( m_chosen < 0 )
     {
         eye = eye + Vector3( std::sin( sway * 0.21f ) * 0.08f, std::sin( sway * 0.33f ) * 0.03f, 0.f );
+        // The camera leans a little toward the pointer, as a head turns to look.
+        Vector3 lean;
+        if( IWindow* window = GetEngine().GetWindow() )
+        {
+            const Vector2 size = window->GetSize();
+            Input& input = GetEngine().GetInput();
+            const Vector2 mouse = input.GetMousePosition() - input.GetMouseOffset();
+            if( size.x > 1.f && size.y > 1.f && mouse.x >= 0.f && mouse.y >= 0.f && mouse.x <= size.x && mouse.y <= size.y )
+            {
+                lean = Vector3( ( mouse.x / size.x - 0.5f ) * 0.3f, -( mouse.y / size.y - 0.5f ) * 0.12f, 0.f );
+            }
+        }
+        m_parallax = Lerp( m_parallax, lean, 1.f - std::exp( -inDeltaTime * 2.5f ) );
+        eye = eye + m_parallax;
     }
     Transform& transform = m_camera->GetComponent<Transform>();
     transform.SetPosition( eye );
@@ -758,7 +833,8 @@ void Hideout::UpdateLabels( RmlUiCore& inUi, const char* inModel )
         const Station& station = m_stations[i];
         const glm::vec4 clip = viewProjection * glm::vec4( station.Position.x, station.Position.y, station.Position.z, 1.f );
         Spot& spot = spots[i];
-        spot.Shown = clip.w > 0.05f && m_chosen < 0 && !m_noticeShown;
+        // Not during the intro: the labels come up once the camera is in the room.
+        spot.Shown = clip.w > 0.05f && m_chosen < 0 && !m_noticeShown && m_intro < 0.f;
         if( spot.Shown )
         {
             const float x = clip.x / clip.w;
@@ -927,6 +1003,20 @@ Hideout::Action Hideout::Update( float inDeltaTime, RmlUiCore& inUi, const char*
     UpdateMotions( inDeltaTime );
     UpdateDrummer( inDeltaTime );
     UpdateFocus( inDeltaTime );
+    // The hover light eases up over the pointed-at station (a little above it, toward the camera).
+    if( m_highlight )
+    {
+        const bool lit = m_hover >= 0 && m_hover < static_cast<int>( m_stations.size() ) && m_chosen < 0 && !m_noticeShown;
+        m_highlightLevel += ( ( lit ? 1.f : 0.f ) - m_highlightLevel ) * ( 1.f - std::exp( -inDeltaTime * 8.f ) );
+        if( lit )
+        {
+            const Vector3 at = m_stations[m_hover].Position;
+            const Vector3 toward = m_current.Eye - at;
+            const float length = std::max( 0.01f, Distance( m_current.Eye, at ) );
+            m_highlight->GetComponent<Transform>().SetPosition( at + toward * ( 0.7f / length ) + Vector3( 0.f, 0.35f, 0.f ) );
+        }
+        m_highlight->GetComponent<Light>().Intensity = 3.5f * m_highlightLevel;
+    }
     UpdateLabels( inUi, inModel );
     const PlayerProfile& profile = PlayerProfile::GetInstance();
     const ProgressionTier* tier = Progression::GetInstance().TierAt( profile.HideoutTier );
@@ -1008,6 +1098,11 @@ bool Hideout::HandleEvent( const std::string& inEvent, const json& inArgs, RmlUi
         {
             Choose( station );
         }
+        return true;
+    }
+    if( inEvent == "station_hover" )
+    {
+        m_hover = static_cast<int>( UIModel::ArgNumber( inArgs, 0, -1.0 ) );
         return true;
     }
     if( inEvent == "hideout_back" )

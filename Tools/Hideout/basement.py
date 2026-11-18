@@ -131,6 +131,11 @@ def back_wall(s, geo, items, lights):
     light(s, lights, "Streetlight Through The Window", eye, kind="Spot", color=(0.6, 0.72, 1.0), intensity=40.0, range_=8.0,
           rot=look_rotation(eye, target), inner=12.0, outer=24.0, shadows=True, volumetric=7.0)
     dust(s, lights, "Dust", (0.9, 1.15, 4.4), (2.6, 2.1, 2.6), count=260, rate=36.0)
+    # Now and then a car goes by up on the street: its headlights sweep the ceiling through the glass.
+    car = (wx, wy + 0.05, D - 0.25)
+    sweep = light(s, lights, "Passing Car", car, kind="Spot", color=(1.0, 0.95, 0.82), intensity=26.0, range_=7.0,
+                  rot=look_rotation(car, (wx - 1.2, TOP, 2.6)), inner=10.0, outer=22.0, volumetric=5.0)
+    motion(sweep, "Pass", amount=0.45, speed=1.0 / 23.0, axis=(1, 0, 0), phase=0.6)
     # The power strip that powers everything (and one more strip plugged into it).
     s.box("Outlet", geo, (-2.2, 0.35, D - 0.01), (0.08, 0.12, 0.02), OFFWHITE)
     s.box("Power Strip", items, (-2.0, 0.03, 5.75), (0.36, 0.04, 0.07), WHITE)
@@ -190,6 +195,25 @@ def kit_corner(s, geo, items, stations, lights):
     rod(s, pivot, "Pull Chain", (0.03, -0.42, 0.0), (0.03, -0.75, 0.0), 0.004, BRASS, metallic=0.9, shadows=False)
 
 
+def camcorder(s, items, lights):
+    """Mom's camcorder on its tripod at the front of the kit, filming practice for the TV."""
+    from hideoutgen import look_rotation
+    base = (-0.95, 0.0, 3.05)
+    s.prop("Tripod", items, "Assets/Models/Venue/CameraTripod.obj", base, yaw=30.0, scale=0.82)
+    lens = (base[0] + 0.02, 1.32, base[2] + 0.05)
+    target = (0.0, 0.95, 5.15)
+    rig = s.entity("Camcorder", items, lens, look_rotation(lens, target))
+    s.box("Camcorder Body", rig, (0.0, 0.0, -0.08), (0.09, 0.11, 0.2), (0.12, 0.12, 0.13), rough=0.4)
+    s.box("Camcorder Lens", rig, (0.0, 0.0, 0.04), (0.06, 0.05, 0.06), (0.05, 0.05, 0.06), rot=(90, 0, 0), shape="Cylinder", metallic=0.4)
+    rec = s.box("Rec Light", rig, (0.03, 0.06, 0.0), (0.012, 0.012, 0.012), (1, 0.05, 0.05), shape="Sphere",
+                emissive=(1.0, 0.05, 0.05), emissive_intensity=10.0, shadows=False)
+    motion(rec, "Blink", amount=0.5, speed=1.0)
+    eye = s.entity("Camcorder View", lights, lens, look_rotation(lens, target))
+    eye.add({"Type": "Camera", "IsCurrent": False, "TargetTexture": "Assets/Hideout/Camcorder.rendertexture", "UpdateInterval": 4,
+             "FieldOfView": 40.0, "Near": 0.05, "Far": 14.0, "ClearType": "Color", "ClearColor": [0.02, 0.02, 0.02],
+             "AmbientOcclusion": False, "VolumetricFog": False, "SunShadows": False})
+
+
 def couch_corner(s, geo, items, stations, lights):
     # The couch, against the wall, facing the room; the cat asleep at the near end.
     s.prop("Couch", items, "Assets/Venues/Backyard/Models/Sofa.obj", (2.66, 0.0, 2.15), yaw=-90.0)
@@ -235,8 +259,16 @@ def couch_corner(s, geo, items, stations, lights):
     body = s.group("TV Body", tv, (0.0, 0.0, 0.0))
     body.components[0]["Rotation"] = [0.0, round(yaw, 4), 0.0]
     s.box("Tube", body, (0.0, 0.58, 0.0), (0.52, 0.44, 0.46), (0.22, 0.21, 0.19), rough=0.55)
-    screen = textured(s.box("Screen", body, (0.0, 0.59, 0.232), (0.42, 0.32, 0.01), (1, 1, 1), rough=0.1, shadows=False),
-                      "TvStatic", emissive=True, emissive_intensity=1.4)
+    # The picture is mom's camcorder's, on the tripod by the kit (camcorder() below), a few frames
+    # a second like a tape.
+    screen = s.box("Screen", body, (0.0, 0.59, 0.232), (0.42, 0.32, 0.01), (1, 1, 1), rough=0.1, shadows=False)
+    feed = "Assets/Hideout/Camcorder.rendertexture"
+    m = screen.components[-1]["Material"]
+    m["Textures"] = {"Diffuse": {"Path": feed}, "Emissive": {"Path": feed}}
+    m["EmissiveColor"] = [0.85, 0.9, 1.0]
+    m["EmissiveIntensity"] = 1.3
+    m["Tiling"] = [1.0, -1.0]
+    m["Offset"] = [0.0, 1.0]
     motion(screen, "Flicker", amount=0.35, speed=3.0)
     for side in (-1, 1):
         rod(s, body, f"Rabbit Ear {side}", (0.0, 0.8, -0.05), (side * 0.22, 1.18, -0.08), 0.008, CHROME, metallic=0.9)
@@ -471,6 +503,7 @@ def build_basement():
     back_wall(s, geo, items, lights)
     kit_corner(s, geo, items, stations, lights)
     couch_corner(s, geo, items, stations, lights)
+    camcorder(s, items, lights)
     utilities(s, geo, items, lights)
     workbench(s, geo, items, stations, lights)
     gig_board(s, geo, items, stations)
@@ -483,5 +516,6 @@ def build_basement():
     sound(s, tone, "Tube Buzz", (-H + 0.55, 1.98, 3.8), "TubeBuzz", volume=0.18, near=0.4, far=4.5)
     sound(s, tone, "Fan Whir", (-1.55, 0.6, 4.75), "FanWhir", volume=0.4, near=0.6, far=6.0)
     sound(s, tone, "Drip", (1.94, 1.9, 5.5), "Drip", volume=0.35, near=0.5, far=6.0)
-    view(s, marks, (0.15, 1.5, -1.3), (0.05, 0.92, 4.4), 56.0)
+    # The overview; the session's first visit starts at the top of the stairs, looking down at the kit.
+    view(s, marks, (0.15, 1.5, -1.3), (0.05, 0.92, 4.4), 56.0, intro_eye=(-2.6, 2.2, -0.9), intro_target=(-0.6, 0.6, 3.2))
     return s

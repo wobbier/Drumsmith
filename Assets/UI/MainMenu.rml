@@ -15,7 +15,7 @@
             <p class="hideout-goal">{{hideout_goal}}</p>
         </div>
         <div data-for="station : stations">
-            <button class="station-label" data-if="station.shown > 0" data-style-left="station.left" data-style-top="station.top" data-style-transform="station.tilt" data-event-click="station(station.index)"><span class="station-name">{{station.label}}</span><span class="station-hint">{{station.hint}}</span></button>
+            <button class="station-label" data-if="station.shown > 0" data-style-left="station.left" data-style-top="station.top" data-style-transform="station.tilt" data-event-click="station(station.index)" data-event-mouseover="station_hover(station.index)" data-event-mouseout="station_hover(-1)" data-event-focus="station_hover(station.index)" data-event-blur="station_hover(-1)"><span class="station-name">{{station.label}}</span><span class="station-hint">{{station.hint}}</span></button>
         </div>
         <div id="hideout-focus" data-if="hideout_focus >= 0">
             <h1>{{hideout_title}}</h1>

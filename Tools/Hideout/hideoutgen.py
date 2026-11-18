@@ -49,9 +49,14 @@ def drummer(s, parent, pos, yaw=180.0, cast=0, energy=0.55):
     return e
 
 
-def view(s, parent, eye, target, fov):
+def view(s, parent, eye, target, fov, intro_eye=None, intro_target=None):
+    """The overview camera; intro_eye / intro_target: where the session's first visit starts from."""
     e = s.entity("Overview", parent, eye, look_rotation(eye, target))
-    e.add({"Type": "HideoutView", "FieldOfView": _r(fov)})
+    comp = {"Type": "HideoutView", "FieldOfView": _r(fov)}
+    if intro_eye:
+        comp["IntroEye"] = vec(intro_eye)
+        comp["IntroTarget"] = vec(intro_target or target)
+    e.add(comp)
     return e
 
 

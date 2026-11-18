@@ -14,7 +14,7 @@ ME_REFLECT_BEGIN( HideoutItemSlot )
     ME_FIELD( Slot ).Tooltip( "The slot an item names (Assets/Progression/Progression.json). This entity and its children are hidden until that item is unlocked" );
 ME_REFLECT_END()
 
-ME_REFLECT_ENUM( HideoutMotion::Kind, { { "Sway", HideoutMotion::Kind::Sway }, { "Flicker", HideoutMotion::Kind::Flicker }, { "Pulse", HideoutMotion::Kind::Pulse }, { "Spin", HideoutMotion::Kind::Spin }, { "Breathe", HideoutMotion::Kind::Breathe }, { "Blink", HideoutMotion::Kind::Blink }, { "Bob", HideoutMotion::Kind::Bob } } )
+ME_REFLECT_ENUM( HideoutMotion::Kind, { { "Sway", HideoutMotion::Kind::Sway }, { "Flicker", HideoutMotion::Kind::Flicker }, { "Pulse", HideoutMotion::Kind::Pulse }, { "Spin", HideoutMotion::Kind::Spin }, { "Breathe", HideoutMotion::Kind::Breathe }, { "Blink", HideoutMotion::Kind::Blink }, { "Bob", HideoutMotion::Kind::Bob }, { "Pass", HideoutMotion::Kind::Pass } } )
 
 ME_REFLECT_BEGIN( HideoutMotion )
     ME_FIELD( Motion ).Tooltip( "Sway: swings about Axis. Flicker: the Light dips at random. Pulse: the Light (or scale) jumps on each beat. Spin: turns about Axis. Breathe: scales along Axis. Blink: on and off. Bob: moves along Axis on each beat" );
@@ -33,6 +33,8 @@ ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( HideoutView )
     ME_FIELD( FieldOfView ).Unit( Reflection::Unit::Degrees ).Range( 10.f, 120.f ).Tooltip( "The overview's vertical field of view. The camera looks along local +Z" );
+    ME_FIELD( IntroEye ).Unit( Reflection::Unit::Meters ).Tooltip( "The first time the menu opens in a session, the camera starts here and comes to the overview. All zero: no intro" );
+    ME_FIELD( IntroTarget ).Unit( Reflection::Unit::Meters ).Tooltip( "What the camera looks at as the intro starts" );
 ME_REFLECT_END()
 
 

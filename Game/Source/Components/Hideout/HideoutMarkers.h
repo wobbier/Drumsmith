@@ -62,12 +62,15 @@ ME_REGISTER_COMPONENT_FOLDER( HideoutItemSlot, "Hideout" )
 //   Blink    the Light (or the scale, to nothing) on for Amount of every 1 / Speed seconds.
 //   Bob      moves Amount metres along Axis on each beat (a speaker cone, a dancing toy), or
 //            Speed bobs a second without music.
+//   Pass     every 1 / Speed seconds (Phase: how far into that wait it starts), sweeps Amount
+//            metres either way along Axis in 2.5 s while its Light swells and fades: a car's
+//            headlights going past the window.
 class HideoutMotion
     : public Component<HideoutMotion>
 {
     ME_REFLECTABLE( HideoutMotion )
 public:
-    enum class Kind : int { Sway = 0, Flicker, Pulse, Spin, Breathe, Blink, Bob };
+    enum class Kind : int { Sway = 0, Flicker, Pulse, Spin, Breathe, Blink, Bob, Pass };
 
     HideoutMotion();
 
@@ -119,5 +122,9 @@ public:
     virtual void Init() final;
 
     float FieldOfView = 55.f;
+    // The first time the menu opens in a session, the camera starts here (looking at IntroTarget)
+    // and comes to the overview: down the stairs, into the room. Off when IntroEye is all zero.
+    Vector3 IntroEye{ 0.f, 0.f, 0.f };
+    Vector3 IntroTarget{ 0.f, 0.f, 0.f };
 };
 ME_REGISTER_COMPONENT_FOLDER( HideoutView, "Hideout" )

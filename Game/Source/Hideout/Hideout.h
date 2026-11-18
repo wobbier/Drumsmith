@@ -42,6 +42,8 @@ public:
     Action Update( float inDeltaTime, RmlUiCore& inUi, const char* inModel );
     // True when it was one of the hideout's events.
     bool HandleEvent( const std::string& inEvent, const json& inArgs, RmlUiCore& inUi, const char* inModel );
+    // The station whose label the pointer (or focus) is on: it's lit a little. -1: none.
+    void Hover( int inStation ) { m_hover = inStation; }
     // Escape: closes a panel or leaves a station. False when there was nothing to leave.
     bool Back();
     // Back to the overview (the settings panel closed).
@@ -104,6 +106,15 @@ private:
     std::vector<std::vector<int>> m_setlists;
     std::string m_status;
     float m_radioOpen = 0.f;
+    // The hover light (a soft point light over the station whose label is under the pointer).
+    int m_hover = -1;
+    EntityHandle m_highlight;
+    float m_highlightLevel = 0.f;
+    Vector3 m_parallax;
+    // The first visit's camera move (HideoutView's IntroEye): seconds into it, < 0 when there's none.
+    float m_intro = -1.f;
+    Pose m_introFrom;
+    static constexpr float kIntroSeconds = 4.5f;
 
     // A prop's motion and how the scene left it.
     struct Motion
