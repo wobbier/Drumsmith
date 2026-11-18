@@ -22,6 +22,8 @@ from venuegen import Scene, look_rotation, repo_root  # noqa: E402
 from hideoutgen import drummer, slot, station  # noqa: E402
 from basement import build_basement  # noqa: E402
 from garage import build_garage  # noqa: E402
+from rehearsal import build_rehearsal  # noqa: E402
+from studio import build_studio  # noqa: E402
 
 BLACK = (0.04, 0.04, 0.045)
 CHROME = (0.75, 0.75, 0.78)
@@ -268,7 +270,7 @@ ROOMS = [
 def main():
     folder = os.path.join(repo_root(), "Assets", "Hideout")
     for room, extras in ROOMS:
-        dressed = {"Basement": build_basement, "Garage": build_garage}
+        dressed = {"Basement": build_basement, "Garage": build_garage, "Rehearsal": build_rehearsal, "Studio": build_studio}
         scene = dressed[room.name]() if room.name in dressed else build_room(room, extras)
         scene.write(os.path.join(folder, f"{room.name}.lvl"))
     print("wrote", folder)

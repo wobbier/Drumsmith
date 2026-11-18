@@ -1,6 +1,6 @@
 # Hideout and Progression
 
-> Verified against the working tree on 2026-11-18 (game commit 7653067 plus the uncommitted hideout work). Engine submodule at 1f558fd1. Headless (lavapipe) captures and unit tests only: nothing here has been played with sticks or heard on speakers yet.
+> Verified against the working tree on 2026-11-18 (game commit 7ee80ad plus the uncommitted rooms work). Engine submodule at f401189d. Headless (lavapipe) captures, editor UI automation and unit tests only: nothing here has been played with sticks or heard on speakers yet.
 
 The main menu is a room, the hideout. It starts as a basement and moves up to a garage, a rehearsal space and a studio as the player plays gigs. A label floats over each thing in the room: the kit plays a song, the practice pad opens the lessons, and so on. What the player has done is kept in a profile. Data-driven rules turn that record into a room, items, lessons and venues. Library songs are never locked.
 
@@ -33,11 +33,13 @@ flowchart LR
 | `Assets/Progression/Progression.json` | The journey itself: tiers, gigs, lesson steps, milestones, items, venue gates |
 | `Game/Source/CoreGame/GigSession.h/.cpp` | The gig being played |
 | `Game/Source/Hideout/Hideout.h/.cpp` | The room behind the main menu |
-| `Game/Source/Components/Hideout/HideoutMarkers.h/.cpp` | `HideoutStation`, `HideoutItemSlot`, `HideoutView` |
+| `Game/Source/Hideout/HideoutDebug.cpp` | The debug menu (F2) |
+| `Game/Source/Components/Hideout/HideoutMarkers.h/.cpp` | `HideoutStation`, `HideoutItemSlot`, `HideoutView`, `HideoutMotion`, `HideoutDrummer`, `HideoutBandName`, `HideoutWhen`, `HideoutReadout` |
 | `Assets/Hideout/Basement.lvl`, `Garage.lvl`, `Rehearsal.lvl`, `Studio.lvl` | The rooms (generated) |
-| `Tools/Hideout/make_hideout.py` | Writes the rooms with `Tools/Venues/venuegen.py`; the basement comes from `Tools/Hideout/basement.py`, helpers from `Tools/Hideout/hideoutgen.py` |
-| `Tools/Hideout/make_textures.py` | Draws `Assets/Hideout/Textures/*.png` with ImageMagick: concrete, wood, cardboard, egg cartons, the banner, the posters, the flyers, the screens |
+| `Tools/Hideout/make_hideout.py` | Writes the rooms with `Tools/Venues/venuegen.py`: `basement.py`, `garage.py`, `rehearsal.py` and `studio.py` in `Tools/Hideout`, with helpers from `hideoutgen.py` |
+| `Tools/Hideout/make_textures.py` | Draws `Assets/Hideout/Textures/*.png` with ImageMagick: concrete, wood, cardboard, egg cartons, foam, blankets, rugs, the banners, the posters, the flyers, the screens, the whiteboard, the windows by day and night |
 | `Tools/Hideout/make_sounds.py` | Synthesises the room tone in `Assets/Hideout/Sounds/*.wav` with ffmpeg |
+| `Assets/Fonts/PermanentMarker-Regular.ttf`, `GochiHand-Regular.ttf` | The handwriting: marker and pen, in the textures, the world text and the labels (Apache 2.0 and OFL; their licences beside them) |
 | `Assets/MainMenu.lvl` | The menu camera, with the room's `PostProcess` |
 | `Game/Tests/Source/PlayerProfileTests.cpp`, `ProgressionTests.cpp` | The record, the rules, the shipped journey, setlists, gigs, venue gating |
 
@@ -87,14 +89,15 @@ The gig board lists every gig: its description, venue, length and pass mark. An 
 `MainMenuController` owns a `Hideout` and starts it on its first update, under the menu's own camera entity. `Hideout::Start` reads the tier's scene (`--hideout-room <path>` overrides it) and instances it as a prefab is: fresh GUIDs, no cores. It then walks the entities:
 
 - `HideoutView`: where the overview camera stands. It looks along local +Z with its `FieldOfView`.
-- `HideoutStation`: `Station` (Kit, PracticePad, Radio, Laptop, TrophyWall, Mixer, GigBoard, Door), an optional `Label`, and `ViewOffset` / `FieldOfView` for the camera once it is picked. The entity's position is what the camera looks at.
-- `HideoutItemSlot`: `Slot`. If an item names the slot and isn't unlocked, the entity and its children are deleted. A slot no item names stays.
+- `HideoutStation`: `Station` (Kit, PracticePad, Radio, Laptop, TrophyWall, Mixer, GigBoard, Door, Wishlist), an optional `Label`, and `ViewOffset` / `FieldOfView` for the camera once it is picked. The entity's position is what the camera looks at.
+- `HideoutItemSlot`: `Slot`. If an item names the slot and isn't unlocked, the entity and its children are deleted. A slot no item names stays. With `WhenLocked` it's the other way round: a stand-in (tape round where the pad will go, a note saying the gold record goes here) shown only until the item comes.
+- `HideoutWhen`: `Day` or `Night` by the player's clock (day is 7:00 to 19:00), `MovingIn` only on the first visit after moving into the room, `Settled` on every visit after. The rest is deleted at load, as a locked slot is.
 
-Each frame `Hideout::Update` eases the camera toward the overview or the chosen station, with a slow sway in the overview. Picked, the camera aims a little left of the station so it sits in the part of the screen the panel leaves open. Each station's position is projected through the camera (`GetProjectionMatrix() * WorldToCamera`, one frame behind) into the `stations` list as percentages, kept clear of the screen edges, for the labels in `MainMenu.rml`. Picking a station flies the camera there. Once it has nearly arrived (at least 0.35 s, at most 1.2 s), the station acts: Kit loads the library, PracticePad the lessons, Laptop the DLC page, Mixer opens the settings panel (closing it returns to the overview), Radio shows the radio widget, TrophyWall and GigBoard open their panels (`hideout_panel`), and Door quits. Escape leaves a station or dismisses the notice. The header shows the room, its description and the next goal (`Hideout::NextGoal`). Notices queued since the last visit show once as *While you were out*, then are cleared from the profile.
+Each frame `Hideout::Update` eases the camera toward the overview or the chosen station, with a slow sway in the overview. Picked, the camera aims a little left of the station so it sits in the part of the screen the panel leaves open. Each station's position is projected through the camera (`GetProjectionMatrix() * WorldToCamera`, one frame behind) into the `stations` list as percentages, kept clear of the screen edges, for the labels in `MainMenu.rml`. Picking a station flies the camera there. Once it has nearly arrived (at least 0.35 s, at most 1.2 s), the station acts: Kit loads the library, PracticePad the lessons, Laptop the DLC page, Mixer opens the settings panel (closing it returns to the overview), Radio shows the radio widget, TrophyWall, GigBoard and Wishlist open their panels (`hideout_panel`), and Door quits. The wishlist lists every item, what's still to come first (what can be worked on now, then what needs something else first, then a later room's), each with how to get it (`Progression::HowToUnlock`: "Pass Rudiments I on the practice pad (1 of 2 lessons)", "Move into the Garage: play Backyard Party"), then what's already in. Escape leaves a station or dismisses the notice. The header shows the room, its description and the next goal (`Hideout::NextGoal`). Notices queued since the last visit show once as *While you were out* (*Welcome to the Garage* on moving in), then are cleared from the profile.
 
 The page binds `hideout`, `hideout_focus`, `hideout_room`, `hideout_room_text`, `hideout_goal`, `hideout_panel`, `hideout_notice`, `hideout_title`, `hideout_hint`, `hideout_status` and the lists `stations`, `records` and `gigs`. `Hideout::RegisterModel` sets them all before the first update. Events: `station(i)`, `hideout_back`, `dismiss_notice`, `gig_play(i)`. With no room (no tier scene, or one that can't be read) `hideout` stays 0 and the old flat menu shows.
 
-`--hideout-station N` starts at station N, its action included; `--hideout-look N` only frames it. Both are for headless captures. Stations are numbered in entity order, which the log lists at start (`[Hideout] station N: LABEL`). `--width 1600 --height 900` captures at 16:9, as most players see it.
+`--hideout-station N` starts at station N, its action included; `--hideout-look N` only frames it. `--hideout-eye x,y,z --hideout-target x,y,z [--hideout-fov deg]` puts the overview anywhere. `--hideout-time day|night` sets the time of day, and `--profile <file>` runs on another profile (captures shouldn't touch the player's). All are for headless captures. Stations are numbered in entity order, which the log lists at start (`[Hideout] station N: LABEL`). `--width 1600 --height 900` captures at 16:9, as most players see it.
 
 ### The basement
 
@@ -111,9 +114,58 @@ The first room is dressed in full (`Tools/Hideout/basement.py`): an unfinished b
 
 Every item slot of `Progression.json` has a place in it too.
 
+**Moving in.** `PlayerProfile::SeenTier` is the highest room shown so far. A room above it is being moved into: its first visit plays the way in even if the session already has, shows its `MovingIn` things (the boxes, the dolly, the road cases), titles the notice *Welcome to* the room, and sets `SeenTier`. A new profile starts at -1, so the very first visit is moving into the basement; a profile from before `SeenTier` existed counts its own room as seen.
+
+**Day and night.** `Hideout::IsDay` reads the player's clock (`Hideout::ClockSeconds`; the debug menu or `--hideout-time` override it, keeping the real minutes on a 14:00 or 23:00 hour). In the basement the sun comes down the window well in a dusty shaft by day and the streetlight and passing cars come through it by night. The garage's door is up a metre by day on the sunny driveway, the fence and a tree, and propped at 42 cm on the streetlight by night. The rehearsal space's transom is white by day and sodium orange by night, and the studio's lounge window shows the city by day (the sun through the blinds in stripes) or lit up by night.
+
+**Words in the room (`HideoutReadout`).** A `TextRenderer` whose `Text` comes from the player, set by `Hideout::UpdateReadouts`:
+- `NowPlaying`: the radio's song on the boombox's display, scrolling (`Scroll` seconds a letter through `MaxLetters`).
+- `RecentSong`: the setlist taped to the floor (`PlayerProfile::RecentSongs`, the last twelve finished, latest first; the radio's song before there are any).
+- `Wishlist`: a line of GEAR I NEED, `[x]` once the `Item` is in.
+- `SongsPlayed`, `FullCombos`, `GigsPlayed`, `LessonsPassed`: the tally on the trophy wall.
+- `NextGoal`, `BandName` (the rehearsal space's bookings whiteboard, the studio's neon), and `Clock`.
+
+`HideoutMotion` `Hour`, `Minute` and `Second` turn a clock's hands to the same clock (about `Axis`, the face's normal). The writing is in Permanent Marker and Gochi Hand: a `TextRenderer` takes a `Font`, and every face directly in `Assets/Fonts` is loaded into RmlUi too (`RmlUiCore::Init`), so the page can name them (`font-family: Permanent Marker`).
+
+**The debug menu (F2).** In non-Retail builds (or with `--hideout-debug`), F2 or the corner's *Debug (F2)* opens a panel on the right (`HideoutDebug.cpp`, `#hideout-debug`):
+- The room, which reloads in place (`Hideout::Reload`). *Move in again* replays a move-in, *The way in* replays the intro, *Tour the items* tours everything in the room, and *Reload* reloads.
+- The time of day: the player's clock, day or night.
+- Each item, in or out. Turning one on shows it off as a new item would.
+- Each gig played or not, and each lesson step passed or not (`PlayerProfile::SetLessonPassed`). *Apply the rules* runs `Progression::Evaluate`, so the notices and tour come as they would after a real gig.
+- The next band name, hiding the menu for a clean look at the room, and starting over as a new player.
+
+Every change saves the profile. Before the first, the player's own is copied to `Profile.debug-backup.json` beside it, and *Restore my own profile* puts it back and deletes the copy. A room reload skips `Evaluate` (it would undo a removed reward), and the room's own reload keeps the camera where it was. `--hideout-debug-open` opens the panel at start, for captures.
+
 ### The garage
 
-The second room (`Tools/Hideout/garage.py`) is the same story a step on: the kit has moved into the parents' garage after the first gig. It has painted drywall and the roll-up door propped open a foot behind the drummer, with the streetlight coming in under it into the haze and a car's lights now and then. There are the opener's light, party lights chasing the beat and two shop lights. It also holds the bench with a vise and the real practice pad's place, the lawnmower that paid for the cymbals, a bike, the paint shelves, the couch and the cat, the boombox, the CRT on a cooler with mom's camcorder still filming, a dartboard, a soda fridge, and the house door open on the kitchen light. The bedsheet hangs off the door tracks. The rehearsal space and the studio are still the greybox of `make_hideout.py`'s `build_room`, with the drummer in place of their primitive kit.
+The second room (`Tools/Hideout/garage.py`) is the same story a step on: the kit has moved into the parents' garage after the first gig. It has painted drywall and the roll-up door propped open a foot behind the drummer, with the streetlight coming in under it into the haze and a car's lights now and then. There are the opener's light, party lights chasing the beat and two shop lights. It also holds the bench with a vise and the real practice pad's place, the lawnmower that paid for the cymbals, a bike, the paint shelves, the couch and the cat, the boombox, the CRT on a cooler with mom's camcorder still filming, a dartboard, a soda fridge, and the house door open on the kitchen light. The bedsheet hangs off the door tracks. Like the basement, it has the boombox's display, a setlist of the recent songs, the gear list taped over the bike, a tally, tape where the gear will go, a clock and moving boxes with a dolly.
+
+### The rehearsal space
+
+The third room (`Tools/Hideout/rehearsal.py`) is Room 14 of a lockout complex, rented after the club booking:
+- Black-painted block with wedge foam either side of the kit, moving blankets nailed up on the left (the back one gives way to foam, the room's own reward), and a drop ceiling with a few tiles missing and a water stain.
+- The kit on a carpeted riser under a printed vinyl banner: the shop's "BAND NAME TBD" sample, then the band's name.
+- A guitar half-stack and a bass fridge with their pilot lights, a PA on tripods, a powered mixer on a road case (the settings), a floor wedge and a vocal mic.
+- Two PAR cans on T-bars throw red and blue at the drummer on the beat, and a red LED strip runs along the top of the back wall. Two clamp lights light the banner, and there is a floor lamp with a red shade.
+- The steel door is open on the hallway, where a tube flickers and a vending machine glows down the end. The way in starts out there.
+- The lounge has a beat couch with fairy lights over it, a road case for a coffee table (the laptop, cans, pizza) and the fridge with a chrome boombox on it.
+- The whiteboard shows the week's bookings, with the band's name on Mondays and Thursdays. The gear list is magneted to it, and the landlord's rules are by the door.
+- The trophies hang over the bass rig's shoulder.
+- The room tone is the band next door through the wall (`BandNextDoor`: a 120 bpm beat with nothing over 250 Hz, stopping for an argument), the hallway tube and an amp humming on standby.
+
+The stand-ins are outlines in white paint pen on the black wall.
+
+### The studio
+
+The last room (`Tools/Hideout/studio.py`) is the live room of a real studio:
+- An oak floor and a slatted oak wall behind the kit, fabric absorbers (the foam, grown up) and skyline diffusers down the sides, and wooden clouds overhead.
+- Three Edison bulbs on long cords swing over the kit. It sits on a big old rug among gobos, overheads, room mics and a kick mic, and the band's name glows on the slat wall in pink neon once that's earned.
+- Through the glass on the left is the control room: the console (the mixing desk, the room's reward) with its meters on the beat, the session up on a big screen, monitors with their woofers pumping, a rack of outboard blinking and the producer's couch. The settings station's label sits at the glass.
+- The vocal booth stands in the back left corner. The gig board is on its front, and RECORDING over its door pulses while the radio plays.
+- On the right are the lounge under a window with blinds, the turntable that is the radio (its record spinning, its valves and VU needles moving, its display scrolling the song), the gold and platinum on the wall (a "reserved: YOUR FIRST GOLD" frame until there is one), the guitars on stands, and the Hammond with its Leslie horn spinning.
+- Track lights pick out the walls. The way in pulls back from the drummer's shoulder to the door.
+
+The labels grow up with the rooms: masking tape in the basement, duct tape in the garage, gaffer tape and paint pen in the rehearsal space, brass plates in the studio (the page's `basement`, `garage`, `rehearsal` and `studio` classes, from `hideout_tier`).
 
 ### The band's name
 
@@ -151,16 +203,17 @@ The overview is framed for 16:9; a narrower window widens its vertical field of 
 
 **A gig, an item, a lesson step, a milestone, a venue gate:** add it to `Progression.json`. No code. The shipped-journey test (`ProgressionTests.cpp`) checks that names resolve and that every gig opens when played straight through.
 
-**A room:** edit `Tools/Hideout/make_hideout.py` (`ROOMS`: size, colours, light, the drum shells' colour, and an `extras` function for the room's own things), run it, and point a tier's `Scene` at the file. A hand-made room in Havana works too: it needs a `HideoutView`, the stations, and an item slot for each item slot name.
+**A room:** write a builder like `Tools/Hideout/rehearsal.py` (a `Scene` with a `HideoutView`, the stations, a slot for every item slot name, and stand-ins, day and night, moving in and readouts as wanted; `hideoutgen.py` has the helpers), list it in `make_hideout.py`, run it, and point a tier's `Scene` at the file. A room nobody has dressed falls back to `make_hideout.py`'s greybox `build_room`. A hand-made room in Havana works too. Look at it with the debug menu (F2) or `--hideout-room <path>`.
 
 **A station kind:** add it to `HideoutStation::Kind` (and its reflect enum), name it in `KindName` / `KindHint` in `Hideout.cpp`, and act on it in `Hideout::Update`.
 
 ## Caveats & Fragility
 
 - **Nothing has been played or heard.** Gig flow, lesson passing and the radio's filter were checked with autoplay and unit tests. Camera moves, label clicks and the sound of the radio need a person.
-- **Only the basement is dressed**; the garage, rehearsal space and studio are greyboxes of primitives. All the lighting is tuned on lavapipe captures only.
+- **All four rooms are dressed, but tuned only on lavapipe captures.** Their GPU cost (the studio has about 600 KB of scene, many lights and volumetrics) hasn't been measured on hardware.
 - **A room needs a shadow-casting ceiling.** A scene with no directional light gets the engine's sun. Through joists alone, with a subfloor that casts no shadows, it falls across the room in stripes. Every generated room's ceiling casts shadows now.
-- **The drummer is rebuilt for every radio song** (`Band::Build` loads the chart's notes on the main thread), so there may be a hitch at each change of song. Measure it on hardware.
+- **The drummer is rebuilt for every radio song** (`Band::Build` loads the chart's notes on the main thread), so there may be a hitch at each change of song. Measure it on hardware. Each build goes through its own `VenueKit` (`m_bandKit`), cleared first, so the last song's drummer and kit go with it (before that they piled up, one frozen copy a song).
+- **The debug menu writes the real profile.** It keeps a copy first, but a change made by hand to `Profile.json` while a backup exists is lost on Restore.
 - **The room tone hasn't been heard**: headless runs play silently.
 - **Gig difficulty is notes per second**, which says little about how hard a chart is.
 - **Gating the venue changes free play for everyone with no profile**: a fresh profile gets the Backyard until Club Night, whatever the Venue setting says. `--unlock-all` lifts it. The Venue tab still lists every venue and doesn't mark locked ones.

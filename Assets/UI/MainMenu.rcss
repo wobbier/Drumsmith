@@ -194,3 +194,54 @@ body.basement #hideout-focus h1 { font-family: Permanent Marker; font-weight: no
 body.basement .wish-row .wish-title, body.basement .gig-card .gig-title { font-family: Permanent Marker; font-weight: normal; }
 body.basement #hideout-focus .wish-row p { font-family: Gochi Hand; font-size: 17dp; }
 body.basement #hideout-corner .corner-link { font-family: Permanent Marker; }
+/* The labels grow up with the room: duct tape in the garage, gaffer tape and paint pen in the
+   rehearsal space, brass plates in the studio. */
+body.garage .station-label { width: 214dp; margin-left: -107dp; padding: 8dp 10dp 6dp; decorator: vertical-gradient( #b9bcc2f0 #8d9097f0 ); background-color: transparent; border-bottom: 0; }
+body.garage .station-label:hover, body.garage .station-label:focus { decorator: vertical-gradient( #ffe08af4 #e7c45ef4 ); }
+body.garage .station-label .station-name { font-family: Permanent Marker; font-weight: normal; font-size: 27dp; color: #16181c; }
+body.garage .station-label .station-hint { font-family: Gochi Hand; font-size: 16dp; color: #2c3036; }
+body.garage #hideout-header { background-color: #8a6a44ee; border: 2dp #5b4329; transform: rotate(-0.6deg); }
+body.garage #hideout-header .hideout-room { font-family: Permanent Marker; font-size: 32dp; }
+body.garage #hideout-header .hideout-goal { font-family: Gochi Hand; font-size: 21dp; color: #fff0b8; }
+body.garage #hideout-header .band-link { font-family: Gochi Hand; font-size: 18dp; }
+body.garage #hideout-notice { background-color: #f5e27aee; border-top: 0; transform: rotate(-1deg); }
+body.garage #hideout-notice h2 { font-family: Permanent Marker; font-weight: normal; color: #9b2c1c; }
+body.garage #hideout-notice p { font-family: Gochi Hand; font-size: 24dp; color: #2a2218; }
+body.garage #hideout-notice .menu-link { color: #2a2218; }
+body.garage #hideout-reveal { background-color: #f5e27aee; border-bottom: 0; transform: rotate(1deg); }
+body.garage #hideout-reveal span { font-family: Permanent Marker; font-weight: normal; color: #2a2218; }
+body.garage #hideout-focus h1 { font-family: Permanent Marker; font-weight: normal; }
+body.garage #hideout-corner .corner-link { font-family: Permanent Marker; decorator: vertical-gradient( #b9bcc2e0 #8d9097e0 ); background-color: transparent; color: #16181c; }
+
+body.rehearsal .station-label { width: 216dp; margin-left: -108dp; padding: 8dp 10dp 6dp; background-color: #121214f0; border-bottom: 0; border-left: 3dp #2a2a2e; border-right: 3dp #2a2a2e; }
+body.rehearsal .station-label:hover, body.rehearsal .station-label:focus { background-color: #2a0d12f4; border-left-color: #ff3355; border-right-color: #ff3355; }
+body.rehearsal .station-label .station-name { font-family: Permanent Marker; font-weight: normal; font-size: 27dp; color: #f2f2ec; }
+body.rehearsal .station-label .station-hint { font-family: Gochi Hand; font-size: 16dp; color: #c8c8c0; }
+body.rehearsal #hideout-header { background-color: #0c0c0eee; border-left: 4dp #ff3355; }
+body.rehearsal #hideout-header .hideout-room { font-family: Permanent Marker; font-size: 32dp; color: #f2f2ec; }
+body.rehearsal #hideout-header .hideout-goal { font-family: Gochi Hand; font-size: 21dp; color: #ff8fa3; }
+body.rehearsal #hideout-header .band-link { font-family: Gochi Hand; font-size: 18dp; }
+body.rehearsal #hideout-notice { background-color: #f4f4efee; border-top: 6dp #121214; transform: rotate(0.8deg); }
+body.rehearsal #hideout-notice h2 { font-family: Permanent Marker; font-weight: normal; color: #c8102e; }
+body.rehearsal #hideout-notice p { font-family: Gochi Hand; font-size: 24dp; color: #16161a; }
+body.rehearsal #hideout-notice .menu-link { color: #16161a; }
+body.rehearsal #hideout-reveal { background-color: #121214f2; border-bottom: 3dp #ff3355; }
+body.rehearsal #hideout-reveal span { font-family: Permanent Marker; font-weight: normal; color: #f2f2ec; }
+body.rehearsal #hideout-focus { background-color: #0a0a0ce8; border-right: 3dp #ff3355; }
+body.rehearsal #hideout-focus h1 { font-family: Permanent Marker; font-weight: normal; }
+body.rehearsal #hideout-corner .corner-link { font-family: Permanent Marker; background-color: #121214e0; color: #f2f2ec; }
+
+body.studio .station-label { width: 230dp; margin-left: -115dp; padding: 7dp 10dp 6dp; decorator: vertical-gradient( #e2c27cf2 #a8823ef2 ); background-color: transparent; border-bottom: 2dp #6b4e1c; }
+body.studio .station-label:hover, body.studio .station-label:focus { decorator: vertical-gradient( #fff1c4f6 #e2bd68f6 ); }
+body.studio .station-label .station-name { font-size: 21dp; font-weight: bold; letter-spacing: 3dp; color: #2a1d0a; }
+body.studio .station-label .station-hint { font-size: 13dp; letter-spacing: 1dp; color: #4a3714; }
+body.studio #hideout-header { background-color: #2a1c12ee; border-bottom: 3dp #c9a55a; }
+body.studio #hideout-header .hideout-room { font-size: 30dp; letter-spacing: 2dp; color: #f3e3bf; }
+body.studio #hideout-header .hideout-goal { color: #e2c27c; }
+body.studio #hideout-notice { background-color: #1f150ef4; border-top: 3dp #c9a55a; }
+body.studio #hideout-notice h2 { color: #e2c27c; letter-spacing: 2dp; }
+body.studio #hideout-reveal { background-color: #1f150ef0; border-bottom: 3dp #c9a55a; }
+body.studio #hideout-reveal span { color: #f3e3bf; letter-spacing: 2dp; }
+body.studio #hideout-focus { background-color: #160f0ae8; border-right: 3dp #c9a55a; }
+body.studio #hideout-focus h1 { letter-spacing: 3dp; color: #f3e3bf; }
+body.studio #hideout-corner .corner-link { decorator: vertical-gradient( #e2c27ce0 #a8823ee0 ); background-color: transparent; color: #2a1d0a; letter-spacing: 1dp; }

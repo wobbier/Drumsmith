@@ -473,6 +473,273 @@ def kick_head_blank():
 
 
 # ---------------------------------------------------------------------------------------------
+# The rehearsal space
+
+def black_wall():
+    """Matte black paint over block, scuffed where gear has been dragged past: 1.6 x 0.8 m."""
+    n = "BlackWall"
+    w, h = 1024, 512
+    rnd = random.Random(201)
+    joints = []
+    for row in range(4):
+        joints += ["-draw", f"line 0,{row * 128} {w},{row * 128}"]
+        shift = 0 if row % 2 == 0 else 128
+        for col in range(5):
+            x = col * 256 + shift
+            joints += ["-draw", f"line {x},{row * 128} {x},{row * 128 + 128}"]
+    scuffs = []
+    for _ in range(40):
+        x, y = rnd.randint(0, w), rnd.randint(int(h * 0.55), h)
+        scuffs += ["-draw", f"line {x},{y} {x + rnd.randint(20, 120)},{y + rnd.randint(-6, 6)}"]
+    magick("-size", f"{w}x{h}", "xc:rgb(40,40,44)", "-stroke", "rgb(22,22,25)", "-strokewidth", 5, *joints,
+           "-stroke", "rgba(120,120,125,0.25)", "-strokewidth", 3, *scuffs, out(n))
+    magick(out(n), "(", "-size", f"{w}x{h}", "-seed", 202, "plasma:fractal", "-colorspace", "gray", "-blur", "0x3", "-auto-level", "+level", "80%,100%", ")",
+           "-compose", "multiply", "-composite", out(n))
+    grain(out(n), 0.5, 203)
+    finish(n)
+
+
+def foam_wedge():
+    """Charcoal wedge foam, 30 cm tiles turned alternately (the picture is 0.6 x 0.6 m)."""
+    n = "FoamWedge"
+    magick("-size", "512x512", "xc:black", "-fx",
+           "0.07 + 0.24 * (((i < 256) == (j < 256)) * (j % 32) / 32 + ((i < 256) != (j < 256)) * (i % 32) / 32)", "-colorspace", "gray",
+           "-fill", "rgb(14,14,16)", "-stroke", "rgb(10,10,12)", "-strokewidth", 3, "-draw", "line 0,256 512,256", "-draw", "line 256,0 256,512",
+           "+level-colors", "rgb(10,10,12),rgb(150,150,160)", out(n))
+    grain(out(n), 0.6, 211)
+    finish(n)
+
+
+def moving_blanket(name, colour, stitch, seed):
+    """A quilted moving blanket: diamond stitching, binding round the edge, faded."""
+    s = 512
+    lines = []
+    for k in range(-8, 9):
+        lines += ["-draw", f"line {k * 64},0 {k * 64 + s},{s}", "-draw", f"line {k * 64 + s},0 {k * 64},{s}"]
+    magick("-size", f"{s}x{s}", f"xc:{colour}", "-stroke", stitch, "-strokewidth", 3, *lines, "-stroke", "none",
+           "-fill", "none", "-stroke", "rgb(40,40,48)", "-strokewidth", 16, "-draw", f"rectangle 0,0 {s - 1},{s - 1}", out(name))
+    magick(out(name), "(", "-size", f"{s}x{s}", "-seed", seed, "plasma:fractal", "-colorspace", "gray", "-blur", "0x6", "-auto-level", "+level", "70%,100%", ")",
+           "-compose", "multiply", "-composite", out(name))
+    grain(out(name), 0.5, seed + 1)
+    finish(name)
+
+
+def carpet_dark():
+    """Industrial loop carpet, blue-grey, with the stains of a thousand rehearsals (2 x 2 m)."""
+    n = "CarpetDark"
+    rnd = random.Random(221)
+    s = 1024
+    stains = []
+    for _ in range(9):
+        cx, cy, r = rnd.randint(0, s), rnd.randint(0, s), rnd.randint(30, 120)
+        stains += ["-draw", f"ellipse {cx},{cy} {r},{int(r * rnd.uniform(0.5, 0.9))} 0,360"]
+    magick("-size", f"{s}x{s}", "xc:rgb(54,58,70)", "-seed", 222, "-attenuate", 1.6, "+noise", "Gaussian", "-blur", "0x0.6", out(n))
+    magick(out(n), "(", "-size", f"{s}x{s}", "xc:none", "-fill", "rgba(20,18,16,0.45)", *stains, "-blur", "0x14", ")", "-compose", "over", "-composite", out(n))
+    finish(n)
+
+
+def persian_rug(name, field, border, accent, seed):
+    """A worn oriental rug: borders, a medallion, a field of small motifs, fringe at the ends (1.5 x 2 m)."""
+    w, h = 768, 1024
+    rnd = random.Random(seed)
+    motifs = []
+    for _ in range(140):
+        x, y = rnd.randint(90, w - 90), rnd.randint(110, h - 110)
+        r = rnd.randint(6, 13)
+        motifs += ["-fill", rnd.choice([accent, border, "rgb(220,200,160)"]), "-draw", f"polygon {x},{y - r} {x + r},{y} {x},{y + r} {x - r},{y}"]
+    fringe = []
+    for x in range(0, w, 7):
+        fringe += ["-draw", f"line {x},0 {x},26", "-draw", f"line {x},{h - 26} {x},{h}"]
+    magick("-size", f"{w}x{h}", f"xc:{field}", *motifs,
+           "-fill", "none", "-stroke", border, "-strokewidth", 34, "-draw", f"rectangle 52,72 {w - 52},{h - 72}",
+           "-stroke", accent, "-strokewidth", 8, "-draw", f"rectangle 84,104 {w - 84},{h - 104}", "-draw", f"rectangle 30,50 {w - 30},{h - 50}",
+           "-stroke", "none", "-fill", border, "-draw", f"polygon {w // 2},{h // 2 - 260} {w // 2 + 180},{h // 2} {w // 2},{h // 2 + 260} {w // 2 - 180},{h // 2}",
+           "-fill", accent, "-draw", f"polygon {w // 2},{h // 2 - 170} {w // 2 + 118},{h // 2} {w // 2},{h // 2 + 170} {w // 2 - 118},{h // 2}",
+           "-fill", field, "-draw", f"polygon {w // 2},{h // 2 - 90} {w // 2 + 62},{h // 2} {w // 2},{h // 2 + 90} {w // 2 - 62},{h // 2}",
+           "-fill", border, "-draw", f"circle {w // 2},{h // 2} {w // 2},{h // 2 + 22}",
+           "-fill", "none", "-stroke", "rgb(232,222,196)", "-strokewidth", 3, *fringe, out(name))
+    magick(out(name), "(", "-size", f"{w}x{h}", "-seed", seed + 1, "plasma:fractal", "-colorspace", "gray", "-blur", "0x5", "-auto-level", "+level", "62%,100%", ")",
+           "-compose", "multiply", "-composite", out(name))
+    grain(out(name), 0.8, seed + 2)
+    finish(name)
+
+
+def ceiling_tile():
+    """A 2 x 2 ft acoustic ceiling tile: fissured, off-white, one with a water stain."""
+    n = "CeilingTile"
+    s = 256
+    rnd = random.Random(231)
+    pits = []
+    for _ in range(320):
+        x, y = rnd.randint(0, s), rnd.randint(0, s)
+        pits += ["-draw", f"line {x},{y} {x + rnd.randint(-5, 5)},{y + rnd.randint(-2, 2)}"]
+    magick("-size", f"{s}x{s}", "xc:rgb(214,210,198)", "-stroke", "rgb(150,146,136)", "-strokewidth", 1, *pits,
+           "-fill", "none", "-stroke", "rgb(120,118,112)", "-strokewidth", 4, "-draw", f"rectangle 0,0 {s - 1},{s - 1}", out(n))
+    grain(out(n), 0.5, 232)
+    finish(n)
+
+
+def vinyl_banner(name, words):
+    """A printed vinyl banner, black with grommets: the band's name (or, before it has one, the
+    shop's sample text)."""
+    w, h = 1024, 384
+    grommets = []
+    for x in (24, w // 2, w - 24):
+        for y in (24, h - 24):
+            grommets += ["-draw", f"circle {x},{y} {x},{y + 9}"]
+    magick("-size", f"{w}x{h}", "xc:rgb(14,14,16)", "-fill", "rgb(170,170,175)", *grommets, out(name))
+    if words:
+        magick(out(name), "-gravity", "center", "-font", HEAVY, "-pointsize", 120, "-fill", "rgb(236,236,236)", "-annotate", "+0-34", words[0],
+               "-font", BOLD, "-pointsize", 40, "-fill", "rgb(220,40,50)", "-annotate", "+0+88", words[1], out(name))
+    magick(out(name), "(", "-size", f"{w}x{h}", "-seed", 241, "plasma:fractal", "-colorspace", "gray", "-blur", "0x10", "-auto-level", "+level", "86%,100%", ")",
+           "-compose", "multiply", "-composite", out(name))
+    finish(name)
+
+
+def whiteboard():
+    """The room's whiteboard: ghosts of old schedules, the week's grid in marker (who has the room
+    when is written over it in the game)."""
+    n = "Whiteboard"
+    w, h = 1024, 640
+    rnd = random.Random(251)
+    ghosts = []
+    for _ in range(18):
+        x, y = rnd.randint(40, w - 200), rnd.randint(60, h - 60)
+        ghosts += ["-draw", f"text {x},{y} '{rnd.choice(['ROOM 14', 'tues??', 'NO', 'call Dave', '$$$', 'TUNE UP', 'bpm 128'])}'"]
+    rows = []
+    for i, day in enumerate(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]):
+        y = 112 + i * 72
+        rows += ["-draw", f"line 40,{y + 20} {w - 40},{y + 20}"]
+    days = []
+    for i, day in enumerate(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]):
+        days += ["-annotate", f"+56+{98 + i * 72}", day]
+    magick("-size", f"{w}x{h}", "xc:rgb(246,247,248)", "-font", MARKER, "-pointsize", 34, "-fill", "rgba(150,160,175,0.18)", *ghosts,
+           "-stroke", "rgb(40,60,150)", "-strokewidth", 4, *rows, "-draw", f"line 180,40 180,{h - 40}", "-stroke", "none",
+           "-fill", "rgb(30,40,120)", "-pointsize", 40, *days, "-fill", "rgb(190,30,40)", "-pointsize", 48, "-annotate", f"+{w - 360}+64", "ROOM 14",
+           out(n))
+    magick(out(n), "-fill", "none", "-stroke", "rgb(120,120,126)", "-strokewidth", 14, "-draw", f"rectangle 0,0 {w - 1},{h - 1}", out(n))
+    grain(out(n), 0.25, 252)
+    finish(n)
+
+
+def rules_sign():
+    """The landlord's laminated sign."""
+    n = "RulesSign"
+    lines = ["1. LOCK THE DOOR. ALWAYS.", "2. NO SMOKING (we can tell)", "3. NO SLEEPING IN ROOMS", "4. KEEP IT UNDER 110 dB", "5. RENT DUE THE 1ST", "",
+             "Room checks Fridays.", "- Management"]
+    magick("-size", "512x680", "xc:rgb(250,250,246)", "-gravity", "north", "-font", HEAVY, "-pointsize", 54, "-fill", "rgb(200,20,30)",
+           "-annotate", "+0+30", "LOCKOUT\nRULES", "-gravity", "northwest", "-font", BOLD, "-pointsize", 25, "-fill", "rgb(20,20,24)",
+           *sum((["-annotate", f"+40+{220 + i * 50}", line] for i, line in enumerate(lines)), []), out(n))
+    magick(out(n), "(", "-size", "512x680", "-background", "none", "gradient:rgba(255,255,255,0.3)-rgba(255,255,255,0)", "-rotate", "30", "-gravity", "center",
+           "-extent", "512x680", ")", "-compose", "over", "-composite", out(n))
+    grain(out(n), 0.2, 261)
+    finish(n)
+
+
+# ---------------------------------------------------------------------------------------------
+# The studio
+
+def oak_floor():
+    """Oak boards, 12 cm wide, running away from the camera (the picture is 1.2 x 1.2 m)."""
+    n = "OakFloor"
+    rnd = random.Random(301)
+    w = 1024
+    magick("-size", "128x1024", "-seed", 302, "plasma:fractal", "-colorspace", "gray", "-resize", f"{w}x{w}!", "-motion-blur", "0x30+90",
+           "-auto-level", "+level-colors", "rgb(120,78,42),rgb(196,148,96)", out(n))
+    seams = []
+    for i in range(11):
+        x = int(i * w / 10)
+        seams += ["-draw", f"line {x},0 {x},{w}"]
+        y = rnd.randint(0, w)
+        seams += ["-draw", f"line {x},{y} {x + w // 10},{y}"]
+    tints = []
+    for i in range(10):
+        v = rnd.randint(-18, 18)
+        tints += ["-fill", f"rgba({128 + v},{90 + v},{50 + v},0.25)", "-draw", f"rectangle {int(i * w / 10)},0 {int((i + 1) * w / 10)},{w}"]
+    magick(out(n), *tints, "-stroke", "rgb(60,38,20)", "-strokewidth", 3, *seams, out(n))
+    grain(out(n), 0.35, 303)
+    finish(n)
+
+
+def wood_slats():
+    """Vertical oak slats, 4 cm, over black felt (the picture is 0.8 m across)."""
+    n = "WoodSlats"
+    w = 512
+    gaps = []
+    for i in range(20):
+        x = int(i * w / 20)
+        gaps += ["-draw", f"rectangle {x},0 {x + 9},{w}"]
+    magick("-size", "64x512", "-seed", 311, "plasma:fractal", "-colorspace", "gray", "-resize", f"{w}x{w}!", "-motion-blur", "0x24+90",
+           "-auto-level", "+level-colors", "rgb(118,80,46),rgb(178,130,82)", "-fill", "rgb(10,9,8)", *gaps, out(n))
+    grain(out(n), 0.3, 312)
+    finish(n)
+
+
+def fabric(name, colour, seed):
+    """Fabric-wrapped absorber: a fine weave, slightly mottled."""
+    magick("-size", "256x256", f"xc:{colour}", "-seed", seed, "-attenuate", 0.8, "+noise", "Gaussian", "-blur", "0x0.5", out(name))
+    magick(out(name), "(", "-size", "256x256", "-seed", seed + 1, "plasma:fractal", "-colorspace", "gray", "-blur", "0x8", "-auto-level", "+level", "85%,100%", ")",
+           "-compose", "multiply", "-composite", out(name))
+    finish(name)
+
+
+def daw_screen():
+    """The control room's screen: a session's arrange window, tracks of coloured clips with
+    waveforms, the transport, the playhead."""
+    n = "DawScreen"
+    w, h = 1024, 576
+    rnd = random.Random(321)
+    draws = ["-fill", "rgb(36,38,44)", "-draw", f"rectangle 0,0 {w},34", "-fill", "rgb(24,26,30)", "-draw", f"rectangle 0,34 170,{h}"]
+    colours = ["rgb(220,90,70)", "rgb(240,180,60)", "rgb(90,190,110)", "rgb(80,150,230)", "rgb(170,110,220)", "rgb(230,110,170)", "rgb(90,200,200)",
+               "rgb(200,200,90)"]
+    names = ["KICK", "SNARE", "OH L", "OH R", "BASS", "GTR 1", "GTR 2", "VOX"]
+    for t in range(8):
+        y = 46 + t * 64
+        draws += ["-fill", "rgb(50,52,58)", "-draw", f"rectangle 6,{y} 164,{y + 56}", "-fill", colours[t], "-draw", f"rectangle 6,{y} 12,{y + 56}"]
+        x = 180
+        while x < w - 40:
+            length = rnd.randint(90, 260)
+            draws += ["-fill", colours[t].replace("rgb", "rgba").replace(")", ",0.55)"), "-draw", f"rectangle {x},{y} {min(w - 10, x + length)},{y + 56}"]
+            pts = []
+            for k in range(0, min(w - 10, x + length) - x, 4):
+                a = rnd.randint(4, 24) if t > 3 else (24 if k % 32 < 4 else rnd.randint(1, 6))
+                pts.append(f"{x + k},{y + 28 - a} {x + k},{y + 28 + a}")
+            draws += ["-stroke", "rgba(20,20,24,0.8)", "-strokewidth", 1] + sum((["-draw", f"line {p}"] for p in pts), []) + ["-stroke", "none"]
+            x += length + rnd.randint(10, 60)
+    labels = sum((["-annotate", f"+20+{75 + t * 64}", names[t]] for t in range(8)), [])
+    magick("-size", f"{w}x{h}", "xc:rgb(30,32,36)", *draws, "-fill", "rgb(230,230,236)", "-font", BOLD, "-pointsize", 18, *labels,
+           "-annotate", "+190+24", "SESSION_04  -  TAKE 12", "-fill", "rgb(255,70,70)", "-draw", "circle 980,17 980,25",
+           "-stroke", "rgb(255,255,255)", "-strokewidth", 2, "-draw", f"line 640,34 640,{h}", out(n))
+    finish(n)
+
+
+def city(name, night, seed):
+    """Through the lounge window: the city across the street, by night (lit windows) or by day."""
+    w, h = 768, 512
+    rnd = random.Random(seed)
+    draws = []
+    x = 0
+    while x < w:
+        bw = rnd.randint(70, 160)
+        top = rnd.randint(60, 260)
+        shade = rnd.randint(18, 34) if night else rnd.randint(150, 200)
+        draws += ["-fill", f"rgb({shade},{shade + 2},{shade + 8})", "-draw", f"rectangle {x},{top} {x + bw},{h}"]
+        for wy in range(top + 14, h, 26):
+            for wx in range(x + 10, x + bw - 14, 22):
+                if night and rnd.random() < 0.35:
+                    c = rnd.choice(["rgb(255,214,140)", "rgb(255,236,190)", "rgb(170,200,255)"])
+                elif not night and rnd.random() < 0.9:
+                    c = "rgb(110,140,170)" if rnd.random() < 0.7 else "rgb(200,220,235)"
+                else:
+                    continue
+                draws += ["-fill", c, "-draw", f"rectangle {wx},{wy} {wx + 11},{wy + 14}"]
+        x += bw + rnd.randint(2, 18)
+    sky = "gradient:rgb(10,14,34)-rgb(46,40,70)" if night else "gradient:rgb(120,170,235)-rgb(210,228,245)"
+    magick("-size", f"{w}x{h}", sky, *draws, out(name))
+    finish(name)
+
+
+# ---------------------------------------------------------------------------------------------
 # Light
 
 def tv_static():
@@ -593,6 +860,26 @@ ALL = {
     "Notebook": lambda: notebook("Notebook", "GEAR I NEED", 141),
     "NotebookRehearsal": lambda: notebook("NotebookRehearsal", "GEAR LIST", 142),
     "SetlistBlank": setlist_blank,
+    "BlackWall": black_wall,
+    "FoamWedge": foam_wedge,
+    "MovingBlanketBlue": lambda: moving_blanket("MovingBlanketBlue", "rgb(40,70,130)", "rgb(26,44,90)", 271),
+    "MovingBlanketGrey": lambda: moving_blanket("MovingBlanketGrey", "rgb(92,94,100)", "rgb(60,62,68)", 273),
+    "CarpetDark": carpet_dark,
+    "RugRed": lambda: persian_rug("RugRed", "rgb(132,30,32)", "rgb(28,36,72)", "rgb(206,150,70)", 281),
+    "RugBlue": lambda: persian_rug("RugBlue", "rgb(30,46,92)", "rgb(140,34,34)", "rgb(210,170,90)", 285),
+    "CeilingTile": ceiling_tile,
+    "VinylBanner": lambda: vinyl_banner("VinylBanner", ("BAND NAME TBD", "BOOKINGS: ASK THE DRUMMER")),
+    "VinylBannerBlank": lambda: vinyl_banner("VinylBannerBlank", None),
+    "Whiteboard": whiteboard,
+    "RulesSign": rules_sign,
+    "OakFloor": oak_floor,
+    "WoodSlats": wood_slats,
+    "FabricCharcoal": lambda: fabric("FabricCharcoal", "rgb(52,54,58)", 331),
+    "FabricTeal": lambda: fabric("FabricTeal", "rgb(28,74,78)", 333),
+    "FabricRust": lambda: fabric("FabricRust", "rgb(120,58,36)", 335),
+    "DawScreen": daw_screen,
+    "CityNight": lambda: city("CityNight", True, 341),
+    "CityDay": lambda: city("CityDay", False, 343),
 }
 
 

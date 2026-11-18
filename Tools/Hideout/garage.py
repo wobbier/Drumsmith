@@ -5,22 +5,26 @@ Painted drywall and a bigger slab, the roll-up door propped open a foot at the b
 streetlight coming in under it behind the drummer, the opener's light on the ceiling, party
 lights strung across. The workbench grew a vise and a proper pegboard; bikes hang from the
 ceiling, the lawnmower that paid for the cymbals sits in the corner, paint and junk on the
-shelves. The couch and the cat came too, with the boombox, the CRT and mom's camcorder; there's a
-dartboard now, and a soda fridge. The house door at the front, the kitchen light on.
+shelves. The couch and the cat came too, with the boombox (its display scrolling the song), the
+CRT and mom's camcorder; there's a dartboard now, and a soda fridge. The house door at the front,
+the kitchen light on. By day the driveway's in the sun under the door; by night the streetlight.
+The gear list is taped over the bike, the setlist to the floor, tape where the gear will go.
 
 Room space as the basement: x across (+x the couch side), y up, z from the camera to the door.
 """
 import math
 import random
 
-from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, CORK, GOLD, OFFWHITE, STEEL, WHITE, WOOD, Scene, drummer, dust, glow_light,
-                        light, look_rotation, motion, poster, rod, slot, sound, station, textured, view)
+from hideoutgen import (band_name, band_name_text, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display,
+                        clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
+                        stand_in, station, tally, tape_outline, textured, view, when)
 
 H = 3.8        # half the width
 D = 7.2        # the back wall's face (the door)
 TOP = 2.9      # the ceiling
 DOOR = 1.75    # half the door's width
-GAP = 0.42     # how far the door is propped open
+GAP = 0.42     # how far the door is propped open at night
+GAP_DAY = 1.1  # and by day, for the air
 
 PLASTIC_RED = (0.62, 0.08, 0.07)
 PLASTIC_BLUE = (0.08, 0.2, 0.55)
@@ -49,16 +53,17 @@ def shell(s, geo):
 
 
 def door(s, geo, lights, items):
-    """The roll-up door, propped up a foot; the driveway and the night outside."""
-    panels = s.group("Roll Door", geo)
-    y = GAP
-    i = 0
-    while y < 2.4:
-        s.slab(f"Door Panel {i}", panels, -DOOR, DOOR, y, min(2.4, y + 0.48), D + 0.02, D + 0.06, (0.86, 0.86, 0.83), metallic=0.3, rough=0.5)
-        s.slab(f"Door Rib {i}", panels, -DOOR, DOOR, y + 0.22, y + 0.26, D - 0.0, D + 0.02, (0.78, 0.78, 0.75), metallic=0.3, rough=0.5)
-        y += 0.48
-        i += 1
-    s.box("Door Handle", panels, (0.0, GAP + 0.18, D - 0.01), (0.18, 0.03, 0.03), STEEL, metallic=0.8)
+    """The roll-up door, propped up a foot at night and higher by day; the driveway outside."""
+    for when_, gap in (("Night", GAP), ("Day", GAP_DAY)):
+        panels = when(s.group(f"Roll Door {when_}", geo), when_)
+        y = gap
+        i = 0
+        while y < 2.4:
+            s.slab(f"Door Panel {i}", panels, -DOOR, DOOR, y, min(2.4, y + 0.48), D + 0.02, D + 0.06, (0.86, 0.86, 0.83), metallic=0.3, rough=0.5)
+            s.slab(f"Door Rib {i}", panels, -DOOR, DOOR, y + 0.22, y + 0.26, D - 0.0, D + 0.02, (0.78, 0.78, 0.75), metallic=0.3, rough=0.5)
+            y += 0.48
+            i += 1
+        s.box("Door Handle", panels, (0.0, gap + 0.18, D - 0.01), (0.18, 0.03, 0.03), STEEL, metallic=0.8)
     # The tracks the door runs up into, and the opener.
     for x in (-DOOR - 0.04, DOOR + 0.04):
         s.slab(f"Door Track {x}", geo, x - 0.03, x + 0.03, 0.0, 2.5, D - 0.05, D, STEEL, metallic=0.7, rough=0.4)
@@ -71,19 +76,36 @@ def door(s, geo, lights, items):
     led = s.box("Opener LED", lights, (0.18, 2.62, 3.04), (0.014, 0.014, 0.014), (0.1, 1.0, 0.2), shape="Sphere",
                 emissive=(0.1, 1.0, 0.2), emissive_intensity=10.0, shadows=False)
     motion(led, "Blink", amount=0.08, speed=0.6)
-    # Outside: the driveway, the street's glow, the lamp over it shining in under the door.
+    # Outside: the driveway, the street's glow, the lamp over it shining in under the door. By
+    # day, the driveway in the afternoon sun and the light off it coming in low.
     s.slab("Driveway", geo, -H - 2.0, H + 2.0, -0.12, -0.02, D + 0.12, D + 7.0, (0.25, 0.25, 0.27), rough=0.8)
-    s.slab("Night", geo, -H - 4.0, H + 4.0, -0.2, 6.0, D + 9.0, D + 9.2, (0.02, 0.03, 0.06), emissive=(0.03, 0.05, 0.1),
+    night = when(s.group("Night", lights), "Night")
+    s.slab("Night Sky", night, -H - 4.0, H + 4.0, -0.2, 6.0, D + 9.0, D + 9.2, (0.02, 0.03, 0.06), emissive=(0.03, 0.05, 0.1),
            emissive_intensity=1.0)
     lamp = (1.4, 3.6, D + 5.5)
-    light(s, lights, "Streetlight Under The Door", lamp, kind="Spot", color=(0.95, 0.75, 0.45), intensity=90.0, range_=14.0,
+    light(s, night, "Streetlight Under The Door", lamp, kind="Spot", color=(0.95, 0.75, 0.45), intensity=90.0, range_=14.0,
           rot=look_rotation(lamp, (0.2, 0.0, D - 1.2)), inner=16.0, outer=30.0, shadows=True, volumetric=6.0)
-    dust(s, lights, "Dust", (0.0, 0.7, D - 1.5), (3.4, 1.4, 2.6), count=220, rate=30.0)
     # Now and then a car goes past out there.
     car = (-4.5, 0.6, D + 3.0)
-    sweep = light(s, lights, "Passing Car", car, kind="Spot", color=(1.0, 0.95, 0.85), intensity=60.0, range_=14.0,
+    sweep = light(s, night, "Passing Car", car, kind="Spot", color=(1.0, 0.95, 0.85), intensity=60.0, range_=14.0,
                   rot=look_rotation(car, (0.0, 0.2, D - 2.0)), inner=10.0, outer=20.0, volumetric=4.0)
     motion(sweep, "Pass", amount=4.0, speed=1.0 / 19.0, axis=(1, 0, 0), phase=0.3)
+    day = when(s.group("Day", lights), "Day")
+    s.slab("Day Sky", day, -H - 4.0, H + 4.0, -0.2, 6.0, D + 9.0, D + 9.2, (0.62, 0.74, 0.9), emissive=(0.62, 0.76, 0.98),
+           emissive_intensity=2.2)
+    s.slab("Lawn", day, -H - 4.0, H + 4.0, -0.11, -0.03, D + 4.0, D + 9.0, (0.22, 0.42, 0.14), rough=0.9)
+    sun = (-2.6, 3.2, D + 6.0)
+    light(s, day, "Sun Under The Door", sun, kind="Spot", color=(1.0, 0.88, 0.68), intensity=170.0, range_=16.0,
+          rot=look_rotation(sun, (0.6, 0.0, D - 1.6)), inner=16.0, outer=28.0, shadows=True, volumetric=8.0)
+    light(s, day, "Daylight Bounce", (0.0, 0.5, D - 0.6), color=(0.85, 0.9, 1.0), intensity=4.0, range_=5.5)
+    # The neighbour's fence and a tree across the street, so the gap isn't just sky.
+    for i in range(14):
+        x = -H - 1.5 + i * 0.75
+        s.box(f"Fence Board {i}", day, (x, 0.75, D + 4.2), (0.7, 1.5, 0.04), (0.78, 0.68, 0.52), rough=0.9)
+    s.box("Tree Trunk", day, (2.6, 1.4, D + 6.5), (0.35, 2.8, 0.35), (0.35, 0.25, 0.16), shape="Cylinder", rough=0.9)
+    s.box("Tree Crown", day, (2.6, 3.4, D + 6.5), (2.6, 2.2, 2.4), (0.25, 0.45, 0.18), shape="Sphere", rough=0.9)
+    s.box("Bin", day, (-1.2, 0.5, D + 2.2), (0.6, 1.0, 0.7), (0.1, 0.3, 0.15), rough=0.6)
+    dust(s, lights, "Dust", (0.0, 0.7, D - 1.5), (3.4, 1.4, 2.6), count=220, rate=30.0)
     # The bedsheet came too, hung off the door tracks.
     band_name(poster(s, items, "Banner", "Banner", (0.0, 2.05, D - 0.25), 2.6, 1.1, "-z", tilt=1.0, thick=0.006), "Unnamed")
     band_name(poster(s, items, "Banner Blank", "BannerBlank", (0.0, 2.05, D - 0.252), 2.6, 1.1, "-z", tilt=1.0, thick=0.006), "Named")
@@ -116,7 +138,7 @@ def kit_area(s, geo, items, stations, lights):
     guitar.add({"Type": "Model", "ModelPath": "Assets/Models/Instruments/Runtime/Guitar.obj"})
     bass = s.entity("Bass", items, (2.3, 0.33, 4.75), (0.0, -35.0, -80.0))
     bass.add({"Type": "Model", "ModelPath": "Assets/Models/Instruments/Runtime/Bass.obj"})
-    textured(s.box("Setlist", items, (0.6, 0.003, 3.65), (0.24, 0.002, 0.34), (1, 1, 1), rot=(0, -12, 0), shadows=False), "Setlist")
+    setlist(s, items, (0.62, 0.003, 3.5), -12.0)
     # The box fan, on a bucket now.
     fan = s.group("Box Fan", items, (-1.6, 0.0, 4.9))
     s.box("Fan Bucket", fan, (0.0, 0.19, 0.0), (0.3, 0.38, 0.3), (0.95, 0.42, 0.08), shape="Cylinder", rough=0.55)
@@ -271,8 +293,7 @@ def right_side(s, geo, items, stations, lights):
     radio = slot(s, items, "Radio", "Radio")
     rx, ry, rz = H - 0.18, 1.62, 2.5
     s.box("Boombox", radio, (rx, ry, rz), (0.22, 0.26, 0.66), (0.14, 0.14, 0.15), rough=0.45, metallic=0.2)
-    s.box("Boombox Dial", radio, (rx - 0.112, ry + 0.095, rz), (0.004, 0.025, 0.2), (0.9, 0.6, 0.2), emissive=(1.0, 0.55, 0.15),
-          emissive_intensity=4.0, shadows=False)
+    boombox_display(s, radio, (rx - 0.112, ry + 0.095, rz), "-x")
     rod(s, radio, "Boombox Handle", (rx, ry + 0.17, rz - 0.22), (rx, ry + 0.17, rz + 0.22), 0.02, CHROME, metallic=0.9)
     for i, z in enumerate((rz - 0.2, rz + 0.2)):
         cone = s.entity(f"Speaker {i}", radio, (rx - 0.112, ry - 0.01, z))
@@ -342,6 +363,81 @@ def right_side(s, geo, items, stations, lights):
               [(0.8, 0.2, 0.2), (0.2, 0.5, 0.8), (0.9, 0.8, 0.2), (0.1, 0.1, 0.1)][i % 4], rough=0.7)
 
 
+def wishlist(s, items, stations):
+    """The gear list, taped to the back wall over the bike (HideoutReadout Wishlist)."""
+    x, y, z = -2.62, 1.5, D - 0.012
+    page = s.group("Wishlist", items, (x, y, z))
+    textured(s.box("Wishlist Page", page, (0.0, 0.0, 0.0), (0.27, 0.35, 0.003), (1, 1, 1), rot=(0, 0, -2.0), rough=0.9, shadows=False),
+             "Notebook", emissive=True, emissive_intensity=0.3)
+    for k, dx in enumerate((-0.09, 0.09)):
+        s.box(f"Wishlist Tape {k}", page, (dx, 0.17, -0.002), (0.08, 0.025, 0.002), (0.86, 0.8, 0.62), rot=(0, 0, 18 - 36 * k), shadows=False)
+    wishes = ("practice-pad", "metronome", "stick-bag", "spare-cymbal", "neon-sign", "lava-lamp", "vinyl-shelf", "acoustic-foam", "gold-record")
+    for i, item in enumerate(wishes):
+        readout(scrawl(s, page, f"Wish {i}", (-0.098, 0.104 - i * 0.0202, -0.003), "", 0.017, (0.12, 0.16, 0.42), align="Left", anchor="Bottom",
+                       tilt=-2.0), "Wishlist", item=item)
+    scrawl(s, page, "Wishlist Footnote", (0.02, -0.165, -0.003), "(birthday??)", 0.014, (0.55, 0.08, 0.08), tilt=3.0)
+    station(s, stations, "Wishlist", "Wishlist", (x, y, z), (0.3, 0.05, -0.85), 38)
+
+
+def stand_ins(s, items):
+    """Where the gear will go, until it comes."""
+    tape = (0.86, 0.8, 0.62)
+    ink = (0.12, 0.16, 0.42)
+    red = (0.62, 0.08, 0.08)
+    bz = 4.3
+    pad = stand_in(s, items, "Practice Pad Goes Here", "PracticePad")
+    tape_outline(s, pad, "Pad Tape", (-H + 0.34, 0.9215, bz), 0.3, 0.3)
+    scrawl(s, pad, "Pad Note", (-H + 0.34, 0.923, bz), "PAD\nhere", 0.075, (0.05, 0.05, 0.06), facing="up", spin=-90.0, font=MARKER)
+    met = stand_in(s, items, "Metronome Note", "Metronome")
+    s.box("Sticky", met, (-H + 0.026, 1.25, bz + 0.6), (0.003, 0.09, 0.09), (0.98, 0.9, 0.36), rot=(5, 0, 0), shadows=False)
+    scrawl(s, met, "Sticky Text", (-H + 0.029, 1.25, bz + 0.6), "buy a\nMETRONOME", 0.016, ink, facing="+x", tilt=5.0)
+    neon = stand_in(s, items, "Neon Goes Here", "Neon")
+    tape_outline(s, neon, "Neon Tape", (-2.6, 2.3, D - 0.03), 0.84, 0.22, facing="-z", colour=tape)
+    scrawl(s, neon, "Neon Note", (-2.6, 2.3, D - 0.035), "NEON (SOMEDAY)", 0.06, red, font=MARKER, tilt=2.0)
+    wz = 5.0
+    record = stand_in(s, items, "Gold Record Goes Here", "GoldRecord")
+    tape_outline(s, record, "Record Tape", (H - 0.012, 2.2, wz + 0.25), 0.34, 0.4, facing="-x", colour=tape)
+    scrawl(s, record, "Record Note", (H - 0.015, 2.21, wz + 0.25), "GOLD\nRECORD\nhere", 0.075, red, facing="-x", font=MARKER, tilt=3.0)
+    for slot_name, z, text in (("PlaqueA", wz + 0.65, "FC\nplaque"), ("PlaqueB", wz + 0.95, "teacher\ncert.")):
+        p = stand_in(s, items, f"{slot_name} Goes Here", slot_name)
+        tape_outline(s, p, f"{slot_name} Tape", (H - 0.012, 1.85, z), 0.24, 0.3, facing="-x", colour=tape, tape=0.018)
+        scrawl(s, p, f"{slot_name} Note", (H - 0.015, 1.85, z), text, 0.05, ink, facing="-x", font=MARKER)
+    band = stand_in(s, items, "Band Poster Goes Here", "PosterA")
+    tape_outline(s, band, "Poster Tape", (H - 0.012, 1.55, wz - 0.4), 0.4, 0.6, facing="-x", colour=tape)
+    scrawl(s, band, "Poster Note", (H - 0.015, 1.58, wz - 0.4), "OUR\nPOSTER\nHERE", 0.1, red, facing="-x", font=MARKER, tilt=-4.0)
+    gz = 2.6
+    for slot_name, y, dz, text in (("FlyerA", 1.6, -0.1, "GIG #1\n???"), ("FlyerB", 1.45, 0.16, "a REAL\ngig"), ("FlyerC", 1.7, 0.05, "FEST\n(lol)")):
+        card = stand_in(s, items, f"{slot_name} Card", slot_name)
+        s.box("Index Card", card, (-H + 0.036, y, gz + dz), (0.003, 0.11, 0.16), (0.97, 0.96, 0.9), rot=(-3, 0, 0), shadows=False)
+        scrawl(s, card, "Card Text", (-H + 0.039, y, gz + dz), text, 0.034, ink, facing="+x", tilt=-3.0, font=MARKER)
+    tally(s, items, (H - 0.012, 1.1, wz + 0.62), "-x")
+    # A clock over the shelves, on the player's time.
+    cx, cy, cz = 2.75, 2.45, D - 0.02
+    s.box("Clock", items, (cx, cy, cz), (0.32, 0.32, 0.03), OFFWHITE, rot=(90, 0, 0), shape="Cylinder", rough=0.5)
+    s.box("Clock Rim", items, (cx, cy, cz + 0.005), (0.35, 0.35, 0.02), BLACK, rot=(90, 0, 0), shape="Cylinder", rough=0.5)
+    import math
+    for k in range(12):
+        a = math.radians(k * 30)
+        s.box(f"Clock Tick {k}", items, (cx + 0.13 * math.sin(a), cy + 0.13 * math.cos(a), cz - 0.016), (0.006, 0.02 if k % 3 == 0 else 0.01, 0.003),
+              BLACK, rot=(0, 0, -k * 30), shadows=False)
+    clock_hands(s, items, (cx, cy, cz - 0.016), "-z", 0.15)
+
+
+def moving_in(s, items):
+    """The first visit: the basement's boxes by the house door, and the dolly that brought them."""
+    boxes = when(s.group("Moving Boxes", items), "MovingIn")
+    textured(s.box("Box Drums", boxes, (-1.95, 0.24, 0.3), (0.6, 0.48, 0.48), (1, 1, 1), rot=(0, 10, 0), rough=0.9), "BoxDrums")
+    textured(s.box("Box Stuff", boxes, (-1.9, 0.66, 0.32), (0.44, 0.36, 0.4), (1, 1, 1), rot=(0, -6, 0), rough=0.9), "BoxStuff")
+    textured(s.box("Box Fragile", boxes, (0.5, 0.2, 1.3), (0.5, 0.4, 0.42), (1, 1, 1), rot=(0, 25, 0), rough=0.9), "BoxFragile")
+    textured(s.box("Box Cables 2", boxes, (0.95, 0.2, 1.05), (0.42, 0.4, 0.42), (1, 1, 1), rot=(0, -15, 0), rough=0.9), "BoxCables")
+    dolly = s.group("Dolly", boxes, (-1.2, 0.0, 0.7))
+    rod(s, dolly, "Dolly Rail L", (-0.18, 0.05, 0.0), (-0.18, 1.2, 0.25), 0.03, (0.75, 0.1, 0.08), metallic=0.5)
+    rod(s, dolly, "Dolly Rail R", (0.18, 0.05, 0.0), (0.18, 1.2, 0.25), 0.03, (0.75, 0.1, 0.08), metallic=0.5)
+    s.box("Dolly Plate", dolly, (0.0, 0.03, -0.1), (0.42, 0.02, 0.22), STEEL, metallic=0.7)
+    for w in (-0.22, 0.22):
+        s.box(f"Dolly Wheel {w}", dolly, (w, 0.1, 0.05), (0.2, 0.05, 0.2), BLACK, rot=(0, 0, 90), shape="Cylinder")
+
+
 def front(s, geo, items, lights):
     """The house door (open a crack, the kitchen light on), the extras, a fill."""
     s.slab("House Door Frame", geo, -3.2, -2.3, 0.0, 2.1, -1.62, -1.55, (0.75, 0.7, 0.62), rough=0.6)
@@ -385,6 +481,9 @@ def build_garage():
     left_side(s, geo, items, stations)
     right_side(s, geo, items, stations, lights)
     front(s, geo, items, lights)
+    wishlist(s, items, stations)
+    stand_ins(s, items)
+    moving_in(s, items)
     tone = s.group("Room Tone", root)
     sound(s, tone, "Tube Buzz", (1.4, 2.44, 2.2), "TubeBuzz", volume=0.12, near=0.4, far=4.5)
     sound(s, tone, "Fan Whir", (-1.6, 0.64, 4.9), "FanWhir", volume=0.35, near=0.6, far=6.0)

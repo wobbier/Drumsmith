@@ -291,3 +291,40 @@ def clock_hands(s, parent, centre, facing, radius, colour=(0.05, 0.05, 0.05), se
         hand_colour = (0.75, 0.08, 0.06) if kind == "Second" else colour
         size = (width, radius * length, 0.003) if facing == "-z" else (0.003, radius * length, width)
         s.box(f"{kind} Hand Bar", pivot, (0.0, radius * length * 0.4, 0.0), size, hand_colour, shadows=False)
+
+
+def setlist(s, parent, centre, yaw, songs=5):
+    """A setlist taped down (SetlistBlank, title only) with the last songs played written on it."""
+    textured(s.box("Setlist", parent, centre, (0.24, 0.002, 0.34), (1, 1, 1), rot=(0, yaw, 0), shadows=False), "SetlistBlank")
+    c, si = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    for i in range(songs):
+        dx, dz = -0.1, 0.075 - i * 0.05
+        p = (centre[0] + dx * c + dz * si, centre[1] + 0.002, centre[2] - dx * si + dz * c)
+        readout(scrawl(s, parent, f"Setlist Song {i}", p, "", 0.034, (0.1, 0.1, 0.14), facing="up", spin=yaw, align="Left", font=MARKER),
+                "RecentSong", line=i, prefix=f"{i + 1}. ", max_letters=13)
+    for k, (dx, dz) in enumerate(((-0.1, 0.16), (0.1, 0.16), (-0.1, -0.16), (0.1, -0.16))):
+        s.box(f"Setlist Tape {k}", parent, (centre[0] + dx * c + dz * si, centre[1] + 0.001, centre[2] - dx * si + dz * c), (0.07, 0.002, 0.025),
+              (0.86, 0.8, 0.62), rot=(0, yaw + 40 * (1 if k % 3 else -1), 0), shadows=False)
+
+
+def boombox_display(s, parent, centre, facing="-x", width=0.24):
+    """A radio's display (a green LCD) scrolling the song it's playing (HideoutReadout NowPlaying)."""
+    size = (0.004, 0.034, width) if facing in ("-x", "+x") else (width, 0.034, 0.004)
+    s.box("Display", parent, centre, size, (0.02, 0.05, 0.03), emissive=(0.05, 0.25, 0.12), emissive_intensity=1.0, shadows=False)
+    out = {"-x": (-0.004, 0, 0), "+x": (0.004, 0, 0), "-z": (0, 0, -0.004)}[facing]
+    p = tuple(centre[k] + out[k] for k in range(3))
+    readout(scrawl(s, parent, "Now Playing", p, "", 0.024, (0.55, 1.0, 0.7), facing=facing, font="Assets/Fonts/JetBrainsMono-Regular.ttf",
+                   lit=False), "NowPlaying", max_letters=int(width / 0.0172), upper=True, scroll=0.22)
+
+
+def tally(s, parent, centre, facing="-x", ink=(0.12, 0.16, 0.42)):
+    """The counts on a scrap of paper: songs played, full combos, gigs (HideoutReadout)."""
+    group = s.group("Tally", parent, centre)
+    size = (0.003, 0.22, 0.3) if facing in ("-x", "+x") else (0.3, 0.22, 0.003)
+    s.box("Tally Paper", group, (0.0, 0.0, 0.0), size, (0.98, 0.97, 0.92), rot=(-2, 0, 0) if facing in ("-x", "+x") else (0, 0, -2), rough=0.9,
+          shadows=False)
+    off = {"-x": (-0.003, 0, 0.13), "+x": (0.003, 0, -0.13), "-z": (-0.13, 0, -0.003)}[facing]
+    for i, (source, prefix) in enumerate((("SongsPlayed", "songs: "), ("FullCombos", "full combos: "), ("GigsPlayed", "gigs: "))):
+        p = (off[0], 0.06 - i * 0.058, off[2])
+        readout(scrawl(s, group, f"Tally {source}", p, "", 0.04, ink, facing=facing, align="Left", tilt=-2.0, font=MARKER), source, prefix=prefix)
+    return group

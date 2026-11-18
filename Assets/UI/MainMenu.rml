@@ -5,7 +5,7 @@
     <link type="text/rcss" href="Radio.rcss"/>
     <link type="text/rcss" href="MainMenu.rcss"/>
 </head>
-<body class="main-menu-page" data-model="main_menu" data-class-hideout="hideout > 0" data-class-basement="hideout > 0 && hideout_tier == 0">
+<body class="main-menu-page" data-model="main_menu" data-class-hideout="hideout > 0" data-class-basement="hideout > 0 && hideout_tier == 0" data-class-garage="hideout > 0 && hideout_tier == 1" data-class-rehearsal="hideout > 0 && hideout_tier == 2" data-class-studio="hideout > 0 && hideout_tier == 3">
     <div class="menu-shade" data-if="hideout == 0 || settings_open"></div>
     <!-- The hideout (Docs/Hideout-and-Progression.md): the room is the menu; a label over each station. -->
     <div id="hideout" data-if="hideout > 0 && !settings_open">

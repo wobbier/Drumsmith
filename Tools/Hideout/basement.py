@@ -17,8 +17,8 @@ import math
 import random
 
 from hideoutgen import (band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, PEN, STEEL, WHITE, WOOD, Scene,
-                        clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, slot, stand_in,
-                        station, tape_outline, textured, view, when)
+                        boombox_display, clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl,
+                        setlist, slot, stand_in, station, tally, tape_outline, textured, view, when)
 
 H = 3.2        # half the width
 D = 6.0        # the back wall's face
@@ -259,11 +259,7 @@ def couch_corner(s, geo, items, stations, lights):
     rx, ry, rz = shelf_x, 1.52, 2.8
     s.box("Boombox", radio, (rx, ry, rz), (0.22, 0.26, 0.66), (0.14, 0.14, 0.15), rough=0.45, metallic=0.2)
     s.box("Boombox Deck", radio, (rx - 0.111, ry + 0.02, rz), (0.005, 0.1, 0.16), (0.05, 0.05, 0.06), rough=0.2)
-    # The display: the song the radio's playing, scrolling by.
-    s.box("Boombox Display", radio, (rx - 0.112, ry + 0.095, rz), (0.004, 0.034, 0.24), (0.02, 0.05, 0.03), emissive=(0.05, 0.25, 0.12),
-          emissive_intensity=1.0, shadows=False)
-    readout(scrawl(s, radio, "Now Playing", (rx - 0.116, ry + 0.095, rz), "", 0.024, (0.55, 1.0, 0.7), facing="-x",
-                   font="Assets/Fonts/JetBrainsMono-Regular.ttf", lit=False), "NowPlaying", max_letters=14, upper=True, scroll=0.22)
+    boombox_display(s, radio, (rx - 0.112, ry + 0.095, rz), "-x")
     rod(s, radio, "Boombox Handle", (rx, ry + 0.17, rz - 0.22), (rx, ry + 0.17, rz + 0.22), 0.02, CHROME, metallic=0.9)
     for i, z in enumerate((rz - 0.2, rz + 0.2)):
         cone = s.entity(f"Speaker {i}", radio, (rx - 0.112, ry - 0.01, z))
@@ -495,20 +491,6 @@ def front(s, geo, items, stations):
     light(s, geo, "Fill", (0.3, 1.3, 0.3), color=(1.0, 0.82, 0.62), intensity=1.4, range_=4.0)
 
 
-def setlist(s, parent, centre, yaw, songs=5):
-    """A setlist taped down (SetlistBlank, title only) with the last songs played written on it."""
-    textured(s.box("Setlist", parent, centre, (0.24, 0.002, 0.34), (1, 1, 1), rot=(0, yaw, 0), shadows=False), "SetlistBlank")
-    c, si = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
-    for i in range(songs):
-        dx, dz = -0.1, 0.075 - i * 0.05
-        p = (centre[0] + dx * c + dz * si, centre[1] + 0.002, centre[2] - dx * si + dz * c)
-        readout(scrawl(s, parent, f"Setlist Song {i}", p, "", 0.034, (0.1, 0.1, 0.14), facing="up", spin=yaw, align="Left", font=MARKER),
-                "RecentSong", line=i, prefix=f"{i + 1}. ", max_letters=13)
-    for k, (dx, dz) in enumerate(((-0.1, 0.16), (0.1, 0.16), (-0.1, -0.16), (0.1, -0.16))):
-        s.box(f"Setlist Tape {k}", parent, (centre[0] + dx * c + dz * si, centre[1] + 0.001, centre[2] - dx * si + dz * c), (0.07, 0.002, 0.025),
-              (0.86, 0.8, 0.62), rot=(0, yaw + 40 * (1 if k % 3 else -1), 0), shadows=False)
-
-
 def wishlist(s, items, stations):
     """The gear wishlist, a notebook page taped to the steel post where it can't be missed: each
     thing ticked off once it's in (HideoutReadout Wishlist). The Wishlist station opens the whole
@@ -564,11 +546,7 @@ def stand_ins(s, items):
         s.box("Index Card", card, (-H + 0.036, y, gz + dz), (0.003, 0.11, 0.16), (0.97, 0.96, 0.9), rot=(-3, 0, 0), shadows=False)
         scrawl(s, card, "Card Text", (-H + 0.039, y, gz + dz), text, 0.034, ink, facing="+x", tilt=-3.0, font=MARKER)
     # The counts, on a scrap under the certificate.
-    tally = s.group("Tally", items, (H - 0.012, 1.12, wz + 0.62))
-    s.box("Tally Paper", tally, (0.0, 0.0, 0.0), (0.003, 0.22, 0.3), (0.98, 0.97, 0.92), rot=(-2, 0, 0), rough=0.9, shadows=False)
-    for i, (source, prefix) in enumerate((("SongsPlayed", "songs: "), ("FullCombos", "full combos: "), ("GigsPlayed", "gigs: "))):
-        readout(scrawl(s, tally, f"Tally {source}", (-0.003, 0.06 - i * 0.058, 0.13), "", 0.04, ink, facing="-x", align="Left", tilt=-2.0,
-                       font=MARKER), source, prefix=prefix)
+    tally(s, items, (H - 0.012, 1.12, wz + 0.62), "-x")
 
 
 def moving_in(s, items):

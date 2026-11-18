@@ -11682,8 +11682,8 @@
    ]
   },
   {
-   "GUID": "427b8536f959bd6b",
-   "Name": "Boombox Display",
+   "GUID": "78e1d3ac4f85270d",
+   "Name": "Display",
    "DestroyOnLoad": true,
    "Parent": "6bd43aa05a38e083",
    "Components": [
@@ -11772,7 +11772,7 @@
      "Show": "NowPlaying",
      "Line": 0,
      "Prefix": "",
-     "MaxLetters": 14,
+     "MaxLetters": 13,
      "Upper": true,
      "Scroll": 0.22
     }

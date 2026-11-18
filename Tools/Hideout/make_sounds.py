@@ -5,8 +5,10 @@
     python3 Tools/Hideout/make_sounds.py
 
 Seamless loops (each one's tail is crossfaded over its own start, so the loop point has nothing to
-click on): the furnace's rumble, the dying fluorescent tube's buzz, the box fan's whir, and a pipe
-that drips now and then. Mono: they're placed in the room as 3D sources (Tools/Hideout/basement.py).
+click on): the furnace's rumble, the dying fluorescent tube's buzz, the box fan's whir, a pipe that
+drips now and then, an amp humming on standby, and the band next door to the rehearsal space
+(through the wall: nothing over 250 Hz). Mono: they're placed in the rooms as 3D sources
+(Tools/Hideout/basement.py, garage.py, rehearsal.py).
 """
 import os
 import subprocess
@@ -51,6 +53,20 @@ def main():
             "+0.25*sin(2*PI*(1700-600*(mod(t,8)-5.3))*(mod(t,8)-5.3))*exp(-42*(mod(t,8)-5.3))*gte(mod(t,8),5.3)*lt(mod(t,8),5.45)'"
             ":d=8:s={r}".format(r=RATE))
     ffmpeg(["-f", "lavfi", "-i", drip, "-af", "aecho=0.8:0.5:60|140:0.3|0.15"], os.path.join(OUT, "Drip.wav"))
+    # The band next door, through a block wall: a 120 bpm rock beat (kick, snare, a bass riff) with
+    # everything over 250 Hz gone; twelve bars, then they stop for four seconds to argue.
+    beat = ("aevalsrc='"
+            "if(lt(t,24),"
+            "0.9*sin(2*PI*(55+70*exp(-30*mod(t,0.5)))*mod(t,0.5))*exp(-9*mod(t,0.5))"
+            "+0.35*gt(mod(t+0.5,1),0.5)*exp(-14*mod(t+0.5,0.5))*sin(2*PI*190*t)"
+            "+0.5*sin(2*PI*(41.2*(1+0.335*gt(mod(t,4),2)+0.5*gt(mod(t,4),3)))*t)*(0.6+0.4*exp(-4*mod(t,0.25)))"
+            ",0)':d=28:s={r}").format(r=RATE)
+    ffmpeg(["-f", "lavfi", "-i", beat, "-af", "lowpass=f=250,lowpass=f=250,volume=0.9,aecho=0.6:0.4:35:0.25"], os.path.join(OUT, "BandNextDoor.wav"))
+    # A valve amp on standby: mains hum and its harmonics, quiet.
+    loop("AmpHum", "anoisesrc=d={d}:c=pink:a=0.01:r={r}:s=9",
+         "aeval='val(0)+0.08*sin(2*PI*60*t)+0.05*sin(2*PI*120*t)+0.02*sin(2*PI*180*t)',lowpass=f=900,volume=0.6", seconds=6.0, fade=1.0)
+    # The studio's air handling: a soft, even hiss.
+    loop("StudioAir", "anoisesrc=d={d}:c=pink:a=0.3:r={r}:s=11", "highpass=f=120,lowpass=f=1800,volume=0.35")
     for name in sorted(os.listdir(OUT)):
         print("wrote", os.path.join(OUT, name), os.path.getsize(os.path.join(OUT, name)), "bytes")
 
