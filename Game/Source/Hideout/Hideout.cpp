@@ -691,6 +691,7 @@ bool Hideout::Reload( bool inEvaluate )
 
 bool Hideout::Load( bool inEvaluate )
 {
+    const auto started = std::chrono::steady_clock::now();
     World& inWorld = *m_world;
     PlayerProfile& profile = PlayerProfile::GetInstance();
     const Progression& progression = Progression::GetInstance();
@@ -1061,8 +1062,10 @@ bool Hideout::Load( bool inEvaluate )
         debugOpened = true;
         m_debugOpen = true;
     }
-    INFO_FMT( "[Hideout]", "%s: %d stations, %d locked items hidden, %d notices, %s%s", scenePath.c_str(), static_cast<int>( m_stations.size() ), hidden,
-        static_cast<int>( m_notices.size() ), day ? "day" : "night", m_movingIn ? ", moving in" : "" );
+    const double loadMs = std::chrono::duration<double, std::milli>( std::chrono::steady_clock::now() - started ).count();
+    INFO_FMT( "[Hideout]", "%s: %d stations, %d locked items hidden, %d notices, %s%s, %d entities, loaded in %.0f ms", scenePath.c_str(),
+        static_cast<int>( m_stations.size() ), hidden, static_cast<int>( m_notices.size() ), day ? "day" : "night", m_movingIn ? ", moving in" : "",
+        static_cast<int>( entities.size() ), loadMs );
     // --gig <id> [--gig-songs N] plays a gig straight away, once (for headless checks).
     static bool gigStarted = false;
     static const std::string kGig = CommandLine::GetString( "--gig" );
