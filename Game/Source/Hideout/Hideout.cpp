@@ -1689,6 +1689,27 @@ void Hideout::FillRecords( RmlUiCore& inUi, const char* inModel ) const
         items += profile.UnlockedItems.count( "item:" + item.Id ) > 0 ? 1 : 0;
     }
     rows.emplace_back( "Things in the hideout", std::to_string( items ) + " / " + std::to_string( progression.Items().size() ) );
+    // The player's best songs, by best accuracy (a full combo marked).
+    std::vector<std::pair<std::string, const PlayerProfile::SongRecord*>> best;
+    for( const auto& [key, record] : profile.Songs() )
+    {
+        best.emplace_back( key, &record );
+    }
+    std::sort( best.begin(), best.end(), []( const auto& a, const auto& b ) { return a.second->BestAccuracy > b.second->BestAccuracy; } );
+    if( !best.empty() )
+    {
+        rows.emplace_back( "Your best", "" );
+        const std::vector<TrackData>& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+        for( size_t i = 0; i < best.size() && i < 5; ++i )
+        {
+            const std::string& key = best[i].first;
+            const auto track = std::find_if( tracks.begin(), tracks.end(), [&key]( const TrackData& inTrack ) { return TrackDatabase::FavoriteKey( inTrack ) == key; } );
+            const std::string name = track != tracks.end() && !track->m_trackName.empty() ? track->m_trackName : key;
+            char value[48];
+            std::snprintf( value, sizeof( value ), "%.1f%%%s", best[i].second->BestAccuracy, best[i].second->FullCombo ? "  FC" : "" );
+            rows.emplace_back( name, value );
+        }
+    }
     for( const ProgressionMilestone& milestone : progression.Milestones() )
     {
         rows.emplace_back( milestone.Name, profile.UnlockedItems.count( "milestone:" + milestone.Id ) > 0 ? "Done" : "-" );

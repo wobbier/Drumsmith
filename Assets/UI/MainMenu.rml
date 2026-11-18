@@ -32,7 +32,7 @@
             <h1>{{hideout_title}}</h1>
             <p>{{hideout_hint}}</p>
             <div id="hideout-records" class="hideout-panel" data-if="hideout_panel == 'records'">
-                <div class="record-row" data-for="record : records"><span>{{record.name}}</span><span>{{record.value}}</span></div>
+                <div class="record-row" data-for="record : records" data-class-head="record.value == ''"><span>{{record.name}}</span><span>{{record.value}}</span></div>
             </div>
             <div id="hideout-wishlist" class="hideout-panel" data-if="hideout_panel == 'wishlist'">
                 <div class="wish-row" data-for="wish : wishes" data-class-got="wish.got > 0">

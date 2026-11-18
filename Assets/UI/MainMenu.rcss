@@ -91,6 +91,7 @@ body.main-menu-page.hideout { decorator: none; }
 #hideout-focus .menu-link { width: auto; margin-top: 16dp; font-size: 32dp; text-align: left; }
 .hideout-panel { margin-top: 10dp; }
 .record-row { display: flex; justify-content: space-between; padding: 6dp 0; font-size: 20dp; border-bottom: 1dp #ffffff20; }
+.record-row.head { margin-top: 14dp; font-weight: bold; color: #ffd166; border-bottom: 2dp #ffd16680; }
 .gig-card { margin-bottom: 14dp; padding: 12dp 14dp; background-color: #ffffff10; border-left: 3dp #ff9933; }
 .gig-card.locked { border-left-color: #ffffff40; color: #ffffff80; }
 .gig-card .gig-title { display: flex; justify-content: space-between; font-size: 24dp; font-weight: bold; }
