@@ -400,6 +400,37 @@ def laptop_screen():
     finish(n)
 
 
+def drywall():
+    """Painted drywall: smooth, the tape lines faintly showing every 1.2 m, a scuff or two."""
+    rnd = random.Random(171)
+    magick("-size", "512x512", "xc:rgb(204,198,184)", "(", "-size", "512x512", "-seed", 172, "plasma:fractal", "-colorspace", "gray",
+           "-blur", "0x8", "-auto-level", "+level", "88%,100%", ")", "-compose", "multiply", "-composite",
+           "-fill", "rgba(255,255,250,0.35)", "-draw", "rectangle 250,0 262,512", out("Drywall"))
+    scuffs = []
+    for _ in range(5):
+        x, y = rnd.randint(0, 512), rnd.randint(300, 500)
+        scuffs += ["-draw", f"line {x},{y} {x + rnd.randint(10, 60)},{y + rnd.randint(-6, 6)}"]
+    magick(out("Drywall"), "-stroke", "rgba(60,55,50,0.25)", "-strokewidth", 2, *scuffs, out("Drywall"))
+    grain(out("Drywall"), 0.25, 173)
+    finish("Drywall")
+
+
+def dartboard():
+    import math
+    n = "Dartboard"
+    draws = ["-fill", "rgb(20,20,20)", "-draw", "circle 256,256 256,6"]
+    for i in range(20):
+        a0, a1 = math.radians(i * 18 - 9), math.radians(i * 18 + 9)
+        for r0, r1, colours in ((200, 236, ("rgb(190,30,30)", "rgb(30,130,60)")), (24, 200, ("rgb(20,20,20)", "rgb(232,220,190)")),
+                                (120, 136, ("rgb(190,30,30)", "rgb(30,130,60)"))):
+            pts = [(256 + r0 * math.sin(a0), 256 - r0 * math.cos(a0)), (256 + r1 * math.sin(a0), 256 - r1 * math.cos(a0)),
+                   (256 + r1 * math.sin(a1), 256 - r1 * math.cos(a1)), (256 + r0 * math.sin(a1), 256 - r0 * math.cos(a1))]
+            draws += ["-fill", colours[i % 2], "-draw", "polygon " + " ".join("%d,%d" % p for p in pts)]
+    draws += ["-fill", "rgb(30,130,60)", "-draw", "circle 256,256 256,232", "-fill", "rgb(190,30,30)", "-draw", "circle 256,256 256,244"]
+    magick("-size", "512x512", "xc:none", *draws, out(n))
+    finish(n)
+
+
 def kick_head():
     """The kick's front head: the band's name in marker, a doodle, and nothing outside the circle
     (alpha 0 there, for a cut-out)."""
@@ -477,6 +508,8 @@ ALL = {
     "Certificate": certificate,
     "LaptopScreen": laptop_screen,
     "KickHead": kick_head,
+    "Drywall": drywall,
+    "Dartboard": dartboard,
     "TvStatic": tv_static,
     "WindowNight": window_night,
 }
