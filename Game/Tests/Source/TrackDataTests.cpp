@@ -226,6 +226,83 @@ TEST_CASE( "MIDI import: note 102 in PART DRUMS is the hi-hat pedal, beside Rock
 }
 
 
+TEST_CASE( "MIDI import: Phase Shift SysEx phrases open the hi-hat, put it under the foot, and rim the snare" )
+{
+    smf::MidiFile midi;
+    midi.absoluteTicks();
+    midi.setTicksPerQuarterNote( 480 );
+    const int track = midi.addTrack();
+    midi.addTempo( 0, 0, 120.0 );
+    midi.addTrackName( track, 0, "PART DRUMS" );
+    const auto phrase = [&]( int inTick, int inDifficulty, int inCode, int inOn ) {
+        std::vector<smf::uchar> sysex = { 0xF0, 'P', 'S', 0x00, 0x00, static_cast<smf::uchar>( inDifficulty ), static_cast<smf::uchar>( inCode ), static_cast<smf::uchar>( inOn ), 0xF7 };
+        midi.addEvent( track, inTick, sysex );
+    };
+    // 120 BPM: 480 ticks is half a second. Yellow gems at 0.5 s (open, a one-tick phrase like the
+    // bundled chart's), 1.0 s (sizzle), 1.5 s (pedal), 2.0 s (the open phrase ends on it, so it is
+    // not covered) and 2.5 s (a Hard-only phrase, not Expert). Snares at 3.0 s (rimshot) and 3.5 s.
+    phrase( 480, 3, 5, 1 );
+    phrase( 481, 3, 5, 0 );
+    phrase( 960, 0xFF, 8, 1 );
+    phrase( 961, 0xFF, 8, 0 );
+    phrase( 1440, 3, 6, 1 );
+    phrase( 1441, 3, 6, 0 );
+    phrase( 1900, 3, 5, 1 );
+    phrase( 1920, 3, 5, 0 );
+    phrase( 2400, 2, 5, 1 );
+    phrase( 2401, 2, 5, 0 );
+    phrase( 2880, 3, 7, 1 );
+    phrase( 2881, 3, 7, 0 );
+    const std::vector<std::pair<int, int>> notes = { { 480, 98 }, { 960, 98 }, { 1440, 98 }, { 1920, 98 }, { 2400, 98 }, { 2880, 97 }, { 3360, 97 } };
+    for( const auto& [tick, key] : notes )
+    {
+        midi.addNoteOn( track, tick, 0, key, 100 );
+        midi.addNoteOff( track, tick + 60, 0, key );
+    }
+    midi.sortTracks();
+    std::stringstream file;
+    midi.write( file );
+    smf::MidiFile read;
+    REQUIRE( read.read( file ) );
+    read.doTimeAnalysis();
+
+    // Not pro: a yellow gem with no hi-hat phrase is a tom.
+    TrackData chart;
+    CustomTrackDefineTest::ReadMidiDrumNotes( read, track, false, chart );
+    std::sort( chart.m_noteData.begin(), chart.m_noteData.end(), []( const NoteData& a, const NoteData& b ) { return a.m_triggerTime < b.m_triggerTime; } );
+    REQUIRE( chart.m_noteData.size() == 7 );
+    CHECK( chart.m_noteData[0].m_editorLane == PadId::OpenHiHat );
+    CHECK( chart.m_noteData[1].m_editorLane == PadId::OpenHiHat );
+    CHECK( chart.m_noteData[2].m_editorLane == PadId::HiHatPedal );
+    CHECK( chart.m_noteData[3].m_editorLane == PadId::HighTom );
+    CHECK( chart.m_noteData[4].m_editorLane == PadId::HighTom );
+    CHECK( chart.m_noteData[5].m_editorLane == PadId::Snare );
+    CHECK( chart.m_noteData[5].m_articulation == Articulation::Rim );
+    CHECK( chart.m_noteData[6].m_articulation == Articulation::Normal );
+
+    // Pro: the uncovered yellow gems are the closed hi-hat.
+    TrackData pro;
+    CustomTrackDefineTest::ReadMidiDrumNotes( read, track, true, pro );
+    std::sort( pro.m_noteData.begin(), pro.m_noteData.end(), []( const NoteData& a, const NoteData& b ) { return a.m_triggerTime < b.m_triggerTime; } );
+    REQUIRE( pro.m_noteData.size() == 7 );
+    CHECK( pro.m_noteData[0].m_editorLane == PadId::OpenHiHat );
+    CHECK( pro.m_noteData[3].m_editorLane == PadId::ClosedHiHat );
+    CHECK( pro.m_noteData[4].m_editorLane == PadId::ClosedHiHat );
+
+    // The rimshot survives the chart's own files.
+    json saved;
+    chart.OnSaveNoteData( saved );
+    TrackData loaded;
+    loaded.OnLoadNoteData( saved );
+    int rims = 0;
+    for( const NoteData& note : loaded.m_noteData )
+    {
+        rims += note.m_articulation == Articulation::Rim ? 1 : 0;
+    }
+    CHECK( rims == 1 );
+}
+
+
 TEST_CASE( "BeatGrid: snapping follows a tempo change" )
 {
     // Two beats at 120 BPM, then beats a second apart.

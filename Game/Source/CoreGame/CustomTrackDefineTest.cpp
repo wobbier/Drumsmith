@@ -420,6 +420,16 @@ void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrum
     struct Span { int Start; int End; };
     std::map<int, std::vector<Span>> tomMarkers;
     std::map<int, int> openMarker;
+    // Phase Shift's drum techniques, as SysEx phrases: F0 'P' 'S' 00 00 <difficulty> <code> <1 on
+    // / 0 off> F7. Difficulty 3 is Expert, FF every difficulty (only Expert is imported). Codes:
+    // 5 hi-hat open, 6 hi-hat pedal, 7 snare rimshot, 8 hi-hat sizzle (YARG.Core's
+    // PhaseShiftSysEx). A phrase covers its start tick up to its end tick, not the end itself.
+    constexpr int kHiHatOpen = 5;
+    constexpr int kHiHatPedal = 6;
+    constexpr int kSnareRimshot = 7;
+    constexpr int kHiHatSizzle = 8;
+    std::map<int, std::vector<Span>> techniques;
+    std::map<int, int> openTechnique;
     bool dynamics = false;
     for( int event = 0; event < drumTrack.size(); ++event )
     {
@@ -427,6 +437,21 @@ void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrum
         if( message.isMetaMessage() && message.getMetaContent().find( "ENABLE_CHART_DYNAMICS" ) != std::string::npos )
         {
             dynamics = true;
+        }
+        if( message.size() == 9 && message[0] == 0xF0 && message[1] == 'P' && message[2] == 'S' && message[3] == 0 && message[4] == 0
+            && ( message[5] == 3 || message[5] == 0xFF ) )
+        {
+            const int code = message[6];
+            if( message[7] == 1 )
+            {
+                openTechnique.try_emplace( code, message.tick );
+            }
+            else if( openTechnique.count( code ) )
+            {
+                techniques[code].push_back( { openTechnique[code], message.tick } );
+                openTechnique.erase( code );
+            }
+            continue;
         }
         const int key = message.isNoteOn() || message.isNoteOff() ? message.getKeyNumber() : -1;
         if( key < 110 || key > 112 )
@@ -455,6 +480,17 @@ void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrum
         return false;
     };
 
+    const auto underTechnique = [&techniques]( int inCode, int inTick ) {
+        for( const Span& span : techniques[inCode] )
+        {
+            if( inTick >= span.Start && ( inTick < span.End || inTick == span.Start ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
     // Expert notes: 95 double-kick, 96 kick, 97 snare, 98 yellow, 99 blue, 100 green. 102 is
     // Drumsmith's own: the hi-hat pedal, which Rock Band has no note for (101 is a five-lane
     // chart's orange gem; nothing else uses 102, and other games skip it).
@@ -472,7 +508,22 @@ void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrum
         case 95:
         case 96: pad = PadId::Bass; break;
         case 97: pad = PadId::Snare; break;
-        case 98: pad = !pro || underTomMarker( 110, message.tick ) ? PadId::HighTom : PadId::ClosedHiHat; break;
+        case 98:
+            // A hi-hat technique makes the yellow gem the hi-hat, pro chart or not.
+            if( underTechnique( kHiHatPedal, message.tick ) )
+            {
+                pad = PadId::HiHatPedal;
+            }
+            else if( underTechnique( kHiHatOpen, message.tick ) || underTechnique( kHiHatSizzle, message.tick ) )
+            {
+                // Drumsmith has no half-open hi-hat: a sizzle is played open.
+                pad = PadId::OpenHiHat;
+            }
+            else
+            {
+                pad = !pro || underTomMarker( 110, message.tick ) ? PadId::HighTom : PadId::ClosedHiHat;
+            }
+            break;
         case 99: pad = !pro || underTomMarker( 111, message.tick ) ? PadId::MidTom : PadId::Ride; break;
         case 100: pad = !pro || underTomMarker( 112, message.tick ) ? PadId::FloorTom : PadId::Crash1; break;
         case 102: pad = PadId::HiHatPedal; break;
@@ -490,6 +541,10 @@ void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrum
         const int velocity = message.getVelocity();
         note.m_velocity = !dynamics ? 100 : velocity <= 1 ? 30 : velocity >= 127 ? 127 : 100;
         note.m_secondPedal = key == 95;
+        if( pad == PadId::Snare && underTechnique( kSnareRimshot, message.tick ) )
+        {
+            note.m_articulation = Articulation::Rim;
+        }
         outTrackData.m_noteData.push_back( note );
         ++outTrackData.m_noteCount;
     }
