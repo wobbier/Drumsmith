@@ -1,5 +1,4 @@
 #include <doctest/doctest.h>
-#include "ComponentRegistry.h"
 #include "Components/Camera.h"
 #include "Components/Lighting/Light.h"
 #include "Components/Transform.h"

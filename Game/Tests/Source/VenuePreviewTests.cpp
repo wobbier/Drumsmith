@@ -1,5 +1,4 @@
 #include <doctest/doctest.h>
-#include "ComponentRegistry.h"
 #include "Components/Transform.h"
 #include "Components/Venue/VenueMarkers.h"
 #include "Cores/VenuePreviewCore.h"
