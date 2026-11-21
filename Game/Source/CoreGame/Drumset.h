@@ -1,3 +1,10 @@
+#pragma once
+
+#include "Dementia.h"
+
+// FMOD playback of a kit's pad samples (the Track Editor's MIDI audition): none without FMOD.
+#if USING( ME_FMOD )
+
 #include <unordered_map>
 #include <string>
 #include <fmod.hpp>
@@ -23,3 +30,5 @@ public:
 
     PadId stringToPadID( const std::string& name );
 };
+
+#endif

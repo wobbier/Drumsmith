@@ -659,4 +659,158 @@ bool AudioPack::IsReady() const
     return true;
 }
 
+#else
+
+#include <utility>
+
+// No FMOD (headless server builds): a pack that never loads and plays nothing, so the code
+// that holds one links and treats the song as not ready.
+
+AudioPack::AudioPack( TrackData& inTrackData )
+{
+    (void)inTrackData;
+}
+
+
+AudioPack::~AudioPack()
+{
+}
+
+
+AudioPack::AudioPack( AudioPack&& other ) noexcept
+    : m_sounds( std::move( other.m_sounds ) )
+    , m_drumTracks( std::move( other.m_drumTracks ) )
+    , m_metronome( std::exchange( other.m_metronome, -1 ) )
+{
+}
+
+
+AudioPack& AudioPack::operator=( AudioPack&& other ) noexcept
+{
+    m_sounds = std::move( other.m_sounds );
+    m_drumTracks = std::move( other.m_drumTracks );
+    m_metronome = std::exchange( other.m_metronome, -1 );
+    return *this;
+}
+
+
+void AudioPack::Play()
+{
+}
+
+
+void AudioPack::Pause()
+{
+}
+
+
+void AudioPack::Resume()
+{
+}
+
+
+void AudioPack::Stop()
+{
+}
+
+
+void AudioPack::SetVolume( float )
+{
+}
+
+
+void AudioPack::SetDrumVolume( float )
+{
+}
+
+
+bool AudioPack::AddMetronome( const std::string& )
+{
+    return false;
+}
+
+
+bool AudioPack::IsMetronomePlaying() const
+{
+    return false;
+}
+
+
+void AudioPack::SetMetronomeVolume( float )
+{
+}
+
+
+void AudioPack::SetPlaybackSpeed( float )
+{
+}
+
+
+float AudioPack::GetVolume()
+{
+    return 0.f;
+}
+
+
+void AudioPack::Seek( float, float )
+{
+}
+
+
+void AudioPack::Update()
+{
+}
+
+
+bool AudioPack::IsSeeking() const
+{
+    return false;
+}
+
+
+unsigned int AudioPack::GetPositionMs() const
+{
+    return 0;
+}
+
+
+unsigned int AudioPack::GetLength() const
+{
+    return 0;
+}
+
+
+unsigned int AudioPack::StemSpreadMs() const
+{
+    return 0;
+}
+
+
+void AudioPack::FadeOut( float )
+{
+}
+
+
+bool AudioPack::IsReady() const
+{
+    return false;
+}
+
+
+bool AudioPack::IsPlaying() const
+{
+    return false;
+}
+
+
+void AudioPack::SetSpeaker( float, float, float )
+{
+}
+
+
+float AudioPack::GetLevel()
+{
+    return 0.f;
+}
+
 #endif

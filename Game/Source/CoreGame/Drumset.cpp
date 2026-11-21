@@ -1,6 +1,9 @@
+#include "Drumset.h"
+
+#if USING( ME_FMOD )
+
 #include <nlohmann/json.hpp>
 #include <fstream>
-#include "Drumset.h"
 
 Drumset::Drumset( FMOD::System* system )
     : fmodSystem( system )
@@ -87,3 +90,5 @@ PadId Drumset::stringToPadID( const std::string& name )
     };
     return padMap.at( name );
 }
+
+#endif

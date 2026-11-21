@@ -6,7 +6,9 @@
 #include "ECS/Core.h"
 #include "Cores/AudioCore.h"
 #include "Resources/SoundResource.h"
+#if USING( ME_FMOD )
 #include <fmod.hpp>
+#endif
 #include "Components/VocalsTestComponent.h"
 #include <Cores/UI/RmlUiCore.h>
 #include <deque>
@@ -87,6 +89,7 @@ void VocalsTestCore::Update( const UpdateContext& context )
 
 void VocalsTestCore::OnStart()
 {
+#if USING( ME_FMOD )
     audioCore = GetEngine().AudioThread;
     audioSystem = audioCore->GetSystem();
     testVocals = MakeShared<Sound>( Path( "Assets/DLC/Saosin - Mookies Last Christmas/vocals.ogg" ), audioSystem );
@@ -103,11 +106,13 @@ void VocalsTestCore::OnStart()
     fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING );
     fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWSIZE, 1024 );  // Resolution of FFT
     channel->addDSP( 0, fftDsp );
+#endif
 }
 
 
 void VocalsTestCore::ProcessFFT()
 {
+#if USING( ME_FMOD )
     if( !fftDsp )
     {
         return;
@@ -145,6 +150,7 @@ void VocalsTestCore::ProcessFFT()
 
         std::cout << "Smoothed Pitch Graph Value: " << smoothedPitch << "/100" << std::endl;
     }
+#endif
 }
 
 
