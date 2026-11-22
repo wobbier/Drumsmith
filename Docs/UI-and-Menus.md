@@ -56,6 +56,7 @@ for( std::string e; !( e = ui->ModelPollEvent( "main_menu" ) ).empty(); )
 - **Register every bound key before the document loads.** When a model gains a key after a document bound to it loaded, the engine reloads that document (`RmlUiCore::SyncModels`), which resets scroll and focus. The controllers set all `detail_*` keys up front for that reason.
 - **Scene changes** go through `LoadSceneEvent` (`Queue()`), from inline actions or controller code, exactly as before; the play handoff to `NoteHighwayCore` is unchanged (`Docs/Game-Architecture.md`).
 - **Escape** is read from `Input::WasKeyPressed` in each controller: closes the flyout or settings panel first, else leaves the scene.
+- **Alt+Z** hides every page and the in-game HUD for screenshots, in every build including Retail. It is the engine's (`RmlUiCore::SetUIHidden`, `Engine/Docs/UI-RmlUi-and-ImGui.md`): pages keep updating but draw nothing and take no clicks, keys or gamepad navigation. Alt+Z again or Escape brings the UI back; that Escape also reaches the controllers, so in a song it shows the UI and opens the pause menu.
 
 ### Main menu (`main_menu`)
 
