@@ -113,6 +113,7 @@ void Director::Clear()
     m_plan = VenuePlan();
     m_arrival.clear();
     m_peakSpots.clear();
+    m_storyShots.clear();
     m_accentPhase = -1.f;
     m_arrivalElapsed = -1.f;
     m_shotName.clear();
@@ -569,6 +570,7 @@ const char* Director::FramingName( Framing inFraming )
     case Framing::PitRun: return "run";
     case Framing::Spot: return "spot";
     case Framing::Arrival: return "arrival";
+    case Framing::Story: return "story";
     }
     return "";
 }
@@ -941,7 +943,7 @@ void Director::AddSpotCuts()
     {
         const VenuePlan::CameraSpot& spot = m_plan.Cameras[i];
         if( spot.Shot != VenuePlan::CameraSpot::Kind::Close && spot.Shot != VenuePlan::CameraSpot::Kind::Custom ) continue;
-        if( spot.Shot == VenuePlan::CameraSpot::Kind::Custom && StartsWith( spot.Tag, "peak/" ) ) continue;
+        if( spot.Shot == VenuePlan::CameraSpot::Kind::Custom && ( StartsWith( spot.Tag, "peak/" ) || StartsWith( spot.Tag, "story/" ) ) ) continue;
         int nearest = -1;
         float best = 0.35f;
         for( int member = 0; member < VenueData::MemberCount; ++member )
@@ -1421,6 +1423,20 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         outFov = 66.f;
         break;
     }
+    case Framing::Story:
+    {
+        // A story shot: its spot, moving to its end spot over the hold (eased at both ends).
+        const StoryShot& shot = m_storyShots[static_cast<size_t>( std::max( inPlan.Variant, 0 ) ) % std::max<size_t>( m_storyShots.size(), 1 )];
+        const VenuePlan::CameraSpot& a = m_plan.Cameras[shot.Spot];
+        const VenuePlan::CameraSpot& b = m_plan.Cameras[shot.End >= 0 ? shot.End : shot.Spot];
+        const float u = VenueTiming::Smooth( held / std::max( static_cast<float>( shot.Until - shot.From ), 0.1f ) );
+        outEye = Lerp( a.Eye, b.Eye, u );
+        const Vector3 forward = Lerp( a.Forward, b.Forward, u );
+        outTarget = outEye + ( forward.Length() > 1e-3f ? forward.Normalized() : a.Forward ) * 10.f;
+        outFov = a.FieldOfView + ( b.FieldOfView - a.FieldOfView ) * u;
+        authored = true;
+        break;
+    }
     case Framing::Spot:
     {
         // One of the venue's own close or custom positions (AddSpotCuts), held, on its subject
@@ -1710,6 +1726,56 @@ void Director::UpdateFeed( double inSeconds, float inDeltaTime, int inCutIndex )
 }
 
 
+void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>& inLanding )
+{
+    m_storyShots.clear();
+    const auto& spots = m_plan.Cameras;
+    for( const auto& [flag, at] : inLanding )
+    {
+        StoryShot shot;
+        float hold = 5.f;
+        for( size_t i = 0; i < spots.size(); ++i )
+        {
+            const std::string& tag = spots[i].Tag;
+            const std::string head = "story/" + flag;
+            if( spots[i].Shot != VenuePlan::CameraSpot::Kind::Custom || tag.compare( 0, head.size(), head ) != 0 || ( tag.size() > head.size() && tag[head.size()] != '/' ) )
+            {
+                continue;
+            }
+            bool end = false;
+            bool hand = false;
+            float seconds = -1.f;
+            size_t from = head.size();
+            while( from < tag.size() )
+            {
+                const size_t next = std::min( tag.find( '/', from + 1 ), tag.size() );
+                const std::string part = tag.substr( from + 1, next - from - 1 );
+                if( part == "end" ) end = true;
+                else if( part == "hand" ) hand = true;
+                else if( !part.empty() && ( std::isdigit( static_cast<unsigned char>( part[0] ) ) || part[0] == '.' ) ) seconds = static_cast<float>( std::atof( part.c_str() ) );
+                from = next;
+            }
+            if( end )
+            {
+                shot.End = static_cast<int>( i );
+                continue;
+            }
+            shot.Spot = static_cast<int>( i );
+            shot.Handheld = hand;
+            if( seconds > 0.f ) hold = seconds;
+        }
+        if( shot.Spot < 0 )
+        {
+            continue;
+        }
+        shot.From = at;
+        shot.Until = at + hold;
+        m_storyShots.push_back( shot );
+    }
+    std::sort( m_storyShots.begin(), m_storyShots.end(), []( const StoryShot& a, const StoryShot& b ) { return a.From < b.From; } );
+}
+
+
 void Director::OnBigMoment( double inSeconds, float inHoldSeconds )
 {
     m_bigStart = inSeconds;
@@ -1892,6 +1958,25 @@ void Director::Update( double inSeconds, float inDeltaTime )
             m_shotName = "venue_arrival";
         }
     }
+    // A story shot holds the screen over everything (the arrival too).
+    if( forcedShot.empty() )
+    {
+        for( size_t i = 0; i < m_storyShots.size(); ++i )
+        {
+            const StoryShot& shot = m_storyShots[i];
+            if( inSeconds >= shot.From && inSeconds < shot.Until )
+            {
+                plan = Plan();
+                plan.Frame = Framing::Story;
+                plan.Variant = static_cast<int>( i );
+                plan.Handheld = shot.Handheld;
+                plan.Static = true;
+                index = -6 - static_cast<int>( i );
+                held = static_cast<float>( inSeconds - shot.From );
+                m_shotName = m_plan.Cameras[shot.Spot].Tag;
+            }
+        }
+    }
     // The shot's move runs on its own clock, a little faster when the show is worked up: started
     // from the time since the cut, so a seek lands mid-move. (A held shot follows the song clock,
     // so a capture at a time always frames the same.)
@@ -1914,7 +1999,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
     Vector3 target;
     float fov = 45.f;
     Vector3 up = Vector3::Up;
-    Frame( plan, plan.Frame == Framing::Arrival ? m_arrivalElapsed : m_moveTime, eye, target, fov, &up );
+    Frame( plan, plan.Frame == Framing::Arrival ? m_arrivalElapsed : plan.Frame == Framing::Story ? held : m_moveTime, eye, target, fov, &up );
     // A fisheye swells the middle of the picture: the shot is taken that much wider, so what it
     // framed is still what's in the middle. The lens changes with the cut.
     const float lensLook = LensFor( plan );

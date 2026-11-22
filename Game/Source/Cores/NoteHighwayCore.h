@@ -38,6 +38,17 @@ public:
 	// so the player gets a run-up instead of the next note at once.
 	static constexpr double kResumeRewindMs = 2000.0;
 	static constexpr float kResumeFadeSeconds = 1.5f;
+	// A continuous show (GigSession::IsContinuous): the next song's first note gets at least this
+	// long on the highway after the hand-off.
+	static constexpr double kShowReadMs = 2500.0;
+	// A song's tail plays out after its last note, up to this long; then it fades and hands off.
+	static constexpr double kShowMaxTailMs = 30000.0;
+	static constexpr float kShowTailFadeSeconds = 1.5f;
+	// HighwayRests: a rest longer than this (ms, last note to next) fades the highway out, and it
+	// is fully back kRestReturnMs before the next note (a note crossing the whole highway).
+	static constexpr double kRestMinMs = 9000.0;
+	static constexpr double kRestReturnMs = 4500.0;
+	static constexpr float kRestFadeSeconds = 1.5f;
 
 	NoteHighwayCore();
 	~NoteHighwayCore();
@@ -54,7 +65,10 @@ public:
 
 	virtual void Update( const UpdateContext& context ) final;
 
-	void SetupTrack( TrackData& inTrackData, int inTrackIndex );
+	// inContinue: a continuous show's next song (GigSession::IsContinuous), played in place of the
+	// one whose tail just ended: no countdown or title card, only the silence the first note
+	// needs to be read (kShowReadMs), and the score, streak and hit counts carry on.
+	void SetupTrack( TrackData& inTrackData, int inTrackIndex, bool inContinue = false );
 	void ShutdownTrack();
 
 	void Pause();
@@ -222,8 +236,17 @@ private:
 	// Whether a kit column is drawn: it has notes (toms come as a set of three).
 	bool ShowsColumn( PadId inPad ) const;
 	void ResetScore();
-	// Accuracy so far, 0 to 100: perfect counts whole, great 3/4, good half, a miss nothing.
+	// Accuracy so far, 0 to 100: perfect counts whole, great 3/4, good half, a miss nothing. In a
+	// continuous show the show's so far; SongAccuracy is this song's alone.
 	double Accuracy() const;
+	double SongAccuracy() const;
+	// A continuous show: the song's notes are done; its tail plays while the next song's audio
+	// opens (StartShowTail), then the next song takes over in place (HandOff).
+	void StartShowTail();
+	void UpdateShowTail();
+	void HandOff();
+	// HighwayRests: fades the highway out through a long rest and back before the next note.
+	void UpdateHighwayRests( float inDeltaTime );
 	// The song or lesson is over: writes its result to PlayerProfile, and what it changed to the
 	// results screen. Calibration, autoplay, no-fail and skipped-ahead runs aren't recorded (--record-autoplay
 	// records autoplay, for headless checks).
@@ -281,6 +304,8 @@ private:
 	std::string m_lyricSung;
 	std::string m_lyricRest;
 	std::string m_lyricNext;
+	// The story caption the HUD shows (VenueShow::StoryCaption).
+	std::string m_storyCaption;
 	float m_venueSwapTimer = 0.f;
 
 	// Score
@@ -307,6 +332,28 @@ private:
 	std::string m_resultGig;
 	// The player seeked forward this run (the debug scrubber, --seek): its result isn't recorded.
 	bool m_skippedAhead = false;
+	// A continuous show (SetupTrack's inContinue): the counts as this song started, so the song's
+	// own result can be told from the show's running total.
+	struct Counts
+	{
+		int Score = 0;
+		int Perfect = 0;
+		int Great = 0;
+		int Good = 0;
+		int Missed = 0;
+	};
+	Counts m_songStart;
+	int m_songMaxCombo = 0;
+	// This song came in by a hand-off: no countdown or title card.
+	bool m_continued = false;
+	// Past the last note, the tail playing out (StartShowTail); the next song's audio opening.
+	bool m_inShowTail = false;
+	AudioPack m_nextPack;
+	int m_nextTrack = -1;
+	// The tail ran too long: it fades out (kept alive until then) while the next song starts.
+	AudioPack m_fadingPack;
+	// HighwayRests: how much of the highway shows (VenueShow::SetHighwayShown).
+	float m_highwayShown = 1.f;
 	std::string m_lastTiming;
 	std::string m_lastHint;
 	float m_judgementAge = 10.f;

@@ -1801,6 +1801,15 @@ void Hideout::FillGigs( RmlUiCore& inUi, const char* inModel )
             m_board.push_back( { nullptr, &set, nullptr, progression.StorySetlist( set, tracks ) } );
         }
     }
+    // Sets not placed in the campaign yet (Progression::ProposedStorySets), to play them through
+    // while they're built: debug builds only, always booked.
+    if( DebugAllowed() )
+    {
+        for( const ProgressionStorySet& set : progression.ProposedStorySets() )
+        {
+            m_board.push_back( { nullptr, &set, nullptr, progression.StorySetlist( set, tracks ) } );
+        }
+    }
     for( const ProgressionGig& gig : progression.Gigs() )
     {
         m_board.push_back( { nullptr, nullptr, &gig, progression.GigOpen( gig, profile ) ? progression.Setlist( gig, tracks ) : std::vector<int>() } );
@@ -1838,9 +1847,14 @@ void Hideout::FillGigs( RmlUiCore& inUi, const char* inModel )
             const bool passed = progression.StoryPassed( set, profile );
             const bool booked = progression.StoryOpen( set, profile );
             const int missing = static_cast<int>( std::count( row.Setlist.begin(), row.Setlist.end(), -1 ) );
-            name = set.Name;
+            const bool proposed = std::any_of( progression.ProposedStorySets().begin(), progression.ProposedStorySets().end(), [&set]( const ProgressionStorySet& inSet ) { return &inSet == &set; } );
+            name = proposed ? "PROPOSED: " + set.Name : set.Name;
             description = set.Description;
-            if( set.OneSitting )
+            if( set.Continuous )
+            {
+                std::snprintf( text, sizeof( text ), "%d songs as one continuous show. Pass with an average of %.0f%%.", static_cast<int>( set.Songs.size() ), set.PassAccuracy );
+            }
+            else if( set.OneSitting )
             {
                 std::snprintf( text, sizeof( text ), "%s%d songs in one sitting. Pass with an average of %.0f%%.", set.PostCredits ? "After the credits. " : "", static_cast<int>( set.Songs.size() ), set.PassAccuracy );
             }

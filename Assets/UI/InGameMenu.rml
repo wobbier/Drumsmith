@@ -17,6 +17,7 @@
         <div class="lyric-line"><span class="lyric-sung">{{lyric_sung}}</span><span class="lyric-rest">{{lyric_rest}}</span></div>
         <div class="lyric-next">{{lyric_next}}</div>
     </div>
+    <div id="hud-caption" data-if="playing && !finished && story_caption != ''">{{story_caption}}</div>
     <div id="hud-calibration" data-if="playing && !finished && calibration">
         <div id="calibration-prompt">{{cal_prompt}}</div>
         <div id="calibration-detail">{{cal_detail}}</div>

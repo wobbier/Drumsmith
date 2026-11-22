@@ -6,6 +6,8 @@
 #include "Venue/VenuePlan.h"
 #include "Venue/VenueTiming.h"
 #include "Components/Transform.h"
+#include "Components/Graphics/Mesh.h"
+#include "Graphics/Material.h"
 #include "Materials/StandardMaterial.h"
 #include "Core/CommandLine.h"
 #include "CLog.h"
@@ -189,6 +191,131 @@ void Band::Clear()
     m_stage = nullptr;
     m_lastSeconds = -1000.0;
     m_endTime = 1e9f;
+    m_ghosted.clear();
+    m_ghost = 0.f;
+}
+
+
+void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale ) const
+{
+    const Member& member = m_members[inIndex];
+    const float t = std::max( inSeconds, 0.f );
+    const float phase = member.Phase + static_cast<float>( inIndex ) * 1.7f;
+    outPosition = member.Spot;
+    outRotation = Vector3( 0.f, member.Yaw, 0.f );
+    outScale = 1.f;
+    switch( inPose )
+    {
+    case StoryPose::Hidden:
+        outScale = 0.001f;
+        break;
+    case StoryPose::Falling:
+    {
+        // Each tumbles their own way, drifting about their spot, and pulls back toward playing
+        // as the seconds go: by about ten they're back in their places.
+        const float settle = std::exp( -t / 6.f );
+        outRotation.x += settle * 55.f * std::sin( t * 0.9f + phase );
+        outRotation.y += settle * ( inIndex % 2 == 0 ? 1.f : -1.f ) * 40.f * t / ( 1.f + t * 0.2f );
+        outRotation.z += settle * 40.f * std::cos( t * 0.7f + phase );
+        outPosition = outPosition + Vector3( settle * 1.4f * std::sin( t * 0.5f + phase ), 1.2f + settle * 1.5f * std::sin( t * 0.8f + phase * 2.f ), settle * 1.f * std::cos( t * 0.6f + phase ) );
+        break;
+    }
+    case StoryPose::Rising:
+        // Boots leave the floor: up slowly at first, then away, swaying.
+        outPosition.y += 0.35f * t * t + 0.4f * std::sin( t * 0.8f + phase ) * std::min( t, 1.f );
+        outRotation.z += 6.f * std::sin( t * 0.6f + phase );
+        break;
+    case StoryPose::Down:
+        // On their backs where they stand, the drummer and kit tipped over with them.
+        outRotation.x += inIndex == VenueData::Drums ? -70.f : -86.f;
+        outPosition.y += 0.18f;
+        break;
+    case StoryPose::Floating:
+        outPosition.y += 0.6f + 0.25f * std::sin( t * 0.6f + phase );
+        outPosition.x += 0.2f * std::sin( t * 0.23f + phase );
+        outRotation.x += 4.f * std::sin( t * 0.4f + phase );
+        outRotation.z += 5.f * std::cos( t * 0.35f + phase );
+        break;
+    default:
+        break;
+    }
+}
+
+
+void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo, float inToSeconds, float inBlend, float inGhost )
+{
+    const float blend = std::clamp( inBlend, 0.f, 1.f );
+    for( int index = 0; index < VenueData::MemberCount; ++index )
+    {
+        Member& member = m_members[index];
+        if( !member.Present || !member.Group )
+        {
+            continue;
+        }
+        Vector3 fromPosition, fromRotation, toPosition, toRotation;
+        float fromScale = 1.f, toScale = 1.f;
+        StoryPlacement( index, inFrom, inFromSeconds, fromPosition, fromRotation, fromScale );
+        StoryPlacement( index, inTo, inToSeconds, toPosition, toRotation, toScale );
+        // Out of hiding (or into it) is a pop, not a grow.
+        const bool pop = inFrom == StoryPose::Hidden || inTo == StoryPose::Hidden;
+        const float u = pop ? 1.f : blend;
+        Transform& group = member.Group->GetComponent<Transform>();
+        group.SetPosition( fromPosition + ( toPosition - fromPosition ) * u );
+        group.SetRotation( fromRotation + ( toRotation - fromRotation ) * u );
+        const float scale = fromScale + ( toScale - fromScale ) * u;
+        group.SetScale( Vector3( scale, scale, scale ) );
+    }
+
+    // The ghost: every material under the band, see-through and glowing pale blue. Each material's
+    // own look is kept the first time, to go back to.
+    inGhost = std::clamp( inGhost, 0.f, 1.f );
+    if( std::fabs( inGhost - m_ghost ) < 1e-3f )
+    {
+        return;
+    }
+    if( m_ghosted.empty() && inGhost > 0.f )
+    {
+        for( const Member& member : m_members )
+        {
+            if( !member.Present || !member.Group )
+            {
+                continue;
+            }
+            std::vector<Transform*> open = { &member.Group->GetComponent<Transform>() };
+            while( !open.empty() )
+            {
+                Transform* at = open.back();
+                open.pop_back();
+                const EntityHandle& owner = at->Parent;
+                if( owner && owner->HasComponent<Mesh>() && owner->GetComponent<Mesh>().MeshMaterial )
+                {
+                    const SharedPtr<Moonlight::Material>& material = owner->GetComponent<Mesh>().MeshMaterial;
+                    if( StandardMaterial* standard = dynamic_cast<StandardMaterial*>( material.get() ) )
+                    {
+                        m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent } );
+                    }
+                }
+                for( Transform* child : at->GetChildren() )
+                {
+                    open.push_back( child );
+                }
+            }
+        }
+    }
+    m_ghost = inGhost;
+    const Vector3 glow( 0.35f, 0.55f, 0.85f );
+    for( const GhostedMaterial& entry : m_ghosted )
+    {
+        const SharedPtr<Moonlight::Material> material = entry.Material.lock();
+        StandardMaterial* standard = material ? dynamic_cast<StandardMaterial*>( material.get() ) : nullptr;
+        if( !standard )
+        {
+            continue;
+        }
+        material->SetRenderMode( inGhost > 0.f || entry.Transparent ? Moonlight::RenderingMode::Transparent : Moonlight::RenderingMode::Opaque );
+        standard->SetOpacity( entry.Opacity * ( 1.f - 0.55f * inGhost ) );
+        standard->SetEmissiveColor( entry.Emissive + ( glow - entry.Emissive ) * ( 0.6f * inGhost ) );
+    }
 }
 
 

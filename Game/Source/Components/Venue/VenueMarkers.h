@@ -120,15 +120,24 @@ ME_REGISTER_COMPONENT_FOLDER( VenueAccent, "Venue" )
 // while a story flag is set, or with WhenSet off only until it is. A set's songs set the flags:
 // the songs before the one playing from its start, the song's own at its cue. Hidden by scale (the
 // pivot is where it grows from) and by dimming the Lights under it.
+//
+// Mode Play leaves it shown and plays the Sequences on it and under it once when the flag lands
+// (a flag set before the song starts them at their end): the trailer slewing, a figure walking
+// down the stairs. Mode SlowMotion runs those Sequences at Speed until the flag lands, then at
+// full speed (the rescue in slow motion until the band wakes).
 class VenueStory : public Component<VenueStory>
 {
     ME_REFLECTABLE( VenueStory )
 public:
+    enum class Motion : int { Show = 0, Play, SlowMotion };
+
     VenueStory() : Component( "VenueStory" ) {}
     void Init() final {}
     std::string Flag;
     bool WhenSet = true;
     float FadeSeconds = 0.75f;
+    Motion Mode = Motion::Show;
+    float Speed = 0.3f;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueStory, "Venue" )
 

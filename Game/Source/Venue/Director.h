@@ -49,6 +49,13 @@ public:
     // cut's place for inHoldSeconds. The neck camera and the crowd surfer's shot keep the screen.
     void OnBigMoment( double inSeconds, float inHoldSeconds );
     void SetAccentPhase( float inPhase ) { m_accentPhase = inPhase; }
+    // Story mode's shots (VenueShow::BuildStory): a story flag landing at a time (song seconds)
+    // cuts to the venue's camera spot tagged "story/<flag>" and holds it, over everything else.
+    // More of the tag, by '/': a number is the hold in seconds (5 without one), "hand" shoots it
+    // handheld. A second spot tagged "story/<flag>/end" is where the shot has moved to by the
+    // end of the hold (a pull back, a zoom). Flags with no spot get no shot.
+    void SetStoryShots( const std::vector<std::pair<std::string, double>>& inLanding );
+    int StoryShotCount() const { return static_cast<int>( m_storyShots.size() ); }
     bool HasPeakShots() const { return !m_peakSpots.empty(); }
     const EntityHandle& FeedCamera() const { return m_feed; }
     const EntityHandle& ProgramCamera() const { return m_program; }
@@ -88,7 +95,9 @@ private:
         Crane, Dolly, Drone, Orbit, LongLens, CrowdPov, Profile, DrumTop, DrumLow, LowHero, Push, PitRun,
         // Spot: one of the venue's own close or custom camera positions (VenuePlan::Cameras), the
         // plan's Variant its index.
-        Spot, Arrival };
+        Spot, Arrival,
+        // Story: a story shot (SetStoryShots), the plan's Variant its index.
+        Story };
 
     struct Plan
     {
@@ -173,6 +182,16 @@ private:
     VenuePlan m_plan;
     std::vector<VenuePlan::CameraSpot> m_arrival;
     std::vector<int> m_peakSpots;
+    // A story shot: when it holds, its spot in m_plan.Cameras and where it ends up (-1: stays).
+    struct StoryShot
+    {
+        double From = 0.0;
+        double Until = 0.0;
+        int Spot = -1;
+        int End = -1;
+        bool Handheld = false;
+    };
+    std::vector<StoryShot> m_storyShots;
     float m_accentPhase = -1.f;
     float m_arrivalElapsed = -1.f;
     double m_arrivalLastSongTime = 0.;

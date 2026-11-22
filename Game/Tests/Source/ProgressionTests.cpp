@@ -608,3 +608,148 @@ TEST_CASE( "Story: a song's venue state is the songs before it, and its own flag
     session.End();
     CHECK_FALSE( VenueRegistry::Story().Active() );
 }
+
+
+namespace
+{
+    json Show()
+    {
+        json root = json::object();
+        root["Sets"] = json::array();
+        root["ProposedSets"] = json::parse( R"([
+            { "Id": "show", "Name": "The Show", "Venue": "Road", "Continuous": true, "OneSitting": true,
+              "Songs": [ { "Artist": "Lorde", "Title": "Royals", "Flags": [ "crash" ], "Cue": "last_note",
+                           "Moments": [ { "Cue": "start", "Flags": [ "open" ] }, { "Cue": "section:verse", "Flags": [ "cop" ] }, { "Cue": "at:0.5" } ] },
+                         { "Artist": "Jet", "Title": "Are You Gonna Be My Girl", "Venue": "Hell", "HighwayRests": true,
+                           "Moments": [ { "Cue": "at:0.4", "Flags": [ "fell", "open" ] } ] },
+                         { "Artist": "Queen", "Title": "We Will Rock You" } ] }
+        ])" );
+        return root;
+    }
+}
+
+
+TEST_CASE( "Story: a proposed set loads apart from the campaign, with its show's cues and venues" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Show() );
+    // Nothing books, lists or unlocks it; --gig finds it.
+    CHECK( progression.StorySets().empty() );
+    REQUIRE( progression.ProposedStorySets().size() == 1 );
+    const ProgressionStorySet* set = progression.FindStorySet( "show" );
+    REQUIRE( set );
+    CHECK( set->Continuous );
+    CHECK( set->OneSitting );
+    REQUIRE( set->Songs.size() == 3 );
+    // A moment with no flags is dropped.
+    REQUIRE( set->Songs[0].Moments.size() == 2 );
+    CHECK( set->Songs[0].Moments[1].Cue == "section:verse" );
+    CHECK( set->Songs[0].Moments[1].Flags == std::vector<std::string>{ "cop" } );
+    CHECK( set->Songs[0].Venue.empty() );
+    CHECK( set->Songs[1].Venue == "Hell" );
+    CHECK( set->Songs[1].HighwayRests );
+    CHECK_FALSE( set->Songs[0].HighwayRests );
+}
+
+
+TEST_CASE( "Story: a real chart wins over the stand-in of the same song" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Story() );
+    const ProgressionStorySet& set = *progression.FindStorySet( "s1" );
+    // The stand-in carries the recording's link; the real chart only the artist and title.
+    std::vector<TrackData> tracks = { Recording( "Lorde", "Royals" ), Recording( "Queen", "We Will Rock You" ), Recording( "Lorde", "Royals" ) };
+    tracks[0].m_dlcSource = "story-stub";
+    tracks[0].m_links["Spotify"] = "https://open.spotify.com/track/AAA";
+    tracks[1].m_dlcSource = "story-stub";
+    CHECK( progression.StorySetlist( set, tracks ) == std::vector<int>{ 2, 1 } );
+    // With only the stand-in, the stand-in plays.
+    tracks.pop_back();
+    CHECK( progression.StorySetlist( set, tracks ) == std::vector<int>{ 0, 1 } );
+}
+
+
+TEST_CASE( "Story: a continuous show hands each song to the next in place, at its own venue" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Show() );
+    const ProgressionStorySet& set = *progression.FindStorySet( "show" );
+    PlayerProfile profile( "" );
+    GigSession session;
+    REQUIRE( session.BeginStory( set, { 7, 8, 9 }, profile ) );
+    CHECK( session.IsContinuous() );
+    // The first song is at the set's venue, its moments staged after its cue's flags.
+    CHECK( VenueRegistry::GigVenue() == "Road" );
+    GigSession::StageStory( set, 0 );
+    const VenueRegistry::StoryStage& first = VenueRegistry::Story();
+    CHECK( first.AtCue == std::set<std::string>{ "crash" } );
+    REQUIRE( first.Moments.size() == 2 );
+    CHECK( first.Moments[0].Cue == "start" );
+    CHECK( first.Moments[0].Flags == std::set<std::string>{ "open" } );
+    REQUIRE( session.CurrentStorySong() );
+    CHECK( session.CurrentStorySong()->Title == "Royals" );
+    CHECK( session.NextTrack() == 8 );
+
+    // The hand-off: the next song, its own venue, everything before it already happened.
+    CHECK( session.Advance() == 8 );
+    CHECK( session.SongIndex() == 1 );
+    CHECK( VenueRegistry::GigVenue() == "Hell" );
+    const VenueRegistry::StoryStage& second = VenueRegistry::Story();
+    CHECK( second.Song == 1 );
+    CHECK( second.Flags == std::set<std::string>{ "crash", "open", "cop" } );
+    // A moment's flag already set stays set; only the new one lands at the moment.
+    REQUIRE( second.Moments.size() == 1 );
+    CHECK( second.Moments[0].Flags == std::set<std::string>{ "fell" } );
+    CHECK( session.CurrentStorySong()->HighwayRests );
+
+    // Back to the set's venue for a song with none of its own; nothing after the last.
+    CHECK( session.Advance() == 9 );
+    CHECK( VenueRegistry::GigVenue() == "Road" );
+    CHECK( session.IsLastSong() );
+    CHECK( session.NextTrack() == -1 );
+    CHECK( session.Advance() == -1 );
+    session.End();
+    CHECK( VenueRegistry::GigVenue().empty() );
+}
+
+
+TEST_CASE( "Story: a set that isn't continuous never hands off in place" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Story() );
+    PlayerProfile profile( "" );
+    GigSession session;
+    REQUIRE( session.BeginStory( *progression.FindStorySet( "s1" ), { 0, 1 }, profile ) );
+    CHECK_FALSE( session.IsContinuous() );
+    CHECK( session.Advance() == -1 );
+    CHECK( session.SongIndex() == 0 );
+    session.End();
+}
+
+
+TEST_CASE( "Story: the band's own flags stay with their song, and a moment can be only a line" )
+{
+    json root = json::object();
+    root["ProposedSets"] = json::parse( R"([
+        { "Id": "ghosts", "Name": "Ghosts", "Continuous": true,
+          "Songs": [ { "Artist": "A", "Title": "One", "Moments": [ { "Cue": "start", "Flags": [ "crash", "band_hidden" ] } ] },
+                     { "Artist": "B", "Title": "Two", "Moments": [ { "Cue": "start", "Flags": [ "band_ghost" ] },
+                                                                  { "Cue": "last_note+1", "Caption": "You gotta hear these guys.", "CaptionSeconds": 3.5 } ] } ] }
+    ])" );
+    Progression progression( Journey() );
+    progression.LoadStory( root );
+    const ProgressionStorySet& set = *progression.FindStorySet( "ghosts" );
+    REQUIRE( set.Songs[1].Moments.size() == 2 );
+    CHECK( set.Songs[1].Moments[1].Flags.empty() );
+    CHECK( set.Songs[1].Moments[1].Caption == "You gotta hear these guys." );
+    CHECK( set.Songs[1].Moments[1].CaptionSeconds == doctest::Approx( 3.5 ) );
+
+    GigSession::StageStory( set, 1 );
+    const VenueRegistry::StoryStage& stage = VenueRegistry::Story();
+    // The crash happened; the band's being hidden was the first song's alone.
+    CHECK( stage.Flags == std::set<std::string>{ "crash" } );
+    REQUIRE( stage.Moments.size() == 2 );
+    CHECK( stage.Moments[0].Flags == std::set<std::string>{ "band_ghost" } );
+    CHECK( stage.Moments[1].Caption == "You gotta hear these guys." );
+    GigSession::StageStory( set, 5 );
+}

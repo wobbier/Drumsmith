@@ -3,10 +3,12 @@
 #include "Venue/Performer.h"
 #include "ECS/EntityHandle.h"
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
 class Transform;
+namespace Moonlight { class Material; }
 class VenueKit;
 struct VenuePlan;
 
@@ -27,6 +29,14 @@ public:
     // The characters (People::kPeople indices) no member on stage is: the crowd's.
     std::vector<int> SpareModels() const;
     void Update( double inSeconds, float inDeltaTime, float inCrowdEnergy );
+    // Story mode's hold on the band (VenueShow's band_ story flags). The pose moves each member,
+    // instrument and all, off their spot: Hidden (gone: posed figures stand in), Falling
+    // (tumbling, each their own way), Rising (lifted off the floor and away), Down (on their
+    // backs), Floating (drifting and bobbing in place). inTo has held inToSeconds; it blends in
+    // from inFrom (held inFromSeconds when inTo came) by inBlend, 0 to 1. inGhost 0 to 1 turns
+    // them see-through and pale, glowing: a ghost of themselves.
+    enum class StoryPose : int { Playing = 0, Hidden, Falling, Rising, Down, Floating };
+    void SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo, float inToSeconds, float inBlend, float inGhost );
 
     // Venue-space points for the director and the lights: a member's head, chest and hands (for
     // a member who isn't there, points over their spot).
@@ -143,6 +153,18 @@ private:
 
     Transform* m_stage = nullptr;
     std::array<Member, VenueData::MemberCount> m_members;
+    // SetStoryState's ghost as last applied, and each material's own look to go back to.
+    struct GhostedMaterial
+    {
+        std::weak_ptr<Moonlight::Material> Material;
+        Vector3 Emissive;
+        float Opacity = 1.f;
+        bool Transparent = false;
+    };
+    std::vector<GhostedMaterial> m_ghosted;
+    // A member's group placed for a story pose (position, euler rotation, scale).
+    void StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale ) const;
+    float m_ghost = 0.f;
     std::array<std::vector<Stroke>, 4> m_strokes;       // per limb
     std::array<size_t, 4> m_strokeCursor{};
     std::array<KitPiece, 10> m_kit;                     // by DrumPiece

@@ -111,11 +111,28 @@ struct ProgressionSongLesson
 // in the library by its Spotify link (a chart's "Links"), else by artist and title.
 struct ProgressionStorySong
 {
+    // More of the venue's state landing at another point of the song: Cue is a cue name as the
+    // song's own (VenueShow::StoryCueTime: "solo", "section:<name>", "at:0.4", "time:95",
+    // "drums_in", "song_end"...).
+    // Caption: a line shown on screen for CaptionSeconds from the moment (a character's line).
+    struct Moment
+    {
+        std::string Cue;
+        std::vector<std::string> Flags;
+        std::string Caption;
+        double CaptionSeconds = 4.0;
+    };
+
     std::string Artist;
     std::string Title;
     std::string Spotify;
     std::vector<std::string> Flags;     // the venue's state once this song is done
     std::string Cue;                    // where in the song its own flags land ("first_chorus"...)
+    std::vector<Moment> Moments;        // flags landing at their own cues, after the song too
+    std::string Venue;                  // this song's venue; empty: the set's
+    // The highway fades away through long rests (an intro with no drums) and comes back in time
+    // to read the next note.
+    bool HighwayRests = false;
 };
 
 // A booking of story mode (Design/Story-Mode-Setlists.md): five songs at one venue, played in
@@ -132,6 +149,9 @@ struct ProgressionStorySet
     std::string VenueBase;      // the room the venue is dressed from (Club, Basement...)
     double PassAccuracy = 70.0;
     bool OneSitting = false;
+    // One continuous show: each song's last note leads straight into the next recording, with no
+    // results screen until the set is over (NoteHighwayCore's hand-off).
+    bool Continuous = false;
     bool Credits = false;       // passing it ends the story
     bool PostCredits = false;   // a bonus after the credits
     ProgressionRequirement Requires;
@@ -198,6 +218,9 @@ public:
     const std::vector<ProgressionItem>& Items() const { return m_items; }
 
     const std::vector<ProgressionStorySet>& StorySets() const { return m_story; }
+    // Story.json's "ProposedSets": sets not placed in the campaign yet. Nothing books, unlocks or
+    // lists them; FindStorySet finds them, so --gig and the gig board's debug rows can play them.
+    const std::vector<ProgressionStorySet>& ProposedStorySets() const { return m_proposed; }
     const std::vector<ProgressionAudition>& Auditions() const { return m_auditions; }
 
     const ProgressionGig* FindGig( const std::string& inId ) const;
@@ -222,6 +245,7 @@ public:
     bool StoryOpen( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const;
     bool StoryPassed( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const;
     // Each song of the set as an index into inTracks, -1 for one the library doesn't have (yet).
+    // A real chart wins over a stand-in (DLCSource "story-stub") of the same song.
     std::vector<int> StorySetlist( const ProgressionStorySet& inSet, const std::vector<TrackData>& inTracks ) const;
     // The song to play next: the first one not banked (0 for a OneSitting set, and once all are).
     int StoryNextSong( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const;
@@ -271,5 +295,6 @@ private:
     std::vector<ProgressionItem> m_items;
     std::vector<ProgressionVenue> m_venues;
     std::vector<ProgressionStorySet> m_story;
+    std::vector<ProgressionStorySet> m_proposed;
     std::vector<ProgressionAudition> m_auditions;
 };

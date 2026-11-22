@@ -134,6 +134,14 @@ Points are multiplied by the combo multiplier: ×1, rising by one every 10 notes
 - **End:** once every note is judged and the audio has stopped, the results screen shows score, accuracy, each judgement's count, the average timing of the hits (`avg_timing`: so many ms early or late) and the best combo, with Retry (reloads the scene with the same track) and Continue (the library; after a practice lesson, Lessons). Escape on the results screen also returns there.
 - **Countdown:** it counts in to the first note, or to the chart's start marker (`TrackData::m_startTime`, set in the Track Editor) when that comes first (`m_countInMs`).
 
+### A continuous show
+
+A story set with `Continuous` (`Docs/Hideout-and-Progression.md` → Story mode) plays as one show. When the current song's last note is past the Good window, `StartShowTail` records it (`RecordResult`: the profile, the gig's tally and the story bank) and opens the next song's `AudioPack` (`m_nextPack`) while this song's tail plays on. When the tail ends (the audio stops), or after `kShowMaxTailMs` past the last note (the tail then fades over `kShowTailFadeSeconds`, `m_fadingPack`), `HandOff` calls `GigSession::Advance` and `SetupTrack( ..., inContinue = true )`: the same scene, the next chart, the venue rebuilt at the next song's venue and story stage, the opened pack, and only as much silence as the first note needs to be read (`kShowReadMs` before it), with no countdown or title card (`m_continued`). The score, streak and hit counts run on across the show (the HUD and the final results show the show's totals); each song's own result (`SongAccuracy`, its score and best streak) comes from the counts as it started (`m_songStart`, `m_songMaxCombo`). The last song finishes as usual, with the set's verdict.
+
+**Highway rests.** A story song with `HighwayRests` fades the highway out through a rest of at least `kRestMinMs` (last note to next) and back in by `kRestReturnMs` before the next note (`UpdateHighwayRests`, `VenueShow::SetHighwayShown`: the overlay's fade distances drawn in toward the strike bar).
+
+`--show-skip <seconds>` jumps each song of a continuous show to that long before its last note, a few seconds after it starts, to check every hand-off in one headless run (the songs aren't recorded: a skip ahead).
+
 ### Pause
 
 The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the core stops its clock and pauses the stems. While paused (and when idle or finished) the MIDI queue is still drained, so nothing stale is judged on resume.

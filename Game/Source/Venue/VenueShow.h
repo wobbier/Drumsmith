@@ -11,9 +11,12 @@
 #include "Venue/VenuePlan.h"
 #include "Venue/VenueRegistry.h"
 #include "Venue/VenueScene.h"
+#include "Components/Venue/VenueMarkers.h"
 #include "ECS/EntityHandle.h"
 #include <chrono>
 #include <cstdint>
+#include <set>
+#include <string>
 #include <vector>
 
 class World;
@@ -82,6 +85,10 @@ public:
     enum class Presentation : int { Both = 0, HighwayOnly, VenueOnly };
     void SetPresentation( Presentation inPresentation );
     Presentation GetPresentation() const { return m_presentation; }
+    // How much of the highway shows over the venue, 0 to 1: below 1 it melts away from its far end
+    // toward the strike bar (a story song's long rests: ProgressionStorySong::HighwayRests). Only
+    // over a venue (Presentation::Both); kept across Build.
+    void SetHighwayShown( float inShown );
 
     // Whether a venue scene's ambience (venue.json's Ambience: a crowd waiting for the band) plays:
     // on for a play, off for the Track Editor's preview. Kept across Build and Clear. It plays from
@@ -91,6 +98,8 @@ public:
 
     bool IsActive() const { return static_cast<bool>( m_root ); }
     const Director& GetDirector() const { return m_director; }
+    // A story moment's caption showing at inSeconds (a line said on screen), else empty.
+    std::string StoryCaption( double inSeconds ) const;
 
 private:
     // Whether a show goes up at all (the Venue setting, --no-venue, a practice lesson).
@@ -117,8 +126,16 @@ private:
     void StartAccent( double inSeconds, int inLevel );
     // Story mode's props (VenueStory markers): what each was authored as, read once the scene is
     // in, and each frame shown or hidden by the story's flags (VenueRegistry::Story).
-    void BuildStory( double inLength );
+    void BuildStory( double inLength, double inFirstNote, double inLastNote );
     void UpdateStory( double inSeconds, float inDeltaTime );
+    // When a story cue falls in this song (seconds): a song cue ("intro", "solo", "song_end"...),
+    // "section:<name>", "at:<share of the song>", "time:<seconds>", "drums_in" (the first note),
+    // "last_note" or "start", each optionally moved by "+<seconds>" or "-<seconds>". An unknown
+    // one is halfway.
+    double StoryCueTime( const std::string& inCue, double inLength, double inFirstNote, double inLastNote ) const;
+    // Whether a story flag is set at inSeconds: before the song, at its cue, or at a moment.
+    bool StoryFlagSet( const std::string& inFlag, double inSeconds ) const;
+
     void SampleAccents( double inBeat );
     // inLevel 1: a lift (jets, a hit on the blinders). 2: a peak (confetti, sparks, flames, a
     // hero shot). Ignored while the last one is still ringing.
@@ -150,10 +167,33 @@ private:
         // The plain Lights under it (not show lights: the rig drives those), at full.
         std::vector<std::pair<EntityHandle, float>> Lights;
         float Shown = -1.f;     // 0 hidden to 1 shown; -1 before the first update (it snaps)
+        VenueStory::Motion Mode = VenueStory::Motion::Show;
+        float Speed = 0.3f;
+        // Mode Play / SlowMotion: the entities with a Sequence under it, and whether it's played.
+        std::vector<EntityHandle> Sequences;
+        bool Played = false;
     };
+    void UpdateStoryMotion( StoryProp& ioProp, bool inSet );
+    // The band_ story flags on the band (Band::SetStoryState).
+    void UpdateStoryBand( double inSeconds, float inDeltaTime );
+    // Every flag landing this song (flags set before it at -1e9), for the band's pose.
+    std::vector<std::pair<std::string, double>> m_storyLanding;
+    // The band has been put in a story pose this song (so it's kept up to date from then on).
+    bool m_bandStoried = false;
+    struct StoryCaptionLine
+    {
+        double From = 0.0;
+        double Until = 0.0;
+        std::string Text;
+    };
+    std::vector<StoryCaptionLine> m_storyCaptions;
     std::vector<StoryProp> m_storyProps;
     // When the song's own flags land (its cue), in song seconds; -1 for no story.
     double m_storyCue = -1.0;
+    // The song's moments: when each lands, and its flags.
+    std::vector<std::pair<double, std::set<std::string>>> m_storyMoments;
+    // How much of the highway shows (SetHighwayShown), as last put on its camera.
+    float m_highwayShown = 1.f;
     Band m_band;
     Crowd m_crowd;
     Director m_director;

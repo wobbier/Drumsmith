@@ -14,6 +14,10 @@
 
 namespace
 {
+    // A story song's stand-in (Tools/Story/make_stub_songs.py): a click and a rock beat.
+    constexpr const char* kStubSource = "story-stub";
+
+
     std::string Lower( std::string inText )
     {
         std::transform( inText.begin(), inText.end(), inText.begin(), []( unsigned char c ) { return static_cast<char>( std::tolower( c ) ); } );
@@ -200,6 +204,7 @@ void Progression::Load( const json& inRoot )
     m_items.clear();
     m_venues.clear();
     m_story.clear();
+    m_proposed.clear();
     m_auditions.clear();
     if( !inRoot.is_object() )
     {
@@ -279,12 +284,13 @@ void Progression::Load( const json& inRoot )
 void Progression::LoadStory( const json& inRoot )
 {
     m_story.clear();
+    m_proposed.clear();
     m_auditions.clear();
     if( !inRoot.is_object() )
     {
         return;
     }
-    for( const json& entry : Entries( inRoot, "Sets" ) )
+    const auto readSet = []( const json& entry, std::vector<ProgressionStorySet>& outSets )
     {
         ProgressionStorySet set;
         set.Id = entry.value( "Id", std::string() );
@@ -295,6 +301,7 @@ void Progression::LoadStory( const json& inRoot )
         set.VenueBase = entry.value( "VenueBase", std::string() );
         set.PassAccuracy = std::clamp( entry.value( "PassAccuracy", 70.0 ), 0.0, 100.0 );
         set.OneSitting = entry.value( "OneSitting", false );
+        set.Continuous = entry.value( "Continuous", false );
         set.Credits = entry.value( "Credits", false );
         set.PostCredits = entry.value( "PostCredits", false );
         set.Requires = Requirement( entry );
@@ -315,15 +322,41 @@ void Progression::LoadStory( const json& inRoot )
                 song.Spotify = value.value( "Spotify", std::string() );
                 song.Flags = Strings( value, "Flags" );
                 song.Cue = value.value( "Cue", std::string() );
+                for( const json& moment : value.contains( "Moments" ) && value["Moments"].is_array() ? value["Moments"] : json::array() )
+                {
+                    if( !moment.is_object() )
+                    {
+                        continue;
+                    }
+                    ProgressionStorySong::Moment entry;
+                    entry.Cue = moment.value( "Cue", std::string() );
+                    entry.Flags = Strings( moment, "Flags" );
+                    entry.Caption = moment.value( "Caption", std::string() );
+                    entry.CaptionSeconds = moment.value( "CaptionSeconds", 4.0 );
+                    if( !entry.Cue.empty() && ( !entry.Flags.empty() || !entry.Caption.empty() ) )
+                    {
+                        song.Moments.push_back( std::move( entry ) );
+                    }
+                }
+                song.Venue = value.value( "Venue", std::string() );
+                song.HighwayRests = value.value( "HighwayRests", false );
                 set.Songs.push_back( std::move( song ) );
             }
         }
         if( set.Songs.empty() )
         {
             YIKES( "Progression: story set " + set.Id + " has no songs; skipped" );
-            continue;
+            return;
         }
-        m_story.push_back( std::move( set ) );
+        outSets.push_back( std::move( set ) );
+    };
+    for( const json& entry : Entries( inRoot, "Sets" ) )
+    {
+        readSet( entry, m_story );
+    }
+    for( const json& entry : Entries( inRoot, "ProposedSets" ) )
+    {
+        readSet( entry, m_proposed );
     }
     for( const json& entry : Entries( inRoot, "Auditions" ) )
     {
@@ -373,8 +406,15 @@ const ProgressionGig* Progression::FindGig( const std::string& inId ) const
 
 const ProgressionStorySet* Progression::FindStorySet( const std::string& inId ) const
 {
-    const auto it = std::find_if( m_story.begin(), m_story.end(), [&inId]( const ProgressionStorySet& inSet ) { return inSet.Id == inId; } );
-    return it == m_story.end() ? nullptr : &*it;
+    for( const std::vector<ProgressionStorySet>* sets : { &m_story, &m_proposed } )
+    {
+        const auto it = std::find_if( sets->begin(), sets->end(), [&inId]( const ProgressionStorySet& inSet ) { return inSet.Id == inId; } );
+        if( it != sets->end() )
+        {
+            return &*it;
+        }
+    }
+    return nullptr;
 }
 
 
@@ -652,9 +692,11 @@ std::vector<int> Progression::StorySetlist( const ProgressionStorySet& inSet, co
         const std::string spotify = SpotifyId( song.Spotify );
         const std::string artist = MatchName( song.Artist, true );
         const std::string title = MatchName( song.Title, false );
-        int byLink = -1;
-        int byName = -1;
-        for( int i = 0; i < static_cast<int>( inTracks.size() ) && byLink < 0; ++i )
+        // [0] real charts, [1] stand-ins: a real chart found only by name still wins over the
+        // stand-in carrying the link, so charting a song takes over from its stand-in.
+        int byLink[2] = { -1, -1 };
+        int byName[2] = { -1, -1 };
+        for( int i = 0; i < static_cast<int>( inTracks.size() ) && byLink[0] < 0; ++i )
         {
             const TrackData& track = inTracks[i];
             // Not m_noteCount: most charts' TrackData.txt leaves it 0 until the notes are read.
@@ -662,17 +704,21 @@ std::vector<int> Progression::StorySetlist( const ProgressionStorySet& inSet, co
             {
                 continue;
             }
+            const int stub = track.m_dlcSource == kStubSource ? 1 : 0;
             const auto link = track.m_links.find( "Spotify" );
             if( !spotify.empty() && link != track.m_links.end() && SpotifyId( link->second ) == spotify )
             {
-                byLink = i;
+                if( byLink[stub] < 0 )
+                {
+                    byLink[stub] = i;
+                }
             }
-            else if( byName < 0 && MatchName( track.m_artistName, true ) == artist && MatchName( track.m_trackName, false ) == title )
+            else if( byName[stub] < 0 && MatchName( track.m_artistName, true ) == artist && MatchName( track.m_trackName, false ) == title )
             {
-                byName = i;
+                byName[stub] = i;
             }
         }
-        setlist.push_back( byLink >= 0 ? byLink : byName );
+        setlist.push_back( byLink[0] >= 0 ? byLink[0] : byName[0] >= 0 ? byName[0] : byLink[1] >= 0 ? byLink[1] : byName[1] );
     }
     return setlist;
 }

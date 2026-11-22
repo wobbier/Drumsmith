@@ -120,9 +120,18 @@ public:
     {
         std::string Set;                // the story set's id
         int Song = -1;
-        std::set<std::string> Flags;    // set from the start of the song
+        std::set<std::string> Flags;    // set from the start of the song (band_ flags never carry over)
         std::set<std::string> AtCue;    // set once the song reaches its cue
         std::string Cue;                // "intro", "verse", "first_chorus", "bridge", "solo", "outro", "song_end"
+        // More flags landing at their own cues (ProgressionStorySong::Moments), in song order.
+        struct Moment
+        {
+            std::string Cue;
+            std::set<std::string> Flags;
+            std::string Caption;
+            double CaptionSeconds = 4.0;
+        };
+        std::vector<Moment> Moments;
         bool Active() const { return !Set.empty(); }
     };
     static StoryStage& Story()

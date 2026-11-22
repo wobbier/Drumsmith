@@ -3,6 +3,7 @@
 
 ME_REFLECT_ENUM( VenueSpot::Role, { { "Drummer", VenueSpot::Role::Drummer }, { "Guitar", VenueSpot::Role::Guitar }, { "Bass", VenueSpot::Role::Bass }, { "Vocals", VenueSpot::Role::Vocals }, { "Keys", VenueSpot::Role::Keys } } )
 ME_REFLECT_ENUM( VenueCameraSpot::Kind, { { "Wide", VenueCameraSpot::Kind::Wide }, { "Desk", VenueCameraSpot::Kind::Desk }, { "Crane", VenueCameraSpot::Kind::Crane }, { "Close", VenueCameraSpot::Kind::Close }, { "Custom", VenueCameraSpot::Kind::Custom } } )
+ME_REFLECT_ENUM( VenueStory::Motion, { { "Show", VenueStory::Motion::Show }, { "Play", VenueStory::Motion::Play }, { "SlowMotion", VenueStory::Motion::SlowMotion } } )
 ME_REFLECT_ENUM( VenueCrowdArea::Kind, { { "Mob", VenueCrowdArea::Kind::Mob }, { "Posed", VenueCrowdArea::Kind::Posed } } )
 ME_REFLECT_ENUM( VenueScreen::Feed, { { "Stage", VenueScreen::Feed::Stage }, { "Program", VenueScreen::Feed::Program }, { "Lyrics", VenueScreen::Feed::Lyrics } } )
 ME_REFLECT_ENUM( VenueShowLight::Role, { { "Wash", VenueShowLight::Role::Wash }, { "Beam", VenueShowLight::Role::Beam }, { "Spot", VenueShowLight::Role::Spot }, { "Blinder", VenueShowLight::Role::Blinder }, { "Strobe", VenueShowLight::Role::Strobe }, { "Static", VenueShowLight::Role::Static } } )
@@ -47,6 +48,8 @@ ME_REFLECT_BEGIN( VenueStory )
     ME_FIELD( Flag ).Tooltip( "The story flag (Design/Story-Mode-Setlists.json StateFlags) this entity follows" );
     ME_FIELD( WhenSet ).Tooltip( "On: shown once the flag is set. Off: shown until it is set (the thing that moves away)" );
     ME_FIELD( FadeSeconds ).Range( 0.f, 10.f ).Tooltip( "How long it takes to grow in or shrink away" );
+    ME_FIELD( Mode ).Tooltip( "Show: shown or hidden by the flag. Play: its Sequences play once when the flag lands. SlowMotion: its Sequences run at Speed until the flag lands" );
+    ME_FIELD( Speed ).Unit( Reflection::Unit::Multiplier ).Range( 0.01f, 1.f ).Tooltip( "SlowMotion: the Sequences' speed until the flag lands" );
 ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( VenueCameraSpot )

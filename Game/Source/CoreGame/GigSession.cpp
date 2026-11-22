@@ -20,6 +20,7 @@ bool GigSession::Begin( const ProgressionGig& inGig, const std::vector<int>& inS
     m_accuracy.assign( inSetlist.size(), -1.0 );
     m_song = 0;
     m_passAccuracy = inGig.PassAccuracy;
+    m_setVenue = inGig.Venue;
     VenueRegistry::GigVenue() = inGig.Venue;
     return true;
 }
@@ -35,6 +36,8 @@ bool GigSession::BeginStory( const ProgressionStorySet& inSet, const std::vector
     m_active = true;
     m_story = true;
     m_oneSitting = inSet.OneSitting;
+    m_continuous = inSet.Continuous;
+    m_storySet = inSet;
     m_gigId = inSet.Id;
     m_gigName = inSet.Name;
     m_setlist = inSetlist;
@@ -51,7 +54,8 @@ bool GigSession::BeginStory( const ProgressionStorySet& inSet, const std::vector
     const auto next = std::find_if( m_accuracy.begin(), m_accuracy.end(), []( double inAccuracy ) { return inAccuracy < 0.0; } );
     m_song = next == m_accuracy.end() ? 0 : static_cast<int>( next - m_accuracy.begin() );
     m_passAccuracy = inSet.PassAccuracy;
-    VenueRegistry::GigVenue() = inSet.Venue;
+    m_setVenue = inSet.Venue;
+    ApplyVenue();
     return true;
 }
 
@@ -64,12 +68,36 @@ bool GigSession::LaunchCurrent() const
     }
     if( m_story )
     {
-        if( const ProgressionStorySet* set = Progression::GetInstance().FindStorySet( m_gigId ) )
-        {
-            StageStory( *set, m_song );
-        }
+        StageStory( m_storySet, m_song );
+        ApplyVenue();
     }
     return TrackRadioUtils::LaunchTrack( CurrentTrack() );
+}
+
+
+int GigSession::Advance()
+{
+    if( !IsContinuous() || IsLastSong() )
+    {
+        return -1;
+    }
+    ++m_song;
+    StageStory( m_storySet, m_song );
+    ApplyVenue();
+    return CurrentTrack();
+}
+
+
+const ProgressionStorySong* GigSession::CurrentStorySong() const
+{
+    return IsStory() && m_song >= 0 && m_song < static_cast<int>( m_storySet.Songs.size() ) ? &m_storySet.Songs[m_song] : nullptr;
+}
+
+
+void GigSession::ApplyVenue() const
+{
+    const ProgressionStorySong* song = CurrentStorySong();
+    VenueRegistry::GigVenue() = song && !song->Venue.empty() ? song->Venue : m_setVenue;
 }
 
 
@@ -83,19 +111,53 @@ void GigSession::StageStory( const ProgressionStorySet& inSet, int inSong )
     }
     stage.Set = inSet.Id;
     stage.Song = inSong;
-    // The set is played in order, so everything before this song has happened.
+    // The set is played in order, so everything before this song has happened. The band's own
+    // state (band_ flags: VenueShow::UpdateStoryBand) is each song's to set.
+    const auto carry = [&stage]( const std::vector<std::string>& inFlags ) {
+        for( const std::string& flag : inFlags )
+        {
+            if( flag.rfind( "band_", 0 ) != 0 )
+            {
+                stage.Flags.insert( flag );
+            }
+        }
+    };
     for( int i = 0; i < inSong; ++i )
     {
-        stage.Flags.insert( inSet.Songs[i].Flags.begin(), inSet.Songs[i].Flags.end() );
+        const ProgressionStorySong& before = inSet.Songs[i];
+        carry( before.Flags );
+        for( const ProgressionStorySong::Moment& moment : before.Moments )
+        {
+            carry( moment.Flags );
+        }
     }
-    for( const std::string& flag : inSet.Songs[inSong].Flags )
+    const ProgressionStorySong& song = inSet.Songs[inSong];
+    for( const std::string& flag : song.Flags )
     {
         if( stage.Flags.count( flag ) == 0 )
         {
             stage.AtCue.insert( flag );
         }
     }
-    stage.Cue = inSet.Songs[inSong].Cue;
+    stage.Cue = song.Cue;
+    for( const ProgressionStorySong::Moment& moment : song.Moments )
+    {
+        VenueRegistry::StoryStage::Moment staged;
+        staged.Cue = moment.Cue;
+        staged.Caption = moment.Caption;
+        staged.CaptionSeconds = moment.CaptionSeconds;
+        for( const std::string& flag : moment.Flags )
+        {
+            if( stage.Flags.count( flag ) == 0 )
+            {
+                staged.Flags.insert( flag );
+            }
+        }
+        if( !staged.Flags.empty() || !staged.Caption.empty() )
+        {
+            stage.Moments.push_back( std::move( staged ) );
+        }
+    }
 }
 
 
@@ -126,6 +188,9 @@ void GigSession::End()
     m_active = false;
     m_story = false;
     m_oneSitting = false;
+    m_continuous = false;
+    m_setVenue.clear();
+    m_storySet = ProgressionStorySet();
     m_setlist.clear();
     m_accuracy.clear();
     m_song = 0;

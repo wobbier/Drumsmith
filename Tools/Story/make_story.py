@@ -3,8 +3,9 @@
 Design/Story-Mode-Setlists.json (Docs/Hideout-and-Progression.md -> Story mode).
 
 The manifest is the writers' copy: it carries the staging, the cues, the alternates and the
-build notes. The game file keeps only what the game reads today. Run it again whenever the
-manifest changes:
+build notes. The game file keeps only what the game reads today. The manifest's ProposedSets (not
+placed in the campaign yet) go to the game file's own ProposedSets, which nothing books or lists:
+--gig <id> and the gig board's debug rows play them. Run it again whenever the manifest changes:
 
     python3 Tools/Story/make_story.py
 """
@@ -36,21 +37,43 @@ VENUES = {
 GIG_VENUES = {"Club", "Festival", "Arena"}
 
 
+def scene_there(scene):
+    return bool(scene) and os.path.isfile(os.path.join(ROOT, "Assets", "Venues", scene, "venue.json"))
+
+
 def venue(entry):
-    scene = VENUES.get(entry["Id"])
-    if scene and os.path.isfile(os.path.join(ROOT, "Assets", "Venues", scene, "venue.json")):
+    scene = entry.get("Venue") or VENUES.get(entry["Id"])
+    if scene_there(scene):
         return scene
     return entry["VenueBase"] if entry.get("VenueBase") in GIG_VENUES else ""
 
 
 def song(entry):
-    return {
+    out = {
         "Artist": entry["Artist"],
         "Title": entry["Title"],
         "Spotify": entry.get("Spotify", ""),
         "Flags": entry.get("StateAfter", []),
         "Cue": (entry.get("Cue") or {}).get("On", ""),
     }
+    # A show's song can carry more cues, its own venue and the highway's rests.
+    moments = []
+    for m in entry.get("Moments", []):
+        if not m.get("On") or not (m.get("StateAfter") or m.get("Caption")):
+            continue
+        moment = {"Cue": m["On"], "Flags": m.get("StateAfter", [])}
+        if m.get("Caption"):
+            moment["Caption"] = m["Caption"]
+            if m.get("CaptionSeconds"):
+                moment["CaptionSeconds"] = m["CaptionSeconds"]
+        moments.append(moment)
+    if moments:
+        out["Moments"] = moments
+    if scene_there(entry.get("Venue")):
+        out["Venue"] = entry["Venue"]
+    if entry.get("HighwayRests"):
+        out["HighwayRests"] = True
+    return out
 
 
 def story_set(entry):
@@ -68,7 +91,7 @@ def story_set(entry):
         "Songs": [song(s) for s in entry["Songs"]],
         "Rewards": [reward["Item"]] if reward.get("Item") else [],
     }
-    for key in ("Credits", "PostCredits", "OneSitting"):
+    for key in ("Credits", "PostCredits", "OneSitting", "Continuous"):
         if entry.get(key):
             out[key] = True
     if reward.get("MovesInto"):
@@ -112,13 +135,14 @@ def main():
     out = {
         "Generated": "by Tools/Story/make_story.py from Design/Story-Mode-Setlists.json: edit those, not this",
         "Sets": [story_set(s) for s in sets],
+        "ProposedSets": [story_set(s) for s in manifest.get("ProposedSets", [])],
         "Auditions": [audition(a) for a in manifest.get("Auditions", [])],
         "Items": [item(s) for s in sets if (s.get("Reward") or {}).get("Item")],
     }
     with open(TARGET, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
         f.write("\n")
-    print(f"{os.path.relpath(TARGET, ROOT)}: {len(out['Sets'])} sets, {len(out['Auditions'])} auditions, {len(out['Items'])} items")
+    print(f"{os.path.relpath(TARGET, ROOT)}: {len(out['Sets'])} sets, {len(out['ProposedSets'])} proposed, {len(out['Auditions'])} auditions, {len(out['Items'])} items")
     return 0
 
 

@@ -176,6 +176,8 @@ void NoteHighwayCore::OnRemovedFromWorld()
 void NoteHighwayCore::OnStop()
 {
     m_currentTrackPack.Stop();
+    m_nextPack.Stop();
+    m_fadingPack.Stop();
 }
 
 
@@ -270,8 +272,18 @@ int NoteHighwayCore::LaneOf( PadId inPad )
 }
 
 
-void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
+void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex, bool inContinue )
 {
+    // A hand-off brings the next song's audio, opened during the tail.
+    AudioPack preloaded;
+    const bool havePreload = inContinue && m_nextTrack == inTrackIndex;
+    if( havePreload )
+    {
+        preloaded = std::move( m_nextPack );
+    }
+    m_nextPack = AudioPack();
+    m_nextTrack = -1;
+    m_inShowTail = false;
     ShutdownTrack();
     m_trackData = &inTrackData;
     m_trackIndex = inTrackIndex;
@@ -296,19 +308,39 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex )
     {
         BuildBeatLines();
     }
-    // A play: the venue's ambience (a crowd waiting) runs through the load and count-in.
-    m_venueShow.SetAmbienceWanted( true );
+    // A play: the venue's ambience (a crowd waiting) runs through the load and count-in. A show
+    // carries straight on: nobody is waiting.
+    m_venueShow.SetAmbienceWanted( !inContinue );
     BuildVenue();
 
-    m_currentTrackPack = AudioPack( inTrackData );
+    // (Still opening, it may be: Loading waits for it.)
+    m_currentTrackPack = havePreload ? std::move( preloaded ) : AudioPack( inTrackData );
     m_metronomeTried = false;
     UpdateMetronome();
-    ResetScore();
+    m_continued = inContinue;
+    if( inContinue )
+    {
+        // The show's score, streak and counts run on; this song's own start from here.
+        m_songStart = { m_score, m_perfect, m_great, m_good, m_missed };
+        m_songMaxCombo = 0;
+        m_skippedAhead = false;
+        m_resultNews.clear();
+        m_resultBests.clear();
+        m_resultUnlocks.clear();
+        m_resultGig.clear();
+    }
+    else
+    {
+        ResetScore();
+    }
     m_songState = SongState::Loading;
     // At least kLeadInMs of silence, and enough that a song whose drums come in straight away still
-    // gets a full countdown before its first note.
-    m_songTimeMs = -std::max( kLeadInMs, kCountdownMs - m_countInMs );
+    // gets a full countdown before its first note. A show's next song only waits as long as its
+    // first note needs to be read.
+    m_songTimeMs = inContinue ? -std::max( 0.0, kShowReadMs - m_countInMs ) : -std::max( kLeadInMs, kCountdownMs - m_countInMs );
     m_isPaused = false;
+    m_highwayShown = 1.f;
+    m_venueShow.SetHighwayShown( 1.f );
     if( RmlUiCore* ui = GetEngine().RmlUi )
     {
         ui->ModelSetString( kModel, "track_title", inTrackData.m_trackName );
@@ -1000,6 +1032,96 @@ void NoteHighwayCore::ShutdownTrack()
     m_currentTrackPack.Stop();
     m_songState = SongState::Idle;
     m_drumsAudible = true;
+    m_continued = false;
+}
+
+
+void NoteHighwayCore::StartShowTail()
+{
+    // The song is over for the score: record it now (banked as any story song), in the
+    // background. Its tail plays on while the next song's stems open.
+    m_inShowTail = true;
+    RecordResult();
+    GigSession& gig = GigSession::GetInstance();
+    auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    m_nextTrack = gig.NextTrack();
+    if( m_nextTrack >= 0 && m_nextTrack < static_cast<int>( tracks.size() ) )
+    {
+        m_nextPack = AudioPack( tracks[m_nextTrack] );
+    }
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Highway: show: song %d done at %.0f ms (%.1f%%), its tail plays into track %d", gig.SongIndex() + 1, m_songTimeMs, SongAccuracy(), m_nextTrack );
+    }
+}
+
+
+void NoteHighwayCore::UpdateShowTail()
+{
+    // The tail's over when the audio stops (or ran out long ago). A long one is cut short with a
+    // fade, the next song starting under it.
+    const double lengthMs = static_cast<double>( m_currentTrackPack.GetLength() );
+    const bool over = !m_currentTrackPack.IsPlaying() || m_songTimeMs > lengthMs + 2000.0;
+    const bool tooLong = m_songTimeMs > m_lastNoteMs + kShowMaxTailMs;
+    if( !over && !tooLong )
+    {
+        return;
+    }
+    if( !over )
+    {
+        m_currentTrackPack.FadeOut( kShowTailFadeSeconds );
+        m_fadingPack = std::move( m_currentTrackPack );
+    }
+    HandOff();
+}
+
+
+void NoteHighwayCore::HandOff()
+{
+    GigSession& gig = GigSession::GetInstance();
+    auto& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    const int next = gig.Advance();
+    if( next < 0 || next >= static_cast<int>( tracks.size() ) )
+    {
+        // Nothing to hand to after all: the show ends here.
+        m_inShowTail = false;
+        m_songState = SongState::Finished;
+        return;
+    }
+    if( CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Highway: show: hand-off to song %d of %d, %s (track %d), venue '%s'", gig.SongIndex() + 1, gig.SongCount(), tracks[next].m_trackName.c_str(), next, VenueRegistry::GigVenue().c_str() );
+    }
+    SetupTrack( tracks[next], next, true );
+}
+
+
+void NoteHighwayCore::UpdateHighwayRests( float inDeltaTime )
+{
+    // A story song that asks for it (ProgressionStorySong::HighwayRests): through a long rest the
+    // highway melts away, and it's whole again a full highway's travel before the next note.
+    const ProgressionStorySong* song = GigSession::GetInstance().CurrentStorySong();
+    float target = 1.f;
+    if( song && song->HighwayRests && m_trackData && !m_trackData->m_practice && GigSession::GetInstance().CurrentTrack() == m_trackIndex )
+    {
+        const double now = VisualTimeMs();
+        double previous = -1e12;
+        double next = 1e12;
+        for( const LaneNotes& lane : m_laneNotes )
+        {
+            const auto after = std::upper_bound( lane.Notes.begin(), lane.Notes.end(), now, []( double t, const NoteState& n ) { return t < n.TimeMs; } );
+            if( after != lane.Notes.end() ) next = std::min( next, after->TimeMs );
+            if( after != lane.Notes.begin() ) previous = std::max( previous, std::prev( after )->TimeMs );
+        }
+        const bool longRest = next - std::max( previous, 0.0 ) >= kRestMinMs || ( previous < 0.0 && next >= kRestMinMs );
+        if( longRest && next - now > kRestReturnMs + kRestFadeSeconds * 1000.0 && now - previous > 1000.0 )
+        {
+            target = 0.f;
+        }
+    }
+    const float step = std::clamp( inDeltaTime, 0.f, 0.25f ) / kRestFadeSeconds;
+    m_highwayShown = target > m_highwayShown ? std::min( target, m_highwayShown + step ) : std::max( target, m_highwayShown - step );
+    m_venueShow.SetHighwayShown( m_highwayShown * m_highwayShown * ( 3.f - 2.f * m_highwayShown ) );
 }
 
 
@@ -1805,6 +1927,7 @@ void NoteHighwayCore::ApplyJudgement( Judgement inJudgement, double inOffsetMs )
 
     ++m_combo;
     m_maxCombo = std::max( m_maxCombo, m_combo );
+    m_songMaxCombo = std::max( m_songMaxCombo, m_combo );
     m_venueShow.OnStreak( m_combo );
     int points = 0;
     switch( inJudgement )
@@ -1919,6 +2042,16 @@ double NoteHighwayCore::Accuracy() const
 }
 
 
+double NoteHighwayCore::SongAccuracy() const
+{
+    const int perfect = m_perfect - m_songStart.Perfect;
+    const int great = m_great - m_songStart.Great;
+    const int good = m_good - m_songStart.Good;
+    const int judged = perfect + great + good + m_missed - m_songStart.Missed;
+    return judged > 0 ? ( perfect + great * 0.75 + good * 0.5 ) * 100.0 / judged : 100.0;
+}
+
+
 void NoteHighwayCore::RecordResult()
 {
     m_resultNews.clear();
@@ -1931,7 +2064,8 @@ void NoteHighwayCore::RecordResult()
         return;
     }
     PlayerProfile& profile = PlayerProfile::GetInstance();
-    const double accuracy = Accuracy();
+    // (A continuous show's counts run on from song to song: this song's are what it added.)
+    const double accuracy = SongAccuracy();
     char text[128];
     if( m_trackData->m_practice )
     {
@@ -1969,10 +2103,10 @@ void NoteHighwayCore::RecordResult()
     {
         const std::string key = TrackDatabase::FavoriteKey( *m_trackData );
         PlayerProfile::SongResult result;
-        result.Score = m_score;
+        result.Score = m_score - m_songStart.Score;
         result.Accuracy = accuracy;
-        result.MaxCombo = m_maxCombo;
-        result.Missed = m_missed;
+        result.MaxCombo = m_songMaxCombo;
+        result.Missed = m_missed - m_songStart.Missed;
         result.TotalNotes = m_totalNotes;
         const PlayerProfile::SongRecord* before = profile.FindSong( key );
         const bool firstPlay = !before || before->Plays == 0;
@@ -2042,6 +2176,8 @@ void NoteHighwayCore::RecordResult()
 void NoteHighwayCore::ResetScore()
 {
     m_score = m_combo = m_maxCombo = m_perfect = m_great = m_good = m_missed = m_wrongTechnique = 0;
+    m_songStart = Counts();
+    m_songMaxCombo = 0;
     m_offsetSumMs = 0.0;
     m_offsetCount = 0;
     m_skippedAhead = false;
@@ -2064,7 +2200,8 @@ void NoteHighwayCore::ResetScore()
         ui->ModelSetNumber( kModel, "total_notes", m_totalNotes );
         ui->ModelSetNumber( kModel, "song_progress", 0 );
         ui->ModelSetNumber( kModel, "practice", 0 );
-        for( const char* key : { "track_title", "track_artist", "judgement", "timing", "hint", "accuracy", "judgement_opacity", "song_clock", "avg_timing" } )
+        m_storyCaption.clear();
+        for( const char* key : { "track_title", "track_artist", "judgement", "timing", "hint", "accuracy", "judgement_opacity", "song_clock", "avg_timing", "story_caption" } )
         {
             ui->ModelSetString( kModel, key, "" );
         }
@@ -2141,12 +2278,22 @@ void NoteHighwayCore::UpdateHud( float inDeltaTime )
     }
     ui->ModelSetNumber( kModel, "finished", m_songState == SongState::Finished );
     UpdateLyrics( *ui );
+    // A story moment's line on screen (Satan's call upstairs), set only when it changes.
+    {
+        const std::string caption = m_songState == SongState::Idle ? std::string() : m_venueShow.StoryCaption( VisualTimeMs() / 1000.0 );
+        if( caption != m_storyCaption )
+        {
+            m_storyCaption = caption;
+            ui->ModelSetString( kModel, "story_caption", caption );
+        }
+    }
     // The title card shows over the lead-in; the count runs down to the first note, not the
     // song's start, so a long intro doesn't end the countdown long before there's anything to hit.
-    const bool counting = m_songState == SongState::Loading || m_songState == SongState::LeadIn || m_songState == SongState::Playing;
+    // A show's hand-off has neither: the music never stops.
+    const bool counting = !m_continued && ( m_songState == SongState::Loading || m_songState == SongState::LeadIn || m_songState == SongState::Playing );
     const double toFirstNoteMs = m_countInMs - m_songTimeMs;
     ui->ModelSetNumber( kModel, "countdown", counting && toFirstNoteMs > 0.0 && toFirstNoteMs <= kCountdownMs ? std::ceil( toFirstNoteMs / 1000.0 ) : 0.0 );
-    ui->ModelSetNumber( kModel, "countdown_intro", m_songState == SongState::Loading || m_songState == SongState::LeadIn );
+    ui->ModelSetNumber( kModel, "countdown_intro", !m_continued && ( m_songState == SongState::Loading || m_songState == SongState::LeadIn ) );
     ui->ModelSetNumber( kModel, "score", m_score );
     ui->ModelSetNumber( kModel, "combo", m_combo );
     ui->ModelSetNumber( kModel, "multiplier", Multiplier( m_combo ) );
@@ -2270,6 +2417,15 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         m_seekedFromCommandLine = true;
         SeekTo( kSeekTo * 1000.0 );
     }
+    // --show-skip <seconds>: in a continuous show, each song jumps to that long before its last
+    // note once it starts (headless checks of every hand-off; the songs aren't recorded).
+    static const float kShowSkip = CommandLine::GetFloat( "--show-skip", -1.f );
+    // (A handed-off song plays its first moments, to see its opening shot.)
+    if( kShowSkip >= 0.f && m_songState == SongState::Playing && GigSession::GetInstance().IsContinuous() && m_songTimeMs > ( m_continued ? 3000.0 : 0.0 )
+        && m_songTimeMs < m_lastNoteMs - kShowSkip * 1000.0 - 1000.0 )
+    {
+        SeekTo( m_lastNoteMs - kShowSkip * 1000.0 );
+    }
     GatherHits( hits );
     if( m_calibrating )
     {
@@ -2312,8 +2468,19 @@ void NoteHighwayCore::Update( const UpdateContext& context )
     m_venueShow.SetPerformance( 0.25f + 0.75f * std::min( 1.f, static_cast<float>( m_combo ) / 80.f ) );
     m_venueShow.Update( VisualTimeMs(), context.GetDeltaTime() );
 
+    UpdateHighwayRests( context.GetDeltaTime() );
+    // A continuous show's song plays its tail into the next one instead of finishing.
+    if( m_songState == SongState::Playing && judgeTime > m_lastNoteMs + kGoodWindowMs && !m_inShowTail && GigSession::GetInstance().IsContinuous()
+        && GigSession::GetInstance().CurrentTrack() == m_trackIndex && !GigSession::GetInstance().IsLastSong() )
+    {
+        StartShowTail();
+    }
+    if( m_inShowTail )
+    {
+        UpdateShowTail();
+    }
     // Done once every note has passed and the audio has stopped (or ran out long ago).
-    if( m_songState == SongState::Playing && judgeTime > m_lastNoteMs + kGoodWindowMs )
+    else if( m_songState == SongState::Playing && judgeTime > m_lastNoteMs + kGoodWindowMs )
     {
         const double lengthMs = static_cast<double>( m_currentTrackPack.GetLength() );
         if( !m_currentTrackPack.IsPlaying() || m_songTimeMs > lengthMs + 2000.0 )
