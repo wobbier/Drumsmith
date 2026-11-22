@@ -843,25 +843,25 @@
           "guitar"
         ]
       },
-      "Premise": "Dad asked for Sinatra. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.",
+      "Premise": "Dad asked for the Beatles. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.",
       "Songs": [
         {
-          "Spotify": "https://open.spotify.com/track/2YkIDPL5lGhRhomCq4S2RO",
-          "Artist": "Frank Sinatra",
-          "Title": "My Way - 2008 Remastered",
-          "DurationSeconds": 276,
+          "Spotify": "https://open.spotify.com/track/389QX9Q1eUOEZ19vtzzI9O",
+          "Artist": "The Beatles",
+          "Title": "While My Guitar Gently Weeps - Remastered 2009",
+          "DurationSeconds": 285,
           "Charted": false,
           "ChartStatus": "planned",
           "Alternates": [
             "https://open.spotify.com/track/4FmCUATNIarCQh72JYdvnm",
             "https://open.spotify.com/track/7iN1s7xHE4ifF5povM6A48"
           ],
-          "PlayingNote": "The accompaniment grows from a restrained pulse to broad orchestral accents.",
+          "PlayingNote": "Keep the kit in view as the drummer settles into Dad’s record.",
           "StateBefore": [],
           "Cue": {
             "On": "intro",
             "Shot": "wide",
-            "Do": "Dad’s portrait and one standing uncle catch the light. As the band enters, the pool of light widens to his daughter and the empty chair beside her."
+            "Do": "From behind the kit, find the uncle holding his toast card and the daughter beside Dad’s empty chair. She mouths the guitar phrase. End on the uncle’s wet shoulder."
           },
           "StateAfter": [
             "toast_seat_empty"
@@ -874,24 +874,21 @@
           "GuestCast": {}
         },
         {
-          "Spotify": "https://open.spotify.com/track/4c38yr2PflGI2DSIzqsnmF",
-          "Artist": "Gerard Way",
-          "Title": "Baby You're a Haunted House",
-          "DurationSeconds": 166,
+          "Spotify": "https://open.spotify.com/track/1gg2pjLIkcxSnNfGORJ0u5",
+          "Artist": "Bullet For My Valentine",
+          "Title": "A Place Where You Belong",
+          "DurationSeconds": 306,
           "Charted": false,
           "ChartStatus": "planned",
-          "Alternates": [
-            "https://open.spotify.com/track/7j31rVgGX9Q2blT92VBEA0",
-            "https://open.spotify.com/track/7ud7UH0utbNsPKy4tCGiaL"
-          ],
-          "PlayingNote": "The loping backbeat gives the first dancers room.",
+          "Alternates": [],
+          "PlayingNote": "Give the opening to the pallbearers and return to the kit for the lead guitar.",
           "StateBefore": [
             "toast_seat_empty"
           ],
           "Cue": {
             "On": "first_chorus",
             "Shot": "wide",
-            "Do": "The uncle is seated. At the chorus the dessert table rolls against the wall, revealing a square of parquet. One lemon square sits crooked on its plate."
+            "Do": "Track beside the casket at shoulder height through the rain. Widen to the black umbrellas at the grave. As the casket lowers, its lid clears the daughter’s sightline to Dad’s friends opposite. Back at the Legion, the cousins wheel the dessert table aside."
           },
           "StateAfter": [
             "toast_seat_empty",
@@ -905,17 +902,14 @@
           "GuestCast": {}
         },
         {
-          "Spotify": "https://open.spotify.com/track/7i5JxL1haaLoyNNZAb6T0L",
-          "Artist": "Marianas Trench",
-          "Title": "Dearly Departed",
-          "DurationSeconds": 259,
+          "Spotify": "https://open.spotify.com/track/4WiOyLEu3WnQW0xzm2ua0Z",
+          "Artist": "Billy Talent",
+          "Title": "Cure for the Enemy",
+          "DurationSeconds": 267,
           "Charted": false,
           "ChartStatus": "planned",
-          "Alternates": [
-            "https://open.spotify.com/track/7KzNRNvOd2kbaRpOm9ENDE",
-            "https://open.spotify.com/track/1jlG3KJ3gdYmhfuySFfpO1"
-          ],
-          "PlayingNote": "The phrasing leaves air around the voice before the arrangement swells.",
+          "Alternates": [],
+          "PlayingNote": "Start behind the kit with the cleared parquet beyond the cymbals.",
           "StateBefore": [
             "toast_seat_empty",
             "dessert_table_moved"
@@ -923,7 +917,7 @@
           "Cue": {
             "On": "first_chorus",
             "Shot": "crowd",
-            "Do": "The daughter and her uncle sway together on the open floor. Her good shoes sit under the empty chair in the light they just left."
+            "Do": "Dad’s friend comes in wearing the same rain-dark suit she carried him in. Her wife eases the jacket off her shoulders. Across the floor the daughter has left her shoes by the empty chair and taken her uncle’s hands."
           },
           "StateAfter": [
             "toast_seat_empty",
@@ -948,7 +942,7 @@
             "https://open.spotify.com/track/1p1nO35bbi4ZlQgjIA4oa4",
             "https://open.spotify.com/track/3IlY76VbP31zwPY0S2EMjh"
           ],
-          "PlayingNote": "The heavier attacks give the band its first hard accents of the evening.",
+          "PlayingNote": "Let the drummer’s accents draw the family onto the floor.",
           "StateBefore": [
             "toast_seat_empty",
             "dessert_table_moved",
@@ -1026,7 +1020,7 @@
         "portrait_on_piano",
         "family_on_floor"
       ],
-      "DurationSeconds": 1101
+      "DurationSeconds": 1258
     },
     {
       "Id": "s06-roller-rink",

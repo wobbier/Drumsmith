@@ -210,33 +210,31 @@ The first night in the garage, use the dive-bar rug to mark out the space for a 
 
 ## 05  Funeral Afterparty at the Legion
 
-Dad asked for Sinatra. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.
+[Full scene and camera plan](Funeral-Afterparty-at-the-Legion.md)
 
-**Booking.** Act 2 · 18:21 · pass at 65% average · target median 3–6 notes/s.
+Dad asked for the Beatles. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.
+
+**Booking.** Act 2 · 20:58 · pass at 65% average · target median 3–6 notes/s.
 
 **Venue and kit.** Club base, medium build cost. Redress the bar footprint with a strip of parquet, folding chairs, a dessert table on wheels and an upright piano. Play the legion kit with a tea towel on the snare.
 
 **On stage.** Drummer, bass and guitar.
 
-1. Frank Sinatra — [My Way - 2008 Remastered](https://open.spotify.com/track/2YkIDPL5lGhRhomCq4S2RO). The accompaniment grows from a restrained pulse to broad orchestral accents.
+1. The Beatles — [While My Guitar Gently Weeps - Remastered 2009](https://open.spotify.com/track/389QX9Q1eUOEZ19vtzzI9O). Keep the kit in view as the drummer settles into Dad’s record.
 
-   **Intro · wide shot.** Dad’s portrait and one standing uncle catch the light. As the band enters, the pool of light widens to his daughter and the empty chair beside her.
+   **Intro · wide shot.** From behind the kit, find the uncle holding his toast card and the daughter beside Dad’s empty chair. She mouths the guitar phrase. End on the uncle’s wet shoulder.
 
    **Alternates.** Frank Sinatra — [That's Life](https://open.spotify.com/track/4FmCUATNIarCQh72JYdvnm) or The Beatles — [Let It Be - Remastered 2009](https://open.spotify.com/track/7iN1s7xHE4ifF5povM6A48).
 
-2. Gerard Way — [Baby You're a Haunted House](https://open.spotify.com/track/4c38yr2PflGI2DSIzqsnmF). The loping backbeat gives the first dancers room.
+2. Bullet For My Valentine — [A Place Where You Belong](https://open.spotify.com/track/1gg2pjLIkcxSnNfGORJ0u5). Give the opening to the pallbearers and return to the kit for the lead guitar.
 
-   **First chorus · wide shot.** The uncle is seated. At the chorus the dessert table rolls against the wall, revealing a square of parquet. One lemon square sits crooked on its plate.
+   **First chorus · wide shot.** Track beside the casket at shoulder height through the rain. Widen to the black umbrellas at the grave. As the casket lowers, its lid clears the daughter’s sightline to Dad’s friends opposite. Back at the Legion, the cousins wheel the dessert table aside.
 
-   **Alternates.** My Chemical Romance — [Teenagers](https://open.spotify.com/track/7j31rVgGX9Q2blT92VBEA0) or Marianas Trench — [Hollywood Renaissance](https://open.spotify.com/track/7ud7UH0utbNsPKy4tCGiaL).
+3. Billy Talent — [Cure for the Enemy](https://open.spotify.com/track/4WiOyLEu3WnQW0xzm2ua0Z). Start behind the kit with the cleared parquet beyond the cymbals.
 
-3. Marianas Trench — [Dearly Departed](https://open.spotify.com/track/7i5JxL1haaLoyNNZAb6T0L). The phrasing leaves air around the voice before the arrangement swells.
+   **First chorus · crowd shot.** Dad’s friend comes in wearing the same rain-dark suit she carried him in. Her wife eases the jacket off her shoulders. Across the floor the daughter has left her shoes by the empty chair and taken her uncle’s hands.
 
-   **First chorus · crowd shot.** The daughter and her uncle sway together on the open floor. Her good shoes sit under the empty chair in the light they just left.
-
-   **Alternates.** The Used — [All That I've Got](https://open.spotify.com/track/7KzNRNvOd2kbaRpOm9ENDE) or Avril Lavigne — [I'm with You](https://open.spotify.com/track/1jlG3KJ3gdYmhfuySFfpO1).
-
-4. The Requiem — [I’ll Be Late For My Funeral](https://open.spotify.com/track/6hoXYrY3T51gLkdDRFk3JI). The heavier attacks give the band its first hard accents of the evening.
+4. The Requiem — [I’ll Be Late For My Funeral](https://open.spotify.com/track/6hoXYrY3T51gLkdDRFk3JI). Let the drummer’s accents draw the family onto the floor.
 
    **Verse · wide shot.** Dad’s portrait now faces the dancers from the upright piano. The uncle’s tie is draped over its corner and a little stack of napkin requests has appeared.
 
