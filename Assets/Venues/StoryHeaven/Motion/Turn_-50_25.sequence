@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "Turn_-50_25",
+ "FrameRate": 30,
+ "DurationFrames": 75,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      0.1961609,
+      -0.4126005,
+      0.0914713,
+      0.8848247
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

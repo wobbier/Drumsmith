@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "Fireball",
+ "FrameRate": 30,
+ "DurationFrames": 66,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Scale",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.05,
+      0.05,
+      0.05,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 7,
+     "Value": [
+      13,
+      10,
+      13,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      10,
+      9,
+      10,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 66,
+     "Value": [
+      0.01,
+      0.01,
+      0.01,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

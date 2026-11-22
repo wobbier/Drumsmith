@@ -1,0 +1,45 @@
+{
+ "Version": 1,
+ "Name": "MedicWorking",
+ "FrameRate": 30,
+ "DurationFrames": 45,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      0.0523041,
+      0.0348517,
+      -0.0018265,
+      0.9980212
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

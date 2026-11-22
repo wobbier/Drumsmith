@@ -1,0 +1,72 @@
+{
+ "Version": 1,
+ "Name": "Slew",
+ "FrameRate": 30,
+ "DurationFrames": 120,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 40,
+     "Value": [
+      -0.0012174,
+      0.0697458,
+      0.0174099,
+      0.9974121
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      0.0,
+      0.2249511,
+      0.0,
+      0.9743701
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      2.5,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

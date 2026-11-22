@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "RingSpinA",
+ "FrameRate": 30,
+ "DurationFrames": 900,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      0.0,
+      0.0,
+      0.8660254,
+      0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 600,
+     "Value": [
+      -0.0,
+      0.0,
+      0.8660254,
+      -0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 900,
+     "Value": [
+      -0.0,
+      0.0,
+      0.0008727,
+      -0.9999996
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}
