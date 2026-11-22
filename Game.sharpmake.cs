@@ -90,7 +90,7 @@ public class SharpGameSolution : BaseGameSolution
         Globals.FMOD_UWP_Dir = "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Universal Windows Platform/";
         Globals.FMOD_macOS_Dir = Util.GetCurrentSharpmakeFileInfo() + "/../ThirdParty/FMOD Programmers API/";
         //Globals.MONO_Win64_Dir = string.Empty;
-        Globals.DOTNET_Win64_Dir = "C:\\Program Files\\dotnet\\packs\\Microsoft.NETCore.App.Host.win-x64\\8.0.27\\runtimes\\win-x64\\native";
+        Globals.DOTNET_Win64_Dir = "C:\\Program Files\\dotnet\\packs\\Microsoft.NETCore.App.Host.win-x64\\8.0.29\\runtimes\\win-x64\\native";
         Globals.IsPhysicsEnabled3D = true;
         //Globals.ExeName = "Drumsmith";
         System.Console.WriteLine(Globals.FMOD_macOS_Dir);

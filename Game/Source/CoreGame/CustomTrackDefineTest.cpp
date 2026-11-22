@@ -434,7 +434,8 @@ void CustomTrackDefineTest::ReadMidiDrumNotes( smf::MidiFile& inMidi, int inDrum
     for( int event = 0; event < drumTrack.size(); ++event )
     {
         const smf::MidiEvent& message = drumTrack[event];
-        if( message.isMetaMessage() && message.getMetaContent().find( "ENABLE_CHART_DYNAMICS" ) != std::string::npos )
+        // The pinned midifile declares getMetaContent() non-const, so read it from a copy.
+        if( message.isMetaMessage() && smf::MidiEvent( message ).getMetaContent().find( "ENABLE_CHART_DYNAMICS" ) != std::string::npos )
         {
             dynamics = true;
         }
@@ -692,7 +693,7 @@ VenueData CustomTrackDefineTest::ReadMidiVenue( smf::MidiFile& inMidi )
                 {
                     continue;
                 }
-                const std::string raw = event.getMetaContent();
+                const std::string raw = smf::MidiEvent( event ).getMetaContent();
                 const std::string text = strip( raw );
                 // On the vocal tracks, unbracketed text and lyric events are the lyrics, one per
                 // syllable at its note; bracketed text is a cue.

@@ -103,7 +103,12 @@ void VocalsTestCore::OnStart()
     }
     // AttachFFT
     audioSystem->createDSPByType( FMOD_DSP_TYPE_FFT, &fftDsp );
+    // FMOD 2.03 renamed FMOD_DSP_FFT_WINDOWTYPE to FMOD_DSP_FFT_WINDOW.
+#if FMOD_VERSION >= 0x00020300
+    fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOW, FMOD_DSP_FFT_WINDOW_HAMMING );
+#else
     fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING );
+#endif
     fftDsp->setParameterInt( FMOD_DSP_FFT_WINDOWSIZE, 1024 );  // Resolution of FFT
     channel->addDSP( 0, fftDsp );
 #endif
