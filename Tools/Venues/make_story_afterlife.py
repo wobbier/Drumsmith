@@ -351,7 +351,7 @@ def highway():
     slew_clip = P.clip(V, 'Slew', 120, [P.track('Rotation', [(0, (0, 0, 0)), (40, (0, 8, 2)), (120, (0, SLEW_YAW, 0))], 'SmoothStep'),
                                         P.track('Position', [(0, (0, 0, 0)), (120, SLEW_SHIFT)], 'SmoothStep')])
     world = s.group('World', P.play(s, root, 'Slew', 'trailer_slews', slew_clip))
-    textured(s.slab('Asphalt', world, -11, 11, -0.2, 0.0, -420, 140, (1, 1, 1), rough=0.9), V, 'Asphalt', (5.5, 140))
+    s.slab('Road bed', world, -11, 11, -0.3, -0.03, -420, 140, ASPHALT, rough=0.95, shadows=False)
     for x in (-10.7, 10.55):
         s.slab('Edge line', world, x, x + 0.15, 0.0, 0.01, -420, 140, LINE_WHITE, shadows=False)
     for x in (-0.2, 0.08):
@@ -377,6 +377,8 @@ def highway():
     dash_clip = P.clip(V, 'RoadDashes', 12, [P.track('Position', [(0, (0, 0, 0)), (12, (0, 0, -12))])])
 
     def lane(parent):
+        # The asphalt goes by with the lines: its texture repeats every 4 m, the loop is 12.
+        textured(s.slab('Asphalt', parent, -11, 11, -0.2, 0.0, -432, 152, (1, 1, 1), rough=0.9), V, 'Asphalt', (5.5, 146))
         for k in range(-34, 13):
             for x in (-5.4, 5.4):
                 s.slab('Dash', parent, x - 0.07, x + 0.07, 0.0, 0.012, k * 12, k * 12 + 3, LINE_WHITE, shadows=False)
@@ -454,6 +456,19 @@ def highway():
         model = P.figure(V, label, 'ShopKeeper_01', '04_B', pose, 'the highway cop')
         P.place(s, P.between(s, world, label, flag_after, flag_before, 0.05, seat), 'Cop', model, seat, 0)
     s.box('Steering wheel', world, (seat[0], 0.98, seat[2] + 0.5), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
+    # The rest of the pursuit: four more cruisers strung out behind, weaving for a way past; they
+    # pull up where they are when the rig goes over.
+    driver = P.figure(V, 'Cop_driving', 'ShopKeeper_01', '04_B', P.DRIVING, 'the highway cop')
+    chasing = P.between(s, world, 'Pursuit', None, 'wreck', 0.2)
+    stopped = P.between(s, world, 'Pursuit, pulled up', 'wreck', None, 0.2)
+    for i, (x, z, yaw, park) in enumerate(((-5.6, -22.0, 3, -24), (5.5, -19.0, -4, 18), (-1.8, -31.0, 2, 30), (6.2, -36.0, -3, -14))):
+        frames = 130 + 28 * i
+        weave = P.clip(V, f'Weave{i}', frames, [P.track('Position', [(0, (0, 0, 0)), (frames // 3, (0.9 - 0.5 * (i % 2), 0, 1.6)), (2 * frames // 3, (-0.7, 0, -1.2 + 0.6 * (i % 2))), (frames, (0, 0, 0))], 'SmoothStep'),
+                                                 P.track('Rotation', [(0, (0, 0, 0)), (frames // 3, (0, 3, 0)), (2 * frames // 3, (0, -3, 0)), (frames, (0, 0, 0))], 'SmoothStep')])
+        for parent, at_yaw in ((P.looping(s, chasing, f'Pursuit {i}', weave, (x, 0, z)), yaw), (s.entity(f'Pursuit {i}, pulled up', stopped, (x, 0, z), (0, park, 0)), 0)):
+            car = cruiser(s, parent, V, (0, 0, 0), at_yaw, name=f'Cruiser {i + 2}')
+            P.place(s, car, 'Cop', driver, (-0.45, 0.32, -0.2), 0)
+            s.box('Steering wheel', car, (-0.45, 0.98, 0.3), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
     s.light('Dash glow', world, (seat[0], 1.0, seat[2] + 0.6), 'Point', (0.4, 0.6, 1.0), 2.5, 2.5)
     s.light('Stage spill on the cop', world, (seat[0] + 0.3, 1.5, car_at[2] + 1.3), 'Point', (1.0, 0.7, 0.6), 3.5, 3.5)
     # The helicopter's searchlight on the deck.

@@ -1,0 +1,102 @@
+{
+ "Version": 1,
+ "Name": "Weave2",
+ "FrameRate": 30,
+ "DurationFrames": 186,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 62,
+     "Value": [
+      0.9,
+      0,
+      1.6,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 124,
+     "Value": [
+      -0.7,
+      0,
+      -1.2,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 186,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 62,
+     "Value": [
+      0.0,
+      0.0261769,
+      0.0,
+      0.9996573
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 124,
+     "Value": [
+      0.0,
+      -0.0261769,
+      0.0,
+      0.9996573
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 186,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

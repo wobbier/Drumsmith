@@ -1380,7 +1380,11 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
             {
                 prop.Lights.emplace_back( owner, owner->GetComponent<Light>().Intensity );
             }
-            if( owner && owner->HasComponent<Sequence>() && prop.Mode != VenueStory::Motion::Show )
+            // Play drives only the one-shots under it (authored with PlayOnStart off): a loop that
+            // plays from the start (a road scrolling under a group that slews, wings beating on an
+            // angel that turns) is the scene's own and keeps running.
+            if( owner && owner->HasComponent<Sequence>() && prop.Mode != VenueStory::Motion::Show
+                && ( prop.Mode == VenueStory::Motion::SlowMotion || !owner->GetComponent<Sequence>().PlayOnStart ) )
             {
                 prop.Sequences.push_back( owner );
             }
