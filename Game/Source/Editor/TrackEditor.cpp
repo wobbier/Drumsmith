@@ -79,7 +79,9 @@ TrackEditor::~TrackEditor()
 void TrackEditor::Init()
 {
     m_padStates.resize( static_cast<size_t>( PadId::COUNT ) );
+#if USING( ME_FMOD )
     m_drums = new Drumset( GetEngine().AudioThread->GetSystem() );
+#endif
     InstallActionRouting();
     AutomationCommands::Register( "track-", [this]( const std::string& command, const std::string& args, std::string& error ) {
         return ExecuteAutomation( command, args, error );
@@ -98,7 +100,9 @@ void TrackEditor::Destroy()
     m_preview.Stop();
     m_transport.Close();
     m_document.Close();
+#if USING( ME_FMOD )
     delete m_drums;
+#endif
     m_drums = nullptr;
 }
 
@@ -873,10 +877,12 @@ void TrackEditor::HandleRecording()
         const double age = message.m_arrival.time_since_epoch().count() != 0 ? std::chrono::duration<double>( std::chrono::steady_clock::now() - message.m_arrival ).count() : 0.0;
         for( const PadMappingStorage::Resolved& meaning : resolved )
         {
+#if USING( ME_FMOD )
             if( m_drums )
             {
                 m_drums->hitPad( meaning.pad, message.m_data2 / 127.f );
             }
+#endif
             record( meaning.pad, meaning.articulation, message.m_data2, age );
         }
     }
@@ -888,10 +894,12 @@ void TrackEditor::HandleRecording()
         {
             if( pad.keyboardBinding != 0 && input.WasKeyPressed( static_cast<KeyCode>( pad.keyboardBinding ) ) )
             {
+#if USING( ME_FMOD )
                 if( m_drums )
                 {
                     m_drums->hitPad( static_cast<PadId>( pad.padId ), 1.f );
                 }
+#endif
                 record( static_cast<PadId>( pad.padId ), Articulation::Normal, 100, 0.0 );
             }
         }
