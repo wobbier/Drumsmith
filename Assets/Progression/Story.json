@@ -1098,6 +1098,24 @@
         "bodies",
         "band_hidden"
        ]
+      },
+      {
+       "Cue": "at:0.3",
+       "Flags": [
+        "cruiser_flips"
+       ]
+      },
+      {
+       "Cue": "at:0.47",
+       "Flags": [
+        "roadblock"
+       ]
+      },
+      {
+       "Cue": "at:0.68",
+       "Flags": [
+        "big_air"
+       ]
       }
      ],
      "Venue": "StoryHighway"

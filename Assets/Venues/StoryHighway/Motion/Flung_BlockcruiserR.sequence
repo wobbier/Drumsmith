@@ -1,0 +1,142 @@
+{
+ "Version": 1,
+ "Name": "Flung_BlockcruiserR",
+ "FrameRate": 30,
+ "DurationFrames": 400,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 115,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 123,
+     "Value": [
+      3.15,
+      1.6,
+      9.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 137,
+     "Value": [
+      5.95,
+      0.4,
+      17.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 165,
+     "Value": [
+      7.0,
+      0.0,
+      20.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 400,
+     "Value": [
+      7.0,
+      0.0,
+      20.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 115,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 121,
+     "Value": [
+      -0.0484852,
+      0.3853379,
+      -0.2171183,
+      0.8955576
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 129,
+     "Value": [
+      0.2131642,
+      0.6397647,
+      -0.2698624,
+      0.6873401
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 145,
+     "Value": [
+      0.7198463,
+      0.6040228,
+      -0.2620026,
+      0.2198463
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 400,
+     "Value": [
+      0.7198463,
+      0.6040228,
+      -0.2620026,
+      0.2198463
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

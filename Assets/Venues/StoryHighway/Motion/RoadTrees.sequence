@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "RoadTrees",
  "FrameRate": 30,
- "DurationFrames": 96,
+ "DurationFrames": 60,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,11 +20,11 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 96,
+     "Frame": 60,
      "Value": [
       0,
       0,
-      -96,
+      -96.0,
       0
      ],
      "Interpolation": "Linear"

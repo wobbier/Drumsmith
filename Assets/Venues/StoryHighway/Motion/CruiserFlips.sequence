@@ -1,0 +1,192 @@
+{
+ "Version": 1,
+ "Name": "CruiserFlips",
+ "FrameRate": 30,
+ "DurationFrames": 400,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      -1.0,
+      0,
+      -3,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      -2.2,
+      1.4,
+      -9,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 36,
+     "Value": [
+      -3.0,
+      2.6,
+      -18,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      -3.6,
+      1.9,
+      -30,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      -4.0,
+      1.6,
+      -45,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      -4.4,
+      1.6,
+      -90,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 400,
+     "Value": [
+      -4.6,
+      1.6,
+      -586,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      0.0,
+      -0.3007058,
+      0.0,
+      0.953717
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      0.3289899,
+      -0.4698463,
+      0.4698463,
+      0.6710101
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 36,
+     "Value": [
+      0.761264,
+      0.0454433,
+      0.642207,
+      -0.0773445
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      0.5825634,
+      0.694272,
+      0.2716538,
+      -0.3237444
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      0.084186,
+      0.9622502,
+      0.0225576,
+      -0.2578342
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 72,
+     "Value": [
+      0.6372885,
+      -0.7594908,
+      0.0839006,
+      0.0999889
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0.996043,
+      -0.017386,
+      0.0871425,
+      0.0015211
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 400,
+     "Value": [
+      0.9961947,
+      -0.0,
+      0.0871557,
+      0.0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

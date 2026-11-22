@@ -415,6 +415,73 @@ def cruiser(venue, door_open=False):
     return prop(venue, 'CruiserOpen' if door_open else 'Cruiser', lambda m: _cruiser(m, door_open))
 
 
+def car(venue, ink):
+    """A saloon facing +z in one of the palette's colours (traffic)."""
+    def build(m):
+        m.box((0, 0.6, 0), (1.8, 0.5, 4.4), ink)
+        m.box((0, 0.92, 1.55), (1.7, 0.18, 1.2), ink, taper=0.9)
+        m.box((0, 0.92, -1.7), (1.7, 0.18, 0.9), ink, taper=0.9)
+        m.box((0, 1.2, -0.2), (1.6, 0.5, 2.1), 'glass', taper=0.8)
+        m.box((0, 1.47, -0.2), (1.3, 0.05, 1.6), ink)
+        m.box((0, 0.42, 2.22), (1.85, 0.16, 0.1), 'steel_dark')
+        m.box((0, 0.42, -2.22), (1.85, 0.16, 0.1), 'steel_dark')
+        for x in (-0.88, 0.88):
+            for z in (-1.4, 1.4):
+                _wheel(m, (x, 0.33, z), 0.33, 0.22)
+            m.box((x * 0.7, 0.68, 2.21), (0.34, 0.14, 0.04), 'lamp')
+            m.box((x * 0.7, 0.7, -2.21), (0.34, 0.12, 0.04), 'red_lamp')
+    return prop(venue, 'Car_' + ink, build)
+
+
+def semi(venue):
+    """A tractor and box trailer facing +z, 17 m long, its middle on the origin."""
+    def build(m):
+        t = Mesh('t')
+        _tractor(t)
+        m.merge(t, (0, 0, 4.6))
+        m.box((0, 2.75, -3.2), (2.6, 3.0, 11.0), 'white')
+        m.box((0, 1.1, -3.2), (2.4, 0.3, 11.0), 'steel_dark')
+        m.box((0, 2.6, -8.72), (2.3, 2.6, 0.04), 'steel')
+        for x in (-1.1, 1.1):
+            for z in (-6.2, -7.5):
+                _wheel(m, (x, 0.55, z), w=0.7)
+            m.box((x, 1.0, -8.74), (0.3, 0.16, 0.04), 'red_lamp')
+    return prop(venue, 'Semi', build)
+
+
+def helicopter(venue):
+    """A police helicopter, nose to +z, the rotor hub at (0, 1.5, 0) (the generator spins the blades)."""
+    def build(m):
+        m.blob((0, 0, 0.3), 1.0, 'navy', 1, 0.0, 1.0, 0, (0.95, 1.0, 1.9))
+        m.blob((0, 0.15, 1.5), 0.62, 'glass', 1, 0.0, 1.0, 0, (1.0, 0.85, 0.9))
+        m.tube([(0, 0.4, -1.2), (0, 0.6, -5.2)], [0.36, 0.12], 'navy', 6)
+        m.box((0, 1.1, -5.2), (0.08, 1.3, 0.7), 'white', taper=0.6)
+        m.box((0, 0.75, -3.0), (2.2, 0.06, 0.45), 'white')
+        m.lathe((0, 1.0, 0), [(0.14, 0.0), (0.1, 0.5)], 'steel_dark', 6)
+        for x in (-0.9, 0.9):
+            m.tube([(x, -1.25, -1.2), (x, -1.25, 1.6)], 0.05, 'steel', 5)
+            for z in (-0.7, 1.0):
+                m.tube([(x * 0.6, -0.8, z), (x, -1.25, z)], 0.04, 'steel', 4)
+        m.box((0.97, 0.0, 0.2), (0.03, 0.5, 1.6), 'white')
+        m.box((-0.97, 0.0, 0.2), (0.03, 0.5, 1.6), 'white')
+        m.lathe((0, -1.0, 1.4), [(0.22, 0.0), (0.26, -0.3), (0.0, -0.3)], 'steel_dark', 8)
+    return prop(venue, 'Helicopter', build)
+
+
+def overpass(venue, half=22.0):
+    """A road bridge across the highway at z = 0: deck from y = 7.2, piers outside the shoulders."""
+    def build(m):
+        m.box((0, 7.9, 0), (half * 2, 1.4, 9.0), 'steel_dark')
+        m.box((0, 7.15, 0), (half * 2, 0.12, 8.0), 'soot')
+        for z in (-4.4, 4.4):
+            m.box((0, 9.0, z), (half * 2, 0.9, 0.3), 'post')
+        for x in (-13.6, 13.6, -half + 0.8, half - 0.8):
+            m.box((x, 3.6, 0), (1.4, 7.2, 5.0), 'post', taper=0.85)
+        for x in (-7.0, 0.0, 7.0):
+            m.box((x, 7.06, 0), (0.5, 0.06, 6.0), 'lamp')
+        m.box((6.5, 8.2, -4.56), (7.0, 1.6, 0.06), 'sign_green')
+    return prop(venue, 'Overpass', build)
+
 def ambulance(venue):
     def build(m):
         m.box((0, 1.75, -0.6), (2.4, 2.5, 4.6), 'white')

@@ -1,0 +1,152 @@
+{
+ "Version": 1,
+ "Name": "Jump",
+ "FrameRate": 30,
+ "DurationFrames": 70,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0,
+      0.3,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      0,
+      -0.4,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      0,
+      -2.8,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 57,
+     "Value": [
+      0,
+      0.28,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 70,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 14,
+     "Value": [
+      0.0218149,
+      0.0,
+      0.0,
+      0.999762
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      0.0,
+      0.0,
+      0.0069813,
+      0.9999756
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      -0.0261769,
+      0.0,
+      0.0,
+      0.9996573
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      0.0069813,
+      0.0,
+      0.0,
+      0.9999756
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 70,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

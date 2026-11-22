@@ -2973,6 +2973,30 @@
               ],
               "Shot": "story/bodies",
               "Do": "Road level: the band lies on the asphalt, one drumstick just beyond the drummer's fingers. Held into Free Bird."
+            },
+            {
+              "On": "at:0.3",
+              "StateAfter": [
+                "cruiser_flips"
+              ],
+              "Shot": "story/cruiser_flips",
+              "Do": "The cruiser on the left quarter clips the oncoming lane and goes over and over, left behind burning."
+            },
+            {
+              "On": "at:0.47",
+              "StateAfter": [
+                "roadblock"
+              ],
+              "Shot": "story/roadblock",
+              "Do": "Two cruisers nose to nose across the road, barrels and trestles: seen from over the cab, the rig goes straight through."
+            },
+            {
+              "On": "at:0.68",
+              "StateAfter": [
+                "big_air"
+              ],
+              "Shot": "story/big_air",
+              "Do": "From the verge, low: the whole rig leaves the road and comes down in sparks."
             }
           ]
         },

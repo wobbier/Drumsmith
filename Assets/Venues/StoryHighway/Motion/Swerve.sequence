@@ -1,0 +1,132 @@
+{
+ "Version": 1,
+ "Name": "Swerve",
+ "FrameRate": 30,
+ "DurationFrames": 210,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      2.1,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 110,
+     "Value": [
+      -1.9,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 160,
+     "Value": [
+      0.9,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.0,
+      -0.0139622,
+      0.0,
+      0.9999025
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 78,
+     "Value": [
+      0.0,
+      0.0130896,
+      0.0,
+      0.9999143
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      0.0,
+      -0.0095992,
+      0.0,
+      0.9999539
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 185,
+     "Value": [
+      0.0,
+      0.0043633,
+      0.0,
+      0.9999905
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

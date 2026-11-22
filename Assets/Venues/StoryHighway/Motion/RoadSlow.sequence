@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "RoadSlow",
+ "FrameRate": 30,
+ "DurationFrames": 600,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 600,
+     "Value": [
+      0,
+      0,
+      -360,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

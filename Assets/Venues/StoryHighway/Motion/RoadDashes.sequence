@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "RoadDashes",
  "FrameRate": 30,
- "DurationFrames": 12,
+ "DurationFrames": 10,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,11 +20,11 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 12,
+     "Frame": 10,
      "Value": [
       0,
       0,
-      -12,
+      -16.0,
       0
      ],
      "Interpolation": "Linear"

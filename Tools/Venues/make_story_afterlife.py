@@ -338,24 +338,30 @@ def highway():
     s.info(marks, 'The Highway', 'Drumsmith', outdoor=True, half_width=60, desk_z=-30, sky_time=21.5, moon=0.8, haze=0.5)
     deck_y = 1.25
     band(s, marks, deck_y)
-    s.camera_spot('Camera Wide', marks, (6.5, 4.2, -9.5), (0, 2.2, 4), 'Wide', 52)
-    s.camera_spot('Camera Crane', marks, (-7, 8, -12), (0, 2, 4), 'Crane', 55)
+    s.camera_spot('Camera Wide', marks, (7.5, 2.2, -7.5), (0, 2.4, 4), 'Wide', 60)
+    s.camera_spot('Camera Crane', marks, (-4.5, 6.2, -12), (0, 2, 4), 'Crane', 58)
     s.camera_spot('Camera Desk', marks, (2, 2.6, -11.0), (0, 2.4, 4), 'Desk', 28)
-    s.camera_spot('Camera roadside', marks, (-9.5, 0.6, 1.0), (0, 2.6, 4.2), 'Custom', 48, 'roadside')
-    s.camera_spot('Camera cab roof', marks, (0.6, 5.6, 9.6), (0, 1.6, 2.0), 'Custom', 58, 'cab')
-    s.camera_spot('Camera chase bumper', marks, (-1.2, 1.1, -9.5), (0.5, 2.4, 4.5), 'Custom', 36, 'bumper')
+    # (Low cameras keep inside the rig's own lanes: the oncoming lane on the left and the slow
+    # lane on the right both have traffic coming through them.)
+    s.camera_spot('Camera roadside', marks, (4.9, 0.35, -2.5), (-0.5, 2.6, 5.0), 'Custom', 64, 'roadside')
+    s.camera_spot('Camera cab roof', marks, (0.6, 5.6, 9.6), (0, 1.6, 2.0), 'Custom', 62, 'cab')
+    s.camera_spot('Camera chase bumper', marks, (-1.2, 1.1, -9.5), (0.5, 2.4, 4.5), 'Custom', 40, 'bumper')
+    s.camera_spot('Camera grille', marks, (4.4, 0.8, 19.5), (0, 2.8, 6.0), 'Custom', 58, 'grille')
+    s.camera_spot('Camera wheel', marks, (3.6, 0.45, -3.0), (1.0, 2.4, 4.6), 'Custom', 66, 'wheel')
 
-    # The road and the shoulders, standing still; what scrolls is the markings, the rails, the poles
-    # and the trees. In the closing bars the whole world turns about the trailer (trailer_slews): the
-    # trailer slewing across the lane, seen from the deck. Everything on the road turns with it.
+    # The road goes by at 48 m/s (1.6 m a frame) until the wreck: what scrolls is the asphalt, its
+    # lines, the rails, the poles, the bridges and the trees, each on a loop its own length, and
+    # the lot swerves from side to side under the rig (the rig and the band stand still: the
+    # world moves). The gig's big moments are one-shots: the rig goes airborne (big_air: the world
+    # drops away and comes back), and in the closing bars the world turns about the trailer
+    # (trailer_slews). Everything on the road turns with it.
+    STEP = 1.6
+    jump_clip = P.clip(V, 'Jump', 70, [P.track('Position', [(0, (0, 0, 0)), (8, (0, 0.3, 0)), (16, (0, -0.4, 0)), (34, (0, -2.8, 0)), (52, (0, 0, 0)), (57, (0, 0.28, 0)), (70, (0, 0, 0))], 'SmoothStep'),
+                                        P.track('Rotation', [(0, (0, 0, 0)), (14, (2.5, 0, 0)), (34, (0, 0, 0.8)), (52, (-3.0, 0, 0)), (60, (0.8, 0, 0)), (70, (0, 0, 0))], 'SmoothStep')])
     slew_clip = P.clip(V, 'Slew', 120, [P.track('Rotation', [(0, (0, 0, 0)), (40, (0, 8, 2)), (120, (0, SLEW_YAW, 0))], 'SmoothStep'),
                                         P.track('Position', [(0, (0, 0, 0)), (120, SLEW_SHIFT)], 'SmoothStep')])
-    world = s.group('World', P.play(s, root, 'Slew', 'trailer_slews', slew_clip))
+    world = s.group('World', P.play(s, P.play(s, root, 'Jump', 'big_air', jump_clip), 'Slew', 'trailer_slews', slew_clip))
     s.slab('Road bed', world, -11, 11, -0.3, -0.03, -420, 140, ASPHALT, rough=0.95, shadows=False)
-    for x in (-10.7, 10.55):
-        s.slab('Edge line', world, x, x + 0.15, 0.0, 0.01, -420, 140, LINE_WHITE, shadows=False)
-    for x in (-0.2, 0.08):
-        s.slab('Centre line', world, x, x + 0.12, 0.0, 0.01, -420, 140, LINE_YELLOW, shadows=False)
     s.slab('Gravel L', world, -15, -11, -0.25, -0.02, -420, 140, GRAVEL)
     s.slab('Gravel R', world, 11, 15, -0.25, -0.02, -420, 140, GRAVEL)
     s.slab('Field L', world, -260, -15, -0.4, -0.1, -420, 140, GRASS)
@@ -364,31 +370,39 @@ def highway():
     for i in range(18):
         x = rng.choice((-1, 1)) * rng.uniform(150, 240)
         s.box(f'Hill {i}', world, (x, -6, rng.uniform(-400, 120)), (rng.uniform(70, 130), rng.uniform(22, 46), rng.uniform(70, 130)), (0.02, 0.03, 0.025), shape='Sphere', shadows=False)
-    # A town's glow far ahead, and its lights.
+    # A town's lights far ahead.
     for i in range(40):
         x, y = rng.uniform(-150, 150), rng.uniform(0.5, 9)
         c = rng.choice(((1.0, 0.8, 0.5), (1.0, 0.9, 0.75), (0.7, 0.85, 1.0), (1.0, 0.4, 0.3)))
         s.box('Town light', world, (x, y, 138 + rng.uniform(0, 3)), (0.9, 0.9, 0.2), c, emissive=c, emissive_intensity=6.0, shadows=False)
     s.light('Moon', world, (0, 60, -40), 'Directional', (0.5, 0.58, 0.85), 1.6, 400, rot=(38, 25, 0), shadows=True, show='Static')
 
-    # Moving at 30 m/s until the wreck: lane dashes and rail posts every 12 m, poles every 48 m,
-    # the trees every 96 m.
     moving = P.between(s, world, 'Road moving', None, 'wreck', 0.2)
-    dash_clip = P.clip(V, 'RoadDashes', 12, [P.track('Position', [(0, (0, 0, 0)), (12, (0, 0, -12))])])
+    swerve_clip = P.clip(V, 'Swerve', 210, [P.track('Position', [(0, (0, 0, 0)), (45, (2.1, 0, 0)), (110, (-1.9, 0, 0)), (160, (0.9, 0, 0)), (210, (0, 0, 0))], 'SmoothStep'),
+                                             P.track('Rotation', [(0, (0, 0, 0)), (22, (0, -1.6, 0)), (78, (0, 1.5, 0)), (135, (0, -1.1, 0)), (185, (0, 0.5, 0)), (210, (0, 0, 0))], 'SmoothStep')])
+    swerving = P.looping(s, moving, 'Swerve', swerve_clip)
+
+    def scroll(name, metres):
+        """A body under the swerve that runs back past the rig, looping every metres."""
+        frames = int(round(metres / STEP))
+        return P.looping(s, swerving, name, P.clip(V, 'Road' + name, frames, [P.track('Position', [(0, (0, 0, 0)), (frames, (0, 0, -metres))])]))
 
     def lane(parent):
-        # The asphalt goes by with the lines: its texture repeats every 4 m, the loop is 12.
+        # The asphalt goes by with the lines: its texture repeats every 4 m, the loop is 16.
         textured(s.slab('Asphalt', parent, -11, 11, -0.2, 0.0, -432, 152, (1, 1, 1), rough=0.9), V, 'Asphalt', (5.5, 146))
-        for k in range(-34, 13):
+        for x in (-10.7, 10.55):
+            s.slab('Edge line', parent, x, x + 0.15, 0.0, 0.01, -432, 152, LINE_WHITE, shadows=False)
+        for x in (-0.2, 0.08):
+            s.slab('Centre line', parent, x, x + 0.12, 0.0, 0.01, -432, 152, LINE_YELLOW, shadows=False)
+        for k in range(-26, 10):
             for x in (-5.4, 5.4):
-                s.slab('Dash', parent, x - 0.07, x + 0.07, 0.0, 0.012, k * 12, k * 12 + 3, LINE_WHITE, shadows=False)
+                s.slab('Dash', parent, x - 0.07, x + 0.07, 0.0, 0.012, k * 16, k * 16 + 4, LINE_WHITE, shadows=False)
+            for side in (-1, 1):
+                s.box('Delineator', parent, (side * 11.6, 0.5, k * 16 + 8), (0.06, 1.0, 0.03), (0.9, 0.9, 0.9), emissive=(1.0, 0.6, 0.1), emissive_intensity=1.6, shadows=False)
         rail = A.guardrail(V, 96.0)
         for k in range(-5, 2):
             A.model(s, parent, 'Guardrail', rail, (15.4, 0, k * 96), shadows=False)
             A.model(s, parent, 'Guardrail', rail, (-15.4, 0, k * 96 + 96), (0, 180, 0), shadows=False)
-        for k in range(-17, 7):
-            for side in (-1, 1):
-                s.box('Delineator', parent, (side * 11.6, 0.5, k * 24), (0.06, 1.0, 0.03), (0.9, 0.9, 0.9), emissive=(1.0, 0.6, 0.1), emissive_intensity=1.2, shadows=False)
 
     def poles(parent):
         for k in range(-8, 4):
@@ -404,19 +418,49 @@ def highway():
 
     def trees(parent):
         A.model(s, parent, 'Treeline', A.treeline(V, 'TreesLoop', -480, 192, 19, 80, 210, 5, period=96.0), shadows=False)
-        # The gantry sign that comes round every 96 m would be too many: one billboard per loop.
         for k in range(-4, 2):
             s.box('Reflector post', parent, (17.5, 0.6, k * 96 + 30), (0.08, 1.2, 0.08), STEEL, shadows=False)
 
-    lane(P.looping(s, moving, 'Dashes', dash_clip))
-    pole_clip = P.clip(V, 'RoadPoles', 48, [P.track('Position', [(0, (0, 0, 0)), (48, (0, 0, -48))])])
-    poles(P.looping(s, moving, 'Poles', pole_clip))
-    tree_clip = P.clip(V, 'RoadTrees', 96, [P.track('Position', [(0, (0, 0, 0)), (96, (0, 0, -96))])])
-    trees(P.looping(s, moving, 'Trees', tree_clip))
+    lane(scroll('Dashes', 16.0))
+    poles(scroll('Poles', 48.0))
+    trees(scroll('Trees', 96.0))
+    # A bridge overhead every 192 m: its lights flick down the deck as it goes over.
+    bridges = scroll('Bridges', 192.0)
+    for k in (-2, -1, 0, 1):
+        z = k * 192 + 120
+        A.model(s, bridges, 'Overpass', A.overpass(V), (0, 0, z), shadows=False)
+        for x in (-7.0, 0.0, 7.0):
+            s.box('Bridge lamp', bridges, (x, 7.02, z), (0.5, 0.05, 6.0), (1, 0.95, 0.8), emissive=(1, 0.93, 0.75), emissive_intensity=7.0, shadows=False)
+        if k in (-1, 0):
+            s.light('Bridge light', bridges, (0, 6.8, z), 'Point', (1.0, 0.92, 0.75), 900.0, 16)
     # The air going by: dust and grit streaking back past the deck.
-    A.particles(s, moving, 'Road grit', (0, 1.6, 30), (-90, 0, 0), Shape='Box', BoxSize=[26, 5, 4], Lifetime=[1.2, 2.0], Speed=[28, 32], Size=[0.02, 0.05],
-                StartColor=[0.9, 0.8, 0.65], StartColor2=[0.6, 0.6, 0.65], EndColor=[0.5, 0.5, 0.5], StartAlpha=0.5, EndAlpha=0.0, Intensity=1.5, Gravity=0.0, Drag=0.0,
-                NoiseStrength=0.3, Blend='Additive', EmissionRate=45, MaxParticles=120, Alignment='Stretched', StretchFactor=0.05, FadeIn=0.1)
+    A.particles(s, moving, 'Road grit', (0, 1.8, 34), (-90, 0, 0), Shape='Box', BoxSize=[30, 4, 6], Lifetime=[0.9, 1.5], Speed=[44, 52], Size=[0.02, 0.06],
+                StartColor=[0.9, 0.8, 0.65], StartColor2=[0.6, 0.6, 0.65], EndColor=[0.5, 0.5, 0.5], StartAlpha=0.6, EndAlpha=0.0, Intensity=1.8, Gravity=0.0, Drag=0.0,
+                NoiseStrength=0.3, Blend='Additive', EmissionRate=90, MaxParticles=180, Alignment='Stretched', StretchFactor=0.07, FadeIn=0.1)
+
+    # Traffic. Oncoming, down the far lane at the two speeds added together: headlights out of the
+    # dark and gone. The slow lane on the right, falling behind.
+    def vehicle(parent, name, kind, at, yaw, lights=True):
+        g = s.entity(name, parent, at, (0, yaw, 0))
+        long_ = kind == 'semi'
+        A.model(s, g, 'Body', A.semi(V) if long_ else A.car(V, kind), shadows=False)
+        nose, tail = (8.9, -8.75) if long_ else (2.25, -2.25)
+        for x in (-0.65, 0.65):
+            s.box('Tail lamp', g, (x, 0.75 if not long_ else 1.0, tail), (0.34, 0.12, 0.04), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=5.0, shadows=False)
+            s.box('Head lamp', g, (x * (1.45 if long_ else 1.0), 0.7 if not long_ else 1.15, nose), (0.34, 0.14, 0.04), (1, 1, 0.9), emissive=(1, 1, 0.85), emissive_intensity=8.0, shadows=False)
+        if lights:
+            s.light('Headlights', g, (0, 0.9, nose + 0.2), 'Spot', (1.0, 0.95, 0.85), 2200.0, 70, rot=(5, 0, 0), inner=14, outer=34)
+        return g
+
+    oncoming = P.looping(s, swerving, 'Oncoming', P.clip(V, 'RoadOncoming', 240, [P.track('Position', [(0, (0, 0, 0)), (240, (0, 0, -624))])]))
+    for i, (z, kind, x) in enumerate(((-250, 'white', -8.6), (-120, 'semi', -8.7), (40, 'cab_red', -8.4), (150, 'steel', -8.7), (280, 'sign_green', -8.5))):
+        for copy in (0, 1):
+            vehicle(oncoming, f'Oncoming {i}', kind, (x, 0, z + copy * 624), 180, lights=copy == 0 or i % 2 == 0)
+    slow = P.looping(s, swerving, 'Slow lane', P.clip(V, 'RoadSlow', 600, [P.track('Position', [(0, (0, 0, 0)), (600, (0, 0, -360))])]))
+    for i, (z, kind) in enumerate(((-150, 'deck'), (-30, 'semi'), (110, 'navy'))):
+        for copy in (0, 1):
+            vehicle(slow, f'Slow traffic {i}', kind, (8.7, 0, z + copy * 360), 0, lights=False)
+
     # Stopped: the markings, rails, poles and trees where they stood.
     still = P.between(s, world, 'Road stopped', 'wreck', None, 0.2)
     lane(still)
@@ -426,7 +470,8 @@ def highway():
     # The flatbed and its tractor, the band on the deck.
     rig = s.group('Rig', root)
     A.model(s, rig, 'Flatbed', A.flatbed(V))
-    wheel_clip = P.clip(V, 'WheelSpin', 6, [P.track('Rotation', [(0, (0, 0, 0)), (3, (180, 0, 0)), (6, (359.9, 0, 0))])])
+    rolling = P.between(s, rig, 'Rolling', None, 'wreck', 0.2)
+    wheel_clip = P.clip(V, 'WheelSpin', 4, [P.track('Rotation', [(0, (0, 0, 0)), (2, (180, 0, 0)), (4, (359.9, 0, 0))])])
     for z in (0.0, 1.3, 6.0, 7.3):
         for x in (-2.6, 2.6):
             spinner = P.looping(s, P.between(s, rig, 'Wheel', None, 'wreck', 0.2, (x, 0.55, z)), 'Wheel', wheel_clip, (x, 0.55, z))
@@ -443,11 +488,25 @@ def highway():
         A.glow_card(s, rig, V, 'Tractor headlight', (x, 1.15, 15.12), 0.8, (1.0, 0.95, 0.8), 6.0)
     s.light('Tractor headlights', rig, (0, 1.3, 15.3), 'Spot', (1.0, 0.93, 0.8), 6000.0, 90, rot=(6, 0, 0), inner=14, outer=32)
     for x in (-1.38, 1.38):
-        A.particles(s, P.between(s, rig, 'Exhaust', None, 'wreck', 0.2), 'Stack smoke', (x, 5.9, 10.6), Shape='Cone', ConeAngle=8, ShapeRadius=0.1, Lifetime=[0.8, 1.4],
+        A.particles(s, rolling, 'Stack smoke', (x, 5.9, 10.6), Shape='Cone', ConeAngle=8, ShapeRadius=0.1, Lifetime=[0.8, 1.4],
                     Speed=[2, 4], Size=[0.3, 0.6], EndSize=4.0, StartColor=[0.12, 0.12, 0.13], StartColor2=[0.2, 0.2, 0.2], EndColor=[0.1, 0.1, 0.1], StartAlpha=0.5,
                     EndAlpha=0.0, Gravity=0.0, Drag=0.2, NoiseStrength=0.4, Blend='Alpha', EmissionRate=14, MaxParticles=40, Texture=A.tex(V, 'Puff'), SimulationSpace='Local')
+        # Fire out of the stacks and up off the deck's back corners on the big moments.
+        for name, at, speed in (('Stack fire', (x, 5.9, 10.6), (9, 14)), ('Deck jet', (x * 2.0, deck_y + 0.1, 8.0), (14, 20))):
+            jet = A.particles(s, rig, name, at, Shape='Cone', ConeAngle=7, ShapeRadius=0.12, Lifetime=[0.35, 0.7], Speed=list(speed), Size=[0.5, 0.9], EndSize=0.4,
+                              StartColor=[1.0, 0.8, 0.3], StartColor2=[1.0, 0.45, 0.08], EndColor=[0.8, 0.1, 0.01], Intensity=7.0, Gravity=0.2, Drag=0.6, NoiseStrength=0.5,
+                              Blend='Additive', EmissionRate=0, BurstCount=0, MaxParticles=300, Texture=A.tex(V, 'Puff'), FadeIn=0.05)
+            jet.add({'Type': 'VenueAccent', 'Beats': 4, 'Particles': 220})
+    # A chain dragging off each back corner, throwing sparks down the road.
+    for x in (-2.7, 2.7):
+        s.box('Drag chain', rolling, (x, 0.42, -1.45), (0.05, 0.9, 0.05), (0.2, 0.2, 0.22), rot=(-35, 0, 0), metallic=0.8, shadows=False)
+        A.particles(s, rolling, 'Chain sparks', (x, 0.06, -1.75), (-78, 0, 0), Shape='Cone', ConeAngle=16, ShapeRadius=0.05, Lifetime=[0.35, 0.9], Speed=[14, 34], Size=[0.03, 0.07],
+                    StartColor=[1.0, 0.85, 0.5], StartColor2=[1.0, 0.55, 0.15], EndColor=[0.9, 0.2, 0.02], Intensity=7.0, Gravity=0.6, Drag=0.1, NoiseStrength=0.8,
+                    Blend='Additive', EmissionRate=70, MaxParticles=90, Alignment='Stretched', StretchFactor=0.035, FadeIn=0.02)
+        s.light('Spark light', rolling, (x, 0.5, -2.4), 'Point', (1.0, 0.6, 0.2), 30.0, 5)
 
-    # The cruiser behind, the cop at the wheel: driving, then the radio, then the nod.
+    # The cruiser behind, the cop at the wheel: driving, then the radio, then the nod. (It holds
+    # its place behind the rig, so the shots through its windscreen hold theirs.)
     car_at = (0.0, 0.0, -13.0)
     cruiser(s, world, V, car_at)
     seat = (car_at[0] - 0.45, 0.32, car_at[2] - 0.2)
@@ -456,21 +515,103 @@ def highway():
         model = P.figure(V, label, 'ShopKeeper_01', '04_B', pose, 'the highway cop')
         P.place(s, P.between(s, world, label, flag_after, flag_before, 0.05, seat), 'Cop', model, seat, 0)
     s.box('Steering wheel', world, (seat[0], 0.98, seat[2] + 0.5), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
-    # The rest of the pursuit: four more cruisers strung out behind, weaving for a way past; they
-    # pull up where they are when the rig goes over.
-    driver = P.figure(V, 'Cop_driving', 'ShopKeeper_01', '04_B', P.DRIVING, 'the highway cop')
-    chasing = P.between(s, world, 'Pursuit', None, 'wreck', 0.2)
-    stopped = P.between(s, world, 'Pursuit, pulled up', 'wreck', None, 0.2)
-    for i, (x, z, yaw, park) in enumerate(((-5.6, -22.0, 3, -24), (5.5, -19.0, -4, 18), (-1.8, -31.0, 2, 30), (6.2, -36.0, -3, -14))):
-        frames = 130 + 28 * i
-        weave = P.clip(V, f'Weave{i}', frames, [P.track('Position', [(0, (0, 0, 0)), (frames // 3, (0.9 - 0.5 * (i % 2), 0, 1.6)), (2 * frames // 3, (-0.7, 0, -1.2 + 0.6 * (i % 2))), (frames, (0, 0, 0))], 'SmoothStep'),
-                                                 P.track('Rotation', [(0, (0, 0, 0)), (frames // 3, (0, 3, 0)), (2 * frames // 3, (0, -3, 0)), (frames, (0, 0, 0))], 'SmoothStep')])
-        for parent, at_yaw in ((P.looping(s, chasing, f'Pursuit {i}', weave, (x, 0, z)), yaw), (s.entity(f'Pursuit {i}, pulled up', stopped, (x, 0, z), (0, park, 0)), 0)):
-            car = cruiser(s, parent, V, (0, 0, 0), at_yaw, name=f'Cruiser {i + 2}')
-            P.place(s, car, 'Cop', driver, (-0.45, 0.32, -0.2), 0)
-            s.box('Steering wheel', car, (-0.45, 0.98, 0.3), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
     s.light('Dash glow', world, (seat[0], 1.0, seat[2] + 0.6), 'Point', (0.4, 0.6, 1.0), 2.5, 2.5)
     s.light('Stage spill on the cop', world, (seat[0] + 0.3, 1.5, car_at[2] + 1.3), 'Point', (1.0, 0.7, 0.6), 3.5, 3.5)
+    driver = P.figure(V, 'Cop_driving', 'ShopKeeper_01', '04_B', P.DRIVING, 'the highway cop')
+
+    def manned(parent, name, yaw=0.0):
+        car = cruiser(s, parent, V, (0, 0, 0), yaw, name=name)
+        P.place(s, car, 'Cop', driver, (-0.45, 0.32, -0.2), 0)
+        s.box('Steering wheel', car, (-0.45, 0.98, 0.3), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
+        return car
+
+    # The rest of the pursuit: four more cruisers strung out behind, fighting for a way past: they
+    # surge up level with the deck and fall back. They pull up where they are when the rig goes over.
+    stopped = P.between(s, world, 'Pursuit, pulled up', 'wreck', None, 0.2)
+    for i, (x, z, yaw, park, surge) in enumerate(((-5.6, -20.0, 3, -24, 13.0), (5.0, -17.0, -4, 18, 10.0), (-2.4, -29.0, 2, 30, 7.0), (5.4, -34.0, -3, -14, 10.0))):
+        frames = 150 + 34 * i
+        side = 1 if x > 0 else -1
+        weave = P.clip(V, f'Weave{i}', frames, [P.track('Position', [(0, (0, 0, 0)), (frames // 4, (-side * 1.2, 0, surge * 0.5)), (frames // 2, (side * 0.6, 0, surge)),
+                                                                    (3 * frames // 4, (-side * 0.9, 0, surge * 0.3)), (frames, (0, 0, 0))], 'SmoothStep'),
+                                                 P.track('Rotation', [(0, (0, 0, 0)), (frames // 8, (0, -side * 7, 0)), (3 * frames // 8, (0, side * 8, 0)), (5 * frames // 8, (0, -side * 6, 0)),
+                                                                    (7 * frames // 8, (0, side * 5, 0)), (frames, (0, 0, 0))], 'SmoothStep')])
+        manned(P.looping(s, swerving, f'Pursuit {i}', weave, (x, 0, z)), f'Cruiser {i + 2}', yaw)
+        manned(s.entity(f'Pursuit {i}, pulled up', stopped, (x, 0, z), (0, park, 0)), f'Cruiser {i + 2}')
+
+    # The police helicopter, off the left bow with its light on the deck.
+    bob = P.clip(V, 'HeliBob', 170, [P.track('Position', [(0, (0, 0, 0)), (45, (1.6, 0.9, -2.0)), (95, (-1.0, -0.7, 2.5)), (140, (0.8, 0.4, 0.6)), (170, (0, 0, 0))], 'SmoothStep'),
+                                     P.track('Rotation', [(0, (0, 0, 0)), (45, (4, 6, -7)), (95, (-3, -5, 6)), (140, (2, 3, -3)), (170, (0, 0, 0))], 'SmoothStep')])
+    copter_at = (-13.5, 12.5, 17.0)
+    copter = P.looping(s, s.entity('Helicopter', P.between(s, root, 'Helicopter', None, 'wreck', 0.5, copter_at), copter_at, (14, 118, -8)), 'Hover', bob)
+    A.model(s, copter, 'Body', A.helicopter(V), shadows=False)
+    blades = P.looping(s, copter, 'Rotor', P.clip(V, 'RotorSpin', 6, [P.track('Rotation', [(0, (0, 0, 0)), (3, (0, 180, 0)), (6, (0, 359.9, 0))])]), (0, 1.52, 0))
+    for yaw in (0, 90):
+        s.box('Blade', blades, (0, 0, 0), (0.22, 0.04, 9.6), (0.08, 0.08, 0.09), rot=(0, yaw, 0), shadows=False)
+    see_through(s.box('Rotor disc', blades, (0, 0, 0), (9.6, 0.02, 9.6), (0.3, 0.3, 0.32), shape='Cylinder', shadows=False), 0.1)
+    s.box('Strobe', copter, (0, -1.1, -1.0), (0.14, 0.14, 0.14), (1, 0.1, 0.1), emissive=(1, 0.1, 0.1), emissive_intensity=9.0, shape='Sphere', shadows=False)
+    s.light('Helicopter searchlight', s.entity('Searchlight', P.between(s, root, 'Helicopter light', None, 'wreck', 0.5, copter_at), (copter_at[0], copter_at[1] - 1.2, copter_at[2])), (0, 0, 0),
+            'Spot', (0.85, 0.92, 1.0), 5000.0, 40, rot=look_rotation((copter_at[0], copter_at[1] - 1.2, copter_at[2]), (0, 1.5, 4)), inner=5, outer=10)
+
+    # --- the stunts ---
+    def parked(flag, clip_name, frames, on, at, keys_in=None):
+        """A body that sits far underground except from frame on[0] to on[1] of a one-shot at flag,
+        when it is at at: for an effect that should run for a moment mid-clip."""
+        clip = P.clip(V, clip_name, frames, [P.track('Position', [(0, (0, -4000, 0)), (on[0] - 1, (0, -4000, 0)), (on[0], (0, 0, 0)), (on[1], (0, 0, 0)), (on[1] + 1, (0, -4000, 0)), (frames, (0, -4000, 0))])])
+        return P.play(s, root, clip_name, flag, clip, at)
+
+    def sparks(parent, name, at, euler=(0, 0, 0), rate=260, speed=(8, 26), cone=60):
+        A.particles(s, parent, name, at, euler, Shape='Cone', ConeAngle=cone, ShapeRadius=0.6, Lifetime=[0.5, 1.3], Speed=list(speed), Size=[0.04, 0.1],
+                    StartColor=[1.0, 0.85, 0.5], StartColor2=[1.0, 0.55, 0.15], EndColor=[0.9, 0.2, 0.02], Intensity=7.0, Gravity=0.9, Drag=0.15, NoiseStrength=0.8,
+                    Blend='Additive', EmissionRate=rate, MaxParticles=240, Alignment='Stretched', StretchFactor=0.04, FadeIn=0.02)
+
+    # 1. cruiser_flips: the cruiser up on the left quarter clips the oncoming lane, goes over and
+    # over and is left behind burning.
+    flip_at = (-6.8, 0.0, -7.5)
+    nudge = P.clip(V, 'WeaveClose', 110, [P.track('Position', [(0, (0, 0, 0)), (30, (0.8, 0, 2.5)), (70, (-0.5, 0, -1.0)), (110, (0, 0, 0))], 'SmoothStep'),
+                                          P.track('Rotation', [(0, (0, 0, 0)), (30, (0, 6, 0)), (70, (0, -6, 0)), (110, (0, 0, 0))], 'SmoothStep')])
+    manned(P.looping(s, P.between(s, swerving, 'Close cruiser', None, 'cruiser_flips', 0.01, flip_at), 'Close cruiser', nudge, flip_at), 'Cruiser 6')
+    flip = P.clip(V, 'CruiserFlips', 400, [
+        P.track('Position', [(0, (0, 0, 0)), (12, (-1.0, 0, -3)), (24, (-2.2, 1.4, -9)), (36, (-3.0, 2.6, -18)), (48, (-3.6, 1.9, -30)), (60, (-4.0, 1.6, -45)), (90, (-4.4, 1.6, -90)), (400, (-4.6, 1.6, -586))]),
+        P.track('Rotation', [(0, (0, 0, 0)), (12, (0, -35, 0)), (24, (0, -70, 70)), (36, (20, -100, 170)), (48, (0, -130, 280)), (60, (0, -150, 350)), (72, (0, -165, 80)), (90, (0, -170, 178)), (400, (0, -170, 180))])])
+    tumbling = P.play(s, P.between(s, swerving, 'Flipped cruiser', 'cruiser_flips', None, 0.01, flip_at), 'Cruiser flips', 'cruiser_flips', flip, flip_at)
+    A.model(s, tumbling, 'Body', A.cruiser(V))
+    sparks(tumbling, 'Flip sparks', (0, 0.6, 0), rate=140, speed=(4, 16), cone=80)
+    fire(s, tumbling, V, (0, 0.6, 0.8), 0.9, 500.0, smoke=False, name='Flip fire')
+
+    # 2. roadblock: two cruisers nose to nose across the road, barrels and trestles: the rig goes
+    # straight through it. It comes down the road from 200 m out and is hit 3.9 s after the flag.
+    HIT = int(round((200 - 15.5) / STEP))
+    run = P.play(s, P.between(s, swerving, 'Roadblock', 'roadblock', None, 0.01, (0, 0, 200)), 'Roadblock run', 'roadblock',
+                 P.clip(V, 'RoadblockRun', 400, [P.track('Position', [(0, (0, 0, 0)), (400, (0, 0, -640))])]), (0, 0, 200))
+
+    def flung(name, rest, yaw, out, spin):
+        """A piece of the roadblock at rest (in the block's own frame) until the hit, then thrown
+        out by out (x, up, z along the road) and spun by spin (degrees of yaw and roll)."""
+        k = [(0, 0.0), (HIT, 0.0), (HIT + 8, 0.45), (HIT + 22, 0.85), (HIT + 50, 1.0), (400, 1.0)]
+        up = {0.0: 0.0, 0.45: 1.0, 0.85: 0.25, 1.0: 0.0}
+        clip = P.clip(V, 'Flung_' + name.replace(' ', ''), 400, [
+            P.track('Position', [(f, (out[0] * t, out[1] * up[t], out[2] * t)) for f, t in k]),
+            P.track('Rotation', [(f, (spin[1] * t * 0.4, spin[0] * t, spin[1] * t)) for f, t in k[:2]] +
+                    [(HIT + 6, (spin[1] * 0.2, spin[0] * 0.3, spin[1] * 0.35)), (HIT + 14, (spin[1] * 0.3, spin[0] * 0.6, spin[1] * 0.7)), (HIT + 30, (0, spin[0], spin[1])), (400, (0, spin[0], spin[1]))])])
+        return P.play(s, s.entity(name, run, rest, (0, yaw, 0)), 'Flung', 'roadblock', clip)
+
+    cruiser(s, flung('Block cruiser L', (-3.5, 0, 0), 82, (-6.5, 2.2, 16), (-150, 170)), V, (0, 0, 0), 0, name='Cruiser 7')
+    cruiser(s, flung('Block cruiser R', (3.5, 0, 0.6), -98, (7.0, 1.6, 20), (140, -100)), V, (0, 0, 0), 0, name='Cruiser 8')
+    for i, x in enumerate((-9.5, -7.6, 7.6, 9.5)):
+        horse = flung(f'Trestle {i}', (x, 0, -1.5), 0, (x * 0.35, 2.5, 26 + 5 * i), (220 - 90 * i, 150))
+        s.box('Trestle bar', horse, (0, 0.95, 0), (1.9, 0.22, 0.06), (0.95, 0.5, 0.05), emissive=(0.95, 0.5, 0.05), emissive_intensity=0.8)
+        for dx in (-0.8, 0.8):
+            s.box('Trestle leg', horse, (dx, 0.45, 0), (0.06, 0.9, 0.5), (0.3, 0.3, 0.32))
+        s.box('Trestle lamp', horse, (0.7, 1.15, 0), (0.14, 0.14, 0.14), (1, 0.5, 0), emissive=(1, 0.5, 0.0), emissive_intensity=8.0, shape='Sphere', shadows=False)
+    for i, (x, z) in enumerate(((-1.6, -4.0), (-0.5, -4.6), (0.6, -4.3), (1.7, -3.9), (-2.6, -3.0), (2.7, -3.2), (0, -6.0), (-1.1, -6.4), (1.2, -6.2))):
+        barrel = flung(f'Barrel {i}', (x, 0, z), 0, (x * 3.5 + (2.5 if i % 2 else -2.5), 3.0 + 0.5 * (i % 3), 22 + 4 * (i % 4)), (200 + 60 * i, 170 - 50 * (i % 3)))
+        s.box('Barrel', barrel, (0, 0.5, 0), (0.6, 1.0, 0.6), (0.95, 0.4, 0.05), shape='Cylinder')
+        s.box('Barrel band', barrel, (0, 0.6, 0), (0.62, 0.16, 0.62), (0.95, 0.95, 0.95), shape='Cylinder', shadows=False)
+    sparks(parked('roadblock', 'RoadblockHit', 400, (HIT - 1, HIT + 14), (0, 0.9, 15.6)), 'Roadblock sparks', (0, 0, 0), (-60, 0, 0), rate=420, speed=(10, 30), cone=75)
+    s.light('Roadblock flash', parked('roadblock', 'RoadblockFlash', 400, (HIT, HIT + 5), (0, 2.0, 15.5)), (0, 0, 0), 'Point', (1.0, 0.8, 0.5), 9000.0, 40)
+
+    # 3. big_air: the landing (the jump itself is the world's Jump clip).
+    sparks(parked('big_air', 'JumpLanding', 70, (51, 62), (0, 0.15, 3.5)), 'Landing sparks', (0, 0, 0), (-80, 0, 0), rate=420, speed=(6, 24), cone=85)
     # The helicopter's searchlight on the deck.
     heli = (-28.0, 34.0, -48.0)
     s.light('Searchlight', root, heli, 'Spot', (0.85, 0.92, 1.0), 14000.0, 90, rot=look_rotation(heli, (0, 1.5, 4)), inner=2.0, outer=4.5)
@@ -525,6 +666,9 @@ def highway():
     shot(s, marks, 'cop_radio', (seat[0] + 1.75, 1.3, seat[2] + 0.75), cop_face, 34, 5, focus=True, end=((seat[0] + 1.5, 1.28, seat[2] + 0.5), cop_face, 28))
     shot(s, marks, 'cop_nods', (seat[0] - 0.2, 1.38, car_at[2] + 1.9), cop_face, 30, 5, focus=True, end=((seat[0] - 0.05, 1.34, car_at[2] + 1.5), cop_face, 22))
     shot(s, marks, 'heli_again', (40, 26, 22), (0, 1.5, 0), 34, 8, hand=True, via=[((44, 24, 2), (0, 1.5, 0), 26)], end=((36, 22, -20), (0, 1.5, 2), 20))
+    shot(s, marks, 'cruiser_flips', (-3.5, 2.7, -0.4), (-7.6, 1.0, -11.0), 64, 5, hand=True, end=((-3.3, 2.9, -0.8), (-11.0, 1.6, -70.0), 40))
+    shot(s, marks, 'roadblock', (0.6, 5.9, 9.2), (0, 1.0, 90.0), 58, 5.5, hand=True, end=((1.4, 6.0, 8.6), (0, 0.5, 24.0), 74))
+    shot(s, marks, 'big_air', (5.0, 0.4, 10.5), (0, 1.6, 4.5), 70, 4, hand=True, end=((4.7, 0.3, 2.5), (0, 2.2, 5.0), 64))
     shot(s, marks, 'trailer_slews', (2.7, 2.5, -1.0), (-0.5, 1.7, 4.2), 60, 4.5, hand=True, end=((3.1, 2.2, -1.9), (-0.9, 1.5, 4.6), 52))
     Ws = slewed((W[0] + 4, 1.5, W[2] + 4))
     shot(s, marks, 'wreck', (Ws[0] - 34, 24, Ws[2] - 26), Ws, 26, 7, hand=True, via=[((Ws[0] - 33, 23, Ws[2] - 28), (Ws[0], 6, Ws[2]), 40)],

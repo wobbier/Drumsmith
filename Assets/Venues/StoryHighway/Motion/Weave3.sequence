@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Weave3",
  "FrameRate": 30,
- "DurationFrames": 214,
+ "DurationFrames": 252,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,27 +20,37 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 71,
+     "Frame": 63,
      "Value": [
-      0.4,
+      -1.2,
       0,
-      1.6,
+      5.0,
       0
      ],
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 142,
+     "Frame": 126,
      "Value": [
-      -0.7,
+      0.6,
       0,
-      -0.6,
+      10.0,
       0
      ],
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 214,
+     "Frame": 189,
+     "Value": [
+      -0.9,
+      0,
+      3.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 252,
      "Value": [
       0,
       0,
@@ -67,27 +77,47 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 71,
+     "Frame": 31,
      "Value": [
       0.0,
-      0.0261769,
+      -0.0610485,
       0.0,
-      0.9996573
+      0.9981348
      ],
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 142,
+     "Frame": 94,
      "Value": [
       0.0,
-      -0.0261769,
+      0.0697565,
       0.0,
-      0.9996573
+      0.9975641
      ],
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 214,
+     "Frame": 157,
+     "Value": [
+      0.0,
+      -0.052336,
+      0.0,
+      0.9986295
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 220,
+     "Value": [
+      0.0,
+      0.0436194,
+      0.0,
+      0.9990482
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 252,
      "Value": [
       0.0,
       0.0,
