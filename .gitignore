@@ -229,3 +229,12 @@ Assets/DLC/dlc_index.download
 
 # Python bytecode from the hideout generators
 /Tools/Hideout/__pycache__/
+
+# Generated build files and runtime logs (CLAUDE.md: never committed)
+/Drumsmith.make
+/compile_commands.json
+/Project/compile_commands.json
+/Engine.txt
+/fmod_log.txt
+/startup.json
+/.nix-devshell-profile*
