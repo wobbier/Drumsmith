@@ -1,0 +1,19 @@
+{
+ "Title": "This Suffering",
+ "Artist": "Billy Talent",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Home Ice at Maple Leaf Gardens",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 237.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/07sJ4xKLvWusl7pb90U9b3"
+ },
+ "NoteCount": 1392
+}

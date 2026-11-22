@@ -1,0 +1,19 @@
+{
+ "Title": "Cure for the Enemy",
+ "Artist": "Billy Talent",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Funeral Afterparty at the Legion",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 267.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/4WiOyLEu3WnQW0xzm2ua0Z"
+ },
+ "NoteCount": 1572
+}

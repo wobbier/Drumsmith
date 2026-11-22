@@ -1,0 +1,19 @@
+{
+ "Title": "Scream Aim Fire",
+ "Artist": "Bullet For My Valentine",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: One Night on the Steel Mill Tour",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 266.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/4wLjoYQXQ44tgllqYjiCPL"
+ },
+ "NoteCount": 1566
+}

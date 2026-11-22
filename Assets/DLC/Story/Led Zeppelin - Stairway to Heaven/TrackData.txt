@@ -1,0 +1,19 @@
+{
+ "Title": "Stairway to Heaven",
+ "Artist": "Led Zeppelin",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Highway to the Afterlife",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 483.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc"
+ },
+ "NoteCount": 2868
+}

@@ -1,0 +1,19 @@
+{
+ "Title": "While My Guitar Gently Weeps - Remastered 2009",
+ "Artist": "The Beatles",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Funeral Afterparty at the Legion",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 285.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/389QX9Q1eUOEZ19vtzzI9O"
+ },
+ "NoteCount": 1680
+}
