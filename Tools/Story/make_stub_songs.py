@@ -9,6 +9,9 @@ eighths, a crash every eight bars. Its TrackData.txt carries the recording's Spo
 how the story finds it. To chart the real song, put the real audio and chart in that folder (or
 replace the folder) and keep the link.
 
+The manifest's ProposedSets (sets not placed in the campaign yet, so make_story.py leaves them out
+of Story.json) get stand-ins too, and so does a song's Backup.
+
 Songs already in Assets/DLC (same artist and title) get no stand-in, and a folder that's already
 there is never touched: pass --force to rewrite every stand-in.
 
@@ -43,15 +46,21 @@ def folder_name(artist, title):
 
 
 def library():
-    """(artist, title) of every song already in Assets/DLC, outside the stand-ins."""
+    """(artist, title) of every song already in Assets/DLC (and real charts in Assets/DLC/Story),
+    outside the stand-ins."""
     songs = set()
-    for entry in os.scandir(DLC):
+    folders = [e for e in os.scandir(DLC) if e.is_dir() and e.name != "Story"]
+    if os.path.isdir(STORY):
+        folders += [e for e in os.scandir(STORY) if e.is_dir()]
+    for entry in folders:
         data = os.path.join(entry.path, "TrackData.txt")
-        if entry.is_dir() and entry.name != "Story" and os.path.isfile(data):
+        if os.path.isfile(data):
             try:
                 with open(data, encoding="utf-8") as f:
                     track = json.load(f)
             except (OSError, ValueError):
+                continue
+            if track.get("DLCSource") == STUB_SOURCE:
                 continue
             artist = track.get("Artist", track.get("SongArtist", ""))
             title = track.get("Title", track.get("SongName", ""))
@@ -131,8 +140,9 @@ def main():
         manifest = json.load(f)
     have = library()
     made = kept = charted = 0
-    for story_set in manifest["Sets"]:
-        for song in story_set["Songs"]:
+    for story_set in manifest["Sets"] + manifest.get("ProposedSets", []):
+        songs = story_set["Songs"] + [song["Backup"] for song in story_set["Songs"] if song.get("Backup")]
+        for song in songs:
             if (match_name(song["Artist"], True), match_name(song["Title"], False)) in have:
                 charted += 1
                 continue
