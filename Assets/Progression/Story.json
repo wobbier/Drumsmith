@@ -308,7 +308,7 @@
    "Id": "s05-legion",
    "Act": 2,
    "Name": "Funeral Afterparty at the Legion",
-   "Description": "Dad asked for Sinatra. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.",
+   "Description": "Dad asked for the Beatles. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.",
    "Venue": "StoryLegion",
    "VenueBase": "Club",
    "PassAccuracy": 65.0,
@@ -323,18 +323,18 @@
    },
    "Songs": [
     {
-     "Artist": "Frank Sinatra",
-     "Title": "My Way - 2008 Remastered",
-     "Spotify": "https://open.spotify.com/track/2YkIDPL5lGhRhomCq4S2RO",
+     "Artist": "The Beatles",
+     "Title": "While My Guitar Gently Weeps - Remastered 2009",
+     "Spotify": "https://open.spotify.com/track/389QX9Q1eUOEZ19vtzzI9O",
      "Flags": [
       "toast_seat_empty"
      ],
      "Cue": "intro"
     },
     {
-     "Artist": "Gerard Way",
-     "Title": "Baby You're a Haunted House",
-     "Spotify": "https://open.spotify.com/track/4c38yr2PflGI2DSIzqsnmF",
+     "Artist": "Bullet For My Valentine",
+     "Title": "A Place Where You Belong",
+     "Spotify": "https://open.spotify.com/track/1gg2pjLIkcxSnNfGORJ0u5",
      "Flags": [
       "toast_seat_empty",
       "dessert_table_moved"
@@ -342,9 +342,9 @@
      "Cue": "first_chorus"
     },
     {
-     "Artist": "Marianas Trench",
-     "Title": "Dearly Departed",
-     "Spotify": "https://open.spotify.com/track/7i5JxL1haaLoyNNZAb6T0L",
+     "Artist": "Billy Talent",
+     "Title": "Cure for the Enemy",
+     "Spotify": "https://open.spotify.com/track/4WiOyLEu3WnQW0xzm2ua0Z",
      "Flags": [
       "toast_seat_empty",
       "dessert_table_moved",
@@ -1019,6 +1019,321 @@
    ],
    "PostCredits": true,
    "OneSitting": true
+  }
+ ],
+ "ProposedSets": [
+  {
+   "Id": "highway-afterlife",
+   "Act": 0,
+   "Name": "Highway to the Afterlife",
+   "Description": "Five songs follow one band from a highway chase to an audience with God. On Earth, the whole trip takes only as long as the rescue.",
+   "Venue": "StoryHighway",
+   "VenueBase": "",
+   "PassAccuracy": 70.0,
+   "Requires": {
+    "StorySets": [],
+    "Members": []
+   },
+   "Songs": [
+    {
+     "Artist": "Mötley Crüe",
+     "Title": "Kickstart My Heart",
+     "Spotify": "https://open.spotify.com/track/7GonnnalI2s19OCQO1J7Tf",
+     "Flags": [
+      "wreck"
+     ],
+     "Cue": "last_note+0.5",
+     "Moments": [
+      {
+       "Cue": "start",
+       "Flags": [
+        "highway_open"
+       ]
+      },
+      {
+       "Cue": "section:intro",
+       "Flags": [
+        "cop_watching"
+       ]
+      },
+      {
+       "Cue": "section:verse_1",
+       "Flags": [
+        "heli_chase"
+       ]
+      },
+      {
+       "Cue": "section:chorus_1",
+       "Flags": [
+        "foot_on_monitor"
+       ]
+      },
+      {
+       "Cue": "section:verse_2",
+       "Flags": [
+        "cop_radio"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2",
+       "Flags": [
+        "cop_nods"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo",
+       "Flags": [
+        "heli_again"
+       ]
+      },
+      {
+       "Cue": "last_note-5",
+       "Flags": [
+        "trailer_slews"
+       ]
+      },
+      {
+       "Cue": "last_note+1",
+       "Flags": [
+        "bodies",
+        "band_hidden"
+       ]
+      }
+     ],
+     "Venue": "StoryHighway"
+    },
+    {
+     "Artist": "Lynyrd Skynyrd",
+     "Title": "Free Bird",
+     "Spotify": "https://open.spotify.com/track/5EWPGh7jbTNO2wakv8LjUI",
+     "Flags": [
+      "encore_called"
+     ],
+     "Cue": "last_note+1",
+     "Moments": [
+      {
+       "Cue": "start",
+       "Flags": [
+        "ghost_hand",
+        "band_ghost",
+        "band_down"
+       ]
+      },
+      {
+       "Cue": "at:0.04",
+       "Flags": [
+        "ghosts_stand",
+        "band_playing"
+       ]
+      },
+      {
+       "Cue": "at:0.09",
+       "Flags": [
+        "cop_runs"
+       ]
+      },
+      {
+       "Cue": "at:0.1",
+       "Flags": [
+        "cop_kneels"
+       ]
+      },
+      {
+       "Cue": "at:0.46",
+       "Flags": [
+        "fell",
+        "band_falling"
+       ]
+      },
+      {
+       "Cue": "at:0.5",
+       "Flags": [
+        "tumbling"
+       ]
+      },
+      {
+       "Cue": "at:0.57",
+       "Flags": [
+        "landed",
+        "band_playing"
+       ]
+      },
+      {
+       "Cue": "at:0.58",
+       "Flags": [
+        "stairs_reveal"
+       ]
+      }
+     ],
+     "Venue": "StoryHell"
+    },
+    {
+     "Artist": "Avenged Sevenfold",
+     "Title": "Bat Country",
+     "Spotify": "https://open.spotify.com/track/3sHH7lklbfpcraDDvYnjo7",
+     "Flags": [
+      "phone_call"
+     ],
+     "Cue": "last_note+1",
+     "Moments": [
+      {
+       "Cue": "start",
+       "Flags": [
+        "throne_view",
+        "band_ghost"
+       ]
+      },
+      {
+       "Cue": "section:verse_1",
+       "Flags": [
+        "demon_catch"
+       ]
+      },
+      {
+       "Cue": "section:chorus_1",
+       "Flags": [
+        "satan_nods"
+       ]
+      },
+      {
+       "Cue": "section:bridge_1",
+       "Flags": [
+        "satan_air_drums"
+       ]
+      },
+      {
+       "Cue": "section:outro",
+       "Flags": [
+        "satan_stands"
+       ]
+      },
+      {
+       "Cue": "last_note+1.5",
+       "Flags": [],
+       "Caption": "“You gotta hear these guys.”",
+       "CaptionSeconds": 3.5
+      },
+      {
+       "Cue": "last_note+5",
+       "Flags": [
+        "smoke_rises",
+        "band_rising"
+       ]
+      }
+     ],
+     "Venue": "StoryHell"
+    },
+    {
+     "Artist": "Led Zeppelin",
+     "Title": "Stairway to Heaven",
+     "Spotify": "https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc",
+     "Flags": [
+      "angels_turn"
+     ],
+     "Cue": "last_note",
+     "Moments": [
+      {
+       "Cue": "start",
+       "Flags": [
+        "ascent",
+        "band_ghost",
+        "band_floating"
+       ]
+      },
+      {
+       "Cue": "section:intro_verse_a",
+       "Flags": [
+        "eyes_meet"
+       ]
+      },
+      {
+       "Cue": "section:verse_1a",
+       "Flags": [
+        "horizon"
+       ]
+      },
+      {
+       "Cue": "drums_in-1.5",
+       "Flags": [
+        "touchdown",
+        "band_playing"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_a",
+       "Flags": [
+        "choir"
+       ]
+      },
+      {
+       "Cue": "last_note+4",
+       "Flags": [
+        "sticks_close"
+       ]
+      }
+     ],
+     "Venue": "StoryHeaven",
+     "HighwayRests": true
+    },
+    {
+     "Artist": "Foo Fighters",
+     "Title": "My Hero",
+     "Spotify": "https://open.spotify.com/track/4dVbhS6OiYvFikshyaQaCN",
+     "Flags": [
+      "resurrection"
+     ],
+     "Cue": "last_note+0.5",
+     "Moments": [
+      {
+       "Cue": "start",
+       "Flags": [
+        "drum_open",
+        "band_ghost"
+       ]
+      },
+      {
+       "Cue": "section:verse_riff",
+       "Flags": [
+        "cpr"
+       ]
+      },
+      {
+       "Cue": "section:chorus_1",
+       "Flags": [
+        "earth_wide"
+       ]
+      },
+      {
+       "Cue": "section:verse_2",
+       "Flags": [
+        "cpr_close"
+       ]
+      },
+      {
+       "Cue": "section:chorus_3",
+       "Flags": [
+        "god_descends"
+       ]
+      },
+      {
+       "Cue": "section:chorus_3+12",
+       "Flags": [
+        "angels_part"
+       ]
+      },
+      {
+       "Cue": "last_note+8",
+       "Flags": [
+        "cop_nod_final"
+       ]
+      }
+     ],
+     "Venue": "StoryHeaven"
+    }
+   ],
+   "Rewards": [],
+   "OneSitting": true,
+   "Continuous": true
   }
  ],
  "Auditions": [

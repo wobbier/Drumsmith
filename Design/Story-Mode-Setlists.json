@@ -2868,6 +2868,490 @@
       "OneSitting": true
     }
   ],
+  "ProposedSets": [
+    {
+      "Id": "highway-afterlife",
+      "Title": "Highway to the Afterlife",
+      "Status": "unplaced",
+      "Plan": "Design/Highway-to-the-Afterlife.md",
+      "Premise": "Five songs follow one band from a highway chase to an audience with God. On Earth, the whole trip takes only as long as the rescue.",
+      "Songs": [
+        {
+          "Spotify": "https://open.spotify.com/track/7GonnnalI2s19OCQO1J7Tf",
+          "Artist": "Mötley Crüe",
+          "Title": "Kickstart My Heart",
+          "DurationSeconds": 282,
+          "Charted": false,
+          "ChartStatus": "planned",
+          "Alternates": [],
+          "Venue": "StoryHighway",
+          "PlayingNote": "Straight-ahead speed: keep the double-time hi-hat driving and land the stops clean.",
+          "OnStage": [
+            "drums",
+            "guitar",
+            "bass",
+            "vocals"
+          ],
+          "Cue": {
+            "On": "last_note+0.5",
+            "Shot": "story/wreck",
+            "Do": "The trailer slews across the lane, crashes and erupts in flame. The helicopter holds wide on the fire."
+          },
+          "StateAfter": [
+            "wreck"
+          ],
+          "Moments": [
+            {
+              "On": "start",
+              "StateAfter": [
+                "highway_open"
+              ],
+              "Shot": "story/highway_open",
+              "Do": "Low on a trailer wheel against the lane markings, rising past the flatbed's edge to the kick pedal."
+            },
+            {
+              "On": "section:intro",
+              "StateAfter": [
+                "cop_watching"
+              ],
+              "Shot": "story/cop_watching",
+              "Do": "Head-on through the cruiser's windshield: the cop's eyes on the trailer."
+            },
+            {
+              "On": "section:verse_1",
+              "StateAfter": [
+                "heli_chase"
+              ],
+              "Shot": "story/heli_chase",
+              "Do": "The helicopter: wide on both vehicles, then the operator zooms past the trailer and corrects back onto the drummer."
+            },
+            {
+              "On": "section:chorus_1",
+              "StateAfter": [
+                "foot_on_monitor"
+              ],
+              "Shot": "story/foot_on_monitor",
+              "Do": "On the deck: a band member braces a foot against a monitor."
+            },
+            {
+              "On": "section:verse_2",
+              "StateAfter": [
+                "cop_radio"
+              ],
+              "Shot": "story/cop_radio",
+              "Do": "The cop checks his radio."
+            },
+            {
+              "On": "section:chorus_2",
+              "StateAfter": [
+                "cop_nods"
+              ],
+              "Shot": "story/cop_nods",
+              "Do": "One small involuntary nod in time."
+            },
+            {
+              "On": "section:gtr_solo",
+              "StateAfter": [
+                "heli_again"
+              ],
+              "Shot": "story/heli_again",
+              "Do": "The helicopter again, both vehicles in frame."
+            },
+            {
+              "On": "last_note-5",
+              "StateAfter": [
+                "trailer_slews"
+              ],
+              "Shot": "story/trailer_slews",
+              "Do": "In the closing bars the trailer slews across a lane; the last hits with the kit still in view."
+            },
+            {
+              "On": "last_note+1",
+              "StateAfter": [
+                "bodies",
+                "band_hidden"
+              ],
+              "Shot": "story/bodies",
+              "Do": "Road level: the band lies on the asphalt, one drumstick just beyond the drummer's fingers. Held into Free Bird."
+            }
+          ]
+        },
+        {
+          "Spotify": "https://open.spotify.com/track/5EWPGh7jbTNO2wakv8LjUI",
+          "Artist": "Lynyrd Skynyrd",
+          "Title": "Free Bird",
+          "DurationSeconds": 547,
+          "Charted": false,
+          "ChartStatus": "planned",
+          "Alternates": [],
+          "Venue": "StoryHell",
+          "PlayingNote": "Breathe through the slow opening, then hold the tempo as the jam gathers speed into the solo.",
+          "OnStage": [
+            "drums",
+            "guitar",
+            "bass",
+            "vocals"
+          ],
+          "Cue": {
+            "On": "last_note+1",
+            "Shot": "story/encore_called",
+            "Do": "The crowd turns to the throne. Satan rolls one hand toward the band for another song."
+          },
+          "StateAfter": [
+            "encore_called"
+          ],
+          "Moments": [
+            {
+              "On": "start",
+              "StateAfter": [
+                "ghost_hand",
+                "band_ghost",
+                "band_down"
+              ],
+              "Shot": "story/ghost_hand",
+              "Do": "Beside the drummer's hand on the road as the recording starts."
+            },
+            {
+              "On": "at:0.04",
+              "StateAfter": [
+                "ghosts_stand",
+                "band_playing"
+              ],
+              "Shot": "story/ghosts_stand",
+              "Do": "Wide: both versions of the band, the ghosts standing over their bodies."
+            },
+            {
+              "On": "at:0.09",
+              "StateAfter": [
+                "cop_runs"
+              ],
+              "Shot": "story/cop_runs",
+              "Do": "The cop runs from the cruiser to the drummer's body."
+            },
+            {
+              "On": "at:0.1",
+              "StateAfter": [
+                "cop_kneels"
+              ],
+              "Shot": "story/cop_kneels",
+              "Do": "The cop runs in and kneels beside the drummer's body."
+            },
+            {
+              "On": "at:0.46",
+              "StateAfter": [
+                "fell",
+                "band_falling"
+              ],
+              "Shot": "story/fell",
+              "Do": "The road falls away: ash floats up, then they realise they are falling. The road overhead shrinks to a bright slit."
+            },
+            {
+              "On": "at:0.5",
+              "StateAfter": [
+                "tumbling"
+              ],
+              "Shot": "story/tumbling",
+              "Do": "Tumbling past one another, pulling back into their places."
+            },
+            {
+              "On": "at:0.57",
+              "StateAfter": [
+                "landed",
+                "band_playing"
+              ],
+              "Shot": "story/landed",
+              "Do": "The kick drum hits stone at the foot of a staircase."
+            },
+            {
+              "On": "at:0.58",
+              "StateAfter": [
+                "stairs_reveal"
+              ],
+              "Shot": "story/stairs_reveal",
+              "Do": "Up the stairs past the demons on the balustrades to Satan on the throne."
+            }
+          ]
+        },
+        {
+          "Spotify": "https://open.spotify.com/track/3sHH7lklbfpcraDDvYnjo7",
+          "Artist": "Avenged Sevenfold",
+          "Title": "Bat Country",
+          "DurationSeconds": 312,
+          "Charted": false,
+          "ChartStatus": "planned",
+          "Alternates": [
+            "https://open.spotify.com/track/2cxbNLOKc9CtQ7hcH88ma3"
+          ],
+          "Backup": {
+            "Spotify": "https://open.spotify.com/track/2cxbNLOKc9CtQ7hcH88ma3",
+            "Artist": "Atreyu",
+            "Title": "Right Side of the Bed",
+            "DurationSeconds": 222,
+            "Charted": false,
+            "ChartStatus": "planned",
+            "Alternates": []
+          },
+          "Venue": "StoryHell",
+          "PlayingNote": "Swing the shuffle, and give every fill an ending Satan can follow.",
+          "OnStage": [
+            "drums",
+            "guitar",
+            "bass",
+            "vocals"
+          ],
+          "Cue": {
+            "On": "last_note+1",
+            "Shot": "story/phone_call",
+            "Do": "Satan picks up a phone beside the throne and looks straight up: “You gotta hear these guys.”"
+          },
+          "StateAfter": [
+            "phone_call"
+          ],
+          "Moments": [
+            {
+              "On": "start",
+              "StateAfter": [
+                "throne_view",
+                "band_ghost"
+              ],
+              "Shot": "story/throne_view",
+              "Do": "From the throne looking down on the stage."
+            },
+            {
+              "On": "section:verse_1",
+              "StateAfter": [
+                "demon_catch"
+              ],
+              "Shot": "story/demon_catch",
+              "Do": "A demon on the steps catches a fill with both hands on the stone, then turns to see whether Satan noticed."
+            },
+            {
+              "On": "section:chorus_1",
+              "StateAfter": [
+                "satan_nods"
+              ],
+              "Shot": "story/satan_nods",
+              "Do": "Satan head-on, the cop's distance: nodding along."
+            },
+            {
+              "On": "section:bridge_1",
+              "StateAfter": [
+                "satan_air_drums"
+              ],
+              "Shot": "story/satan_air_drums",
+              "Do": "Satan finishing the fill on the armrests."
+            },
+            {
+              "On": "section:outro",
+              "StateAfter": [
+                "satan_stands"
+              ],
+              "Shot": "story/satan_stands",
+              "Do": "By the closing passage he is on his feet."
+            },
+            {
+              "On": "last_note+1.5",
+              "StateAfter": [],
+              "Caption": "“You gotta hear these guys.”",
+              "CaptionSeconds": 3.5,
+              "Do": "Satan, into the phone, looking straight up."
+            },
+            {
+              "On": "last_note+5",
+              "StateAfter": [
+                "smoke_rises",
+                "band_rising"
+              ],
+              "Shot": "story/smoke_rises",
+              "Do": "His free hand lifts; the drummer's boots leave the stone and smoke rises past the lens, turning white."
+            }
+          ]
+        },
+        {
+          "Spotify": "https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc",
+          "Artist": "Led Zeppelin",
+          "Title": "Stairway to Heaven",
+          "DurationSeconds": 483,
+          "Charted": false,
+          "ChartStatus": "planned",
+          "Alternates": [
+            "https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt"
+          ],
+          "PlayingNote": "Wait out the quiet opening; when the drums come in, play it big and patient under the choir.",
+          "Venue": "StoryHeaven",
+          "HighwayRests": true,
+          "OnStage": [
+            "drums",
+            "guitar",
+            "bass",
+            "vocals"
+          ],
+          "Cue": {
+            "On": "last_note",
+            "Shot": "story/angels_turn",
+            "Do": "As the performance resolves, the angels turn toward the drummer. God waits on the platform."
+          },
+          "StateAfter": [
+            "angels_turn"
+          ],
+          "Moments": [
+            {
+              "On": "start",
+              "StateAfter": [
+                "ascent",
+                "band_ghost",
+                "band_floating"
+              ],
+              "Shot": "story/ascent",
+              "Do": "Inches from the side of the drummer's face, cloud and the others drifting in and out of focus."
+            },
+            {
+              "On": "section:intro_verse_a",
+              "StateAfter": [
+                "eyes_meet"
+              ],
+              "Shot": "story/eyes_meet",
+              "Do": "Another member looking down for the friend who fell beside them; their eyes meet."
+            },
+            {
+              "On": "section:verse_1a",
+              "StateAfter": [
+                "horizon"
+              ],
+              "Shot": "story/horizon",
+              "Do": "The first view of the horizon."
+            },
+            {
+              "On": "drums_in-1.5",
+              "StateAfter": [
+                "touchdown",
+                "band_playing"
+              ],
+              "Shot": "story/touchdown",
+              "Do": "The highway is back; the camera pulls back as the band touches down on a floor of cloud."
+            },
+            {
+              "On": "section:gtr_solo_a",
+              "StateAfter": [
+                "choir"
+              ],
+              "Shot": "story/choir",
+              "Do": "The distant arch opens its eyes: rings and wings, then a whole choir of angels, the band small at the bottom of the frame."
+            },
+            {
+              "On": "last_note+4",
+              "StateAfter": [
+                "sticks_close"
+              ],
+              "Shot": "story/sticks_close",
+              "Do": "From the celestial wide all the way back to a close shot of the sticks."
+            }
+          ]
+        },
+        {
+          "Spotify": "https://open.spotify.com/track/4dVbhS6OiYvFikshyaQaCN",
+          "Artist": "Foo Fighters",
+          "Title": "My Hero",
+          "DurationSeconds": 260,
+          "Charted": false,
+          "ChartStatus": "planned",
+          "Alternates": [],
+          "Venue": "StoryHeaven",
+          "PlayingNote": "The exposed opening is all yours: keep the toms even and let the guitars land on you.",
+          "OnStage": [
+            "drums",
+            "guitar",
+            "bass",
+            "vocals"
+          ],
+          "Cue": {
+            "On": "last_note+0.5",
+            "Shot": "story/resurrection",
+            "Do": "Back on the shoulder at normal speed: the drummer opens their eyes, an EMS worker sees another band member stir."
+          },
+          "StateAfter": [
+            "resurrection"
+          ],
+          "Moments": [
+            {
+              "On": "start",
+              "StateAfter": [
+                "drum_open",
+                "band_ghost"
+              ],
+              "Shot": "story/drum_open",
+              "Do": "Tight on the drummer in heaven through the opening pattern."
+            },
+            {
+              "On": "section:verse_riff",
+              "StateAfter": [
+                "cpr"
+              ],
+              "Shot": "story/cpr",
+              "Do": "Match cut on a stick stroke: the cop's hands giving CPR on Earth, slow motion, the trailer still burning, red and blue across his face."
+            },
+            {
+              "On": "section:chorus_1",
+              "StateAfter": [
+                "earth_wide"
+              ],
+              "Shot": "story/earth_wide",
+              "Do": "Earth wide: the cop in the foreground, the flashing light leading back to the responders around the others."
+            },
+            {
+              "On": "section:verse_2",
+              "StateAfter": [
+                "cpr_close"
+              ],
+              "Shot": "story/cpr_close",
+              "Do": "The cop's attention stays on the person in front of him."
+            },
+            {
+              "On": "section:chorus_3",
+              "StateAfter": [
+                "god_descends"
+              ],
+              "Shot": "story/god_descends",
+              "Do": "Final chorus: God comes down the stairs to the band's level."
+            },
+            {
+              "On": "section:chorus_3+12",
+              "StateAfter": [
+                "angels_part"
+              ],
+              "Shot": "story/angels_part",
+              "Do": "The angels fold their wings aside; through the opening, the crash site."
+            },
+            {
+              "On": "last_note+8",
+              "StateAfter": [
+                "cop_nod_final"
+              ],
+              "Shot": "story/cop_nod_final",
+              "Do": "Two fingers tapping the asphalt. The cop hears it and gives the same small nod. End of the set."
+            }
+          ]
+        }
+      ],
+      "Act": 0,
+      "VenueBase": "",
+      "Venue": "StoryHighway",
+      "Continuous": true,
+      "OneSitting": true,
+      "PassAccuracy": 0.7,
+      "Requires": {
+        "Sets": [],
+        "Members": []
+      },
+      "OnStage": [
+        "drums",
+        "guitar",
+        "bass",
+        "vocals"
+      ],
+      "Staging": "One continuous show (Continuous): each song's tail plays into the next recording with no results screen until My Hero ends. One sitting for now: leaving starts over at the chase. Each song names its venue; flags land at their cues (Cue and Moments), and a camera spot tagged story/<flag> in the venue takes the screen when its flag lands. Cue times are placeholders (at:<share>, last_note+N) until the charts have sections. Flags starting band_ move the live band and are each song's own (they never carry to the next): band_ghost (see-through, glowing), band_down (on their backs), band_falling (tumbling), band_floating, band_rising (lifted off the floor), band_hidden, band_playing (back at their marks); the latest pose wins, blended over 2.5 s. A moment can carry a Caption: a line shown on screen."
+    }
+  ],
   "Auditions": [
     {
       "Id": "aud-bass",
