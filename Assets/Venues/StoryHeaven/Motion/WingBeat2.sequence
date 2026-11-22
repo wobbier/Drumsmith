@@ -1,0 +1,45 @@
+{
+ "Version": 1,
+ "Name": "WingBeat2",
+ "FrameRate": 30,
+ "DurationFrames": 150,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      0.0,
+      0.0,
+      0.0436194,
+      0.9990482
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

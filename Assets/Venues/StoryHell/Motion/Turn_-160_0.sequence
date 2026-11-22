@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "Turn_-160_0",
+ "FrameRate": 30,
+ "DurationFrames": 45,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0,
+      -0.9848078,
+      0.0,
+      0.1736482
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

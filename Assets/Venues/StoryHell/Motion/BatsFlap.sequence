@@ -1,0 +1,45 @@
+{
+ "Version": 1,
+ "Name": "BatsFlap",
+ "FrameRate": 30,
+ "DurationFrames": 8,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Scale",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      1,
+      1,
+      1,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 4,
+     "Value": [
+      1,
+      -0.6,
+      1,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      1,
+      1,
+      1,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

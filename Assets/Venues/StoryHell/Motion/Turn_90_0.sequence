@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "Turn_90_0",
+ "FrameRate": 30,
+ "DurationFrames": 36,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 36,
+     "Value": [
+      0.0,
+      0.7071068,
+      0.0,
+      0.7071068
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

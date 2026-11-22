@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "RingSpinC",
+ "FrameRate": 30,
+ "DurationFrames": 1000,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 333,
+     "Value": [
+      0.8660254,
+      0.0,
+      0.0,
+      0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 666,
+     "Value": [
+      0.8660254,
+      0.0,
+      -0.0,
+      -0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 1000,
+     "Value": [
+      0.0008727,
+      0.0,
+      -0.0,
+      -0.9999996
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

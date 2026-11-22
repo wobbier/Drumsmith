@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Turn_95_0",
  "FrameRate": 30,
- "DurationFrames": 36,
+ "DurationFrames": 48,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 36,
+     "Frame": 48,
      "Value": [
       0.0,
       0.7372773,

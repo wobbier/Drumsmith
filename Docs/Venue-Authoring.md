@@ -297,6 +297,9 @@ As of 6840e53:
 - Nothing has been seen on a real GPU or in motion at speed, and Win64 and macOS have not been built.
 - Venue packs cannot come from the DLC server (it needs an index type and an install path).
 - Crowd rectangles cannot have holes.
+- The fog is distance fog at a fixed density (`Director` sets 0.012 a metre): nothing shows past about 150 m, whatever `Haze` is, so a sky has to be a dome inside that with its light turned up (StoryHeaven's is 125 m). A see-through surface fogs itself, so an additive glow card far off in a bright-fog venue shows as a square: use an emissive mesh there.
+- A venue's own meshes (`Tools/Venues/story_afterlife_mesh.py` is the newest writer): in the OBJ, v = 1 is the image's top row, and a card facing +z seen from in front has +x on the left. A `Model`'s part override takes a whole `StandardMaterial`.
+- The renderer reserves room for 1,024 see-through meshes a view (`BGFXRenderer::kMeshTransparencyTempSize`); a debug build asserts past it.
 
 ## Key Files
 

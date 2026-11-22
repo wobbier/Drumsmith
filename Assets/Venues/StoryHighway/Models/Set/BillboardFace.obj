@@ -1,0 +1,16 @@
+# BillboardFace: built by Tools/Venues/story_afterlife_mesh.py
+mtllib AL_Billboard.mtl
+o BillboardFace
+s off
+v 1 1 0
+v 1 -1 0
+v -1 -1 0
+v -1 1 0
+vt 0 1
+vt 0 0
+vt 1 0
+vt 1 1
+vn 0 0 -1
+usemtl AL_Billboard
+f 1/1/1 2/2/1 3/3/1
+f 4/4/1 1/1/1 3/3/1

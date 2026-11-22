@@ -78,15 +78,19 @@ Five songs follow one band from a highway chase to an audience with God. On Eart
 
 **Playable now.** `--gig highway-afterlife`, or the gig board's "PROPOSED: Highway to the Afterlife" row in non-Retail builds. The set lives under `ProposedSets` in `Story-Mode-Setlists.json` and `Story.json`: no campaign placement yet. It is `Continuous` (one show, no results screen until My Hero ends) and `OneSitting` (leaving starts over at the chase), which is the one-sitting version of the open decision above.
 
-**Venues.** `Tools/Venues/make_story_afterlife.py` builds all three as greybox scenes (primitives, posed figures from `story_afterlife_people.py`, looping clips):
+**Venues.** `Tools/Venues/make_story_afterlife.py` builds all three from its own props: meshes and textures drawn by `story_afterlife_mesh.py` / `story_afterlife_art.py` (written into each venue's `Models/Set` and `Textures`), posed figures from `story_afterlife_people.py`, particles and looping clips.
 
 | Venue | Songs | Phases (story flags) |
 |---|---|---|
-| `StoryHighway` | Kickstart My Heart | the road and poles scroll until `wreck`; the cop's poses `cop_radio`, `cop_nods`; the burning trailer on the marked shoulder (mile marker, billboard) at `wreck`, the bodies at `bodies` |
-| `StoryHell` | Free Bird, Bat Country | the crash site until `fell`; the shaft between `fell` and `landed`; hell from `landed`; Satan's poses `encore_called`, `satan_air_drums`, `satan_stands`, `phone_call`; the step demon `demon_catch`; `smoke_rises` |
-| `StoryHeaven` | Stairway to Heaven, My Hero | the ascent until `touchdown`; the cloud floor, stairs and God's platform; the arch angel's eyes and the choir at `choir`; `god_descends`, `angels_part`; Earth's crash site and rescue, far off in the same scene, with `resurrection` and `cop_nod_final` |
+| `StoryHighway` | Kickstart My Heart | the flatbed and tractor; the lane lines, guardrails, lamp poles and treeline scroll until `wreck`; the helicopter's searchlight; the cop's poses `cop_radio`, `cop_nods`; on the marked shoulder (mile marker 66, the PREPARE TO MEET GOD billboard) the fireball and the burning, overturned rig at `wreck`, the bodies at `bodies` |
+| `StoryHell` | Free Bird, Bat Country | the crash site until `fell`: the overturned flatbed and jackknifed tractor burning, the kit thrown across the road, skid marks, the torn guardrail, flares, the cruiser with its door open, stars and treeline. The shaft between `fell` and `landed`: rock walls and crags streaming up, embers, the road a slit of light above. Hell from `landed`: a cavern over a lake of lava, the cracked island the band plays on, three terraces of demons each side, the staircase with gargoyles, Satan's throne of spikes under a horned skull with burning eyes, lava falls, banners, hanging cages, braziers, bats circling, fire jets on the peaks. Satan's poses `encore_called`, `satan_air_drums`, `satan_stands`, `phone_call`; the step demon `demon_catch`; `smoke_rises` |
+| `StoryHeaven` | Stairway to Heaven, My Hero | the ascent until `touchdown`: cumulus streaming down in three depths over a sea of cloud, under a painted sky. Then the floor of cloud with its marble dais, the colonnade and stairs, the gates and God's platform; the arch (plain gold rings) wakes into an angel of eyed wheels and wings at `choir`, with seven more and sixty-six far ranks behind; `god_descends`, `angels_part`; Earth's crash site and rescue, beyond the sky in the same scene, with `resurrection` and `cop_nod_final` |
 
-Every beat in this plan is a moment in the manifest (a cue and a flag). The venue's camera spot tagged `story/<flag>` is the shot that takes the screen when it lands.
+Each place in a venue has its own stage lights: a show light under a story group is cued only while the group shows, and particle effects under it run only then (`Docs/Venue-Authoring.md` → VenueStory).
+
+Every beat in this plan is a moment in the manifest (a cue and a flag). The venue's camera spot tagged `story/<flag>` is the shot that takes the screen when it lands. A shot can pass through waypoints (`/w1`, `/w2`: the wheel-to-kit opening, the helicopter's overshoot, the crane up hell's stairs to the skull) and pull focus (`/f<metres>`: the hand on the asphalt, the drummer's eyelashes in the ascent).
+
+**Camera beats beyond the plan.** Five moments were added for coverage: Free Bird's `crash_survey` (along the shoulder to the burning rig), `the_slit` (straight up the shaft) and `hell_wide` (high over the lava); Bat Country's `cavern_orbit`; Stairway's `heaven_wide` (the whole choir). Their cues are shares of the song or an offset from a bound section; move them once Free Bird has a chart.
 
 **Cue timing.** Kickstart My Heart, Bat Country and My Hero are bound to their charts' sections (for example the CPR match cut at My Hero's `verse_riff`, God's descent at `chorus_3`). So is Stairway to Heaven, the Zeppelin chart. Free Bird is still a stand-in, so its cues are shares of the song (`at:0.46` for the fall, `at:0.57` for the landing); bind them to sections once its chart exists.
 
@@ -114,6 +118,9 @@ Every beat in this plan is a moment in the manifest (a cue and a flag). The venu
 - Free Bird is still the stand-in.
 
 **Still open.**
+- The sets have only been seen as stills on a Windows debug build (`--venue-only` captures on a test track): the camera moves, the loops' joins and the frame rate in a Profile build want a look in motion, on the real songs.
+- Hell is heavy: about 1,800 entities, 680 models and 55 particle systems.
+- Satan and God are stock figures with horns, wings and a halo added; neither has a face of his own.
 - Real voice audio for Satan's line.
 - Kickstart's tail is about a second, so the `bodies` shot barely shows before Free Bird's opening shot (the same hand on the road) takes over.
 - Atreyu's *Right Side of the Bed* is set aside.

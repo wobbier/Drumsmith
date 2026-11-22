@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "WingsPartL",
  "FrameRate": 30,
- "DurationFrames": 75,
+ "DurationFrames": 90,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,9 +20,9 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 75,
+     "Frame": 90,
      "Value": [
-      -9.0,
+      -10.0,
       0.5,
       1.5,
       0
@@ -47,12 +47,12 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 75,
+     "Frame": 90,
      "Value": [
-      0.027054,
-      -0.2574012,
-      0.1009667,
-      0.9606344
+      0.0356311,
+      -0.2901924,
+      0.1165442,
+      0.9491766
      ],
      "Interpolation": "SmoothStep"
     }

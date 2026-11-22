@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Turn_80_0",
  "FrameRate": 30,
- "DurationFrames": 45,
+ "DurationFrames": 42,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 45,
+     "Frame": 42,
      "Value": [
       0.0,
       0.6427876,

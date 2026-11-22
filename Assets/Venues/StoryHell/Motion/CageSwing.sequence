@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "CageSwing",
+ "FrameRate": 30,
+ "DurationFrames": 180,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0218016,
+      0.0007613,
+      0.0348912,
+      0.999153
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      -0.0218016,
+      0.0007613,
+      -0.0348912,
+      0.999153
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

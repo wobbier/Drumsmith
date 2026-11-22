@@ -3069,6 +3069,30 @@
               ],
               "Shot": "story/stairs_reveal",
               "Do": "Up the stairs past the demons on the balustrades to Satan on the throne."
+            },
+            {
+              "On": "at:0.02",
+              "StateAfter": [
+                "crash_survey"
+              ],
+              "Shot": "story/crash_survey",
+              "Do": "Along the shoulder past the cruiser and its lights to the burning rig: the whole scene before anyone moves."
+            },
+            {
+              "On": "at:0.48",
+              "StateAfter": [
+                "the_slit"
+              ],
+              "Shot": "story/the_slit",
+              "Do": "Straight up from among the falling band: the road a slit of light, shrinking."
+            },
+            {
+              "On": "at:0.63",
+              "StateAfter": [
+                "hell_wide"
+              ],
+              "Shot": "story/hell_wide",
+              "Do": "High over the lake of lava: the island, the terraces of demons, the stairs and the skull over the throne."
             }
           ]
         },
@@ -3164,6 +3188,14 @@
               ],
               "Shot": "story/smoke_rises",
               "Do": "His free hand lifts; the drummer's boots leave the stone and smoke rises past the lens, turning white."
+            },
+            {
+              "On": "at:0.42",
+              "StateAfter": [
+                "cavern_orbit"
+              ],
+              "Shot": "story/cavern_orbit",
+              "Do": "Round the back of the band, low: the kit against the crowd, the stairs and the throne beyond."
             }
           ]
         },
@@ -3245,6 +3277,14 @@
               ],
               "Shot": "story/sticks_close",
               "Do": "From the celestial wide all the way back to a close shot of the sticks."
+            },
+            {
+              "On": "section:gtr_solo_a+16",
+              "StateAfter": [
+                "heaven_wide"
+              ],
+              "Shot": "story/heaven_wide",
+              "Do": "Far back and high: the band a speck on its dais, the gates, the platform and the whole choir."
             }
           ]
         },

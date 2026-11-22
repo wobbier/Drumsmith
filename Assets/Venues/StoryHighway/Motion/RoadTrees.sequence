@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "RoadTrees",
+ "FrameRate": 30,
+ "DurationFrames": 96,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 96,
+     "Value": [
+      0,
+      0,
+      -96,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

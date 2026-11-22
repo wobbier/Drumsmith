@@ -1163,6 +1163,24 @@
        "Flags": [
         "stairs_reveal"
        ]
+      },
+      {
+       "Cue": "at:0.02",
+       "Flags": [
+        "crash_survey"
+       ]
+      },
+      {
+       "Cue": "at:0.48",
+       "Flags": [
+        "the_slit"
+       ]
+      },
+      {
+       "Cue": "at:0.63",
+       "Flags": [
+        "hell_wide"
+       ]
       }
      ],
      "Venue": "StoryHell"
@@ -1219,6 +1237,12 @@
         "smoke_rises",
         "band_rising"
        ]
+      },
+      {
+       "Cue": "at:0.42",
+       "Flags": [
+        "cavern_orbit"
+       ]
       }
      ],
      "Venue": "StoryHell"
@@ -1269,6 +1293,12 @@
        "Cue": "last_note+4",
        "Flags": [
         "sticks_close"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_a+16",
+       "Flags": [
+        "heaven_wide"
        ]
       }
      ],
