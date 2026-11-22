@@ -1,0 +1,44 @@
+newmtl white_glow4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 4 4 4
+map_Ke Palette.png
+
+newmtl cyan_glow4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 4 4 4
+map_Ke Palette.png
+
+newmtl hotpink_glow4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 4 4 4
+map_Ke Palette.png
+
+newmtl yellow_glow3_5
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 3.5 3.5 3.5
+map_Ke Palette.png
+
+newmtl glass_glow4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 4 4 4
+map_Ke Palette.png

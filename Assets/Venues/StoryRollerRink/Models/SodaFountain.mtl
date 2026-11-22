@@ -1,0 +1,49 @@
+newmtl steel
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl red_glow1_6
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 1.6 1.6 1.6
+map_Ke Palette.png
+
+newmtl cyan_glow1_6
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 1.6 1.6 1.6
+map_Ke Palette.png
+
+newmtl lime_glow1_6
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 1.6 1.6 1.6
+map_Ke Palette.png
+
+newmtl orange_glow1_6
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 1.6 1.6 1.6
+map_Ke Palette.png
+
+newmtl chrome
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png

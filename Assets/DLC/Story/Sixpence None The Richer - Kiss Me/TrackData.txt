@@ -1,0 +1,19 @@
+{
+ "Title": "Kiss Me",
+ "Artist": "Sixpence None The Richer",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Millennial Coffee Shop",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 209.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/754kgU5rWscRTfvlsuEwFp"
+ },
+ "NoteCount": 1224
+}

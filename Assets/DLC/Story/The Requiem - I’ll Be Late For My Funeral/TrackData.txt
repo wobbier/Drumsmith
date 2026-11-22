@@ -1,0 +1,19 @@
+{
+ "Title": "I’ll Be Late For My Funeral",
+ "Artist": "The Requiem",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Funeral Afterparty at the Legion",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 195.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/6hoXYrY3T51gLkdDRFk3JI"
+ },
+ "NoteCount": 1140
+}

@@ -1,0 +1,19 @@
+{
+ "Title": "What About Me?",
+ "Artist": "Snarky Puppy",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Drummer Hall of Fame at the Event Horizon",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 403.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/4YpXSKVrp8jhI7EAPV1xpF"
+ },
+ "NoteCount": 2388
+}

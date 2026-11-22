@@ -1,0 +1,19 @@
+{
+ "Title": "Tom Sawyer",
+ "Artist": "Rush",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Home Ice at Maple Leaf Gardens",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 277.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/1MkoCFGbhPQIDI5lRdAheQ"
+ },
+ "NoteCount": 1632
+}

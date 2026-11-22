@@ -25,9 +25,88 @@ bool GigSession::Begin( const ProgressionGig& inGig, const std::vector<int>& inS
 }
 
 
+bool GigSession::BeginStory( const ProgressionStorySet& inSet, const std::vector<int>& inSetlist, const PlayerProfile& inProfile )
+{
+    End();
+    if( inSetlist.empty() || inSetlist.size() != inSet.Songs.size() || std::find( inSetlist.begin(), inSetlist.end(), -1 ) != inSetlist.end() )
+    {
+        return false;
+    }
+    m_active = true;
+    m_story = true;
+    m_oneSitting = inSet.OneSitting;
+    m_gigId = inSet.Id;
+    m_gigName = inSet.Name;
+    m_setlist = inSetlist;
+    m_accuracy.assign( inSetlist.size(), -1.0 );
+    const auto record = inProfile.Story.find( inSet.Id );
+    if( !m_oneSitting && record != inProfile.Story.end() )
+    {
+        for( size_t i = 0; i < m_accuracy.size() && i < record->second.Banked.size(); ++i )
+        {
+            m_accuracy[i] = record->second.Banked[i];
+        }
+    }
+    // The first song not banked (Progression::StoryNextSong); from the top once all are.
+    const auto next = std::find_if( m_accuracy.begin(), m_accuracy.end(), []( double inAccuracy ) { return inAccuracy < 0.0; } );
+    m_song = next == m_accuracy.end() ? 0 : static_cast<int>( next - m_accuracy.begin() );
+    m_passAccuracy = inSet.PassAccuracy;
+    VenueRegistry::GigVenue() = inSet.Venue;
+    return true;
+}
+
+
 bool GigSession::LaunchCurrent() const
 {
-    return m_active && TrackRadioUtils::LaunchTrack( CurrentTrack() );
+    if( !m_active )
+    {
+        return false;
+    }
+    if( m_story )
+    {
+        if( const ProgressionStorySet* set = Progression::GetInstance().FindStorySet( m_gigId ) )
+        {
+            StageStory( *set, m_song );
+        }
+    }
+    return TrackRadioUtils::LaunchTrack( CurrentTrack() );
+}
+
+
+void GigSession::StageStory( const ProgressionStorySet& inSet, int inSong )
+{
+    VenueRegistry::StoryStage& stage = VenueRegistry::Story();
+    stage = VenueRegistry::StoryStage();
+    if( inSong < 0 || inSong >= static_cast<int>( inSet.Songs.size() ) )
+    {
+        return;
+    }
+    stage.Set = inSet.Id;
+    stage.Song = inSong;
+    // The set is played in order, so everything before this song has happened.
+    for( int i = 0; i < inSong; ++i )
+    {
+        stage.Flags.insert( inSet.Songs[i].Flags.begin(), inSet.Songs[i].Flags.end() );
+    }
+    for( const std::string& flag : inSet.Songs[inSong].Flags )
+    {
+        if( stage.Flags.count( flag ) == 0 )
+        {
+            stage.AtCue.insert( flag );
+        }
+    }
+    stage.Cue = inSet.Songs[inSong].Cue;
+}
+
+
+bool GigSession::JumpTo( int inSong )
+{
+    if( !m_active || inSong < 0 || inSong >= SongCount() )
+    {
+        return false;
+    }
+    m_song = inSong;
+    return true;
 }
 
 
@@ -45,10 +124,13 @@ bool GigSession::LaunchNext()
 void GigSession::End()
 {
     m_active = false;
+    m_story = false;
+    m_oneSitting = false;
     m_setlist.clear();
     m_accuracy.clear();
     m_song = 0;
     VenueRegistry::GigVenue().clear();
+    VenueRegistry::Story() = VenueRegistry::StoryStage();
 }
 
 
@@ -66,6 +148,21 @@ bool GigSession::RecordSong( int inTrackIndex, double inAccuracy )
     }
     m_accuracy[m_song] = std::max( m_accuracy[m_song], inAccuracy );
     return SetDone();
+}
+
+
+void GigSession::Bank( PlayerProfile& ioProfile ) const
+{
+    if( !IsStory() || m_oneSitting || m_song < 0 || m_song >= SongCount() || m_accuracy[m_song] < 0.0 )
+    {
+        return;
+    }
+    std::vector<double>& banked = ioProfile.Story[m_gigId].Banked;
+    if( banked.size() < m_accuracy.size() )
+    {
+        banked.resize( m_accuracy.size(), -1.0 );
+    }
+    banked[m_song] = std::max( banked[m_song], m_accuracy[m_song] );
 }
 
 
@@ -92,5 +189,16 @@ double GigSession::AverageAccuracy() const
 
 bool GigSession::Complete( PlayerProfile& ioProfile ) const
 {
-    return Passed() && ioProfile.CompletedGigs.insert( m_gigId ).second;
+    if( !Passed() )
+    {
+        return false;
+    }
+    if( m_story )
+    {
+        PlayerProfile::StoryRecord& record = ioProfile.Story[m_gigId];
+        const bool first = !record.Passed;
+        record.Passed = true;
+        return first;
+    }
+    return ioProfile.CompletedGigs.insert( m_gigId ).second;
 }

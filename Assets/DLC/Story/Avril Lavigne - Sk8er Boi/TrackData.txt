@@ -1,0 +1,19 @@
+{
+ "Title": "Sk8er Boi",
+ "Artist": "Avril Lavigne",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Food Court Farewell Show",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 204.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/00Mb3DuaIH1kjrwOku9CGU"
+ },
+ "NoteCount": 1194
+}

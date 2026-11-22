@@ -5,9 +5,11 @@
 #include "CoreGame/TrackList.h"
 #include "File.h"
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstdio>
 #include <cstdint>
+#include <map>
 #include <set>
 
 namespace
@@ -52,6 +54,8 @@ namespace
         requirement.FullCombos = need.value( "FullCombos", 0 );
         requirement.SongsAtAccuracy = need.value( "SongsAtAccuracy", 0 );
         requirement.Accuracy = need.value( "Accuracy", 0.0 );
+        requirement.StorySets = Strings( need, "StorySets" );
+        requirement.Members = Strings( need, "Members" );
         return requirement;
     }
 
@@ -77,6 +81,54 @@ namespace
     }
 
 
+    // A song's name reduced for matching a chart to a recording: the first artist only, no
+    // "- Remastered 2011" or "(feat. ...)", lower case letters and digits.
+    std::string MatchName( const std::string& inText, bool inArtist )
+    {
+        std::string text = inText;
+        if( inArtist )
+        {
+            text = text.substr( 0, text.find( ',' ) );
+        }
+        else
+        {
+            text = text.substr( 0, text.find( " - " ) );
+            text = text.substr( 0, text.find( '(' ) );
+        }
+        std::string name;
+        for( unsigned char c : text )
+        {
+            if( std::isalnum( c ) )
+            {
+                name += static_cast<char>( std::tolower( c ) );
+            }
+        }
+        return name;
+    }
+
+
+    // Who sits in a seat, for the player: "bass" -> "bassist".
+    std::string SeatPlayer( const std::string& inSeat )
+    {
+        static const std::map<std::string, std::string> kPlayers = { { "bass", "bassist" }, { "guitar", "guitarist" }, { "vocals", "singer" }, { "keys", "keys player" } };
+        const auto it = kPlayers.find( inSeat );
+        return it == kPlayers.end() ? inSeat + " player" : it->second;
+    }
+
+
+    // The track id of a Spotify link ("https://open.spotify.com/track/<id>?si=..."), else empty.
+    std::string SpotifyId( const std::string& inLink )
+    {
+        const size_t track = inLink.find( "/track/" );
+        if( track == std::string::npos )
+        {
+            return std::string();
+        }
+        const std::string id = inLink.substr( track + 7 );
+        return id.substr( 0, id.find_first_of( "?/#" ) );
+    }
+
+
     // FNV-1a: the same order for the same gig and song on every machine.
     uint32_t Hash( const std::string& inText, uint32_t inSeed = 2166136261u )
     {
@@ -93,7 +145,8 @@ namespace
 
 bool ProgressionRequirement::Empty() const
 {
-    return Tier <= 0 && Gigs.empty() && LessonSteps.empty() && LessonsPassed <= 0 && SongsPlayed <= 0 && FullCombos <= 0 && SongsAtAccuracy <= 0;
+    return Tier <= 0 && Gigs.empty() && LessonSteps.empty() && LessonsPassed <= 0 && SongsPlayed <= 0 && FullCombos <= 0 && SongsAtAccuracy <= 0
+        && StorySets.empty() && Members.empty();
 }
 
 
@@ -115,6 +168,20 @@ Progression::Progression()
         return;
     }
     Load( root );
+    // Story mode is its own file. Without it there is no story; the rest still works.
+    const Path story( kStoryFile );
+    if( story.Exists )
+    {
+        const json storyRoot = json::parse( File( story ).Read(), nullptr, false );
+        if( storyRoot.is_discarded() )
+        {
+            YIKES( std::string( "Progression: " ) + kStoryFile + " isn't valid JSON; no story mode" );
+        }
+        else
+        {
+            LoadStory( storyRoot );
+        }
+    }
 }
 
 
@@ -132,6 +199,8 @@ void Progression::Load( const json& inRoot )
     m_milestones.clear();
     m_items.clear();
     m_venues.clear();
+    m_story.clear();
+    m_auditions.clear();
     if( !inRoot.is_object() )
     {
         return;
@@ -200,6 +269,98 @@ void Progression::Load( const json& inRoot )
         venue.Requires = Requirement( entry );
         m_venues.push_back( std::move( venue ) );
     }
+    if( inRoot.contains( "Sets" ) || inRoot.contains( "Auditions" ) )
+    {
+        LoadStory( inRoot );
+    }
+}
+
+
+void Progression::LoadStory( const json& inRoot )
+{
+    m_story.clear();
+    m_auditions.clear();
+    if( !inRoot.is_object() )
+    {
+        return;
+    }
+    for( const json& entry : Entries( inRoot, "Sets" ) )
+    {
+        ProgressionStorySet set;
+        set.Id = entry.value( "Id", std::string() );
+        set.Act = entry.value( "Act", 0 );
+        set.Name = entry.value( "Name", set.Id );
+        set.Description = entry.value( "Description", std::string() );
+        set.Venue = entry.value( "Venue", std::string() );
+        set.VenueBase = entry.value( "VenueBase", std::string() );
+        set.PassAccuracy = std::clamp( entry.value( "PassAccuracy", 70.0 ), 0.0, 100.0 );
+        set.OneSitting = entry.value( "OneSitting", false );
+        set.Credits = entry.value( "Credits", false );
+        set.PostCredits = entry.value( "PostCredits", false );
+        set.Requires = Requirement( entry );
+        set.Rewards = Strings( entry, "Rewards" );
+        set.MovesInto = entry.value( "MovesInto", std::string() );
+        set.Audition = entry.value( "Audition", std::string() );
+        if( entry.contains( "Songs" ) && entry["Songs"].is_array() )
+        {
+            for( const json& value : entry["Songs"] )
+            {
+                if( !value.is_object() )
+                {
+                    continue;
+                }
+                ProgressionStorySong song;
+                song.Artist = value.value( "Artist", std::string() );
+                song.Title = value.value( "Title", std::string() );
+                song.Spotify = value.value( "Spotify", std::string() );
+                song.Flags = Strings( value, "Flags" );
+                song.Cue = value.value( "Cue", std::string() );
+                set.Songs.push_back( std::move( song ) );
+            }
+        }
+        if( set.Songs.empty() )
+        {
+            YIKES( "Progression: story set " + set.Id + " has no songs; skipped" );
+            continue;
+        }
+        m_story.push_back( std::move( set ) );
+    }
+    for( const json& entry : Entries( inRoot, "Auditions" ) )
+    {
+        ProgressionAudition audition;
+        audition.Id = entry.value( "Id", std::string() );
+        audition.Seat = entry.value( "Seat", std::string() );
+        audition.After = entry.value( "After", std::string() );
+        audition.Optional = entry.value( "Optional", false );
+        audition.Description = entry.value( "Description", std::string() );
+        for( const json& value : Entries( entry, "Candidates" ) )
+        {
+            ProgressionCandidate candidate;
+            candidate.Id = value.value( "Id", std::string() );
+            candidate.Name = value.value( "Name", candidate.Id );
+            candidate.Description = value.value( "Description", std::string() );
+            candidate.Leans = value.value( "Leans", std::string() );
+            candidate.Pitch = value.value( "Pitch", std::string() );
+            candidate.Body = value.value( "Body", std::string() );
+            candidate.Clothes = value.value( "Clothes", std::string() );
+            audition.Candidates.push_back( std::move( candidate ) );
+        }
+        m_auditions.push_back( std::move( audition ) );
+    }
+    // The story's rewards join the hideout's items (an id already there keeps its first entry).
+    for( const json& entry : Entries( inRoot, "Items" ) )
+    {
+        ProgressionItem item;
+        item.Id = entry.value( "Id", std::string() );
+        if( FindItem( item.Id ) )
+        {
+            continue;
+        }
+        item.Name = entry.value( "Name", item.Id );
+        item.Description = entry.value( "Description", std::string() );
+        item.Slot = entry.value( "Slot", item.Id );
+        m_items.push_back( std::move( item ) );
+    }
 }
 
 
@@ -207,6 +368,20 @@ const ProgressionGig* Progression::FindGig( const std::string& inId ) const
 {
     const auto it = std::find_if( m_gigs.begin(), m_gigs.end(), [&inId]( const ProgressionGig& inGig ) { return inGig.Id == inId; } );
     return it == m_gigs.end() ? nullptr : &*it;
+}
+
+
+const ProgressionStorySet* Progression::FindStorySet( const std::string& inId ) const
+{
+    const auto it = std::find_if( m_story.begin(), m_story.end(), [&inId]( const ProgressionStorySet& inSet ) { return inSet.Id == inId; } );
+    return it == m_story.end() ? nullptr : &*it;
+}
+
+
+const ProgressionAudition* Progression::FindAudition( const std::string& inId ) const
+{
+    const auto it = std::find_if( m_auditions.begin(), m_auditions.end(), [&inId]( const ProgressionAudition& inAudition ) { return inAudition.Id == inId; } );
+    return it == m_auditions.end() ? nullptr : &*it;
 }
 
 
@@ -248,6 +423,21 @@ bool Progression::Holds( const ProgressionRequirement& inRequirement, const Play
             return false;
         }
     }
+    for( const std::string& id : inRequirement.StorySets )
+    {
+        const ProgressionStorySet* set = FindStorySet( id );
+        if( !set || !StoryPassed( *set, inProfile ) )
+        {
+            return false;
+        }
+    }
+    for( const std::string& seat : inRequirement.Members )
+    {
+        if( inProfile.BandMembers.count( seat ) == 0 )
+        {
+            return false;
+        }
+    }
     return inProfile.LessonsPassed() >= inRequirement.LessonsPassed
         && inProfile.SongsPlayed() >= inRequirement.SongsPlayed
         && inProfile.FullCombos() >= inRequirement.FullCombos
@@ -278,6 +468,21 @@ std::string Progression::Describe( const ProgressionRequirement& inRequirement, 
         {
             const auto passed = std::count_if( step->Lessons.begin(), step->Lessons.end(), [&inProfile]( const std::string& inLesson ) { return inProfile.LessonPassed( inLesson ); } );
             parts.push_back( "pass " + step->Name + " (" + std::to_string( passed ) + " of " + std::to_string( step->Lessons.size() ) + " lessons)" );
+        }
+    }
+    for( const std::string& id : inRequirement.StorySets )
+    {
+        const ProgressionStorySet* set = FindStorySet( id );
+        if( !set || !StoryPassed( *set, inProfile ) )
+        {
+            parts.push_back( "finish " + ( set ? set->Name : id ) );
+        }
+    }
+    for( const std::string& seat : inRequirement.Members )
+    {
+        if( inProfile.BandMembers.count( seat ) == 0 )
+        {
+            parts.push_back( "find a " + SeatPlayer( seat ) );
         }
     }
     const auto count = [&parts]( int inHave, int inNeed, const char* inWhat ) {
@@ -332,6 +537,14 @@ std::string Progression::HowToUnlock( const std::string& inItemId, const PlayerP
         {
             const std::string need = Describe( gig.Requires, inProfile );
             return "Play " + gig.Name + " (the gig board)" + ( need.empty() ? std::string() : "; to get booked: " + need );
+        }
+    }
+    for( const ProgressionStorySet& set : m_story )
+    {
+        if( gives( set.Rewards ) )
+        {
+            const std::string need = StoryOpen( set, inProfile ) ? std::string() : Describe( set.Requires, inProfile );
+            return "Finish " + set.Name + " (story mode)" + ( need.empty() ? std::string() : "; to get booked: " + need );
         }
     }
     for( const ProgressionLessonStep& step : m_steps )
@@ -414,6 +627,156 @@ bool Progression::VenueOpen( const std::string& inVenue, const PlayerProfile& in
 bool Progression::GigOpen( const ProgressionGig& inGig, const PlayerProfile& inProfile ) const
 {
     return UnlockAll || Holds( inGig.Requires, inProfile );
+}
+
+
+bool Progression::StoryOpen( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const
+{
+    return UnlockAll || Holds( inSet.Requires, inProfile );
+}
+
+
+bool Progression::StoryPassed( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const
+{
+    const auto it = inProfile.Story.find( inSet.Id );
+    return it != inProfile.Story.end() && it->second.Passed;
+}
+
+
+std::vector<int> Progression::StorySetlist( const ProgressionStorySet& inSet, const std::vector<TrackData>& inTracks ) const
+{
+    std::vector<int> setlist;
+    for( const ProgressionStorySong& song : inSet.Songs )
+    {
+        // The recording the chart says it is, else the same artist and title.
+        const std::string spotify = SpotifyId( song.Spotify );
+        const std::string artist = MatchName( song.Artist, true );
+        const std::string title = MatchName( song.Title, false );
+        int byLink = -1;
+        int byName = -1;
+        for( int i = 0; i < static_cast<int>( inTracks.size() ) && byLink < 0; ++i )
+        {
+            const TrackData& track = inTracks[i];
+            // Not m_noteCount: most charts' TrackData.txt leaves it 0 until the notes are read.
+            if( track.m_practice || track.m_calibration )
+            {
+                continue;
+            }
+            const auto link = track.m_links.find( "Spotify" );
+            if( !spotify.empty() && link != track.m_links.end() && SpotifyId( link->second ) == spotify )
+            {
+                byLink = i;
+            }
+            else if( byName < 0 && MatchName( track.m_artistName, true ) == artist && MatchName( track.m_trackName, false ) == title )
+            {
+                byName = i;
+            }
+        }
+        setlist.push_back( byLink >= 0 ? byLink : byName );
+    }
+    return setlist;
+}
+
+
+int Progression::StoryNextSong( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const
+{
+    const auto it = inProfile.Story.find( inSet.Id );
+    if( inSet.OneSitting || it == inProfile.Story.end() )
+    {
+        return 0;
+    }
+    const std::vector<double>& banked = it->second.Banked;
+    for( int i = 0; i < static_cast<int>( inSet.Songs.size() ); ++i )
+    {
+        if( i >= static_cast<int>( banked.size() ) || banked[i] < 0.0 )
+        {
+            return i;
+        }
+    }
+    return 0;
+}
+
+
+double Progression::StoryAverage( const ProgressionStorySet& inSet, const PlayerProfile& inProfile ) const
+{
+    const auto it = inProfile.Story.find( inSet.Id );
+    if( it == inProfile.Story.end() || inSet.Songs.empty() )
+    {
+        return 0.0;
+    }
+    double sum = 0.0;
+    for( size_t i = 0; i < inSet.Songs.size() && i < it->second.Banked.size(); ++i )
+    {
+        sum += std::max( 0.0, it->second.Banked[i] );
+    }
+    return sum / static_cast<double>( inSet.Songs.size() );
+}
+
+
+std::vector<std::string> Progression::StoryFlags( const ProgressionStorySet& inSet, int inSong, const PlayerProfile& inProfile ) const
+{
+    // A OneSitting run plays in order, so everything before the song has happened in this run.
+    const auto it = inProfile.Story.find( inSet.Id );
+    std::set<std::string> flags;
+    for( int i = 0; i < inSong && i < static_cast<int>( inSet.Songs.size() ); ++i )
+    {
+        const bool banked = it != inProfile.Story.end() && i < static_cast<int>( it->second.Banked.size() ) && it->second.Banked[i] >= 0.0;
+        if( inSet.OneSitting || banked )
+        {
+            flags.insert( inSet.Songs[i].Flags.begin(), inSet.Songs[i].Flags.end() );
+        }
+    }
+    return std::vector<std::string>( flags.begin(), flags.end() );
+}
+
+
+bool Progression::StoryFinished( const PlayerProfile& inProfile ) const
+{
+    return std::any_of( m_story.begin(), m_story.end(), [&]( const ProgressionStorySet& inSet ) { return inSet.Credits && StoryPassed( inSet, inProfile ); } );
+}
+
+
+const ProgressionAudition* Progression::PendingAudition( const PlayerProfile& inProfile ) const
+{
+    for( const ProgressionAudition& audition : m_auditions )
+    {
+        const ProgressionStorySet* after = FindStorySet( audition.After );
+        const bool declined = inProfile.UnlockedItems.count( "declined:" + audition.Id ) > 0;
+        if( after && StoryPassed( *after, inProfile ) && inProfile.BandMembers.count( audition.Seat ) == 0 && !declined && !audition.Candidates.empty() )
+        {
+            return &audition;
+        }
+    }
+    return nullptr;
+}
+
+
+bool Progression::ChooseMember( const std::string& inAuditionId, const std::string& inCandidateId, PlayerProfile& ioProfile ) const
+{
+    const ProgressionAudition* audition = FindAudition( inAuditionId );
+    if( !audition )
+    {
+        return false;
+    }
+    const auto candidate = std::find_if( audition->Candidates.begin(), audition->Candidates.end(), [&inCandidateId]( const ProgressionCandidate& inCandidate ) { return inCandidate.Id == inCandidateId; } );
+    if( candidate == audition->Candidates.end() )
+    {
+        return false;
+    }
+    ioProfile.BandMembers[audition->Seat] = candidate->Id;
+    return true;
+}
+
+
+bool Progression::DeclineAudition( const std::string& inAuditionId, PlayerProfile& ioProfile ) const
+{
+    const ProgressionAudition* audition = FindAudition( inAuditionId );
+    if( !audition || !audition->Optional )
+    {
+        return false;
+    }
+    ioProfile.UnlockedItems.insert( "declined:" + audition->Id );
+    return true;
 }
 
 
@@ -508,6 +871,14 @@ std::vector<ProgressionUnlock> Progression::Evaluate( PlayerProfile& ioProfile )
             }
         }
     };
+    const auto moveTo = [&]( int inTier ) {
+        for( int moved = ioProfile.HideoutTier + 1; moved <= inTier; ++moved )
+        {
+            unlock( "tier", m_tiers[moved].Id, "Moved into " + m_tiers[moved].Name );
+            reward( m_tiers[moved].Rewards );
+        }
+        ioProfile.HideoutTier = std::max( ioProfile.HideoutTier, inTier );
+    };
     // Each pass can open something the next one needs (a tier opens a gig's venue...), so go
     // round until nothing changes. Every unlock is a set insert, so this ends.
     for( int pass = 0; pass < 32; ++pass )
@@ -518,12 +889,7 @@ std::vector<ProgressionUnlock> Progression::Evaluate( PlayerProfile& ioProfile )
         {
             if( Holds( m_tiers[tier].Requires, ioProfile ) )
             {
-                for( int moved = ioProfile.HideoutTier + 1; moved <= tier; ++moved )
-                {
-                    unlock( "tier", m_tiers[moved].Id, "Moved into " + m_tiers[moved].Name );
-                    reward( m_tiers[moved].Rewards );
-                }
-                ioProfile.HideoutTier = tier;
+                moveTo( tier );
                 break;
             }
         }
@@ -582,6 +948,28 @@ std::vector<ProgressionUnlock> Progression::Evaluate( PlayerProfile& ioProfile )
             {
                 unlock( "gig", gig.Id, "New gig: " + gig.Name );
             }
+        }
+        // Story mode: a passed set gives its rewards and moves the band in; the next one is booked.
+        for( const ProgressionStorySet& set : m_story )
+        {
+            if( StoryPassed( set, ioProfile ) )
+            {
+                unlock( "story", set.Id, ( set.Credits ? "The story is told: " : "Finished: " ) + set.Name );
+                reward( set.Rewards );
+                const auto tier = std::find_if( m_tiers.begin(), m_tiers.end(), [&set]( const ProgressionTier& inTier ) { return inTier.Id == set.MovesInto; } );
+                if( tier != m_tiers.end() && tier - m_tiers.begin() > ioProfile.HideoutTier )
+                {
+                    moveTo( static_cast<int>( tier - m_tiers.begin() ) );
+                }
+            }
+            else if( Holds( set.Requires, ioProfile ) && !set.Requires.Empty() )
+            {
+                unlock( "booking", set.Id, ( set.PostCredits ? "After the credits: " : "New booking: " ) + set.Name );
+            }
+        }
+        if( const ProgressionAudition* audition = PendingAudition( ioProfile ) )
+        {
+            unlock( "audition", audition->Id, "Auditions: the band needs a " + SeatPlayer( audition->Seat ) );
         }
         for( const ProgressionVenue& venue : m_venues )
         {

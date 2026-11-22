@@ -115,6 +115,10 @@ private:
     // moments that set off the effects.
     void UpdateHype( double inSeconds, float inDeltaTime );
     void StartAccent( double inSeconds, int inLevel );
+    // Story mode's props (VenueStory markers): what each was authored as, read once the scene is
+    // in, and each frame shown or hidden by the story's flags (VenueRegistry::Story).
+    void BuildStory( double inLength );
+    void UpdateStory( double inSeconds, float inDeltaTime );
     void SampleAccents( double inBeat );
     // inLevel 1: a lift (jets, a hit on the blinders). 2: a peak (confetti, sparks, flames, a
     // hero shot). Ignored while the last one is still ringing.
@@ -136,6 +140,20 @@ private:
     // The venue scene showing (none in a procedural room), and its registry id.
     VenueScene m_scene;
     std::string m_sceneId;
+    struct StoryProp
+    {
+        EntityHandle Entity;
+        std::string Flag;
+        bool WhenSet = true;
+        float Fade = 0.75f;
+        Vector3 Scale;
+        // The plain Lights under it (not show lights: the rig drives those), at full.
+        std::vector<std::pair<EntityHandle, float>> Lights;
+        float Shown = -1.f;     // 0 hidden to 1 shown; -1 before the first update (it snaps)
+    };
+    std::vector<StoryProp> m_storyProps;
+    // When the song's own flags land (its cue), in song seconds; -1 for no story.
+    double m_storyCue = -1.0;
     Band m_band;
     Crowd m_crowd;
     Director m_director;

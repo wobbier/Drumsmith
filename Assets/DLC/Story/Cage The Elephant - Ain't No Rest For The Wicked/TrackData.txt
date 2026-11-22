@@ -1,0 +1,19 @@
+{
+ "Title": "Ain't No Rest For The Wicked",
+ "Artist": "Cage The Elephant",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Dead End Dive Bar",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 175.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/1SfOQKZv0c9FqNXd2Kjt6P"
+ },
+ "NoteCount": 1020
+}

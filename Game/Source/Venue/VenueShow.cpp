@@ -10,6 +10,8 @@
 #include "Components/Lighting/Light.h"
 #include "Components/Transform.h"
 #include "Config/GameSettings.h"
+#include "CoreGame/GigSession.h"
+#include "CoreGame/Progression.h"
 #include "Core/CommandLine.h"
 #include "Engine/World.h"
 #include "Graphics/Texture.h"
@@ -133,6 +135,8 @@ void VenueShow::Clear()
     m_kick = 0.f;
     m_peaks.clear();
     m_finale = 1e9f;
+    m_storyProps.clear();
+    m_storyCue = -1.0;
     m_venue.Clear();
     m_plan = VenuePlan();
     m_beats.clear();
@@ -402,6 +406,7 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
         FillHouse( root, count > 0 ? std::clamp( static_cast<float>( posed ) / static_cast<float>( count ), 0.f, 4.f ) : 1.f );
     }
     m_director.Build( inWorld, m_plan, m_venue, m_beats, m_bpm, std::max( lastNote + 4.f, inTrack.m_duration ), GameSettings::GetInstance().VenueCamera == 1, &m_band );
+    BuildStory( std::max( lastNote + 4.f, inTrack.m_duration ) );
     VenueKit* kit = &m_kit;
     const VenueScene::Markers* scene = m_scene.IsLoaded() ? &m_scene.GetMarkers() : nullptr;
     if( m_plan.BuildRig || ( scene && !scene->Lights.empty() ) )
@@ -1007,6 +1012,7 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     m_lyricBoard.Update( seconds );
     m_director.SetHype( m_hype );
     m_director.Update( seconds, inDeltaTime );
+    UpdateStory( seconds, inDeltaTime );
     m_lights.SetCrowdEnergy( CrowdUp() ? m_crowd.Energy() : 0.6f );
     UpdateHype( seconds, inDeltaTime );
     // The follow spots keep a little front light on the band so they read in any look, and come
@@ -1203,6 +1209,145 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
     if( m_fx.Ignited() )
     {
         m_director.Kick( 1.f );
+    }
+}
+
+
+void VenueShow::BuildStory( double inLength )
+{
+    m_storyProps.clear();
+    m_storyCue = -1.0;
+    if( !m_scene.IsLoaded() || m_scene.GetMarkers().Story.empty() )
+    {
+        return;
+    }
+    // --story <set id> [--story-song N]: a story song's state with no gig, for previews.
+    VenueRegistry::StoryStage& stage = VenueRegistry::Story();
+    static const std::string kStorySet = CommandLine::GetString( "--story" );
+    if( !stage.Active() && !kStorySet.empty() )
+    {
+        if( const ProgressionStorySet* set = Progression::GetInstance().FindStorySet( kStorySet ) )
+        {
+            GigSession::StageStory( *set, CommandLine::GetInt( "--story-song", 1 ) - 1 );
+        }
+        else
+        {
+            YIKES_FMT( "[Venues] --story %s is no story set", kStorySet.c_str() );
+        }
+    }
+    for( const EntityHandle& entity : m_scene.GetMarkers().Story )
+    {
+        const VenueStory* marker = entity ? entity->TryGetComponent<VenueStory>() : nullptr;
+        if( !marker || marker->Flag.empty() )
+        {
+            continue;
+        }
+        StoryProp prop;
+        prop.Entity = entity;
+        prop.Flag = marker->Flag;
+        prop.WhenSet = marker->WhenSet;
+        prop.Fade = std::max( marker->FadeSeconds, 0.f );
+        Transform& transform = entity->GetComponent<Transform>();
+        prop.Scale = transform.GetScale();
+        // Its lights, to dim with it (a show light is the rig's to drive, so it's left alone).
+        std::vector<Transform*> open = { &transform };
+        while( !open.empty() )
+        {
+            Transform* at = open.back();
+            open.pop_back();
+            const EntityHandle& owner = at->Parent;
+            if( owner && owner->HasComponent<Light>() && !owner->HasComponent<VenueShowLight>() )
+            {
+                prop.Lights.emplace_back( owner, owner->GetComponent<Light>().Intensity );
+            }
+            for( Transform* child : at->GetChildren() )
+            {
+                open.push_back( child );
+            }
+        }
+        m_storyProps.push_back( std::move( prop ) );
+    }
+    // The song's cue: its section of that name in the chart, else a share of the song.
+    if( stage.Active() )
+    {
+        struct CueRule
+        {
+            const char* Cue;
+            const char* Section;
+            double Share;
+        };
+        static const CueRule kRules[] = { { "intro", "intro", 0.02 }, { "verse", "verse", 0.15 }, { "first_chorus", "chorus", 0.3 }, { "chorus", "chorus", 0.3 },
+            { "bridge", "bridge", 0.6 }, { "solo", "solo", 0.55 }, { "outro", "outro", 0.85 } };
+        m_storyCue = inLength * 0.5;
+        if( stage.Cue == "song_end" || stage.Cue == "end" )
+        {
+            m_storyCue = std::max( inLength - 6.0, 0.0 );
+            for( const TimedCueData& event : m_venue.m_songEvents )
+            {
+                if( event.m_name == "music_end" || event.m_name == "end" ) m_storyCue = event.m_time;
+            }
+        }
+        for( const CueRule& rule : kRules )
+        {
+            if( stage.Cue != rule.Cue )
+            {
+                continue;
+            }
+            m_storyCue = inLength * rule.Share;
+            for( const TimedCueData& section : m_venue.m_sections )
+            {
+                if( VenueTiming::Contains( section.m_name, rule.Section ) )
+                {
+                    m_storyCue = section.m_time;
+                    break;
+                }
+            }
+        }
+        static const float kCueAt = CommandLine::GetFloat( "--story-cue-at", -1.f );
+        if( kCueAt >= 0.f )
+        {
+            m_storyCue = kCueAt;
+        }
+    }
+    INFO_FMT( "[Venues]", "story: %d props, set '%s' song %d, %d flags set, %d at the cue (%s, %.1f s)", static_cast<int>( m_storyProps.size() ), stage.Set.c_str(), stage.Song + 1,
+        static_cast<int>( stage.Flags.size() ), static_cast<int>( stage.AtCue.size() ), stage.Cue.c_str(), m_storyCue );
+}
+
+
+void VenueShow::UpdateStory( double inSeconds, float inDeltaTime )
+{
+    if( m_storyProps.empty() )
+    {
+        return;
+    }
+    const VenueRegistry::StoryStage& stage = VenueRegistry::Story();
+    for( StoryProp& prop : m_storyProps )
+    {
+        if( !prop.Entity )
+        {
+            continue;
+        }
+        const bool set = stage.Flags.count( prop.Flag ) > 0 || ( stage.AtCue.count( prop.Flag ) > 0 && m_storyCue >= 0.0 && inSeconds >= m_storyCue );
+        const float target = set == prop.WhenSet ? 1.f : 0.f;
+        // The first frame, and after a jump back (a retry), it is where it should be at once.
+        if( prop.Shown < 0.f || prop.Fade <= 0.f )
+        {
+            prop.Shown = target;
+        }
+        else
+        {
+            const float step = std::clamp( inDeltaTime, 0.f, 0.25f ) / prop.Fade;
+            prop.Shown = target > prop.Shown ? std::min( target, prop.Shown + step ) : std::max( target, prop.Shown - step );
+        }
+        const float eased = prop.Shown * prop.Shown * ( 3.f - 2.f * prop.Shown );
+        prop.Entity->GetComponent<Transform>().SetScale( prop.Scale * std::max( eased, 0.0001f ) );
+        for( auto& [light, intensity] : prop.Lights )
+        {
+            if( light && light->HasComponent<Light>() )
+            {
+                light->GetComponent<Light>().Intensity = intensity * eased;
+            }
+        }
     }
 }
 

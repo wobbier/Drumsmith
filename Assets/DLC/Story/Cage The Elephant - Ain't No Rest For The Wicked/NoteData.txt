@@ -1,0 +1,6124 @@
+{
+ "Notes": [
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 3.0,
+   "TriggerTimeMS": 3000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 3.0,
+   "TriggerTimeMS": 3000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 3.25,
+   "TriggerTimeMS": 3250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 3.5,
+   "TriggerTimeMS": 3500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 3.5,
+   "TriggerTimeMS": 3500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 3.75,
+   "TriggerTimeMS": 3750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 4.0,
+   "TriggerTimeMS": 4000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 4.0,
+   "TriggerTimeMS": 4000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 4.25,
+   "TriggerTimeMS": 4250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 4.5,
+   "TriggerTimeMS": 4500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 4.5,
+   "TriggerTimeMS": 4500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 4.75,
+   "TriggerTimeMS": 4750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 5.0,
+   "TriggerTimeMS": 5000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 5.0,
+   "TriggerTimeMS": 5000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 5.25,
+   "TriggerTimeMS": 5250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 5.5,
+   "TriggerTimeMS": 5500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 5.5,
+   "TriggerTimeMS": 5500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 5.75,
+   "TriggerTimeMS": 5750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 6.0,
+   "TriggerTimeMS": 6000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 6.0,
+   "TriggerTimeMS": 6000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 6.25,
+   "TriggerTimeMS": 6250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 6.5,
+   "TriggerTimeMS": 6500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 6.5,
+   "TriggerTimeMS": 6500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 6.75,
+   "TriggerTimeMS": 6750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 7.0,
+   "TriggerTimeMS": 7000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 7.0,
+   "TriggerTimeMS": 7000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 7.25,
+   "TriggerTimeMS": 7250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 7.5,
+   "TriggerTimeMS": 7500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 7.5,
+   "TriggerTimeMS": 7500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 7.75,
+   "TriggerTimeMS": 7750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 8.0,
+   "TriggerTimeMS": 8000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 8.0,
+   "TriggerTimeMS": 8000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 8.25,
+   "TriggerTimeMS": 8250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 8.5,
+   "TriggerTimeMS": 8500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 8.5,
+   "TriggerTimeMS": 8500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 8.75,
+   "TriggerTimeMS": 8750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 9.0,
+   "TriggerTimeMS": 9000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 9.0,
+   "TriggerTimeMS": 9000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 9.25,
+   "TriggerTimeMS": 9250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 9.5,
+   "TriggerTimeMS": 9500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 9.5,
+   "TriggerTimeMS": 9500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 9.75,
+   "TriggerTimeMS": 9750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 10.0,
+   "TriggerTimeMS": 10000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 10.0,
+   "TriggerTimeMS": 10000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 10.25,
+   "TriggerTimeMS": 10250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 10.5,
+   "TriggerTimeMS": 10500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 10.5,
+   "TriggerTimeMS": 10500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 10.75,
+   "TriggerTimeMS": 10750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 11.0,
+   "TriggerTimeMS": 11000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 11.0,
+   "TriggerTimeMS": 11000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 11.25,
+   "TriggerTimeMS": 11250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 11.5,
+   "TriggerTimeMS": 11500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 11.5,
+   "TriggerTimeMS": 11500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 11.75,
+   "TriggerTimeMS": 11750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 12.0,
+   "TriggerTimeMS": 12000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 12.0,
+   "TriggerTimeMS": 12000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 12.25,
+   "TriggerTimeMS": 12250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 12.5,
+   "TriggerTimeMS": 12500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 12.5,
+   "TriggerTimeMS": 12500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 12.75,
+   "TriggerTimeMS": 12750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 13.0,
+   "TriggerTimeMS": 13000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 13.0,
+   "TriggerTimeMS": 13000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 13.25,
+   "TriggerTimeMS": 13250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 13.5,
+   "TriggerTimeMS": 13500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 13.5,
+   "TriggerTimeMS": 13500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 13.75,
+   "TriggerTimeMS": 13750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 14.0,
+   "TriggerTimeMS": 14000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 14.0,
+   "TriggerTimeMS": 14000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 14.25,
+   "TriggerTimeMS": 14250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 14.5,
+   "TriggerTimeMS": 14500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 14.5,
+   "TriggerTimeMS": 14500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 14.75,
+   "TriggerTimeMS": 14750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 15.0,
+   "TriggerTimeMS": 15000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 15.0,
+   "TriggerTimeMS": 15000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 15.25,
+   "TriggerTimeMS": 15250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 15.5,
+   "TriggerTimeMS": 15500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 15.5,
+   "TriggerTimeMS": 15500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 15.75,
+   "TriggerTimeMS": 15750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 16.0,
+   "TriggerTimeMS": 16000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 16.0,
+   "TriggerTimeMS": 16000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 16.25,
+   "TriggerTimeMS": 16250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 16.5,
+   "TriggerTimeMS": 16500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 16.5,
+   "TriggerTimeMS": 16500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 16.75,
+   "TriggerTimeMS": 16750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 17.0,
+   "TriggerTimeMS": 17000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 17.0,
+   "TriggerTimeMS": 17000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 17.25,
+   "TriggerTimeMS": 17250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 17.5,
+   "TriggerTimeMS": 17500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 17.5,
+   "TriggerTimeMS": 17500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 17.75,
+   "TriggerTimeMS": 17750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 18.0,
+   "TriggerTimeMS": 18000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 18.0,
+   "TriggerTimeMS": 18000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 18.25,
+   "TriggerTimeMS": 18250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 18.5,
+   "TriggerTimeMS": 18500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 18.5,
+   "TriggerTimeMS": 18500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 18.75,
+   "TriggerTimeMS": 18750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 19.0,
+   "TriggerTimeMS": 19000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 19.0,
+   "TriggerTimeMS": 19000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 19.25,
+   "TriggerTimeMS": 19250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 19.5,
+   "TriggerTimeMS": 19500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 19.5,
+   "TriggerTimeMS": 19500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 19.75,
+   "TriggerTimeMS": 19750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 20.0,
+   "TriggerTimeMS": 20000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 20.0,
+   "TriggerTimeMS": 20000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 20.25,
+   "TriggerTimeMS": 20250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 20.5,
+   "TriggerTimeMS": 20500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 20.5,
+   "TriggerTimeMS": 20500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 20.75,
+   "TriggerTimeMS": 20750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 21.0,
+   "TriggerTimeMS": 21000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 21.0,
+   "TriggerTimeMS": 21000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 21.25,
+   "TriggerTimeMS": 21250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 21.5,
+   "TriggerTimeMS": 21500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 21.5,
+   "TriggerTimeMS": 21500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 21.75,
+   "TriggerTimeMS": 21750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 22.0,
+   "TriggerTimeMS": 22000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 22.0,
+   "TriggerTimeMS": 22000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 22.25,
+   "TriggerTimeMS": 22250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 22.5,
+   "TriggerTimeMS": 22500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 22.5,
+   "TriggerTimeMS": 22500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 22.75,
+   "TriggerTimeMS": 22750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 23.0,
+   "TriggerTimeMS": 23000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 23.0,
+   "TriggerTimeMS": 23000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 23.25,
+   "TriggerTimeMS": 23250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 23.5,
+   "TriggerTimeMS": 23500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 23.5,
+   "TriggerTimeMS": 23500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 23.75,
+   "TriggerTimeMS": 23750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 24.0,
+   "TriggerTimeMS": 24000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 24.0,
+   "TriggerTimeMS": 24000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 24.25,
+   "TriggerTimeMS": 24250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 24.5,
+   "TriggerTimeMS": 24500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 24.5,
+   "TriggerTimeMS": 24500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 24.75,
+   "TriggerTimeMS": 24750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 25.0,
+   "TriggerTimeMS": 25000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 25.0,
+   "TriggerTimeMS": 25000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 25.25,
+   "TriggerTimeMS": 25250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 25.5,
+   "TriggerTimeMS": 25500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 25.5,
+   "TriggerTimeMS": 25500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 25.75,
+   "TriggerTimeMS": 25750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 26.0,
+   "TriggerTimeMS": 26000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 26.0,
+   "TriggerTimeMS": 26000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 26.25,
+   "TriggerTimeMS": 26250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 26.5,
+   "TriggerTimeMS": 26500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 26.5,
+   "TriggerTimeMS": 26500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 26.75,
+   "TriggerTimeMS": 26750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 27.0,
+   "TriggerTimeMS": 27000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 27.0,
+   "TriggerTimeMS": 27000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 27.25,
+   "TriggerTimeMS": 27250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 27.5,
+   "TriggerTimeMS": 27500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 27.5,
+   "TriggerTimeMS": 27500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 27.75,
+   "TriggerTimeMS": 27750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 28.0,
+   "TriggerTimeMS": 28000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 28.0,
+   "TriggerTimeMS": 28000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 28.25,
+   "TriggerTimeMS": 28250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 28.5,
+   "TriggerTimeMS": 28500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 28.5,
+   "TriggerTimeMS": 28500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 28.75,
+   "TriggerTimeMS": 28750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 29.0,
+   "TriggerTimeMS": 29000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 29.0,
+   "TriggerTimeMS": 29000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 29.25,
+   "TriggerTimeMS": 29250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 29.5,
+   "TriggerTimeMS": 29500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 29.5,
+   "TriggerTimeMS": 29500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 29.75,
+   "TriggerTimeMS": 29750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 30.0,
+   "TriggerTimeMS": 30000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 30.0,
+   "TriggerTimeMS": 30000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 30.25,
+   "TriggerTimeMS": 30250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 30.5,
+   "TriggerTimeMS": 30500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 30.5,
+   "TriggerTimeMS": 30500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 30.75,
+   "TriggerTimeMS": 30750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 31.0,
+   "TriggerTimeMS": 31000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 31.0,
+   "TriggerTimeMS": 31000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 31.25,
+   "TriggerTimeMS": 31250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 31.5,
+   "TriggerTimeMS": 31500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 31.5,
+   "TriggerTimeMS": 31500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 31.75,
+   "TriggerTimeMS": 31750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 32.0,
+   "TriggerTimeMS": 32000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 32.0,
+   "TriggerTimeMS": 32000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 32.25,
+   "TriggerTimeMS": 32250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 32.5,
+   "TriggerTimeMS": 32500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 32.5,
+   "TriggerTimeMS": 32500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 32.75,
+   "TriggerTimeMS": 32750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 33.0,
+   "TriggerTimeMS": 33000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 33.0,
+   "TriggerTimeMS": 33000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 33.25,
+   "TriggerTimeMS": 33250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 33.5,
+   "TriggerTimeMS": 33500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 33.5,
+   "TriggerTimeMS": 33500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 33.75,
+   "TriggerTimeMS": 33750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 34.0,
+   "TriggerTimeMS": 34000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 34.0,
+   "TriggerTimeMS": 34000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 34.25,
+   "TriggerTimeMS": 34250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 34.5,
+   "TriggerTimeMS": 34500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 34.5,
+   "TriggerTimeMS": 34500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 34.75,
+   "TriggerTimeMS": 34750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 35.0,
+   "TriggerTimeMS": 35000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 35.0,
+   "TriggerTimeMS": 35000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 35.25,
+   "TriggerTimeMS": 35250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 35.5,
+   "TriggerTimeMS": 35500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 35.5,
+   "TriggerTimeMS": 35500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 35.75,
+   "TriggerTimeMS": 35750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 36.0,
+   "TriggerTimeMS": 36000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 36.0,
+   "TriggerTimeMS": 36000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 36.25,
+   "TriggerTimeMS": 36250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 36.5,
+   "TriggerTimeMS": 36500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 36.5,
+   "TriggerTimeMS": 36500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 36.75,
+   "TriggerTimeMS": 36750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 37.0,
+   "TriggerTimeMS": 37000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 37.0,
+   "TriggerTimeMS": 37000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 37.25,
+   "TriggerTimeMS": 37250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 37.5,
+   "TriggerTimeMS": 37500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 37.5,
+   "TriggerTimeMS": 37500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 37.75,
+   "TriggerTimeMS": 37750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 38.0,
+   "TriggerTimeMS": 38000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 38.0,
+   "TriggerTimeMS": 38000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 38.25,
+   "TriggerTimeMS": 38250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 38.5,
+   "TriggerTimeMS": 38500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 38.5,
+   "TriggerTimeMS": 38500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 38.75,
+   "TriggerTimeMS": 38750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 39.0,
+   "TriggerTimeMS": 39000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 39.0,
+   "TriggerTimeMS": 39000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 39.25,
+   "TriggerTimeMS": 39250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 39.5,
+   "TriggerTimeMS": 39500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 39.5,
+   "TriggerTimeMS": 39500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 39.75,
+   "TriggerTimeMS": 39750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 40.0,
+   "TriggerTimeMS": 40000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 40.0,
+   "TriggerTimeMS": 40000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 40.25,
+   "TriggerTimeMS": 40250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 40.5,
+   "TriggerTimeMS": 40500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 40.5,
+   "TriggerTimeMS": 40500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 40.75,
+   "TriggerTimeMS": 40750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 41.0,
+   "TriggerTimeMS": 41000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 41.0,
+   "TriggerTimeMS": 41000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 41.25,
+   "TriggerTimeMS": 41250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 41.5,
+   "TriggerTimeMS": 41500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 41.5,
+   "TriggerTimeMS": 41500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 41.75,
+   "TriggerTimeMS": 41750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 42.0,
+   "TriggerTimeMS": 42000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 42.0,
+   "TriggerTimeMS": 42000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 42.25,
+   "TriggerTimeMS": 42250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 42.5,
+   "TriggerTimeMS": 42500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 42.5,
+   "TriggerTimeMS": 42500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 42.75,
+   "TriggerTimeMS": 42750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 43.0,
+   "TriggerTimeMS": 43000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 43.0,
+   "TriggerTimeMS": 43000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 43.25,
+   "TriggerTimeMS": 43250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 43.5,
+   "TriggerTimeMS": 43500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 43.5,
+   "TriggerTimeMS": 43500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 43.75,
+   "TriggerTimeMS": 43750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 44.0,
+   "TriggerTimeMS": 44000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 44.0,
+   "TriggerTimeMS": 44000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 44.25,
+   "TriggerTimeMS": 44250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 44.5,
+   "TriggerTimeMS": 44500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 44.5,
+   "TriggerTimeMS": 44500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 44.75,
+   "TriggerTimeMS": 44750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 45.0,
+   "TriggerTimeMS": 45000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 45.0,
+   "TriggerTimeMS": 45000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 45.25,
+   "TriggerTimeMS": 45250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 45.5,
+   "TriggerTimeMS": 45500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 45.5,
+   "TriggerTimeMS": 45500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 45.75,
+   "TriggerTimeMS": 45750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 46.0,
+   "TriggerTimeMS": 46000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 46.0,
+   "TriggerTimeMS": 46000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 46.25,
+   "TriggerTimeMS": 46250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 46.5,
+   "TriggerTimeMS": 46500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 46.5,
+   "TriggerTimeMS": 46500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 46.75,
+   "TriggerTimeMS": 46750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 47.0,
+   "TriggerTimeMS": 47000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 47.0,
+   "TriggerTimeMS": 47000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 47.25,
+   "TriggerTimeMS": 47250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 47.5,
+   "TriggerTimeMS": 47500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 47.5,
+   "TriggerTimeMS": 47500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 47.75,
+   "TriggerTimeMS": 47750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 48.0,
+   "TriggerTimeMS": 48000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 48.0,
+   "TriggerTimeMS": 48000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 48.25,
+   "TriggerTimeMS": 48250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 48.5,
+   "TriggerTimeMS": 48500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 48.5,
+   "TriggerTimeMS": 48500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 48.75,
+   "TriggerTimeMS": 48750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 49.0,
+   "TriggerTimeMS": 49000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 49.0,
+   "TriggerTimeMS": 49000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 49.25,
+   "TriggerTimeMS": 49250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 49.5,
+   "TriggerTimeMS": 49500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 49.5,
+   "TriggerTimeMS": 49500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 49.75,
+   "TriggerTimeMS": 49750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 50.0,
+   "TriggerTimeMS": 50000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 50.0,
+   "TriggerTimeMS": 50000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 50.25,
+   "TriggerTimeMS": 50250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 50.5,
+   "TriggerTimeMS": 50500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 50.5,
+   "TriggerTimeMS": 50500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 50.75,
+   "TriggerTimeMS": 50750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 51.0,
+   "TriggerTimeMS": 51000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 51.0,
+   "TriggerTimeMS": 51000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 51.25,
+   "TriggerTimeMS": 51250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 51.5,
+   "TriggerTimeMS": 51500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 51.5,
+   "TriggerTimeMS": 51500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 51.75,
+   "TriggerTimeMS": 51750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 52.0,
+   "TriggerTimeMS": 52000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 52.0,
+   "TriggerTimeMS": 52000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 52.25,
+   "TriggerTimeMS": 52250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 52.5,
+   "TriggerTimeMS": 52500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 52.5,
+   "TriggerTimeMS": 52500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 52.75,
+   "TriggerTimeMS": 52750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 53.0,
+   "TriggerTimeMS": 53000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 53.0,
+   "TriggerTimeMS": 53000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 53.25,
+   "TriggerTimeMS": 53250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 53.5,
+   "TriggerTimeMS": 53500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 53.5,
+   "TriggerTimeMS": 53500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 53.75,
+   "TriggerTimeMS": 53750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 54.0,
+   "TriggerTimeMS": 54000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 54.0,
+   "TriggerTimeMS": 54000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 54.25,
+   "TriggerTimeMS": 54250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 54.5,
+   "TriggerTimeMS": 54500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 54.5,
+   "TriggerTimeMS": 54500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 54.75,
+   "TriggerTimeMS": 54750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 55.0,
+   "TriggerTimeMS": 55000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 55.0,
+   "TriggerTimeMS": 55000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 55.25,
+   "TriggerTimeMS": 55250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 55.5,
+   "TriggerTimeMS": 55500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 55.5,
+   "TriggerTimeMS": 55500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 55.75,
+   "TriggerTimeMS": 55750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 56.0,
+   "TriggerTimeMS": 56000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 56.0,
+   "TriggerTimeMS": 56000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 56.25,
+   "TriggerTimeMS": 56250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 56.5,
+   "TriggerTimeMS": 56500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 56.5,
+   "TriggerTimeMS": 56500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 56.75,
+   "TriggerTimeMS": 56750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 57.0,
+   "TriggerTimeMS": 57000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 57.0,
+   "TriggerTimeMS": 57000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 57.25,
+   "TriggerTimeMS": 57250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 57.5,
+   "TriggerTimeMS": 57500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 57.5,
+   "TriggerTimeMS": 57500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 57.75,
+   "TriggerTimeMS": 57750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 58.0,
+   "TriggerTimeMS": 58000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 58.0,
+   "TriggerTimeMS": 58000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 58.25,
+   "TriggerTimeMS": 58250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 58.5,
+   "TriggerTimeMS": 58500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 58.5,
+   "TriggerTimeMS": 58500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 58.75,
+   "TriggerTimeMS": 58750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 59.0,
+   "TriggerTimeMS": 59000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 59.0,
+   "TriggerTimeMS": 59000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 59.25,
+   "TriggerTimeMS": 59250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 59.5,
+   "TriggerTimeMS": 59500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 59.5,
+   "TriggerTimeMS": 59500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 59.75,
+   "TriggerTimeMS": 59750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 60.0,
+   "TriggerTimeMS": 60000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 60.0,
+   "TriggerTimeMS": 60000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 60.25,
+   "TriggerTimeMS": 60250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 60.5,
+   "TriggerTimeMS": 60500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 60.5,
+   "TriggerTimeMS": 60500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 60.75,
+   "TriggerTimeMS": 60750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 61.0,
+   "TriggerTimeMS": 61000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 61.0,
+   "TriggerTimeMS": 61000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 61.25,
+   "TriggerTimeMS": 61250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 61.5,
+   "TriggerTimeMS": 61500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 61.5,
+   "TriggerTimeMS": 61500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 61.75,
+   "TriggerTimeMS": 61750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 62.0,
+   "TriggerTimeMS": 62000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 62.0,
+   "TriggerTimeMS": 62000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 62.25,
+   "TriggerTimeMS": 62250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 62.5,
+   "TriggerTimeMS": 62500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 62.5,
+   "TriggerTimeMS": 62500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 62.75,
+   "TriggerTimeMS": 62750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 63.0,
+   "TriggerTimeMS": 63000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 63.0,
+   "TriggerTimeMS": 63000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 63.25,
+   "TriggerTimeMS": 63250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 63.5,
+   "TriggerTimeMS": 63500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 63.5,
+   "TriggerTimeMS": 63500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 63.75,
+   "TriggerTimeMS": 63750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 64.0,
+   "TriggerTimeMS": 64000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 64.0,
+   "TriggerTimeMS": 64000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 64.25,
+   "TriggerTimeMS": 64250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 64.5,
+   "TriggerTimeMS": 64500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 64.5,
+   "TriggerTimeMS": 64500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 64.75,
+   "TriggerTimeMS": 64750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 65.0,
+   "TriggerTimeMS": 65000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 65.0,
+   "TriggerTimeMS": 65000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 65.25,
+   "TriggerTimeMS": 65250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 65.5,
+   "TriggerTimeMS": 65500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 65.5,
+   "TriggerTimeMS": 65500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 65.75,
+   "TriggerTimeMS": 65750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 66.0,
+   "TriggerTimeMS": 66000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 66.0,
+   "TriggerTimeMS": 66000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 66.25,
+   "TriggerTimeMS": 66250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 66.5,
+   "TriggerTimeMS": 66500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 66.5,
+   "TriggerTimeMS": 66500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 66.75,
+   "TriggerTimeMS": 66750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 67.0,
+   "TriggerTimeMS": 67000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 67.0,
+   "TriggerTimeMS": 67000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 67.25,
+   "TriggerTimeMS": 67250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 67.5,
+   "TriggerTimeMS": 67500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 67.5,
+   "TriggerTimeMS": 67500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 67.75,
+   "TriggerTimeMS": 67750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 68.0,
+   "TriggerTimeMS": 68000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 68.0,
+   "TriggerTimeMS": 68000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 68.25,
+   "TriggerTimeMS": 68250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 68.5,
+   "TriggerTimeMS": 68500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 68.5,
+   "TriggerTimeMS": 68500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 68.75,
+   "TriggerTimeMS": 68750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 69.0,
+   "TriggerTimeMS": 69000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 69.0,
+   "TriggerTimeMS": 69000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 69.25,
+   "TriggerTimeMS": 69250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 69.5,
+   "TriggerTimeMS": 69500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 69.5,
+   "TriggerTimeMS": 69500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 69.75,
+   "TriggerTimeMS": 69750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 70.0,
+   "TriggerTimeMS": 70000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 70.0,
+   "TriggerTimeMS": 70000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 70.25,
+   "TriggerTimeMS": 70250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 70.5,
+   "TriggerTimeMS": 70500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 70.5,
+   "TriggerTimeMS": 70500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 70.75,
+   "TriggerTimeMS": 70750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 71.0,
+   "TriggerTimeMS": 71000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 71.0,
+   "TriggerTimeMS": 71000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 71.25,
+   "TriggerTimeMS": 71250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 71.5,
+   "TriggerTimeMS": 71500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 71.5,
+   "TriggerTimeMS": 71500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 71.75,
+   "TriggerTimeMS": 71750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 72.0,
+   "TriggerTimeMS": 72000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 72.0,
+   "TriggerTimeMS": 72000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 72.25,
+   "TriggerTimeMS": 72250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 72.5,
+   "TriggerTimeMS": 72500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 72.5,
+   "TriggerTimeMS": 72500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 72.75,
+   "TriggerTimeMS": 72750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 73.0,
+   "TriggerTimeMS": 73000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 73.0,
+   "TriggerTimeMS": 73000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 73.25,
+   "TriggerTimeMS": 73250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 73.5,
+   "TriggerTimeMS": 73500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 73.5,
+   "TriggerTimeMS": 73500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 73.75,
+   "TriggerTimeMS": 73750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 74.0,
+   "TriggerTimeMS": 74000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 74.0,
+   "TriggerTimeMS": 74000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 74.25,
+   "TriggerTimeMS": 74250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 74.5,
+   "TriggerTimeMS": 74500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 74.5,
+   "TriggerTimeMS": 74500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 74.75,
+   "TriggerTimeMS": 74750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 75.0,
+   "TriggerTimeMS": 75000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 75.0,
+   "TriggerTimeMS": 75000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 75.25,
+   "TriggerTimeMS": 75250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 75.5,
+   "TriggerTimeMS": 75500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 75.5,
+   "TriggerTimeMS": 75500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 75.75,
+   "TriggerTimeMS": 75750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 76.0,
+   "TriggerTimeMS": 76000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 76.0,
+   "TriggerTimeMS": 76000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 76.25,
+   "TriggerTimeMS": 76250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 76.5,
+   "TriggerTimeMS": 76500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 76.5,
+   "TriggerTimeMS": 76500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 76.75,
+   "TriggerTimeMS": 76750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 77.0,
+   "TriggerTimeMS": 77000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 77.0,
+   "TriggerTimeMS": 77000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 77.25,
+   "TriggerTimeMS": 77250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 77.5,
+   "TriggerTimeMS": 77500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 77.5,
+   "TriggerTimeMS": 77500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 77.75,
+   "TriggerTimeMS": 77750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 78.0,
+   "TriggerTimeMS": 78000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 78.0,
+   "TriggerTimeMS": 78000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 78.25,
+   "TriggerTimeMS": 78250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 78.5,
+   "TriggerTimeMS": 78500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 78.5,
+   "TriggerTimeMS": 78500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 78.75,
+   "TriggerTimeMS": 78750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 79.0,
+   "TriggerTimeMS": 79000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 79.0,
+   "TriggerTimeMS": 79000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 79.25,
+   "TriggerTimeMS": 79250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 79.5,
+   "TriggerTimeMS": 79500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 79.5,
+   "TriggerTimeMS": 79500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 79.75,
+   "TriggerTimeMS": 79750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 80.0,
+   "TriggerTimeMS": 80000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 80.0,
+   "TriggerTimeMS": 80000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 80.25,
+   "TriggerTimeMS": 80250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 80.5,
+   "TriggerTimeMS": 80500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 80.5,
+   "TriggerTimeMS": 80500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 80.75,
+   "TriggerTimeMS": 80750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 81.0,
+   "TriggerTimeMS": 81000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 81.0,
+   "TriggerTimeMS": 81000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 81.25,
+   "TriggerTimeMS": 81250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 81.5,
+   "TriggerTimeMS": 81500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 81.5,
+   "TriggerTimeMS": 81500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 81.75,
+   "TriggerTimeMS": 81750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 82.0,
+   "TriggerTimeMS": 82000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 82.0,
+   "TriggerTimeMS": 82000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 82.25,
+   "TriggerTimeMS": 82250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 82.5,
+   "TriggerTimeMS": 82500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 82.5,
+   "TriggerTimeMS": 82500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 82.75,
+   "TriggerTimeMS": 82750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 83.0,
+   "TriggerTimeMS": 83000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 83.0,
+   "TriggerTimeMS": 83000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 83.25,
+   "TriggerTimeMS": 83250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 83.5,
+   "TriggerTimeMS": 83500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 83.5,
+   "TriggerTimeMS": 83500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 83.75,
+   "TriggerTimeMS": 83750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 84.0,
+   "TriggerTimeMS": 84000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 84.0,
+   "TriggerTimeMS": 84000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 84.25,
+   "TriggerTimeMS": 84250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 84.5,
+   "TriggerTimeMS": 84500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 84.5,
+   "TriggerTimeMS": 84500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 84.75,
+   "TriggerTimeMS": 84750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 85.0,
+   "TriggerTimeMS": 85000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 85.0,
+   "TriggerTimeMS": 85000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 85.25,
+   "TriggerTimeMS": 85250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 85.5,
+   "TriggerTimeMS": 85500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 85.5,
+   "TriggerTimeMS": 85500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 85.75,
+   "TriggerTimeMS": 85750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 86.0,
+   "TriggerTimeMS": 86000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 86.0,
+   "TriggerTimeMS": 86000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 86.25,
+   "TriggerTimeMS": 86250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 86.5,
+   "TriggerTimeMS": 86500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 86.5,
+   "TriggerTimeMS": 86500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 86.75,
+   "TriggerTimeMS": 86750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 87.0,
+   "TriggerTimeMS": 87000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 87.0,
+   "TriggerTimeMS": 87000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 87.25,
+   "TriggerTimeMS": 87250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 87.5,
+   "TriggerTimeMS": 87500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 87.5,
+   "TriggerTimeMS": 87500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 87.75,
+   "TriggerTimeMS": 87750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 88.0,
+   "TriggerTimeMS": 88000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 88.0,
+   "TriggerTimeMS": 88000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 88.25,
+   "TriggerTimeMS": 88250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 88.5,
+   "TriggerTimeMS": 88500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 88.5,
+   "TriggerTimeMS": 88500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 88.75,
+   "TriggerTimeMS": 88750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 89.0,
+   "TriggerTimeMS": 89000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 89.0,
+   "TriggerTimeMS": 89000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 89.25,
+   "TriggerTimeMS": 89250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 89.5,
+   "TriggerTimeMS": 89500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 89.5,
+   "TriggerTimeMS": 89500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 89.75,
+   "TriggerTimeMS": 89750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 90.0,
+   "TriggerTimeMS": 90000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 90.0,
+   "TriggerTimeMS": 90000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 90.25,
+   "TriggerTimeMS": 90250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 90.5,
+   "TriggerTimeMS": 90500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 90.5,
+   "TriggerTimeMS": 90500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 90.75,
+   "TriggerTimeMS": 90750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 91.0,
+   "TriggerTimeMS": 91000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 91.0,
+   "TriggerTimeMS": 91000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 91.25,
+   "TriggerTimeMS": 91250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 91.5,
+   "TriggerTimeMS": 91500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 91.5,
+   "TriggerTimeMS": 91500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 91.75,
+   "TriggerTimeMS": 91750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 92.0,
+   "TriggerTimeMS": 92000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 92.0,
+   "TriggerTimeMS": 92000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 92.25,
+   "TriggerTimeMS": 92250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 92.5,
+   "TriggerTimeMS": 92500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 92.5,
+   "TriggerTimeMS": 92500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 92.75,
+   "TriggerTimeMS": 92750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 93.0,
+   "TriggerTimeMS": 93000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 93.0,
+   "TriggerTimeMS": 93000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 93.25,
+   "TriggerTimeMS": 93250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 93.5,
+   "TriggerTimeMS": 93500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 93.5,
+   "TriggerTimeMS": 93500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 93.75,
+   "TriggerTimeMS": 93750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 94.0,
+   "TriggerTimeMS": 94000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 94.0,
+   "TriggerTimeMS": 94000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 94.25,
+   "TriggerTimeMS": 94250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 94.5,
+   "TriggerTimeMS": 94500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 94.5,
+   "TriggerTimeMS": 94500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 94.75,
+   "TriggerTimeMS": 94750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 95.0,
+   "TriggerTimeMS": 95000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 95.0,
+   "TriggerTimeMS": 95000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 95.25,
+   "TriggerTimeMS": 95250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 95.5,
+   "TriggerTimeMS": 95500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 95.5,
+   "TriggerTimeMS": 95500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 95.75,
+   "TriggerTimeMS": 95750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 96.0,
+   "TriggerTimeMS": 96000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 96.0,
+   "TriggerTimeMS": 96000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 96.25,
+   "TriggerTimeMS": 96250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 96.5,
+   "TriggerTimeMS": 96500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 96.5,
+   "TriggerTimeMS": 96500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 96.75,
+   "TriggerTimeMS": 96750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 97.0,
+   "TriggerTimeMS": 97000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 97.0,
+   "TriggerTimeMS": 97000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 97.25,
+   "TriggerTimeMS": 97250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 97.5,
+   "TriggerTimeMS": 97500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 97.5,
+   "TriggerTimeMS": 97500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 97.75,
+   "TriggerTimeMS": 97750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 98.0,
+   "TriggerTimeMS": 98000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 98.0,
+   "TriggerTimeMS": 98000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 98.25,
+   "TriggerTimeMS": 98250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 98.5,
+   "TriggerTimeMS": 98500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 98.5,
+   "TriggerTimeMS": 98500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 98.75,
+   "TriggerTimeMS": 98750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 99.0,
+   "TriggerTimeMS": 99000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 99.0,
+   "TriggerTimeMS": 99000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 99.25,
+   "TriggerTimeMS": 99250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 99.5,
+   "TriggerTimeMS": 99500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 99.5,
+   "TriggerTimeMS": 99500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 99.75,
+   "TriggerTimeMS": 99750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 100.0,
+   "TriggerTimeMS": 100000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 100.0,
+   "TriggerTimeMS": 100000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 100.25,
+   "TriggerTimeMS": 100250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 100.5,
+   "TriggerTimeMS": 100500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 100.5,
+   "TriggerTimeMS": 100500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 100.75,
+   "TriggerTimeMS": 100750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 101.0,
+   "TriggerTimeMS": 101000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 101.0,
+   "TriggerTimeMS": 101000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 101.25,
+   "TriggerTimeMS": 101250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 101.5,
+   "TriggerTimeMS": 101500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 101.5,
+   "TriggerTimeMS": 101500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 101.75,
+   "TriggerTimeMS": 101750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 102.0,
+   "TriggerTimeMS": 102000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 102.0,
+   "TriggerTimeMS": 102000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 102.25,
+   "TriggerTimeMS": 102250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 102.5,
+   "TriggerTimeMS": 102500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 102.5,
+   "TriggerTimeMS": 102500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 102.75,
+   "TriggerTimeMS": 102750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 103.0,
+   "TriggerTimeMS": 103000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 103.0,
+   "TriggerTimeMS": 103000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 103.25,
+   "TriggerTimeMS": 103250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 103.5,
+   "TriggerTimeMS": 103500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 103.5,
+   "TriggerTimeMS": 103500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 103.75,
+   "TriggerTimeMS": 103750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 104.0,
+   "TriggerTimeMS": 104000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 104.0,
+   "TriggerTimeMS": 104000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 104.25,
+   "TriggerTimeMS": 104250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 104.5,
+   "TriggerTimeMS": 104500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 104.5,
+   "TriggerTimeMS": 104500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 104.75,
+   "TriggerTimeMS": 104750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 105.0,
+   "TriggerTimeMS": 105000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 105.0,
+   "TriggerTimeMS": 105000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 105.25,
+   "TriggerTimeMS": 105250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 105.5,
+   "TriggerTimeMS": 105500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 105.5,
+   "TriggerTimeMS": 105500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 105.75,
+   "TriggerTimeMS": 105750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 106.0,
+   "TriggerTimeMS": 106000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 106.0,
+   "TriggerTimeMS": 106000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 106.25,
+   "TriggerTimeMS": 106250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 106.5,
+   "TriggerTimeMS": 106500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 106.5,
+   "TriggerTimeMS": 106500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 106.75,
+   "TriggerTimeMS": 106750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 107.0,
+   "TriggerTimeMS": 107000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 107.0,
+   "TriggerTimeMS": 107000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 107.25,
+   "TriggerTimeMS": 107250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 107.5,
+   "TriggerTimeMS": 107500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 107.5,
+   "TriggerTimeMS": 107500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 107.75,
+   "TriggerTimeMS": 107750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 108.0,
+   "TriggerTimeMS": 108000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 108.0,
+   "TriggerTimeMS": 108000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 108.25,
+   "TriggerTimeMS": 108250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 108.5,
+   "TriggerTimeMS": 108500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 108.5,
+   "TriggerTimeMS": 108500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 108.75,
+   "TriggerTimeMS": 108750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 109.0,
+   "TriggerTimeMS": 109000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 109.0,
+   "TriggerTimeMS": 109000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 109.25,
+   "TriggerTimeMS": 109250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 109.5,
+   "TriggerTimeMS": 109500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 109.5,
+   "TriggerTimeMS": 109500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 109.75,
+   "TriggerTimeMS": 109750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 110.0,
+   "TriggerTimeMS": 110000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 110.0,
+   "TriggerTimeMS": 110000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 110.25,
+   "TriggerTimeMS": 110250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 110.5,
+   "TriggerTimeMS": 110500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 110.5,
+   "TriggerTimeMS": 110500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 110.75,
+   "TriggerTimeMS": 110750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 111.0,
+   "TriggerTimeMS": 111000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 111.0,
+   "TriggerTimeMS": 111000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 111.25,
+   "TriggerTimeMS": 111250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 111.5,
+   "TriggerTimeMS": 111500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 111.5,
+   "TriggerTimeMS": 111500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 111.75,
+   "TriggerTimeMS": 111750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 112.0,
+   "TriggerTimeMS": 112000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 112.0,
+   "TriggerTimeMS": 112000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 112.25,
+   "TriggerTimeMS": 112250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 112.5,
+   "TriggerTimeMS": 112500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 112.5,
+   "TriggerTimeMS": 112500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 112.75,
+   "TriggerTimeMS": 112750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 113.0,
+   "TriggerTimeMS": 113000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 113.0,
+   "TriggerTimeMS": 113000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 113.25,
+   "TriggerTimeMS": 113250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 113.5,
+   "TriggerTimeMS": 113500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 113.5,
+   "TriggerTimeMS": 113500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 113.75,
+   "TriggerTimeMS": 113750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 114.0,
+   "TriggerTimeMS": 114000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 114.0,
+   "TriggerTimeMS": 114000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 114.25,
+   "TriggerTimeMS": 114250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 114.5,
+   "TriggerTimeMS": 114500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 114.5,
+   "TriggerTimeMS": 114500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 114.75,
+   "TriggerTimeMS": 114750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 115.0,
+   "TriggerTimeMS": 115000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 115.0,
+   "TriggerTimeMS": 115000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 115.25,
+   "TriggerTimeMS": 115250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 115.5,
+   "TriggerTimeMS": 115500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 115.5,
+   "TriggerTimeMS": 115500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 115.75,
+   "TriggerTimeMS": 115750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 116.0,
+   "TriggerTimeMS": 116000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 116.0,
+   "TriggerTimeMS": 116000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 116.25,
+   "TriggerTimeMS": 116250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 116.5,
+   "TriggerTimeMS": 116500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 116.5,
+   "TriggerTimeMS": 116500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 116.75,
+   "TriggerTimeMS": 116750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 117.0,
+   "TriggerTimeMS": 117000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 117.0,
+   "TriggerTimeMS": 117000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 117.25,
+   "TriggerTimeMS": 117250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 117.5,
+   "TriggerTimeMS": 117500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 117.5,
+   "TriggerTimeMS": 117500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 117.75,
+   "TriggerTimeMS": 117750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 118.0,
+   "TriggerTimeMS": 118000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 118.0,
+   "TriggerTimeMS": 118000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 118.25,
+   "TriggerTimeMS": 118250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 118.5,
+   "TriggerTimeMS": 118500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 118.5,
+   "TriggerTimeMS": 118500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 118.75,
+   "TriggerTimeMS": 118750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 119.0,
+   "TriggerTimeMS": 119000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 119.0,
+   "TriggerTimeMS": 119000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 119.25,
+   "TriggerTimeMS": 119250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 119.5,
+   "TriggerTimeMS": 119500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 119.5,
+   "TriggerTimeMS": 119500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 119.75,
+   "TriggerTimeMS": 119750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 120.0,
+   "TriggerTimeMS": 120000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 120.0,
+   "TriggerTimeMS": 120000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 120.25,
+   "TriggerTimeMS": 120250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 120.5,
+   "TriggerTimeMS": 120500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 120.5,
+   "TriggerTimeMS": 120500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 120.75,
+   "TriggerTimeMS": 120750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 121.0,
+   "TriggerTimeMS": 121000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 121.0,
+   "TriggerTimeMS": 121000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 121.25,
+   "TriggerTimeMS": 121250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 121.5,
+   "TriggerTimeMS": 121500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 121.5,
+   "TriggerTimeMS": 121500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 121.75,
+   "TriggerTimeMS": 121750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 122.0,
+   "TriggerTimeMS": 122000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 122.0,
+   "TriggerTimeMS": 122000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 122.25,
+   "TriggerTimeMS": 122250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 122.5,
+   "TriggerTimeMS": 122500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 122.5,
+   "TriggerTimeMS": 122500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 122.75,
+   "TriggerTimeMS": 122750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 123.0,
+   "TriggerTimeMS": 123000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 123.0,
+   "TriggerTimeMS": 123000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 123.25,
+   "TriggerTimeMS": 123250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 123.5,
+   "TriggerTimeMS": 123500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 123.5,
+   "TriggerTimeMS": 123500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 123.75,
+   "TriggerTimeMS": 123750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 124.0,
+   "TriggerTimeMS": 124000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 124.0,
+   "TriggerTimeMS": 124000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 124.25,
+   "TriggerTimeMS": 124250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 124.5,
+   "TriggerTimeMS": 124500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 124.5,
+   "TriggerTimeMS": 124500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 124.75,
+   "TriggerTimeMS": 124750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 125.0,
+   "TriggerTimeMS": 125000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 125.0,
+   "TriggerTimeMS": 125000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 125.25,
+   "TriggerTimeMS": 125250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 125.5,
+   "TriggerTimeMS": 125500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 125.5,
+   "TriggerTimeMS": 125500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 125.75,
+   "TriggerTimeMS": 125750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 126.0,
+   "TriggerTimeMS": 126000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 126.0,
+   "TriggerTimeMS": 126000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 126.25,
+   "TriggerTimeMS": 126250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 126.5,
+   "TriggerTimeMS": 126500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 126.5,
+   "TriggerTimeMS": 126500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 126.75,
+   "TriggerTimeMS": 126750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 127.0,
+   "TriggerTimeMS": 127000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 127.0,
+   "TriggerTimeMS": 127000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 127.25,
+   "TriggerTimeMS": 127250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 127.5,
+   "TriggerTimeMS": 127500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 127.5,
+   "TriggerTimeMS": 127500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 127.75,
+   "TriggerTimeMS": 127750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 128.0,
+   "TriggerTimeMS": 128000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 128.0,
+   "TriggerTimeMS": 128000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 128.25,
+   "TriggerTimeMS": 128250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 128.5,
+   "TriggerTimeMS": 128500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 128.5,
+   "TriggerTimeMS": 128500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 128.75,
+   "TriggerTimeMS": 128750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 129.0,
+   "TriggerTimeMS": 129000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 129.0,
+   "TriggerTimeMS": 129000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 129.25,
+   "TriggerTimeMS": 129250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 129.5,
+   "TriggerTimeMS": 129500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 129.5,
+   "TriggerTimeMS": 129500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 129.75,
+   "TriggerTimeMS": 129750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 130.0,
+   "TriggerTimeMS": 130000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 130.0,
+   "TriggerTimeMS": 130000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 130.25,
+   "TriggerTimeMS": 130250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 130.5,
+   "TriggerTimeMS": 130500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 130.5,
+   "TriggerTimeMS": 130500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 130.75,
+   "TriggerTimeMS": 130750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 131.0,
+   "TriggerTimeMS": 131000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 131.0,
+   "TriggerTimeMS": 131000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 131.25,
+   "TriggerTimeMS": 131250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 131.5,
+   "TriggerTimeMS": 131500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 131.5,
+   "TriggerTimeMS": 131500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 131.75,
+   "TriggerTimeMS": 131750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 132.0,
+   "TriggerTimeMS": 132000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 132.0,
+   "TriggerTimeMS": 132000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 132.25,
+   "TriggerTimeMS": 132250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 132.5,
+   "TriggerTimeMS": 132500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 132.5,
+   "TriggerTimeMS": 132500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 132.75,
+   "TriggerTimeMS": 132750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 133.0,
+   "TriggerTimeMS": 133000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 133.0,
+   "TriggerTimeMS": 133000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 133.25,
+   "TriggerTimeMS": 133250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 133.5,
+   "TriggerTimeMS": 133500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 133.5,
+   "TriggerTimeMS": 133500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 133.75,
+   "TriggerTimeMS": 133750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 134.0,
+   "TriggerTimeMS": 134000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 134.0,
+   "TriggerTimeMS": 134000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 134.25,
+   "TriggerTimeMS": 134250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 134.5,
+   "TriggerTimeMS": 134500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 134.5,
+   "TriggerTimeMS": 134500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 134.75,
+   "TriggerTimeMS": 134750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 135.0,
+   "TriggerTimeMS": 135000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 135.0,
+   "TriggerTimeMS": 135000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 135.25,
+   "TriggerTimeMS": 135250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 135.5,
+   "TriggerTimeMS": 135500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 135.5,
+   "TriggerTimeMS": 135500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 135.75,
+   "TriggerTimeMS": 135750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 136.0,
+   "TriggerTimeMS": 136000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 136.0,
+   "TriggerTimeMS": 136000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 136.25,
+   "TriggerTimeMS": 136250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 136.5,
+   "TriggerTimeMS": 136500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 136.5,
+   "TriggerTimeMS": 136500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 136.75,
+   "TriggerTimeMS": 136750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 137.0,
+   "TriggerTimeMS": 137000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 137.0,
+   "TriggerTimeMS": 137000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 137.25,
+   "TriggerTimeMS": 137250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 137.5,
+   "TriggerTimeMS": 137500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 137.5,
+   "TriggerTimeMS": 137500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 137.75,
+   "TriggerTimeMS": 137750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 138.0,
+   "TriggerTimeMS": 138000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 138.0,
+   "TriggerTimeMS": 138000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 138.25,
+   "TriggerTimeMS": 138250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 138.5,
+   "TriggerTimeMS": 138500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 138.5,
+   "TriggerTimeMS": 138500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 138.75,
+   "TriggerTimeMS": 138750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 139.0,
+   "TriggerTimeMS": 139000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 139.0,
+   "TriggerTimeMS": 139000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 139.25,
+   "TriggerTimeMS": 139250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 139.5,
+   "TriggerTimeMS": 139500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 139.5,
+   "TriggerTimeMS": 139500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 139.75,
+   "TriggerTimeMS": 139750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 140.0,
+   "TriggerTimeMS": 140000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 140.0,
+   "TriggerTimeMS": 140000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 140.25,
+   "TriggerTimeMS": 140250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 140.5,
+   "TriggerTimeMS": 140500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 140.5,
+   "TriggerTimeMS": 140500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 140.75,
+   "TriggerTimeMS": 140750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 141.0,
+   "TriggerTimeMS": 141000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 141.0,
+   "TriggerTimeMS": 141000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 141.25,
+   "TriggerTimeMS": 141250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 141.5,
+   "TriggerTimeMS": 141500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 141.5,
+   "TriggerTimeMS": 141500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 141.75,
+   "TriggerTimeMS": 141750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 142.0,
+   "TriggerTimeMS": 142000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 142.0,
+   "TriggerTimeMS": 142000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 142.25,
+   "TriggerTimeMS": 142250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 142.5,
+   "TriggerTimeMS": 142500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 142.5,
+   "TriggerTimeMS": 142500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 142.75,
+   "TriggerTimeMS": 142750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 143.0,
+   "TriggerTimeMS": 143000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 143.0,
+   "TriggerTimeMS": 143000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 143.25,
+   "TriggerTimeMS": 143250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 143.5,
+   "TriggerTimeMS": 143500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 143.5,
+   "TriggerTimeMS": 143500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 143.75,
+   "TriggerTimeMS": 143750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 144.0,
+   "TriggerTimeMS": 144000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 144.0,
+   "TriggerTimeMS": 144000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 144.25,
+   "TriggerTimeMS": 144250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 144.5,
+   "TriggerTimeMS": 144500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 144.5,
+   "TriggerTimeMS": 144500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 144.75,
+   "TriggerTimeMS": 144750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 145.0,
+   "TriggerTimeMS": 145000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 145.0,
+   "TriggerTimeMS": 145000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 145.25,
+   "TriggerTimeMS": 145250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 145.5,
+   "TriggerTimeMS": 145500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 145.5,
+   "TriggerTimeMS": 145500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 145.75,
+   "TriggerTimeMS": 145750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 146.0,
+   "TriggerTimeMS": 146000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 146.0,
+   "TriggerTimeMS": 146000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 146.25,
+   "TriggerTimeMS": 146250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 146.5,
+   "TriggerTimeMS": 146500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 146.5,
+   "TriggerTimeMS": 146500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 146.75,
+   "TriggerTimeMS": 146750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 147.0,
+   "TriggerTimeMS": 147000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 147.0,
+   "TriggerTimeMS": 147000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 147.25,
+   "TriggerTimeMS": 147250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 147.5,
+   "TriggerTimeMS": 147500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 147.5,
+   "TriggerTimeMS": 147500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 147.75,
+   "TriggerTimeMS": 147750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 148.0,
+   "TriggerTimeMS": 148000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 148.0,
+   "TriggerTimeMS": 148000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 148.25,
+   "TriggerTimeMS": 148250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 148.5,
+   "TriggerTimeMS": 148500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 148.5,
+   "TriggerTimeMS": 148500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 148.75,
+   "TriggerTimeMS": 148750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 149.0,
+   "TriggerTimeMS": 149000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 149.0,
+   "TriggerTimeMS": 149000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 149.25,
+   "TriggerTimeMS": 149250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 149.5,
+   "TriggerTimeMS": 149500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 149.5,
+   "TriggerTimeMS": 149500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 149.75,
+   "TriggerTimeMS": 149750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 150.0,
+   "TriggerTimeMS": 150000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 150.0,
+   "TriggerTimeMS": 150000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 150.25,
+   "TriggerTimeMS": 150250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 150.5,
+   "TriggerTimeMS": 150500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 150.5,
+   "TriggerTimeMS": 150500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 150.75,
+   "TriggerTimeMS": 150750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 151.0,
+   "TriggerTimeMS": 151000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 151.0,
+   "TriggerTimeMS": 151000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 151.25,
+   "TriggerTimeMS": 151250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 151.5,
+   "TriggerTimeMS": 151500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 151.5,
+   "TriggerTimeMS": 151500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 151.75,
+   "TriggerTimeMS": 151750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 152.0,
+   "TriggerTimeMS": 152000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 152.0,
+   "TriggerTimeMS": 152000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 152.25,
+   "TriggerTimeMS": 152250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 152.5,
+   "TriggerTimeMS": 152500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 152.5,
+   "TriggerTimeMS": 152500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 152.75,
+   "TriggerTimeMS": 152750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 153.0,
+   "TriggerTimeMS": 153000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 153.0,
+   "TriggerTimeMS": 153000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 153.25,
+   "TriggerTimeMS": 153250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 153.5,
+   "TriggerTimeMS": 153500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 153.5,
+   "TriggerTimeMS": 153500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 153.75,
+   "TriggerTimeMS": 153750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 154.0,
+   "TriggerTimeMS": 154000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 154.0,
+   "TriggerTimeMS": 154000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 154.25,
+   "TriggerTimeMS": 154250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 154.5,
+   "TriggerTimeMS": 154500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 154.5,
+   "TriggerTimeMS": 154500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 154.75,
+   "TriggerTimeMS": 154750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 155.0,
+   "TriggerTimeMS": 155000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 155.0,
+   "TriggerTimeMS": 155000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 155.25,
+   "TriggerTimeMS": 155250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 155.5,
+   "TriggerTimeMS": 155500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 155.5,
+   "TriggerTimeMS": 155500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 155.75,
+   "TriggerTimeMS": 155750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 156.0,
+   "TriggerTimeMS": 156000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 156.0,
+   "TriggerTimeMS": 156000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 156.25,
+   "TriggerTimeMS": 156250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 156.5,
+   "TriggerTimeMS": 156500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 156.5,
+   "TriggerTimeMS": 156500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 156.75,
+   "TriggerTimeMS": 156750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 157.0,
+   "TriggerTimeMS": 157000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 157.0,
+   "TriggerTimeMS": 157000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 157.25,
+   "TriggerTimeMS": 157250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 157.5,
+   "TriggerTimeMS": 157500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 157.5,
+   "TriggerTimeMS": 157500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 157.75,
+   "TriggerTimeMS": 157750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 158.0,
+   "TriggerTimeMS": 158000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 158.0,
+   "TriggerTimeMS": 158000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 158.25,
+   "TriggerTimeMS": 158250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 158.5,
+   "TriggerTimeMS": 158500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 158.5,
+   "TriggerTimeMS": 158500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 158.75,
+   "TriggerTimeMS": 158750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 159.0,
+   "TriggerTimeMS": 159000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 159.0,
+   "TriggerTimeMS": 159000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 159.25,
+   "TriggerTimeMS": 159250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 159.5,
+   "TriggerTimeMS": 159500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 159.5,
+   "TriggerTimeMS": 159500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 159.75,
+   "TriggerTimeMS": 159750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 160.0,
+   "TriggerTimeMS": 160000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 160.0,
+   "TriggerTimeMS": 160000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 160.25,
+   "TriggerTimeMS": 160250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 160.5,
+   "TriggerTimeMS": 160500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 160.5,
+   "TriggerTimeMS": 160500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 160.75,
+   "TriggerTimeMS": 160750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 161.0,
+   "TriggerTimeMS": 161000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 161.0,
+   "TriggerTimeMS": 161000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 161.25,
+   "TriggerTimeMS": 161250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 161.5,
+   "TriggerTimeMS": 161500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 161.5,
+   "TriggerTimeMS": 161500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 161.75,
+   "TriggerTimeMS": 161750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 162.0,
+   "TriggerTimeMS": 162000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 162.0,
+   "TriggerTimeMS": 162000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 162.25,
+   "TriggerTimeMS": 162250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 162.5,
+   "TriggerTimeMS": 162500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 162.5,
+   "TriggerTimeMS": 162500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 162.75,
+   "TriggerTimeMS": 162750
+  },
+  {
+   "EditorLane": 9,
+   "NoteName": "crash2",
+   "TriggerTime": 163.0,
+   "TriggerTimeMS": 163000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 163.0,
+   "TriggerTimeMS": 163000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 163.25,
+   "TriggerTimeMS": 163250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 163.5,
+   "TriggerTimeMS": 163500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 163.5,
+   "TriggerTimeMS": 163500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 163.75,
+   "TriggerTimeMS": 163750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 164.0,
+   "TriggerTimeMS": 164000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 164.0,
+   "TriggerTimeMS": 164000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 164.25,
+   "TriggerTimeMS": 164250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 164.5,
+   "TriggerTimeMS": 164500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 164.5,
+   "TriggerTimeMS": 164500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 164.75,
+   "TriggerTimeMS": 164750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 165.0,
+   "TriggerTimeMS": 165000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 165.0,
+   "TriggerTimeMS": 165000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 165.25,
+   "TriggerTimeMS": 165250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 165.5,
+   "TriggerTimeMS": 165500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 165.5,
+   "TriggerTimeMS": 165500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 165.75,
+   "TriggerTimeMS": 165750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 166.0,
+   "TriggerTimeMS": 166000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 166.0,
+   "TriggerTimeMS": 166000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 166.25,
+   "TriggerTimeMS": 166250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 166.5,
+   "TriggerTimeMS": 166500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 166.5,
+   "TriggerTimeMS": 166500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 166.75,
+   "TriggerTimeMS": 166750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 167.0,
+   "TriggerTimeMS": 167000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 167.0,
+   "TriggerTimeMS": 167000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 167.25,
+   "TriggerTimeMS": 167250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 167.5,
+   "TriggerTimeMS": 167500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 167.5,
+   "TriggerTimeMS": 167500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 167.75,
+   "TriggerTimeMS": 167750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 168.0,
+   "TriggerTimeMS": 168000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 168.0,
+   "TriggerTimeMS": 168000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 168.25,
+   "TriggerTimeMS": 168250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 168.5,
+   "TriggerTimeMS": 168500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 168.5,
+   "TriggerTimeMS": 168500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 168.75,
+   "TriggerTimeMS": 168750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 169.0,
+   "TriggerTimeMS": 169000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 169.0,
+   "TriggerTimeMS": 169000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 169.25,
+   "TriggerTimeMS": 169250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 169.5,
+   "TriggerTimeMS": 169500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 169.5,
+   "TriggerTimeMS": 169500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 169.75,
+   "TriggerTimeMS": 169750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 170.0,
+   "TriggerTimeMS": 170000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 170.0,
+   "TriggerTimeMS": 170000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 170.25,
+   "TriggerTimeMS": 170250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 170.5,
+   "TriggerTimeMS": 170500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 170.5,
+   "TriggerTimeMS": 170500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 170.75,
+   "TriggerTimeMS": 170750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 171.0,
+   "TriggerTimeMS": 171000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 171.0,
+   "TriggerTimeMS": 171000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 171.25,
+   "TriggerTimeMS": 171250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 171.5,
+   "TriggerTimeMS": 171500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 171.5,
+   "TriggerTimeMS": 171500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 171.75,
+   "TriggerTimeMS": 171750
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 172.0,
+   "TriggerTimeMS": 172000
+  },
+  {
+   "EditorLane": 0,
+   "NoteName": "bass1",
+   "TriggerTime": 172.0,
+   "TriggerTimeMS": 172000
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 172.25,
+   "TriggerTimeMS": 172250
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 172.5,
+   "TriggerTimeMS": 172500
+  },
+  {
+   "EditorLane": 1,
+   "NoteName": "snare1",
+   "TriggerTime": 172.5,
+   "TriggerTimeMS": 172500
+  },
+  {
+   "EditorLane": 3,
+   "NoteName": "closed_hh",
+   "TriggerTime": 172.75,
+   "TriggerTimeMS": 172750
+  }
+ ]
+}

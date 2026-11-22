@@ -1,0 +1,6 @@
+newmtl Skin_03_B
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../../../../Models/Venue/PolygonTown_03_B.png

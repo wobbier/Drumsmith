@@ -1,0 +1,8 @@
+newmtl yellow_glow4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 4 4 4
+map_Ke Palette.png

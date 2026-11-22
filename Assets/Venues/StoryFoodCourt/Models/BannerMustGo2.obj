@@ -1,0 +1,17 @@
+# Food Court: BannerMustGo2.png on a 6.0 x 1.5 m card. Faces -Z.
+mtllib BannerMustGo2.mtl
+o BannerMustGo2
+s off
+v -3 -0.75 0
+v 3 -0.75 0
+v 3 0.75 0
+v -3 0.75 0
+vt 0 0
+vt 1 0
+vt 1 1
+vt 0 1
+vn 0 0 1
+vn 0 0 -1
+usemtl BannerMustGo2
+f 1/1/1 2/2/1 3/3/1 4/4/1
+f 4/4/2 3/3/2 2/2/2 1/1/2

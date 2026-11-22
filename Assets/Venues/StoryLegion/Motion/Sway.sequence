@@ -1,0 +1,185 @@
+{
+ "Version": 1,
+ "Name": "Sway",
+ "FrameRate": 30,
+ "DurationFrames": 720,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0,
+      -0.1950903,
+      0.0,
+      0.9807853
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      -0.0,
+      -0.3826834,
+      -0.0,
+      0.9238795
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      0.0,
+      -0.5555702,
+      0.0,
+      0.8314696
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      -0.0,
+      -0.7071068,
+      -0.0,
+      0.7071068
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      0.0,
+      -0.8314696,
+      0.0,
+      0.5555702
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      -0.0,
+      -0.9238795,
+      -0.0,
+      0.3826834
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 315,
+     "Value": [
+      0.0,
+      -0.9807853,
+      0.0,
+      0.1950903
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 360,
+     "Value": [
+      -0.0,
+      -1.0,
+      -0.0,
+      0.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 405,
+     "Value": [
+      0.0,
+      -0.9807853,
+      -0.0,
+      -0.1950903
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 450,
+     "Value": [
+      -0.0,
+      -0.9238795,
+      0.0,
+      -0.3826834
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 495,
+     "Value": [
+      0.0,
+      -0.8314696,
+      -0.0,
+      -0.5555702
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 540,
+     "Value": [
+      -0.0,
+      -0.7071068,
+      0.0,
+      -0.7071068
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 585,
+     "Value": [
+      -0.0,
+      -0.5555702,
+      0.0,
+      -0.8314696
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 630,
+     "Value": [
+      -0.0,
+      -0.3826834,
+      0.0,
+      -0.9238795
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 675,
+     "Value": [
+      0.0,
+      -0.1950903,
+      -0.0,
+      -0.9807853
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 720,
+     "Value": [
+      -0.0,
+      -0.0,
+      0.0,
+      -1.0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

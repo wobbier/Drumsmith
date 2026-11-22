@@ -1,0 +1,26 @@
+newmtl tangerine_glow0_35
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 0.35 0.35 0.35
+map_Ke Palette.png
+
+newmtl tangerine_glow0_6
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 0.6 0.6 0.6
+map_Ke Palette.png
+
+newmtl tangerine_glow0_9
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 0.9 0.9 0.9
+map_Ke Palette.png

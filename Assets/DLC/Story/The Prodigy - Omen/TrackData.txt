@@ -1,0 +1,19 @@
+{
+ "Title": "Omen",
+ "Artist": "The Prodigy",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Midnight at the FM Drive In",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 216.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/1edapjizXWDfcJPt29Jg8Z"
+ },
+ "NoteCount": 1266
+}

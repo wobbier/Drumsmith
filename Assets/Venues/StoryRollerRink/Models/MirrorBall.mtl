@@ -1,0 +1,56 @@
+newmtl mirror_glow1_4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 1.4 1.4 1.4
+map_Ke Palette.png
+
+newmtl mirror_glow2_2
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 2.2 2.2 2.2
+map_Ke Palette.png
+
+newmtl silver_glow0_6
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 0.6 0.6 0.6
+map_Ke Palette.png
+
+newmtl silver
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl steel
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl chrome
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl glass_glow0_9
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 0.9 0.9 0.9
+map_Ke Palette.png

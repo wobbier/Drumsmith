@@ -1,0 +1,24 @@
+newmtl Glow
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 2.2 2.2 2.2
+map_Ke Palette.png
+
+newmtl Pal
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl Ribbon
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Ribbon.png
+Ke 1.7 1.7 1.7
+map_Ke Ribbon.png

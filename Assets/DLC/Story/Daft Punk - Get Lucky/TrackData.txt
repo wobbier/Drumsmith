@@ -1,0 +1,19 @@
+{
+ "Title": "Get Lucky (feat. Pharrell Williams and Nile Rodgers)",
+ "Artist": "Daft Punk, Pharrell Williams, Nile Rodgers",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Adults Only at the Roller Rink",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 370.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/69kOkLUCkxIZYexIgSG8rq"
+ },
+ "NoteCount": 2190
+}

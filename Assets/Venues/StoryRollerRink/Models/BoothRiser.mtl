@@ -1,0 +1,22 @@
+newmtl violet
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl black
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+
+newmtl purple_glow1_5
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd Palette.png
+Ke 1.5 1.5 1.5
+map_Ke Palette.png

@@ -1,0 +1,139 @@
+newmtl Palette
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Legion_Palette.png
+
+newmtl Parquet
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Parquet.png
+
+newmtl Panelling
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Panelling.png
+
+newmtl Lino
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Lino.png
+
+newmtl Ceiling
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Ceiling.png
+
+newmtl Crest
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Crest.png
+
+newmtl FlagCanada
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/FlagCanada.png
+
+newmtl FlagBranch
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/FlagBranch.png
+
+newmtl Portrait
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Portrait.png
+
+newmtl HonourRoll
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/HonourRoll.png
+
+newmtl LetterBoard
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/LetterBoard.png
+
+newmtl MeatDraw
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/MeatDraw.png
+
+newmtl MemorialCard
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/MemorialCard.png
+
+newmtl Exit
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Exit.png
+
+newmtl LestWeForget
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/LestWeForget.png
+
+newmtl OldPhotos
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/OldPhotos.png
+
+newmtl TeaTowel
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/TeaTowel.png
+
+newmtl Napkins
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Napkins.png
+
+newmtl Banner
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/Banner.png
+
+newmtl WindowBlind
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd ../Textures/WindowBlind.png

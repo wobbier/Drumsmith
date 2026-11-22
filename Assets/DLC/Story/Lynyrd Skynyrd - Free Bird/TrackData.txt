@@ -1,0 +1,19 @@
+{
+ "Title": "Free Bird",
+ "Artist": "Lynyrd Skynyrd",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Retractable Roof Is Open",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 547.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/5EWPGh7jbTNO2wakv8LjUI"
+ },
+ "NoteCount": 3252
+}

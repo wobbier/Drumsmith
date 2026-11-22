@@ -264,8 +264,11 @@ class TrackDatabase
 public:
     TrackDatabase();
 
+    // Assets/DLC's song folders, and those in its Story folder.
     void Reload();
     bool RegisterNewTrack( const std::string& inDirectory );
+    // The folder under Assets/DLC holding story mode's stand-in songs (Tools/Story/make_stub_songs.py).
+    static constexpr const char* kStoryFolder = "Story";
     // Converts every notes.mid song folder. A song edited in the Track Editor (TrackData::m_authored)
     // keeps its chart unless inForce.
     void ExportMidiTrackMetaData( bool inForce = false );
@@ -302,4 +305,8 @@ public:
     int m_sortedSize = 0;
     std::vector<unsigned int> m_sortedIndices;
     std::vector<unsigned int> m_filterMatches;
+
+private:
+    // Adds the song in inFolder (a folder holding TrackData.txt) to the list.
+    void LoadSongFolder( const std::string& inFolder );
 };

@@ -157,6 +157,16 @@ json PlayerProfile::ToJson() const
     root["HideoutTier"] = HideoutTier;
     root["BandName"] = BandName;
     root["CompletedGigs"] = CompletedGigs;
+    json story = json::object();
+    for( const auto& [id, record] : Story )
+    {
+        story[id] = {
+            { "Banked", record.Banked },
+            { "Passed", record.Passed },
+        };
+    }
+    root["Story"] = story;
+    root["BandMembers"] = BandMembers;
     root["UnlockedItems"] = UnlockedItems;
     root["Notices"] = Notices;
     root["NewItems"] = NewItems;
@@ -171,6 +181,8 @@ void PlayerProfile::FromJson( const json& inRoot )
     m_songs.clear();
     m_lessons.clear();
     CompletedGigs.clear();
+    Story.clear();
+    BandMembers.clear();
     UnlockedItems.clear();
     Notices.clear();
     NewItems.clear();
@@ -228,6 +240,35 @@ void PlayerProfile::FromJson( const json& inRoot )
         }
     };
     readSet( "CompletedGigs", CompletedGigs );
+    if( inRoot.contains( "Story" ) && inRoot["Story"].is_object() )
+    {
+        for( const auto& [id, entry] : inRoot["Story"].items() )
+        {
+            if( !entry.is_object() )
+            {
+                continue;
+            }
+            StoryRecord& record = Story[id];
+            record.Passed = entry.value( "Passed", false );
+            if( entry.contains( "Banked" ) && entry["Banked"].is_array() )
+            {
+                for( const json& value : entry["Banked"] )
+                {
+                    record.Banked.push_back( value.is_number() ? value.get<double>() : -1.0 );
+                }
+            }
+        }
+    }
+    if( inRoot.contains( "BandMembers" ) && inRoot["BandMembers"].is_object() )
+    {
+        for( const auto& [seat, member] : inRoot["BandMembers"].items() )
+        {
+            if( member.is_string() && !member.get<std::string>().empty() )
+            {
+                BandMembers[seat] = member.get<std::string>();
+            }
+        }
+    }
     readSet( "UnlockedItems", UnlockedItems );
     if( inRoot.contains( "NewItems" ) && inRoot["NewItems"].is_array() )
     {

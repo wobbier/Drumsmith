@@ -1,0 +1,19 @@
+{
+ "Title": "Sleeping In - Remastered",
+ "Artist": "The Postal Service",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: In the Basement with My AirPods",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 261.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/2J6JBKRoQndkNyY4rf29Tl"
+ },
+ "NoteCount": 1536
+}

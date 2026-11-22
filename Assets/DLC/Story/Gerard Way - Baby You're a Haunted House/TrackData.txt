@@ -1,0 +1,19 @@
+{
+ "Title": "Baby You're a Haunted House",
+ "Artist": "Gerard Way",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Funeral Afterparty at the Legion",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 166.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/4c38yr2PflGI2DSIzqsnmF"
+ },
+ "NoteCount": 966
+}

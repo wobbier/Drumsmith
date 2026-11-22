@@ -1,0 +1,3453 @@
+{
+ "Version": 1,
+ "Name": "Pair32",
+ "FrameRate": 30,
+ "DurationFrames": 360,
+ "Tracks": [
+  {
+   "Binding": "Lap",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -10.69222,
+      0,
+      2.5548,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 4,
+     "Value": [
+      -10.3546,
+      0,
+      2.9234,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      -9.97396,
+      0,
+      3.277,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 11,
+     "Value": [
+      -9.55218,
+      0,
+      3.61467,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -9.09118,
+      0,
+      3.93551,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 19,
+     "Value": [
+      -8.59292,
+      0,
+      4.23862,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      -8.05947,
+      0,
+      4.5231,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 26,
+     "Value": [
+      -7.49302,
+      0,
+      4.78808,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      -6.89585,
+      0,
+      5.03269,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      -6.27039,
+      0,
+      5.25613,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 38,
+     "Value": [
+      -5.61918,
+      0,
+      5.45761,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 41,
+     "Value": [
+      -4.94486,
+      0,
+      5.63642,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      -4.25019,
+      0,
+      5.79192,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 49,
+     "Value": [
+      -3.53802,
+      0,
+      5.92354,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      -2.81125,
+      0,
+      6.03077,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 56,
+     "Value": [
+      -2.07289,
+      0,
+      6.11323,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      -1.32597,
+      0,
+      6.17059,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 64,
+     "Value": [
+      -0.57357,
+      0,
+      6.20265,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 68,
+     "Value": [
+      0.18119,
+      0,
+      6.20927,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 71,
+     "Value": [
+      0.93521,
+      0,
+      6.19043,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      1.68536,
+      0,
+      6.1462,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 79,
+     "Value": [
+      2.42856,
+      0,
+      6.07676,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 82,
+     "Value": [
+      3.16173,
+      0,
+      5.98237,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 86,
+     "Value": [
+      3.88186,
+      0,
+      5.86338,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      4.586,
+      0,
+      5.72023,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 94,
+     "Value": [
+      5.27125,
+      0,
+      5.55346,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 98,
+     "Value": [
+      5.93481,
+      0,
+      5.36368,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 101,
+     "Value": [
+      6.57398,
+      0,
+      5.15157,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 105,
+     "Value": [
+      7.18617,
+      0,
+      4.91787,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 109,
+     "Value": [
+      7.76889,
+      0,
+      4.66338,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 112,
+     "Value": [
+      8.31978,
+      0,
+      4.38893,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 116,
+     "Value": [
+      8.83661,
+      0,
+      4.0954,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      9.31723,
+      0,
+      3.78367,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 124,
+     "Value": [
+      9.75965,
+      0,
+      3.45464,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 128,
+     "Value": [
+      10.16192,
+      0,
+      3.1092,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 131,
+     "Value": [
+      10.52214,
+      0,
+      2.74828,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      10.83845,
+      0,
+      2.37283,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 139,
+     "Value": [
+      11.10895,
+      0,
+      1.98393,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 142,
+     "Value": [
+      11.33166,
+      0,
+      1.58286,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 146,
+     "Value": [
+      11.50465,
+      0,
+      1.17125,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      11.62604,
+      0,
+      0.75123,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 154,
+     "Value": [
+      11.69429,
+      0,
+      0.32548,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 158,
+     "Value": [
+      11.70843,
+      0,
+      -0.10286,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 161,
+     "Value": [
+      11.66824,
+      0,
+      -0.53037,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 165,
+     "Value": [
+      11.57432,
+      0,
+      -0.95374,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 169,
+     "Value": [
+      11.42794,
+      0,
+      -1.37002,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 172,
+     "Value": [
+      11.23085,
+      0,
+      -1.7768,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 176,
+     "Value": [
+      10.98495,
+      0,
+      -2.17221,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      10.69222,
+      0,
+      -2.5548,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 184,
+     "Value": [
+      10.3546,
+      0,
+      -2.9234,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 188,
+     "Value": [
+      9.97396,
+      0,
+      -3.277,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 191,
+     "Value": [
+      9.55218,
+      0,
+      -3.61467,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 195,
+     "Value": [
+      9.09118,
+      0,
+      -3.93551,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 199,
+     "Value": [
+      8.59292,
+      0,
+      -4.23862,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 202,
+     "Value": [
+      8.05947,
+      0,
+      -4.5231,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 206,
+     "Value": [
+      7.49302,
+      0,
+      -4.78808,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      6.89585,
+      0,
+      -5.03269,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 214,
+     "Value": [
+      6.27039,
+      0,
+      -5.25613,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 218,
+     "Value": [
+      5.61918,
+      0,
+      -5.45761,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 221,
+     "Value": [
+      4.94486,
+      0,
+      -5.63642,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      4.25019,
+      0,
+      -5.79192,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 229,
+     "Value": [
+      3.53802,
+      0,
+      -5.92354,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 232,
+     "Value": [
+      2.81125,
+      0,
+      -6.03077,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 236,
+     "Value": [
+      2.07289,
+      0,
+      -6.11323,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      1.32597,
+      0,
+      -6.17059,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 244,
+     "Value": [
+      0.57357,
+      0,
+      -6.20265,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 248,
+     "Value": [
+      -0.18119,
+      0,
+      -6.20927,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 251,
+     "Value": [
+      -0.93521,
+      0,
+      -6.19043,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 255,
+     "Value": [
+      -1.68536,
+      0,
+      -6.1462,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 259,
+     "Value": [
+      -2.42856,
+      0,
+      -6.07676,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 262,
+     "Value": [
+      -3.16173,
+      0,
+      -5.98237,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 266,
+     "Value": [
+      -3.88186,
+      0,
+      -5.86338,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      -4.586,
+      0,
+      -5.72023,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 274,
+     "Value": [
+      -5.27125,
+      0,
+      -5.55346,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 278,
+     "Value": [
+      -5.93481,
+      0,
+      -5.36368,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 281,
+     "Value": [
+      -6.57398,
+      0,
+      -5.15157,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 285,
+     "Value": [
+      -7.18617,
+      0,
+      -4.91787,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 289,
+     "Value": [
+      -7.76889,
+      0,
+      -4.66338,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 292,
+     "Value": [
+      -8.31978,
+      0,
+      -4.38893,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 296,
+     "Value": [
+      -8.83661,
+      0,
+      -4.0954,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      -9.31723,
+      0,
+      -3.78367,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 304,
+     "Value": [
+      -9.75965,
+      0,
+      -3.45464,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 308,
+     "Value": [
+      -10.16192,
+      0,
+      -3.1092,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 311,
+     "Value": [
+      -10.52214,
+      0,
+      -2.74828,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 315,
+     "Value": [
+      -10.83845,
+      0,
+      -2.37283,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 319,
+     "Value": [
+      -11.10895,
+      0,
+      -1.98393,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 322,
+     "Value": [
+      -11.33166,
+      0,
+      -1.58286,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 326,
+     "Value": [
+      -11.50465,
+      0,
+      -1.17125,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 330,
+     "Value": [
+      -11.62604,
+      0,
+      -0.75123,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 334,
+     "Value": [
+      -11.69429,
+      0,
+      -0.32548,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 338,
+     "Value": [
+      -11.70843,
+      0,
+      0.10286,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 341,
+     "Value": [
+      -11.66824,
+      0,
+      0.53037,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 345,
+     "Value": [
+      -11.57432,
+      0,
+      0.95374,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 349,
+     "Value": [
+      -11.42794,
+      0,
+      1.37002,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 352,
+     "Value": [
+      -11.23085,
+      0,
+      1.7768,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 356,
+     "Value": [
+      -10.98495,
+      0,
+      2.17221,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 360,
+     "Value": [
+      -10.69222,
+      0,
+      2.5548,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Lap",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.34215,
+      0.0,
+      0.93964
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 4,
+     "Value": [
+      0.0,
+      0.38152,
+      0.0,
+      0.92436
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0.0,
+      0.4168,
+      0.0,
+      0.909
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 11,
+     "Value": [
+      0.0,
+      0.44843,
+      0.0,
+      0.89382
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.0,
+      0.47688,
+      0.0,
+      0.87897
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 19,
+     "Value": [
+      0.0,
+      0.50258,
+      0.0,
+      0.86453
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.0,
+      0.52591,
+      0.0,
+      0.85054
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 26,
+     "Value": [
+      0.0,
+      0.54722,
+      0.0,
+      0.83699
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0.0,
+      0.56679,
+      0.0,
+      0.82386
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      0.0,
+      0.5849,
+      0.0,
+      0.8111
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 38,
+     "Value": [
+      0.0,
+      0.60177,
+      0.0,
+      0.79867
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 41,
+     "Value": [
+      0.0,
+      0.61757,
+      0.0,
+      0.78652
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0,
+      0.63248,
+      0.0,
+      0.77458
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 49,
+     "Value": [
+      0.0,
+      0.64663,
+      0.0,
+      0.7628
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      0.0,
+      0.66015,
+      0.0,
+      0.75113
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 56,
+     "Value": [
+      0.0,
+      0.67316,
+      0.0,
+      0.7395
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      0.0,
+      0.68574,
+      0.0,
+      0.72785
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 64,
+     "Value": [
+      0.0,
+      0.69798,
+      0.0,
+      0.71612
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 68,
+     "Value": [
+      0.0,
+      0.70996,
+      0.0,
+      0.70424
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 71,
+     "Value": [
+      0.0,
+      0.72176,
+      0.0,
+      0.69214
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      0.0,
+      0.73345,
+      0.0,
+      0.67975
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 79,
+     "Value": [
+      0.0,
+      0.74508,
+      0.0,
+      0.66697
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 82,
+     "Value": [
+      0.0,
+      0.75672,
+      0.0,
+      0.65373
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 86,
+     "Value": [
+      0.0,
+      0.76844,
+      0.0,
+      0.63992
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0.0,
+      0.78029,
+      0.0,
+      0.62542
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 94,
+     "Value": [
+      0.0,
+      0.79232,
+      0.0,
+      0.61011
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 98,
+     "Value": [
+      0.0,
+      0.8046,
+      0.0,
+      0.59382
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 101,
+     "Value": [
+      0.0,
+      0.81718,
+      0.0,
+      0.57638
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 105,
+     "Value": [
+      0.0,
+      0.83011,
+      0.0,
+      0.55759
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 109,
+     "Value": [
+      0.0,
+      0.84344,
+      0.0,
+      0.53722
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 112,
+     "Value": [
+      0.0,
+      0.8572,
+      0.0,
+      0.51498
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 116,
+     "Value": [
+      0.0,
+      0.8714,
+      0.0,
+      0.49056
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      0.0,
+      0.88605,
+      0.0,
+      0.4636
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 124,
+     "Value": [
+      0.0,
+      0.90107,
+      0.0,
+      0.43367
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 128,
+     "Value": [
+      0.0,
+      0.91636,
+      0.0,
+      0.40035
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 131,
+     "Value": [
+      0.0,
+      0.93173,
+      0.0,
+      0.36316
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      0.0,
+      0.94685,
+      0.0,
+      0.32169
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 139,
+     "Value": [
+      0.0,
+      0.96127,
+      0.0,
+      0.27561
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 142,
+     "Value": [
+      0.0,
+      0.97441,
+      0.0,
+      0.22479
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 146,
+     "Value": [
+      0.0,
+      0.98554,
+      0.0,
+      0.16945
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      0.0,
+      0.99391,
+      0.0,
+      0.11019
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 154,
+     "Value": [
+      0.0,
+      0.99884,
+      0.0,
+      0.04813
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 158,
+     "Value": [
+      -0.0,
+      0.99988,
+      -0.0,
+      -0.01523
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 161,
+     "Value": [
+      -0.0,
+      0.99694,
+      -0.0,
+      -0.07818
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 165,
+     "Value": [
+      -0.0,
+      0.99028,
+      -0.0,
+      -0.13906
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 169,
+     "Value": [
+      -0.0,
+      0.98049,
+      -0.0,
+      -0.19655
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 172,
+     "Value": [
+      -0.0,
+      0.9683,
+      -0.0,
+      -0.24977
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 176,
+     "Value": [
+      -0.0,
+      0.95447,
+      -0.0,
+      -0.29832
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      -0.0,
+      0.93964,
+      -0.0,
+      -0.34215
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 184,
+     "Value": [
+      -0.0,
+      0.92436,
+      -0.0,
+      -0.38152
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 188,
+     "Value": [
+      -0.0,
+      0.909,
+      -0.0,
+      -0.4168
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 191,
+     "Value": [
+      -0.0,
+      0.89382,
+      -0.0,
+      -0.44843
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 195,
+     "Value": [
+      -0.0,
+      0.87897,
+      -0.0,
+      -0.47688
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 199,
+     "Value": [
+      -0.0,
+      0.86453,
+      -0.0,
+      -0.50258
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 202,
+     "Value": [
+      -0.0,
+      0.85054,
+      -0.0,
+      -0.52591
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 206,
+     "Value": [
+      -0.0,
+      0.83699,
+      -0.0,
+      -0.54722
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      -0.0,
+      0.82386,
+      -0.0,
+      -0.56679
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 214,
+     "Value": [
+      -0.0,
+      0.8111,
+      -0.0,
+      -0.5849
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 218,
+     "Value": [
+      -0.0,
+      0.79867,
+      -0.0,
+      -0.60177
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 221,
+     "Value": [
+      -0.0,
+      0.78652,
+      -0.0,
+      -0.61757
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      -0.0,
+      0.77458,
+      -0.0,
+      -0.63248
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 229,
+     "Value": [
+      -0.0,
+      0.7628,
+      -0.0,
+      -0.64663
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 232,
+     "Value": [
+      -0.0,
+      0.75113,
+      -0.0,
+      -0.66015
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 236,
+     "Value": [
+      -0.0,
+      0.7395,
+      -0.0,
+      -0.67316
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      -0.0,
+      0.72785,
+      -0.0,
+      -0.68574
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 244,
+     "Value": [
+      -0.0,
+      0.71612,
+      -0.0,
+      -0.69798
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 248,
+     "Value": [
+      -0.0,
+      0.70424,
+      -0.0,
+      -0.70996
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 251,
+     "Value": [
+      -0.0,
+      0.69214,
+      -0.0,
+      -0.72176
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 255,
+     "Value": [
+      -0.0,
+      0.67975,
+      -0.0,
+      -0.73345
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 259,
+     "Value": [
+      -0.0,
+      0.66697,
+      -0.0,
+      -0.74508
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 262,
+     "Value": [
+      -0.0,
+      0.65373,
+      -0.0,
+      -0.75672
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 266,
+     "Value": [
+      -0.0,
+      0.63992,
+      -0.0,
+      -0.76844
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      -0.0,
+      0.62542,
+      -0.0,
+      -0.78029
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 274,
+     "Value": [
+      -0.0,
+      0.61011,
+      -0.0,
+      -0.79232
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 278,
+     "Value": [
+      -0.0,
+      0.59382,
+      -0.0,
+      -0.8046
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 281,
+     "Value": [
+      -0.0,
+      0.57638,
+      -0.0,
+      -0.81718
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 285,
+     "Value": [
+      -0.0,
+      0.55759,
+      -0.0,
+      -0.83011
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 289,
+     "Value": [
+      -0.0,
+      0.53722,
+      -0.0,
+      -0.84344
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 292,
+     "Value": [
+      -0.0,
+      0.51498,
+      -0.0,
+      -0.8572
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 296,
+     "Value": [
+      -0.0,
+      0.49056,
+      -0.0,
+      -0.8714
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      -0.0,
+      0.4636,
+      -0.0,
+      -0.88605
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 304,
+     "Value": [
+      -0.0,
+      0.43367,
+      -0.0,
+      -0.90107
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 308,
+     "Value": [
+      -0.0,
+      0.40035,
+      -0.0,
+      -0.91636
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 311,
+     "Value": [
+      -0.0,
+      0.36316,
+      -0.0,
+      -0.93173
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 315,
+     "Value": [
+      -0.0,
+      0.32169,
+      -0.0,
+      -0.94685
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 319,
+     "Value": [
+      -0.0,
+      0.27561,
+      -0.0,
+      -0.96127
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 322,
+     "Value": [
+      -0.0,
+      0.22479,
+      -0.0,
+      -0.97441
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 326,
+     "Value": [
+      -0.0,
+      0.16945,
+      -0.0,
+      -0.98554
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 330,
+     "Value": [
+      -0.0,
+      0.11019,
+      -0.0,
+      -0.99391
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 334,
+     "Value": [
+      -0.0,
+      0.04813,
+      -0.0,
+      -0.99884
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 338,
+     "Value": [
+      -0.0,
+      -0.01523,
+      -0.0,
+      -0.99988
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 341,
+     "Value": [
+      -0.0,
+      -0.07818,
+      -0.0,
+      -0.99694
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 345,
+     "Value": [
+      -0.0,
+      -0.13906,
+      -0.0,
+      -0.99028
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 349,
+     "Value": [
+      -0.0,
+      -0.19655,
+      -0.0,
+      -0.98049
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 352,
+     "Value": [
+      -0.0,
+      -0.24977,
+      -0.0,
+      -0.9683
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 356,
+     "Value": [
+      -0.0,
+      -0.29832,
+      -0.0,
+      -0.95447
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 360,
+     "Value": [
+      -0.0,
+      -0.34215,
+      -0.0,
+      -0.93964
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Torso",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 38,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 68,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 82,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 98,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 105,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 112,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 128,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 142,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 158,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 165,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 172,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 188,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 195,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 202,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 218,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 232,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 248,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 255,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 262,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 278,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 285,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 292,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 308,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 315,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 322,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 330,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 338,
+     "Value": [
+      0.0855,
+      0.03853,
+      0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 345,
+     "Value": [
+      0.08716,
+      0.0,
+      0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 352,
+     "Value": [
+      0.0855,
+      -0.03853,
+      -0.04039,
+      0.99477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 360,
+     "Value": [
+      0.08716,
+      -0.0,
+      -0.0,
+      0.9962
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "ArmL",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 38,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 68,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 82,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 98,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 105,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 112,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 128,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 142,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 158,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 165,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 172,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 188,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 195,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 202,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 218,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 232,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 248,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 255,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 262,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 278,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 285,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 292,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 308,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 315,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 322,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 330,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 338,
+     "Value": [
+      -0.27479,
+      0.02163,
+      -0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 345,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 352,
+     "Value": [
+      0.13874,
+      -0.01092,
+      -0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 360,
+     "Value": [
+      -0.06954,
+      0.00547,
+      -0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "ArmR",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 38,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 68,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 75,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 82,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 98,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 105,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 112,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 120,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 128,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 142,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 158,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 165,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 172,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 188,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 195,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 202,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 210,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 218,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 232,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 248,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 255,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 262,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 278,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 285,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 292,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 308,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 315,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 322,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 330,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 338,
+     "Value": [
+      0.13874,
+      0.01092,
+      0.0777,
+      0.98721
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 345,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 352,
+     "Value": [
+      -0.27479,
+      -0.02163,
+      0.07542,
+      0.9583
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 360,
+     "Value": [
+      -0.06954,
+      -0.00547,
+      0.07827,
+      0.99449
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

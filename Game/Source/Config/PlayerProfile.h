@@ -46,6 +46,14 @@ public:
         bool Passed = false;
     };
 
+    // A story set's progress (CoreGame/Progression.h): each song's banked best accuracy (0 to 100,
+    // -1 for not banked yet), and whether the set has passed.
+    struct StoryRecord
+    {
+        std::vector<double> Banked;
+        bool Passed = false;
+    };
+
     // What a recorded result changed, for the results screen to say so.
     struct Outcome
     {
@@ -74,6 +82,10 @@ public:
     // What the player called the band (the bedsheet, the kick head); empty: "BAND NAME TBD".
     std::string BandName;
     std::set<std::string> CompletedGigs;
+    // Story mode, by set id.
+    std::map<std::string, StoryRecord> Story;
+    // The band: who sits in each seat ("bass" -> a candidate id), chosen at the auditions.
+    std::map<std::string, std::string> BandMembers;
     // Every unlock so far, by kind and id ("item:practice-pad", "venue:club", "tier:garage"...;
     // CoreGame/Progression.h). An id in here was already announced.
     std::set<std::string> UnlockedItems;

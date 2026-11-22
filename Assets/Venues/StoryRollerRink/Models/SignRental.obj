@@ -1,0 +1,15 @@
+# SignRental.png on a 4.0 x 1.0 m quad facing the crowd.
+mtllib SignRental.mtl
+o SignRental
+s off
+v -2 -0.5 0
+v 2 -0.5 0
+v 2 0.5 0
+v -2 0.5 0
+vt 0.000000 0.000000
+vt 1.000000 0.000000
+vt 1.000000 1.000000
+vt 0.000000 1.000000
+vn 0 0 1
+usemtl pic_glow2_2
+f 1/1/1 2/2/1 3/3/1 4/4/1

@@ -1994,9 +1994,16 @@ void NoteHighwayCore::RecordResult()
             std::snprintf( text, sizeof( text ), "Best %d, %.1f%%, played %d time%s", record->BestScore, record->BestAccuracy, record->Plays, record->Plays == 1 ? "" : "s" );
             m_resultBests = text;
         }
-        // A gig's song: the set's tally, and the gig completed when its last song passes it.
+        // A gig's song: the set's tally, and the gig completed when its last song passes it. A
+        // story set's song is banked as it lands, so leaving now keeps it.
         GigSession& gig = GigSession::GetInstance();
-        if( gig.IsActive() && gig.RecordSong( m_trackIndex, accuracy ) )
+        const bool setDone = gig.IsActive() && gig.RecordSong( m_trackIndex, accuracy );
+        if( gig.IsStory() && !gig.IsOneSitting() )
+        {
+            gig.Bank( profile );
+            profile.Save();
+        }
+        if( setDone )
         {
             if( gig.Passed() )
             {

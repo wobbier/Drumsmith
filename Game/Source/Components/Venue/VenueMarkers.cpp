@@ -43,6 +43,12 @@ ME_REFLECT_BEGIN( VenueAccent )
     ME_FIELD( Particles ).Range( 0, 512 ).Tooltip( "Burst on the attached ParticleSystem at a peak. Ordinary lifts get half." );
 ME_REFLECT_END()
 
+ME_REFLECT_BEGIN( VenueStory )
+    ME_FIELD( Flag ).Tooltip( "The story flag (Design/Story-Mode-Setlists.json StateFlags) this entity follows" );
+    ME_FIELD( WhenSet ).Tooltip( "On: shown once the flag is set. Off: shown until it is set (the thing that moves away)" );
+    ME_FIELD( FadeSeconds ).Range( 0.f, 10.f ).Tooltip( "How long it takes to grow in or shrink away" );
+ME_REFLECT_END()
+
 ME_REFLECT_BEGIN( VenueCameraSpot )
     ME_FIELD( Shot ).Tooltip( "What kind of shot this position is for. The camera looks along local +Z" );
     ME_FIELD( FieldOfView ).Unit( Reflection::Unit::Degrees ).Range( 5.f, 140.f ).Tooltip( "Vertical field of view" );

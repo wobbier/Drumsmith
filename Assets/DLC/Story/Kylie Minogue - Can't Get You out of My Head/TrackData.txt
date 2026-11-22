@@ -1,0 +1,19 @@
+{
+ "Title": "Can't Get You out of My Head",
+ "Artist": "Kylie Minogue",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Adults Only at the Roller Rink",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 231.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/3E7ZwUMJFqpsDOJzEkBrQ7"
+ },
+ "NoteCount": 1356
+}

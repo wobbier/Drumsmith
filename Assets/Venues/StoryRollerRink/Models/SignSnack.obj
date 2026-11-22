@@ -1,0 +1,15 @@
+# SignSnack.png on a 3.6 x 0.9 m quad facing the crowd.
+mtllib SignSnack.mtl
+o SignSnack
+s off
+v -1.8 -0.45 0
+v 1.8 -0.45 0
+v 1.8 0.45 0
+v -1.8 0.45 0
+vt 0.000000 0.000000
+vt 1.000000 0.000000
+vt 1.000000 1.000000
+vt 0.000000 1.000000
+vn 0 0 1
+usemtl pic_glow2_2
+f 1/1/1 2/2/1 3/3/1 4/4/1

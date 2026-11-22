@@ -1,0 +1,19 @@
+{
+ "Title": "Trainwreck 1979",
+ "Artist": "Death From Above 1979",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Home Ice at Maple Leaf Gardens",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 227.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/6kjNwoSgt7F3cQ5sru8ylO"
+ },
+ "NoteCount": 1332
+}

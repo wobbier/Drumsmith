@@ -1,0 +1,10277 @@
+{
+ "Version": 2,
+ "Cores": [],
+ "Entities": [
+  {
+   "GUID": "65ecb8934f3c6d24",
+   "Name": "Funeral Afterparty at the Legion",
+   "DestroyOnLoad": true,
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0383992d88ad7f55",
+   "Name": "The hall",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "138447c39db6fe51",
+   "Name": "Tables, bar and dressing",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "730dc4b15737c7f3",
+   "Name": "Stage",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0169d2842da56e75",
+   "Name": "The family",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "4a9b6064e3eb3d2e",
+   "Name": "Story: how the night turns over",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "088a3ec985e2a989",
+   "Name": "Lights",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "5a9e5dca12b17262",
+   "Name": "Venue markers",
+   "DestroyOnLoad": true,
+   "Parent": "65ecb8934f3c6d24",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "746e6c1d6ab9e6ff",
+   "Name": "Lino floor",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -0.05,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      0.05,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.6,
+      "Tiling": [
+       30.0,
+       39.1667
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Lino.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1a5e35848e6a8a4f",
+   "Name": "Parquet strip",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.006,
+      -1.45
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      3.2,
+      0.006,
+      4.15
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.45,
+      "Tiling": [
+       5.3333,
+       6.9167
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Parquet.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "66821684fc14fafe",
+   "Name": "Parquet edge",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.004,
+      -1.45
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      3.25,
+      0.004,
+      4.2
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.08,
+       0.05,
+       0.03
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3844267cdd44736c",
+   "Name": "Panelling behind the band",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.8,
+      8.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      1.8,
+      0.05
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85,
+      "Tiling": [
+       15.0,
+       3.0
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Panelling.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "117bf892885b0df3",
+   "Name": "Panelling, doors wall",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.8,
+      -15.05
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      1.8,
+      0.05
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85,
+      "Tiling": [
+       15.0,
+       3.0
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Panelling.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0a899f4bfc7eec2e",
+   "Name": "Panelling, west wall",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -9.05,
+      1.8,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.05,
+      1.8,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85,
+      "Tiling": [
+       19.5833,
+       3.0
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Panelling.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1e37ae5ad25aeff0",
+   "Name": "Panelling, east wall",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      9.05,
+      1.8,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.05,
+      1.8,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85,
+      "Tiling": [
+       19.5833,
+       3.0
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Panelling.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2b615882e58b1a9f",
+   "Name": "Chair rail, west",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.985,
+      0.975,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.025,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.06,
+       0.03
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2c8de90684dcc0b3",
+   "Name": "Baseboard, west",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.985,
+      0.06,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.06,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.06,
+       0.035,
+       0.02
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3577640372b3b1a3",
+   "Name": "Chair rail, east",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.985,
+      0.975,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.025,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.06,
+       0.03
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "30be11089452ca21",
+   "Name": "Baseboard, east",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.985,
+      0.06,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.06,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.06,
+       0.035,
+       0.02
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "69590ca56c7546f6",
+   "Name": "Chair rail, south",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.975,
+      -14.985
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      0.025,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.06,
+       0.03
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "165c400d6f5dac9f",
+   "Name": "Baseboard, south",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.06,
+      -14.985
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      0.06,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.06,
+       0.035,
+       0.02
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3d2a3c72fa0c835b",
+   "Name": "Chair rail, north",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.975,
+      8.485
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      0.025,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.12,
+       0.06,
+       0.03
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7cb0baeee3532670",
+   "Name": "Baseboard, north",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.06,
+      8.485
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      0.06,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.06,
+       0.035,
+       0.02
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4fdef67238709eff",
+   "Name": "Drop ceiling",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.625,
+      -3.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.0,
+      0.025,
+      11.75
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.78,
+       0.76,
+       0.72
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.85,
+      "Tiling": [
+       15.0,
+       39.1667
+      ],
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/Ceiling.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6ed85be376055d24",
+   "Name": "Troffer 1",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0,
+      3.585,
+      -12.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "55d1ba757a4fba21",
+   "Name": "Troffer 2",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0,
+      3.585,
+      -8.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "33fba1c183241870",
+   "Name": "Troffer 3",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0,
+      3.585,
+      -4.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "53417c6415e95501",
+   "Name": "Troffer 4",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0,
+      3.585,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.78,
+       0.8
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4081ce877e192a54",
+   "Name": "Troffer 5",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.0,
+      3.585,
+      -12.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "26f9518d73307f15",
+   "Name": "Troffer 6",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.0,
+      3.585,
+      -8.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7d2284c670517bfe",
+   "Name": "Troffer 7",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.0,
+      3.585,
+      -4.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.78,
+       0.8
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "58d81fe2c8d62f03",
+   "Name": "Troffer 8",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.0,
+      3.585,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "76f59a50c927f5e4",
+   "Name": "Troffer 9",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.0,
+      3.585,
+      -12.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "549525475918667c",
+   "Name": "Troffer 10",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.0,
+      3.585,
+      -8.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0a4ce333e1d10847",
+   "Name": "Troffer 11",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.0,
+      3.585,
+      -4.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5ccda0d592a5f0fd",
+   "Name": "Troffer 12",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.0,
+      3.585,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.78,
+       0.8
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "06322dfc3dfb1aac",
+   "Name": "Troffer 13",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      3.585,
+      -12.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6414375dfa852e37",
+   "Name": "Troffer 14",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      3.585,
+      -8.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.75,
+       0.78,
+       0.8
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "30b2a6d790e02272",
+   "Name": "Troffer 15",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      3.585,
+      -4.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0f0ce2ae498c5f4b",
+   "Name": "Troffer 16",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      3.585,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.31,
+      0.015,
+      0.61
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.9,
+       0.94,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.75,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "104a724bd6498a91",
+   "Name": "Stage deck",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.2,
+      5.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      5.0,
+      0.2,
+      2.9
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.16,
+       0.09,
+       0.05
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "62cf7c6fb80f1b87",
+   "Name": "Drum riser",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.525,
+      6.275
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.7,
+      0.125,
+      1.525
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": true,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.05,
+       0.06,
+       0.09
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4c2c976af120823b",
+   "Name": "Stage skirt and curtains",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/StageDress.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7fa4e2c646159ac5",
+   "Name": "Kit rug",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.655,
+      6.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.8,
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/DrumRug.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6f73e263f4168c90",
+   "Name": "Tea towel on the snare",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.16,
+      1.395,
+      6.15
+     ],
+     "Rotation": [
+      0.0,
+      -90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "4cb014f40a3b2eaf",
+   "Name": "Towel on the head",
+   "DestroyOnLoad": true,
+   "Parent": "6f73e263f4168c90",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.004,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.005,
+      0.17
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/TeaTowel.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "14451a74f4b70e90",
+   "Name": "Towel tail",
+   "DestroyOnLoad": true,
+   "Parent": "6f73e263f4168c90",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -0.11,
+      -0.17
+     ],
+     "Rotation": [
+      -8.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.2,
+      0.11,
+      0.005
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "Textures": {
+       "Diffuse": {
+        "Path": "Assets/Venues/StoryLegion/Textures/TeaTowel.png"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "27401ab089afeb2d",
+   "Name": "Mug by the throne",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.85,
+      0.65,
+      6.85
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.9,
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/BeerCup.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "11e05ece911eb74b",
+   "Name": "Setlist taped down",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.9,
+      0.653,
+      5.3
+     ],
+     "Rotation": [
+      0.0,
+      14.0,
+      0.0
+     ],
+     "Scale": [
+      0.105,
+      0.002,
+      0.145
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.95,
+       0.93,
+       0.88
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1c9204158032104b",
+   "Name": "Guitar cab",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.1,
+      0.4,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/GuitarCab.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "59d2cc349e84329f",
+   "Name": "Guitar head",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.1,
+      1.15,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/AmpHead.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "20e525e3237e436b",
+   "Name": "Bass rig",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.2,
+      0.4,
+      6.7
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/AmpRack.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6deffc6eadda7c2f",
+   "Name": "Wedge 1",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.6,
+      0.4,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Wedge.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "69c827febec13466",
+   "Name": "Wedge 2",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.6,
+      0.4,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Wedge.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "2132e5aa067c444d",
+   "Name": "PA 1",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.4,
+      0.4,
+      3.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/SpeakerTall.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "29fad0ac8a73f985",
+   "Name": "PA 2",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.4,
+      0.4,
+      3.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/SpeakerTall.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "115cbb3b919cadbf",
+   "Name": "Cable coil",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.9,
+      0.4,
+      7.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/CableCoil.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4c165e302a7fe46f",
+   "Name": "Flag of Canada",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.4,
+      0.4,
+      7.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FlagCanada.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "489a3283b02a5f25",
+   "Name": "Branch standard",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.4,
+      0.4,
+      7.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FlagBranch.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4dbd4489b8d964fd",
+   "Name": "Signs, crest and photos",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/WallArt.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "772d3d64d73353f8",
+   "Name": "Doors",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Doors.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "010a9f06b6db3927",
+   "Name": "Exit glow, doors",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.2,
+      2.55,
+      -14.945
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.11,
+      0.01
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.2,
+       0.9,
+       0.4
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       1.0,
+       0.5
+      ],
+      "EmissiveIntensity": 1.2
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "75ffc301e341dbdb",
+   "Name": "Exit glow, fire door",
+   "DestroyOnLoad": true,
+   "Parent": "0383992d88ad7f55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.945,
+      2.65,
+      5.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.01,
+      0.11,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.2,
+       0.9,
+       0.4
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       1.0,
+       0.5
+      ],
+      "EmissiveIntensity": 1.2
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0a2c0c971a5cbe83",
+   "Name": "Table 1",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.3,
+      0.0,
+      -0.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "2ba994f0cf228fc4",
+   "Name": "Table and settings",
+   "DestroyOnLoad": true,
+   "Parent": "0a2c0c971a5cbe83",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Table1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "57395158228f056a",
+   "Name": "Chair 4",
+   "DestroyOnLoad": true,
+   "Parent": "0a2c0c971a5cbe83",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.1591,
+      0.0,
+      -1.0379
+     ],
+     "Rotation": [
+      0.0,
+      359.2857,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7cb82d4b734f7d62",
+   "Name": "Chair 6",
+   "DestroyOnLoad": true,
+   "Parent": "0a2c0c971a5cbe83",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.0473,
+      0.0,
+      0.0759
+     ],
+     "Rotation": [
+      0.0,
+      462.1429,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5b196aaf53545f08",
+   "Name": "Chair 7",
+   "DestroyOnLoad": true,
+   "Parent": "0a2c0c971a5cbe83",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.5936,
+      0.0,
+      0.8661
+     ],
+     "Rotation": [
+      0.0,
+      499.5714,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "09718ea2ccd8d979",
+   "Name": "Table 2",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.7,
+      0.0,
+      -4.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "4253a71bdd944edc",
+   "Name": "Table and settings",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Table2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5e0daa141a5f848b",
+   "Name": "Chair 1",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.5872,
+      0.0,
+      0.8705
+     ],
+     "Rotation": [
+      0.0,
+      208.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4d16908f819940e4",
+   "Name": "Chair 2",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.0474,
+      0.0,
+      -0.0732
+     ],
+     "Rotation": [
+      0.0,
+      282.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "067c686aa5230446",
+   "Name": "Chair 3",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.4603,
+      0.0,
+      -0.9437
+     ],
+     "Rotation": [
+      0.0,
+      328.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4707917e0a6c02ed",
+   "Name": "Chair 4",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.5872,
+      0.0,
+      -0.8705
+     ],
+     "Rotation": [
+      0.0,
+      402.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7fcd6b53ff115f68",
+   "Name": "Aunt with the cardigan",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.7009,
+      0.0,
+      -0.9968
+     ],
+     "Rotation": [
+      0.0,
+      402.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 0.8,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "0fffaab19a656d14"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0fffaab19a656d14",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "7fcd6b53ff115f68",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Auntwiththecardigan.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "499c9a175f78352e",
+   "Name": "Chair 5",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.0474,
+      0.0,
+      0.0732
+     ],
+     "Rotation": [
+      0.0,
+      448.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "2f0451a4344a9ccb",
+   "Name": "Great-uncle",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.2173,
+      0.0,
+      0.0673
+     ],
+     "Rotation": [
+      0.0,
+      448.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 0.8700000000000001,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "2c9b20c9ca55b3b5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "2c9b20c9ca55b3b5",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "2f0451a4344a9ccb",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Greatuncle.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "786b8dd151110444",
+   "Name": "Chair 6",
+   "DestroyOnLoad": true,
+   "Parent": "09718ea2ccd8d979",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.4603,
+      0.0,
+      0.9437
+     ],
+     "Rotation": [
+      0.0,
+      522.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "497c4180d231b505",
+   "Name": "Table 3",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.7,
+      0.0,
+      -9.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "46f13d08a2c15181",
+   "Name": "Table and settings",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Table3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4d4eb22a6e723744",
+   "Name": "Chair 1",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.816,
+      0.0,
+      0.6608
+     ],
+     "Rotation": [
+      0.0,
+      225.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "36a8d0fabf98ab3b",
+   "Name": "Neighbour",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.9362,
+      0.0,
+      0.781
+     ],
+     "Rotation": [
+      0.0,
+      225.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 0.9400000000000001,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "70ab8785c205cb1a"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "70ab8785c205cb1a",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "36a8d0fabf98ab3b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Neighbour.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3098b7b827f20b41",
+   "Name": "Chair 2",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.9803,
+      0.0,
+      -0.3763
+     ],
+     "Rotation": [
+      0.0,
+      299.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "09401d4719abde4c",
+   "Name": "Chair 3",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.1643,
+      0.0,
+      -1.0371
+     ],
+     "Rotation": [
+      0.0,
+      345.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "09a3c7811a9cccee",
+   "Name": "Old Legion friend",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.2083,
+      0.0,
+      -1.2013
+     ],
+     "Rotation": [
+      0.0,
+      345.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.01,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "533fa96d8f62a46b"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "533fa96d8f62a46b",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "09a3c7811a9cccee",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_OldLegionfriend.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "271daf3a8b1fc79f",
+   "Name": "Chair 4",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.816,
+      0.0,
+      -0.6608
+     ],
+     "Rotation": [
+      0.0,
+      419.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4529127dc3c7ddec",
+   "Name": "Chair 5",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.9803,
+      0.0,
+      0.3763
+     ],
+     "Rotation": [
+      0.0,
+      465.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5395fe89fd3c8bbe",
+   "Name": "Chair 6",
+   "DestroyOnLoad": true,
+   "Parent": "497c4180d231b505",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.1643,
+      0.0,
+      1.0371
+     ],
+     "Rotation": [
+      0.0,
+      539.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "53605c6b8da17b5b",
+   "Name": "Table 4",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.6,
+      0.0,
+      -4.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "342b8ea2be7b6a4e",
+   "Name": "Table and settings",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Table4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "23c371dd01fd3773",
+   "Name": "Chair 1",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.9735,
+      0.0,
+      0.3933
+     ],
+     "Rotation": [
+      0.0,
+      242.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "06b2b1f24e89fc76",
+   "Name": "Chair 2",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.8274,
+      0.0,
+      -0.6464
+     ],
+     "Rotation": [
+      0.0,
+      316.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "51003f79ae11dfba",
+   "Name": "Cousin-in-law",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.9455,
+      0.0,
+      -0.7687
+     ],
+     "Rotation": [
+      0.0,
+      316.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.08,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "170259ad8dc5a44b"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "170259ad8dc5a44b",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "51003f79ae11dfba",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Cousininlaw.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4e2250ce99051164",
+   "Name": "Chair 3",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.1461,
+      0.0,
+      -1.0398
+     ],
+     "Rotation": [
+      0.0,
+      362.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "06f3ddace8b2f009",
+   "Name": "Chair 4",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.9735,
+      0.0,
+      -0.3933
+     ],
+     "Rotation": [
+      0.0,
+      436.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3b493bc32630d46d",
+   "Name": "Grandmother",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.1385,
+      0.0,
+      -0.4345
+     ],
+     "Rotation": [
+      0.0,
+      436.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.1500000000000001,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "6c0008efdfe47a4f"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "6c0008efdfe47a4f",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "3b493bc32630d46d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Grandmother.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1bff1da177c1eb96",
+   "Name": "Chair 5",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.8274,
+      0.0,
+      0.6464
+     ],
+     "Rotation": [
+      0.0,
+      482.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "2793897a42d1dbab",
+   "Name": "Chair 6",
+   "DestroyOnLoad": true,
+   "Parent": "53605c6b8da17b5b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.1461,
+      0.0,
+      1.0398
+     ],
+     "Rotation": [
+      0.0,
+      556.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3deff7f1e7a1ba2d",
+   "Name": "Table 5",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.7,
+      0.0,
+      -8.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "64124bdb349a0805",
+   "Name": "Table and settings",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Table5.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1999dc064e42c254",
+   "Name": "Chair 1",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.046,
+      0.0,
+      0.0915
+     ],
+     "Rotation": [
+      0.0,
+      259.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3482711738445256",
+   "Name": "Family friend",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.2129,
+      0.0,
+      0.124
+     ],
+     "Rotation": [
+      0.0,
+      259.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.2200000000000002,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "49f4b8f1ebc189b5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "49f4b8f1ebc189b5",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "3482711738445256",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Familyfriend.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "37d68ef1dd6e8fa9",
+   "Name": "Chair 2",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.6023,
+      0.0,
+      -0.8601
+     ],
+     "Rotation": [
+      0.0,
+      333.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "79ec156c7e430bd6",
+   "Name": "Chair 3",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.4437,
+      0.0,
+      -0.9516
+     ],
+     "Rotation": [
+      0.0,
+      379.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1fd17180b97c4a9c",
+   "Name": "The minister",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.4991,
+      0.0,
+      -1.1124
+     ],
+     "Rotation": [
+      0.0,
+      379.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.29,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "0e0ce23de276017d"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0e0ce23de276017d",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "1fd17180b97c4a9c",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Seated_Theminister.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "16622df80d1a1952",
+   "Name": "Chair 4",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.046,
+      0.0,
+      -0.0915
+     ],
+     "Rotation": [
+      0.0,
+      453.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "29403d7275034c34",
+   "Name": "Chair 5",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.6023,
+      0.0,
+      0.8601
+     ],
+     "Rotation": [
+      0.0,
+      499.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5810fe364235d350",
+   "Name": "Chair 6",
+   "DestroyOnLoad": true,
+   "Parent": "3deff7f1e7a1ba2d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.4437,
+      0.0,
+      0.9516
+     ],
+     "Rotation": [
+      0.0,
+      573.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7515f3bd796478ce",
+   "Name": "Family table, floor side",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "445d3529a6782429",
+   "Name": "Her chair",
+   "DestroyOnLoad": true,
+   "Parent": "7515f3bd796478ce",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.25,
+      0.0,
+      0.28
+     ],
+     "Rotation": [
+      0.0,
+      62.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0dc2ee09210c0f82",
+   "Name": "The empty chair",
+   "DestroyOnLoad": true,
+   "Parent": "7515f3bd796478ce",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.95,
+      0.0,
+      -0.42
+     ],
+     "Rotation": [
+      0.0,
+      62.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "03e380376808709e",
+   "Name": "Chair 3",
+   "DestroyOnLoad": true,
+   "Parent": "7515f3bd796478ce",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.45,
+      0.0,
+      0.95
+     ],
+     "Rotation": [
+      0.0,
+      120.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "52a0f00185f8a406",
+   "Name": "Uncle\u2019s chair",
+   "DestroyOnLoad": true,
+   "Parent": "7515f3bd796478ce",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.25,
+      0.0,
+      -1.2
+     ],
+     "Rotation": [
+      0.0,
+      54.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "2dc4787f13f304a2",
+   "Name": "The bar",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.55,
+      0.0,
+      -12.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Bar.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "56a20bfdba3c2551",
+   "Name": "Bar stool 1",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.75,
+      0.0,
+      -13.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Stool.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4944ef7e24dc7b6e",
+   "Name": "Bar stool 2",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.75,
+      0.0,
+      -12.8
+     ],
+     "Rotation": [
+      0.0,
+      15.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Stool.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "50b2b0a2880d1033",
+   "Name": "Bar stool 3",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.75,
+      0.0,
+      -12.0
+     ],
+     "Rotation": [
+      0.0,
+      30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Stool.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "79a1e77f4dc63cc4",
+   "Name": "Bar stool 4",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.75,
+      0.0,
+      -11.2
+     ],
+     "Rotation": [
+      0.0,
+      45.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Stool.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1a67f01226ebec46",
+   "Name": "Dartboard",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.97,
+      1.73,
+      -11.9
+     ],
+     "Rotation": [
+      0.0,
+      -90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Dartboard.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3625f9ba4f349976",
+   "Name": "Coat rack",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.0,
+      0.0,
+      -14.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/CoatRack.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7b3452ff5c2a87b0",
+   "Name": "Coat rack 2",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.2,
+      0.0,
+      -14.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/CoatRack.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "244e2e660b27e174",
+   "Name": "Stacked chairs",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.55,
+      0.0,
+      -14.0
+     ],
+     "Rotation": [
+      0.0,
+      90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/StackedChairs.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "657c154f8dfdf758",
+   "Name": "Stacked chairs 2",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.55,
+      0.0,
+      -6.6
+     ],
+     "Rotation": [
+      0.0,
+      90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/StackedChairs.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7ff9d237c5e2a37b",
+   "Name": "Party T-bar west",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.9,
+      0.0,
+      2.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/TBarStand.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "427037310475a40c",
+   "Name": "Party T-bar east",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.9,
+      0.0,
+      1.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/TBarStand.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "47dcf82b398be62c",
+   "Name": "Memorial table",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.15,
+      0.0,
+      2.2
+     ],
+     "Rotation": [
+      0.0,
+      -35.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/MemorialTable.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1462e8e55d7b6a31",
+   "Name": "Easel",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.25,
+      0.0,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      -30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Easel.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6c83020e50faab7e",
+   "Name": "Upright piano",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.65,
+      0.0,
+      2.55
+     ],
+     "Rotation": [
+      0.0,
+      45.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/UprightPiano.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "48978891ebd4592e",
+   "Name": "Cooler of pop",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.4,
+      0.0,
+      -9.2
+     ],
+     "Rotation": [
+      0.0,
+      80.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Cooler.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "61f5c3e0c800e96d",
+   "Name": "Recycling bin",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.45,
+      0.0,
+      -8.5
+     ],
+     "Rotation": [
+      0.0,
+      10.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/CardboardBox.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7f0c44cbae42f6ec",
+   "Name": "Mirror ball chain",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.4,
+      -1.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.0075,
+      0.2,
+      0.0075
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.4,
+       0.4,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "18a37315832deb70",
+   "Name": "Mirror ball",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.05,
+      -1.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.18,
+      0.18,
+      0.18
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.85,
+       0.87,
+       0.9
+      ],
+      "Metallic": 1.0,
+      "Roughness": 0.12
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3a86d958852de794",
+   "Name": "Party bulb 1",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.2,
+      3.1,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "098992cfe4f66eb3",
+   "Name": "Party bulb 2",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.7048,
+      3.0694,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4491efd43ad6dffb",
+   "Name": "Party bulb 3",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.2095,
+      3.0525,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6bec0d60642a96e5",
+   "Name": "Party bulb 4",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.7143,
+      3.0906,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1680a14400b4c8bd",
+   "Name": "Party bulb 5",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.219,
+      3.0906,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7d23d55be354c59c",
+   "Name": "Party bulb 6",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.7238,
+      3.0525,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "41e296955f7c80c1",
+   "Name": "Party bulb 7",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.2286,
+      3.0694,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5d2397b75170430a",
+   "Name": "Party bulb 8",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.7333,
+      3.1,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "197c6be90c320c8d",
+   "Name": "Party bulb 9",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.2381,
+      3.0694,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5ffd7599942f89a4",
+   "Name": "Party bulb 10",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.7429,
+      3.0525,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "39cf104dbfd7a544",
+   "Name": "Party bulb 11",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.2476,
+      3.0906,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "418eef9a1653034b",
+   "Name": "Party bulb 12",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.2476,
+      3.0906,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7e7e9fa157004734",
+   "Name": "Party bulb 13",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.7429,
+      3.0525,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3d9f372b73afc7fd",
+   "Name": "Party bulb 14",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.2381,
+      3.0694,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6286710b83b96aeb",
+   "Name": "Party bulb 15",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.7333,
+      3.1,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3fa59244323fc7e7",
+   "Name": "Party bulb 16",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.2286,
+      3.0694,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "09cd466d2f3593c9",
+   "Name": "Party bulb 17",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.7238,
+      3.0525,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "78c64d94b9c4eead",
+   "Name": "Party bulb 18",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.219,
+      3.0906,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7cb6de376a2441cc",
+   "Name": "Party bulb 19",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.7143,
+      3.0906,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.15,
+       0.85,
+       0.9
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "27c5a20b2b26c748",
+   "Name": "Party bulb 20",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.2095,
+      3.0525,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.3,
+       0.38,
+       1.0
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3f54d719364a9437",
+   "Name": "Party bulb 21",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.7048,
+      3.0694,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.55,
+       0.18
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5189fc1eab3e9138",
+   "Name": "Party bulb 22",
+   "DestroyOnLoad": true,
+   "Parent": "730dc4b15737c7f3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.2,
+      3.1,
+      2.64
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.03,
+      0.04,
+      0.03
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.18,
+       0.55
+      ],
+      "EmissiveIntensity": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6d174cbf725c9b45",
+   "Name": "Candle flame 1",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.535,
+      1.01,
+      2.0525
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.011,
+      0.0225,
+      0.011
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.8,
+       0.4
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.7,
+       0.3
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "28890609961531ee",
+   "Name": "Candle flame 2",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.4121,
+      1.01,
+      2.1385
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.011,
+      0.0225,
+      0.011
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.8,
+       0.4
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.7,
+       0.3
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0ee31449782bc339",
+   "Name": "Piano sconce bulb 1",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.056,
+      1.12,
+      2.8328
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.03,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.8,
+       0.5
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.75,
+       0.4
+      ],
+      "EmissiveIntensity": 2.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "55c8e0ed1c87d95d",
+   "Name": "Piano sconce bulb 2",
+   "DestroyOnLoad": true,
+   "Parent": "138447c39db6fe51",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.9328,
+      1.12,
+      1.956
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.015,
+      0.03,
+      0.015
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.8,
+       0.5
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.75,
+       0.4
+      ],
+      "EmissiveIntensity": 2.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5ce7006d0c2fb24a",
+   "Name": "Bartender",
+   "DestroyOnLoad": true,
+   "Parent": "0169d2842da56e75",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.65,
+      0.0,
+      -11.6
+     ],
+     "Rotation": [
+      0.0,
+      90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "247dc9a5391d65c0",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "5ce7006d0c2fb24a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Bartender.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7b8c90abf0a1e62a",
+   "Name": "Toast: the uncle on his feet",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.35,
+      0.0,
+      -1.05
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "toast_seat_empty",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "245b70ff779703bc",
+   "Name": "The uncle, toasting",
+   "DestroyOnLoad": true,
+   "Parent": "7b8c90abf0a1e62a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      70.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0cc85fd2c7bf53d6",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "245b70ff779703bc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Uncle_Toast.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "34a5174f0d6ada08",
+   "Name": "A narrow light on the toast",
+   "DestroyOnLoad": true,
+   "Parent": "7b8c90abf0a1e62a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.15,
+      3.5,
+      -0.55
+     ],
+     "Rotation": [
+      59.744,
+      -63.4349,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 210.0,
+     "Range": 7.0,
+     "InnerConeAngle": 8.0,
+     "OuterConeAngle": 16.0
+    }
+   ]
+  },
+  {
+   "GUID": "4aa73362fa9df2a7",
+   "Name": "Toast done: the pool on her and the empty chair",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.95,
+      0.0,
+      -0.42
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "toast_seat_empty",
+     "WhenSet": true,
+     "FadeSeconds": 2.5
+    }
+   ]
+  },
+  {
+   "GUID": "04218621587eef55",
+   "Name": "The folded toast on the seat",
+   "DestroyOnLoad": true,
+   "Parent": "4aa73362fa9df2a7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      62.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/ToastChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "2df8a261b763ab0b",
+   "Name": "The pool widens",
+   "DestroyOnLoad": true,
+   "Parent": "4aa73362fa9df2a7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.35,
+      3.5,
+      -0.88
+     ],
+     "Rotation": [
+      57.7949,
+      -50.1944,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 300.0,
+     "Range": 9.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    }
+   ]
+  },
+  {
+   "GUID": "305afd0fc86f5230",
+   "Name": "Uncle seated (until he gets up to dance)",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.25,
+      0.0,
+      -1.2
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "toast_seat_empty",
+     "WhenSet": true,
+     "FadeSeconds": 1.5
+    }
+   ]
+  },
+  {
+   "GUID": "2b0e290d109ae029",
+   "Name": "...he gets up to dance",
+   "DestroyOnLoad": true,
+   "Parent": "305afd0fc86f5230",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "shoes_by_chair",
+     "WhenSet": false,
+     "FadeSeconds": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "202830df37d8146c",
+   "Name": "The uncle, seated",
+   "DestroyOnLoad": true,
+   "Parent": "2b0e290d109ae029",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.1375,
+      0.0,
+      -0.0999
+     ],
+     "Rotation": [
+      0.0,
+      54.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 0.9,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "61a4b13128ae32ab"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "61a4b13128ae32ab",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "202830df37d8146c",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Uncle_Seated.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4def1ae69d2b9f48",
+   "Name": "Daughter at the table",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.25,
+      0.0,
+      0.28
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "shoes_by_chair",
+     "WhenSet": false,
+     "FadeSeconds": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "67f42f839301d5cf",
+   "Name": "Dad\u2019s daughter, seated",
+   "DestroyOnLoad": true,
+   "Parent": "4def1ae69d2b9f48",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.1501,
+      0.0,
+      -0.0798
+     ],
+     "Rotation": [
+      0.0,
+      62.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Breathe.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.1,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "3c9a1db351a373e6"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "3c9a1db351a373e6",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "67f42f839301d5cf",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Daughter_Seated.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0f6e39381110d428",
+   "Name": "Daughter and uncle sway on the floor",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.9,
+      0.0,
+      -0.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "shoes_by_chair",
+     "WhenSet": true,
+     "FadeSeconds": 1.5
+    }
+   ]
+  },
+  {
+   "GUID": "734c37272392e3f9",
+   "Name": "Couple",
+   "DestroyOnLoad": true,
+   "Parent": "0f6e39381110d428",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Sway.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.0,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "1ec4bfa0f3e5ae63"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "1ec4bfa0f3e5ae63",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "734c37272392e3f9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "6fffdeb27a8e2969",
+   "Name": "Her",
+   "DestroyOnLoad": true,
+   "Parent": "1ec4bfa0f3e5ae63",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      -0.27
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Daughter_Dancing.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7f056c080eb55667",
+   "Name": "Him",
+   "DestroyOnLoad": true,
+   "Parent": "1ec4bfa0f3e5ae63",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.29
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Uncle_Dancing.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "03d2725aa5548fe6",
+   "Name": "A light finds them on the floor",
+   "DestroyOnLoad": true,
+   "Parent": "0f6e39381110d428",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.5,
+      0.0
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 260.0,
+     "Range": 6.0,
+     "InnerConeAngle": 12.0,
+     "OuterConeAngle": 26.0
+    }
+   ]
+  },
+  {
+   "GUID": "69e15de287c705c3",
+   "Name": "Her shoes under the empty chair",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.95,
+      0.0,
+      -0.42
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "shoes_by_chair",
+     "WhenSet": true,
+     "FadeSeconds": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "742bce75a25b0bca",
+   "Name": "Her good shoes",
+   "DestroyOnLoad": true,
+   "Parent": "69e15de287c705c3",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.05,
+      0.0,
+      0.05
+     ],
+     "Rotation": [
+      0.0,
+      222.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Heels.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "07b672b4f4221957",
+   "Name": "Dessert cart on the dance floor",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.9,
+      0.0,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "dessert_table_moved",
+     "WhenSet": false,
+     "FadeSeconds": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "746e34c62c7ca438",
+   "Name": "Dessert cart",
+   "DestroyOnLoad": true,
+   "Parent": "07b672b4f4221957",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      12.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/DessertCart.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "158af6ef94a8d86a",
+   "Name": "Dessert cart pushed to the east wall",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.4,
+      0.0,
+      -0.45
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "dessert_table_moved",
+     "WhenSet": true,
+     "FadeSeconds": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "05a051eb35d167c4",
+   "Name": "Dessert cart, against the wall",
+   "DestroyOnLoad": true,
+   "Parent": "158af6ef94a8d86a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/DessertCartPushed.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "582892b601cfc1cb",
+   "Name": "Over the desserts",
+   "DestroyOnLoad": true,
+   "Parent": "158af6ef94a8d86a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.2,
+      2.7,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 18.0,
+     "Range": 3.2
+    }
+   ]
+  },
+  {
+   "GUID": "0d6fd050547a96b9",
+   "Name": "Portrait on the easel",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.25,
+      0.0,
+      3.15
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "portrait_on_piano",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "241db3f218c3fe5f",
+   "Name": "On the ledge",
+   "DestroyOnLoad": true,
+   "Parent": "0d6fd050547a96b9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.04,
+      1.04,
+      -0.0693
+     ],
+     "Rotation": [
+      -8.0,
+      -30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Portrait.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "201d5f85c5ba4c11",
+   "Name": "Picture light on the easel",
+   "DestroyOnLoad": true,
+   "Parent": "0d6fd050547a96b9",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.65,
+      3.5,
+      -1.55
+     ],
+     "Rotation": [
+      41.4591,
+      -46.7899,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 160.0,
+     "Range": 6.0,
+     "InnerConeAngle": 7.0,
+     "OuterConeAngle": 15.0
+    }
+   ]
+  },
+  {
+   "GUID": "302d469f46387835",
+   "Name": "Portrait on the piano",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.65,
+      1.3,
+      2.55
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "portrait_on_piano",
+     "WhenSet": true,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "5790374dea027658",
+   "Name": "Leaning on the wall",
+   "DestroyOnLoad": true,
+   "Parent": "302d469f46387835",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0354,
+      0.0,
+      0.0354
+     ],
+     "Rotation": [
+      -6.0,
+      45.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Portrait.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "10b2859d46bf5e6e",
+   "Name": "His tie on the corner",
+   "DestroyOnLoad": true,
+   "Parent": "302d469f46387835",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.4172,
+      0.0,
+      -0.5728
+     ],
+     "Rotation": [
+      0.0,
+      45.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Tie.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7593d80752e232fb",
+   "Name": "Napkin requests",
+   "DestroyOnLoad": true,
+   "Parent": "302d469f46387835",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.297,
+      0.0,
+      0.4101
+     ],
+     "Rotation": [
+      0.0,
+      55.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Napkins.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "24aac9a4763d453a",
+   "Name": "Picture light on the piano",
+   "DestroyOnLoad": true,
+   "Parent": "302d469f46387835",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.25,
+      2.2,
+      -2.15
+     ],
+     "Rotation": [
+      30.7297,
+      46.302,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 190.0,
+     "Range": 6.5,
+     "InnerConeAngle": 8.0,
+     "OuterConeAngle": 17.0
+    }
+   ]
+  },
+  {
+   "GUID": "2d1949287d2d047a",
+   "Name": "Cousins fill the parquet",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.8,
+      0.0,
+      -1.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "family_on_floor",
+     "WhenSet": true,
+     "FadeSeconds": 1.5
+    }
+   ]
+  },
+  {
+   "GUID": "14908dc944a9e9e0",
+   "Name": "Cousin Arms Up",
+   "DestroyOnLoad": true,
+   "Parent": "2d1949287d2d047a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.4,
+      0.0,
+      1.6
+     ],
+     "Rotation": [
+      0.0,
+      200.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Bounce.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 0.9,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "5caf2a1ae8847079"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "5caf2a1ae8847079",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "14908dc944a9e9e0",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Arms_Up.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0a9fc05862dec25a",
+   "Name": "Cousin Twirl",
+   "DestroyOnLoad": true,
+   "Parent": "2d1949287d2d047a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.3,
+      0.0,
+      0.4
+     ],
+     "Rotation": [
+      0.0,
+      235.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Bounce.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 0.98,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "6c4a99605061b521"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "6c4a99605061b521",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "0a9fc05862dec25a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Twirl.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6b24ea9190ce4947",
+   "Name": "Cousin Point",
+   "DestroyOnLoad": true,
+   "Parent": "2d1949287d2d047a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.6,
+      0.0,
+      -1.0
+     ],
+     "Rotation": [
+      0.0,
+      160.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Bounce.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.06,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "3ee8cdabffa73a52"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "3ee8cdabffa73a52",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "6b24ea9190ce4947",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Point.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "37770a5c52eb7741",
+   "Name": "Cousin Clap",
+   "DestroyOnLoad": true,
+   "Parent": "2d1949287d2d047a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.6,
+      0.0,
+      2.3
+     ],
+     "Rotation": [
+      0.0,
+      215.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Bounce.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.1400000000000001,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "28108ffc69c6127d"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "28108ffc69c6127d",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "37770a5c52eb7741",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Clap.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "73576f4f74f44984",
+   "Name": "Cousin Jump",
+   "DestroyOnLoad": true,
+   "Parent": "2d1949287d2d047a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.2,
+      0.0,
+      1.9
+     ],
+     "Rotation": [
+      0.0,
+      170.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Bounce.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.22,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "22fe1c916a0ee9eb"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "22fe1c916a0ee9eb",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "73576f4f74f44984",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Jump.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3324031c1d68f4a8",
+   "Name": "Cousin Sway",
+   "DestroyOnLoad": true,
+   "Parent": "2d1949287d2d047a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.8,
+      0.0,
+      -0.9
+     ],
+     "Rotation": [
+      0.0,
+      250.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Sequence",
+     "Clip": "Assets/Venues/StoryLegion/Motion/Bounce.sequence",
+     "PlayOnStart": true,
+     "Loop": true,
+     "Speed": 1.3,
+     "Bindings": [
+      {
+       "Slot": "Body",
+       "Target": "34d2597f2cfae765"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "34d2597f2cfae765",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "3324031c1d68f4a8",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Sway.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0bf46bea6ab1ee90",
+   "Name": "His shoes join hers",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.95,
+      0.0,
+      -0.42
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "family_on_floor",
+     "WhenSet": true,
+     "FadeSeconds": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "0b9bdbcb4a80c0a0",
+   "Name": "His shoes",
+   "DestroyOnLoad": true,
+   "Parent": "0bf46bea6ab1ee90",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.18,
+      0.0,
+      -0.12
+     ],
+     "Rotation": [
+      0.0,
+      262.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/Oxfords.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "2aa603d89453640a",
+   "Name": "The family photo",
+   "DestroyOnLoad": true,
+   "Parent": "4a9b6064e3eb3d2e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.7,
+      0.0,
+      -2.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "family_on_floor",
+     "WhenSet": true,
+     "FadeSeconds": 0.8
+    }
+   ]
+  },
+  {
+   "GUID": "5963af4907a77138",
+   "Name": "Chair she stands on",
+   "DestroyOnLoad": true,
+   "Parent": "2aa603d89453640a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      70.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/FoldingChair.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "723b1261352baa1c",
+   "Name": "Cousin with the camera",
+   "DestroyOnLoad": true,
+   "Parent": "2aa603d89453640a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.49,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      70.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "3ca20c611cc704ba",
+   "Name": "Body",
+   "DestroyOnLoad": true,
+   "Parent": "723b1261352baa1c",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryLegion/Models/People/Cousin_Camera.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3a4504f9f7fe05ce",
+   "Name": "The flash",
+   "DestroyOnLoad": true,
+   "Parent": "2aa603d89453640a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.2819,
+      2.12,
+      0.1026
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.035,
+      0.025,
+      0.025
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "EmissiveIntensity": 2.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3816c8d871748ae7",
+   "Name": "Photo flash",
+   "DestroyOnLoad": true,
+   "Parent": "2aa603d89453640a",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0819,
+      2.2,
+      0.1026
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.97,
+      0.92
+     ],
+     "Intensity": 30.0,
+     "Range": 5.0
+    }
+   ]
+  },
+  {
+   "GUID": "24cefa55299f7ab4",
+   "Name": "Hall key (through the ceiling)",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      12.0,
+      -8.0
+     ],
+     "Rotation": [
+      58.0,
+      18.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Directional",
+     "Color": [
+      1.0,
+      0.86,
+      0.7
+     ],
+     "Intensity": 0.55,
+     "Range": 10.0,
+     "DirectionalSource": "Manual",
+     "CastShadows": true
+    }
+   ]
+  },
+  {
+   "GUID": "06e08bac49c4c176",
+   "Name": "Fluorescents, dimmed 1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.5,
+      3.5,
+      -11.5
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.82,
+      0.9,
+      1.0
+     ],
+     "Intensity": 110.0,
+     "Range": 7.5,
+     "InnerConeAngle": 40.0,
+     "OuterConeAngle": 75.0
+    }
+   ]
+  },
+  {
+   "GUID": "04db65f44d72873f",
+   "Name": "Fluorescents, dimmed 2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.5,
+      -11.5
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.82,
+      0.9,
+      1.0
+     ],
+     "Intensity": 110.0,
+     "Range": 7.5,
+     "InnerConeAngle": 40.0,
+     "OuterConeAngle": 75.0
+    }
+   ]
+  },
+  {
+   "GUID": "4b6b58c570dd3dcf",
+   "Name": "Fluorescents, dimmed 3",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.5,
+      3.5,
+      -11.5
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.82,
+      0.9,
+      1.0
+     ],
+     "Intensity": 110.0,
+     "Range": 7.5,
+     "InnerConeAngle": 40.0,
+     "OuterConeAngle": 75.0
+    }
+   ]
+  },
+  {
+   "GUID": "518c04a1b7a46a52",
+   "Name": "Fluorescents, dimmed 4",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.5,
+      3.5,
+      -6.0
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.82,
+      0.9,
+      1.0
+     ],
+     "Intensity": 110.0,
+     "Range": 7.5,
+     "InnerConeAngle": 40.0,
+     "OuterConeAngle": 75.0
+    }
+   ]
+  },
+  {
+   "GUID": "1a3803ac8d4c6fd2",
+   "Name": "Fluorescents, dimmed 5",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.5,
+      3.5,
+      -6.0
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.82,
+      0.9,
+      1.0
+     ],
+     "Intensity": 110.0,
+     "Range": 7.5,
+     "InnerConeAngle": 40.0,
+     "OuterConeAngle": 75.0
+    }
+   ]
+  },
+  {
+   "GUID": "5705e70ba0ec0248",
+   "Name": "Fluorescents, dimmed 6",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.5,
+      -6.0
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.82,
+      0.9,
+      1.0
+     ],
+     "Intensity": 110.0,
+     "Range": 7.5,
+     "InnerConeAngle": 40.0,
+     "OuterConeAngle": 75.0
+    }
+   ]
+  },
+  {
+   "GUID": "0e670d9c7a4cf4d7",
+   "Name": "Behind the bar",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.1,
+      2.4,
+      -12.3
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.55,
+      0.18
+     ],
+     "Intensity": 40.0,
+     "Range": 4.5
+    }
+   ]
+  },
+  {
+   "GUID": "5ba009f29abd78f9",
+   "Name": "Exit green",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.2,
+      2.4,
+      -14.7
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.3,
+      1.0,
+      0.5
+     ],
+     "Intensity": 6.0,
+     "Range": 2.5
+    }
+   ]
+  },
+  {
+   "GUID": "2bb1b8e073afa585",
+   "Name": "Memorial candles",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.0,
+      1.2,
+      2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.62,
+      0.3
+     ],
+     "Intensity": 9.0,
+     "Range": 2.6
+    }
+   ]
+  },
+  {
+   "GUID": "02247d25c219e542",
+   "Name": "Piano sconces",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.15,
+      1.35,
+      2.05
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "Intensity": 10.0,
+     "Range": 2.8
+    }
+   ]
+  },
+  {
+   "GUID": "72fa81e01634dbea",
+   "Name": "Window spill",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.5,
+      2.2,
+      -11.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.4,
+      0.5,
+      0.9
+     ],
+     "Intensity": 8.0,
+     "Range": 4.5
+    }
+   ]
+  },
+  {
+   "GUID": "69844e5be280e1a0",
+   "Name": "Warm house light over the family table",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.3,
+      3.4,
+      -1.5
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 170.0,
+     "Range": 7.0,
+     "InnerConeAngle": 35.0,
+     "OuterConeAngle": 72.0
+    }
+   ]
+  },
+  {
+   "GUID": "5e29957b22d8cb34",
+   "Name": "Warm house light, east tables",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.6,
+      3.4,
+      -6.4
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 170.0,
+     "Range": 7.0,
+     "InnerConeAngle": 35.0,
+     "OuterConeAngle": 72.0
+    }
+   ]
+  },
+  {
+   "GUID": "7c9fdb92c2c84de6",
+   "Name": "Warm house light, memorial corner",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.6,
+      3.4,
+      2.4
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 170.0,
+     "Range": 7.0,
+     "InnerConeAngle": 35.0,
+     "OuterConeAngle": 72.0
+    }
+   ]
+  },
+  {
+   "GUID": "570afe6688cf01f3",
+   "Name": "Warm house light, west tables",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.2,
+      3.4,
+      -7.0
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 170.0,
+     "Range": 7.0,
+     "InnerConeAngle": 35.0,
+     "OuterConeAngle": 72.0
+    }
+   ]
+  },
+  {
+   "GUID": "2a68d2ae6557f8e2",
+   "Name": "Warm house light, piano corner",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.6,
+      3.45,
+      1.2
+     ],
+     "Rotation": [
+      90.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 170.0,
+     "Range": 7.0,
+     "InnerConeAngle": 35.0,
+     "OuterConeAngle": 72.0
+    }
+   ]
+  },
+  {
+   "GUID": "0798e6ef01b08f3a",
+   "Name": "Crest light",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.45,
+      3.6
+     ],
+     "Rotation": [
+      8.7022,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 140.0,
+     "Range": 7.0,
+     "InnerConeAngle": 10.0,
+     "OuterConeAngle": 20.0
+    }
+   ]
+  },
+  {
+   "GUID": "14563e2034a6f3a2",
+   "Name": "Party can W1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.4,
+      2.2,
+      2.25
+     ],
+     "Rotation": [
+      9.264,
+      62.9125,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.55,
+      0.18
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "2e06d6d15cbc58c1",
+   "Name": "Party can W2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0667,
+      2.2,
+      2.25
+     ],
+     "Rotation": [
+      8.8747,
+      64.1574,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.18,
+      0.55
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "4effb9b9ab30ec9f",
+   "Name": "Party can W3",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.7333,
+      2.2,
+      2.25
+     ],
+     "Rotation": [
+      8.5131,
+      65.2997,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.15,
+      0.85,
+      0.9
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "0066654b6b0216c6",
+   "Name": "Party can W4",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.4,
+      2.2,
+      2.25
+     ],
+     "Rotation": [
+      8.1768,
+      66.351,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.3,
+      0.38,
+      1.0
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "3269907be470acf8",
+   "Name": "Party can E1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.4,
+      2.2,
+      1.65
+     ],
+     "Rotation": [
+      7.9347,
+      -62.6909,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.55,
+      0.18
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "44f87da5e3331082",
+   "Name": "Party can E2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.7333,
+      2.2,
+      1.65
+     ],
+     "Rotation": [
+      8.2409,
+      -61.5275,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.18,
+      0.55
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "4e04ad56c76889c0",
+   "Name": "Party can E3",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0667,
+      2.2,
+      1.65
+     ],
+     "Rotation": [
+      8.5676,
+      -60.27,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.15,
+      0.85,
+      0.9
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "1eb1e71f12f4a934",
+   "Name": "Party can E4",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.4,
+      2.2,
+      1.65
+     ],
+     "Rotation": [
+      8.9162,
+      -58.9078,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.3,
+      0.38,
+      1.0
+     ],
+     "Intensity": 650.0,
+     "Range": 11.0,
+     "InnerConeAngle": 14.0,
+     "OuterConeAngle": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "7470be3c4947daaa",
+   "Name": "Mirror ball beam 1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      2.9,
+      -1.4
+     ],
+     "Rotation": [
+      42.2822,
+      -131.1859,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.18,
+      0.55
+     ],
+     "Intensity": 420.0,
+     "Range": 6.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "4db04f3800901c6d",
+   "Name": "Mirror ball beam 2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      2.9,
+      -1.4
+     ],
+     "Rotation": [
+      41.4793,
+      52.4314,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.15,
+      0.85,
+      0.9
+     ],
+     "Intensity": 420.0,
+     "Range": 6.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "3d1974bb177210e9",
+   "Name": "Uplight 1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.6,
+      0.5,
+      3.0
+     ],
+     "Rotation": [
+      -22.9326,
+      21.4413,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.55,
+      0.18
+     ],
+     "Intensity": 700.0,
+     "Range": 8.0,
+     "InnerConeAngle": 5.0,
+     "OuterConeAngle": 12.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "4426fda18fb0abc6",
+   "Name": "Uplight 2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.6,
+      0.5,
+      3.0
+     ],
+     "Rotation": [
+      -22.9326,
+      -21.4413,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.3,
+      0.38,
+      1.0
+     ],
+     "Intensity": 700.0,
+     "Range": 8.0,
+     "InnerConeAngle": 5.0,
+     "OuterConeAngle": 12.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "0e49b52c2a65917e",
+   "Name": "Follow 1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      3.45,
+      -1.0
+     ],
+     "Rotation": [
+      12.4881,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.9,
+      0.8
+     ],
+     "Intensity": 560.0,
+     "Range": 12.0,
+     "InnerConeAngle": 7.0,
+     "OuterConeAngle": 15.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "458233ee19a4d244",
+   "Name": "Follow 2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.5,
+      3.45,
+      -1.2
+     ],
+     "Rotation": [
+      20.0768,
+      -11.3099,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.9,
+      0.8
+     ],
+     "Intensity": 560.0,
+     "Range": 12.0,
+     "InnerConeAngle": 7.0,
+     "OuterConeAngle": 15.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "570d9ffe651d6496",
+   "Name": "Follow 3",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.5,
+      3.45,
+      -1.2
+     ],
+     "Rotation": [
+      19.7587,
+      11.113,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.9,
+      0.8
+     ],
+     "Intensity": 560.0,
+     "Range": 12.0,
+     "InnerConeAngle": 7.0,
+     "OuterConeAngle": 15.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "36e344e8bda6d51b",
+   "Name": "Blinder 1",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.9,
+      2.35,
+      2.1
+     ],
+     "Rotation": [
+      4.9757,
+      157.7598,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 520.0,
+     "Range": 14.0,
+     "InnerConeAngle": 18.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Blinder",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "3bb7373762ec8bd1",
+   "Name": "Blinder 2",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.9,
+      2.35,
+      1.5
+     ],
+     "Rotation": [
+      5.2399,
+      -156.5036,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.78,
+      0.52
+     ],
+     "Intensity": 520.0,
+     "Range": 14.0,
+     "InnerConeAngle": 18.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Blinder",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "348b8aebe76769d4",
+   "Name": "Strobe on the lip",
+   "DestroyOnLoad": true,
+   "Parent": "088a3ec985e2a989",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.5,
+      3.0
+     ],
+     "Rotation": [
+      -6.3402,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "Intensity": 600.0,
+     "Range": 12.0,
+     "InnerConeAngle": 30.0,
+     "OuterConeAngle": 55.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Strobe",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "79efdf808c44b3d5",
+   "Name": "VenueInfo",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueInfo",
+     "Name": "Funeral Afterparty at the Legion",
+     "Author": "Drumsmith",
+     "Outdoor": false,
+     "RoomBack": -15.0,
+     "RoomCeiling": 3.6,
+     "RoomHalfWidth": 9.0,
+     "DeskZ": -13.0,
+     "BuildStage": false,
+     "BuildSet": false,
+     "BuildRig": false,
+     "BuildFx": false,
+     "AmbientColor": [
+      0.06,
+      0.045,
+      0.035
+     ],
+     "FogColor": [
+      0.03,
+      0.022,
+      0.016
+     ],
+     "Haze": 0.45,
+     "SkyTime": 22.0,
+     "MoonBrightness": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "39a389e99d4d1816",
+   "Name": "Spot_Drummer",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.65,
+      6.75
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Drummer"
+    }
+   ]
+  },
+  {
+   "GUID": "1b414b6766925958",
+   "Name": "Spot_Guitar",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.6,
+      0.4,
+      4.3
+     ],
+     "Rotation": [
+      0.0,
+      8.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Guitar"
+    }
+   ]
+  },
+  {
+   "GUID": "665a742adf60e258",
+   "Name": "Spot_Bass",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.6,
+      0.4,
+      4.4
+     ],
+     "Rotation": [
+      0.0,
+      -8.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Bass"
+    }
+   ]
+  },
+  {
+   "GUID": "4f8b542f7ae3f95c",
+   "Name": "Standing at the back",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.6,
+      0.0,
+      -11.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      9.6,
+      1.0,
+      2.6
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 20,
+     "Jitter": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "656f237de11ac66b",
+   "Name": "At the bar",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.9,
+      0.0,
+      -12.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      2.2,
+      1.0,
+      3.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 7,
+     "Jitter": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "019cc4185f34a370",
+   "Name": "Watching the floor",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      -9.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      6.0,
+      1.0,
+      2.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "Figures": "Posed",
+     "HeadCount": 9,
+     "Jitter": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "6e0c8b8953b6dd21",
+   "Name": "West, between the tables",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.1,
+      0.0,
+      -7.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.4,
+      1.0,
+      3.6
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 6,
+     "Jitter": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "4e128a7ce2be7bfb",
+   "Name": "East of the floor",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.3,
+      0.0,
+      0.1
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.0,
+      3.4
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "Figures": "Posed",
+     "HeadCount": 7,
+     "Jitter": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "6aea71d804ba30d5",
+   "Name": "Between the east tables",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.4,
+      0.0,
+      -7.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.0,
+      4.4
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 7,
+     "Jitter": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "2ff63d76f7e37dfc",
+   "Name": "Camera positions",
+   "DestroyOnLoad": true,
+   "Parent": "5a9e5dca12b17262",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "07cf4352e268994c",
+   "Name": "hall-wide",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.4,
+      3.25,
+      -14.6
+     ],
+     "Rotation": [
+      7.1643,
+      -1.34,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Wide",
+     "FieldOfView": 60.0,
+     "Tag": "hall-wide"
+    }
+   ]
+  },
+  {
+   "GUID": "3bab33f8027fa44e",
+   "Name": "crane-west",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.4,
+      3.25,
+      -8.6
+     ],
+     "Rotation": [
+      9.5036,
+      36.5289,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Crane",
+     "FieldOfView": 56.0,
+     "Tag": "crane-west"
+    }
+   ]
+  },
+  {
+   "GUID": "42204db447db40ab",
+   "Name": "bar-long-lens",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.2,
+      2.05,
+      -13.2
+     ],
+     "Rotation": [
+      0.8533,
+      12.0352,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Desk",
+     "FieldOfView": 30.0,
+     "Tag": "bar-long-lens"
+    }
+   ]
+  },
+  {
+   "GUID": "0784cfa1771868d3",
+   "Name": "toast-table",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.5,
+      1.9,
+      -5.2
+     ],
+     "Rotation": [
+      9.781,
+      -35.8821,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 58.0,
+     "Tag": "toast-table"
+    }
+   ]
+  },
+  {
+   "GUID": "55209432754e1491",
+   "Name": "portrait-piano",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.4,
+      1.85,
+      -2.6
+     ],
+     "Rotation": [
+      2.6564,
+      39.3518,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 46.0,
+     "Tag": "portrait-piano"
+    }
+   ]
+  },
+  {
+   "GUID": "4fcd5f088ecf68bf",
+   "Name": "dance-floor",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.6,
+      1.65,
+      -6.9
+     ],
+     "Rotation": [
+      4.3453,
+      16.7826,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 55.0,
+     "Tag": "dance-floor"
+    }
+   ]
+  },
+  {
+   "GUID": "530c328f4facc1e3",
+   "Name": "dessert-wall",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.6,
+      1.75,
+      -4.6
+     ],
+     "Rotation": [
+      8.1339,
+      41.3785,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 50.0,
+     "Tag": "dessert-wall"
+    }
+   ]
+  },
+  {
+   "GUID": "51c4df4964d72800",
+   "Name": "memorial",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.8,
+      1.7,
+      -1.4
+     ],
+     "Rotation": [
+      2.5742,
+      -37.6942,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 50.0,
+     "Tag": "memorial"
+    }
+   ]
+  },
+  {
+   "GUID": "6a78fa4e24ec9815",
+   "Name": "tea-towel",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.7,
+      2.0,
+      5.0
+     ],
+     "Rotation": [
+      19.8252,
+      -55.4915,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Close",
+     "FieldOfView": 44.0,
+     "Tag": "tea-towel"
+    }
+   ]
+  },
+  {
+   "GUID": "047453a11617b929",
+   "Name": "Arrival 01",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.3,
+      1.62,
+      -14.6
+     ],
+     "Rotation": [
+      0.2046,
+      1.023,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 64.0,
+     "Tag": "arrival/01"
+    }
+   ]
+  },
+  {
+   "GUID": "772f5ed46332516b",
+   "Name": "Arrival 02",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.2,
+      1.66,
+      -13.2
+     ],
+     "Rotation": [
+      0.4148,
+      -81.6743,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 62.0,
+     "Tag": "arrival/02"
+    }
+   ]
+  },
+  {
+   "GUID": "3b4fca3840812667",
+   "Name": "Arrival 03",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.6,
+      1.7,
+      -11.0
+     ],
+     "Rotation": [
+      2.3962,
+      -47.9682,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 60.0,
+     "Tag": "arrival/03"
+    }
+   ]
+  },
+  {
+   "GUID": "0e2d05d872111c63",
+   "Name": "Arrival 04",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.9,
+      1.72,
+      -8.4
+     ],
+     "Rotation": [
+      1.4461,
+      -29.8009,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 58.0,
+     "Tag": "arrival/04"
+    }
+   ]
+  },
+  {
+   "GUID": "53edbcf155892fe4",
+   "Name": "Arrival 05",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.6,
+      1.78,
+      -6.5
+     ],
+     "Rotation": [
+      2.5429,
+      45.4735,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 58.0,
+     "Tag": "arrival/05"
+    }
+   ]
+  },
+  {
+   "GUID": "270cf474d7a051bb",
+   "Name": "Arrival 06",
+   "DestroyOnLoad": true,
+   "Parent": "2ff63d76f7e37dfc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.85,
+      -5.0
+     ],
+     "Rotation": [
+      0.2728,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 56.0,
+     "Tag": "arrival/06"
+    }
+   ]
+  }
+ ]
+}

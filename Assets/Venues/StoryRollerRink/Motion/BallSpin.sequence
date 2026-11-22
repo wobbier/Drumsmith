@@ -1,0 +1,265 @@
+{
+ "Version": 1,
+ "Name": "BallSpin",
+ "FrameRate": 30,
+ "DurationFrames": 270,
+ "Tracks": [
+  {
+   "Binding": "Spin",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 11,
+     "Value": [
+      0.0,
+      -0.13053,
+      0.0,
+      0.99145
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.0,
+      -0.25882,
+      0.0,
+      0.96593
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      0.0,
+      -0.38268,
+      0.0,
+      0.92388
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0,
+      -0.5,
+      0.0,
+      0.86603
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 56,
+     "Value": [
+      0.0,
+      -0.60876,
+      0.0,
+      0.79335
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 68,
+     "Value": [
+      0.0,
+      -0.70711,
+      0.0,
+      0.70711
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 79,
+     "Value": [
+      0.0,
+      -0.79335,
+      0.0,
+      0.60876
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0.0,
+      -0.86603,
+      0.0,
+      0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 101,
+     "Value": [
+      0.0,
+      -0.92388,
+      0.0,
+      0.38268
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 112,
+     "Value": [
+      0.0,
+      -0.96593,
+      0.0,
+      0.25882
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 124,
+     "Value": [
+      0.0,
+      -0.99145,
+      0.0,
+      0.13053
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      0.0,
+      -1.0,
+      0.0,
+      0.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 146,
+     "Value": [
+      0.0,
+      -0.99145,
+      0.0,
+      -0.13053
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 158,
+     "Value": [
+      0.0,
+      -0.96593,
+      0.0,
+      -0.25882
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 169,
+     "Value": [
+      0.0,
+      -0.92388,
+      0.0,
+      -0.38268
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 180,
+     "Value": [
+      0.0,
+      -0.86603,
+      0.0,
+      -0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 191,
+     "Value": [
+      0.0,
+      -0.79335,
+      0.0,
+      -0.60876
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 202,
+     "Value": [
+      0.0,
+      -0.70711,
+      0.0,
+      -0.70711
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 214,
+     "Value": [
+      0.0,
+      -0.60876,
+      0.0,
+      -0.79335
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      0.0,
+      -0.5,
+      0.0,
+      -0.86603
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 236,
+     "Value": [
+      0.0,
+      -0.38268,
+      0.0,
+      -0.92388
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 248,
+     "Value": [
+      0.0,
+      -0.25882,
+      0.0,
+      -0.96593
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 259,
+     "Value": [
+      0.0,
+      -0.13053,
+      0.0,
+      -0.99145
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 270,
+     "Value": [
+      0.0,
+      -0.0,
+      0.0,
+      -1.0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

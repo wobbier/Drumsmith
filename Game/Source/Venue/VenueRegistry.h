@@ -3,6 +3,7 @@
 #include "JSON.h"
 #include <cstdint>
 #include <functional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -111,6 +112,23 @@ public:
     {
         static std::string venue;
         return venue;
+    }
+
+    // Story mode's state of the venue for the song being played (VenueStory markers): set by
+    // GigSession for a story song, or by --story / --story-song for a preview. Empty: no story.
+    struct StoryStage
+    {
+        std::string Set;                // the story set's id
+        int Song = -1;
+        std::set<std::string> Flags;    // set from the start of the song
+        std::set<std::string> AtCue;    // set once the song reaches its cue
+        std::string Cue;                // "intro", "verse", "first_chorus", "bridge", "solo", "outro", "song_end"
+        bool Active() const { return !Set.empty(); }
+    };
+    static StoryStage& Story()
+    {
+        static StoryStage stage;
+        return stage;
     }
 
 private:

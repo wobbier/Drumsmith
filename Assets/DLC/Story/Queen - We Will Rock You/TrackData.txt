@@ -1,0 +1,19 @@
+{
+ "Title": "We Will Rock You - Remastered 2011",
+ "Artist": "Queen",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Last Train Busking Pitch",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 122.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/54flyrjcdnQdco7300avMJ"
+ },
+ "NoteCount": 702
+}

@@ -171,14 +171,17 @@ void TrackDatabase::Reload()
                     bool exists = fileExistsInDirectory( entry.path(), "TrackData.txt" );
                     if( exists )
                     {
-                        m_trackList.m_tracks.emplace_back( TrackData( Path( entry.path().generic_string() + "/TrackData.txt" ) ) );
-                        m_trackList.m_tracks.back().Load();
-
-                        Path trackPath( m_trackList.m_tracks.back().m_trackSourcePath );
-                        if( !trackPath.Exists )
+                        LoadSongFolder( entry.path().generic_string() );
+                    }
+                    else if( entry.path().filename().generic_string() == kStoryFolder )
+                    {
+                        // Story mode's stand-ins (Tools/Story/make_stub_songs.py): a song folder each.
+                        for( const auto& song : fs::directory_iterator( entry.path() ) )
                         {
-                            YIKES_FMT( "Song does not exist in directory: %s", m_trackList.m_tracks.back().m_trackFileName.c_str() );
-                            continue;
+                            if( song.is_directory() && fileExistsInDirectory( song.path(), "TrackData.txt" ) )
+                            {
+                                LoadSongFolder( song.path().generic_string() );
+                            }
                         }
                     }
                     else if( entry.path().filename().generic_string().rfind( '.', 0 ) != 0 )
@@ -205,6 +208,19 @@ void TrackDatabase::Reload()
     //    path.LoadNoteData();
     //    path.Save();
     //}
+}
+
+
+void TrackDatabase::LoadSongFolder( const std::string& inFolder )
+{
+    m_trackList.m_tracks.emplace_back( TrackData( Path( inFolder + "/TrackData.txt" ) ) );
+    m_trackList.m_tracks.back().Load();
+
+    Path trackPath( m_trackList.m_tracks.back().m_trackSourcePath );
+    if( !trackPath.Exists )
+    {
+        YIKES_FMT( "Song does not exist in directory: %s", m_trackList.m_tracks.back().m_trackFileName.c_str() );
+    }
 }
 
 

@@ -1,0 +1,1214 @@
+{
+ "Generated": "by Tools/Story/make_story.py from Design/Story-Mode-Setlists.json: edit those, not this",
+ "Sets": [
+  {
+   "Id": "s01-basement",
+   "Act": 1,
+   "Name": "In the Basement with My AirPods",
+   "Description": "The old bucket drums are still beside the real kit. Upstairs somebody leaves the kitchen door open a little longer with each song. Down here it’s just you, the camcorder and the BASSIST WANTED flyer on the gig board.",
+   "Venue": "StoryBasement",
+   "VenueBase": "Basement",
+   "PassAccuracy": 60.0,
+   "Requires": {
+    "StorySets": [],
+    "Members": []
+   },
+   "Songs": [
+    {
+     "Artist": "Lorde",
+     "Title": "Royals",
+     "Spotify": "https://open.spotify.com/track/7BFI9QZPQKgYuR2HhDgwbG",
+     "Flags": [
+      "tape_rolling"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "Billie Eilish",
+     "Title": "bad guy",
+     "Spotify": "https://open.spotify.com/track/2Fxmhks0bxGSBdJ92vM42m",
+     "Flags": [
+      "tape_rolling",
+      "crt_turned_toward_kit"
+     ],
+     "Cue": "outro"
+    },
+    {
+     "Artist": "Lights",
+     "Title": "February Air",
+     "Spotify": "https://open.spotify.com/track/6P4a5UilWpLGsX4hd5friw",
+     "Flags": [
+      "tape_rolling",
+      "crt_turned_toward_kit",
+      "window_well_blue"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "The Postal Service",
+     "Title": "Sleeping In - Remastered",
+     "Spotify": "https://open.spotify.com/track/2J6JBKRoQndkNyY4rf29Tl",
+     "Flags": [
+      "tape_rolling",
+      "crt_turned_toward_kit",
+      "window_well_blue",
+      "kitchen_door_ajar"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Owl City",
+     "Title": "Fireflies",
+     "Spotify": "https://open.spotify.com/track/3DamFFqW32WihKkTVlwTYQ",
+     "Flags": [
+      "tape_rolling",
+      "crt_turned_toward_kit",
+      "window_well_blue",
+      "kitchen_door_ajar",
+      "crate_at_stairs"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "milk-crate"
+   ]
+  },
+  {
+   "Id": "s02-busking",
+   "Act": 1,
+   "Name": "The Last Train Busking Pitch",
+   "Description": "A phone speaker, a bucket and a dry patch between the turnstiles and the stairs. Two trains will come and go before the commuter in the mustard scarf spends their first loonie.",
+   "Venue": "StorySubway",
+   "VenueBase": "Club",
+   "PassAccuracy": 60.0,
+   "Requires": {
+    "StorySets": [
+     "s01-basement"
+    ],
+    "Members": []
+   },
+   "Songs": [
+    {
+     "Artist": "Queen",
+     "Title": "We Will Rock You - Remastered 2011",
+     "Spotify": "https://open.spotify.com/track/54flyrjcdnQdco7300avMJ",
+     "Flags": [
+      "commuter_at_pillar"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Gorillaz, Del The Funky Homosapien",
+     "Title": "Clint Eastwood",
+     "Spotify": "https://open.spotify.com/track/7yMiX7n9SBvadzox8T5jzT",
+     "Flags": [
+      "commuter_at_pillar",
+      "first_train_gone"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "M.I.A.",
+     "Title": "Paper Planes",
+     "Spotify": "https://open.spotify.com/track/3ZlFUr0RBrUYYsmlcFvD0e",
+     "Flags": [
+      "commuter_at_pillar",
+      "first_train_gone",
+      "family_at_pitch"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "The Marvelettes",
+     "Title": "Please Mr. Postman",
+     "Spotify": "https://open.spotify.com/track/5fNDP3NTdE69szQHUl4fFr",
+     "Flags": [
+      "commuter_at_pillar",
+      "first_train_gone",
+      "family_at_pitch",
+      "second_train_gone"
+     ],
+     "Cue": "outro"
+    },
+    {
+     "Artist": "The Jackson 5",
+     "Title": "I Want You Back",
+     "Spotify": "https://open.spotify.com/track/5LxvwujISqiB8vpRYv887S",
+     "Flags": [
+      "commuter_at_pillar",
+      "first_train_gone",
+      "family_at_pitch",
+      "second_train_gone",
+      "tip_in_case"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "drilled-loonie"
+   ]
+  },
+  {
+   "Id": "s03-coffee-shop",
+   "Act": 1,
+   "Name": "The Millennial Coffee Shop",
+   "Description": "The manager pays in cash and a breakfast sandwich. Jules from the early shift sits in on guitar for the one-minute opener. The rest of the set runs from the backing track while Jules pulls shots. Two customers share a table, a laptop and a very good excuse to stay.",
+   "Venue": "StoryCoffeeShop",
+   "VenueBase": "Club",
+   "PassAccuracy": 65.0,
+   "Requires": {
+    "StorySets": [
+     "s02-busking"
+    ],
+    "Members": []
+   },
+   "Songs": [
+    {
+     "Artist": "Beck",
+     "Title": "Ramona - Acoustic Version",
+     "Spotify": "https://open.spotify.com/track/1Z50OHs5UJCybYStfwIcot",
+     "Flags": [
+      "guitar_at_counter"
+     ],
+     "Cue": "song_end"
+    },
+    {
+     "Artist": "Lights, Owl City",
+     "Title": "Cactus In The Valley - Acoustic",
+     "Spotify": "https://open.spotify.com/track/288xqEJiCcSc2zGFanlclV",
+     "Flags": [
+      "guitar_at_counter",
+      "laptop_lowered"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Sixpence None The Richer",
+     "Title": "Kiss Me",
+     "Spotify": "https://open.spotify.com/track/754kgU5rWscRTfvlsuEwFp",
+     "Flags": [
+      "guitar_at_counter",
+      "laptop_lowered",
+      "chairs_turned"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Milky Chance",
+     "Title": "Stolen Dance",
+     "Spotify": "https://open.spotify.com/track/6vECYJHxYmm3Ydt3fF01pE",
+     "Flags": [
+      "guitar_at_counter",
+      "laptop_lowered",
+      "chairs_turned",
+      "spare_chair_filled"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Of Monsters and Men",
+     "Title": "Little Talks",
+     "Spotify": "https://open.spotify.com/track/2ihCaVdNZmnHZWt0fvAM7B",
+     "Flags": [
+      "guitar_at_counter",
+      "laptop_lowered",
+      "chairs_turned",
+      "spare_chair_filled",
+      "wand_off"
+     ],
+     "Cue": "first_chorus"
+    }
+   ],
+   "Rewards": [
+    "espresso-tin"
+   ],
+   "Audition": "aud-bass"
+  },
+  {
+   "Id": "s04-dive-bar",
+   "Act": 2,
+   "Name": "The Dead End Dive Bar",
+   "Description": "Your new bassist wedges an amp against your knees. The bartender offers you the door take if you can keep the pool league around after the last game. You can count the entire audience in the mirror behind the bottles.",
+   "Venue": "StoryDiveBar",
+   "VenueBase": "Club",
+   "PassAccuracy": 65.0,
+   "Requires": {
+    "StorySets": [
+     "s03-coffee-shop"
+    ],
+    "Members": [
+     "bass"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Cage The Elephant",
+     "Title": "Ain't No Rest For The Wicked",
+     "Spotify": "https://open.spotify.com/track/1SfOQKZv0c9FqNXd2Kjt6P",
+     "Flags": [
+      "league_at_table"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "July Talk",
+     "Title": "The Garden",
+     "Spotify": "https://open.spotify.com/track/2Amx73GQrRztXRe2N6xgM1",
+     "Flags": [
+      "league_at_table",
+      "first_listener"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Finger Eleven",
+     "Title": "Paralyzer",
+     "Spotify": "https://open.spotify.com/track/14XKGDgTHB8o0Y3ozCvxNV",
+     "Flags": [
+      "league_at_table",
+      "first_listener",
+      "eight_sunk"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "The White Stripes",
+     "Title": "Icky Thump",
+     "Spotify": "https://open.spotify.com/track/09QZAEmdbq28OaNyqTOEvY",
+     "Flags": [
+      "league_at_table",
+      "first_listener",
+      "eight_sunk",
+      "pool_table_covered"
+     ],
+     "Cue": "outro"
+    },
+    {
+     "Artist": "Jet",
+     "Title": "Are You Gonna Be My Girl",
+     "Spotify": "https://open.spotify.com/track/305WCRhhS10XUcH6AEwZk6",
+     "Flags": [
+      "league_at_table",
+      "first_listener",
+      "eight_sunk",
+      "pool_table_covered",
+      "door_take_counted"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "bar-rug"
+   ],
+   "MovesInto": "garage",
+   "Audition": "aud-guitar"
+  },
+  {
+   "Id": "s05-legion",
+   "Act": 2,
+   "Name": "Funeral Afterparty at the Legion",
+   "Description": "Dad asked for Sinatra. His daughter brought the mix she made for the ride home. Leave a square of parquet for her first dance. Her uncle thinks he’s just here to make the toast.",
+   "Venue": "StoryLegion",
+   "VenueBase": "Club",
+   "PassAccuracy": 65.0,
+   "Requires": {
+    "StorySets": [
+     "s04-dive-bar"
+    ],
+    "Members": [
+     "bass",
+     "guitar"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Frank Sinatra",
+     "Title": "My Way - 2008 Remastered",
+     "Spotify": "https://open.spotify.com/track/2YkIDPL5lGhRhomCq4S2RO",
+     "Flags": [
+      "toast_seat_empty"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "Gerard Way",
+     "Title": "Baby You're a Haunted House",
+     "Spotify": "https://open.spotify.com/track/4c38yr2PflGI2DSIzqsnmF",
+     "Flags": [
+      "toast_seat_empty",
+      "dessert_table_moved"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Marianas Trench",
+     "Title": "Dearly Departed",
+     "Spotify": "https://open.spotify.com/track/7i5JxL1haaLoyNNZAb6T0L",
+     "Flags": [
+      "toast_seat_empty",
+      "dessert_table_moved",
+      "shoes_by_chair"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "The Requiem",
+     "Title": "I’ll Be Late For My Funeral",
+     "Spotify": "https://open.spotify.com/track/6hoXYrY3T51gLkdDRFk3JI",
+     "Flags": [
+      "toast_seat_empty",
+      "dessert_table_moved",
+      "shoes_by_chair",
+      "portrait_on_piano"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "My Chemical Romance",
+     "Title": "Helena",
+     "Spotify": "https://open.spotify.com/track/5dTHtzHFPyi8TlTtzoz1J9",
+     "Flags": [
+      "toast_seat_empty",
+      "dessert_table_moved",
+      "shoes_by_chair",
+      "portrait_on_piano",
+      "family_on_floor"
+     ],
+     "Cue": "first_chorus"
+    }
+   ],
+   "Rewards": [
+    "family-photo"
+   ]
+  },
+  {
+   "Id": "s06-roller-rink",
+   "Act": 2,
+   "Name": "Adults Only at the Roller Rink",
+   "Description": "Somebody carried the nacho warmer downstairs so you could fit the kit in the booth. The regulars in silver jackets know every turn on this floor. The last pair of orange rentals went to somebody who has never made a lap.",
+   "Venue": "StoryRollerRink",
+   "VenueBase": "Club",
+   "PassAccuracy": 70.0,
+   "Requires": {
+    "StorySets": [
+     "s05-legion"
+    ],
+    "Members": [
+     "bass",
+     "guitar"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Boney M.",
+     "Title": "Daddy Cool",
+     "Spotify": "https://open.spotify.com/track/3qPp6FTnjEM0qedq3VJYN8",
+     "Flags": [
+      "newcomer_at_rail"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "Kylie Minogue",
+     "Title": "Can't Get You out of My Head",
+     "Spotify": "https://open.spotify.com/track/3E7ZwUMJFqpsDOJzEkBrQ7",
+     "Flags": [
+      "newcomer_at_rail",
+      "rail_lit"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "ABBA",
+     "Title": "Gimme! Gimme! Gimme! (A Man After Midnight)",
+     "Spotify": "https://open.spotify.com/track/3vkQ5DAB1qQMYO4Mr9zJN6",
+     "Flags": [
+      "newcomer_at_rail",
+      "rail_lit",
+      "rail_empty"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Daft Punk, Pharrell Williams, Nile Rodgers",
+     "Title": "Get Lucky (feat. Pharrell Williams and Nile Rodgers)",
+     "Spotify": "https://open.spotify.com/track/69kOkLUCkxIZYexIgSG8rq",
+     "Flags": [
+      "newcomer_at_rail",
+      "rail_lit",
+      "rail_empty",
+      "three_abreast"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Bruno Mars",
+     "Title": "Treasure",
+     "Spotify": "https://open.spotify.com/track/55h7vJchibLdUkxdlX3fK7",
+     "Flags": [
+      "newcomer_at_rail",
+      "rail_lit",
+      "rail_empty",
+      "three_abreast",
+      "circle_open"
+     ],
+     "Cue": "first_chorus"
+    }
+   ],
+   "Rewards": [
+    "mirror-ball"
+   ],
+   "Audition": "aud-vocals"
+  },
+  {
+   "Id": "s07-pledge-drive",
+   "Act": 3,
+   "Name": "The Pledge Drive Night Shift",
+   "Description": "A campus station loses its sampler on pledge night. You take the shift with five local voices rotating through one mic. On the other side of the glass, volunteers have until the end of the broadcast to make rent.",
+   "Venue": "StoryRadioStation",
+   "VenueBase": "Studio",
+   "PassAccuracy": 70.0,
+   "Requires": {
+    "StorySets": [
+     "s06-roller-rink"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "The Notorious B.I.G.",
+     "Title": "Juicy - 2007 Remaster",
+     "Spotify": "https://open.spotify.com/track/2b7FqlHc3JrzlYtGEkzq22",
+     "Flags": [
+      "first_phone_lit"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Outkast",
+     "Title": "Ms. Jackson",
+     "Spotify": "https://open.spotify.com/track/0I3q5fE6wg7LIfHGngUTnV",
+     "Flags": [
+      "first_phone_lit",
+      "second_phone_lit"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Kendrick Lamar",
+     "Title": "King Kunta",
+     "Spotify": "https://open.spotify.com/track/0N3W5peJUQtI4eyR6GJT5O",
+     "Flags": [
+      "first_phone_lit",
+      "second_phone_lit",
+      "pledges_cover_glass"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Anderson .Paak",
+     "Title": "Put Me Thru",
+     "Spotify": "https://open.spotify.com/track/70SjyVMzhmMeJQD8hOmIBp",
+     "Flags": [
+      "first_phone_lit",
+      "second_phone_lit",
+      "pledges_cover_glass",
+      "all_phones_lit"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "D'Angelo",
+     "Title": "Chicken Grease",
+     "Spotify": "https://open.spotify.com/track/5MFYNPVGgMfWwNY3yl4M6F",
+     "Flags": [
+      "first_phone_lit",
+      "second_phone_lit",
+      "pledges_cover_glass",
+      "all_phones_lit",
+      "rent_paid"
+     ],
+     "Cue": "outro"
+    }
+   ],
+   "Rewards": [
+    "on-air-lamp"
+   ],
+   "MovesInto": "rehearsal"
+  },
+  {
+   "Id": "s08-food-court",
+   "Act": 3,
+   "Name": "Food Court Farewell Show",
+   "Description": "The mall closes Sunday. On Saturday the skate shop spends the last of its promo money on your band’s first full-lineup matinee. Somebody has brought a marker and a spare kick head for the regulars to sign.",
+   "Venue": "StoryFoodCourt",
+   "VenueBase": "Club",
+   "PassAccuracy": 72.0,
+   "Requires": {
+    "StorySets": [
+     "s07-pledge-drive"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Simple Plan",
+     "Title": "Addicted",
+     "Spotify": "https://open.spotify.com/track/38z6jaLE0F13dxv28n3wlq",
+     "Flags": [
+      "one_signature"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "Avril Lavigne",
+     "Title": "Sk8er Boi",
+     "Spotify": "https://open.spotify.com/track/00Mb3DuaIH1kjrwOku9CGU",
+     "Flags": [
+      "one_signature",
+      "guard_drawn"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Sum 41",
+     "Title": "Fat Lip",
+     "Spotify": "https://open.spotify.com/track/4dzOxPZFYX77xpMwv4EhnO",
+     "Flags": [
+      "one_signature",
+      "guard_drawn",
+      "guard_signed"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Green Day",
+     "Title": "Basket Case",
+     "Spotify": "https://open.spotify.com/track/6L89mwZXSOwYl76YXfX13s",
+     "Flags": [
+      "one_signature",
+      "guard_drawn",
+      "guard_signed",
+      "shutters_down"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Paramore",
+     "Title": "Misery Business",
+     "Spotify": "https://open.spotify.com/track/3l9CW99AHtExIRV4hW2N5m",
+     "Flags": [
+      "one_signature",
+      "guard_drawn",
+      "guard_signed",
+      "shutters_down",
+      "head_on_riser"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "signed-kick-head"
+   ]
+  },
+  {
+   "Id": "s09-drive-in",
+   "Act": 3,
+   "Name": "Midnight at the FM Drive In",
+   "Description": "The regional electronic festival sends your kit out over FM. It’s your first booking away from town. A quilt and a battered hatchback mark the pair whose shadows will end up forty feet tall.",
+   "Venue": "StoryDriveIn",
+   "VenueBase": "Festival",
+   "PassAccuracy": 72.0,
+   "Requires": {
+    "StorySets": [
+     "s08-food-court"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Justice",
+     "Title": "Genesis",
+     "Spotify": "https://open.spotify.com/track/2W29TNaSCiolWbPfQNgNOW",
+     "Flags": [
+      "headlights_on"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "NERO",
+     "Title": "Promises",
+     "Spotify": "https://open.spotify.com/track/2LCCxYQ5dw1dz3Pu6APEUH",
+     "Flags": [
+      "headlights_on",
+      "quilt_at_hatch"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Skrillex",
+     "Title": "Scary Monsters and Nice Sprites",
+     "Spotify": "https://open.spotify.com/track/4rwpZEcnalkuhPyGkEdhu0",
+     "Flags": [
+      "headlights_on",
+      "quilt_at_hatch",
+      "quilt_on_roof"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "The Prodigy",
+     "Title": "Omen",
+     "Spotify": "https://open.spotify.com/track/1edapjizXWDfcJPt29Jg8Z",
+     "Flags": [
+      "headlights_on",
+      "quilt_at_hatch",
+      "quilt_on_roof",
+      "shadows_on_screen"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Pendulum",
+     "Title": "Witchcraft",
+     "Spotify": "https://open.spotify.com/track/4Y2glvLjQGOb4dXnwm1hQf",
+     "Flags": [
+      "headlights_on",
+      "quilt_at_hatch",
+      "quilt_on_roof",
+      "shadows_on_screen",
+      "hands_on_screen"
+     ],
+     "Cue": "outro"
+    }
+   ],
+   "Rewards": [
+    "amber-lamp"
+   ],
+   "Audition": "aud-keys"
+  },
+  {
+   "Id": "s10-steel-mill",
+   "Act": 3,
+   "Name": "One Night on the Steel Mill Tour",
+   "Description": "A metal package tour needs one drummer for five changeovers. Each act gets one song with you and leaves a marked-up sheet by the floor tom. Halfway through the night, the crew stops clearing the wing. The other bands want to see this.",
+   "Venue": "StorySteelMill",
+   "VenueBase": "Festival",
+   "PassAccuracy": 75.0,
+   "Requires": {
+    "StorySets": [
+     "s09-drive-in"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Alexisonfire",
+     "Title": "This Could Be Anywhere In The World",
+     "Spotify": "https://open.spotify.com/track/0pmdgnrTrUUR60u69LE5GR",
+     "Flags": [
+      "sheet_one"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "Dead by April",
+     "Title": "Collapsing",
+     "Spotify": "https://open.spotify.com/track/3ZiG3VBaqoQ5doSLLe5woP",
+     "Flags": [
+      "sheet_one",
+      "sheet_two"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Slipknot",
+     "Title": "Duality",
+     "Spotify": "https://open.spotify.com/track/61mWefnWQOLf90gepjOCb3",
+     "Flags": [
+      "sheet_one",
+      "sheet_two",
+      "sheet_three"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Avenged Sevenfold",
+     "Title": "Bat Country",
+     "Spotify": "https://open.spotify.com/track/3sHH7lklbfpcraDDvYnjo7",
+     "Flags": [
+      "sheet_one",
+      "sheet_two",
+      "sheet_three",
+      "sheet_four"
+     ],
+     "Cue": "solo"
+    },
+    {
+     "Artist": "Bullet For My Valentine",
+     "Title": "Scream Aim Fire",
+     "Spotify": "https://open.spotify.com/track/4wLjoYQXQ44tgllqYjiCPL",
+     "Flags": [
+      "sheet_one",
+      "sheet_two",
+      "sheet_three",
+      "sheet_four",
+      "case_faces_house"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "stencilled-case"
+   ]
+  },
+  {
+   "Id": "s11-gardens",
+   "Act": 4,
+   "Name": "Home Ice at Maple Leaf Gardens",
+   "Description": "Maple Leaf Gardens, dressed for a dream booking in the old hockey-palace configuration. Five Canadian records. For the first time the promoter asks what your band wants to play. The first goal lamp comes on at soundcheck. By the encore you can see your name in the rafters.",
+   "Venue": "StoryGardens",
+   "VenueBase": "Arena",
+   "PassAccuracy": 78.0,
+   "Requires": {
+    "StorySets": [
+     "s10-steel-mill"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Metric",
+     "Title": "Gold Guns Girls",
+     "Spotify": "https://open.spotify.com/track/0x6qwdMRFfWJpBUq6vQDVs",
+     "Flags": [
+      "goal_lamp_on"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Death From Above 1979",
+     "Title": "Trainwreck 1979",
+     "Spotify": "https://open.spotify.com/track/6kjNwoSgt7F3cQ5sru8ylO",
+     "Flags": [
+      "goal_lamp_on",
+      "both_ends_lit"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Billy Talent",
+     "Title": "This Suffering",
+     "Spotify": "https://open.spotify.com/track/07sJ4xKLvWusl7pb90U9b3",
+     "Flags": [
+      "goal_lamp_on",
+      "both_ends_lit",
+      "board_wave"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Marianas Trench",
+     "Title": "Masterpiece Theatre III",
+     "Spotify": "https://open.spotify.com/track/6BBuny7qOcQ1HEWLVABgHI",
+     "Flags": [
+      "goal_lamp_on",
+      "both_ends_lit",
+      "board_wave",
+      "banner_rigged"
+     ],
+     "Cue": "outro"
+    },
+    {
+     "Artist": "Rush",
+     "Title": "Tom Sawyer",
+     "Spotify": "https://open.spotify.com/track/1MkoCFGbhPQIDI5lRdAheQ",
+     "Flags": [
+      "goal_lamp_on",
+      "both_ends_lit",
+      "board_wave",
+      "banner_rigged",
+      "banner_dropped"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "gardens-banner"
+   ],
+   "MovesInto": "studio"
+  },
+  {
+   "Id": "s12-stadium",
+   "Act": 4,
+   "Name": "The Retractable Roof Is Open",
+   "Description": "At your hometown headline, the same bucket sits next to the floor tom. You get almost half an hour under an open roof. Leave breath between the big entrances. By the time the long guitar coda arrives, the crowd knows what to play back.",
+   "Venue": "StoryStadium",
+   "VenueBase": "Arena",
+   "PassAccuracy": 80.0,
+   "Requires": {
+    "StorySets": [
+     "s11-gardens"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "The Who",
+     "Title": "Baba O'Riley",
+     "Spotify": "https://open.spotify.com/track/3qiyyUfYe7CRYLucrPmulD",
+     "Flags": [
+      "mug_on_screen"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "My Chemical Romance",
+     "Title": "Welcome to the Black Parade",
+     "Spotify": "https://open.spotify.com/track/5wQnmLuC1W7ATsArWACrgW",
+     "Flags": [
+      "mug_on_screen",
+      "upper_deck_lit"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Queen",
+     "Title": "Bohemian Rhapsody - Remastered 2011",
+     "Spotify": "https://open.spotify.com/track/7tFiyTwD0nx5a1eklYtX2J",
+     "Flags": [
+      "mug_on_screen",
+      "upper_deck_lit",
+      "stands_in_dialogue"
+     ],
+     "Cue": "bridge"
+    },
+    {
+     "Artist": "Foo Fighters",
+     "Title": "Everlong",
+     "Spotify": "https://open.spotify.com/track/5UWwZ5lm5PKu6eKsHAGxOk",
+     "Flags": [
+      "mug_on_screen",
+      "upper_deck_lit",
+      "stands_in_dialogue",
+      "loonie_on_screen"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Lynyrd Skynyrd",
+     "Title": "Free Bird",
+     "Spotify": "https://open.spotify.com/track/5EWPGh7jbTNO2wakv8LjUI",
+     "Flags": [
+      "mug_on_screen",
+      "upper_deck_lit",
+      "stands_in_dialogue",
+      "loonie_on_screen",
+      "bucket_answered"
+     ],
+     "Cue": "song_end"
+    }
+   ],
+   "Rewards": [
+    "headline-ticket"
+   ],
+   "Credits": true
+  },
+  {
+   "Id": "s13-event-horizon",
+   "Act": 5,
+   "Name": "The Drummer Hall of Fame at the Event Horizon",
+   "Description": "Your induction concert is already on the air when a black hole starts eating the stars outside the Hall. The orbital station has five brass rings around its hull. The kit is wired to their drive coils. Every strike sends a pulse out through the metal. Across the stage, the house conductor lifts a baton. Your band watches you.",
+   "Venue": "StoryEventHorizon",
+   "VenueBase": "Arena",
+   "PassAccuracy": 85.0,
+   "Requires": {
+    "StorySets": [
+     "s12-stadium"
+    ],
+    "Members": [
+     "bass",
+     "guitar",
+     "vocals"
+    ]
+   },
+   "Songs": [
+    {
+     "Artist": "Led Zeppelin",
+     "Title": "Good Times Bad Times - 1993 Remaster",
+     "Spotify": "https://open.spotify.com/track/0QwZfbw26QeUoIy82Z2jYp",
+     "Flags": [
+      "first_ring_turning"
+     ],
+     "Cue": "first_chorus"
+    },
+    {
+     "Artist": "Muse",
+     "Title": "Assassin",
+     "Spotify": "https://open.spotify.com/track/6JnFVmPyJvjnfBag0hhIFa",
+     "Flags": [
+      "first_ring_turning",
+      "second_ring_aligned"
+     ],
+     "Cue": "intro"
+    },
+    {
+     "Artist": "TOOL",
+     "Title": "Lateralus",
+     "Spotify": "https://open.spotify.com/track/7tvuLLroI0n6uYBWuFig5d",
+     "Flags": [
+      "first_ring_turning",
+      "second_ring_aligned",
+      "third_ring_locked"
+     ],
+     "Cue": "verse"
+    },
+    {
+     "Artist": "Daft Punk",
+     "Title": "Contact",
+     "Spotify": "https://open.spotify.com/track/2KHRENHQzTIQ001nlP9Gdc",
+     "Flags": [
+      "first_ring_turning",
+      "second_ring_aligned",
+      "third_ring_locked",
+      "fourth_ring_charged"
+     ],
+     "Cue": "outro"
+    },
+    {
+     "Artist": "Snarky Puppy",
+     "Title": "What About Me?",
+     "Spotify": "https://open.spotify.com/track/4YpXSKVrp8jhI7EAPV1xpF",
+     "Flags": [
+      "first_ring_turning",
+      "second_ring_aligned",
+      "third_ring_locked",
+      "fourth_ring_charged",
+      "fifth_ring_armed"
+     ],
+     "Cue": "outro"
+    }
+   ],
+   "Rewards": [
+    "hall-of-fame-stand"
+   ],
+   "PostCredits": true,
+   "OneSitting": true
+  }
+ ],
+ "Auditions": [
+  {
+   "Id": "aud-bass",
+   "Seat": "bass",
+   "After": "s03-coffee-shop",
+   "Optional": false,
+   "Description": "Back at the basement board, two tear-off tabs are missing from BASSIST WANTED. Jules brings the café amp. Ness puts a strip of white tape on the floor where the kick creeps. Play the chorus with each.",
+   "Candidates": [
+    {
+     "Id": "jules",
+     "Name": "Jules Park",
+     "Description": "Counts under their breath and always leaves space for the singer.",
+     "Leans": "Indie pop and Motown",
+     "Pitch": "You saw what I can do in a minute. Give me a whole side.",
+     "Body": "BodyType1_ShopKeeper_01",
+     "Clothes": "PolygonTown_02_A"
+    },
+    {
+     "Id": "ness",
+     "Name": "Ness Caron",
+     "Description": "Says very little before a take and remembers every kick placement after it.",
+     "Leans": "Dub and dance rock",
+     "Pitch": "Play me the bit you keep missing. That’s where my line goes.",
+     "Body": "BodyType1_Mother_02",
+     "Clothes": "PolygonTown_03_B"
+    }
+   ]
+  },
+  {
+   "Id": "aud-guitar",
+   "Seat": "guitar",
+   "After": "s04-dive-bar",
+   "Optional": false,
+   "Description": "The first night in the garage, use the dive-bar rug to mark out the space for a third player. Both candidates get the same stop on the same riff.",
+   "Candidates": [
+    {
+     "Id": "rory",
+     "Name": "Rory Bell",
+     "Description": "Takes the first run too fast, laughs, then nails the stop with the drummer.",
+     "Leans": "Garage rock and punk",
+     "Pitch": "Give me one nod for the cut. The bar won’t hear the end coming.",
+     "Body": "BodyType1_Son_01",
+     "Clothes": "PolygonTown_04_B"
+    },
+    {
+     "Id": "bea",
+     "Name": "Bea Okafor",
+     "Description": "Patient enough to try six chord voicings until the snare has room.",
+     "Leans": "Disco and post-punk",
+     "Pitch": "If you can still hear your ghost notes, I’ve got the right chord.",
+     "Body": "BodyType1_Mother_01",
+     "Clothes": "PolygonTown_01_B"
+    }
+   ]
+  },
+  {
+   "Id": "aud-vocals",
+   "Seat": "vocals",
+   "After": "s06-roller-rink",
+   "Optional": false,
+   "Description": "The rink lets two singers try the same chorus after closing. One sings toward the empty bleachers. One turns around to hear the band.",
+   "Candidates": [
+    {
+     "Id": "kit",
+     "Name": "Kit Alvarez",
+     "Description": "Can coax the one shy voice at the back of a room into the chorus.",
+     "Leans": "Pop punk and emo",
+     "Pitch": "Give me that last bar again. This time let them sing it.",
+     "Body": "BodyType1_Rigged",
+     "Clothes": "PolygonTown_04_A"
+    },
+    {
+     "Id": "sol",
+     "Name": "Sol Baptiste",
+     "Description": "Listens through the whole groove before choosing a place to come in.",
+     "Leans": "Neo-soul and gospel",
+     "Pitch": "You already put a breath there. I’ll sing on the other side of it.",
+     "Body": "BodyType1_Daughter_01",
+     "Clothes": "PolygonTown_02_C"
+    }
+   ]
+  },
+  {
+   "Id": "aud-keys",
+   "Seat": "keys",
+   "After": "s09-drive-in",
+   "Optional": true,
+   "Description": "At load-out the drive-in offers a spare power strip. Invite one keys player into the rehearsal room, or take the Gardens date as a four-piece.",
+   "Candidates": [
+    {
+     "Id": "dee",
+     "Name": "Dee Lau",
+     "Description": "Can hold one chord patiently until a room starts to move around it.",
+     "Leans": "Synth pop and house",
+     "Pitch": "You keep the clock. I’ll make the roof feel higher.",
+     "Body": "BodyType1_Mother_02",
+     "Clothes": "PolygonTown_04_C"
+    },
+    {
+     "Id": "otto",
+     "Name": "Otto Klein",
+     "Description": "Taps out odd metres on the bench and waits for the band to find beat one.",
+     "Leans": "Soul and prog",
+     "Pitch": "I only need one outlet. Two if you want the organ to behave.",
+     "Body": "BodyType1_Rigged",
+     "Clothes": "PolygonTown_03_C"
+    }
+   ]
+  }
+ ],
+ "Items": [
+  {
+   "Id": "milk-crate",
+   "Name": "Busking crate",
+   "Description": "A milk crate just big enough for the bucket, sticks and phone speaker. It waits under the basement stairs. Turn it over at the station and you have a drum throne.",
+   "Slot": "milk-crate"
+  },
+  {
+   "Id": "drilled-loonie",
+   "Name": "First tip and café transfer",
+   "Description": "Hang the drilled loonie from the hi-hat stand. Back in the basement, pin the handwritten café transfer to the gig board.",
+   "Slot": "drilled-loonie"
+  },
+  {
+   "Id": "espresso-tin",
+   "Name": "House brushes in an espresso tin",
+   "Description": "Take home the house brushes in a stained espresso tin. They fit on the basement practice bench beside the gig board.",
+   "Slot": "espresso-tin"
+  },
+  {
+   "Id": "bar-rug",
+   "Name": "Threadbare drum rug and garage key",
+   "Description": "The door take pays for a garage key. Move the band into the garage, hang the key by the door and unroll the bar’s threadbare rug under the kit. The old kick-spur holes still line up.",
+   "Slot": "bar-rug"
+  },
+  {
+   "Id": "family-photo",
+   "Name": "The request slip wrapped around a family photo",
+   "Description": "The daughter folds her request slip around the photo of the cousins dancing. Pin both over the garage kit.",
+   "Slot": "family-photo"
+  },
+  {
+   "Id": "mirror-ball",
+   "Name": "Dented mirror ball",
+   "Description": "Take home the rink’s dented mirror ball. It casts a moving spot across the garage ceiling.",
+   "Slot": "mirror-ball"
+  },
+  {
+   "Id": "on-air-lamp",
+   "Name": "Red ON AIR lamp and the session tape",
+   "Description": "Move into the rented rehearsal room. Wire the station’s red ON AIR lamp over the door and shelve the tape of your shift.",
+   "Slot": "on-air-lamp"
+  },
+  {
+   "Id": "signed-kick-head",
+   "Name": "Food-court kick head",
+   "Description": "Hang the signed kick head over the spare stands in the rehearsal room. The skate-shop manager gets your kit onto the truck for the next out-of-town show.",
+   "Slot": "signed-kick-head"
+  },
+  {
+   "Id": "amber-lamp",
+   "Name": "Projectionist’s amber count-in lamp",
+   "Description": "Back in the rehearsal room, the projectionist’s amber lamp signals the count-in from beside the PA.",
+   "Slot": "amber-lamp"
+  },
+  {
+   "Id": "stencilled-case",
+   "Name": "Road case with five bands’ tape",
+   "Description": "The tour crew leaves you the case with five bands’ tape on it. Park it by the rehearsal room’s load-out door with your name facing out.",
+   "Slot": "stencilled-case"
+  },
+  {
+   "Id": "gardens-banner",
+   "Name": "Miniature rafter banner",
+   "Description": "Move the band into the studio. A miniature of the rafter banner hangs over the mixing desk, complete with your band name and the date.",
+   "Slot": "gardens-banner"
+  },
+  {
+   "Id": "headline-ticket",
+   "Name": "Framed hometown headline ticket",
+   "Description": "Frame the hometown headline ticket beside the first loonie in the studio. Credits roll over the load-out, and the last shot is the battered bucket going back in the van. After the credits, the next booking on the board bears the seal of the Drummer Hall of Fame.",
+   "Slot": "headline-ticket"
+  },
+  {
+   "Id": "hall-of-fame-stand",
+   "Name": "Engraved induction stand",
+   "Description": "The rings strike together on your cutoff. Their returning pulse pinches the black hole shut. Stars reappear through its centre. In the silence, the conductor lays the baton across the snare and turns your music stand around. Its brass face now carries your name beside the other inductees. Your band carries it home to the studio as an epilogue.",
+   "Slot": "hall-of-fame-stand"
+  }
+ ]
+}

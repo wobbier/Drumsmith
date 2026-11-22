@@ -1,0 +1,19 @@
+{
+ "Title": "Chicken Grease",
+ "Artist": "D'Angelo",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Pledge Drive Night Shift",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 279.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/5MFYNPVGgMfWwNY3yl4M6F"
+ },
+ "NoteCount": 1644
+}

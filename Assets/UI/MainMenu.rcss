@@ -99,9 +99,14 @@ body.main-menu-page.hideout { decorator: none; }
 .gig-card.locked .gig-state { color: #ffffff70; }
 #hideout-focus .gig-card p { margin: 4dp 0; font-size: 16dp; }
 #hideout-focus .gig-card .gig-detail { color: #ffd166; }
-#hideout-focus .gig-card .gig-songs { color: #ffffffa8; }
+#hideout-focus .gig-card .gig-songs { color: #ffffffa8; white-space: pre-line; }
 .gig-card .gig-play { display: block; margin-top: 8dp; padding: 8dp 12dp; font-size: 20dp; font-weight: bold; text-align: center; color: #000000; background-color: #66ff99; }
 .gig-card .gig-play:hover, .gig-card .gig-play:focus { background-color: #a6ffc6; }
+.gig-card .gig-skip { background-color: #ffffff30; color: #ffffff; }
+.gig-card .gig-debug { display: flex; margin-top: 6dp; font-size: 14dp; color: #ff6b6b; }
+.gig-card .gig-debug span { padding: 6dp 8dp 0 0; letter-spacing: 1dp; }
+.gig-card .gig-debug button { margin-right: 6dp; padding: 4dp 10dp; font-size: 16dp; color: #000000; background-color: #ff9a9a; }
+.gig-card .gig-debug button:hover { background-color: #ffd0d0; }
 #hideout-focus .hideout-status { color: #ff6666; }
 #hideout-corner { position: absolute; left: 3vw; bottom: 3vh; }
 #hideout-corner .corner-link { display: inline-block; margin-right: 18dp; padding: 6dp 12dp; font-size: 18dp; color: #ffffffc0; background-color: #00000080; }

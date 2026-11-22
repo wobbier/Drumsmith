@@ -1,0 +1,82 @@
+{
+ "Version": 1,
+ "Name": "Pump",
+ "FrameRate": 30,
+ "DurationFrames": 28,
+ "Tracks": [
+  {
+   "Binding": "Left",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      -0.965926,
+      0.258819
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      0.0,
+      0.0,
+      -0.994522,
+      0.104528
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 28,
+     "Value": [
+      0.0,
+      0.0,
+      -0.965926,
+      0.258819
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Right",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.965926,
+      0.258819
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      0.0,
+      0.0,
+      0.994522,
+      0.104528
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 28,
+     "Value": [
+      0.0,
+      0.0,
+      0.965926,
+      0.258819
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

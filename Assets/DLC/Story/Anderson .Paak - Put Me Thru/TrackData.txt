@@ -1,0 +1,19 @@
+{
+ "Title": "Put Me Thru",
+ "Artist": "Anderson .Paak",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Pledge Drive Night Shift",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 161.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/70SjyVMzhmMeJQD8hOmIBp"
+ },
+ "NoteCount": 936
+}

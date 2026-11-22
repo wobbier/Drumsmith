@@ -1,0 +1,65 @@
+{
+ "Version": 1,
+ "Name": "Swing23",
+ "FrameRate": 30,
+ "DurationFrames": 69,
+ "Tracks": [
+  {
+   "Binding": "Swing",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 17,
+     "Value": [
+      0.0,
+      0.0,
+      0.0784591,
+      0.9969173
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 52,
+     "Value": [
+      0.0,
+      0.0,
+      -0.0784591,
+      0.9969173
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 69,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

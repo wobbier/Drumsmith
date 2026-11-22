@@ -1,0 +1,19 @@
+{
+ "Title": "Cactus In The Valley - Acoustic",
+ "Artist": "Lights, Owl City",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Millennial Coffee Shop",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 204.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/288xqEJiCcSc2zGFanlclV"
+ },
+ "NoteCount": 1194
+}

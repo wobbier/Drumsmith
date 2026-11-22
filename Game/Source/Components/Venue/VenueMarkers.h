@@ -116,6 +116,23 @@ ME_REGISTER_COMPONENT_FOLDER( VenueAccent, "Venue" )
 // A camera position the director can cut to. Position is the eye and the camera looks along the
 // entity's local +Z (the engine's forward axis, same as Camera and Light), so rotate it toward the
 // target as you would any camera.
+// Story mode (Docs/Venue-Authoring.md -> Story props): shows this entity and its children only
+// while a story flag is set, or with WhenSet off only until it is. A set's songs set the flags:
+// the songs before the one playing from its start, the song's own at its cue. Hidden by scale (the
+// pivot is where it grows from) and by dimming the Lights under it.
+class VenueStory : public Component<VenueStory>
+{
+    ME_REFLECTABLE( VenueStory )
+public:
+    VenueStory() : Component( "VenueStory" ) {}
+    void Init() final {}
+    std::string Flag;
+    bool WhenSet = true;
+    float FadeSeconds = 0.75f;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueStory, "Venue" )
+
+
 class VenueCameraSpot
     : public Component<VenueCameraSpot>
 {

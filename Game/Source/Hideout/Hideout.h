@@ -11,6 +11,9 @@
 
 class RmlUiCore;
 class World;
+struct ProgressionAudition;
+struct ProgressionGig;
+struct ProgressionStorySet;
 class Transform;
 class Camera;
 
@@ -130,8 +133,16 @@ private:
     std::string m_panel;
     std::vector<std::string> m_notices;
     bool m_noticeShown = false;
-    // The gigs the board lists, by index into Progression::Gigs, and each one's setlist.
-    std::vector<std::vector<int>> m_setlists;
+    // The gig board's rows, top to bottom: an audition to hold, the story sets, then the side
+    // gigs. Each row is one of the three; a set's or gig's setlist is filled when it's open.
+    struct BoardRow
+    {
+        const ProgressionAudition* Audition = nullptr;
+        const ProgressionStorySet* Story = nullptr;
+        const ProgressionGig* Gig = nullptr;
+        std::vector<int> Setlist;
+    };
+    std::vector<BoardRow> m_board;
     std::string m_status;
     float m_radioOpen = 0.f;
     // The hover light (a soft point light over the station whose label is under the pointer).

@@ -101,6 +101,15 @@ void Hideout::DebugUpdate( RmlUiCore& inUi, const char* inModel )
         inUi.ModelSetItemString( inModel, "debug_gigs", i, "name", gigs[i].Name );
     }
 
+    const auto& story = progression.StorySets();
+    inUi.ModelSetListCount( inModel, "debug_story", static_cast<int>( story.size() ) );
+    for( int i = 0; i < static_cast<int>( story.size() ); ++i )
+    {
+        inUi.ModelSetItemNumber( inModel, "debug_story", i, "index", i );
+        inUi.ModelSetItemNumber( inModel, "debug_story", i, "on", progression.StoryPassed( story[i], profile ) ? 1 : 0 );
+        inUi.ModelSetItemString( inModel, "debug_story", i, "name", std::to_string( i + 1 ) + ". " + story[i].Name );
+    }
+
     const auto& steps = progression.LessonSteps();
     inUi.ModelSetListCount( inModel, "debug_steps", static_cast<int>( steps.size() ) );
     for( int i = 0; i < static_cast<int>( steps.size() ); ++i )
@@ -208,6 +217,24 @@ bool Hideout::DebugEvent( const std::string& inEvent, const json& inArgs, RmlUiC
             profile.CompletedGigs.insert( gig.Id );
         }
         return done( ( played ? "Played " : "Not played: " ) + gig.Name + " (Apply the rules to move up)", false );
+    }
+    if( inEvent == "debug_story" && index >= 0 && index < static_cast<int>( progression.StorySets().size() ) )
+    {
+        // Passed: every song banked at 100%. Not: the set forgotten, banked songs and all.
+        KeepBackup();
+        const ProgressionStorySet& set = progression.StorySets()[index];
+        const bool passed = !progression.StoryPassed( set, profile );
+        if( passed )
+        {
+            PlayerProfile::StoryRecord& record = profile.Story[set.Id];
+            record.Banked.assign( set.Songs.size(), 100.0 );
+            record.Passed = true;
+        }
+        else
+        {
+            profile.Story.erase( set.Id );
+        }
+        return done( ( passed ? "Passed " : "Not passed: " ) + set.Name + " (Apply the rules for its rewards and room)", false );
     }
     if( inEvent == "debug_step" && index >= 0 && index < static_cast<int>( progression.LessonSteps().size() ) )
     {

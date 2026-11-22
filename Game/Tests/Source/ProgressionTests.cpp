@@ -358,3 +358,253 @@ TEST_CASE( "Gigs: the set's average of each song's best decides it, and it force
     CHECK( profile.CompletedGigs.count( "backyard" ) == 1 );
     session.End();
 }
+
+
+namespace
+{
+    // Story.json for Journey: two sets and a bonus, a band seat between them, and a room the first
+    // one moves into.
+    json Story()
+    {
+        json root = json::object();
+        root["Sets"] = json::parse( R"([
+            { "Id": "s1", "Name": "The Basement", "PassAccuracy": 60, "MovesInto": "garage", "Rewards": [ "crate" ], "Audition": "aud-bass",
+              "Songs": [ { "Artist": "Lorde", "Title": "Royals", "Spotify": "https://open.spotify.com/track/AAA", "Flags": [ "tape" ] },
+                         { "Artist": "Queen", "Title": "We Will Rock You - Remastered 2011", "Flags": [ "tape", "crate" ] } ] },
+            { "Id": "s2", "Name": "The Dive Bar", "Credits": true, "Requires": { "StorySets": [ "s1" ], "Members": [ "bass" ] },
+              "Songs": [ { "Artist": "Jet", "Title": "Are You Gonna Be My Girl" } ] },
+            { "Id": "s3", "Name": "The Hall", "PostCredits": true, "OneSitting": true, "Requires": { "StorySets": [ "s2" ] },
+              "Songs": [ { "Artist": "Jet", "Title": "Are You Gonna Be My Girl", "Flags": [ "ring" ] }, { "Artist": "Lorde", "Title": "Royals" } ] }
+        ])" );
+        root["Auditions"] = json::parse( R"([
+            { "Id": "aud-bass", "Seat": "bass", "After": "s1", "Candidates": [ { "Id": "jules", "Name": "Jules Park" }, { "Id": "ness", "Name": "Ness Caron" } ] },
+            { "Id": "aud-keys", "Seat": "keys", "After": "s2", "Optional": true, "Candidates": [ { "Id": "dee", "Name": "Dee Lau" } ] }
+        ])" );
+        root["Items"] = json::parse( R"([ { "Id": "crate", "Name": "Busking crate" }, { "Id": "rug", "Name": "Not this one" } ])" );
+        return root;
+    }
+
+
+    TrackData Recording( const std::string& inArtist, const std::string& inTitle )
+    {
+        TrackData track = Song( inArtist + " - " + inTitle, 600, 200.f );
+        track.m_artistName = inArtist;
+        track.m_trackName = inTitle;
+        return track;
+    }
+}
+
+
+TEST_CASE( "Story: songs are found by their Spotify link, else by artist and title" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Story() );
+    const ProgressionStorySet& set = *progression.FindStorySet( "s1" );
+    std::vector<TrackData> tracks = { Recording( "Lorde", "Royals" ), Recording( "Queen", "We Will Rock You" ), Recording( "Lorde", "Royals" ) };
+    // The second Royals is the recording the set names; the first is only the same title.
+    tracks[2].m_links["Spotify"] = "https://open.spotify.com/track/AAA?si=123";
+    CHECK( progression.StorySetlist( set, tracks ) == std::vector<int>{ 2, 1 } );
+    // A song the library hasn't got (no chart yet) is -1.
+    tracks.pop_back();
+    tracks.erase( tracks.begin() + 1 );
+    CHECK( progression.StorySetlist( set, tracks ) == std::vector<int>{ 0, -1 } );
+    // The story's items join the hideout's, without replacing one already there.
+    REQUIRE( progression.FindItem( "crate" ) );
+    CHECK( progression.FindItem( "rug" )->Name == "Rug" );
+}
+
+
+TEST_CASE( "Story: each song is banked, the set resumes, and passing moves the band in" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Story() );
+    const ProgressionStorySet& set = *progression.FindStorySet( "s1" );
+    PlayerProfile profile( "" );
+    progression.Evaluate( profile );
+    CHECK( progression.StoryOpen( set, profile ) );
+    CHECK( progression.StoryNextSong( set, profile ) == 0 );
+
+    // The first song, then the player leaves: it stays banked.
+    GigSession session;
+    REQUIRE( session.BeginStory( set, { 3, 5 }, profile ) );
+    CHECK( session.IsStory() );
+    CHECK( session.CurrentTrack() == 3 );
+    CHECK_FALSE( session.RecordSong( 3, 50.0 ) );
+    session.Bank( profile );
+    session.End();
+    CHECK( progression.StoryNextSong( set, profile ) == 1 );
+    CHECK( progression.StoryFlags( set, 1, profile ) == std::vector<std::string>{ "tape" } );
+    CHECK( progression.StoryAverage( set, profile ) == doctest::Approx( 25.0 ) );
+
+    // Back the next day: it starts at song two with the first one counted. 50 and 60 is 55: short.
+    REQUIRE( session.BeginStory( set, { 3, 5 }, profile ) );
+    CHECK( session.SongIndex() == 1 );
+    CHECK( session.RecordSong( 5, 60.0 ) );
+    session.Bank( profile );
+    CHECK_FALSE( session.Passed() );
+    CHECK_FALSE( session.Complete( profile ) );
+    session.End();
+    // Every song is banked, so it replays from the top; a better first song passes it.
+    CHECK( progression.StoryNextSong( set, profile ) == 0 );
+    REQUIRE( session.BeginStory( set, { 3, 5 }, profile ) );
+    CHECK( session.SongIndex() == 0 );
+    CHECK( session.RecordSong( 3, 80.0 ) );
+    session.Bank( profile );
+    CHECK( session.Passed() );
+    CHECK( session.Complete( profile ) );
+    CHECK_FALSE( session.Complete( profile ) );
+    session.End();
+    CHECK( profile.Story["s1"].Banked == std::vector<double>{ 80.0, 60.0 } );
+
+    // Passing gives the reward and moves into the garage, past the gig the garage asks for.
+    const std::vector<ProgressionUnlock> unlocks = progression.Evaluate( profile );
+    CHECK( Has( unlocks, "story", "s1" ) );
+    CHECK( Has( unlocks, "item", "crate" ) );
+    CHECK( Has( unlocks, "tier", "garage" ) );
+    CHECK( profile.HideoutTier == 1 );
+    // The next booking waits for a bassist.
+    CHECK( Has( unlocks, "audition", "aud-bass" ) );
+    CHECK_FALSE( progression.StoryOpen( *progression.FindStorySet( "s2" ), profile ) );
+    CHECK( progression.Describe( progression.FindStorySet( "s2" )->Requires, profile ) == "find a bassist" );
+    CHECK( progression.HowToUnlock( "crate", profile ) == "Finish The Basement (story mode)" );
+
+    // A missing song keeps a set from starting.
+    CHECK_FALSE( session.BeginStory( set, { 3, -1 }, profile ) );
+}
+
+
+TEST_CASE( "Story: auditions fill the seats, the credits roll, and the bonus counts one sitting" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Story() );
+    PlayerProfile profile( "" );
+    profile.Story["s1"].Passed = true;
+    REQUIRE( progression.PendingAudition( profile ) );
+    CHECK( progression.PendingAudition( profile )->Id == "aud-bass" );
+    CHECK_FALSE( progression.ChooseMember( "aud-bass", "nobody", profile ) );
+    CHECK_FALSE( progression.DeclineAudition( "aud-bass", profile ) );  // not optional
+    CHECK( progression.ChooseMember( "aud-bass", "ness", profile ) );
+    CHECK( profile.BandMembers["bass"] == "ness" );
+    CHECK( progression.PendingAudition( profile ) == nullptr );
+    const std::vector<ProgressionUnlock> booked = progression.Evaluate( profile );
+    CHECK( Has( booked, "booking", "s2" ) );
+    CHECK_FALSE( progression.StoryFinished( profile ) );
+
+    // The credits set: the story is told, and the optional keys audition can be passed on.
+    profile.Story["s2"].Passed = true;
+    CHECK( progression.StoryFinished( profile ) );
+    CHECK( progression.PendingAudition( profile )->Id == "aud-keys" );
+    CHECK( progression.DeclineAudition( "aud-keys", profile ) );
+    CHECK( progression.PendingAudition( profile ) == nullptr );
+    CHECK( profile.BandMembers.count( "keys" ) == 0 );
+
+    // The bonus banks nothing: leaving starts the run over from the first song.
+    const ProgressionStorySet& bonus = *progression.FindStorySet( "s3" );
+    GigSession session;
+    REQUIRE( session.BeginStory( bonus, { 1, 2 }, profile ) );
+    CHECK( session.IsOneSitting() );
+    CHECK_FALSE( session.RecordSong( 1, 95.0 ) );
+    session.Bank( profile );
+    CHECK( profile.Story.count( "s3" ) == 0 );
+    session.End();
+    REQUIRE( session.BeginStory( bonus, { 1, 2 }, profile ) );
+    CHECK( session.SongIndex() == 0 );
+    CHECK( session.AverageAccuracy() == doctest::Approx( 0.0 ) );
+    session.End();
+    // Within a run, the venue has moved on with every song before this one.
+    CHECK( progression.StoryFlags( bonus, 1, profile ) == std::vector<std::string>{ "ring" } );
+}
+
+
+TEST_CASE( "Story: the profile keeps banked songs and the band" )
+{
+    PlayerProfile profile( "" );
+    profile.Story["s1"].Banked = { 80.0, -1.0 };
+    profile.Story["s2"].Passed = true;
+    profile.BandMembers["bass"] = "jules";
+    PlayerProfile copy( "" );
+    copy.FromJson( profile.ToJson() );
+    CHECK( copy.Story["s1"].Banked == std::vector<double>{ 80.0, -1.0 } );
+    CHECK_FALSE( copy.Story["s1"].Passed );
+    CHECK( copy.Story["s2"].Passed );
+    CHECK( copy.BandMembers["bass"] == "jules" );
+}
+
+
+TEST_CASE( "Story: the shipped story names only sets, rooms, auditions and items that exist" )
+{
+    std::filesystem::path root = std::filesystem::current_path();
+    for( int up = 0; up < 8 && !std::filesystem::exists( root / "Assets/Progression/Story.json" ) && root.has_parent_path() && root != root.parent_path(); ++up )
+    {
+        root = root.parent_path();
+    }
+    std::ifstream file( root / "Assets/Progression/Progression.json" );
+    std::ifstream storyFile( root / "Assets/Progression/Story.json" );
+    if( !file || !storyFile )
+    {
+        MESSAGE( "Progression.json or Story.json not reachable from the test's working folder; skipped" );
+        return;
+    }
+    std::stringstream text;
+    text << file.rdbuf();
+    std::stringstream storyText;
+    storyText << storyFile.rdbuf();
+    Progression progression( json::parse( text.str() ) );
+    progression.LoadStory( json::parse( storyText.str() ) );
+
+    REQUIRE( progression.StorySets().size() >= 12 );
+    int credits = 0;
+    for( const ProgressionStorySet& set : progression.StorySets() )
+    {
+        CAPTURE( set.Id );
+        CHECK( set.Songs.size() == 5 );
+        credits += set.Credits ? 1 : 0;
+        for( const std::string& id : set.Requires.StorySets )
+        {
+            CHECK( progression.FindStorySet( id ) );
+        }
+        for( const std::string& id : set.Rewards )
+        {
+            CHECK( progression.FindItem( id ) );
+        }
+        if( !set.MovesInto.empty() )
+        {
+            CHECK( std::any_of( progression.Tiers().begin(), progression.Tiers().end(), [&set]( const ProgressionTier& inTier ) { return inTier.Id == set.MovesInto; } ) );
+        }
+        if( !set.Audition.empty() )
+        {
+            CHECK( progression.FindAudition( set.Audition ) );
+        }
+    }
+    // One set rolls the credits, and only the bonus after them is played in one sitting.
+    CHECK( credits == 1 );
+    for( const ProgressionAudition& audition : progression.Auditions() )
+    {
+        CAPTURE( audition.Id );
+        CHECK( progression.FindStorySet( audition.After ) );
+        CHECK( audition.Candidates.size() >= 2 );
+    }
+    // The first booking is open to a new player.
+    PlayerProfile profile( "" );
+    CHECK( progression.StoryOpen( progression.StorySets().front(), profile ) );
+}
+
+
+TEST_CASE( "Story: a song's venue state is the songs before it, and its own flags at its cue" )
+{
+    Progression progression( Journey() );
+    progression.LoadStory( Story() );
+    const ProgressionStorySet& set = *progression.FindStorySet( "s1" );
+    GigSession::StageStory( set, 1 );
+    const VenueRegistry::StoryStage& stage = VenueRegistry::Story();
+    CHECK( stage.Active() );
+    CHECK( stage.Set == "s1" );
+    CHECK( stage.Flags == std::set<std::string>{ "tape" } );
+    // The song's flags already set before it don't wait for its cue.
+    CHECK( stage.AtCue == std::set<std::string>{ "crate" } );
+    GigSession::StageStory( set, 5 );
+    CHECK_FALSE( VenueRegistry::Story().Active() );
+    GigSession session;
+    session.End();
+    CHECK_FALSE( VenueRegistry::Story().Active() );
+}

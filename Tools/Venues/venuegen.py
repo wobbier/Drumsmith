@@ -182,6 +182,14 @@ class Scene:
         e.add({"Type": "VenueScreen", "Source": feed, "Emissive": _r(emissive)})
         return e
 
+    def story(self, name, parent, flag, when_set=True, fade=0.75, pos=(0, 0, 0)):
+        """A story-mode group (VenueStory): its children show only while the story flag is set
+        (when_set False: only until it is set). They grow from the group's pivot, so put pos where
+        the thing stands. Plain Lights under it dim with it; never put a VenueShowLight under it."""
+        e = self.entity(name, parent, pos)
+        e.add({"Type": "VenueStory", "Flag": flag, "WhenSet": bool(when_set), "FadeSeconds": _r(fade)})
+        return e
+
     def camera(self, name, parent, eye, target, fov=55.0, far=400.0):
         """A real engine Camera (for debug renders only; venue scenes must not ship a current one)."""
         e = self.entity(name, parent, eye, look_rotation(eye, target))

@@ -1,0 +1,19 @@
+{
+ "Title": "Are You Gonna Be My Girl",
+ "Artist": "Jet",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Dead End Dive Bar",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 214.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/305WCRhhS10XUcH6AEwZk6"
+ },
+ "NoteCount": 1254
+}

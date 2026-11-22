@@ -1,0 +1,8 @@
+newmtl SignSecurity
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd SignSecurity.png
+Ke 0.6 0.6 0.6
+map_Ke SignSecurity.png

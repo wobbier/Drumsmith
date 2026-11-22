@@ -1,0 +1,19 @@
+{
+ "Title": "Daddy Cool",
+ "Artist": "Boney M.",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Adults Only at the Roller Rink",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 208.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/3qPp6FTnjEM0qedq3VJYN8"
+ },
+ "NoteCount": 1218
+}

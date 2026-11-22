@@ -2,7 +2,7 @@
 
 The first time anyone plays along with you, it’s a commuter tapping a travel mug. Four hours later the same rhythm comes back from a stadium stand. By the thirteenth booking, that drummer has to give a count that an entire orbital concert hall can follow.
 
-**Passing a booking.** In sets 01–12, finish the five tracks in the printed order. Bank each finished track’s accuracy, then compare the mean of the five percentages with the set’s pass mark. A replay can raise a banked best. Resume at the next unfinished song. If all five are banked below the mark, replay any of them. Award the room move, item and audition once on passing. The next set opens after the previous pass and any required audition choice. The optional keys seat can be left empty. Passing the stadium opens set 13. The Hall of Fame judges one uninterrupted performance of all five songs. The induction and credits follow a passing run.
+**Passing a booking.** In sets 01–12, finish the five tracks in the printed order. Bank each finished track’s accuracy, then compare the mean of the five percentages with the set’s pass mark. A replay can raise a banked best. Resume at the next unfinished song. If all five are banked below the mark, replay any of them. Award the room move, item and audition once on passing. The next set opens after the previous pass and any required audition choice. The optional keys seat can be left empty. Passing the stadium rolls the credits and ends the story. After the credits, set 13 opens as a post-credits bonus. The Hall of Fame judges one uninterrupted performance of all five songs, and a passing run plays the induction as an epilogue.
 
 The existing gig system runs a set back to back and checks its average accuracy. Leaving abandons that run. Story banking and this manifest are a proposed campaign layer. Free play stays open to every library song. Backyard Party, Club Night, Festival Slot and Arena Headline remain independent side gigs with generated setlists.
 
@@ -574,9 +574,11 @@ At your hometown headline, the same bucket sits next to the floor tom. You get a
 
 **What carries forward.** mug on screen → upper deck lit → stands in dialogue → loonie on screen → bucket answered.
 
-**Reward.** Frame the hometown headline ticket beside the first loonie in the studio. At load-out the battered bucket goes back in the van. The next booking on the board bears the seal of the Drummer Hall of Fame.
+**Reward and credits.** Frame the hometown headline ticket beside the first loonie in the studio. Credits roll over the load-out. The last shot is the battered bucket going back in the van. After the credits, the next booking on the board bears the seal of the Drummer Hall of Fame.
 
 ## 13  The Drummer Hall of Fame at the Event Horizon
+
+*Post-credits bonus. It opens once the credits have rolled after the stadium. The story is already over; this is the encore.*
 
 Your induction concert is already on the air when a black hole starts eating the stars outside the Hall. The orbital station has five brass rings around its hull. The kit is wired to their drive coils. Every strike sends a pulse out through the metal. Across the stage, the house conductor lifts a baton. Your band watches you.
 
@@ -620,7 +622,7 @@ Your induction concert is already on the air when a black hole starts eating the
 
 **What carries through this run.** Each song brings one ring into position. The fifth arms the array. The final verdict determines whether the pulse fires. A missed pass leaves the hole in the window and the nameplate blank.
 
-**Reward and credits.** The rings strike together on your cutoff. Their returning pulse pinches the black hole shut. Stars reappear through its centre. In the silence, the conductor lays the baton across the snare and turns your music stand around. Its brass face now carries your name beside the other inductees. Credits roll as your band carries it home to the studio. The engraved stand goes beside the practice pad.
+**Reward and epilogue.** The rings strike together on your cutoff. Their returning pulse pinches the black hole shut. Stars reappear through its centre. In the silence, the conductor lays the baton across the snare and turns your music stand around. Its brass face now carries your name beside the other inductees. Your band carries it home to the studio as an epilogue. The engraved stand goes beside the practice pad.
 
 ## Venue casting
 

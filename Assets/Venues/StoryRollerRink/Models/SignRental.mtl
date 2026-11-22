@@ -1,0 +1,8 @@
+newmtl pic_glow2_2
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd SignRental.png
+Ke 2.2 2.2 2.2
+map_Ke SignRental.png

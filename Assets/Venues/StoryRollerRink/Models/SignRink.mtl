@@ -1,0 +1,8 @@
+newmtl pic_glow2_4
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd SignRink.png
+Ke 2.4 2.4 2.4
+map_Ke SignRink.png

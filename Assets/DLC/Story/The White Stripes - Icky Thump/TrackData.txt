@@ -1,0 +1,19 @@
+{
+ "Title": "Icky Thump",
+ "Artist": "The White Stripes",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Dead End Dive Bar",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 255.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/09QZAEmdbq28OaNyqTOEvY"
+ },
+ "NoteCount": 1500
+}

@@ -1,0 +1,8 @@
+newmtl SignJuice
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+illum 1
+map_Kd SignJuice.png
+Ke 0.85 0.85 0.85
+map_Ke SignJuice.png

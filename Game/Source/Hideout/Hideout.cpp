@@ -616,7 +616,7 @@ void Hideout::ApplyRadio( float inDeltaTime )
 
 const std::vector<const char*>& Hideout::Events()
 {
-    static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play", "band_name_edit",
+    static const std::vector<const char*> kEvents = { "station", "station_hover", "hideout_back", "dismiss_notice", "gig_play", "gig_song", "audition_pick", "audition_skip", "debug_story", "band_name_edit",
         "band_name_save", "band_name_cancel", "debug_toggle", "debug_room", "debug_move_in", "debug_item", "debug_items", "debug_gig", "debug_step",
         "debug_time", "debug_evaluate", "debug_intro", "debug_tour", "debug_overlay", "debug_name", "debug_restore", "debug_reset", "debug_reload",
         "debug_freelook", "wish_show" };
@@ -649,7 +649,7 @@ void Hideout::RegisterModel( RmlUiCore& inUi, const char* inModel )
     inUi.ModelSetNumber( inModel, "debug_backup", 0 );
     inUi.ModelSetString( inModel, "debug_status", "" );
     inUi.ModelSetString( inModel, "debug_clock", "" );
-    for( const char* list : { "debug_rooms", "debug_items", "debug_gigs", "debug_steps" } )
+    for( const char* list : { "debug_rooms", "debug_items", "debug_gigs", "debug_story", "debug_steps" } )
     {
         inUi.ModelSetListCount( inModel, list, 0 );
     }
@@ -1072,7 +1072,23 @@ bool Hideout::Load( bool inEvaluate )
     if( !kGig.empty() && !gigStarted )
     {
         gigStarted = true;
-        if( const ProgressionGig* gig = progression.FindGig( kGig ) )
+        if( const ProgressionStorySet* set = progression.FindStorySet( kGig ) )
+        {
+            // A story set resumes where the profile left it (--story-song N plays song N instead);
+            // --gig-songs doesn't apply.
+            GigSession& session = GigSession::GetInstance();
+            const int song = CommandLine::GetInt( "--story-song", 0 );
+            if( session.BeginStory( *set, progression.StorySetlist( *set, TrackDatabase::GetInstance().m_trackList.m_tracks ), PlayerProfile::GetInstance() )
+                && ( song <= 0 || session.JumpTo( song - 1 ) ) && session.LaunchCurrent() )
+            {
+                INFO_FMT( "[Hideout]", "--gig %s: story set, song %d", kGig.c_str(), session.SongIndex() + 1 );
+            }
+            else
+            {
+                YIKES( "Hideout: --gig " + kGig + ": the library is missing some of its songs" );
+            }
+        }
+        else if( const ProgressionGig* gig = progression.FindGig( kGig ) )
         {
             std::vector<int> setlist = progression.Setlist( *gig, TrackDatabase::GetInstance().m_trackList.m_tracks );
             const int songs = CommandLine::GetInt( "--gig-songs", 0 );
@@ -1771,36 +1787,137 @@ void Hideout::FillGigs( RmlUiCore& inUi, const char* inModel )
     const PlayerProfile& profile = PlayerProfile::GetInstance();
     const Progression& progression = Progression::GetInstance();
     const std::vector<TrackData>& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
-    const auto& gigs = progression.Gigs();
-    m_setlists.assign( gigs.size(), {} );
-    inUi.ModelSetListCount( inModel, "gigs", static_cast<int>( gigs.size() ) );
-    for( int i = 0; i < static_cast<int>( gigs.size() ); ++i )
+    m_board.clear();
+    if( const ProgressionAudition* audition = progression.PendingAudition( profile ) )
     {
-        const ProgressionGig& gig = gigs[i];
-        const bool open = progression.GigOpen( gig, profile );
-        const bool done = profile.CompletedGigs.count( gig.Id ) > 0;
-        std::string songs;
-        if( open )
+        m_board.push_back( { audition, nullptr, nullptr, {} } );
+    }
+    // The story's bookings; the bonus after the credits shows once they've rolled.
+    const bool finished = progression.StoryFinished( profile );
+    for( const ProgressionStorySet& set : progression.StorySets() )
+    {
+        if( !set.PostCredits || finished )
         {
-            m_setlists[i] = progression.Setlist( gig, tracks );
-            for( int track : m_setlists[i] )
+            m_board.push_back( { nullptr, &set, nullptr, progression.StorySetlist( set, tracks ) } );
+        }
+    }
+    for( const ProgressionGig& gig : progression.Gigs() )
+    {
+        m_board.push_back( { nullptr, nullptr, &gig, progression.GigOpen( gig, profile ) ? progression.Setlist( gig, tracks ) : std::vector<int>() } );
+    }
+    inUi.ModelSetListCount( inModel, "gigs", static_cast<int>( m_board.size() ) );
+    for( int i = 0; i < static_cast<int>( m_board.size() ); ++i )
+    {
+        const BoardRow& row = m_board[i];
+        std::string name;
+        std::string description;
+        std::string detail;
+        std::string songs;
+        std::string state;
+        std::string play = "PLAY THE GIG";
+        bool open = false;
+        std::vector<std::string> candidates;
+        char text[200];
+        if( row.Audition )
+        {
+            // The candidates each get a button; their pitch is the songs line.
+            const ProgressionAudition& audition = *row.Audition;
+            name = "Auditions for " + audition.Seat;
+            description = audition.Description;
+            detail = audition.Optional ? "Pick one to join the band, or keep the seat empty." : "Pick one to join the band.";
+            for( const ProgressionCandidate& candidate : audition.Candidates )
+            {
+                songs += ( songs.empty() ? "" : "\n" ) + candidate.Name + " (" + candidate.Leans + "): " + candidate.Description + " \"" + candidate.Pitch + "\"";
+                candidates.push_back( "TAKE " + candidate.Name );
+            }
+            state = "NOW";
+        }
+        else if( row.Story )
+        {
+            const ProgressionStorySet& set = *row.Story;
+            const bool passed = progression.StoryPassed( set, profile );
+            const bool booked = progression.StoryOpen( set, profile );
+            const int missing = static_cast<int>( std::count( row.Setlist.begin(), row.Setlist.end(), -1 ) );
+            name = set.Name;
+            description = set.Description;
+            if( set.OneSitting )
+            {
+                std::snprintf( text, sizeof( text ), "%s%d songs in one sitting. Pass with an average of %.0f%%.", set.PostCredits ? "After the credits. " : "", static_cast<int>( set.Songs.size() ), set.PassAccuracy );
+            }
+            else
+            {
+                std::snprintf( text, sizeof( text ), "Act %d. %d songs, played in order. Pass with an average of %.0f%%.", set.Act, static_cast<int>( set.Songs.size() ), set.PassAccuracy );
+            }
+            detail = text;
+            if( booked )
+            {
+                // Each song, marked banked or still needing a chart.
+                const int next = progression.StoryNextSong( set, profile );
+                const auto record = profile.Story.find( set.Id );
+                for( int s = 0; s < static_cast<int>( set.Songs.size() ); ++s )
+                {
+                    const ProgressionStorySong& song = set.Songs[s];
+                    std::string line = std::to_string( s + 1 ) + ". " + song.Artist + " - " + song.Title;
+                    const bool banked = record != profile.Story.end() && s < static_cast<int>( record->second.Banked.size() ) && record->second.Banked[s] >= 0.0;
+                    if( row.Setlist[s] < 0 )
+                    {
+                        line += " (no chart yet)";
+                    }
+                    else if( banked && !set.OneSitting )
+                    {
+                        std::snprintf( text, sizeof( text ), " (%.0f%%)", record->second.Banked[s] );
+                        line += text;
+                    }
+                    songs += ( songs.empty() ? "" : "\n" ) + line;
+                }
+                if( !set.OneSitting && next > 0 )
+                {
+                    std::snprintf( text, sizeof( text ), " Average so far: %.0f%%.", progression.StoryAverage( set, profile ) );
+                    detail += text;
+                    play = "PLAY SONG " + std::to_string( next + 1 );
+                }
+            }
+            open = booked && missing == 0;
+            state = passed ? "PASSED" : !booked ? "LOCKED" : missing > 0 ? "NEEDS " + std::to_string( missing ) + ( missing == 1 ? " CHART" : " CHARTS" ) : "";
+        }
+        else
+        {
+            const ProgressionGig& gig = *row.Gig;
+            const bool gigOpen = progression.GigOpen( gig, profile );
+            for( int track : row.Setlist )
             {
                 songs += ( songs.empty() ? "" : ", " ) + tracks[track].m_trackName;
             }
-            if( songs.empty() )
+            if( gigOpen && songs.empty() )
             {
                 songs = "No songs in your library yet.";
             }
+            std::snprintf( text, sizeof( text ), "Side gig. %d songs at %s. Pass with an average of %.0f%%.", gig.Songs, gig.Venue.c_str(), gig.PassAccuracy );
+            name = gig.Name;
+            description = gig.Description;
+            detail = text;
+            open = gigOpen && !row.Setlist.empty();
+            state = profile.CompletedGigs.count( gig.Id ) > 0 ? "PLAYED" : gigOpen ? "" : "LOCKED";
         }
-        char detail[160];
-        std::snprintf( detail, sizeof( detail ), "%d songs at %s. Pass with an average of %.0f%%.", gig.Songs, gig.Venue.c_str(), gig.PassAccuracy );
         inUi.ModelSetItemNumber( inModel, "gigs", i, "index", i );
-        inUi.ModelSetItemNumber( inModel, "gigs", i, "open", open && !m_setlists[i].empty() ? 1 : 0 );
-        inUi.ModelSetItemString( inModel, "gigs", i, "name", gig.Name );
-        inUi.ModelSetItemString( inModel, "gigs", i, "description", gig.Description );
+        inUi.ModelSetItemNumber( inModel, "gigs", i, "open", open ? 1 : 0 );
+        inUi.ModelSetItemString( inModel, "gigs", i, "name", name );
+        inUi.ModelSetItemString( inModel, "gigs", i, "description", description );
         inUi.ModelSetItemString( inModel, "gigs", i, "detail", detail );
-        inUi.ModelSetItemString( inModel, "gigs", i, "songs", open ? songs : std::string() );
-        inUi.ModelSetItemString( inModel, "gigs", i, "state", done ? "PLAYED" : open ? "" : "LOCKED" );
+        inUi.ModelSetItemString( inModel, "gigs", i, "songs", songs );
+        inUi.ModelSetItemString( inModel, "gigs", i, "state", state );
+        inUi.ModelSetItemString( inModel, "gigs", i, "play", play );
+        // An audition's buttons: up to three candidates, and a pass for an optional seat.
+        inUi.ModelSetItemNumber( inModel, "gigs", i, "candidates", static_cast<double>( candidates.size() ) );
+        for( int c = 0; c < 3; ++c )
+        {
+            inUi.ModelSetItemString( inModel, "gigs", i, "candidate" + std::to_string( c ), c < static_cast<int>( candidates.size() ) ? candidates[c] : std::string() );
+        }
+        inUi.ModelSetItemNumber( inModel, "gigs", i, "can_skip", row.Audition && row.Audition->Optional ? 1 : 0 );
+        // The debug menu's song buttons: any song of a story set whose songs are all there, locked or not.
+        const bool debugSongs = row.Story && !row.Story->Songs.empty() && DebugAllowed()
+            && std::find( row.Setlist.begin(), row.Setlist.end(), -1 ) == row.Setlist.end() && row.Setlist.size() == row.Story->Songs.size();
+        inUi.ModelSetItemNumber( inModel, "gigs", i, "story_songs", debugSongs ? static_cast<double>( row.Story->Songs.size() ) : 0.0 );
     }
 }
 
@@ -1809,6 +1926,24 @@ std::string Hideout::NextGoal() const
 {
     const PlayerProfile& profile = PlayerProfile::GetInstance();
     const Progression& progression = Progression::GetInstance();
+    // The story comes first: an audition to hold, then the next booking the library can play.
+    if( const ProgressionAudition* audition = progression.PendingAudition( profile ) )
+    {
+        return "Next: auditions for " + audition->Seat + " (the gig board).";
+    }
+    const std::vector<TrackData>& tracks = TrackDatabase::GetInstance().m_trackList.m_tracks;
+    for( const ProgressionStorySet& set : progression.StorySets() )
+    {
+        if( !progression.StoryPassed( set, profile ) && progression.StoryOpen( set, profile ) && ( !set.PostCredits || progression.StoryFinished( profile ) ) )
+        {
+            const std::vector<int> setlist = progression.StorySetlist( set, tracks );
+            if( std::find( setlist.begin(), setlist.end(), -1 ) == setlist.end() )
+            {
+                return "Next: " + set.Name + ", song " + std::to_string( progression.StoryNextSong( set, profile ) + 1 ) + " of " + std::to_string( set.Songs.size() ) + " (the gig board).";
+            }
+            break;
+        }
+    }
     // The first open gig not yet played, else the next locked one and what it needs.
     for( const ProgressionGig& gig : progression.Gigs() )
     {
@@ -2050,17 +2185,56 @@ bool Hideout::HandleEvent( const std::string& inEvent, const json& inArgs, RmlUi
     if( inEvent == "gig_play" )
     {
         const int index = static_cast<int>( UIModel::ArgNumber( inArgs, 0, -1.0 ) );
-        const auto& gigs = Progression::GetInstance().Gigs();
-        if( index < 0 || index >= static_cast<int>( gigs.size() ) || index >= static_cast<int>( m_setlists.size() ) || m_setlists[index].empty() )
+        const BoardRow* row = index >= 0 && index < static_cast<int>( m_board.size() ) ? &m_board[index] : nullptr;
+        if( !row || row->Audition || row->Setlist.empty() || std::find( row->Setlist.begin(), row->Setlist.end(), -1 ) != row->Setlist.end() )
         {
             m_status = "That gig isn't open yet.";
             return true;
         }
         GigSession& session = GigSession::GetInstance();
-        if( !session.Begin( gigs[index], m_setlists[index] ) || !session.LaunchCurrent() )
+        const bool begun = row->Story ? session.BeginStory( *row->Story, row->Setlist, PlayerProfile::GetInstance() ) : session.Begin( *row->Gig, row->Setlist );
+        if( !begun || !session.LaunchCurrent() )
         {
             session.End();
             m_status = "Couldn't start the gig.";
+        }
+        return true;
+    }
+    if( inEvent == "gig_song" && DebugAllowed() )
+    {
+        // Debug: a story set from any song, whatever's locked or banked.
+        const int index = static_cast<int>( UIModel::ArgNumber( inArgs, 0, -1.0 ) );
+        const int song = static_cast<int>( UIModel::ArgNumber( inArgs, 1, 0.0 ) );
+        const BoardRow* row = index >= 0 && index < static_cast<int>( m_board.size() ) ? &m_board[index] : nullptr;
+        GigSession& session = GigSession::GetInstance();
+        if( !row || !row->Story || !session.BeginStory( *row->Story, row->Setlist, PlayerProfile::GetInstance() ) || !session.JumpTo( song ) || !session.LaunchCurrent() )
+        {
+            session.End();
+            m_status = "Couldn't start that song.";
+        }
+        return true;
+    }
+    if( inEvent == "audition_pick" || inEvent == "audition_skip" )
+    {
+        // Someone joins the band (or the optional seat stays empty), and the board moves on.
+        const int index = static_cast<int>( UIModel::ArgNumber( inArgs, 0, -1.0 ) );
+        const int pick = static_cast<int>( UIModel::ArgNumber( inArgs, 1, -1.0 ) );
+        const BoardRow* row = index >= 0 && index < static_cast<int>( m_board.size() ) ? &m_board[index] : nullptr;
+        if( !row || !row->Audition )
+        {
+            return true;
+        }
+        const Progression& progression = Progression::GetInstance();
+        PlayerProfile& profile = PlayerProfile::GetInstance();
+        const ProgressionAudition& audition = *row->Audition;
+        const bool done = inEvent == "audition_skip" ? progression.DeclineAudition( audition.Id, profile )
+            : pick >= 0 && pick < static_cast<int>( audition.Candidates.size() ) && progression.ChooseMember( audition.Id, audition.Candidates[pick].Id, profile );
+        if( done )
+        {
+            m_status = inEvent == "audition_skip" ? "The " + audition.Seat + " seat stays empty." : audition.Candidates[pick].Name + " is in the band.";
+            progression.Evaluate( profile );
+            profile.Save();
+            FillGigs( inUi, inModel );
         }
         return true;
     }

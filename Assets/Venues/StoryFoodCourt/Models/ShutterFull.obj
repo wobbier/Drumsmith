@@ -1,0 +1,15 @@
+# Food Court: Shutter.png on a 4.4 x 3.4 m card. Faces -Z.
+mtllib ShutterFull.mtl
+o ShutterFull
+s off
+v -2.2 -1.7 0
+v 2.2 -1.7 0
+v 2.2 1.7 0
+v -2.2 1.7 0
+vt 0 0
+vt 4 0
+vt 4 1.55
+vt 0 1.55
+vn 0 0 1
+usemtl ShutterFull
+f 1/1/1 2/2/1 3/3/1 4/4/1

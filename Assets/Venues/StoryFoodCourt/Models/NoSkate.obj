@@ -1,0 +1,15 @@
+# Food Court: NoSkate.png on a 0.5 x 0.62 m card. Faces -Z.
+mtllib NoSkate.mtl
+o NoSkate
+s off
+v -0.25 -0.31 0
+v 0.25 -0.31 0
+v 0.25 0.31 0
+v -0.25 0.31 0
+vt 0 0
+vt 1 0
+vt 1 1
+vt 0 1
+vn 0 0 1
+usemtl NoSkate
+f 1/1/1 2/2/1 3/3/1 4/4/1

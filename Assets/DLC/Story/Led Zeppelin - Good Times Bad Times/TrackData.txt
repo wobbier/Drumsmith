@@ -1,0 +1,19 @@
+{
+ "Title": "Good Times Bad Times - 1993 Remaster",
+ "Artist": "Led Zeppelin",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: The Drummer Hall of Fame at the Event Horizon",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 166.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/0QwZfbw26QeUoIy82Z2jYp"
+ },
+ "NoteCount": 966
+}

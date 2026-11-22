@@ -1,0 +1,8242 @@
+{
+ "Version": 2,
+ "Cores": [],
+ "Entities": [
+  {
+   "GUID": "657f27dd7732664f",
+   "Name": "The Drummer Hall of Fame at the Event Horizon",
+   "DestroyOnLoad": true,
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "16a60d0009a210ec",
+   "Name": "Space outside",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "6f8debde6c0b67dc",
+   "Name": "Rotunda",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0dc06d9ed04ee07f",
+   "Name": "Five brass rings",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "58f9a7079612d484",
+   "Name": "Stage dressing",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "614887f4858c1228",
+   "Name": "House",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "6d6e6f590e217682",
+   "Name": "Show lights",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "309381a379479fd7",
+   "Name": "Venue markers",
+   "DestroyOnLoad": true,
+   "Parent": "657f27dd7732664f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "5e77a0b64048a319",
+   "Name": "StarsWhite",
+   "DestroyOnLoad": true,
+   "Parent": "16a60d0009a210ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/StarsWhite.obj",
+     "Compact": true,
+     "Parts": {
+      "StarsWhite.obj#0/StarsWhite#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.95,
+         0.97,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.95,
+         0.97,
+         1.0
+        ],
+        "EmissiveIntensity": 5.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "06d37bce909feac7",
+   "Name": "StarsBlue",
+   "DestroyOnLoad": true,
+   "Parent": "16a60d0009a210ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/StarsBlue.obj",
+     "Compact": true,
+     "Parts": {
+      "StarsBlue.obj#0/StarsBlue#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.55,
+         0.72,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.55,
+         0.72,
+         1.0
+        ],
+        "EmissiveIntensity": 6.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "2cb3c0583173eda9",
+   "Name": "StarsWarm",
+   "DestroyOnLoad": true,
+   "Parent": "16a60d0009a210ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/StarsWarm.obj",
+     "Compact": true,
+     "Parts": {
+      "StarsWarm.obj#0/StarsWarm#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.78,
+         0.55
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.78,
+         0.55
+        ],
+        "EmissiveIntensity": 5.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "532a0bab9b082214",
+   "Name": "StarsDust",
+   "DestroyOnLoad": true,
+   "Parent": "16a60d0009a210ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/StarsDust.obj",
+     "Compact": true,
+     "Parts": {
+      "StarsDust.obj#0/StarsDust#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.7,
+         0.72,
+         0.95
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.7,
+         0.72,
+         0.95
+        ],
+        "EmissiveIntensity": 1.6,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "268290585581a8f1",
+   "Name": "Hole as it opens",
+   "DestroyOnLoad": true,
+   "Parent": "16a60d0009a210ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      48.0,
+      125.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": false,
+     "FadeSeconds": 2.5
+    }
+   ]
+  },
+  {
+   "GUID": "03d82e9cc2fe4781",
+   "Name": "Black hole",
+   "DestroyOnLoad": true,
+   "Parent": "268290585581a8f1",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      48.0,
+      125.0
+     ],
+     "Rotation": [
+      -16.6992,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.35,
+      1.35,
+      1.35
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "2c6e8cd96848941f",
+   "Name": "Shadow",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      15.1,
+      15.1,
+      15.1
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0,
+      "EmissiveColor": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "741d48ed1c4489df",
+   "Name": "Photon ring",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/PhotonRing.obj",
+     "Compact": true,
+     "Parts": {
+      "PhotonRing.obj#0/PhotonRing#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.92,
+         0.78
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.92,
+         0.78
+        ],
+        "EmissiveIntensity": 9.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4fc67d38e41cd33f",
+   "Name": "Lensed disc, inner",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensInner.obj",
+     "Compact": true,
+     "Parts": {
+      "LensInner.obj#0/LensInner#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.72,
+         0.36
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.72,
+         0.36
+        ],
+        "EmissiveIntensity": 3.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4f7bf715c8ce6b6f",
+   "Name": "Lensed disc, middle",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensMid.obj",
+     "Compact": true,
+     "Parts": {
+      "LensMid.obj#0/LensMid#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.45,
+         0.14
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.45,
+         0.14
+        ],
+        "EmissiveIntensity": 2.2,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1beebaae43783133",
+   "Name": "Lensed disc, outer",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensOuter.obj",
+     "Compact": true,
+     "Parts": {
+      "LensOuter.obj#0/LensOuter#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.2,
+         0.06
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.2,
+         0.06
+        ],
+        "EmissiveIntensity": 0.9,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "072bcc3179f666ab",
+   "Name": "Accretion disc, hot",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/DiscHot.obj",
+     "Compact": true,
+     "Parts": {
+      "DiscHot.obj#0/DiscHot#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.86,
+         0.6
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.86,
+         0.6
+        ],
+        "EmissiveIntensity": 3.5,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "15d11eaa97d8f317",
+   "Name": "Accretion disc, warm",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/DiscWarm.obj",
+     "Compact": true,
+     "Parts": {
+      "DiscWarm.obj#0/DiscWarm#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.5,
+         0.16
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.5,
+         0.16
+        ],
+        "EmissiveIntensity": 1.7,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "211894d5c48084e7",
+   "Name": "Accretion disc, cool",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/DiscCool.obj",
+     "Compact": true,
+     "Parts": {
+      "DiscCool.obj#0/DiscCool#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.7,
+         0.18,
+         0.06
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.7,
+         0.18,
+         0.06
+        ],
+        "EmissiveIntensity": 1.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "450d7cff340debb2",
+   "Name": "Bent starlight",
+   "DestroyOnLoad": true,
+   "Parent": "03d82e9cc2fe4781",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "second_ring_aligned",
+     "WhenSet": true,
+     "FadeSeconds": 1.5
+    }
+   ]
+  },
+  {
+   "GUID": "6a53e9d2e3f375de",
+   "Name": "A row of stars, twice",
+   "DestroyOnLoad": true,
+   "Parent": "450d7cff340debb2",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensedStars.obj",
+     "Compact": true,
+     "Parts": {
+      "LensedStars.obj#0/LensedStars#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.85,
+         0.93,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.85,
+         0.93,
+         1.0
+        ],
+        "EmissiveIntensity": 6.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "73e364d77ed4625e",
+   "Name": "Hole fills the window",
+   "DestroyOnLoad": true,
+   "Parent": "16a60d0009a210ec",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      48.0,
+      125.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": true,
+     "FadeSeconds": 3.0
+    }
+   ]
+  },
+  {
+   "GUID": "3f43bf2c4f5cf777",
+   "Name": "Black hole",
+   "DestroyOnLoad": true,
+   "Parent": "73e364d77ed4625e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      48.0,
+      125.0
+     ],
+     "Rotation": [
+      -16.6992,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      2.2,
+      2.2,
+      2.2
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "0561b5abaa7148e0",
+   "Name": "Shadow",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      15.1,
+      15.1,
+      15.1
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 1.0,
+      "EmissiveColor": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1ec67fb490d8176d",
+   "Name": "Photon ring",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/PhotonRing.obj",
+     "Compact": true,
+     "Parts": {
+      "PhotonRing.obj#0/PhotonRing#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.92,
+         0.78
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.92,
+         0.78
+        ],
+        "EmissiveIntensity": 9.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1d887cb1f4c18843",
+   "Name": "Lensed disc, inner",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensInner.obj",
+     "Compact": true,
+     "Parts": {
+      "LensInner.obj#0/LensInner#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.72,
+         0.36
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.72,
+         0.36
+        ],
+        "EmissiveIntensity": 3.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "530a16331e42c0b2",
+   "Name": "Lensed disc, middle",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensMid.obj",
+     "Compact": true,
+     "Parts": {
+      "LensMid.obj#0/LensMid#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.45,
+         0.14
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.45,
+         0.14
+        ],
+        "EmissiveIntensity": 2.2,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "20c54bd895a70d2a",
+   "Name": "Lensed disc, outer",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensOuter.obj",
+     "Compact": true,
+     "Parts": {
+      "LensOuter.obj#0/LensOuter#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.2,
+         0.06
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.2,
+         0.06
+        ],
+        "EmissiveIntensity": 0.9,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6b65c35f10e294dc",
+   "Name": "Accretion disc, hot",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/DiscHot.obj",
+     "Compact": true,
+     "Parts": {
+      "DiscHot.obj#0/DiscHot#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.86,
+         0.6
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.86,
+         0.6
+        ],
+        "EmissiveIntensity": 3.5,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4cbd780f93d2dade",
+   "Name": "Accretion disc, warm",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/DiscWarm.obj",
+     "Compact": true,
+     "Parts": {
+      "DiscWarm.obj#0/DiscWarm#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.5,
+         0.16
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.5,
+         0.16
+        ],
+        "EmissiveIntensity": 1.7,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "754132219e99683e",
+   "Name": "Accretion disc, cool",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/DiscCool.obj",
+     "Compact": true,
+     "Parts": {
+      "DiscCool.obj#0/DiscCool#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.7,
+         0.18,
+         0.06
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.7,
+         0.18,
+         0.06
+        ],
+        "EmissiveIntensity": 1.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "689e89c535416b43",
+   "Name": "Bent starlight",
+   "DestroyOnLoad": true,
+   "Parent": "3f43bf2c4f5cf777",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "second_ring_aligned",
+     "WhenSet": true,
+     "FadeSeconds": 1.5
+    }
+   ]
+  },
+  {
+   "GUID": "06159b197025f9e4",
+   "Name": "A row of stars, twice",
+   "DestroyOnLoad": true,
+   "Parent": "689e89c535416b43",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LensedStars.obj",
+     "Compact": true,
+     "Parts": {
+      "LensedStars.obj#0/LensedStars#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.85,
+         0.93,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.85,
+         0.93,
+         1.0
+        ],
+        "EmissiveIntensity": 6.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "400830093b13bbea",
+   "Name": "Hall",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Hall.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "73a9a12aac81b529",
+   "Name": "Ring pylons",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingPylons.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "560dd1cb879b8a93",
+   "Name": "Frieze over the window",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      29.0,
+      24.4
+     ],
+     "Rotation": [
+      0.0,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Frieze.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "630b75d70cbe505b",
+   "Name": "Frieze over the doors",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      11.0,
+      -28.4
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/FriezeBack.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0a8f051f344084ad",
+   "Name": "Inductees 01",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.9234,
+      9.4,
+      -27.8385
+     ],
+     "Rotation": [
+      0.0,
+      15.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4c831ff748748281",
+   "Name": "Inductees 02",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.9234,
+      12.2,
+      -27.8385
+     ],
+     "Rotation": [
+      0.0,
+      15.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "756d638e4d520b6c",
+   "Name": "Inductees 03",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -13.375,
+      9.4,
+      -25.1662
+     ],
+     "Rotation": [
+      0.0,
+      30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "692122dec5b14e33",
+   "Name": "Inductees 04",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -13.375,
+      12.2,
+      -25.1662
+     ],
+     "Rotation": [
+      0.0,
+      30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5c1701987d75d88f",
+   "Name": "Inductees 05",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -18.9151,
+      9.4,
+      -20.9151
+     ],
+     "Rotation": [
+      0.0,
+      45.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "362c0b48386e085a",
+   "Name": "Inductees 06",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -18.9151,
+      12.2,
+      -20.9151
+     ],
+     "Rotation": [
+      0.0,
+      45.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "15a5a0fcfeb90b13",
+   "Name": "Inductees 07",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -23.1662,
+      9.4,
+      -15.375
+     ],
+     "Rotation": [
+      0.0,
+      60.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "675cf7ffaeff6cce",
+   "Name": "Inductees 08",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -23.1662,
+      12.2,
+      -15.375
+     ],
+     "Rotation": [
+      0.0,
+      60.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5ecc9e7973839ce6",
+   "Name": "Inductees 09",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -25.8385,
+      9.4,
+      -8.9234
+     ],
+     "Rotation": [
+      0.0,
+      75.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "768b7eb3026108c9",
+   "Name": "Inductees 10",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -25.8385,
+      12.2,
+      -8.9234
+     ],
+     "Rotation": [
+      0.0,
+      75.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "77a94f2f69e5e594",
+   "Name": "Inductees 11",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -26.75,
+      9.4,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "36c7543409dbdb36",
+   "Name": "Inductees 12",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -26.75,
+      12.2,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      90.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3aeb5784e8b9dd05",
+   "Name": "Inductees 13",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -25.8385,
+      9.4,
+      4.9234
+     ],
+     "Rotation": [
+      0.0,
+      105.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "43237d091d5894d8",
+   "Name": "Inductees 14",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -25.8385,
+      12.2,
+      4.9234
+     ],
+     "Rotation": [
+      0.0,
+      105.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "443014c6a4d31f88",
+   "Name": "Inductees 15",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      25.8385,
+      9.4,
+      4.9234
+     ],
+     "Rotation": [
+      0.0,
+      255.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/PlaqueBlank.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "02172bc58e180467",
+   "Name": "Inductees 16",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      25.8385,
+      12.2,
+      4.9234
+     ],
+     "Rotation": [
+      0.0,
+      255.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5fd90d16548aa3f3",
+   "Name": "Inductees 17",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      26.75,
+      9.4,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      270.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0d9b69dfd2f5e8ca",
+   "Name": "Inductees 18",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      26.75,
+      12.2,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      270.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "47f06886b5f1a92b",
+   "Name": "Inductees 19",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      25.8385,
+      9.4,
+      -8.9234
+     ],
+     "Rotation": [
+      0.0,
+      285.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "571ac88f2559e369",
+   "Name": "Inductees 20",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      25.8385,
+      12.2,
+      -8.9234
+     ],
+     "Rotation": [
+      0.0,
+      285.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6e6ef0397be5e6e0",
+   "Name": "Inductees 21",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      23.1662,
+      9.4,
+      -15.375
+     ],
+     "Rotation": [
+      0.0,
+      300.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1c76e9009965a823",
+   "Name": "Inductees 22",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      23.1662,
+      12.2,
+      -15.375
+     ],
+     "Rotation": [
+      0.0,
+      300.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "49e2807cdcb195f4",
+   "Name": "Inductees 23",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      18.9151,
+      9.4,
+      -20.9151
+     ],
+     "Rotation": [
+      0.0,
+      315.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "248e63b055bc5bfc",
+   "Name": "Inductees 24",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      18.9151,
+      12.2,
+      -20.9151
+     ],
+     "Rotation": [
+      0.0,
+      315.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "785aace63cfc0fd0",
+   "Name": "Inductees 25",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      13.375,
+      9.4,
+      -25.1662
+     ],
+     "Rotation": [
+      0.0,
+      330.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3302e98704e548b0",
+   "Name": "Inductees 26",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      13.375,
+      12.2,
+      -25.1662
+     ],
+     "Rotation": [
+      0.0,
+      330.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6e3a9b084e2d6eac",
+   "Name": "Inductees 27",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.9234,
+      9.4,
+      -27.8385
+     ],
+     "Rotation": [
+      0.0,
+      345.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "1e700d3070c5f504",
+   "Name": "Inductees 28",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.9234,
+      12.2,
+      -27.8385
+     ],
+     "Rotation": [
+      0.0,
+      345.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6bbe27d42e48c78a",
+   "Name": "Great plate -1/1",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -21.6379,
+      17.0,
+      12.5949
+     ],
+     "Rotation": [
+      0.0,
+      124.0,
+      0.0
+     ],
+     "Scale": [
+      2.0,
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "05beb7f73aa6853c",
+   "Name": "Great plate -1/2",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -21.6379,
+      24.0,
+      12.5949
+     ],
+     "Rotation": [
+      0.0,
+      124.0,
+      0.0
+     ],
+     "Scale": [
+      2.0,
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "01b73396af8b28da",
+   "Name": "Great plate +1/1",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      21.6379,
+      17.0,
+      12.5949
+     ],
+     "Rotation": [
+      0.0,
+      236.0,
+      0.0
+     ],
+     "Scale": [
+      2.0,
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "4a8e4fa72c612cfc",
+   "Name": "Great plate +1/2",
+   "DestroyOnLoad": true,
+   "Parent": "6f8debde6c0b67dc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      21.6379,
+      24.0,
+      12.5949
+     ],
+     "Rotation": [
+      0.0,
+      236.0,
+      0.0
+     ],
+     "Scale": [
+      2.0,
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Plaque4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "24b76aa1e2d0fc5e",
+   "Name": "Ring 1 adrift",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "first_ring_turning",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "32d34458b9accd68",
+   "Name": "Ring 1 (tilted)",
+   "DestroyOnLoad": true,
+   "Parent": "24b76aa1e2d0fc5e",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      68.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "441337576efb51b7",
+   "Name": "Ring 1 in line",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "first_ring_turning",
+     "WhenSet": true,
+     "FadeSeconds": 1.6
+    }
+   ]
+  },
+  {
+   "GUID": "20b029aefab70ef1",
+   "Name": "Ring 1",
+   "DestroyOnLoad": true,
+   "Parent": "441337576efb51b7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring1.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "645bf7b374ab8196",
+   "Name": "Ring 1 light",
+   "DestroyOnLoad": true,
+   "Parent": "441337576efb51b7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingGlow1.obj",
+     "Compact": true,
+     "Parts": {
+      "RingGlow1.obj#0/RingGlow1#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.55,
+         0.18
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.55,
+         0.18
+        ],
+        "EmissiveIntensity": 1.5,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "528eb988cad28189",
+   "Name": "Ring 1 spill",
+   "DestroyOnLoad": true,
+   "Parent": "441337576efb51b7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -10.0,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.55,
+      0.18
+     ],
+     "Intensity": 45.0,
+     "Range": 8.0
+    }
+   ]
+  },
+  {
+   "GUID": "370359dbe54de678",
+   "Name": "Ring 2 adrift",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "second_ring_aligned",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "3665e7fb69c706e9",
+   "Name": "Ring 2 (tilted)",
+   "DestroyOnLoad": true,
+   "Parent": "370359dbe54de678",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      62.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "532886d484846a50",
+   "Name": "Ring 2 in line",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "second_ring_aligned",
+     "WhenSet": true,
+     "FadeSeconds": 1.6
+    }
+   ]
+  },
+  {
+   "GUID": "49639744da8938ae",
+   "Name": "Ring 2",
+   "DestroyOnLoad": true,
+   "Parent": "532886d484846a50",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring2.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5576d6a4dc1a227f",
+   "Name": "Ring 2 light",
+   "DestroyOnLoad": true,
+   "Parent": "532886d484846a50",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingGlow2.obj",
+     "Compact": true,
+     "Parts": {
+      "RingGlow2.obj#0/RingGlow2#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.78,
+         0.38
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.78,
+         0.38
+        ],
+        "EmissiveIntensity": 1.3,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "39866e7b98bc6504",
+   "Name": "Ring 2 spill",
+   "DestroyOnLoad": true,
+   "Parent": "532886d484846a50",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -8.3,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.78,
+      0.38
+     ],
+     "Intensity": 45.0,
+     "Range": 8.0
+    }
+   ]
+  },
+  {
+   "GUID": "7df92f52ca3fb9fa",
+   "Name": "Ring 3 adrift",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "third_ring_locked",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "725d4ae20789f3e5",
+   "Name": "Ring 3 (tilted)",
+   "DestroyOnLoad": true,
+   "Parent": "7df92f52ca3fb9fa",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      38.0,
+      -34.0,
+      18.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "601a1ac13d23eceb",
+   "Name": "Ring 3 in line",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "third_ring_locked",
+     "WhenSet": true,
+     "FadeSeconds": 1.6
+    }
+   ]
+  },
+  {
+   "GUID": "4a2bd575eb686cd7",
+   "Name": "Ring 3",
+   "DestroyOnLoad": true,
+   "Parent": "601a1ac13d23eceb",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring3.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "460ccfd743ac0fc4",
+   "Name": "Ring 3 light",
+   "DestroyOnLoad": true,
+   "Parent": "601a1ac13d23eceb",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingGlow3.obj",
+     "Compact": true,
+     "Parts": {
+      "RingGlow3.obj#0/RingGlow3#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.35,
+         0.85,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.35,
+         0.85,
+         1.0
+        ],
+        "EmissiveIntensity": 1.4,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1415386821a27bdd",
+   "Name": "Ring 3 spill",
+   "DestroyOnLoad": true,
+   "Parent": "601a1ac13d23eceb",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -6.6,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.35,
+      0.85,
+      1.0
+     ],
+     "Intensity": 45.0,
+     "Range": 8.0
+    }
+   ]
+  },
+  {
+   "GUID": "37b6b7b0b03c443f",
+   "Name": "Ring 4 adrift",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "076cbcb8d326abdc",
+   "Name": "Ring 4 (tilted)",
+   "DestroyOnLoad": true,
+   "Parent": "37b6b7b0b03c443f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      -52.0,
+      22.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring4.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "3814c8cd06e2f45d",
+   "Name": "Ring 4 in line",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": true,
+     "FadeSeconds": 1.6
+    }
+   ]
+  },
+  {
+   "GUID": "31e0d6e22f3fd41b",
+   "Name": "Ring 4, white hot",
+   "DestroyOnLoad": true,
+   "Parent": "3814c8cd06e2f45d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring4.obj",
+     "Compact": true,
+     "Parts": {
+      "Ring4.obj#0/Ring4#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.95,
+         0.85
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.95,
+         0.85
+        ],
+        "EmissiveIntensity": 0.35,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "46797f70d41163fc",
+   "Name": "Ring 4 light",
+   "DestroyOnLoad": true,
+   "Parent": "3814c8cd06e2f45d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingGlow4.obj",
+     "Compact": true,
+     "Parts": {
+      "RingGlow4.obj#0/RingGlow4#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.97,
+         0.92
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.97,
+         0.92
+        ],
+        "EmissiveIntensity": 2.4,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "34612c1dd8f49485",
+   "Name": "Ring 4 spill",
+   "DestroyOnLoad": true,
+   "Parent": "3814c8cd06e2f45d",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -4.9,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.97,
+      0.92
+     ],
+     "Intensity": 120.0,
+     "Range": 12.0
+    }
+   ]
+  },
+  {
+   "GUID": "682506b6c492aae2",
+   "Name": "Ring 5 adrift",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fifth_ring_armed",
+     "WhenSet": false,
+     "FadeSeconds": 1.2
+    }
+   ]
+  },
+  {
+   "GUID": "09eec986a4b0e502",
+   "Name": "Ring 5 (tilted)",
+   "DestroyOnLoad": true,
+   "Parent": "682506b6c492aae2",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      24.0,
+      70.0,
+      -12.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring5.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7c444afc0d199ed7",
+   "Name": "Ring 5 in line",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fifth_ring_armed",
+     "WhenSet": true,
+     "FadeSeconds": 1.6
+    }
+   ]
+  },
+  {
+   "GUID": "6aabefc778fdd17d",
+   "Name": "Ring 5",
+   "DestroyOnLoad": true,
+   "Parent": "7c444afc0d199ed7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Ring5.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "38cb8db690e034bd",
+   "Name": "Ring 5 light",
+   "DestroyOnLoad": true,
+   "Parent": "7c444afc0d199ed7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingGlow5.obj",
+     "Compact": true,
+     "Parts": {
+      "RingGlow5.obj#0/RingGlow5#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.78,
+         0.38
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.78,
+         0.38
+        ],
+        "EmissiveIntensity": 1.4,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6d08d67c8dfdbc28",
+   "Name": "Ring 5 spill",
+   "DestroyOnLoad": true,
+   "Parent": "7c444afc0d199ed7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      -3.2,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.78,
+      0.38
+     ],
+     "Intensity": 45.0,
+     "Range": 8.0
+    }
+   ]
+  },
+  {
+   "GUID": "5c6f18c0458fa220",
+   "Name": "Clamps locked",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "third_ring_locked",
+     "WhenSet": true,
+     "FadeSeconds": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "69873fff7f6c69f3",
+   "Name": "Lock clamps",
+   "DestroyOnLoad": true,
+   "Parent": "5c6f18c0458fa220",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingClamps.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7ff90002d491141a",
+   "Name": "Lock lamps",
+   "DestroyOnLoad": true,
+   "Parent": "5c6f18c0458fa220",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/ClampLamps.obj",
+     "Compact": true,
+     "Parts": {
+      "ClampLamps.obj#0/ClampLamps#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.35,
+         0.85,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.35,
+         0.85,
+         1.0
+        ],
+        "EmissiveIntensity": 3.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "397c317b84d50a11",
+   "Name": "Array armed",
+   "DestroyOnLoad": true,
+   "Parent": "0dc06d9ed04ee07f",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fifth_ring_armed",
+     "WhenSet": true,
+     "FadeSeconds": 1.4
+    }
+   ]
+  },
+  {
+   "GUID": "5e26b54005da424a",
+   "Name": "Charge nodes 1",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingNodes1.obj",
+     "Compact": true,
+     "Parts": {
+      "RingNodes1.obj#0/RingNodes1#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "EmissiveIntensity": 2.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "3c8963305dca65e0",
+   "Name": "Charge nodes 2",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingNodes2.obj",
+     "Compact": true,
+     "Parts": {
+      "RingNodes2.obj#0/RingNodes2#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "EmissiveIntensity": 2.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "24a45ef6c9c05a47",
+   "Name": "Charge nodes 3",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingNodes3.obj",
+     "Compact": true,
+     "Parts": {
+      "RingNodes3.obj#0/RingNodes3#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "EmissiveIntensity": 2.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "764ca1b3973b850e",
+   "Name": "Charge nodes 4",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingNodes4.obj",
+     "Compact": true,
+     "Parts": {
+      "RingNodes4.obj#0/RingNodes4#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "EmissiveIntensity": 2.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "1820468412b9bfaa",
+   "Name": "Charge nodes 5",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RingNodes5.obj",
+     "Compact": true,
+     "Parts": {
+      "RingNodes5.obj#0/RingNodes5#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         0.75,
+         0.95,
+         1.0
+        ],
+        "EmissiveIntensity": 2.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "306b528f751c490a",
+   "Name": "Pulse beam",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      28.3139,
+      59.3796
+     ],
+     "Rotation": [
+      73.3008,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.11,
+      50.5097,
+      0.11
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cylinder",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.8,
+       0.95,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.92,
+       1.0
+      ],
+      "EmissiveIntensity": 2.5
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4961a9b315e3fa97",
+   "Name": "Pulse core",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      13.8,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.45,
+      0.45,
+      0.45
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.85,
+       0.97,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "524c39ee54f29ebc",
+   "Name": "Armed core",
+   "DestroyOnLoad": true,
+   "Parent": "397c317b84d50a11",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      7.8,
+      8.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.35,
+      0.85,
+      1.0
+     ],
+     "Intensity": 70.0,
+     "Range": 12.0
+    }
+   ]
+  },
+  {
+   "GUID": "4ea7e2734e60ef11",
+   "Name": "Kit leads and pickups",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/KitLeads.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "79bebafb3b75f6ef",
+   "Name": "Drilled loonie on the hat stand",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.95,
+      1.95,
+      6.55
+     ],
+     "Rotation": [
+      0.0,
+      20.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/HatLoonie.obj",
+     "Compact": true,
+     "Parts": {
+      "HatLoonie.obj#0/HatLoonie#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.78,
+         0.38
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.78,
+         0.38
+        ],
+        "EmissiveIntensity": 1.5,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "027d1af1c511e401",
+   "Name": "One plain music stand",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.75,
+      1.0,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      -25.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/MusicStand.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "75e7d4873905352f",
+   "Name": "Rehearsal lamp",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.9,
+      1.0,
+      8.1
+     ],
+     "Rotation": [
+      0.0,
+      30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/RehearsalLamp.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7026060f7600ccf5",
+   "Name": "Rehearsal lamp shade",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.9,
+      1.0,
+      8.1
+     ],
+     "Rotation": [
+      0.0,
+      30.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/LampShade.obj",
+     "Compact": true,
+     "Parts": {
+      "LampShade.obj#0/LampShade#0/@#0": {
+       "CastShadows": false,
+       "Material": {
+        "Type": "StandardMaterial",
+        "DiffuseColor": [
+         1.0,
+         0.7,
+         0.36
+        ],
+        "Roughness": 0.9,
+        "EmissiveColor": [
+         1.0,
+         0.7,
+         0.36
+        ],
+        "EmissiveIntensity": 5.0,
+        "FaceMode": 2
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4df7947d07bcc9f0",
+   "Name": "Rehearsal lamp glow",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.75,
+      2.7,
+      7.75
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.66,
+      0.36
+     ],
+     "Intensity": 38.0,
+     "Range": 5.5
+    }
+   ]
+  },
+  {
+   "GUID": "183703087541b742",
+   "Name": "Conductor podium",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.2,
+      0.6,
+      7.0
+     ],
+     "Rotation": [
+      0.0,
+      73.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/ConductorPodium.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6de7e6f0895b8df6",
+   "Name": "Conductor at the desk",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.2,
+      0.92,
+      7.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "third_ring_locked",
+     "WhenSet": false,
+     "FadeSeconds": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "5e390e790e0b507e",
+   "Name": "Conductor, baton up",
+   "DestroyOnLoad": true,
+   "Parent": "6de7e6f0895b8df6",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.2,
+      0.92,
+      7.0
+     ],
+     "Rotation": [
+      0.0,
+      73.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Conductor_up.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7d5020f65abb2b56",
+   "Name": "Conductor steps back",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.45,
+      0.92,
+      7.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "third_ring_locked",
+     "WhenSet": true,
+     "FadeSeconds": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "6204c28b62ac0e5c",
+   "Name": "...until the fourth",
+   "DestroyOnLoad": true,
+   "Parent": "7d5020f65abb2b56",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.45,
+      0.92,
+      7.25
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": false,
+     "FadeSeconds": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "16c4aeb4e324a37a",
+   "Name": "Conductor, listening",
+   "DestroyOnLoad": true,
+   "Parent": "6204c28b62ac0e5c",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.45,
+      0.92,
+      7.25
+     ],
+     "Rotation": [
+      0.0,
+      73.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Conductor_down.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "519c924a7774e364",
+   "Name": "Conductor turns to the drummer",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.2,
+      0.92,
+      7.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": true,
+     "FadeSeconds": 0.6
+    }
+   ]
+  },
+  {
+   "GUID": "57b32dc2aa4d1128",
+   "Name": "Conductor, cueing the drummer",
+   "DestroyOnLoad": true,
+   "Parent": "519c924a7774e364",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.2,
+      0.92,
+      7.0
+     ],
+     "Rotation": [
+      0.0,
+      94.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Venues/StoryEventHorizon/Models/Conductor_point.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "0dd57f2b203ae6aa",
+   "Name": "Wedge 1",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.4,
+      0.6,
+      2.0
+     ],
+     "Rotation": [
+      0.0,
+      200.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Wedge.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6e5fe02471d7a1b6",
+   "Name": "Wedge 2",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      0.6,
+      2.2
+     ],
+     "Rotation": [
+      0.0,
+      160.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/Wedge.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "035f373f3c59b679",
+   "Name": "Bass rig",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.6,
+      0.6,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      190.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/GuitarCab.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "6f802c6fbde841ee",
+   "Name": "Guitar rig",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.4,
+      0.6,
+      6.4
+     ],
+     "Rotation": [
+      0.0,
+      170.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/GuitarCab.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "7fb8952e1a0ca768",
+   "Name": "Bass head",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.6,
+      1.35,
+      6.6
+     ],
+     "Rotation": [
+      0.0,
+      190.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/AmpHead.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "75651f7690c05d15",
+   "Name": "Guitar head",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.4,
+      1.35,
+      6.4
+     ],
+     "Rotation": [
+      0.0,
+      170.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/AmpHead.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5433091084395b99",
+   "Name": "Drum rug",
+   "DestroyOnLoad": true,
+   "Parent": "58f9a7079612d484",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.005,
+      6.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.9,
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "Type": "Model",
+     "ModelPath": "Assets/Models/Venue/DrumRug.obj"
+    }
+   ]
+  },
+  {
+   "GUID": "5235b589f91b2afc",
+   "Name": "House lights",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      8.0,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueStory",
+     "Flag": "fourth_ring_charged",
+     "WhenSet": false,
+     "FadeSeconds": 3.0
+    }
+   ]
+  },
+  {
+   "GUID": "6c4f4bf9f81b8283",
+   "Name": "Sconce 1",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.7552,
+      6.6,
+      -27.2107
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4610af5b1fdda6ae",
+   "Name": "Sconce light 1",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.4705,
+      6.0,
+      -26.1481
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "07fb3718277c8838",
+   "Name": "Sconce 2",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -18.4555,
+      6.6,
+      -20.4555
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "434b6f908c894857",
+   "Name": "Sconce light 2",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -17.6777,
+      6.0,
+      -19.6777
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "1366d25efb0c7511",
+   "Name": "Sconce 3",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -25.2107,
+      6.6,
+      -8.7552
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6f196d43ef865d13",
+   "Name": "Sconce light 3",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -24.1481,
+      6.0,
+      -8.4705
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "1cb48209638d1786",
+   "Name": "Sconce 4",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -25.2107,
+      6.6,
+      4.7552
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6f5a65a7fdaa74c9",
+   "Name": "Sconce light 4",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -24.1481,
+      6.0,
+      4.4705
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "703dd1e18a73c44a",
+   "Name": "Sconce 9",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      25.2107,
+      6.6,
+      4.7552
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5ec1d8c8337ca36a",
+   "Name": "Sconce light 9",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      24.1481,
+      6.0,
+      4.4705
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "59409a223fc9655c",
+   "Name": "Sconce 10",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      25.2107,
+      6.6,
+      -8.7552
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "4c829897aa739ceb",
+   "Name": "Sconce light 10",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      24.1481,
+      6.0,
+      -8.4705
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "71108e19eeee7773",
+   "Name": "Sconce 11",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      18.4555,
+      6.6,
+      -20.4555
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "252374baaead9a40",
+   "Name": "Sconce light 11",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      17.6777,
+      6.0,
+      -19.6777
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "1b8c5754fffc32eb",
+   "Name": "Sconce 12",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.7552,
+      6.6,
+      -27.2107
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.25,
+      0.35,
+      0.25
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Sphere",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       1.0,
+       0.72,
+       0.42
+      ],
+      "EmissiveIntensity": 4.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5b1ceb8d7ce1b226",
+   "Name": "Sconce light 12",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.4705,
+      6.0,
+      -26.1481
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 140.0,
+     "Range": 11.0
+    }
+   ]
+  },
+  {
+   "GUID": "03e928fe9f852f4f",
+   "Name": "Hall glow",
+   "DestroyOnLoad": true,
+   "Parent": "5235b589f91b2afc",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      22.0,
+      -6.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.55,
+      0.6,
+      0.9
+     ],
+     "Intensity": 900.0,
+     "Range": 40.0
+    }
+   ]
+  },
+  {
+   "GUID": "60bf2fd872600703",
+   "Name": "Oculus lamp 1",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.9497,
+      45.3,
+      -6.9497
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7442add3c8634a37",
+   "Name": "Oculus lamp 2",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.0,
+      45.3,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "02bce0561a3e630c",
+   "Name": "Oculus lamp 3",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.9497,
+      45.3,
+      2.9497
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "7f5a58c5fb7321dc",
+   "Name": "Oculus lamp 4",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      45.3,
+      5.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "5f49df6c34dd0483",
+   "Name": "Oculus lamp 5",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.9497,
+      45.3,
+      2.9497
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "6d923fe0adea937e",
+   "Name": "Oculus lamp 6",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.0,
+      45.3,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "320e3c6c1475679a",
+   "Name": "Oculus lamp 7",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.9497,
+      45.3,
+      -6.9497
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "24b2ac9f076dacb4",
+   "Name": "Oculus lamp 8",
+   "DestroyOnLoad": true,
+   "Parent": "614887f4858c1228",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      45.3,
+      -9.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      0.3,
+      0.15,
+      0.3
+     ]
+    },
+    {
+     "Type": "Mesh",
+     "MeshType": "Cube",
+     "CastShadows": false,
+     "Material": {
+      "Type": "StandardMaterial",
+      "DiffuseColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "Metallic": 0.0,
+      "Roughness": 0.9,
+      "EmissiveColor": [
+       0.7,
+       0.85,
+       1.0
+      ],
+      "EmissiveIntensity": 3.0
+     }
+    }
+   ]
+  },
+  {
+   "GUID": "0cfaf729cf035806",
+   "Name": "Accretion light",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      48.0,
+      125.0
+     ],
+     "Rotation": [
+      21.6379,
+      180.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Directional",
+     "Color": [
+      1.0,
+      0.72,
+      0.5
+     ],
+     "Intensity": 0.9,
+     "Range": 10.0,
+     "DirectionalSource": "Manual",
+     "CastShadows": true
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Static",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "41a66a435e2073a5",
+   "Name": "Starlight fill",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      30.0,
+      -10.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.5,
+      0.6,
+      1.0
+     ],
+     "Intensity": 500.0,
+     "Range": 45.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Static",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "0e20bc837263b13a",
+   "Name": "Front wash 1",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -9.0,
+      13.0,
+      -7.0
+     ],
+     "Rotation": [
+      43.1167,
+      20.556,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.75,
+      0.8,
+      1.0
+     ],
+     "Intensity": 2600.0,
+     "Range": 30.0,
+     "InnerConeAngle": 20.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "07066ca141be89ea",
+   "Name": "Front wash 2",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.0,
+      13.0,
+      -7.0
+     ],
+     "Rotation": [
+      44.3915,
+      11.7683,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.75,
+      0.8,
+      1.0
+     ],
+     "Intensity": 2600.0,
+     "Range": 30.0,
+     "InnerConeAngle": 20.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "62d80835585e7302",
+   "Name": "Front wash 3",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.5,
+      13.0,
+      -7.0
+     ],
+     "Rotation": [
+      44.9442,
+      3.5763,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.75,
+      0.8,
+      1.0
+     ],
+     "Intensity": 2600.0,
+     "Range": 30.0,
+     "InnerConeAngle": 20.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "778e20bc0394c80f",
+   "Name": "Front wash 4",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.5,
+      13.0,
+      -7.0
+     ],
+     "Rotation": [
+      44.9442,
+      -3.5763,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.75,
+      0.8,
+      1.0
+     ],
+     "Intensity": 2600.0,
+     "Range": 30.0,
+     "InnerConeAngle": 20.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "646daf8c53ed4874",
+   "Name": "Front wash 5",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.0,
+      13.0,
+      -7.0
+     ],
+     "Rotation": [
+      44.3915,
+      -11.7683,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.75,
+      0.8,
+      1.0
+     ],
+     "Intensity": 2600.0,
+     "Range": 30.0,
+     "InnerConeAngle": 20.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "7adf49b8a677265d",
+   "Name": "Front wash 6",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      9.0,
+      13.0,
+      -7.0
+     ],
+     "Rotation": [
+      43.1167,
+      -20.556,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.75,
+      0.8,
+      1.0
+     ],
+     "Intensity": 2600.0,
+     "Range": 30.0,
+     "InnerConeAngle": 20.0,
+     "OuterConeAngle": 40.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "4c43e539f6b29b20",
+   "Name": "Back wash 1",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0,
+      11.0,
+      15.0
+     ],
+     "Rotation": [
+      42.1753,
+      167.692,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "Intensity": 1600.0,
+     "Range": 22.0,
+     "InnerConeAngle": 22.0,
+     "OuterConeAngle": 42.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "4b767015bbf40d88",
+   "Name": "Back wash 2",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.0,
+      11.0,
+      15.0
+     ],
+     "Rotation": [
+      42.7636,
+      175.8404,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "Intensity": 1600.0,
+     "Range": 22.0,
+     "InnerConeAngle": 22.0,
+     "OuterConeAngle": 42.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "6fb4c9621b0879fc",
+   "Name": "Back wash 3",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.0,
+      11.0,
+      15.0
+     ],
+     "Rotation": [
+      42.7636,
+      -175.8404,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "Intensity": 1600.0,
+     "Range": 22.0,
+     "InnerConeAngle": 22.0,
+     "OuterConeAngle": 42.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "27fa26518b8d3e74",
+   "Name": "Back wash 4",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      11.0,
+      15.0
+     ],
+     "Rotation": [
+      42.1753,
+      -167.692,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "Intensity": 1600.0,
+     "Range": 22.0,
+     "InnerConeAngle": 22.0,
+     "OuterConeAngle": 42.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Wash",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "41e5e7e51dffcd6d",
+   "Name": "Follow spot / Drummer",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      16.0,
+      -14.0
+     ],
+     "Rotation": [
+      33.1356,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.95,
+      0.88
+     ],
+     "Intensity": 4200.0,
+     "Range": 40.0,
+     "InnerConeAngle": 4.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "73a7069da0c3ecf8",
+   "Name": "Follow spot / Vocals",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      16.0,
+      -14.0
+     ],
+     "Rotation": [
+      40.9407,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.95,
+      0.88
+     ],
+     "Intensity": 4200.0,
+     "Range": 40.0,
+     "InnerConeAngle": 4.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "55c1bad025bd2555",
+   "Name": "Follow spot / Guitar",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.26,
+      16.0,
+      -14.0
+     ],
+     "Rotation": [
+      36.8325,
+      -8.796,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.95,
+      0.88
+     ],
+     "Intensity": 4200.0,
+     "Range": 40.0,
+     "InnerConeAngle": 4.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 2
+    }
+   ]
+  },
+  {
+   "GUID": "3266bcf3bd18fd91",
+   "Name": "Follow spot / Bass",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.26,
+      16.0,
+      -14.0
+     ],
+     "Rotation": [
+      36.8325,
+      8.796,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.95,
+      0.88
+     ],
+     "Intensity": 4200.0,
+     "Range": 40.0,
+     "InnerConeAngle": 4.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 3
+    }
+   ]
+  },
+  {
+   "GUID": "062b9d7dac40e491",
+   "Name": "Follow spot / Keys",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.1,
+      16.0,
+      -14.0
+     ],
+     "Rotation": [
+      33.9745,
+      -13.2559,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.95,
+      0.88
+     ],
+     "Intensity": 4200.0,
+     "Range": 40.0,
+     "InnerConeAngle": 4.0,
+     "OuterConeAngle": 7.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Spot",
+     "Group": 4
+    }
+   ]
+  },
+  {
+   "GUID": "659aec5592759aa0",
+   "Name": "Rim beam 1",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.4,
+      0.8,
+      9.8373
+     ],
+     "Rotation": [
+      -68.1131,
+      -59.2373,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.75,
+      0.35
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "4e5d5d3590d3fc8e",
+   "Name": "Rim beam 2",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.0,
+      0.8,
+      12.7655
+     ],
+     "Rotation": [
+      -72.205,
+      -50.1944,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.85,
+      0.6,
+      1.0
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "5ff09771628adb6c",
+   "Name": "Rim beam 3",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.6,
+      0.8,
+      14.1915
+     ],
+     "Rotation": [
+      -75.7914,
+      -35.7539,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.75,
+      0.35
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "648ca6f12dbfad49",
+   "Name": "Rim beam 4",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.2,
+      0.8,
+      14.8239
+     ],
+     "Rotation": [
+      -78.0681,
+      -13.4957,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.85,
+      0.6,
+      1.0
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "712f7e72b0e89926",
+   "Name": "Rim beam 5",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.2,
+      0.8,
+      14.8239
+     ],
+     "Rotation": [
+      -78.0681,
+      13.4957,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.75,
+      0.35
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "331388b8eb5e380c",
+   "Name": "Rim beam 6",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.6,
+      0.8,
+      14.1915
+     ],
+     "Rotation": [
+      -75.7914,
+      35.7539,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.85,
+      0.6,
+      1.0
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "4cb3f5fc4e0e6e06",
+   "Name": "Rim beam 7",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      6.0,
+      0.8,
+      12.7655
+     ],
+     "Rotation": [
+      -72.205,
+      50.1944,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.75,
+      0.35
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "663c84a33ad8a5e9",
+   "Name": "Rim beam 8",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.4,
+      0.8,
+      9.8373
+     ],
+     "Rotation": [
+      -68.1131,
+      59.2373,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      0.85,
+      0.6,
+      1.0
+     ],
+     "Intensity": 3000.0,
+     "Range": 40.0,
+     "InnerConeAngle": 3.0,
+     "OuterConeAngle": 6.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Beam",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "0b9fc44771190912",
+   "Name": "Blinder 1",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -8.2,
+      3.0,
+      12.0
+     ],
+     "Rotation": [
+      2.3206,
+      166.5494,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 1800.0,
+     "Range": 30.0,
+     "InnerConeAngle": 25.0,
+     "OuterConeAngle": 50.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Blinder",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "51133195d8d5e4b3",
+   "Name": "Blinder 2",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.2,
+      3.0,
+      12.0
+     ],
+     "Rotation": [
+      2.3206,
+      -166.5494,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Spot",
+     "Color": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "Intensity": 1800.0,
+     "Range": 30.0,
+     "InnerConeAngle": 25.0,
+     "OuterConeAngle": 50.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Blinder",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "25f24b7043728d6b",
+   "Name": "Strobe 1",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -12.0,
+      9.0,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.9,
+      0.95,
+      1.0
+     ],
+     "Intensity": 1500.0,
+     "Range": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Strobe",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "1be5df14edbe57e8",
+   "Name": "Strobe 2",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      12.0,
+      9.0,
+      11.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.9,
+      0.95,
+      1.0
+     ],
+     "Intensity": 1500.0,
+     "Range": 30.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Strobe",
+     "Group": 1
+    }
+   ]
+  },
+  {
+   "GUID": "65213a0467832de2",
+   "Name": "Band key",
+   "DestroyOnLoad": true,
+   "Parent": "6d6e6f590e217682",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      7.0,
+      -2.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "Light",
+     "LightType": "Point",
+     "Color": [
+      0.95,
+      0.88,
+      0.8
+     ],
+     "Intensity": 160.0,
+     "Range": 18.0
+    },
+    {
+     "Type": "VenueShowLight",
+     "Kind": "Static",
+     "Group": 0
+    }
+   ]
+  },
+  {
+   "GUID": "2eb43816bdd5cf32",
+   "Name": "VenueInfo",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueInfo",
+     "Name": "The Drummer Hall of Fame at the Event Horizon",
+     "Author": "Drumsmith",
+     "Outdoor": false,
+     "RoomBack": -28.0,
+     "RoomCeiling": 46.0,
+     "RoomHalfWidth": 26.0,
+     "DeskZ": -21.0,
+     "BuildStage": false,
+     "BuildSet": false,
+     "BuildRig": false,
+     "BuildFx": false,
+     "AmbientColor": [
+      0.004,
+      0.005,
+      0.012
+     ],
+     "FogColor": [
+      0.012,
+      0.011,
+      0.024
+     ],
+     "Haze": 0.1,
+     "SkyTime": 22.0,
+     "MoonBrightness": 1.0
+    }
+   ]
+  },
+  {
+   "GUID": "30b9cde0aa4bcec8",
+   "Name": "Spot_Drummer",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      1.0,
+      7.9
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Drummer"
+    }
+   ]
+  },
+  {
+   "GUID": "40216361fbf1fa46",
+   "Name": "Spot_Bass",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      4.2,
+      0.6,
+      5.0
+     ],
+     "Rotation": [
+      0.0,
+      -12.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Bass"
+    }
+   ]
+  },
+  {
+   "GUID": "57712de3214d5111",
+   "Name": "Spot_Guitar",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -4.2,
+      0.6,
+      5.0
+     ],
+     "Rotation": [
+      0.0,
+      12.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Guitar"
+    }
+   ]
+  },
+  {
+   "GUID": "0e53e193cdcddab3",
+   "Name": "Spot_Vocals",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.6,
+      2.6
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Vocals"
+    }
+   ]
+  },
+  {
+   "GUID": "54115c9d5876a18f",
+   "Name": "Spot_Keys",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.0,
+      0.6,
+      6.8
+     ],
+     "Rotation": [
+      0.0,
+      28.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueSpot",
+     "Member": "Keys"
+    }
+   ]
+  },
+  {
+   "GUID": "758f40222bff1134",
+   "Name": "Inductees, front rows",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      -6.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      15.0,
+      1.0,
+      4.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "Figures": "Posed",
+     "HeadCount": 60,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "55c5cdc17adab086",
+   "Name": "Gala floor",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      -14.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      24.0,
+      1.0,
+      10.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 170,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "78b3e6e39fe47bc2",
+   "Name": "Gala floor, sides",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      -21.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      18.0,
+      1.0,
+      4.5
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 50,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "09366e3549a6a4ed",
+   "Name": "Left gallery, low",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -18.6,
+      3.2,
+      -7.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.0,
+      16.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 26,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "11fd677f0a4473cf",
+   "Name": "Left gallery, high",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -20.6,
+      4.0,
+      -7.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.0,
+      15.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 24,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "3d4146eb45386a72",
+   "Name": "Right gallery, low",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      18.6,
+      3.2,
+      -7.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.0,
+      16.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 26,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "5201f2c87e94a53a",
+   "Name": "Right gallery, high",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      20.6,
+      4.0,
+      -7.5
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.8,
+      1.0,
+      15.0
+     ]
+    },
+    {
+     "Type": "VenueCrowdArea",
+     "HeadCount": 24,
+     "Jitter": 0.5
+    }
+   ]
+  },
+  {
+   "GUID": "07efc2d44fac4d55",
+   "Name": "Camera positions",
+   "DestroyOnLoad": true,
+   "Parent": "309381a379479fd7",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "21cb770bd37a36fb",
+   "Name": "down-the-rings",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      4.5,
+      -20.0
+     ],
+     "Rotation": [
+      -11.113,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Wide",
+     "FieldOfView": 60.0,
+     "Tag": "down-the-rings"
+    }
+   ]
+  },
+  {
+   "GUID": "395815f65d6e3ecd",
+   "Name": "gallery-crane",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -15.5,
+      13.0,
+      -12.0
+     ],
+     "Rotation": [
+      13.3399,
+      37.7757,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Crane",
+     "FieldOfView": 58.0,
+     "Tag": "gallery-crane"
+    }
+   ]
+  },
+  {
+   "GUID": "47ded4c4b0935bbb",
+   "Name": "long-lens",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.5,
+      3.6,
+      -21.0
+     ],
+     "Rotation": [
+      2.9556,
+      -5.2901,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Desk",
+     "FieldOfView": 30.0,
+     "Tag": "long-lens"
+    }
+   ]
+  },
+  {
+   "GUID": "4ffc9b4e19fb9348",
+   "Name": "under-the-rings",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -5.5,
+      2.3,
+      -5.0
+     ],
+     "Rotation": [
+      -36.4558,
+      17.9279,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 64.0,
+     "Tag": "under-the-rings"
+    }
+   ]
+  },
+  {
+   "GUID": "58b6969c07539105",
+   "Name": "stand-and-lamp",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.4,
+      2.4,
+      3.2
+     ],
+     "Rotation": [
+      7.3315,
+      -36.0274,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 52.0,
+     "Tag": "stand-and-lamp"
+    }
+   ]
+  },
+  {
+   "GUID": "32cdee61e97713f0",
+   "Name": "conductor",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      2.5,
+      2.3,
+      1.6
+     ],
+     "Rotation": [
+      3.1317,
+      40.0063,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 50.0,
+     "Tag": "conductor"
+    }
+   ]
+  },
+  {
+   "GUID": "4e06833806ee8c1a",
+   "Name": "sticks",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.5,
+      2.7,
+      4.7
+     ],
+     "Rotation": [
+      13.4152,
+      -26.5651,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Close",
+     "FieldOfView": 46.0,
+     "Tag": "sticks"
+    }
+   ]
+  },
+  {
+   "GUID": "51fdfa070f505638",
+   "Name": "bass-locks-eyes",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      7.5,
+      2.4,
+      1.2
+     ],
+     "Rotation": [
+      2.5891,
+      -47.2906,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 50.0,
+     "Tag": "bass-locks-eyes"
+    }
+   ]
+  },
+  {
+   "GUID": "295c982f80939784",
+   "Name": "ring-window",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      12.0,
+      9.0,
+      -6.0
+     ],
+     "Rotation": [
+      -9.305,
+      -34.992,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Crane",
+     "FieldOfView": 60.0,
+     "Tag": "ring-window"
+    }
+   ]
+  },
+  {
+   "GUID": "4c9907a67f8e62a4",
+   "Name": "Arrival 01",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -3.0,
+      1.7,
+      -24.0
+     ],
+     "Rotation": [
+      -3.0766,
+      7.125,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 66.0,
+     "Tag": "arrival/01"
+    }
+   ]
+  },
+  {
+   "GUID": "0a20a1c24270d0f9",
+   "Name": "Arrival 02",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -2.2,
+      1.75,
+      -19.0
+     ],
+     "Rotation": [
+      -5.562,
+      5.4638,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 64.0,
+     "Tag": "arrival/02"
+    }
+   ]
+  },
+  {
+   "GUID": "6ac56033db46ca37",
+   "Name": "Arrival 03",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.4,
+      1.8,
+      -14.0
+     ],
+     "Rotation": [
+      -15.7086,
+      3.6412,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 62.0,
+     "Tag": "arrival/03"
+    }
+   ]
+  },
+  {
+   "GUID": "226629e377345ea5",
+   "Name": "Arrival 04",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -0.8,
+      1.9,
+      -10.0
+     ],
+     "Rotation": [
+      -27.8425,
+      2.1816,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 60.0,
+     "Tag": "arrival/04"
+    }
+   ]
+  },
+  {
+   "GUID": "04abf83d720a4dfe",
+   "Name": "Arrival 05",
+   "DestroyOnLoad": true,
+   "Parent": "07efc2d44fac4d55",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      2.1,
+      -7.6
+     ],
+     "Rotation": [
+      0.4213,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 58.0,
+     "Tag": "arrival/05"
+    }
+   ]
+  }
+ ]
+}

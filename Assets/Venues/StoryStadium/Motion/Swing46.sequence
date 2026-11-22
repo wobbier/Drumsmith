@@ -1,0 +1,65 @@
+{
+ "Version": 1,
+ "Name": "Swing46",
+ "FrameRate": 30,
+ "DurationFrames": 138,
+ "Tracks": [
+  {
+   "Binding": "Swing",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 34,
+     "Value": [
+      0.0,
+      0.0,
+      0.0436194,
+      0.9990482
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 69,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 104,
+     "Value": [
+      0.0,
+      0.0,
+      -0.0436194,
+      0.9990482
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 138,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

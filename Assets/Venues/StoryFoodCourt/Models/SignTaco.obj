@@ -1,0 +1,15 @@
+# Food Court: SignTaco.png on a 4.2 x 1.05 m card. Faces -Z.
+mtllib SignTaco.mtl
+o SignTaco
+s off
+v -2.1 -0.525 0
+v 2.1 -0.525 0
+v 2.1 0.525 0
+v -2.1 0.525 0
+vt 0 0
+vt 1 0
+vt 1 1
+vt 0 1
+vn 0 0 1
+usemtl SignTaco
+f 1/1/1 2/2/1 3/3/1 4/4/1

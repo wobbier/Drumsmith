@@ -11,6 +11,7 @@ Four pieces, each usable without the next:
 1. **The record** (`PlayerProfile`, `Docs/Game-Architecture.md` → Player profile): each song's bests and each lesson's results, saved in `Profile.json` when a run finishes.
 2. **The rules** (`Progression`, `Assets/Progression/Progression.json`): rooms (tiers), gigs, the lesson ladder, milestones, items and venue gates. `Progression::Evaluate` turns the record into unlocks and queues a notice for each new one.
 3. **Gigs** (`GigSession`): a short setlist from the player's own library, played back to back at the gig's venue. Its average accuracy decides whether it is completed, and completing one moves the hideout up.
+   **Story mode** (`Assets/Progression/Story.json`, below) rides on the same rules and sessions: thirteen authored five-song sets, each song banked as it is played, with auditions that fill the band's seats between them.
 4. **The room** (`Hideout`, `Assets/Hideout/*.lvl`): the tier's scene, loaded behind the main menu. It shows unlocked items, labels the stations, flies the camera to the one picked, and plays the menu music as the radio in the room would.
 
 ```mermaid
@@ -31,7 +32,11 @@ flowchart LR
 | `Game/Source/Config/PlayerProfile.h/.cpp` | The record and `Profile.json` |
 | `Game/Source/CoreGame/Progression.h/.cpp` | The rules: loading, `Holds`, `Evaluate`, lesson and venue gates, `Setlist` |
 | `Assets/Progression/Progression.json` | The journey itself: tiers, gigs, lesson steps, milestones, items, venue gates |
-| `Game/Source/CoreGame/GigSession.h/.cpp` | The gig being played |
+| `Game/Source/CoreGame/GigSession.h/.cpp` | The gig (or story set) being played |
+| `Assets/Progression/Story.json` | Story mode: the sets, the auditions and the rewards' items. Generated: don't edit it |
+| `Tools/Story/make_story.py` | Writes `Story.json` from `Design/Story-Mode-Setlists.json`, the writers' manifest (staging, cues, alternates, casting) |
+| `Tools/Story/make_stub_songs.py` | Writes a stand-in song in `Assets/DLC/Story/<Artist - Title>/` for every story song the library hasn't got |
+| `Design/Story-Mode-Setlists.md` | The story as written: every set's songs, staging and rewards |
 | `Game/Source/Hideout/Hideout.h/.cpp` | The room behind the main menu |
 | `Game/Source/Hideout/HideoutDebug.cpp` | The debug menu (F2) |
 | `Game/Source/Components/Hideout/HideoutMarkers.h/.cpp` | `HideoutStation`, `HideoutItemSlot`, `HideoutView`, `HideoutMotion`, `HideoutDrummer`, `HideoutBandName`, `HideoutWhen`, `HideoutReadout` |
@@ -41,7 +46,7 @@ flowchart LR
 | `Tools/Hideout/make_sounds.py` | Synthesises the room tone in `Assets/Hideout/Sounds/*.wav` with ffmpeg |
 | `Assets/Fonts/PermanentMarker-Regular.ttf`, `GochiHand-Regular.ttf` | The handwriting: marker and pen, in the textures, the world text and the labels (Apache 2.0 and OFL; their licences beside them) |
 | `Assets/MainMenu.lvl` | The menu camera, with the room's `PostProcess` |
-| `Game/Tests/Source/PlayerProfileTests.cpp`, `ProgressionTests.cpp` | The record, the rules, the shipped journey, setlists, gigs, venue gating |
+| `Game/Tests/Source/PlayerProfileTests.cpp`, `ProgressionTests.cpp` | The record, the rules, the shipped journey and story, setlists, gigs, story banking and auditions, venue gating |
 
 ## How It Works
 
@@ -56,6 +61,8 @@ flowchart LR
 | `LessonSteps` | every lesson of those ladder steps has passed |
 | `LessonsPassed`, `SongsPlayed`, `FullCombos` | the profile counts at least that many (different songs) |
 | `SongsAtAccuracy` + `Accuracy` | that many songs have a best accuracy of at least that |
+| `StorySets` | those story sets passed |
+| `Members` | those band seats filled (`bass`, `guitar`, `vocals`, `keys`) |
 
 - **Tiers** are the rooms in order, each with its `Scene` and `Rewards` (item ids). The first needs nothing. The hideout moves to the highest tier whose requirement holds, and never moves back down.
 - **Gigs**: `Venue` (a registry id such as `Backyard`, or a room name `Club` / `Festival` / `Arena`), `Songs`, a notes-per-second range (`MinNotesPerSecond`, `MaxNotesPerSecond`; `m_noteCount / m_duration`, a stand-in for difficulty since charts carry no rating), optional `SongKeys` (song folders to use first), `PassAccuracy` and `Rewards`.
@@ -67,6 +74,21 @@ flowchart LR
 `Evaluate` loops until nothing changes, so one unlock can lead to another (a gig moves the tier up, which opens the next gig). Each unlock goes into `PlayerProfile::UnlockedItems` as `kind:id` (`tier:garage`, `item:practice-pad`, `step:grooves-1`, `lessons:rudiments-1`, `milestone:first-song`, `gig:club-night`, `venue:Club`), so it is announced once. Its text is also queued on `PlayerProfile::Notices`. It runs after every recorded result (`NoteHighwayCore::RecordResult`, which shows the new unlocks on the results screen) and when the hideout loads, which also gives a new player the first room's rewards.
 
 `--unlock-all` (`Progression::UnlockAll`) opens every lesson, gig, venue and item, without touching the profile. A missing or broken `Progression.json` also opens everything, with a log line.
+
+### Story mode
+
+`Progression` also loads `Story.json` (`LoadStory`; a root passed to `Load` with `Sets` or `Auditions` loads them too, for tests). The design is `Design/Story-Mode-Setlists.md`; `Tools/Story/make_story.py` turns its manifest into the game file, keeping only what the game reads.
+
+- **Sets** (`ProgressionStorySet`): `Act`, `Name`, `Description`, `Venue` (a gig venue, or empty to keep the player's own: the basement and the radio studio have no stage room yet), `VenueBase`, `PassAccuracy`, `Requires`, five `Songs`, `Rewards`, `MovesInto` (a tier id), `Audition`, and the flags `Credits` (passing it ends the story), `PostCredits` (shown only once the credits have rolled) and `OneSitting`.
+- **Songs** are recordings, not charts: `Artist`, `Title`, `Spotify` and `Flags` (the venue's state once the song is done). `StorySetlist` finds each in the library by the chart's `Links.Spotify` track id, else by the first artist and the title with "- Remastered…" and "(feat. …)" cut. A song with no chart is -1, and the set can't start until every song is found. **When charting a story song, put its Spotify link in the chart's Links** so a retitled chart still matches.
+- **Stand-ins.** `make_stub_songs.py` gives every story song the library lacks a folder in `Assets/DLC/Story/` (the library reads that folder's song folders too, `TrackDatabase::kStoryFolder`): a 120 BPM click as `song.ogg` for the recording's length, a plain rock beat as `NoteData.txt`, and a `TrackData.txt` with the recording's Spotify link, `DLCSource` `story-stub` and `Genre` "Story: <set>". So every set plays now. A song already in `Assets/DLC` by artist and title gets none (five of the 65), and an existing folder is never rewritten without `--force`. To chart the real song, put its audio and chart in that folder, or delete the folder once the real one is elsewhere: both the stand-in and the real chart match, and the first in the library wins. The stand-ins are ordinary songs, so free play and the side gigs list them too. Deleting one from the song list doesn't work (`RemoveTrack` only deletes folders directly under `Assets/DLC`).
+- **Banking.** `GigSession::BeginStory` starts a set at `StoryNextSong` (the first song not banked; the top once all are), with the banked songs already counted. `NoteHighwayCore::RecordResult` banks each story song into `PlayerProfile::Story[set].Banked` (`GigSession::Bank`, best only) and saves, so leaving mid-set keeps it. The set passes when every song is banked and the average reaches the mark; `Complete` sets `Passed`. A `OneSitting` set banks nothing, so leaving starts it over.
+- **The venue's state.** Each set has its own venue scene, `Assets/Venues/Story*` (`make_story.py`'s `VENUES`; a set whose folder is missing falls back to its `VenueBase` room). `GigSession::LaunchCurrent` stages the song (`StageStory` into `VenueRegistry::Story()`): the flags of every song before it from the start, its own `Flags` at its `Cue`. The venue's `VenueStory` props follow them (`Docs/Venue-Authoring.md` → VenueStory). `StoryFlags` is the same from the profile's banked songs.
+- **Debugging a set.** The F2 panel's *Story sets passed* toggles a set (on: every song banked at 100%; *Apply the rules* gives its rewards). In non-Retail builds each story set on the gig board has DEBUG: PLAY SONG 1-5, which plays that song of the set whatever is locked or banked. `--gig <set> --story-song N` does the same from the command line; `--unlock-all` books every set.
+- **Evaluate**: a passed set unlocks `story:<id>` ("Finished: …", or "The story is told: …" for the credits set), gives its rewards and moves the hideout up to `MovesInto` if it's higher. That is on top of the tiers' own rules, so the old gigs still move the room too. A set whose requirement now holds is announced as `booking:<id>`.
+- **Auditions** (`ProgressionAudition`): a `Seat`, the set it comes `After`, `Optional`, and two or three `Candidates` (name, description, leanings, pitch, and a `Body` and `Clothes` from `People.generated.h`). `PendingAudition` is the first whose set has passed and whose seat is empty and not declined. `ChooseMember` writes `PlayerProfile::BandMembers[seat]`; `DeclineAudition` leaves an optional seat empty (`declined:<id>` in `UnlockedItems`). Nothing reads the members' looks yet: the band on stage is still cast from the song.
+- **The gig board** lists a pending audition first (a TAKE button per candidate, KEEP THE SEAT EMPTY for an optional seat), then the story sets (the bonus only after the credits), then the side gigs. A story set shows its songs, each banked score or "(no chart yet)", NEEDS N CHARTS while any is missing, and PLAY SONG N to resume. The hideout's goal names a pending audition, else the first open story set the library can play, else the gigs as before.
+- `--gig <story set id>` starts a story set at its next song, for headless checks.
 
 ### Lessons
 
@@ -202,6 +224,8 @@ The overview is framed for 16:9; a narrower window widens its vertical field of 
 
 ## How to Extend
 
+**A story set or audition:** edit `Design/Story-Mode-Setlists.json` and run `python3 Tools/Story/make_story.py`. The shipped-story test checks the ids, rooms and items resolve, every set has five songs, and one set rolls the credits.
+
 **A gig, an item, a lesson step, a milestone, a venue gate:** add it to `Progression.json`. No code. The shipped-journey test (`ProgressionTests.cpp`) checks that names resolve and that every gig opens when played straight through.
 
 **A room:** write a builder like `Tools/Hideout/rehearsal.py` (a `Scene` with a `HideoutView`, the stations, a slot for every item slot name, and stand-ins, day and night, moving in and readouts as wanted; `hideoutgen.py` has the helpers), list it in `make_hideout.py`, run it, and point a tier's `Scene` at the file. A room nobody has dressed falls back to `make_hideout.py`'s greybox `build_room`. A hand-made room in Havana works too. Look at it with the debug menu (F2) or `--hideout-room <path>`.
@@ -217,6 +241,7 @@ The overview is framed for 16:9; a narrower window widens its vertical field of 
 - **The debug menu writes the real profile.** It keeps a copy first, but a change made by hand to `Profile.json` while a backup exists is lost on Restore.
 - **The room tone hasn't been heard**: headless runs play silently.
 - **Gig difficulty is notes per second**, which says little about how hard a chart is.
+- **Story mode is missing pieces.** The chosen members on stage and in the hideout, the credits and the one-sitting rule for Retry (a retried song in a OneSitting run keeps the better take instead of ending the attempt) aren't built. 60 of the 65 songs are stand-ins (a click and a rock beat) until they're charted.
 - **Gating the venue changes free play for everyone with no profile**: a fresh profile gets the Backyard until Club Night, whatever the Venue setting says. `--unlock-all` lifts it. The Venue tab still lists every venue and doesn't mark locked ones.
 - **Autoplay, no-fail and skipped-ahead runs don't count**, so a gig can't be passed with autoplay unless `--record-autoplay` is given.
 - **Labels can overlap** when two stations line up from the camera. Picking either still works.

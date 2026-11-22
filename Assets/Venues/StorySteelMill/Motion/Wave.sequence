@@ -1,0 +1,156 @@
+{
+ "Version": 1,
+ "Name": "Wave",
+ "FrameRate": 30,
+ "DurationFrames": 48,
+ "Tracks": [
+  {
+   "Binding": "Spine",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0174524,
+      0.9998477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      0.0,
+      0.0,
+      -0.0174524,
+      0.9998477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      0.0,
+      0.0,
+      0.0174524,
+      0.9998477
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Head",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.052336,
+      0.0,
+      0.0,
+      0.9986295
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      -0.052336,
+      0.0,
+      0.0,
+      0.9986295
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      -0.052336,
+      0.0,
+      0.0,
+      0.9986295
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Left",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.9555548,
+      0.2382466,
+      -0.0420093,
+      0.1684901
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      -0.9774671,
+      0.1200179,
+      -0.0211624,
+      0.1723538
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      -0.9555548,
+      0.2382466,
+      -0.0420093,
+      0.1684901
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Right",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.9555548,
+      -0.2382466,
+      0.0420093,
+      0.1684901
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      -0.9254166,
+      -0.3368241,
+      0.0593912,
+      0.1631759
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      -0.9555548,
+      -0.2382466,
+      0.0420093,
+      0.1684901
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

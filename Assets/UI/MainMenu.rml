@@ -47,7 +47,17 @@
                     <p>{{gig.description}}</p>
                     <p class="gig-detail">{{gig.detail}}</p>
                     <p class="gig-songs" data-if="gig.songs != ''">{{gig.songs}}</p>
-                    <button class="gig-play" data-if="gig.open > 0" data-event-click="gig_play(gig.index)">PLAY THE GIG</button>
+                    <button class="gig-play" data-if="gig.open > 0" data-event-click="gig_play(gig.index)">{{gig.play}}</button>
+                    <button class="gig-play" data-if="gig.candidates > 0" data-event-click="audition_pick(gig.index, 0)">{{gig.candidate0}}</button>
+                    <button class="gig-play" data-if="gig.candidates > 1" data-event-click="audition_pick(gig.index, 1)">{{gig.candidate1}}</button>
+                    <button class="gig-play" data-if="gig.candidates > 2" data-event-click="audition_pick(gig.index, 2)">{{gig.candidate2}}</button>
+                    <button class="gig-play gig-skip" data-if="gig.can_skip > 0" data-event-click="audition_skip(gig.index)">KEEP THE SEAT EMPTY</button>
+                    <div class="gig-debug" data-if="debug_allowed > 0 && gig.story_songs > 0"><span>DEBUG: PLAY SONG</span>
+                        <button data-if="gig.story_songs > 0" data-event-click="gig_song(gig.index, 0)">1</button>
+                        <button data-if="gig.story_songs > 1" data-event-click="gig_song(gig.index, 1)">2</button>
+                        <button data-if="gig.story_songs > 2" data-event-click="gig_song(gig.index, 2)">3</button>
+                        <button data-if="gig.story_songs > 3" data-event-click="gig_song(gig.index, 3)">4</button>
+                        <button data-if="gig.story_songs > 4" data-event-click="gig_song(gig.index, 4)">5</button></div>
                 </div>
             </div>
             <p class="hideout-status" data-if="hideout_status != ''">{{hideout_status}}</p>
@@ -92,6 +102,8 @@
             <div id="debug-items" class="debug-grid"><button class="debug-toggle" data-for="item : debug_items" data-class-on="item.on > 0" data-event-click="debug_item(item.index)">{{item.name}}</button></div>
             <h3>Gigs played</h3>
             <div id="debug-gigs" class="debug-grid"><button class="debug-toggle" data-for="gig : debug_gigs" data-class-on="gig.on > 0" data-event-click="debug_gig(gig.index)">{{gig.name}}</button></div>
+            <h3>Story sets passed <span>on: every song banked at 100%; the gig board's 1-5 plays any song</span></h3>
+            <div id="debug-story" class="debug-grid"><button class="debug-toggle" data-for="set : debug_story" data-class-on="set.on > 0" data-event-click="debug_story(set.index)">{{set.name}}</button></div>
             <h3>Lessons passed</h3>
             <div id="debug-steps" class="debug-grid"><button class="debug-toggle" data-for="step : debug_steps" data-class-on="step.on > 0" data-event-click="debug_step(step.index)">{{step.name}} <span>{{step.count}}</span></button></div>
             <button id="debug-evaluate" class="debug-wide" data-event-click="debug_evaluate">Apply the rules: move up, give rewards</button>

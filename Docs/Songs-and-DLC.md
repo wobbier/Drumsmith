@@ -49,7 +49,7 @@ A song is a folder under `Assets/DLC/` containing audio stems, a MIDI chart, and
 
 ### The track database
 
-`TrackDatabase` (singleton) scans `Assets/DLC/` in `Reload()` — every subdirectory containing a `TrackData.txt` becomes a `TrackData` entry (its `NoteData.txt` is loaded lazily by `NoteHighwayCore::SetupTrack`, not at scan time). Missing audio logs `YIKES` and skips. `RegisterNewTrack` appends a single folder after a DLC download.
+`TrackDatabase` (singleton) scans `Assets/DLC/` in `Reload()` — every subdirectory containing a `TrackData.txt` becomes a `TrackData` entry, and so does every song folder inside `Assets/DLC/Story/` (story mode's stand-ins, `Docs/Hideout-and-Progression.md` → Story mode) (its `NoteData.txt` is loaded lazily by `NoteHighwayCore::SetupTrack`, not at scan time). Missing audio logs `YIKES` and skips. `RegisterNewTrack` appends a single folder after a DLC download.
 
 `SortTracks(sort, filter)` builds `m_sortedIndices`: a filter pass on each song's `m_dlcSource` tag, then an optional sort by title/artist/year. `GatherFilterCounts` produces per-filter counts for the UI flyout. Both go through **`TrackDatabase::FilterForSource`**, the one tag table the library and the DLC catalogue share: `ds`, `rb1`–`rb4`, `rb3dlc`, `rbb`, `lrb`, `gdrb`, `gh`/`gh1`–`gh4`, `ghwt`, `ghwtdlc`, `gh5`, `gh5dlc`, matched in any case with spaces ignored. A tag nobody knows, or none, is **Other**, which is a filter like the rest. `SourceBadge` gives a filter's short badge ("RB2", "GH5", "DS"). The UI consumes indices via the menu controllers (`Docs/UI-and-Menus.md`).
 

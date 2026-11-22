@@ -1,0 +1,19 @@
+{
+ "Title": "Basket Case",
+ "Artist": "Green Day",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Food Court Farewell Show",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 182.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/6L89mwZXSOwYl76YXfX13s"
+ },
+ "NoteCount": 1062
+}

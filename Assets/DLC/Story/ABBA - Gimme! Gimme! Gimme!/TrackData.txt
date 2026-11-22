@@ -1,0 +1,19 @@
+{
+ "Title": "Gimme! Gimme! Gimme! (A Man After Midnight)",
+ "Artist": "ABBA",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Adults Only at the Roller Rink",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 293.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/3vkQ5DAB1qQMYO4Mr9zJN6"
+ },
+ "NoteCount": 1728
+}

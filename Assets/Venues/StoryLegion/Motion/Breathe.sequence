@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "Breathe",
+ "FrameRate": 30,
+ "DurationFrames": 240,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0.0261411,
+      0.052318,
+      -0.00137,
+      0.9982873
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 160,
+     "Value": [
+      0.0087212,
+      -0.0348982,
+      0.0003046,
+      0.9993528
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}
