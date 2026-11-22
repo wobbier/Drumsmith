@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <random>
+#include <unordered_map>
 
 namespace
 {
@@ -137,6 +138,8 @@ void VenueShow::Clear()
     m_peaks.clear();
     m_finale = 1e9f;
     m_storyProps.clear();
+    m_storyParticles.clear();
+    m_storyShowLights.clear();
     m_storyMoments.clear();
     m_storyLanding.clear();
     m_storyCaptions.clear();
@@ -1063,6 +1066,7 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     m_lights.SetHype( m_hype );
     m_lights.SetBurn( m_fx.Burn() );
     m_lights.Update( inSongTimeMs, inDeltaTime );
+    DimStoryShowLights();
     // The dressing's LED pieces follow the rig, the beat and the kick.
     m_kick *= std::exp( -std::clamp( inDeltaTime, 0.f, 0.1f ) * 8.f );
     StageSet::Show show;
@@ -1345,6 +1349,10 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
         }
     }
     const std::vector<EntityHandle> noMarkers;
+    m_storyParticles.clear();
+    m_storyShowLights.clear();
+    std::unordered_map<const Transform*, size_t> particleIndex;
+    std::unordered_map<const Transform*, size_t> showLightIndex;
     for( const EntityHandle& entity : m_scene.IsLoaded() ? m_scene.GetMarkers().Story : noMarkers )
     {
         const VenueStory* marker = entity ? entity->TryGetComponent<VenueStory>() : nullptr;
@@ -1375,6 +1383,31 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
             if( owner && owner->HasComponent<Sequence>() && prop.Mode != VenueStory::Motion::Show )
             {
                 prop.Sequences.push_back( owner );
+            }
+            if( owner && prop.Mode == VenueStory::Motion::Show && owner->HasComponent<Light>() && owner->HasComponent<VenueShowLight>() )
+            {
+                auto found = showLightIndex.find( at );
+                if( found == showLightIndex.end() )
+                {
+                    found = showLightIndex.emplace( at, m_storyShowLights.size() ).first;
+                    StoryShowLight light;
+                    light.Entity = owner;
+                    m_storyShowLights.push_back( light );
+                }
+                m_storyShowLights[found->second].Props.push_back( m_storyProps.size() );
+            }
+            // Its particle systems, to stop while it is hidden (an accent's are the show's).
+            if( owner && prop.Mode == VenueStory::Motion::Show && owner->HasComponent<ParticleSystem>() && !owner->HasComponent<VenueAccent>() )
+            {
+                auto found = particleIndex.find( at );
+                if( found == particleIndex.end() )
+                {
+                    found = particleIndex.emplace( at, m_storyParticles.size() ).first;
+                    StoryParticles particles;
+                    particles.Entity = owner;
+                    m_storyParticles.push_back( particles );
+                }
+                m_storyParticles[found->second].Props.push_back( m_storyProps.size() );
             }
             for( Transform* child : at->GetChildren() )
             {
@@ -1487,6 +1520,59 @@ void VenueShow::UpdateStory( double inSeconds, float inDeltaTime )
                 light->GetComponent<Light>().Intensity = intensity * eased;
             }
         }
+    }
+    for( StoryParticles& particles : m_storyParticles )
+    {
+        ParticleSystem* system = particles.Entity ? particles.Entity->TryGetComponent<ParticleSystem>() : nullptr;
+        if( !system )
+        {
+            continue;
+        }
+        bool on = true;
+        for( size_t index : particles.Props )
+        {
+            on = on && index < m_storyProps.size() && m_storyProps[index].Shown > 0.5f;
+        }
+        if( particles.On == ( on ? 1 : 0 ) )
+        {
+            continue;
+        }
+        particles.On = on ? 1 : 0;
+        if( on )
+        {
+            system->Play();
+        }
+        else
+        {
+            system->Stop();
+        }
+    }
+}
+
+
+void VenueShow::DimStoryShowLights()
+{
+    for( StoryShowLight& entry : m_storyShowLights )
+    {
+        Light* light = entry.Entity ? entry.Entity->TryGetComponent<Light>() : nullptr;
+        if( !light )
+        {
+            continue;
+        }
+        // The rig writes the cued level when it cues the light; a value that isn't the one left
+        // here last time is a fresh cue.
+        if( light->Intensity != entry.Written )
+        {
+            entry.Cued = light->Intensity;
+        }
+        float shown = 1.f;
+        for( size_t index : entry.Props )
+        {
+            const float propShown = index < m_storyProps.size() ? std::clamp( m_storyProps[index].Shown, 0.f, 1.f ) : 1.f;
+            shown *= propShown * propShown * ( 3.f - 2.f * propShown );
+        }
+        entry.Written = entry.Cued * shown;
+        light->Intensity = entry.Written;
     }
 }
 

@@ -1430,10 +1430,48 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         const VenuePlan::CameraSpot& a = m_plan.Cameras[shot.Spot];
         const VenuePlan::CameraSpot& b = m_plan.Cameras[shot.End >= 0 ? shot.End : shot.Spot];
         const float u = VenueTiming::Smooth( held / std::max( static_cast<float>( shot.Until - shot.From ), 0.1f ) );
-        outEye = Lerp( a.Eye, b.Eye, u );
-        const Vector3 forward = Lerp( a.Forward, b.Forward, u );
-        outTarget = outEye + ( forward.Length() > 1e-3f ? forward.Normalized() : a.Forward ) * 10.f;
-        outFov = a.FieldOfView + ( b.FieldOfView - a.FieldOfView ) * u;
+        Vector3 forward;
+        if( shot.Via.empty() )
+        {
+            outEye = Lerp( a.Eye, b.Eye, u );
+            forward = Lerp( a.Forward, b.Forward, u );
+            outFov = a.FieldOfView + ( b.FieldOfView - a.FieldOfView ) * u;
+        }
+        else
+        {
+            // Through the spots on the way: a Catmull-Rom curve, the ends held as their own
+            // neighbours, so the camera passes through each one without stopping.
+            std::vector<const VenuePlan::CameraSpot*> path;
+            path.push_back( &a );
+            for( int via : shot.Via ) path.push_back( &m_plan.Cameras[via] );
+            if( shot.End >= 0 ) path.push_back( &b );
+            const int last = static_cast<int>( path.size() ) - 1;
+            const float along = u * static_cast<float>( last );
+            const int k = std::clamp( static_cast<int>( along ), 0, last - 1 );
+            const float t = along - static_cast<float>( k );
+            const VenuePlan::CameraSpot& p0 = *path[std::max( k - 1, 0 )];
+            const VenuePlan::CameraSpot& p1 = *path[k];
+            const VenuePlan::CameraSpot& p2 = *path[k + 1];
+            const VenuePlan::CameraSpot& p3 = *path[std::min( k + 2, last )];
+            const float t2 = t * t;
+            const float t3 = t2 * t;
+            const float w0 = 0.5f * ( -t3 + 2.f * t2 - t );
+            const float w1 = 0.5f * ( 3.f * t3 - 5.f * t2 + 2.f );
+            const float w2 = 0.5f * ( -3.f * t3 + 4.f * t2 + t );
+            const float w3 = 0.5f * ( t3 - t2 );
+            outEye = p0.Eye * w0 + p1.Eye * w1 + p2.Eye * w2 + p3.Eye * w3;
+            forward = p0.Forward * w0 + p1.Forward * w1 + p2.Forward * w2 + p3.Forward * w3;
+            outFov = std::clamp( p0.FieldOfView * w0 + p1.FieldOfView * w1 + p2.FieldOfView * w2 + p3.FieldOfView * w3, 2.f, 120.f );
+        }
+        // The target is the focus point: where the shot's "f" says, else well ahead.
+        float reach = 10.f;
+        if( shot.FocusFrom > 0.f || shot.FocusTo > 0.f )
+        {
+            const float from = shot.FocusFrom > 0.f ? shot.FocusFrom : shot.FocusTo;
+            const float to = shot.FocusTo > 0.f ? shot.FocusTo : shot.FocusFrom;
+            reach = from + ( to - from ) * u;
+        }
+        outTarget = outEye + ( forward.Length() > 1e-3f ? forward.Normalized() : a.Forward ) * reach;
         authored = true;
         break;
     }
@@ -1734,6 +1772,7 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
     {
         StoryShot shot;
         float hold = 5.f;
+        std::vector<std::pair<int, int>> vias;    // (order, spot)
         for( size_t i = 0; i < spots.size(); ++i )
         {
             const std::string& tag = spots[i].Tag;
@@ -1745,25 +1784,39 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             bool end = false;
             bool hand = false;
             float seconds = -1.f;
+            float focus = 0.f;
+            int via = -1;
             size_t from = head.size();
             while( from < tag.size() )
             {
                 const size_t next = std::min( tag.find( '/', from + 1 ), tag.size() );
                 const std::string part = tag.substr( from + 1, next - from - 1 );
+                const bool numbered = part.size() > 1 && ( std::isdigit( static_cast<unsigned char>( part[1] ) ) || part[1] == '.' );
                 if( part == "end" ) end = true;
                 else if( part == "hand" ) hand = true;
+                else if( part[0] == 'w' && numbered ) via = std::atoi( part.c_str() + 1 );
+                else if( part[0] == 'f' && numbered ) focus = static_cast<float>( std::atof( part.c_str() + 1 ) );
                 else if( !part.empty() && ( std::isdigit( static_cast<unsigned char>( part[0] ) ) || part[0] == '.' ) ) seconds = static_cast<float>( std::atof( part.c_str() ) );
                 from = next;
+            }
+            if( via >= 0 )
+            {
+                vias.emplace_back( via, static_cast<int>( i ) );
+                continue;
             }
             if( end )
             {
                 shot.End = static_cast<int>( i );
+                shot.FocusTo = focus;
                 continue;
             }
             shot.Spot = static_cast<int>( i );
             shot.Handheld = hand;
+            shot.FocusFrom = focus;
             if( seconds > 0.f ) hold = seconds;
         }
+        std::sort( vias.begin(), vias.end() );
+        for( const auto& [order, spot] : vias ) shot.Via.push_back( spot );
         if( shot.Spot < 0 )
         {
             continue;
@@ -1797,6 +1850,7 @@ float Director::BlurFor( const Plan& inPlan )
     case Framing::DrumLow: return 7.f;
     case Framing::LowHero: return 6.f;
     case Framing::LongLens: return 8.f;
+    case Framing::Story: return inPlan.Blur;
     default: return 0.f;
     }
 }
@@ -1970,6 +2024,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
                 plan.Frame = Framing::Story;
                 plan.Variant = static_cast<int>( i );
                 plan.Handheld = shot.Handheld;
+                plan.Blur = shot.FocusFrom > 0.f || shot.FocusTo > 0.f ? 11.f : 0.f;
                 plan.Static = true;
                 index = -6 - static_cast<int>( i );
                 held = static_cast<float>( inSeconds - shot.From );

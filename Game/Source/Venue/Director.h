@@ -53,7 +53,10 @@ public:
     // cuts to the venue's camera spot tagged "story/<flag>" and holds it, over everything else.
     // More of the tag, by '/': a number is the hold in seconds (5 without one), "hand" shoots it
     // handheld. A second spot tagged "story/<flag>/end" is where the shot has moved to by the
-    // end of the hold (a pull back, a zoom). Flags with no spot get no shot.
+    // end of the hold (a pull back, a zoom), by way of any spots tagged "story/<flag>/w1", "/w2",
+    // ... (a crane up the stairs, a zoom that overshoots and comes back). "f<metres>" on the
+    // spot or its end pulls focus to that distance and softens the rest (a rack focus when the two
+    // differ). Flags with no spot get no shot.
     void SetStoryShots( const std::vector<std::pair<std::string, double>>& inLanding );
     int StoryShotCount() const { return static_cast<int>( m_storyShots.size() ); }
     bool HasPeakShots() const { return !m_peakSpots.empty(); }
@@ -107,6 +110,8 @@ private:
         bool Static = false;
         // Bit 0 the side, bit 1 an alternate take, bits 2-3 the treatment (Vary).
         int Variant = 0;
+        // Story: how soft the background goes (BlurFor's pixels; 0 sharp).
+        float Blur = 0.f;
     };
 
     struct Cut
@@ -190,6 +195,11 @@ private:
         int Spot = -1;
         int End = -1;
         bool Handheld = false;
+        // Spots the move passes through between Spot and End, in order ("w1", "w2", ...).
+        std::vector<int> Via;
+        // The focus distance in metres at the start and the end ("f0.5"; 0: sharp throughout).
+        float FocusFrom = 0.f;
+        float FocusTo = 0.f;
     };
     std::vector<StoryShot> m_storyShots;
     float m_accentPhase = -1.f;

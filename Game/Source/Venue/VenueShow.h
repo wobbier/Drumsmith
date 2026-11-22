@@ -173,6 +173,27 @@ private:
         std::vector<EntityHandle> Sequences;
         bool Played = false;
     };
+    // A ParticleSystem under Show props: it emits only while every one of them is shown (a hidden
+    // prop is only scaled away, which would leave its fire burning at its pivot), and starts over
+    // when they show, so a one-shot burst goes off as its flag lands.
+    struct StoryParticles
+    {
+        EntityHandle Entity;
+        std::vector<size_t> Props;
+        int On = -1;            // -1 before the first update
+    };
+    std::vector<StoryParticles> m_storyParticles;
+    // A VenueShowLight under Show props: the rig still cues it, and it is dimmed with the props
+    // after the cue is applied (hell's red washes stay dark until the band lands there).
+    struct StoryShowLight
+    {
+        EntityHandle Entity;
+        std::vector<size_t> Props;
+        float Cued = 0.f;       // the level the rig last gave it
+        float Written = -1.f;   // what was left in the Light after dimming
+    };
+    std::vector<StoryShowLight> m_storyShowLights;
+    void DimStoryShowLights();
     void UpdateStoryMotion( StoryProp& ioProp, bool inSet );
     // The band_ story flags on the band (Band::SetStoryState).
     void UpdateStoryBand( double inSeconds, float inDeltaTime );
