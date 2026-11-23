@@ -71,8 +71,6 @@ def song(entry):
         out["Moments"] = moments
     if scene_there(entry.get("Venue")):
         out["Venue"] = entry["Venue"]
-    if entry.get("HighwayRests"):
-        out["HighwayRests"] = True
     return out
 
 

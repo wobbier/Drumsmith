@@ -87,7 +87,7 @@ public:
     void SetPresentation( Presentation inPresentation );
     Presentation GetPresentation() const { return m_presentation; }
     // How much of the highway shows over the venue, 0 to 1: below 1 it melts away from its far end
-    // toward the strike bar (a story song's long rests: ProgressionStorySong::HighwayRests). Only
+    // toward the strike bar, and the last of it fades as a whole (NoteHighwayCore::UpdateHighwayRests). Only
     // over a venue (Presentation::Both); kept across Build.
     void SetHighwayShown( float inShown );
 
@@ -169,6 +169,8 @@ private:
     };
     std::vector<BeatProp> m_beatProps;
     void UpdateBeats( double inSeconds );
+    // Turns each entity with a VenueAim marker onto its point.
+    void UpdateAims( double inSeconds );
     struct StoryProp
     {
         EntityHandle Entity;
@@ -219,6 +221,24 @@ private:
     bool m_shotSkyOn = false;
     int m_shotSkyClear = 0;
     Moonlight::ProceduralSkySettings m_shotSkySaved;
+    // The sky_ story flags: the main camera under the procedural sky, its hour turning from one
+    // flag to the next (sky_<hour> is the hour as that flag lands, past 24 for the next day;
+    // sky_off gives the venue's own background back).
+    void UpdateStorySky( double inSeconds );
+    struct StorySkyKey
+    {
+        double At = 0.0;
+        float Hour = 0.f;
+        bool Off = false;
+    };
+    std::vector<StorySkyKey> m_storySky;
+    bool m_storySkyOn = false;
+    int m_storySkyClear = 0;
+    Moonlight::ProceduralSkySettings m_storySkySaved;
+    Vector3 m_storySkyFog;
+    float m_storySkyFogOpacity = 0.f;
+    float m_storySkyFogFalloff = 0.f;
+    float m_storySkyFar = 0.f;
     void UpdateStoryMotion( StoryProp& ioProp, bool inSet );
     // The band_ story flags on the band (Band::SetStoryState).
     void UpdateStoryBand( double inSeconds, float inDeltaTime );

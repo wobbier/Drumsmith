@@ -14,6 +14,7 @@
 #include "CoreGame/Progression.h"
 #include "Core/CommandLine.h"
 #include "Engine/World.h"
+#include "Graphics/DynamicSky.h"
 #include "Graphics/Texture.h"
 #include "Materials/StandardMaterial.h"
 #include "Resource/ResourceCache.h"
@@ -33,6 +34,11 @@ namespace
     constexpr float kHighwayFadeStart = 42.f;
     constexpr float kHighwayFadeEnd = 120.f;
     constexpr float kHighwayBoardOpacity = 0.6f;
+    // It is gone by the top of the screen, fading over this much of the screen's height, so it
+    // never runs into the top edge whatever the window's shape.
+    constexpr float kHighwayTopFade = 0.3f;
+    // The last of a melting highway (SetHighwayShown below this) fades as a whole.
+    constexpr float kHighwayShownSolid = 0.25f;
     // The follow spots' floor: a front light on the band in every look.
     constexpr float kFrontFill = 0.18f;
     // The arena's floor plan behind the crowd (VenueLayout): its geometry is built here.
@@ -102,6 +108,8 @@ void VenueShow::Clear()
         Camera& camera = m_highwayCamera->GetComponent<Camera>();
         camera.Overlay = false;
         camera.OverlayDarkOpacity = 1.f;
+        camera.OverlayOpacity = 1.f;
+        camera.OverlayTopFade = 0.f;
         camera.SetCurrent();
         camera.SunShadows = m_highwaySunShadows;
         if( m_highwayCamera->HasComponent<PostProcess>() )
@@ -147,6 +155,8 @@ void VenueShow::Clear()
     m_storyLanding.clear();
     m_storyCaptions.clear();
     m_shotSkyOn = false;
+    m_storySky.clear();
+    m_storySkyOn = false;
     m_bandStoried = false;
     m_storyCue = -1.0;
     m_venue.Clear();
@@ -570,6 +580,8 @@ void VenueShow::ApplyPresentation()
         // The highway's camera takes the screen back, as it has it without a venue.
         camera.Overlay = false;
         camera.OverlayDarkOpacity = 1.f;
+        camera.OverlayOpacity = 1.f;
+        camera.OverlayTopFade = 0.f;
         camera.SetCurrent();
         camera.SunShadows = m_highwaySunShadows;
         if( post )
@@ -583,9 +595,12 @@ void VenueShow::ApplyPresentation()
     // Over the venue the highway draws no sun cascades of its own (DRU-81): four shadow passes
     // for a few notes, whose shadows don't read against the see-through board.
     camera.SunShadows = false;
-    // A story song's rests draw it in toward the strike bar (SetHighwayShown).
+    // A rest draws it in toward the strike bar (SetHighwayShown), and the last of it fades as a
+    // whole: at 0 nothing of the highway is left on the screen, its glow and edges included.
     camera.OverlayFadeStart = kHighwayFadeStart * m_highwayShown;
     camera.OverlayFadeEnd = std::max( kHighwayFadeEnd * m_highwayShown, 0.001f );
+    camera.OverlayOpacity = std::clamp( m_highwayShown / kHighwayShownSolid, 0.f, 1.f );
+    camera.OverlayTopFade = kHighwayTopFade;
     // The dark board lets the stage show through; notes, lines and pads stay solid.
     camera.OverlayDarkOpacity = kHighwayBoardOpacity;
     if( m_presentation == Presentation::VenueOnly || CommandLine::Has( "--venue-only" ) )
@@ -593,6 +608,7 @@ void VenueShow::ApplyPresentation()
         // Fade the whole highway out, to frame the venue.
         camera.OverlayFadeStart = 0.f;
         camera.OverlayFadeEnd = 0.001f;
+        camera.OverlayOpacity = 0.f;
     }
     if( post )
     {
@@ -1058,7 +1074,9 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     UpdateShotSky();
     UpdateStory( seconds, inDeltaTime );
     UpdateBeats( seconds );
+    UpdateAims( seconds );
     UpdateStoryBand( seconds, inDeltaTime );
+    UpdateStorySky( seconds );
     m_lights.SetCrowdEnergy( CrowdUp() ? m_crowd.Energy() : 0.6f );
     UpdateHype( seconds, inDeltaTime );
     // The follow spots keep a little front light on the band so they read in any look, and come
@@ -1548,6 +1566,21 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
         m_storyLanding.emplace_back( flag, -1e9 );
     }
     m_storyLanding.insert( m_storyLanding.end(), landing.begin(), landing.end() );
+    // The sky's hours (UpdateStorySky), in the order they land.
+    m_storySky.clear();
+    for( const auto& [flag, at] : m_storyLanding )
+    {
+        if( flag.rfind( "sky_", 0 ) != 0 )
+        {
+            continue;
+        }
+        StorySkyKey key;
+        key.At = at;
+        key.Off = flag == "sky_off";
+        key.Hour = key.Off ? 0.f : static_cast<float>( std::atof( flag.c_str() + 4 ) );
+        m_storySky.push_back( key );
+    }
+    std::stable_sort( m_storySky.begin(), m_storySky.end(), []( const StorySkyKey& a, const StorySkyKey& b ) { return a.At < b.At; } );
     m_director.SetStoryShots( landing );
     INFO_FMT( "[Venues]", "story: %d props, set '%s' song %d, %d flags set, %d at the cue (%s, %.1f s), %d moments, %d story shots", static_cast<int>( m_storyProps.size() ), stage.Set.c_str(), stage.Song + 1,
         static_cast<int>( stage.Flags.size() ), static_cast<int>( stage.AtCue.size() ), stage.Cue.c_str(), m_storyCue, static_cast<int>( m_storyMoments.size() ), m_director.StoryShotCount() );
@@ -1716,6 +1749,110 @@ void VenueShow::UpdateShotSky()
 }
 
 
+namespace
+{
+    // The story sky by day (UpdateStorySky): how far the camera sees, and the air's haze (its
+    // thickness as a haze scale, how quickly it thins with height, and how much of the far
+    // distance it takes).
+    constexpr float kDayFar = 4500.f;
+    constexpr float kDayHazeScale = 0.022f;
+    constexpr float kDayHazeFalloff = 0.004f;
+    constexpr float kDayHazeOpacity = 0.97f;
+}
+
+
+void VenueShow::UpdateStorySky( double inSeconds )
+{
+    // The sky_ flags: from the first to land, the main camera is under the procedural sky (which
+    // lights the scene with its sun and moon), at the hour of the latest flag turning steadily to
+    // the next one's as that lands. Hours run on past 24 (sky_30 is six the next morning), so a
+    // night can turn to day through its dawn and back the way it came. sky_off ends it.
+    const EntityHandle& main = m_director.MainCamera();
+    if( !main || m_storySky.empty() || m_shotSkyOn )
+    {
+        return;
+    }
+    int latest = -1;
+    for( size_t i = 0; i < m_storySky.size() && m_storySky[i].At <= inSeconds; ++i )
+    {
+        latest = static_cast<int>( i );
+    }
+    const bool on = latest >= 0 && !m_storySky[latest].Off;
+    Camera& camera = main->GetComponent<Camera>();
+    PostProcess* post = main->HasComponent<PostProcess>() ? &main->GetComponent<PostProcess>() : nullptr;
+    if( !on )
+    {
+        if( m_storySkyOn )
+        {
+            camera.ClearType = static_cast<Moonlight::ClearColorType>( m_storySkyClear );
+            camera.ProceduralSky = m_storySkySaved;
+            camera.Far = m_storySkyFar;
+            if( post )
+            {
+                post->FogColor = m_storySkyFog;
+                post->FogMaxOpacity = m_storySkyFogOpacity;
+                post->FogHeightFalloff = m_storySkyFogFalloff;
+            }
+            m_lights.SetHazeScale( m_plan.HazeScale );
+            m_director.SetDaylight( 0.f );
+            m_storySkyOn = false;
+        }
+        return;
+    }
+    if( !m_storySkyOn )
+    {
+        m_storySkyClear = static_cast<int>( camera.ClearType );
+        m_storySkySaved = camera.ProceduralSky;
+        m_storySkyFar = camera.Far;
+        if( post )
+        {
+            m_storySkyFog = post->FogColor;
+            m_storySkyFogOpacity = post->FogMaxOpacity;
+            m_storySkyFogFalloff = post->FogHeightFalloff;
+        }
+        camera.ClearType = Moonlight::ClearColorType::Procedural;
+        camera.ProceduralSky.StarBrightness = 2.f;
+        camera.ProceduralSky.MoonPhase = 0.5f;
+        camera.ProceduralSky.MoonBrightness = m_plan.MoonBrightness;
+        camera.ProceduralSky.CloudCoverage = m_plan.CloudCoverage;
+        m_storySkyOn = true;
+    }
+    const StorySkyKey& from = m_storySky[latest];
+    float hour = from.Hour;
+    if( latest + 1 < static_cast<int>( m_storySky.size() ) && !m_storySky[latest + 1].Off )
+    {
+        const StorySkyKey& to = m_storySky[latest + 1];
+        const double span = std::max( to.At - from.At, 1e-3 );
+        hour += ( to.Hour - from.Hour ) * std::clamp( static_cast<float>( ( inSeconds - from.At ) / span ), 0.f, 1.f );
+    }
+    hour = std::fmod( hour, 24.f );
+    camera.ProceduralSky.Time = hour < 0.f ? hour + 24.f : hour;
+    // How much of a day it is, by the sun's height: the haze takes the sky's colour as the sun
+    // comes up (the venue's own, a night's, would stand dark against a blue sky).
+    const float sun = Moonlight::ComputeSkyCelestial( camera.ProceduralSky ).Sun.y;
+    const float dawn = std::clamp( ( sun + 0.12f ) / 0.22f, 0.f, 1.f );
+    const float day = std::clamp( ( sun - 0.02f ) / 0.3f, 0.f, 1.f );
+    if( post )
+    {
+        const Vector3 dusk( 0.32f, 0.2f, 0.16f );
+        const Vector3 noon( 0.5f, 0.62f, 0.8f );
+        const Vector3 lit = dusk + ( noon - dusk ) * day;
+        post->FogColor = m_storySkyFog + ( lit - m_storySkyFog ) * dawn;
+        // By day the haze is the air itself: thin enough to see the country for a couple of
+        // kilometres (from the air too: the venue's own haze thickens quickly below the stage,
+        // and hides anything far under it), and thickening until the land is lost in it before
+        // it ends.
+        post->FogMaxOpacity = m_storySkyFogOpacity + ( kDayHazeOpacity - m_storySkyFogOpacity ) * dawn;
+        post->FogHeightFalloff = m_storySkyFogFalloff + ( kDayHazeFalloff - m_storySkyFogFalloff ) * dawn;
+    }
+    m_lights.SetHazeScale( m_plan.HazeScale + ( kDayHazeScale - m_plan.HazeScale ) * dawn );
+    // The camera sees that far as soon as there is light to see by (a night's show stops at the
+    // dark), and daylight needs less of the bloom a night's lamps are given.
+    camera.Far = m_storySkyFar + ( std::max( kDayFar, m_storySkyFar ) - m_storySkyFar ) * std::clamp( dawn * 4.f, 0.f, 1.f );
+    m_director.SetDaylight( day );
+}
+
+
 void VenueShow::UpdateBeats( double inSeconds )
 {
     if( m_beatProps.empty() )
@@ -1750,6 +1887,39 @@ void VenueShow::UpdateBeats( double inSeconds )
             amount = std::max( std::exp( -at * 4.f ), gather );
         }
         prop.Entity->GetComponent<Transform>().SetPosition( prop.Rest + marker->Offset * amount );
+    }
+}
+
+
+void VenueShow::UpdateAims( double inSeconds )
+{
+    if( !m_root || !m_scene.IsLoaded() )
+    {
+        return;
+    }
+    Transform& root = m_root->GetComponent<Transform>();
+    uint32_t index = 0;
+    for( const EntityHandle& entity : m_scene.GetMarkers().Aims )
+    {
+        ++index;
+        const VenueAim* marker = entity ? entity->TryGetComponent<VenueAim>() : nullptr;
+        if( !marker )
+        {
+            continue;
+        }
+        Vector3 target = marker->Target;
+        if( marker->Wander > 0.f )
+        {
+            // A slow drift off the point and back, a quicker correction over it and a tremor: three
+            // sines to an axis, at rates that never line up, each light out of step with the rest.
+            const float time = static_cast<float>( inSeconds ) * 6.2831853f / std::max( marker->Seconds, 0.2f );
+            const float phase = static_cast<float>( index ) * 2.4f;
+            const auto stray = [time]( float inPhase ) {
+                return 0.6f * std::sin( time + inPhase ) + 0.3f * std::sin( time * 2.7f + inPhase * 1.9f ) + 0.1f * std::sin( time * 9.1f + inPhase * 3.1f );
+            };
+            target += Vector3( stray( phase ), 0.35f * stray( phase + 4.1f ), stray( phase + 1.7f ) * 1.1f ) * marker->Wander;
+        }
+        entity->GetComponent<Transform>().LookAt( root.TransformPoint( target ) );
     }
 }
 

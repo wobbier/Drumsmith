@@ -44,10 +44,13 @@ public:
 	// A song's tail plays out after its last note, up to this long; then it fades and hands off.
 	static constexpr double kShowMaxTailMs = 30000.0;
 	static constexpr float kShowTailFadeSeconds = 1.5f;
-	// HighwayRests: a rest longer than this (ms, last note to next) fades the highway out, and it
-	// is fully back kRestReturnMs before the next note (a note crossing the whole highway).
+	// The highway is only up while there are drums to play (UpdateHighwayRests): it fades in before
+	// the first note, out kRestLeaveMs after the last, and out through a rest longer than
+	// kRestMinMs (ms, last note to next). It is fully back kRestReturnMs before the next note (a
+	// note crossing the whole highway).
 	static constexpr double kRestMinMs = 9000.0;
 	static constexpr double kRestReturnMs = 4500.0;
+	static constexpr double kRestLeaveMs = 1000.0;
 	static constexpr float kRestFadeSeconds = 1.5f;
 
 	NoteHighwayCore();
@@ -245,7 +248,7 @@ private:
 	void StartShowTail();
 	void UpdateShowTail();
 	void HandOff();
-	// HighwayRests: fades the highway out through a long rest and back before the next note.
+	// Fades the highway in before the first note, out after the last and through a long rest.
 	void UpdateHighwayRests( float inDeltaTime );
 	// The song or lesson is over: writes its result to PlayerProfile, and what it changed to the
 	// results screen. Calibration, autoplay, no-fail and skipped-ahead runs aren't recorded (--record-autoplay
@@ -352,7 +355,7 @@ private:
 	int m_nextTrack = -1;
 	// The tail ran too long: it fades out (kept alive until then) while the next song starts.
 	AudioPack m_fadingPack;
-	// HighwayRests: how much of the highway shows (VenueShow::SetHighwayShown).
+	// How much of the highway shows (UpdateHighwayRests, VenueShow::SetHighwayShown).
 	float m_highwayShown = 1.f;
 	std::string m_lastTiming;
 	std::string m_lastHint;

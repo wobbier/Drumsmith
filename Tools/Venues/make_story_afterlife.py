@@ -135,12 +135,15 @@ def see_through(e, opacity, additive=False):
 
 
 # ---- shared pieces ------------------------------------------------------------------------------
+FLAME = 3.2     # a flame's glow (its core a little more): bright enough to bloom, not to burn out to a white blob
+
+
 def fire(s, parent, venue, at, size=1.0, light=500.0, smoke=True, name='Fire'):
     """A fire: tongues of flame flickering on loops, flames and sparks and smoke in the air, and an
     orange light that jumps about."""
     rng = random.Random(int(at[0] * 100 + at[2] * 7))
-    flame_mat = A.mat(venue, 'Palette', (0, 0, 0), glow=(1.0, 0.5, 0.12), power=5.0, additive=True, both=True)
-    core_mat = A.mat(venue, 'Palette', (0, 0, 0), glow=(1.0, 0.85, 0.45), power=7.0, additive=True, both=True)
+    flame_mat = A.mat(venue, 'Palette', (0, 0, 0), glow=(1.0, 0.5, 0.12), power=FLAME, additive=True, both=True)
+    core_mat = A.mat(venue, 'Palette', (0, 0, 0), glow=(1.0, 0.85, 0.45), power=FLAME * 1.3, additive=True, both=True)
     for i in range(6):
         clip = P.clip(venue, f'Flicker{i % 3}', 14 + 5 * (i % 3), [P.track('Scale', [(0, (1, 1, 1)), (4 + i % 3, (1.15, 1.4 - 0.1 * (i % 3), 0.9)), (9 + 2 * (i % 3), (0.85, 0.75, 1.15)),
                                                                              (14 + 5 * (i % 3), (1, 1, 1))], 'SmoothStep')])
@@ -150,7 +153,7 @@ def fire(s, parent, venue, at, size=1.0, light=500.0, smoke=True, name='Fire'):
         A.model(s, body, 'Flame', A.flame(venue), (0, 0, 0), (0, rng.uniform(0, 360), 0), (size * rng.uniform(0.9, 1.5), h, size * rng.uniform(0.9, 1.5)), flame_mat, shadows=False)
         A.model(s, body, 'Flame core', A.flame(venue), (0, 0, 0), (0, rng.uniform(0, 360), 0), (size * 0.6, h * 0.6, size * 0.6), core_mat, shadows=False)
     A.fire_fx(s, parent, venue, name, (at[0], at[1] + 0.2 * size, at[2]), size, smoke)
-    A.glow_card(s, parent, venue, name + ' glow', (at[0], at[1] + 0.06, at[2]), 3.2 * size, (1.0, 0.4, 0.08), 1.6, (90, 0, 0))
+    A.glow_card(s, parent, venue, name + ' glow', (at[0], at[1] + 0.06, at[2]), 3.2 * size, (1.0, 0.4, 0.08), 1.1, (90, 0, 0))
     jump = P.clip(venue, 'FireLight', 20, [P.track('Position', [(0, (0, 0, 0)), (3, (0.25, 0.2, -0.2)), (7, (-0.3, -0.15, 0.2)), (12, (0.2, 0.3, 0.3)), (16, (-0.15, 0.0, -0.3)), (20, (0, 0, 0))])])
     s.light(name + ' light', P.looping(s, parent, name + ' light', jump, (at[0], at[1] + 1.6 * size, at[2]), speed=1.3), (0, 0, 0), 'Point', (1.0, 0.6, 0.28), light, 20 * size)
 
@@ -175,11 +178,12 @@ def add3(a, b):
     return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
 
 
-def beacons(s, parent, venue, red=450.0, blue=600.0, reach=60.0, speed=1.0, glare=(0.6, 2.0)):
-    """The patrol cruiser's two roof beacons turning: a glare going round each, and (red / blue
-    above 0) a spot light sweeping from each at those levels, opposite one another."""
+def beacons(s, parent, venue, red=450.0, blue=600.0, reach=60.0, speed=1.0, glare=(0.6, 2.0), kind=None):
+    """A police car's two roof beacons turning (the patrol cruiser's, or kind's of the fleet): a
+    glare going round each, and (red / blue above 0) a spot light sweeping from each at those
+    levels, opposite one another."""
     spin = P.clip(venue, 'LightbarSpin', 24, [P.track('Rotation', [(0, (0, 0, 0)), (12, (0, 180, 0)), (24, (0, 359.9, 0))])])
-    x, y, z = A.PATROL_BEACON
+    x, y, z = A.VEHICLES[kind]['Beacons'][-1] if kind else A.PATROL_BEACON
     for side, yaw, name, c, lamp, level in ((-1, 0, 'red', (1.0, 0.06, 0.05), (1.0, 0.05, 0.05), red), (1, 180, 'blue', (0.12, 0.25, 1.0), (0.1, 0.25, 1.0), blue)):
         body = P.looping(s, parent, f'Beacon {name}', spin, (side * x, y, z), speed=speed)
         if level > 0:
@@ -187,17 +191,64 @@ def beacons(s, parent, venue, red=450.0, blue=600.0, reach=60.0, speed=1.0, glar
         A.glow_card(s, body, venue, 'Glare', P_rot((0, 0, 0.14), yaw), glare[0], c, glare[1], (0, yaw, 0))
 
 
-def cruiser(s, parent, venue, at, yaw=0.0, name='Cruiser', door_open=False, beams=True):
-    """A police car facing +z at yaw 0, its centre at at (on the road). Returns its group."""
+def cruiser(s, parent, venue, at, yaw=0.0, name='Cruiser', door_open=False, beams=True, kind=None):
+    """A police car facing +z at yaw 0, its centre at at (on the road): the patrol cruiser, or
+    kind of the fleet (TrailDuster, Ranger). Returns its group."""
     g = s.entity(name, parent, at, (0, yaw, 0))
-    # The patrol cruiser brings its own glass, lamps and beacons: only their light is added.
-    A.patrol_cruiser(s, g, door_open=door_open)
-    hx, hy, hz = A.PATROL_HEADLAMP
+    # The model brings its own glass, lamps and beacons: only their light is added.
+    if kind:
+        A.vehicle(s, g, kind)
+        hx, hy, hz = A.lamp(kind, 'Headlamp')
+    else:
+        A.patrol_cruiser(s, g, door_open=door_open)
+        hx, hy, hz = A.PATROL_HEADLAMP
     for x in (-hx, hx):
         A.glow_card(s, g, venue, 'Headlight glare', (x, hy, hz + 0.05), 0.5, (1.0, 0.95, 0.8), 1.2)
     A.headlights(s, g, hx, hy, hz + 0.15, 1500.0, 60)
-    beacons(s, g, venue)
+    beacons(s, g, venue, kind=kind)
     return g
+
+
+def driver_seat(kind=None):
+    """Where the seated cop goes in a police car (the patrol cruiser, or kind of the fleet), from
+    the car's centre: the same reach to the steering wheel in each."""
+    if not kind:
+        return (-0.45, SEAT_Y, -0.2)
+    x, y, z = A.VEHICLES[kind]['SteeringWheel']
+    return (round(x - 0.01, 3), round(SEAT_Y + y - 0.98, 3), round(z - 0.53, 3))
+
+
+def police_helicopter(s, parent, venue, kind, at, rot, target, level, reach, name='Helicopter', wander=1.5, inner=4.0, outer=8.0, pace=1.0):
+    """A police helicopter of the fleet (JetRanger, AS350) hovering with its skids at at, its nose
+    (+z) turned by rot, its rotors turning; and the searchlight under its belly, which rides with it
+    and is held on target (venue space) by hand: it strays up to about wander metres off it and is
+    pulled back (VenueAim). pace: its hover's speed, so two of them don't move as one. Returns the
+    body, for anything else that should ride with it."""
+    facts = A.VEHICLES[kind]
+    bob = P.clip(venue, 'HeliBob', 170, [P.track('Position', [(0, (0, 0, 0)), (45, (1.6, 0.9, -2.0)), (95, (-1.0, -0.7, 2.5)), (140, (0.8, 0.4, 0.6)), (170, (0, 0, 0))], 'SmoothStep'),
+                                         P.track('Rotation', [(0, (0, 0, 0)), (45, (4, 6, -7)), (95, (-3, -5, 6)), (140, (2, 3, -3)), (170, (0, 0, 0))], 'SmoothStep')])
+    copter = P.looping(s, s.entity(name, parent, at, rot), 'Hover', bob, speed=pace)
+    A.vehicle(s, copter, kind)
+    span = facts['RotorSpan']
+    blades = P.looping(s, copter, 'Rotor', P.clip(venue, 'RotorSpin', 6, [P.track('Rotation', [(0, (0, 0, 0)), (3, (0, 180, 0)), (6, (0, 359.9, 0))])]), tuple(facts['Rotor']))
+    A.vehicle(s, blades, kind + 'Rotor', 'Blades')
+    see_through(s.box('Rotor disc', blades, (0, 0, 0), (span, 0.02, span), (0.3, 0.3, 0.32), shape='Cylinder', shadows=False), 0.1)
+    tail = P.looping(s, copter, 'Tail rotor', P.clip(venue, 'TailRotorSpin', 4, [P.track('Rotation', [(0, (0, 0, 0)), (2, (180, 0, 0)), (4, (359.9, 0, 0))])]), tuple(facts['TailRotor']))
+    A.vehicle(s, tail, kind + 'TailRotor', 'Blades')
+    see_through(s.box('Tail rotor disc', tail, (0, 0, 0), (1.5, 0.02, 1.5), (0.3, 0.3, 0.32), rot=(0, 0, 90), shape='Cylinder', shadows=False), 0.1)
+    bx, by, bz = facts['Beacons'][0]
+    A.glow_card(s, copter, venue, 'Beacon glare', (bx, by + 0.03, bz), 0.4, (1.0, 0.08, 0.06), 1.5, (0, 90, 0))
+    # The searchlight: a yoke under the belly forward of the skids' cross tubes, and in it the lamp
+    # housing, which is what the aim turns (its lens and its beam with it).
+    belly = (0.0, 0.5, round(facts['Max'][2] * 0.42, 3))
+    s.box('Searchlight yoke', copter, (belly[0], belly[1] + 0.2, belly[2]), (0.1, 0.24, 0.1), (0.05, 0.05, 0.06), metallic=0.6, shadows=False)
+    lamp = s.entity('Searchlight', copter, belly, (60, 0, 0))
+    lamp.add({'Type': 'VenueAim', 'Target': [round(float(c), 3) for c in target], 'Wander': float(wander), 'Seconds': 3.4})
+    s.box('Housing', lamp, (0, 0, 0), (0.34, 0.4, 0.34), (0.05, 0.05, 0.06), rot=(90, 0, 0), metallic=0.6, rough=0.5, shape='Cylinder', shadows=False)
+    s.box('Lens', lamp, (0, 0, 0.2), (0.3, 0.02, 0.3), (1, 1, 1), rot=(90, 0, 0), emissive=(0.85, 0.92, 1.0), emissive_intensity=14.0, shape='Cylinder', shadows=False)
+    A.glow_card(s, lamp, venue, 'Lens glare', (0, 0, 0.24), 1.3, (0.85, 0.92, 1.0), 4.0)
+    s.light('Beam', lamp, (0, 0, 0.26), 'Spot', (0.85, 0.92, 1.0), level, reach, inner=inner, outer=outer)
+    return copter
 
 
 def road(s, parent, venue, x0, x1, z0, z1, dashes=True):
@@ -229,7 +280,7 @@ def burning_wreck(s, parent, venue, o):
     textured(s.box('Fuel', g, (2.6, 0.006, 8.0), (5.5, 0.004, 7.5), (0.02, 0.02, 0.025), rough=0.05, metallic=0.7, shadows=False), venue, 'Asphalt', (1, 1))
     for i, (x, z) in enumerate(((0.3, 7.6), (1.9, 6.4), (3.2, 10.6), (2.4, 4.2))):
         body = P.looping(s, g, f'Fuel flame {i}', P.clip(venue, 'Flicker1', 19, [P.track('Scale', [(0, (1, 1, 1)), (5, (1.15, 1.3, 0.9)), (11, (0.85, 0.75, 1.15)), (19, (1, 1, 1))], 'SmoothStep')]), (x, 0, z), speed=1.0 + 0.2 * i)
-        A.model(s, body, 'Flame', A.flame(venue), (0, 0, 0), (0, i * 70, 0), (0.5, 0.5 + 0.12 * i, 0.5), A.mat(venue, 'Palette', (0, 0, 0), glow=(1.0, 0.5, 0.12), power=5.0, additive=True, both=True), shadows=False)
+        A.model(s, body, 'Flame', A.flame(venue), (0, 0, 0), (0, i * 70, 0), (0.5, 0.5 + 0.12 * i, 0.5), A.mat(venue, 'Palette', (0, 0, 0), glow=(1.0, 0.5, 0.12), power=FLAME, additive=True, both=True), shadows=False)
     return g
 
 
@@ -326,19 +377,35 @@ def night_sky(s, parent, venue, centre):
             A.mat(venue, 'Night', (0, 0, 0), glow=(1, 1, 1), power=1.0), shadows=False)
 
 
-def roadside(s, parent, venue, centre, half=60.0, shoulder_x=14.0, torn_z=None, trees=True, sky=True):
-    """The night around a stretch of road at centre: the stars, the treeline, the guardrails (torn
-    open at torn_z on the +x side), flares set out across the lanes."""
+def earth(s, parent, venue):
+    """The country round the crash site, for when it is seen from the air by day (Free Bird's way
+    up, and the fall back): the ground out to hills on the horizon, the highway running on both
+    ways, woods and fields, and real trees (MitchTree) along the road where the cameras stand."""
+    g = s.group('The Earth', parent)
+    A.model(s, g, 'Ground', A.earth_ground(venue), material=A.mat(venue, 'Earth', rough=1.0), shadows=False)
+    A.model(s, g, 'Highway', A.earth_road(venue), material=A.mat(venue, 'Palette', rough=0.9), shadows=False)
+    A.model(s, g, 'Woods', A.earth_crowns(venue), material=A.mat(venue, 'Palette', color=(0.17, 0.3, 0.11), rough=1.0), shadows=False)
+    A.plant_roadside(s, s.group('Roadside trees', g), venue, A.roadside_spots(-175, 175, A.BELT[0] + 3, A.BELT[1] + 4, 125, 5), shadows=True, tall=(9.0, 15.0))
+    return g
+
+
+def roadside(s, parent, venue, centre, half=60.0, shoulder_x=14.0, torn_z=None, trees=True, sky=True, earth_too=False):
+    """The night around a stretch of road at centre: the stars, the trees, the guardrails (torn
+    open at torn_z on the +x side). earth_too: the whole country round it (earth), instead of
+    a patch of ground that ends in the dark."""
     cx, cy, cz = centre
     if sky:
         night_sky(s, parent, venue, centre)
-    s.slab('Ground', parent, cx - 170, cx + 170, cy - 1.2, cy - 0.3, cz - 170, cz + 170, (0.02, 0.03, 0.02), rough=1.0, shadows=False)
+    if earth_too:
+        earth(s, parent, venue)
+    else:
+        s.slab('Ground', parent, cx - 170, cx + 170, cy - 1.2, cy - 0.3, cz - 170, cz + 170, (0.02, 0.03, 0.02), rough=1.0, shadows=False)
+        s.slab('Verge R', parent, cx + shoulder_x + 6, cx + 120, -0.3, -0.06, cz - half * 2, cz + half * 2, GRASS)
+        s.slab('Verge L', parent, cx - 120, cx - shoulder_x - 6, -0.3, -0.06, cz - half * 2, cz + half * 2, GRASS)
+        if trees:
+            A.plant_roadside(s, s.entity('Roadside trees', parent, (cx, cy, cz)), venue, A.roadside_spots(-110, 110, shoulder_x + 12, 75, 70, 5, y=-0.06))
     s.slab('Shoulder R', parent, cx + shoulder_x, cx + shoulder_x + 6, -0.25, -0.02, cz - half, cz + half, GRAVEL)
     s.slab('Shoulder L', parent, cx - shoulder_x - 6, cx - shoulder_x, -0.25, -0.02, cz - half, cz + half, GRAVEL)
-    s.slab('Verge R', parent, cx + shoulder_x + 6, cx + 120, -0.3, -0.06, cz - half * 2, cz + half * 2, GRASS)
-    s.slab('Verge L', parent, cx - 120, cx - shoulder_x - 6, -0.3, -0.06, cz - half * 2, cz + half * 2, GRASS)
-    if trees:
-        A.model(s, parent, 'Treeline', A.treeline(venue, 'Treeline', -110, 110, shoulder_x + 12, 75, 110, 5), (cx, cy, cz), shadows=False)
     rail = A.guardrail(venue, 48.0, 'Guardrail48')
     for side in (-1, 1):
         x = cx + side * (shoulder_x + 1.2)
@@ -350,6 +417,8 @@ def roadside(s, parent, venue, centre, half=60.0, shoulder_x=14.0, torn_z=None, 
         else:
             for k in (-1, 0):
                 A.model(s, parent, 'Guardrail', rail, (x, 0, cz + k * 48 + (48 if side < 0 else 0)), (0, yaw, 0))
+    if not sky:
+        return      # (under the engine's own sky, which has its own stars and moon)
     rng = random.Random(int(cx) + 9)
     for i in range(110):
         a, el = rng.uniform(0, 2 * math.pi), math.radians(rng.uniform(8, 80))
@@ -464,7 +533,8 @@ def highway():
                     s.light('Pole light', parent, (x - side * 2.8, 9.5, z), 'Spot', (1.0, 0.78, 0.5), 1500.0, 28, rot=(90, 0, 0), inner=32, outer=58)
 
     def trees(parent):
-        A.model(s, parent, 'Treeline', A.treeline(V, 'TreesLoop', -480, 192, 19, 80, 210, 5, period=96.0), shadows=False)
+        # Real trees (MitchTree), the same twenty-two every 96 m.
+        A.plant_roadside(s, parent, V, A.roadside_spots(-480, 192, 19, 72, 22, 5, period=96.0, y=-0.12))
         for k in range(-4, 2):
             s.box('Reflector post', parent, (17.5, 0.6, k * 96 + 30), (0.08, 1.2, 0.08), STEEL, shadows=False)
 
@@ -488,23 +558,28 @@ def highway():
     # Traffic. Oncoming, down the far lane at the two speeds added together: headlights out of the
     # dark and gone. The slow lane on the right, falling behind.
     def vehicle(parent, name, kind, at, yaw, lights=True):
+        """kind: 'semi', or one of the fleet's cars (A.TRAFFIC)."""
         g = s.entity(name, parent, at, (0, yaw, 0))
-        long_ = kind == 'semi'
-        A.model(s, g, 'Body', A.semi(V) if long_ else A.car(V, kind), shadows=False)
-        nose, tail = (8.9, -8.75) if long_ else (2.25, -2.25)
-        for x in (-0.65, 0.65):
-            s.box('Tail lamp', g, (x, 0.75 if not long_ else 1.0, tail), (0.34, 0.12, 0.04), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=5.0, shadows=False)
-            s.box('Head lamp', g, (x * (1.45 if long_ else 1.0), 0.7 if not long_ else 1.15, nose), (0.34, 0.14, 0.04), (1, 1, 0.9), emissive=(1, 1, 0.85), emissive_intensity=8.0, shadows=False)
+        if kind == 'semi':
+            A.model(s, g, 'Body', A.semi(V), shadows=False)
+            for x in (-0.65, 0.65):
+                s.box('Tail lamp', g, (x, 1.0, -8.75), (0.34, 0.12, 0.04), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=5.0, shadows=False)
+                s.box('Head lamp', g, (x * 1.45, 1.15, 8.9), (0.34, 0.14, 0.04), (1, 1, 0.9), emissive=(1, 1, 0.85), emissive_intensity=8.0, shadows=False)
+            head = (0.65 * 1.45, 1.15, 8.9)
+        else:
+            A.vehicle(s, g, kind)
+            A.vehicle_lamps(s, g, V, kind)
+            head = A.lamp(kind, 'Headlamp')
         if lights:
-            A.headlights(s, g, 0.65 * (1.45 if long_ else 1.0), 0.7 if not long_ else 1.15, nose + 0.2, 2200.0, 70, inner=14, outer=34)
+            A.headlights(s, g, head[0], head[1], head[2] + 0.2, 2200.0, 70, inner=14, outer=34)
         return g
 
     oncoming = P.looping(s, swerving, 'Oncoming', P.clip(V, 'RoadOncoming', 240, [P.track('Position', [(0, (0, 0, 0)), (240, (0, 0, -624))])]))
-    for i, (z, kind, x) in enumerate(((-250, 'white', -8.6), (-120, 'semi', -8.7), (40, 'cab_red', -8.4), (150, 'steel', -8.7), (280, 'sign_green', -8.5))):
+    for i, (z, kind, x) in enumerate(((-250, 'Caprice', -8.6), (-120, 'semi', -8.7), (40, 'Corvette', -8.4), (150, 'Civic', -8.7), (280, 'Caravan', -8.5))):
         for copy in (0, 1):
             vehicle(oncoming, f'Oncoming {i}', kind, (x, 0, z + copy * 624), 180, lights=copy == 0 or i % 2 == 0)
     slow = P.looping(s, swerving, 'Slow lane', P.clip(V, 'RoadSlow', 600, [P.track('Position', [(0, (0, 0, 0)), (600, (0, 0, -360))])]))
-    for i, (z, kind) in enumerate(((-150, 'deck'), (-30, 'semi'), (110, 'navy'))):
+    for i, (z, kind) in enumerate(((-150, 'C10'), (-30, 'semi'), (110, 'Caprice'))):
         for copy in (0, 1):
             vehicle(slow, f'Slow traffic {i}', kind, (8.7, 0, z + copy * 360), 0, lights=False)
 
@@ -567,13 +642,14 @@ def highway():
     s.light('Stage spill on the cop', world, (seat[0] + 0.3, 1.5, car_at[2] + 1.3), 'Point', (1.0, 0.7, 0.6), 3.5, 3.5)
     driver = P.figure(V, 'Cop_driving', 'ShopKeeper_01', '04_B', P.DRIVING, 'the highway cop')
 
-    def manned(parent, name, yaw=0.0):
-        car = cruiser(s, parent, V, (0, 0, 0), yaw, name=name)
-        P.place(s, car, 'Cop', driver, (-0.45, SEAT_Y, -0.2), 0)
+    def manned(parent, name, yaw=0.0, kind=None):
+        car = cruiser(s, parent, V, (0, 0, 0), yaw, name=name, kind=kind)
+        P.place(s, car, 'Cop', driver, driver_seat(kind), 0)
         return car
 
-    # The rest of the pursuit: four more cruisers strung out behind, fighting for a way past: they
-    # surge up level with the deck and fall back. They pull up where they are when the rig goes over.
+    # The rest of the pursuit: four more strung out behind (two cruisers, two of the highway
+    # patrol's Trail Dusters), fighting for a way past: they surge up level with the deck and fall
+    # back. They pull up where they are when the rig goes over.
     stopped = P.between(s, world, 'Pursuit, pulled up', 'wreck', None, 0.2)
     for i, (x, z, yaw, park, surge) in enumerate(((-5.6, -20.0, 3, -24, 13.0), (5.0, -17.0, -4, 18, 10.0), (-2.4, -29.0, 2, 30, 7.0), (5.4, -34.0, -3, -14, 10.0))):
         frames = 150 + 34 * i
@@ -582,22 +658,15 @@ def highway():
                                                                     (3 * frames // 4, (-side * 0.9, 0, surge * 0.3)), (frames, (0, 0, 0))], 'SmoothStep'),
                                                  P.track('Rotation', [(0, (0, 0, 0)), (frames // 8, (0, -side * 7, 0)), (3 * frames // 8, (0, side * 8, 0)), (5 * frames // 8, (0, -side * 6, 0)),
                                                                     (7 * frames // 8, (0, side * 5, 0)), (frames, (0, 0, 0))], 'SmoothStep')])
-        manned(P.looping(s, swerving, f'Pursuit {i}', weave, (x, 0, z)), f'Cruiser {i + 2}', yaw)
-        manned(s.entity(f'Pursuit {i}, pulled up', stopped, (x, 0, z), (0, park, 0)), f'Cruiser {i + 2}')
+        kind = 'TrailDuster' if i % 2 else None
+        manned(P.looping(s, swerving, f'Pursuit {i}', weave, (x, 0, z)), f'Cruiser {i + 2}', yaw, kind)
+        manned(s.entity(f'Pursuit {i}, pulled up', stopped, (x, 0, z), (0, park, 0)), f'Cruiser {i + 2}', kind=kind)
 
-    # The police helicopter, off the left bow with its light on the deck.
-    bob = P.clip(V, 'HeliBob', 170, [P.track('Position', [(0, (0, 0, 0)), (45, (1.6, 0.9, -2.0)), (95, (-1.0, -0.7, 2.5)), (140, (0.8, 0.4, 0.6)), (170, (0, 0, 0))], 'SmoothStep'),
-                                     P.track('Rotation', [(0, (0, 0, 0)), (45, (4, 6, -7)), (95, (-3, -5, 6)), (140, (2, 3, -3)), (170, (0, 0, 0))], 'SmoothStep')])
-    copter_at = (-13.5, 12.5, 17.0)
-    copter = P.looping(s, s.entity('Helicopter', P.between(s, root, 'Helicopter', None, 'wreck', 0.5, copter_at), copter_at, (14, 118, -8)), 'Hover', bob)
-    A.model(s, copter, 'Body', A.helicopter(V), shadows=False)
-    blades = P.looping(s, copter, 'Rotor', P.clip(V, 'RotorSpin', 6, [P.track('Rotation', [(0, (0, 0, 0)), (3, (0, 180, 0)), (6, (0, 359.9, 0))])]), (0, 1.52, 0))
-    for yaw in (0, 90):
-        s.box('Blade', blades, (0, 0, 0), (0.22, 0.04, 9.6), (0.08, 0.08, 0.09), rot=(0, yaw, 0), shadows=False)
-    see_through(s.box('Rotor disc', blades, (0, 0, 0), (9.6, 0.02, 9.6), (0.3, 0.3, 0.32), shape='Cylinder', shadows=False), 0.1)
-    s.box('Strobe', copter, (0, -1.1, -1.0), (0.14, 0.14, 0.14), (1, 0.1, 0.1), emissive=(1, 0.1, 0.1), emissive_intensity=9.0, shape='Sphere', shadows=False)
-    s.light('Helicopter searchlight', s.entity('Searchlight', P.between(s, root, 'Helicopter light', None, 'wreck', 0.5, copter_at), (copter_at[0], copter_at[1] - 1.2, copter_at[2])), (0, 0, 0),
-            'Spot', (0.85, 0.92, 1.0), 5000.0, 40, rot=look_rotation((copter_at[0], copter_at[1] - 1.2, copter_at[2]), (0, 1.5, 4)), inner=5, outer=10)
+    # The police helicopters, each flying the road with its searchlight held on the deck: a JetRanger
+    # off the left bow, and an AS350 high astern (the one the helicopter shots are taken from: it hangs above
+    # and behind where their camera starts, out of its picture).
+    copter_at = (-13.5, 11.2, 17.0)
+    police_helicopter(s, P.between(s, root, 'Helicopter', None, 'wreck', 0.5, copter_at), V, 'JetRanger', copter_at, (9, 16, -5), (0, 1.5, 4), 5000.0, 40, wander=1.5)
 
     # --- the stunts ---
     def parked(flag, clip_name, frames, on, at, keys_in=None):
@@ -643,7 +712,7 @@ def highway():
         return P.play(s, s.entity(name, run, rest, (0, yaw, 0)), 'Flung', 'roadblock', clip)
 
     cruiser(s, flung('Block cruiser L', (-3.5, 0, 0), 82, (-6.5, 2.2, 16), (-150, 170)), V, (0, 0, 0), 0, name='Cruiser 7')
-    cruiser(s, flung('Block cruiser R', (3.5, 0, 0.6), -98, (7.0, 1.6, 20), (140, -100)), V, (0, 0, 0), 0, name='Cruiser 8')
+    cruiser(s, flung('Block cruiser R', (3.5, 0, 0.6), -98, (7.0, 1.6, 20), (140, -100)), V, (0, 0, 0), 0, name='Cruiser 8', kind='Ranger')
     for i, x in enumerate((-9.5, -7.6, 7.6, 9.5)):
         horse = flung(f'Trestle {i}', (x, 0, -1.5), 0, (x * 0.35, 2.5, 26 + 5 * i), (220 - 90 * i, 150))
         s.box('Trestle bar', horse, (0, 0.95, 0), (1.9, 0.22, 0.06), (0.95, 0.5, 0.05), emissive=(0.95, 0.5, 0.05), emissive_intensity=0.8)
@@ -659,9 +728,10 @@ def highway():
 
     # 3. big_air: the landing (the jump itself is the world's Jump clip).
     sparks(parked('big_air', 'JumpLanding', 70, (51, 62), (0, 0.15, 3.5)), 'Landing sparks', (0, 0, 0), (-80, 0, 0), rate=420, speed=(6, 24), cone=85)
-    # The helicopter's searchlight on the deck.
+    # The second helicopter and its searchlight on the deck.
     heli = (-28.0, 34.0, -48.0)
-    s.light('Searchlight', root, heli, 'Spot', (0.85, 0.92, 1.0), 14000.0, 90, rot=look_rotation(heli, (0, 1.5, 4)), inner=2.0, outer=4.5)
+    police_helicopter(s, root, V, 'AS350', (heli[0] - 2.5, heli[1] + 5.0, heli[2] - 9.0), (10, 24, 4), (0, 1.5, 4), 14000.0, 95, name='Helicopter astern',
+                      wander=1.8, inner=2.0, outer=4.5, pace=0.8)
 
     # The marked stretch of shoulder (the finale comes back to it): mile marker 66, a billboard,
     # the rail the trailer goes through, the wreck.
@@ -745,8 +815,10 @@ def hell():
     # up to the gates; at 'denied' the light goes out and they plummet: the Earth comes back up at
     # them and they go through the road at 'fell', PLUNGE seconds later.
     EARTH_DROP, PLUNGE = 220.0, 3.2
+    BREAK_GLOW = 4.5                 # the night through the break in the road, seen from 150 m down the shaft's haze
     crash = P.between(s, root, 'The crash site', None, 'fell', 0.0)
-    night_sky(s, crash, V, (0, 0, 0))
+    # (No dome of stars here: this stretch is under the engine's own sky, which the song's sky_
+    # flags turn from the night of the crash to day as they rise and back as they fall.)
     # Each place has its own rig (a VenueShowLight under a story group is cued only while it shows).
     for i, x in enumerate((-3.5, 3.5, -1.2, 1.2)):
         s.light(f'Crash wash {i}', crash, (x, 7, -3), 'Spot', (0.7, 0.8, 1.0), 700.0, 18, rot=look_rotation((x, 7, -3), (x * 0.4, 1, 3.5)), inner=22, outer=42, show='Wash', group=i)
@@ -756,7 +828,7 @@ def hell():
     # (From here on 'crash' is the Earth: everything on it goes down with it and comes back.)
     crash = P.play(s, P.play(s, crash, 'The Earth sinks away', 'ascent', sink), 'The Earth comes back', 'denied', plunge)
     road(s, crash, V, -14, 14, -70, 70)
-    roadside(s, crash, V, (0, 0, 0), 70.0, 14.0, torn_z=6.0, sky=False)
+    roadside(s, crash, V, (0, 0, 0), 70.0, 14.0, torn_z=6.0, sky=False, earth_too=True)
     s.light('Moon', crash, (0, 40, -20), 'Directional', (0.4, 0.5, 0.8), 2.4, 300, rot=(42, 150, 0), shadows=True)
     for x, z in ((-30, -30), (30, 30), (-30, 40), (30, -40)):
         s.light('Night fill', crash, (x, 26, z), 'Point', (0.3, 0.4, 0.75), 2600.0, 90)
@@ -781,7 +853,7 @@ def hell():
 
     # 1b. The way up. Cloud streaming down past them in three depths (each one mesh).
     tease = P.between(s, root, 'The way up', 'ascent', 'fell', 0.0)
-    cloud_mat = A.mat(V, 'Palette', (1, 1, 1), glow=(0.5, 0.6, 0.85), power=0.6, rough=1.0)
+    cloud_mat = A.mat(V, 'Palette', (1, 1, 1), glow=(0.5, 0.6, 0.85), power=0.3, rough=1.0)
     clouds = P.gated(s, P.gated(s, tease, 'Clouds', 'clouds', True, 6.0, (0, 320, 3)), 'Clouds (until denied)', 'denied', False, 0.8, (0, 500, 3))
     for depth, (count, r0, r1, size0, size1, period, frames) in enumerate(((16, 5, 14, 2.0, 4.5, 90.0, 300), (16, 16, 40, 6.0, 12.0, 160.0, 800), (10, 46, 80, 14.0, 24.0, 240.0, 2400))):
         clip = P.clip(V, f'CloudsFalling{depth}', frames, [P.track('Position', [(0, (0, 0, 0)), (frames, (0, -period, 0))])])
@@ -867,9 +939,14 @@ def hell():
         for a, r, y, rx, ry in flakes:
             s.box('Ash', ash, (math.sin(a) * r, copy * 10 + y, math.cos(a) * r + 3), (0.05, 0.05, 0.05), (0.5, 0.48, 0.45),
                   emissive=(0.5, 0.25, 0.15), emissive_intensity=2.0, shadows=False, rot=(rx, ry, 0))
-    s.box('The road, far above', upper, (0, 150, 3), (9, 0.5, 0.5), WHITE, emissive=(1, 0.95, 0.85), emissive_intensity=30, shadows=False)
-    A.model(s, upper, 'The road, its glow', A.light_card(V), (0, 149, 3), (-90, 0, 0), (26, 7, 1), A.mat(V, 'Glow', (0, 0, 0), glow=(0.9, 0.92, 1.0), power=3.0, additive=True, both=True), shadows=False)
-    s.light('Slit light', upper, (0, 70, 3), 'Spot', (0.85, 0.9, 1.0), 60000.0, 110, rot=(90, 0, 0), inner=5, outer=11)
+    # The break in the road, far above: a ragged fissure in the dark with the night they fell out
+    # of showing through it, moonlight coming down. (Its glow is kept under white so that its
+    # shape and colour read from the bottom of the shaft: a soft white glow card was a blank pill.)
+    night = (0.42, 0.6, 1.0)
+    under, through = A.road_break(V)
+    A.model(s, upper, 'The road, far above', under, (0, 150, 3), (0, 0, 0), 1.0, A.mat(V, 'Palette', (1, 1, 1), rough=1.0), shadows=False)
+    A.model(s, upper, 'The night through the road', through, (0, 150, 3), (0, 0, 0), 1.0, A.mat(V, 'Palette', (0, 0, 0), glow=night, power=BREAK_GLOW, glow_tex=False), shadows=False)
+    s.light('Slit light', upper, (0, 70, 3), 'Spot', (0.7, 0.82, 1.0), 60000.0, 110, rot=(90, 0, 0), inner=5, outer=11)
     s.light('Pit glow', upper, (0, -14, 3), 'Point', (1.0, 0.3, 0.08), 2600.0, 40)
     A.glow_card(s, upper, V, 'The pit', (0, -70, 3), 60.0, (1.0, 0.22, 0.03), 3.0, (90, 0, 0))
     for i, x in enumerate((-3.0, 3.0)):

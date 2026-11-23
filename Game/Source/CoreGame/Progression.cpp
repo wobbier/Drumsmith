@@ -339,7 +339,6 @@ void Progression::LoadStory( const json& inRoot )
                     }
                 }
                 song.Venue = value.value( "Venue", std::string() );
-                song.HighwayRests = value.value( "HighwayRests", false );
                 set.Songs.push_back( std::move( song ) );
             }
         }

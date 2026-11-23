@@ -32,7 +32,10 @@ public:
     // Story mode's hold on the band (VenueShow's band_ story flags). The pose moves each member,
     // instrument and all, off their spot: Hidden (gone: posed figures stand in), Falling
     // (tumbling, each their own way), Rising (lifted off the floor and away), Down (on their
-    // backs), Floating (drifting and bobbing in place). inTo has held inToSeconds; it blends in
+    // backs), Floating (drifting and bobbing in place). A fall that lasts turns into a dive: once
+    // the tumble is over everyone but the drummer goes head first, the amps and wedges tumble
+    // loose beside them, the mic stands are gone and the singer has a mic in hand. inTo has held
+    // inToSeconds; it blends in
     // from inFrom (held inFromSeconds when inTo came) by inBlend, 0 to 1. inGhost 0 to 1 turns
     // them see-through and pale, glowing: a ghost of themselves.
     enum class StoryPose : int { Playing = 0, Hidden, Falling, Rising, Down, Floating, Aloft };
@@ -95,6 +98,17 @@ private:
         // sibling of Group in the same frame. It stays down when they rise and isn't there
         // while they float (SetStoryState).
         EntityHandle Backline;
+        // The gear that comes loose in a fall (amps, wedges): each tumbles its own way beside
+        // them (SetStoryState), from where it stands in the backline.
+        struct LoosePiece
+        {
+            EntityHandle Entity;
+            Vector3 Rest;
+            glm::quat Turn{ 1.f, 0.f, 0.f, 0.f };
+            float Seed = 0.f;
+        };
+        std::vector<LoosePiece> Loose;
+        EntityHandle HandMic;      // the singer's, in their hand through a fall (hidden otherwise)
         Performer Body;
         int Model = -1;            // which character (People::kPeople)
         Performer::Pose Pose;
@@ -145,6 +159,9 @@ private:
     void UpdateVocals( Member& ioMember, double inSeconds, double inBeat, float inEnergy );
     void UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float inEnergy );
     void UpdateKit( float inDeltaTime );
+    // A fall's dive (m_dive) laid over a playing pose, before the body stands in it: the back
+    // arched, the head up to see where they're going, the legs trailing and kicking.
+    void DivePose( const Member& inMember, Performer::Pose& ioPose, bool inKeepLean ) const;
 
     // Where a piece is struck (the drummer's space): its middle, or where a hand's (0 left, 1
     // right) stick lands on it.
@@ -172,6 +189,11 @@ private:
     // Adds the StandardMaterials under inRoot that m_ghosted doesn't have yet; true if any were new.
     bool GatherGhosted( Transform& inRoot );
     float m_ghost = 0.f;
+    // SetStoryState's fall as last set: how much of the band's hold is Falling (0 to 1), how long
+    // the fall has lasted, and how far into the dive they are (0 the tumble, 1 head first).
+    float m_fall = 0.f;
+    float m_fallSeconds = 0.f;
+    float m_dive = 0.f;
     std::array<std::vector<Stroke>, 4> m_strokes;       // per limb
     std::array<size_t, 4> m_strokeCursor{};
     std::array<KitPiece, 10> m_kit;                     // by DrumPiece

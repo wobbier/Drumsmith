@@ -50,6 +50,8 @@ public:
     // The hour of the procedural sky the shot on screen asks for (a story shot tagged
     // "sky<hour>"), or -1: VenueShow puts the sky behind the venue while it holds.
     float ShotSky() const { return m_shotSky; }
+    // How much of a day the scene is under (0 a night, 1 broad daylight): daylight takes less bloom.
+    void SetDaylight( float inDay ) { m_daylight = inDay; }
     // What a look that takes the colour out leaves in (set every frame): x reds, y blues (0 none,
     // 1 all), z how far the reds reach into orange and yellow. A story shot tagged "lights"
     // keeps all three whatever this says.
@@ -311,6 +313,7 @@ private:
     Vector3 m_keepTarget = Vector3( 0.f, 0.f, 0.f );   // SetColorKeep
     Vector3 m_keep = Vector3( 0.f, 0.f, 0.f );
     bool m_shotLights = false; // the shot on screen is tagged "lights"
+    float m_daylight = 0.f;
     float m_shotSky = -1.f;    // the shot on screen is tagged "sky<hour>" (-1: it isn't)
     bool m_keptLights = false; // and was when the grade was last applied
     // A big moment's hero shot (OnBigMoment), from m_bigStart until m_bigEnd.

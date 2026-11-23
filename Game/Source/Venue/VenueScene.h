@@ -50,6 +50,8 @@ public:
         std::vector<EntityHandle> Story;
         // Entities with a VenueBeat marker.
         std::vector<EntityHandle> Beats;
+        // Entities with a VenueAim marker.
+        std::vector<EntityHandle> Aims;
         // The scene lights itself with a directional (a sun or moon of its own).
         bool HasDirectional = false;
         int Spots = 0;

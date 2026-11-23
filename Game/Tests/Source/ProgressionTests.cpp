@@ -708,7 +708,7 @@ namespace
             { "Id": "show", "Name": "The Show", "Venue": "Road", "Continuous": true, "OneSitting": true,
               "Songs": [ { "Artist": "Lorde", "Title": "Royals", "Flags": [ "crash" ], "Cue": "last_note",
                            "Moments": [ { "Cue": "start", "Flags": [ "open" ] }, { "Cue": "section:verse", "Flags": [ "cop" ] }, { "Cue": "at:0.5" } ] },
-                         { "Artist": "Jet", "Title": "Are You Gonna Be My Girl", "Venue": "Hell", "HighwayRests": true,
+                         { "Artist": "Jet", "Title": "Are You Gonna Be My Girl", "Venue": "Hell",
                            "Moments": [ { "Cue": "at:0.4", "Flags": [ "fell", "open" ] } ] },
                          { "Artist": "Queen", "Title": "We Will Rock You" } ] }
         ])" );
@@ -735,8 +735,6 @@ TEST_CASE( "Story: a proposed set loads apart from the campaign, with its show's
     CHECK( set->Songs[0].Moments[1].Flags == std::vector<std::string>{ "cop" } );
     CHECK( set->Songs[0].Venue.empty() );
     CHECK( set->Songs[1].Venue == "Hell" );
-    CHECK( set->Songs[1].HighwayRests );
-    CHECK_FALSE( set->Songs[0].HighwayRests );
 }
 
 
@@ -788,7 +786,7 @@ TEST_CASE( "Story: a continuous show hands each song to the next in place, at it
     // A moment's flag already set stays set; only the new one lands at the moment.
     REQUIRE( second.Moments.size() == 1 );
     CHECK( second.Moments[0].Flags == std::set<std::string>{ "fell" } );
-    CHECK( session.CurrentStorySong()->HighwayRests );
+    CHECK( session.CurrentStorySong()->Venue == "Hell" );
 
     // Back to the set's venue for a song with none of its own; nothing after the last.
     CHECK( session.Advance() == 9 );

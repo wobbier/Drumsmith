@@ -63,6 +63,12 @@ ME_REFLECT_BEGIN( VenueBeat )
     ME_FIELD( Sharp ).Tooltip( "Out at once on the beat and straight back, with no gathering before the next: a blip, like a heart monitor's trace" );
 ME_REFLECT_END()
 
+ME_REFLECT_BEGIN( VenueAim )
+    ME_FIELD( Target ).Tooltip( "The point the entity's local +Z is held on, in the venue's space (metres from the venue's origin)" );
+    ME_FIELD( Wander ).Range( 0.f, 20.f ).Tooltip( "How far from the point the aim strays, in metres: a hand-held searchlight. 0 holds it dead on the point" );
+    ME_FIELD( Seconds ).Range( 0.2f, 30.f ).Tooltip( "Roughly how long one drift across the point takes" );
+ME_REFLECT_END()
+
 ME_REFLECT_BEGIN( VenueStory )
     ME_FIELD( Flag ).Tooltip( "The story flag (Design/Story-Mode-Setlists.json StateFlags) this entity follows" );
     ME_FIELD( WhenSet ).Tooltip( "On: shown once the flag is set. Off: shown until it is set (the thing that moves away)" );

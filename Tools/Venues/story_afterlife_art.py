@@ -5,6 +5,7 @@ own copies under Assets/Venues/<venue>/Models/Set and /Textures, so a venue stan
 A prop function returns the model's asset path; model() places it, with mat() to override its
 material (a glow, see-through, additive light).
 """
+import json
 import math
 import os
 import random
@@ -106,6 +107,11 @@ def _draw(name, path):
             d = math.hypot(x - S / 2, y - S / 2) / (S / 2)
             a = (1 - smooth(0.15, 1.0, d)) * smooth(0.2, 0.75, n.at(x, y) + 0.35 * (1 - d))
             return (1, 1, 1, a)
+    elif name == 'Earth':
+        S = EARTH_PIXELS
+
+        def f(x, y):
+            return earth_at(x + 0.5, y + 0.5)[0]
     elif name == 'Glow':
         def f(x, y):
             d = math.hypot(x - S / 2 + 0.5, y - S / 2 + 0.5) / (S / 2)
@@ -276,7 +282,7 @@ def fire_fx(s, parent, venue, name, pos, size=1.0, smoke=True):
     """Flames, sparks and (smoke) a column of black smoke at pos."""
     particles(s, parent, name + ' flames', pos, Shape='Cone', ConeAngle=14, ShapeRadius=0.45 * size, Lifetime=[0.5, 1.1], Speed=[1.2 * size, 3.0 * size],
               Size=[0.5 * size, 1.1 * size], EndSize=0.25, StartColor=[1.0, 0.75, 0.25], StartColor2=[1.0, 0.45, 0.08], EndColor=[0.7, 0.08, 0.01],
-              StartAlpha=0.9, EndAlpha=0.0, FadeIn=0.12, Intensity=4.0, Gravity=-0.35, Drag=0.4, NoiseStrength=0.9, NoiseFrequency=1.4,
+              StartAlpha=0.9, EndAlpha=0.0, FadeIn=0.12, Intensity=2.6, Gravity=-0.35, Drag=0.4, NoiseStrength=0.9, NoiseFrequency=1.4,
               Blend='Additive', EmissionRate=38, MaxParticles=90, Texture=tex(venue, 'Puff'))
     particles(s, parent, name + ' sparks', pos, Shape='Cone', ConeAngle=30, ShapeRadius=0.4 * size, Lifetime=[1.2, 3.0], Speed=[2.0, 6.0],
               Size=[0.03, 0.07], EndSize=0.4, StartColor=[1.0, 0.8, 0.35], StartColor2=[1.0, 0.5, 0.1], EndColor=[0.8, 0.15, 0.02], Intensity=5.0,
@@ -404,22 +410,46 @@ def patrol_cruiser(s, parent, name='Body', door_open=False):
     return e
 
 
-def car(venue, ink):
-    """A saloon facing +z in one of the palette's colours (traffic)."""
-    def build(m):
-        m.box((0, 0.6, 0), (1.8, 0.5, 4.4), ink)
-        m.box((0, 0.92, 1.55), (1.7, 0.18, 1.2), ink, taper=0.9)
-        m.box((0, 0.92, -1.7), (1.7, 0.18, 0.9), ink, taper=0.9)
-        m.box((0, 1.2, -0.2), (1.6, 0.5, 2.1), 'glass', taper=0.8)
-        m.box((0, 1.47, -0.2), (1.3, 0.05, 1.6), ink)
-        m.box((0, 0.42, 2.22), (1.85, 0.16, 0.1), 'steel_dark')
-        m.box((0, 0.42, -2.22), (1.85, 0.16, 0.1), 'steel_dark')
-        for x in (-0.88, 0.88):
-            for z in (-1.4, 1.4):
-                _wheel(m, (x, 0.33, z), 0.33, 0.22)
-            m.box((x * 0.7, 0.68, 2.21), (0.34, 0.14, 0.04), 'lamp')
-            m.box((x * 0.7, 0.7, -2.21), (0.34, 0.12, 0.04), 'red_lamp')
-    return prop(venue, 'Car_' + ink, build)
+# The highway fleet (Assets/Models/Vehicles, exported from Art/Vehicles by export_vehicles.py): the
+# traffic (Caprice, Civic, Corvette, Caravan, C10), the police (TrailDuster, Ranger) and the police
+# helicopters (JetRanger, AS350, each with a Rotor and a TailRotor model to spin). Each faces +z
+# with its wheels or skids on y = 0 and the driver's side at -x. The export writes where each
+# one's lamps, beacons, steering wheel and rotor hubs are: VEHICLES[kind], the +x side's for a pair.
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'story_vehicles.json'), encoding='utf-8') as _f:
+    VEHICLES = json.load(_f)
+TRAFFIC = ('Caprice', 'Civic', 'Corvette', 'Caravan', 'C10')
+
+
+def vehicle(s, parent, kind, name='Body'):
+    """One of the fleet's models under parent (kind: a VEHICLES key, or a helicopter's with Rotor
+    or TailRotor after it): drawn by the Model itself, a part for each material."""
+    e = s.entity(name, parent)
+    e.add({'Type': 'Model', 'ModelPath': f'Assets/Models/Vehicles/{kind}.fbx', 'Compact': True})
+    return e
+
+
+def lamp(kind, which):
+    """Where kind's Headlamp or TailLamp is on its +x side (mirror x for the other)."""
+    facts = VEHICLES[kind]
+    if which in facts:
+        return tuple(facts[which])
+    # The Corvette's headlamps are folded away: light it from where they would stand, over the
+    # indicators.
+    x, y, z = facts['Indicator']
+    return (x, y + 0.14, z)
+
+
+def vehicle_lamps(s, parent, venue, kind, head=1.5, tail=1.0, hazard=False):
+    """The glare on kind's four lamps (its lenses glow on their own): the level of each pair, 0 to
+    leave one out. hazard: the tail pair amber."""
+    hx, hy, hz = lamp(kind, 'Headlamp')
+    tx, ty, tz = lamp(kind, 'TailLamp')
+    for side in (-1, 1):
+        if head > 0:
+            glow_card(s, parent, venue, 'Headlight glare', (side * hx, hy, hz + 0.05), 0.5, (1.0, 0.95, 0.8), head)
+        if tail > 0:
+            glow_card(s, parent, venue, 'Hazard glare' if hazard else 'Tail lamp glare', (side * tx, ty, tz - 0.04), 0.34,
+                      (1.0, 0.5, 0.05) if hazard else (1.0, 0.05, 0.05), tail, (0, 180, 0))
 
 
 def semi(venue):
@@ -436,25 +466,6 @@ def semi(venue):
                 _wheel(m, (x, 0.55, z), w=0.7)
             m.box((x, 1.0, -8.74), (0.3, 0.16, 0.04), 'red_lamp')
     return prop(venue, 'Semi', build)
-
-
-def helicopter(venue):
-    """A police helicopter, nose to +z, the rotor hub at (0, 1.5, 0) (the generator spins the blades)."""
-    def build(m):
-        m.blob((0, 0, 0.3), 1.0, 'navy', 1, 0.0, 1.0, 0, (0.95, 1.0, 1.9))
-        m.blob((0, 0.15, 1.5), 0.62, 'glass', 1, 0.0, 1.0, 0, (1.0, 0.85, 0.9))
-        m.tube([(0, 0.4, -1.2), (0, 0.6, -5.2)], [0.36, 0.12], 'navy', 6)
-        m.box((0, 1.1, -5.2), (0.08, 1.3, 0.7), 'white', taper=0.6)
-        m.box((0, 0.75, -3.0), (2.2, 0.06, 0.45), 'white')
-        m.lathe((0, 1.0, 0), [(0.14, 0.0), (0.1, 0.5)], 'steel_dark', 6)
-        for x in (-0.9, 0.9):
-            m.tube([(x, -1.25, -1.2), (x, -1.25, 1.6)], 0.05, 'steel', 5)
-            for z in (-0.7, 1.0):
-                m.tube([(x * 0.6, -0.8, z), (x, -1.25, z)], 0.04, 'steel', 4)
-        m.box((0.97, 0.0, 0.2), (0.03, 0.5, 1.6), 'white')
-        m.box((-0.97, 0.0, 0.2), (0.03, 0.5, 1.6), 'white')
-        m.lathe((0, -1.0, 1.4), [(0.22, 0.0), (0.26, -0.3), (0.0, -0.3)], 'steel_dark', 8)
-    return prop(venue, 'Helicopter', build)
 
 
 def overpass(venue, half=22.0):
@@ -513,29 +524,226 @@ def guardrail_torn(venue):
     return prop(venue, 'GuardrailTorn', build)
 
 
-def _pine(m, at, h, seed):
-    x, y, z = at
-    m.tube([(x, y, z), (x, y + h * 0.3, z)], [0.16 * h / 8, 0.12 * h / 8], 'bark', 5, caps=False)
-    for k in range(4):
-        y0 = y + h * (0.18 + 0.2 * k)
-        r = h * (0.26 - 0.05 * k)
-        m.lathe((x, y0, z), [(r, 0), (r * 0.25, h * 0.2), (0.0, h * 0.34)], 'pine' if (k + seed) % 2 else 'pine_dark', 6)
+# The MitchTree recipes (Engine/Assets/Trees) a roadside is planted with: (name, the engine's recipe,
+# seed, how often it is picked). Conifers mostly: this was a wall of pines.
+ROAD_TREES = (('RoadPineA', 'Pine', 11, 3), ('RoadPineB', 'Pine', 5, 3), ('RoadSpruce', 'Presets/Spruce', 2, 3), ('RoadMaple', 'Maple', 21, 2),
+              ('RoadBirch', 'Presets/Birch', 3, 1), ('RoadOak', 'Presets/Oak', 7, 2))
+_TREE_HEIGHT = {}       # a recipe's asset path -> its trunk's height at scale 1, metres
+TREE_PARTS = ('MitchTree#0/@Bark#0', 'MitchTree#0/@Leaves#0')     # a grown tree's parts in a compact Model
 
 
-def treeline(venue, name='Treeline', z0=-200.0, z1=200.0, near=24.0, far=70.0, count=120, seed=5, period=None):
-    """Pines both sides of the road. period: the pattern repeats every period metres along z."""
+def tree(venue, name, source, seed):
+    """A MitchTree recipe in the venue (Engine/Docs/MitchTree.md): one of the engine's with its own
+    seed, and a fuller crown (the engine's are first drafts, thin enough to see through: more and
+    bigger leaf cards, and some along the limbs). A recipe is a model path: the tree is grown when
+    it loads. Returns its asset path."""
+    with open(os.path.join(ROOT, 'Engine', 'Assets', 'Trees', source + '.mtree')) as f:
+        recipe = json.load(f)
+    recipe['Name'], recipe['Seed'] = name, seed
+    leaves = recipe['Leaves']
+    broad = leaves['Kind'] == 'Broadleaf'
+    leaves['PerStem'] = round(leaves['PerStem'] * (2.2 if broad else 1.5))
+    leaves['Size'] = round(leaves['Size'] * (1.7 if broad else 1.3), 3)
+    leaves['ParentCoverage'] = max(leaves['ParentCoverage'], 0.4 if broad else 0.6)
+    save_bytes(os.path.join(ROOT, 'Assets', 'Venues', venue, 'Trees', name + '.mtree'), (json.dumps(recipe, indent=4) + '\n').encode())
+    _TREE_HEIGHT[f'Assets/Venues/{venue}/Trees/{name}.mtree'] = recipe['Trunk']['Height']
+    return f'Assets/Venues/{venue}/Trees/{name}.mtree'
+
+
+def plant(s, parent, name, path, pos, yaw=0.0, scale=1.0, shadows=False):
+    """A tree (a .mtree recipe's path) standing at pos: one entity, its bark and leaves the Model's
+    own parts."""
+    e = s.entity(name, parent, pos, (0, yaw, 0), (scale, scale, scale))
+    comp = {'Type': 'Model', 'ModelPath': path, 'Compact': True}
+    if not shadows:
+        comp['Parts'] = {key: {'CastShadows': False} for key in TREE_PARTS}
+    e.add(comp)
+    return e
+
+
+def plant_roadside(s, parent, venue, spots, seed=5, name='Tree', shadows=False, tall=(8.0, 13.0)):
+    """Trees of the roadside's kinds at spots [(x, y, z)], each turned its own way and between
+    tall[0] and tall[1] metres high (the recipes grow taller than that: a crane or a helicopter
+    shot looks over a roadside's trees, and must not find itself in one's crown)."""
+    kinds = [tree(venue, n, source, sd) for n, source, sd, _ in ROAD_TREES]
+    weights = [w for _, _, _, w in ROAD_TREES]
+    rng = random.Random(seed)
+    for i, at in enumerate(spots):
+        kind = rng.choices(kinds, weights)[0]
+        plant(s, parent, f'{name} {i + 1}', kind, at, round(rng.uniform(0, 360), 1), round(rng.uniform(*tall) / _TREE_HEIGHT[kind], 3), shadows)
+
+
+def roadside_spots(z0, z1, near, far, count, seed, period=None, y=-0.3, gap=7.0):
+    """Where a roadside's trees stand, both sides of a road along z: between near and far metres
+    out from its middle, more of them close to the road, none within gap metres of another.
+    period: the pattern is one period long and repeats along z (count is then the trees in one)."""
+    rng = random.Random(seed)
+    span = period or (z1 - z0)
+    base, tries = [], 0
+    while len(base) < count and tries < count * 60:
+        tries += 1
+        x, z = rng.choice((-1, 1)) * (near + (far - near) * rng.random() ** 1.6), rng.random() * span
+
+        def apart(o):
+            dz = abs(o[1] - z)
+            return math.hypot(o[0] - x, min(dz, span - dz) if period else dz)
+        if all(apart(o) >= gap for o in base):
+            base.append((x, z))
+    copies = int(round((z1 - z0) / period)) if period else 1
+    return [(round(x, 2), y, round(z0 + k * span + z, 2)) for k in range(copies) for x, z in base]
+
+
+# ---- the Earth from above -------------------------------------------------------------------
+# The country the highway runs through, for the daylight Free Bird rises into: fields, woods and
+# hedges drawn into one texture that repeats every EARTH_TILE metres, and the same function says
+# where the woods stand (earth_woods), so that crowns can be stood on them.
+EARTH_TILE, EARTH_PIXELS = 1536.0, 512
+BELT = (22.0, 84.0)             # the trees along the highway: this far out from its middle, both sides
+_EARTH = {}
+FIELDS = ((0.085, 0.15, 0.05), (0.11, 0.17, 0.06), (0.06, 0.125, 0.045), (0.27, 0.23, 0.1), (0.15, 0.105, 0.065), (0.2, 0.2, 0.085),
+          (0.1, 0.16, 0.055), (0.075, 0.135, 0.05))
+WOODS = (0.028, 0.062, 0.03)
+
+
+def earth_at(px, py):
+    """The ground at a pixel of the Earth texture: (colour, how wooded 0..1)."""
+    S, N = EARTH_PIXELS, 11
+    if not _EARTH:
+        _EARTH.update(n=Tile(S, 301, 8, 5), big=Tile(S, 302, 3, 3), fine=Tile(S, 304, 128, 2),
+                      pts=[[(_hash2(i, j, 303, 1), _hash2(i, j, 303, 2)) for i in range(N)] for j in range(N)])
+    n, big = _EARTH['n'].at(px, py), _EARTH['big'].at(px, py)
+    # The fields: Voronoi plots, each its own crop, hedges where two meet.
+    u, v = px * N / S, py * N / S
+    ci, cj = int(u), int(v)
+    d1 = d2 = 9.0
+    plot = (0, 0)
+    for dj in (-1, 0, 1):
+        for di in (-1, 0, 1):
+            qx, qy = _EARTH['pts'][(cj + dj) % N][(ci + di) % N]
+            d = math.hypot(ci + di + qx - u, cj + dj + qy - v)
+            if d < d1:
+                d1, d2, plot = d, d1, ((ci + di) % N, (cj + dj) % N)
+            elif d < d2:
+                d2 = d
+    kind = _hash2(plot[0], plot[1], 305, 0)
+    c = FIELDS[int(kind * len(FIELDS)) % len(FIELDS)]
+    # Rows across a plot (the plough's or the crop's), each plot at its own angle.
+    a = _hash2(plot[0], plot[1], 305, 1) * math.pi
+    rows = math.sin((px * math.cos(a) + py * math.sin(a)) * 1.9)
+    c = mul(c, 0.93 + 0.07 * rows + 0.3 * (n - 0.5) + 0.1 * (_EARTH['fine'].at(px, py) - 0.5))
+    hedge = 1 - smooth(0.02, 0.05, d2 - d1)
+    # The woods: big soft shapes with ragged edges, and the belt along the highway (x = 0, and
+    # again a tile away).
+    metres = (px / S) * EARTH_TILE
+    off = min(metres, EARTH_TILE - metres)
+    belt = smooth(BELT[0] - 4, BELT[0] + 4, off + 10 * (n - 0.5)) * (1 - smooth(BELT[1] - 8, BELT[1] + 8, off + 30 * (n - 0.5)))
+    woods = max(smooth(0.5, 0.56, big * 0.72 + n * 0.28), belt)
+    # The verge: mown grass between the road and the trees.
+    verge = 1 - smooth(BELT[0] - 6, BELT[0] + 2, off)
+    c = mix(c, (0.07, 0.115, 0.045), verge)
+    c = mix(c, WOODS, max(woods, hedge * 0.85 * (1 - verge)))
+    if woods > 0.5:
+        c = mul(c, 0.8 + 0.5 * _EARTH['fine'].at(px + 91, py + 37))
+    return c, woods
+
+
+def _hash2(*k):
+    from story_afterlife_mesh import _hash
+    return _hash(*k)
+
+
+def earth_woods(x, z):
+    """How wooded the Earth is at (x, z) metres from the crash site, 0..1 (the texture's own woods)."""
+    S = EARTH_PIXELS
+    return earth_at((x / EARTH_TILE % 1.0) * S, ((1 - z / EARTH_TILE) % 1.0) * S)[1]
+
+
+def earth_height(x, z, reach):
+    """The Earth's ground: level along the highway (it runs along z at x = 0), rolling away from
+    it, and hills standing all round the horizon (reach metres out)."""
+    off = smooth(120.0, 520.0, abs(x))
+    roll = 22.0 * (fbm3(x * 0.0021, 0.0, z * 0.0021, 311, 3) - 0.5) + 6.0 * (fbm3(x * 0.009, 0.0, z * 0.009, 312, 2) - 0.5)
+    r = math.hypot(x, z)
+    rim = smooth(reach * 0.5, reach * 0.95, r)
+    hills = rim * rim * (70.0 + 260.0 * fbm3(x * 0.0011, 0.0, z * 0.0011, 313, 3))
+    return -0.3 + off * (roll + hills)
+
+
+def earth_ground(venue, reach=3072.0, gap=20.0):
+    """The Earth's ground out to reach metres, in two halves either side of the highway's gap
+    (the road is its own mesh, so that nothing lies on top of anything else far off)."""
+    def build(m):
+        for side in (-1, 1):
+            # (Finer near the road, where the rolling starts.)
+            xs = [gap, 60.0, 120.0, 200.0, 300.0, 420.0, 560.0] + [560.0 + (reach - 560.0) * k / 34 for k in range(1, 35)]
+            nz = 84
+            for i in range(len(xs) - 1):
+                for j in range(nz):
+                    z0, z1 = -reach + 2 * reach * j / nz, -reach + 2 * reach * (j + 1) / nz
+                    q = [(side * xa, earth_height(side * xa, zz, reach), zz) for xa, zz in ((xs[i], z0), (xs[i], z1), (xs[i + 1], z1), (xs[i + 1], z0))]
+                    if side < 0:
+                        q.reverse()
+                    m._quad(q, None, [(p[0] / EARTH_TILE, p[2] / EARTH_TILE) for p in q])
+    return prop(venue, 'EarthGround', build, 'Earth', smooth_=True)
+
+
+def earth_road(venue, near=70.0, far=2900.0, half=14.0, gap=20.0, rails_to=900.0):
+    """The highway beyond the crash site's own stretch, both ways: asphalt, its lines and dashes,
+    the gravel shoulders and the rails, every strip beside the next (never on top of it)."""
+    def build(m):
+        def strip(x0, x1, z0, z1, ink, y=0.0):
+            m.face([(x0, y, z0), (x0, y, z1), (x1, y, z1), (x1, y, z0)], ink, outward=(0, 1, 0))
+        # Across the road: (from x, to x, what).
+        bands = [(-gap, -half, 'grille'), (-half, -half + 0.3, 'soot'), (-half + 0.3, -half + 0.45, 'paper'), (-half + 0.45, -5.47, 'soot'), (-5.47, -5.33, 'dash'),
+                 (-5.33, -0.2, 'soot'), (-0.2, -0.08, 'brass'), (-0.08, 0.08, 'soot'), (0.08, 0.2, 'brass'), (0.2, 5.33, 'soot'), (5.33, 5.47, 'dash'),
+                 (5.47, half - 0.45, 'soot'), (half - 0.45, half - 0.3, 'paper'), (half - 0.3, half, 'soot'), (half, gap, 'grille')]
+        for end in (-1, 1):
+            for x0, x1, ink in bands:
+                if ink != 'dash':
+                    strip(x0, x1, end * near, end * far, ink)
+                    continue
+                # A dash every 12 m for as far as one can be told from the next, then plain.
+                z, told = near, 700.0
+                while z < told:
+                    strip(x0, x1, end * z, end * (z + 3.0), 'paper')
+                    strip(x0, x1, end * (z + 3.0), end * (z + 12.0), 'soot')
+                    z += 12.0
+                strip(x0, x1, end * z, end * far, 'soot')
+            # The gravel's edge, down to the ground, and the rails.
+            for side in (-1, 1):
+                m.face([(side * gap, 0.0, end * near), (side * gap, 0.0, end * far), (side * gap, -0.6, end * far), (side * gap, -0.6, end * near)], 'grille', outward=(side, 0, 0))
+                mid, long = end * (near + rails_to) / 2, rails_to - near
+                for y, d in ((0.62, 0.0), (0.52, 0.045), (0.72, 0.045)):
+                    m.box((side * (half + 1.2) + d, y, mid), (0.04, 0.11 if d == 0 else 0.09, long), 'rail')
+                for k in range(int(long / 4)):
+                    m.box((side * (half + 1.28), 0.38, end * (near + 2.0 + k * 4.0)), (0.1, 0.76, 0.14), 'post')
+    return prop(venue, 'EarthRoad', build)
+
+
+def earth_crowns(venue, reach=760.0, clear=170.0, spacing=15.0, seed=31):
+    """The woods' crowns, where earth_woods says there are woods (out to reach metres; beyond
+    that the ground's colour is enough): low lumps and a few conifers, one mesh, painted in
+    greys for the material's green to colour. clear: the stretch by the crash site (along z)
+    where the roadside's real trees stand instead."""
     def build(m):
         rng = random.Random(seed)
-        base = [(rng.choice((-1, 1)) * rng.uniform(near, far), rng.random(), rng.uniform(6, 15)) for _ in range(count)]
-        if period:
-            n = int((z1 - z0) / period)
-            for k in range(n):
-                for i, (x, t, h) in enumerate(base[:count // n]):
-                    _pine(m, (x, -0.3, z0 + (k + t) * period), h, i)
-        else:
-            for i, (x, t, h) in enumerate(base):
-                _pine(m, (x, -0.3, z0 + t * (z1 - z0)), h, i)
-    return prop(venue, name, build)
+        n = int(reach / spacing)
+        for j in range(-n, n + 1):
+            for i in range(-n, n + 1):
+                x, z = (i + rng.uniform(-0.4, 0.4)) * spacing, (j + rng.uniform(-0.4, 0.4)) * spacing
+                size, pick, shade = rng.uniform(0.75, 1.3), rng.random(), rng.choice(('white', 'marble_shade', 'marble_shade', 'rail'))
+                if math.hypot(x, z) > reach or abs(x) < BELT[0] - 1 or (abs(x) < BELT[1] + 12 and abs(z) < clear):
+                    continue
+                if earth_woods(x, z) < 0.6:
+                    continue
+                y = earth_height(x, z, 3072.0)
+                if pick < 0.3:
+                    h = 15.0 * size
+                    m.lathe((x, y + 1.5, z), [(h * 0.26, 0), (h * 0.1, h * 0.55), (0.0, h)], shade, 5)
+                else:
+                    r = 6.6 * size
+                    m.blob((x, y + r * 0.95, z), r, shade, 0, 0.35, 1.3, rng.randrange(999), (1.0, 0.85, 1.0))
+    return prop(venue, 'EarthCrowns', build)
 
 
 def sign_face(venue, which):
@@ -941,6 +1149,45 @@ def bats(venue, count=14, seed=3):
                 m.face([add(c, mul(fwd, sz * 0.5)), tip, add(c, mul(fwd, -sz * 0.4))], 'black', both=True)
                 m.face([add(c, mul(fwd, -sz * 0.4)), tip, add(tip, mul(fwd, -sz * 0.7))], 'wing_dark', both=True)
     return prop(venue, 'Bats', build)
+
+
+def road_break(venue, half_long=15.0, wide=2.3):
+    """The break in the road they fell through, seen from far below: the road's dark underside
+    and, just under it, the tear across it (along x) as a shape of its own to be given a glow: a
+    kinked fissure widest in the middle, thinner cracks forking off it. Two models about the
+    origin, both facing down."""
+    def under(m):
+        outer, sides = 26.0, 24
+        ring = [(outer * math.cos(2 * math.pi * i / sides), 0, outer * math.sin(2 * math.pi * i / sides)) for i in range(sides)]
+        m.face(ring, 'black', outward=(0, -1, 0))
+
+    def light(m):
+        rng = random.Random(77)
+
+        def run(x, z, course, length, width, depth):
+            """One crack from (x, z) along course: kinked lengths (a zigzag about the course, so
+            that it holds its line) thinning to a point, forking now and then."""
+            steps = max(2, int(length / 2.0))
+            heading = course + rng.uniform(-0.5, 0.5)
+            last = None
+            for n in range(steps + 1):
+                w = width * (1 - n / steps) ** 0.8
+                sx, sz = -math.sin(course), math.cos(course)
+                here = ((x - sx * w, -0.05 - 0.02 * depth, z - sz * w), (x + sx * w, -0.05 - 0.02 * depth, z + sz * w))
+                if last:
+                    m.face([last[0], last[1], here[1], here[0]], 'white', outward=(0, -1, 0))
+                last = here
+                if n == steps:
+                    break
+                if depth < 2 and n and rng.random() < (0.8 if depth == 0 else 0.45):
+                    side = rng.choice((-1, 1))
+                    run(x, z, course + side * rng.uniform(0.6, 1.2), length * (1 - n / steps) * rng.uniform(0.45, 0.8) + 2.0, w * rng.uniform(0.35, 0.6), depth + 1)
+                step = length / steps * rng.uniform(0.75, 1.25)
+                heading = course + rng.uniform(0.25, 0.7) * (-1 if heading > course else 1)
+                x, z = x + math.cos(heading) * step, z + math.sin(heading) * step
+        run(0.0, 0.0, 0.2, half_long, wide, 0)
+        run(0.0, 0.0, 0.2 + math.pi, half_long, wide, 0)
+    return prop(venue, 'RoadBreak', under), prop(venue, 'RoadBreakLight', light)
 
 
 SHAFT_PERIOD = 65.0

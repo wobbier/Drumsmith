@@ -213,6 +213,7 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
         if( entity->HasComponent<VenueAccent>() ) outMarkers.Accents.push_back( transform->Parent );
         if( entity->HasComponent<VenueStory>() ) outMarkers.Story.push_back( transform->Parent );
         if( entity->HasComponent<VenueBeat>() ) outMarkers.Beats.push_back( transform->Parent );
+        if( entity->HasComponent<VenueAim>() ) outMarkers.Aims.push_back( transform->Parent );
         if( VenueCrowdArea* area = entity->TryGetComponent<VenueCrowdArea>() )
         {
             areas.push_back( { area, transform } );

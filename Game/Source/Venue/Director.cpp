@@ -1971,8 +1971,10 @@ void Director::ApplyGrade( float inDeltaTime )
     post.Contrast = m_grade.Contrast;
     post.Temperature = m_grade.Temperature + m_whiteBalance;
     post.Tint = m_grade.Tint;
-    post.BloomIntensity = 0.12f * m_grade.Bloom;
-    post.BloomThreshold = m_grade.BloomThreshold;
+    // (In daylight most of the picture is past a night's threshold: only what is really bright
+    // glows, and less.)
+    post.BloomIntensity = 0.12f * m_grade.Bloom * ( 1.f - 0.6f * m_daylight );
+    post.BloomThreshold = m_grade.BloomThreshold + 0.6f * m_daylight;
     post.VignetteIntensity = m_grade.Vignette;
     post.ExposureCompensation = m_grade.Exposure + m_closeExposure + m_hunt;
     // A home video's standard definition: the venue renders that many lines tall and is scaled up
@@ -2667,6 +2669,20 @@ void Director::Update( double inSeconds, float inDeltaTime )
             up = Vector3::Up;
             fov = parts.size() >= 7 ? std::stof( parts[6] ) : 60.f;
             m_main->GetComponent<PostProcess>().DepthOfField = false;
+        }
+    }
+    // Looking nearly straight up or down, "up" says nothing about which way the top of the
+    // picture goes: the horizon is whatever the last centimetre of handheld sway or of a moving
+    // subject makes it, and the picture spins. Within about 25 degrees of vertical the top of
+    // the frame eases over to a fixed heading instead: the camera faces upstage and tips back
+    // (or forward), so straight overhead the crowd's side is the top of the picture.
+    {
+        const Vector3 ahead = ( target - eye ).Normalized();
+        const float steep = VenueTiming::Smooth( ( std::fabs( ahead.y ) - 0.9f ) / 0.07f );
+        if( steep > 0.f )
+        {
+            const Vector3 tipped( 0.f, 0.f, ahead.y > 0.f ? -1.f : 1.f );
+            up = ( up + ( tipped - up ) * steep ).Normalized();
         }
     }
     Transform& transform = m_main->GetComponent<Transform>();

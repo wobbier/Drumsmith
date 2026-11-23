@@ -190,6 +190,26 @@ public:
 ME_REGISTER_COMPONENT_FOLDER( VenueBeat, "Venue" )
 
 
+// Keeps its entity's local +Z on a point in the venue however its parents move
+// (VenueShow::UpdateAims): the searchlight slung under a helicopter that hovers and turns, held
+// on the stage. Put it on a Spot light, or on the parent of a lamp housing and its light. With
+// Wander the aim strays about the point and is pulled back, the way a hand-held light does.
+class VenueAim : public Component<VenueAim>
+{
+    ME_REFLECTABLE( VenueAim )
+public:
+    VenueAim() : Component( "VenueAim" ) {}
+    void Init() final {}
+    // The point it is held on, in the venue's space.
+    Vector3 Target = Vector3( 0.f, 0.f, 0.f );
+    // How far from the point the aim strays, in metres (0: dead on it).
+    float Wander = 0.f;
+    // Roughly how long one drift across the point takes.
+    float Seconds = 3.f;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueAim, "Venue" )
+
+
 class VenueCameraSpot
     : public Component<VenueCameraSpot>
 {

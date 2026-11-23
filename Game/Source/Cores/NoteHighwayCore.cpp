@@ -355,8 +355,13 @@ void NoteHighwayCore::SetupTrack( TrackData& inTrackData, int inTrackIndex, bool
     // first note needs to be read.
     m_songTimeMs = inContinue ? -std::max( 0.0, kShowReadMs - m_countInMs ) : -std::max( kLeadInMs, kCountdownMs - m_countInMs );
     m_isPaused = false;
-    m_highwayShown = 1.f;
-    m_venueShow.SetHighwayShown( 1.f );
+    // The highway fades in for the song's first note (UpdateHighwayRests); a show's next song
+    // finds it as the last one left it.
+    if( !inContinue )
+    {
+        m_highwayShown = 0.f;
+        m_venueShow.SetHighwayShown( 0.f );
+    }
     if( RmlUiCore* ui = GetEngine().RmlUi )
     {
         ui->ModelSetString( kModel, "track_title", inTrackData.m_trackName );
@@ -1114,11 +1119,11 @@ void NoteHighwayCore::HandOff()
 
 void NoteHighwayCore::UpdateHighwayRests( float inDeltaTime )
 {
-    // A story song that asks for it (ProgressionStorySong::HighwayRests): through a long rest the
-    // highway melts away, and it's whole again a full highway's travel before the next note.
-    const ProgressionStorySong* song = GigSession::GetInstance().CurrentStorySong();
+    // Every song: the highway comes up just before the drums do, melts away through a long rest and
+    // once the last note has gone, and is whole again a full highway's travel before the next note.
+    // A practice lesson and the calibration keep it up.
     float target = 1.f;
-    if( song && song->HighwayRests && m_trackData && !m_trackData->m_practice && GigSession::GetInstance().CurrentTrack() == m_trackIndex )
+    if( m_trackData && !m_trackData->m_practice && !m_trackData->m_calibration )
     {
         const double now = VisualTimeMs();
         double previous = -1e12;
@@ -1129,8 +1134,10 @@ void NoteHighwayCore::UpdateHighwayRests( float inDeltaTime )
             if( after != lane.Notes.end() ) next = std::min( next, after->TimeMs );
             if( after != lane.Notes.begin() ) previous = std::max( previous, std::prev( after )->TimeMs );
         }
-        const bool longRest = next - std::max( previous, 0.0 ) >= kRestMinMs || ( previous < 0.0 && next >= kRestMinMs );
-        if( longRest && next - now > kRestReturnMs + kRestFadeSeconds * 1000.0 && now - previous > 1000.0 )
+        // Before the first note it waits however short the intro is; after the last it goes for good.
+        const bool opening = previous < -1e11;
+        const bool longRest = opening || next - previous >= kRestMinMs;
+        if( longRest && next - now > kRestReturnMs + kRestFadeSeconds * 1000.0 && ( opening || now - previous > kRestLeaveMs ) )
         {
             target = 0.f;
         }

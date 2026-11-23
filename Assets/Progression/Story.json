@@ -1134,7 +1134,8 @@
        "Flags": [
         "ghost_hand",
         "band_ghost",
-        "band_down"
+        "band_down",
+        "sky_21.5"
        ]
       },
       {
@@ -1166,32 +1167,37 @@
        "Cue": "section:verse_1|at:0.13",
        "Flags": [
         "ascent",
-        "band_aloft"
+        "band_aloft",
+        "sky_21.5"
        ]
       },
       {
        "Cue": "section:verse_1+18|at:0.165",
        "Flags": [
-        "clouds"
+        "clouds",
+        "sky_28.5"
        ]
       },
       {
        "Cue": "section:chorus_1|at:0.23",
        "Flags": [
-        "heavens_light"
+        "heavens_light",
+        "sky_31"
        ]
       },
       {
        "Cue": "section:chorus_2|at:0.435",
        "Flags": [
-        "gates"
+        "gates",
+        "sky_34"
        ]
       },
       {
        "Cue": "section:fast_part-3.2|at:0.5-3.2",
        "Flags": [
         "denied",
-        "band_falling"
+        "band_falling",
+        "sky_36"
        ],
        "Caption": "Denied.",
        "CaptionSeconds": 2.5
@@ -1199,7 +1205,9 @@
       {
        "Cue": "section:fast_part|at:0.5",
        "Flags": [
-        "fell"
+        "fell",
+        "sky_21.5",
+        "sky_off"
        ]
       },
       {
@@ -1509,8 +1517,7 @@
        ]
       }
      ],
-     "Venue": "StoryHeaven",
-     "HighwayRests": true
+     "Venue": "StoryHeaven"
     },
     {
      "Artist": "Foo Fighters",

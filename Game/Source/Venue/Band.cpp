@@ -7,6 +7,7 @@
 #include "Venue/VenueTiming.h"
 #include "Components/Transform.h"
 #include "Components/Graphics/Mesh.h"
+#include "Components/Graphics/Model.h"
 #include "Graphics/Material.h"
 #include "Materials/StandardMaterial.h"
 #include "Core/CommandLine.h"
@@ -45,6 +46,21 @@ namespace
     const glm::vec3 kX( 1.f, 0.f, 0.f );
     const glm::vec3 kY( 0.f, 1.f, 0.f );
     const glm::vec3 kZ( 0.f, 0.f, 1.f );
+
+    // How far forward each member pitches in a fall's dive, degrees about their hips (90 is
+    // flat out face down, past it head first). The drummer stays on the throne; the keyboard
+    // player leans out over the keys, which go with them.
+    float DivePitch( int inMember )
+    {
+        switch( inMember )
+        {
+        case VenueData::Guitar: return 118.f;
+        case VenueData::Bass: return 128.f;
+        case VenueData::Vocals: return 136.f;
+        case VenueData::Keys: return 62.f;
+        default: return 0.f;
+        }
+    }
 
     // A beat-locked pulse: 1 on the beat, easing to 0 over it.
     float Pulse( double inBeat, double inPower = 2.0 )
@@ -193,6 +209,9 @@ void Band::Clear()
     m_endTime = 1e9f;
     m_ghosted.clear();
     m_ghost = 0.f;
+    m_fall = 0.f;
+    m_fallSeconds = 0.f;
+    m_dive = 0.f;
 }
 
 
@@ -267,6 +286,14 @@ void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vecto
 void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo, float inToSeconds, float inBlend, float inGhost )
 {
     const float blend = std::clamp( inBlend, 0.f, 1.f );
+    // Out of hiding (or into it) is a pop, not a grow.
+    const bool pop = inFrom == StoryPose::Hidden || inTo == StoryPose::Hidden;
+    const float u = pop ? 1.f : blend;
+    // The fall: how much of the hold it is, and how long it has lasted. The tumble comes first;
+    // from a couple of seconds in they straighten out into a dive.
+    m_fall = ( inTo == StoryPose::Falling ? u : 0.f ) + ( inFrom == StoryPose::Falling ? 1.f - u : 0.f );
+    m_fallSeconds = std::max( inTo == StoryPose::Falling ? inToSeconds : inFrom == StoryPose::Falling ? inFromSeconds : 0.f, 0.f );
+    m_dive = m_fall * VenueTiming::Smooth( ( m_fallSeconds - 2.f ) / 7.f );
     for( int index = 0; index < VenueData::MemberCount; ++index )
     {
         Member& member = m_members[index];
@@ -274,27 +301,59 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
         {
             continue;
         }
-        Vector3 fromPosition, fromRotation, toPosition, toRotation;
-        float fromScale = 1.f, toScale = 1.f;
-        StoryPlacement( index, inFrom, inFromSeconds, fromPosition, fromRotation, fromScale );
-        StoryPlacement( index, inTo, inToSeconds, toPosition, toRotation, toScale );
-        // Out of hiding (or into it) is a pop, not a grow.
-        const bool pop = inFrom == StoryPose::Hidden || inTo == StoryPose::Hidden;
-        const float u = pop ? 1.f : blend;
-        Transform& group = member.Group->GetComponent<Transform>();
-        group.SetPosition( fromPosition + ( toPosition - fromPosition ) * u );
-        group.SetRotation( fromRotation + ( toRotation - fromRotation ) * u );
-        const float scale = fromScale + ( toScale - fromScale ) * u;
-        group.SetScale( Vector3( scale, scale, scale ) );
+        // The dive pitches a member forward about their hips, each rocking a little in the air.
+        const float pitch = m_dive * ( DivePitch( index ) + ( DivePitch( index ) > 0.f ? 6.f * std::sin( m_fallSeconds * 0.5f + member.Phase ) : 0.f ) );
+        const auto place = [u, index, inFrom, inFromSeconds, inTo, inToSeconds, this]( Transform& ioTransform, bool inBackline, float inPitch ) {
+            Vector3 fromPosition, fromRotation, toPosition, toRotation;
+            float fromScale = 1.f, toScale = 1.f;
+            StoryPlacement( index, inFrom, inFromSeconds, fromPosition, fromRotation, fromScale, inBackline );
+            StoryPlacement( index, inTo, inToSeconds, toPosition, toRotation, toScale, inBackline );
+            const Vector3 position = fromPosition + ( toPosition - fromPosition ) * u;
+            const Vector3 rotation = fromRotation + ( toRotation - fromRotation ) * u;
+            const float scale = fromScale + ( toScale - fromScale ) * u;
+            ioTransform.SetScale( Vector3( scale, scale, scale ) );
+            if( inPitch == 0.f )
+            {
+                ioTransform.SetPosition( position );
+                ioTransform.SetRotation( rotation );
+                return;
+            }
+            const glm::quat upright = Quaternion::FromEulerDegrees( rotation ).InternalQuat;
+            const glm::quat dived = upright * Axis( inPitch, kX );
+            const glm::vec3 hips( 0.f, 1.f, 0.f );
+            ioTransform.SetPosition( Vector3( position.InternalVector + upright * hips - dived * hips ) );
+            ioTransform.SetRotation( Quaternion( dived ) );
+        };
+        place( member.Group->GetComponent<Transform>(), false, pitch );
         if( member.Backline )
         {
-            StoryPlacement( index, inFrom, inFromSeconds, fromPosition, fromRotation, fromScale, true );
-            StoryPlacement( index, inTo, inToSeconds, toPosition, toRotation, toScale, true );
-            Transform& backline = member.Backline->GetComponent<Transform>();
-            backline.SetPosition( fromPosition + ( toPosition - fromPosition ) * u );
-            backline.SetRotation( fromRotation + ( toRotation - fromRotation ) * u );
-            const float gear = fromScale + ( toScale - fromScale ) * u;
-            backline.SetScale( Vector3( gear, gear, gear ) );
+            // The keyboard dives with its player; the rest of the backline keeps level.
+            place( member.Backline->GetComponent<Transform>(), true, index == VenueData::Keys ? pitch : 0.f );
+        }
+        // In a fall the amps and wedges come loose: each drifts out from the band and about,
+        // turning over and over its own way. The mic stands are gone.
+        for( const Member::LoosePiece& piece : member.Loose )
+        {
+            if( !piece.Entity )
+            {
+                continue;
+            }
+            const float t = m_fallSeconds;
+            const float seed = piece.Seed;
+            glm::vec3 outward( piece.Rest.x, 0.f, piece.Rest.z );
+            outward = glm::dot( outward, outward ) > 1e-6f ? glm::normalize( outward ) : -kZ;
+            const glm::vec3 drift = outward * 0.9f + glm::vec3( 0.5f * std::sin( t * 0.37f + seed * 5.f ), 0.6f + 0.8f * std::sin( t * 0.29f + seed * 9.f ), 0.4f * std::cos( t * 0.23f + seed * 3.f ) );
+            const glm::vec3 axis = glm::normalize( glm::vec3( std::sin( seed * 7.f ), std::cos( seed * 11.f ), std::sin( seed * 13.f + 1.f ) ) + glm::vec3( 0.f, 0.f, 0.01f ) );
+            const float rate = 28.f + 30.f * ( 0.5f + 0.5f * std::sin( seed * 17.f ) );
+            const glm::quat spin = glm::angleAxis( rate * kDeg * t, axis );
+            Transform& loose = piece.Entity->GetComponent<Transform>();
+            loose.SetPosition( Vector3( piece.Rest.InternalVector + drift * m_fall ) );
+            loose.SetRotation( Quaternion( piece.Turn * glm::slerp( glm::quat( 1.f, 0.f, 0.f, 0.f ), spin, m_fall ) ) );
+        }
+        if( member.MicStand )
+        {
+            const float stand = std::max( 0.001f, 1.f - m_fall );
+            member.MicStand->GetComponent<Transform>().SetScale( Vector3( stand, stand, stand ) );
         }
     }
 
@@ -336,7 +395,7 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
         material->SetRenderMode( inGhost > 0.f || entry.Transparent ? Moonlight::RenderingMode::Transparent : Moonlight::RenderingMode::Opaque );
         standard->SetOpacity( entry.Opacity * ( 1.f - 0.3f * inGhost ) );
         // A faint glow all over; the rim carries the rest (more than this blooms the band into a blob in a dark scene).
-        standard->SetEmissiveColor( entry.Emissive + ( glow * 0.3f - entry.Emissive ) * inGhost );
+        standard->SetEmissiveColor( entry.Emissive + ( glow * 0.7f - entry.Emissive ) * inGhost );
         standard->SetRim( entry.Rim + ( 1.f - entry.Rim ) * inGhost );
     }
 }
@@ -345,21 +404,34 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
 bool Band::GatherGhosted( Transform& inRoot )
 {
     bool found = false;
+    const auto gather = [this, &found]( const SharedPtr<Moonlight::Material>& material ) {
+        StandardMaterial* standard = material ? dynamic_cast<StandardMaterial*>( material.get() ) : nullptr;
+        const bool known = std::any_of( m_ghosted.begin(), m_ghosted.end(), [&material]( const GhostedMaterial& entry ) { return entry.Material.lock() == material; } );
+        if( standard && !known )
+        {
+            m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent, standard->Rim } );
+            found = true;
+        }
+    };
     std::vector<Transform*> open = { &inRoot };
     while( !open.empty() )
     {
         Transform* at = open.back();
         open.pop_back();
         const EntityHandle& owner = at->Parent;
-        if( owner && owner->HasComponent<Mesh>() && owner->GetComponent<Mesh>().MeshMaterial )
+        if( owner && owner->HasComponent<Mesh>() )
         {
-            const SharedPtr<Moonlight::Material>& material = owner->GetComponent<Mesh>().MeshMaterial;
-            StandardMaterial* standard = dynamic_cast<StandardMaterial*>( material.get() );
-            const bool known = std::any_of( m_ghosted.begin(), m_ghosted.end(), [&material]( const GhostedMaterial& entry ) { return entry.Material.lock() == material; } );
-            if( standard && !known )
+            gather( owner->GetComponent<Mesh>().MeshMaterial );
+        }
+        // A compact model (the players themselves) keeps its meshes to itself, not on entities.
+        if( owner && owner->HasComponent<Model>() )
+        {
+            for( Model::RenderPart& part : owner->GetComponent<Model>().GetRenderParts() )
             {
-                m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent, standard->Rim } );
-                found = true;
+                if( part.Renderer )
+                {
+                    gather( part.Renderer->MeshMaterial );
+                }
             }
         }
         for( Transform* child : at->GetChildren() )
@@ -823,9 +895,17 @@ void Band::BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass )
     // An amp behind them.
     const float side = inBass ? 1.f : -1.f;
     Transform& floor = FloorOf( ioMember );
-    inKit.Box( Vector3( side * 0.4f, 0.55f, -1.5f ), Vector3( 0.9f, 1.1f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &floor );
-    inKit.Box( Vector3( side * 0.4f, 0.55f, -1.27f ), Vector3( 0.8f, 0.8f, 0.01f ), Vector3( 0.08f, 0.08f, 0.09f ), &floor );
-    inKit.Box( Vector3( side * 0.4f, 1.03f, -1.27f ), Vector3( 0.06f, 0.03f, 0.01f ), Vector3( 1.f, 0.1f, 0.05f ), &floor, Vector3( 2.f, 0.2f, 0.1f ) );
+    // One piece, about its middle: it comes loose and tumbles in a fall (SetStoryState).
+    const Vector3 ampAt( side * 0.4f, 0.55f, -1.5f );
+    EntityHandle amp = inKit.Group( "Amp", &floor, ampAt );
+    if( amp )
+    {
+        Transform& cabinet = amp->GetComponent<Transform>();
+        inKit.Box( Vector3( 0.f, 0.f, 0.f ), Vector3( 0.9f, 1.1f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &cabinet );
+        inKit.Box( Vector3( 0.f, 0.f, 0.23f ), Vector3( 0.8f, 0.8f, 0.01f ), Vector3( 0.08f, 0.08f, 0.09f ), &cabinet );
+        inKit.Box( Vector3( 0.f, 0.48f, 0.23f ), Vector3( 0.06f, 0.03f, 0.01f ), Vector3( 1.f, 0.1f, 0.05f ), &cabinet, Vector3( 2.f, 0.2f, 0.1f ) );
+        ioMember.Loose.push_back( { amp, ampAt, glm::quat( 1.f, 0.f, 0.f, 0.f ), inBass ? 0.37f : 0.81f } );
+    }
     BuildMicStand( inKit, ioMember, Vector3( 0.f, 0.f, 0.55f ), 1.46f );
 }
 
@@ -864,8 +944,23 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
     }
     for( float x : { -0.6f, 0.6f } )
     {
-        EntityHandle wedge = inKit.Box( Vector3( x, 0.18f, 1.15f ), Vector3( 0.6f, 0.34f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &FloorOf( ioMember ) );
-        if( wedge ) wedge->GetComponent<Transform>().SetRotation( Vector3( 35.f, 0.f, 0.f ) );
+        const Vector3 wedgeAt( x, 0.18f, 1.15f );
+        EntityHandle wedge = inKit.Box( wedgeAt, Vector3( 0.6f, 0.34f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &FloorOf( ioMember ) );
+        if( wedge )
+        {
+            wedge->GetComponent<Transform>().SetRotation( Quaternion( Axis( 35.f, kX ) ) );
+            ioMember.Loose.push_back( { wedge, wedgeAt, Axis( 35.f, kX ), x < 0.f ? 0.13f : 0.59f } );
+        }
+    }
+    // A mic for their hand: the stand doesn't come with them in a fall (hidden until then).
+    ioMember.HandMic = inKit.Group( "HandMic", &group );
+    if( ioMember.HandMic )
+    {
+        using Shape = Moonlight::MeshType;
+        Transform& mic = ioMember.HandMic->GetComponent<Transform>();
+        inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.f, 0.f ), Vector3( 0.032f, 0.17f, 0.032f ), Vector3( 0.05f, 0.05f, 0.06f ), &mic );
+        inKit.Piece( Shape::Sphere, Vector3( 0.f, 0.11f, 0.f ), Vector3( 0.062f, 0.062f, 0.062f ), Vector3( 0.4f, 0.4f, 0.42f ), &mic );
+        mic.SetScale( Vector3( 0.001f, 0.001f, 0.001f ) );
     }
 }
 
@@ -1433,6 +1528,7 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
         pose.Offset += ( glm::vec3( 0.f, 0.f, 0.12f ) - pose.Offset ) * atMic;
         pose.Turn *= 1.f - atMic;
     }
+    DivePose( ioMember, pose, false );
     ioMember.Body.Stand( pose );
 
     // The guitar hangs off the torso, its neck up and to the player's left.
@@ -1801,7 +1897,38 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
             micArm.Grip = 0.8f;
         }
     }
+    // In a fall there's no stand: the mic is in their hand, up at their mouth, and as the dive
+    // comes the other arm stretches out ahead of them.
+    const bool handheld = m_fall > 0.5f;
+    DivePose( ioMember, pose, false );
+    if( handheld )
+    {
+        ioMember.Body.Stand( pose );
+        const glm::quat head = ioMember.Body.HeadRotation();
+        micArm = Performer::Arm();
+        micArm.Reach = true;
+        micArm.Target = ioMember.Body.HeadCentre() + head * glm::vec3( 0.03f, -0.1f, 0.2f );
+        micArm.Pole = glm::vec3( 1.f, -1.f, 0.f );
+        micArm.Fingers = head * glm::vec3( -0.4f, 0.2f, 0.2f );
+        micArm.Palm = head * glm::vec3( 0.f, 0.3f, -1.f );
+        micArm.Grip = 0.9f;
+        if( !percussion )
+        {
+            freeArm.Raise += ( 165.f - freeArm.Raise ) * m_dive;
+            freeArm.Spread += ( 14.f - freeArm.Spread ) * m_dive;
+            freeArm.Elbow += ( 8.f - freeArm.Elbow ) * m_dive;
+        }
+    }
     ioMember.Body.Apply( pose );
+    if( ioMember.HandMic )
+    {
+        ioMember.HandMic->GetComponent<Transform>().SetScale( handheld ? Vector3( 1.f, 1.f, 1.f ) : Vector3( 0.001f, 0.001f, 0.001f ) );
+        if( handheld )
+        {
+            // Its head tipped back toward their mouth.
+            Puppet::PlacePiece( ioMember.HandMic, ioMember.Body.Hand( 1 ), ioMember.Body.HeadRotation() * Axis( -50.f, kX ) );
+        }
+    }
     // The instrument in the playing hand; hidden (shrunk) the rest of the time.
     const glm::quat spine = ioMember.Body.SpineRotation();
     // inGrip: the point of the prop (its own space) that sits in the palm.
@@ -1815,6 +1942,37 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     // cowbell by its handle.
     hold( ioMember.Tambourine, percussion && percussion->Kind == Percussion::Tambourine, Axis( 75.f, kX ) * Axis( 25.f * strike, kZ ), glm::vec3( 0.f, 0.f, 0.11f ) );
     hold( ioMember.Cowbell, percussion && percussion->Kind == Percussion::Cowbell, Axis( 20.f, kX ), glm::vec3( 0.f, 0.04f, 0.f ) );
+}
+
+
+void Band::DivePose( const Member& inMember, Performer::Pose& ioPose, bool inKeepLean ) const
+{
+    const float dive = m_dive;
+    if( dive <= 0.f )
+    {
+        return;
+    }
+    // Nobody walks out front in mid air.
+    ioPose.Offset *= 1.f - dive;
+    ioPose.Crouch *= 1.f - dive;
+    if( !inKeepLean )
+    {
+        ioPose.Lean += ( -10.f - ioPose.Lean ) * dive;
+    }
+    ioPose.Nod += ( -28.f - ioPose.Nod ) * dive;
+    for( int side = 0; side < 2; ++side )
+    {
+        const float s = side == 0 ? -1.f : 1.f;
+        Performer::Leg& leg = ioPose.Legs[side];
+        // From about where the foot is planted to trailing behind, the two kicking in turn.
+        const float kick = std::sin( m_fallSeconds * 2.3f + inMember.Phase + static_cast<float>( side ) * kPi );
+        const glm::vec3 planted = glm::vec3( s * ( 0.1f + 0.78f * std::sin( leg.Spread * kDeg ) ), 0.f, 0.f ) + ioPose.Offset;
+        const glm::vec3 trailing( s * 0.17f, 0.1f + 0.07f * kick, -0.3f - 0.1f * kick );
+        leg.Reach = true;
+        leg.Target = planted + ( trailing - planted ) * dive;
+        leg.Pole = glm::vec3( s * 0.25f, 0.f, 1.f );
+        leg.Toe = 45.f * dive;
+    }
 }
 
 
@@ -1842,6 +2000,7 @@ void Band::UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float 
         arm.Palm = -kY;
         arm.Grip = 0.3f;
     }
+    DivePose( ioMember, pose, true );
     ioMember.Body.Apply( pose );
     (void)inEnergy;
 }

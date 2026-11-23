@@ -130,9 +130,6 @@ struct ProgressionStorySong
     std::string Cue;                    // where in the song its own flags land ("first_chorus"...)
     std::vector<Moment> Moments;        // flags landing at their own cues, after the song too
     std::string Venue;                  // this song's venue; empty: the set's
-    // The highway fades away through long rests (an intro with no drums) and comes back in time
-    // to read the next note.
-    bool HighwayRests = false;
 };
 
 // A booking of story mode (Design/Story-Mode-Setlists.md): five songs at one venue, played in

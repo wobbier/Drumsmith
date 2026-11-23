@@ -3030,7 +3030,8 @@
               "StateAfter": [
                 "ghost_hand",
                 "band_ghost",
-                "band_down"
+                "band_down",
+                "sky_21.5"
               ],
               "Shot": "story/ghost_hand",
               "Do": "Beside the drummer's hand on the road as the recording starts."
@@ -3072,7 +3073,8 @@
               "On": "section:verse_1|at:0.13",
               "StateAfter": [
                 "ascent",
-                "band_aloft"
+                "band_aloft",
+                "sky_21.5"
               ],
               "Shot": "story/ascent",
               "Do": "Their feet leave the road. Down past the drummer to the cop at the body, the crash site dropping away: they are going up."
@@ -3080,22 +3082,25 @@
             {
               "On": "section:verse_1+18|at:0.165",
               "StateAfter": [
-                "clouds"
+                "clouds",
+                "sky_28.5"
               ],
-              "Do": "Cloud comes down round them, streaming past in the moonlight."
+              "Do": "Cloud comes down round them, streaming past in the moonlight. The night starts to turn: by the time the light opens it is dawn."
             },
             {
               "On": "section:chorus_1|at:0.23",
               "StateAfter": [
-                "heavens_light"
+                "heavens_light",
+                "sky_31"
               ],
               "Shot": "story/heavens_light",
-              "Do": "A light opens above them, gold, growing. From low among them, up into it."
+              "Do": "A light opens above them, gold, growing, and the sun is up: the higher they go the more of a day it is. From low among them, up into it."
             },
             {
               "On": "section:chorus_2|at:0.435",
               "StateAfter": [
-                "gates"
+                "gates",
+                "sky_34"
               ],
               "Shot": "story/gates",
               "Do": "The gates themselves, standing open overhead and coming down to meet them: straight up from among the band."
@@ -3104,17 +3109,20 @@
               "On": "section:fast_part-3.2|at:0.5-3.2",
               "StateAfter": [
                 "denied",
-                "band_falling"
+                "band_falling",
+                "sky_36"
               ],
               "Shot": "story/denied",
-              "Do": "Denied. The light goes out at a stroke, a red bolt comes down instead, and they drop: straight down at the Earth coming back up.",
+              "Do": "Denied. The light goes out at a stroke, a red bolt comes down instead, and they drop: straight down at the Earth coming back up, the day running backwards to the night they left as they fall.",
               "Caption": "Denied.",
               "CaptionSeconds": 2.5
             },
             {
               "On": "section:fast_part|at:0.5",
               "StateAfter": [
-                "fell"
+                "fell",
+                "sky_21.5",
+                "sky_off"
               ],
               "Shot": "story/fell",
               "Do": "Through the road on the first beat of the fast part and on down: the road overhead shrinks to a bright slit."
@@ -3467,7 +3475,6 @@
           ],
           "PlayingNote": "Wait out the quiet opening; when the drums come in, play it big and patient under the choir.",
           "Venue": "StoryHeaven",
-          "HighwayRests": true,
           "OnStage": [
             "drums",
             "guitar",

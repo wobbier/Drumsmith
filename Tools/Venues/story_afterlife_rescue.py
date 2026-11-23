@@ -567,7 +567,7 @@ def run(s, root, marks, V, M):
             if k in (0, 1):
                 s.light('Pole light', poles, (x - side * 2.8, 9.5, z), 'Spot', (1.0, 0.78, 0.5), 320.0, 28, rot=(90, 0, 0), inner=32, outer=58)
     trees = scroll('Trees', 96.0)
-    A.model(s, trees, 'Treeline', A.treeline(V, 'TreesLoop', -288, 288, 19, 80, 126, 5, period=96.0), shadows=False)
+    A.plant_roadside(s, trees, V, A.roadside_spots(-288, 288, 19, 72, 22, 5, period=96.0, y=-0.12))
     rail = A.guardrail(V, 96.0)
     for k in range(-3, 3):
         A.model(s, trees, 'Guardrail', rail, (15.4, 0, k * 96), shadows=False)
@@ -575,11 +575,10 @@ def run(s, root, marks, V, M):
     # Traffic pulled over to let them through.
     aside = scroll('Aside', 192.0)
     for k in (-1, 0, 1):
-        for z, ink, x in ((30, 'white', 12.7), (118, 'cab_red', 12.9), (160, 'steel', -12.8)):
+        for z, kind, x in ((30, 'Caravan', 12.7), (118, 'Civic', 12.9), (160, 'C10', -12.8)):
             car = s.entity('Pulled over', aside, (x, 0, k * 192 + z), (0, 0 if x > 0 else 180, 0))
-            A.model(s, car, 'Body', A.car(V, ink), shadows=False)
-            for dx in (-0.65, 0.65):
-                s.box('Hazard', car, (dx, 0.72, -2.24), (0.3, 0.1, 0.04), (1, 0.5, 0.05), emissive=(1, 0.5, 0.05), emissive_intensity=5.0, shadows=False)
+            A.vehicle(s, car, kind)
+            A.vehicle_lamps(s, car, V, kind, head=0.8, tail=1.6, hazard=True)
     A.particles(s, g, 'Road grit', at(R, (0, 1.8, 34)), (-90, 0, 0), Shape='Box', BoxSize=[30, 4, 6], Lifetime=[0.9, 1.5], Speed=[44, 52], Size=[0.02, 0.06],
                 StartColor=[0.9, 0.8, 0.65], StartColor2=[0.6, 0.6, 0.65], EndColor=[0.5, 0.5, 0.5], StartAlpha=0.6, EndAlpha=0.0, Intensity=1.8, Gravity=0.0, Drag=0.0,
                 NoiseStrength=0.3, Blend='Additive', EmissionRate=90, MaxParticles=180, Alignment='Stretched', StretchFactor=0.07, FadeIn=0.1)
@@ -598,7 +597,8 @@ def run(s, root, marks, V, M):
     A.headlights(s, amb, 0.82, 0.9, 3.4, 380.0, 45, inner=14, outer=34, name='Ambulance headlight')
     inside(s, amb, V)
 
-    # The escort: cruisers ahead, alongside and behind, each weaving in its lane.
+    # The escort: cruisers ahead, alongside and behind (the two on the outside lane Trail Dusters),
+    # each weaving in its lane.
     escort = ((AMB_X, 17.0, True), (-2.7, 11.0, True), (-2.7, -2.0, False), (8.1, 4.0, False), (AMB_X, -12.5, True), (-2.7, -16.0, True), (8.1, -11.0, False))
     for i, (x, z, full) in enumerate(escort):
         frames = 150 + 40 * (i % 3)
@@ -606,28 +606,24 @@ def run(s, root, marks, V, M):
         weave = P.clip(V, f'EscortWeave{i % 6}', frames, [P.track('Position', [(0, (0, 0, 0)), (frames // 4, (side * 0.6, 0, 1.3)), (frames // 2, (0, 0, -0.7)), (3 * frames // 4, (-side * 0.5, 0, 0.9)), (frames, (0, 0, 0))], 'SmoothStep'),
                                                          P.track('Rotation', [(0, (0, 0, 0)), (frames // 8, (0, side * 5, 0)), (3 * frames // 8, (0, -side * 6, 0)), (5 * frames // 8, (0, side * 4, 0)), (frames, (0, 0, 0))], 'SmoothStep')])
         car = P.looping(s, g, f'Escort {i}', weave, at(R, (x, 0, z)))
-        A.patrol_cruiser(s, car)
-        hx, hy, hz = A.PATROL_HEADLAMP
+        kind = 'TrailDuster' if x > 5 else None
+        if kind:
+            A.vehicle(s, car, kind)
+            (hx, hy, hz), tail = A.lamp(kind, 'Headlamp'), A.lamp(kind, 'TailLamp')
+        else:
+            A.patrol_cruiser(s, car)
+            (hx, hy, hz), tail = A.PATROL_HEADLAMP, A.PATROL_TAIL_LAMP
         for dx in (-hx, hx):
             A.glow_card(s, car, V, 'Headlight glare', (dx, hy, hz + 0.05), 0.45, (1.0, 0.95, 0.8), 0.8)
-            A.glow_card(s, car, V, 'Tail lamp glare', (dx * A.PATROL_TAIL_LAMP[0] / hx, A.PATROL_TAIL_LAMP[1], A.PATROL_TAIL_LAMP[2] - 0.03), 0.28, (1.0, 0.05, 0.05), 0.8, (0, 180, 0))
+            A.glow_card(s, car, V, 'Tail lamp glare', (dx * tail[0] / hx, tail[1], tail[2] - 0.03), 0.28, (1.0, 0.05, 0.05), 0.8, (0, 180, 0))
         if full:
             A.headlights(s, car, hx, hy, hz + 0.15, 260.0, 32)
-        M.beacons(s, car, V, 110.0 if full else 0.0, 150.0, 22.0, 1.0 + 0.1 * i, glare=(0.5, 1.2))
-    # The helicopter over them, its light on the ambulance's roof.
-    bob = P.clip(V, 'HeliBob', 170, [P.track('Position', [(0, (0, 0, 0)), (45, (1.6, 0.9, -2.0)), (95, (-1.0, -0.7, 2.5)), (140, (0.8, 0.4, 0.6)), (170, (0, 0, 0))], 'SmoothStep'),
-                                     P.track('Rotation', [(0, (0, 0, 0)), (45, (4, 6, -7)), (95, (-3, -5, 6)), (140, (2, 3, -3)), (170, (0, 0, 0))], 'SmoothStep')])
-    copter_at = at(R, (-9.0, 15.0, 12.0))
-    copter = P.looping(s, s.entity('Helicopter', g, copter_at, (12, 10, -6)), 'Hover', bob)
-    A.model(s, copter, 'Body', A.helicopter(V), shadows=False)
-    blades = P.looping(s, copter, 'Rotor', P.clip(V, 'RotorSpin', 6, [P.track('Rotation', [(0, (0, 0, 0)), (3, (0, 180, 0)), (6, (0, 359.9, 0))])]), (0, 1.52, 0))
-    for yaw in (0, 90):
-        s.box('Blade', blades, (0, 0, 0), (0.22, 0.04, 9.6), (0.08, 0.08, 0.09), rot=(0, yaw, 0), shadows=False)
-    M_see(s.box('Rotor disc', blades, (0, 0, 0), (9.6, 0.02, 9.6), (0.3, 0.3, 0.32), shape='Cylinder', shadows=False), 0.1)
-    s.box('Strobe', copter, (0, -1.1, -1.0), (0.14, 0.14, 0.14), (1, 0.1, 0.1), emissive=(1, 0.1, 0.1), emissive_intensity=9.0, shape='Sphere', shadows=False)
-    beam_at = at(copter_at, (0, -1.2, 0))
-    # (Until the cut to the inside: nothing here casts a shadow but the sun, so it would light the cot.)
-    s.light('Helicopter searchlight', P.between(s, g, 'Searchlight', None, 'defib', 0.0, beam_at), beam_at, 'Spot', (0.85, 0.92, 1.0), 1500.0, 40, rot=look_rotation(beam_at, at(amb_at, (0, 2, 0))), inner=5, outer=10)
+        M.beacons(s, car, V, 110.0 if full else 0.0, 150.0, 22.0, 1.0 + 0.1 * i, glare=(0.5, 1.2), kind=kind)
+    # The helicopter over them, its searchlight held on the ambulance's roof. (Until the cut to the
+    # inside: nothing here casts a shadow but the sun, so the light would be on the cot.)
+    copter_at = at(R, (-9.0, 13.7, 12.0))
+    M.police_helicopter(s, P.between(s, g, 'Helicopter', None, 'defib', 0.0, copter_at), V, 'AS350', copter_at, (12, 10, -6), at(amb_at, (0, 2, 0)), 1500.0, 40,
+                        wander=1.2, inner=5, outer=10)
 
     # From the road ahead of the lead cruisers, back at the ambulance coming on; then up and over
     # the escort to look down on the whole run from behind.
@@ -701,21 +697,7 @@ TREES = (('WardMapleA', 'Maple', 21), ('WardMapleB', 'Maple', 4), ('WardMapleC',
          ('WardBirch', 'Presets/Birch', 3), ('WardOak', 'Presets/Oak', 7))
 
 
-def tree(venue, name, source, seed):
-    """A MitchTree recipe in the venue (Engine/Docs/MitchTree.md): one of the engine's with its own
-    seed, and a fuller crown (the engine's are first drafts, thin enough to see through: more and
-    bigger leaf cards, and some along the limbs). A recipe is a model path: the tree is grown when
-    it loads. Returns its asset path."""
-    with open(os.path.join(A.ROOT, 'Engine', 'Assets', 'Trees', source + '.mtree')) as f:
-        recipe = json.load(f)
-    recipe['Name'], recipe['Seed'] = name, seed
-    leaves = recipe['Leaves']
-    broad = leaves['Kind'] == 'Broadleaf'
-    leaves['PerStem'] = round(leaves['PerStem'] * (2.2 if broad else 1.5))
-    leaves['Size'] = round(leaves['Size'] * (1.7 if broad else 1.3), 3)
-    leaves['ParentCoverage'] = max(leaves['ParentCoverage'], 0.4 if broad else 0.6)
-    save_bytes(os.path.join(A.ROOT, 'Assets', 'Venues', venue, 'Trees', name + '.mtree'), (json.dumps(recipe, indent=4) + '\n').encode())
-    return f'Assets/Venues/{venue}/Trees/{name}.mtree'
+tree = A.tree     # (a MitchTree recipe in the venue)
 
 
 def _panes(m, rng, wide, y, facing, off, w=1.35, h=1.7, pitch=2.7):
