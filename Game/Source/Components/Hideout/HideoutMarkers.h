@@ -122,6 +122,29 @@ public:
 ME_REGISTER_COMPONENT_FOLDER( HideoutDrummer, "Hideout" )
 
 
+// What the room's radio plays through (RoomSpeaker, AudioPack::SetSpeaker): the sound standing at
+// it, which gets better with the room. A boombox plays a narrow band, honks in the mids, breaks
+// up and is near mono; a hi-fi plays the song as it is (the defaults). Across the room it's
+// narrower still. One per room, on the radio's station; a room without one plays the song clean.
+class HideoutSpeaker
+    : public Component<HideoutSpeaker>
+{
+    ME_REFLECTABLE( HideoutSpeaker )
+public:
+    HideoutSpeaker();
+
+    virtual void Init() final;
+
+    float LowCut = 20.f;
+    float HighCut = 20000.f;
+    float Honk = 0.f;
+    float HonkAt = 1500.f;
+    float Width = 1.f;
+    float Drive = 0.f;
+};
+ME_REGISTER_COMPONENT_FOLDER( HideoutSpeaker, "Hideout" )
+
+
 // Part of the band's name in the room (the bedsheet, the kick head): shown only while the band has
 // no name (Unnamed: the "BAND NAME TBD" pictures) or only once it has one (Named: a blank sheet,
 // and a TextRenderer, whose Text becomes the name). PlayerProfile::BandName.

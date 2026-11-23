@@ -42,13 +42,38 @@ public:
     // The room's look, all optional. AmbientColor: indoors, the colour the camera clears to,
     // which also lights the whole room a little (black leaves a faint grey base). FogColor: the
     // light the haze scatters, which lifts whatever is far off. Haze: how thick the haze hangs
-    // (1 the usual; out of doors it is already under half that). SkyTime and MoonBrightness: out
-    // of doors, the night sky's hour (0-24; 20 is dusk) and its moon.
+    // (1 the usual; out of doors it is already under half that). SkyTime, MoonBrightness and
+    // CloudCoverage: out of doors, the night sky's hour (0-24; 20 is dusk), its moon, and how much
+    // of it is cloud (0 runs no cloud pass at all).
     Vector3 AmbientColor{ 0.f, 0.f, 0.f };
     Vector3 FogColor{ 0.01f, 0.01f, 0.015f };
     float Haze = 1.f;
     float SkyTime = 22.f;
     float MoonBrightness = 1.f;
+    float CloudCoverage = 0.25f;
+    // Light the show's haze from the froxel grid instead of the per-pixel march: about 2 ms
+    // cheaper at 5120 x 1440 on the Backyard, and suited to broad haze rather than crisp beams.
+    bool HazeFroxels = false;
+    // Who filmed the show when it plays as a live show (the music video always has the real
+    // cameras). Broadcast: the director's crew. Camcorder / Phone: only the guests' own 2000s
+    // camcorders or flip phones, from the guest/ camera spots (Docs/Venue-Authoring.md). Mixed:
+    // some of each, a device per spot.
+    enum class FootageKind : int { Broadcast = 0, Camcorder, Phone, Mixed };
+    FootageKind Footage = FootageKind::Broadcast;
+    // The whole venue is on the move (a stage on a truck at speed): every camera but an aerial
+    // one rattles, heaves and takes the road's bumps, this hard (0 none, 1 a fast highway). It
+    // stops once the story flag RideUntil is set (empty: it never stops).
+    float Ride = 0.f;
+    std::string RideUntil;
+    // Colours a look that takes the colour out (black and white, sepia) leaves in, in this venue:
+    // how much of the reds and the blues (0 none, 1 all), and how far the reds reach into orange
+    // and yellow (0 pure red, 1 fire). Between the story flags LightsFrom and LightsUntil (either
+    // may be empty; both empty: never) it keeps all three: police lights and fire.
+    float KeepRed = 0.f;
+    float KeepBlue = 0.f;
+    float KeepWarmth = 0.f;
+    std::string LightsFrom;
+    std::string LightsUntil;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueInfo, "Venue" )
 

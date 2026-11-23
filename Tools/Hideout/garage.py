@@ -17,7 +17,7 @@ import random
 
 from hideoutgen import (flyer_name, band_name, band_name_text, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
-                        stand_in, station, tally, tape_outline, textured, view, when)
+                        speaker, stand_in, station, tally, tape_outline, textured, view, when)
 
 H = 3.8        # half the width
 D = 7.2        # the back wall's face (the door)
@@ -301,7 +301,9 @@ def right_side(s, geo, items, stations, lights):
         cone = s.entity(f"Speaker {i}", radio, (rx - 0.112, ry - 0.01, z))
         motion(cone, "Bob", amount=0.012, speed=2.0, axis=(-1, 0, 0), music=True)
         s.box("Cone", cone, (0.0, 0.0, 0.0), (0.18, 0.012, 0.18), (0.06, 0.06, 0.06), rot=(0, 0, 90), shape="Cylinder", rough=0.7)
-    station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.45, 0.05, -0.35), 40)
+    # The same boombox, new batteries, off the floor: a little more bass and top, less honk.
+    speaker(station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.45, 0.05, -0.35), 40),
+            low_cut=120.0, high_cut=8000.0, honk=3.5, honk_at=1200.0, width=0.45, drive=0.1)
     # The CRT, now on a cooler, showing the camcorder.
     tv = s.group("TV", items, (2.45, 0.0, 3.5))
     s.prop("Cooler", tv, "Assets/Models/Venue/Cooler.obj", (0.0, 0.0, 0.0), yaw=90.0, scale=0.85)

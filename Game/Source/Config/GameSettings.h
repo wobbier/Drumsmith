@@ -47,6 +47,9 @@ public:
     // Whose camera cuts the venue plays: 0 the live show's (VENUE), 1 the music video's (MV VENUE)
     // where the chart has one.
     int VenueCamera = 0;
+    // Found footage (Docs/Venue-and-Band.md): the guests' camcorders burn their date and time into
+    // the picture.
+    bool VenueDateStamp = false;
     // Which room (VenueShow::Style): 0 arena, 1 club, 2 festival, 3 a random one per song.
     int VenueStyle = 0;
     // A scene venue picked from Assets/Venues (Venue/VenueRegistry.h) by its id; empty uses VenueStyle.

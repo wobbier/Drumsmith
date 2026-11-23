@@ -103,6 +103,7 @@ void VenueShow::Clear()
         camera.Overlay = false;
         camera.OverlayDarkOpacity = 1.f;
         camera.SetCurrent();
+        camera.SunShadows = m_highwaySunShadows;
         if( m_highwayCamera->HasComponent<PostProcess>() )
         {
             m_highwayCamera->GetComponent<PostProcess>().Fog = m_highwayFog;
@@ -140,6 +141,7 @@ void VenueShow::Clear()
     m_storyProps.clear();
     m_storyParticles.clear();
     m_storyShowLights.clear();
+    m_storyLights.clear();
     m_storyMoments.clear();
     m_storyLanding.clear();
     m_storyCaptions.clear();
@@ -500,7 +502,8 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
             sky.ProceduralSky.StarBrightness = 2.f;
             sky.ProceduralSky.MoonPhase = 0.5f;
             sky.ProceduralSky.MoonBrightness = m_plan.MoonBrightness;
-            sky.ProceduralSky.CloudCoverage = 0.25f;
+            // 0 skips the cloud pass (DRU-80: at night it lit almost nothing for 0.24 ms).
+            sky.ProceduralSky.CloudCoverage = m_plan.CloudCoverage;
             if( camera->HasComponent<PostProcess>() )
             {
                 camera->GetComponent<PostProcess>().FogMaxOpacity = 0.55f;
@@ -530,6 +533,7 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
         {
             m_highwayFog = m_highwayCamera->GetComponent<PostProcess>().Fog;
         }
+        m_highwaySunShadows = m_highwayCamera->GetComponent<Camera>().SunShadows;
         m_savedHighway = true;
         m_highwayAlone = false;
         ApplyPresentation();
@@ -565,6 +569,7 @@ void VenueShow::ApplyPresentation()
         camera.Overlay = false;
         camera.OverlayDarkOpacity = 1.f;
         camera.SetCurrent();
+        camera.SunShadows = m_highwaySunShadows;
         if( post )
         {
             post->Fog = m_highwayFog;
@@ -573,6 +578,9 @@ void VenueShow::ApplyPresentation()
         return;
     }
     camera.Overlay = true;
+    // Over the venue the highway draws no sun cascades of its own (DRU-81): four shadow passes
+    // for a few notes, whose shadows don't read against the see-through board.
+    camera.SunShadows = false;
     // A story song's rests draw it in toward the strike bar (SetHighwayShown).
     camera.OverlayFadeStart = kHighwayFadeStart * m_highwayShown;
     camera.OverlayFadeEnd = std::max( kHighwayFadeEnd * m_highwayShown, 0.001f );
@@ -1037,6 +1045,13 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     m_band.Update( seconds, inDeltaTime, CrowdUp() ? m_crowd.Energy() : 0.6f );
     m_lyricBoard.Update( seconds );
     m_director.SetHype( m_hype );
+    // A venue on the move (VenueInfo::Ride): the cameras take the road until its flag lands.
+    m_director.SetRide( m_plan.Ride > 0.f && ( m_plan.RideUntil.empty() || !StoryFlagSet( m_plan.RideUntil, seconds ) ) ? m_plan.Ride : 0.f );
+    // What a black and white look leaves in colour here (VenueInfo::KeepRed...), and all of it
+    // between the venue's Lights flags (the crash: police lights and fire).
+    const bool lights = ( !m_plan.LightsFrom.empty() || !m_plan.LightsUntil.empty() )
+        && ( m_plan.LightsFrom.empty() || StoryFlagSet( m_plan.LightsFrom, seconds ) ) && ( m_plan.LightsUntil.empty() || !StoryFlagSet( m_plan.LightsUntil, seconds ) );
+    m_director.SetColorKeep( lights ? Vector3( 1.f, 1.f, 1.f ) : m_plan.ColorKeep );
     m_director.Update( seconds, inDeltaTime );
     UpdateStory( seconds, inDeltaTime );
     UpdateStoryBand( seconds, inDeltaTime );
@@ -1351,8 +1366,10 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
     const std::vector<EntityHandle> noMarkers;
     m_storyParticles.clear();
     m_storyShowLights.clear();
+    m_storyLights.clear();
     std::unordered_map<const Transform*, size_t> particleIndex;
     std::unordered_map<const Transform*, size_t> showLightIndex;
+    std::unordered_map<const Transform*, size_t> lightIndex;
     for( const EntityHandle& entity : m_scene.IsLoaded() ? m_scene.GetMarkers().Story : noMarkers )
     {
         const VenueStory* marker = entity ? entity->TryGetComponent<VenueStory>() : nullptr;
@@ -1376,9 +1393,18 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
             Transform* at = open.back();
             open.pop_back();
             const EntityHandle& owner = at->Parent;
-            if( owner && owner->HasComponent<Light>() && !owner->HasComponent<VenueShowLight>() )
+            if( owner && prop.Mode == VenueStory::Motion::Show && owner->HasComponent<Light>() && !owner->HasComponent<VenueShowLight>() )
             {
-                prop.Lights.emplace_back( owner, owner->GetComponent<Light>().Intensity );
+                auto found = lightIndex.find( at );
+                if( found == lightIndex.end() )
+                {
+                    found = lightIndex.emplace( at, m_storyLights.size() ).first;
+                    StoryLight light;
+                    light.Entity = owner;
+                    light.Intensity = owner->GetComponent<Light>().Intensity;
+                    m_storyLights.push_back( light );
+                }
+                m_storyLights[found->second].Props.push_back( m_storyProps.size() );
             }
             // Play drives only the one-shots under it (authored with PlayOnStart off): a loop that
             // plays from the start (a road scrolling under a group that slews, wings beating on an
@@ -1517,13 +1543,22 @@ void VenueShow::UpdateStory( double inSeconds, float inDeltaTime )
         }
         const float eased = prop.Shown * prop.Shown * ( 3.f - 2.f * prop.Shown );
         prop.Entity->GetComponent<Transform>().SetScale( prop.Scale * std::max( eased, 0.0001f ) );
-        for( auto& [light, intensity] : prop.Lights )
+    }
+    // Its lights dim with it: by every prop above them, so a group inside a hidden group is dark.
+    for( const StoryLight& entry : m_storyLights )
+    {
+        Light* light = entry.Entity ? entry.Entity->TryGetComponent<Light>() : nullptr;
+        if( !light )
         {
-            if( light && light->HasComponent<Light>() )
-            {
-                light->GetComponent<Light>().Intensity = intensity * eased;
-            }
+            continue;
         }
+        float shown = 1.f;
+        for( size_t index : entry.Props )
+        {
+            const float propShown = index < m_storyProps.size() ? std::clamp( m_storyProps[index].Shown, 0.f, 1.f ) : 1.f;
+            shown *= propShown * propShown * ( 3.f - 2.f * propShown );
+        }
+        light->Intensity = entry.Intensity * shown;
     }
     for( StoryParticles& particles : m_storyParticles )
     {

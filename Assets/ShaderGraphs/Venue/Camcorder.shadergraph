@@ -1,0 +1,473 @@
+{
+	"Version": 1,
+	"Settings": {
+		"Target": "PostProcess",
+		"Surface": "Transparent",
+		"Injection": "AfterTonemap"
+	},
+	"Properties": [
+		{
+			"Id": "p1",
+			"Name": "Bleed",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				4.0,
+				4.0,
+				4.0,
+				4.0
+			],
+			"Range": [
+				0.0,
+				16.0
+			]
+		},
+		{
+			"Id": "p2",
+			"Name": "Sharpen",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.7,
+				0.7,
+				0.7,
+				0.7
+			],
+			"Range": [
+				0.0,
+				2.0
+			]
+		},
+		{
+			"Id": "p3",
+			"Name": "Smear",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.55,
+				0.55,
+				0.55,
+				0.55
+			],
+			"Range": [
+				0.0,
+				2.0
+			]
+		},
+		{
+			"Id": "p4",
+			"Name": "Block",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.0,
+				0.0,
+				0.0,
+				0.0
+			],
+			"Range": [
+				0.0,
+				8.0
+			]
+		},
+		{
+			"Id": "p5",
+			"Name": "Noise",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.07,
+				0.07,
+				0.07,
+				0.07
+			],
+			"Range": [
+				0.0,
+				0.5
+			]
+		},
+		{
+			"Id": "p6",
+			"Name": "Break",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.0,
+				0.0,
+				0.0,
+				0.0
+			],
+			"Range": [
+				0.0,
+				1.0
+			]
+		},
+		{
+			"Id": "p7",
+			"Name": "Seed",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.0,
+				0.0,
+				0.0,
+				0.0
+			],
+			"Range": [
+				0.0,
+				1000.0
+			]
+		},
+		{
+			"Id": "p8",
+			"Name": "Stamp",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				0.0,
+				0.0,
+				0.0,
+				0.0
+			],
+			"Range": [
+				0.0,
+				1.0
+			]
+		},
+		{
+			"Id": "p9",
+			"Name": "StampDate",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				704.0,
+				704.0,
+				704.0,
+				704.0
+			],
+			"Range": [
+				101.0,
+				1231.0
+			]
+		},
+		{
+			"Id": "p10",
+			"Name": "StampYear",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				2004.0,
+				2004.0,
+				2004.0,
+				2004.0
+			],
+			"Range": [
+				1990.0,
+				2030.0
+			]
+		},
+		{
+			"Id": "p11",
+			"Name": "StampClock",
+			"Type": "Float",
+			"Exposed": true,
+			"Default": [
+				84420.0,
+				84420.0,
+				84420.0,
+				84420.0
+			],
+			"Range": [
+				0.0,
+				86400.0
+			]
+		}
+	],
+	"Nodes": [
+		{
+			"Id": 1,
+			"Type": "Output",
+			"Position": [
+				0,
+				0
+			]
+		},
+		{
+			"Id": 2,
+			"Type": "Property",
+			"Position": [
+				-900,
+				-300
+			],
+			"Settings": {
+				"Property": "p1"
+			}
+		},
+		{
+			"Id": 3,
+			"Type": "Property",
+			"Position": [
+				-900,
+				-210
+			],
+			"Settings": {
+				"Property": "p2"
+			}
+		},
+		{
+			"Id": 4,
+			"Type": "Property",
+			"Position": [
+				-900,
+				-120
+			],
+			"Settings": {
+				"Property": "p3"
+			}
+		},
+		{
+			"Id": 5,
+			"Type": "Property",
+			"Position": [
+				-900,
+				-30
+			],
+			"Settings": {
+				"Property": "p4"
+			}
+		},
+		{
+			"Id": 6,
+			"Type": "Property",
+			"Position": [
+				-900,
+				60
+			],
+			"Settings": {
+				"Property": "p5"
+			}
+		},
+		{
+			"Id": 7,
+			"Type": "Property",
+			"Position": [
+				-900,
+				150
+			],
+			"Settings": {
+				"Property": "p6"
+			}
+		},
+		{
+			"Id": 8,
+			"Type": "Property",
+			"Position": [
+				-900,
+				240
+			],
+			"Settings": {
+				"Property": "p7"
+			}
+		},
+		{
+			"Id": 9,
+			"Type": "Property",
+			"Position": [
+				-900,
+				330
+			],
+			"Settings": {
+				"Property": "p8"
+			}
+		},
+		{
+			"Id": 10,
+			"Type": "Property",
+			"Position": [
+				-900,
+				420
+			],
+			"Settings": {
+				"Property": "p9"
+			}
+		},
+		{
+			"Id": 11,
+			"Type": "Property",
+			"Position": [
+				-900,
+				510
+			],
+			"Settings": {
+				"Property": "p10"
+			}
+		},
+		{
+			"Id": 12,
+			"Type": "Property",
+			"Position": [
+				-900,
+				600
+			],
+			"Settings": {
+				"Property": "p11"
+			}
+		},
+		{
+			"Id": 19,
+			"Type": "UV",
+			"Position": [
+				-900,
+				-420
+			]
+		},
+		{
+			"Id": 20,
+			"Type": "CustomFunction",
+			"Position": [
+				-400,
+				0
+			],
+			"Settings": {
+				"Name": "Camcorder",
+				"Inputs": [
+					{
+						"Name": "UV",
+						"Type": "Vec2"
+					},
+					{
+						"Name": "Bleed",
+						"Type": "Float"
+					},
+					{
+						"Name": "Sharpen",
+						"Type": "Float"
+					},
+					{
+						"Name": "Smear",
+						"Type": "Float"
+					},
+					{
+						"Name": "Block",
+						"Type": "Float"
+					},
+					{
+						"Name": "Noise",
+						"Type": "Float"
+					},
+					{
+						"Name": "Break",
+						"Type": "Float"
+					},
+					{
+						"Name": "Seed",
+						"Type": "Float"
+					},
+					{
+						"Name": "Stamp",
+						"Type": "Float"
+					},
+					{
+						"Name": "StampDate",
+						"Type": "Float"
+					},
+					{
+						"Name": "StampYear",
+						"Type": "Float"
+					},
+					{
+						"Name": "StampClock",
+						"Type": "Float"
+					}
+				],
+				"Outputs": [
+					{
+						"Name": "Color",
+						"Type": "Vec3"
+					}
+				],
+				"Code": "// A home video's picture: Drumsmith's found-footage venues (Docs/Venue-and-Band.md, \"Found footage\").\nvec2 texel = u_viewTexel.xy;\nif (Break > 0.99)\n{\n    // The REC break: black while the tape stops and starts.\n    Color = vec3_splat(0.0);\n    return;\n}\nvec2 uv = UV;\nfloat row = floor(uv.y / texel.y);\n// The tape getting up to speed: rows slip sideways and the band at the bottom (the head switch) tears.\nfloat slip = fract(sin(row * 12.9898 + Seed * 78.233) * 43758.5453) - 0.5;\nfloat band = step(1.0 - 0.025 - 0.06 * Break, uv.y) * step(0.001, Break);\nuv.x += Break * (slip * 0.012 + band * (0.03 + 0.05 * fract(sin(row * 3.7 + Seed) * 951.3)));\n// A phone's resolution: the picture in blocks, its colour in blocks twice the size.\nvec2 lumaUV = uv;\nvec2 chromaUV = uv;\nif (Block > 0.5)\n{\n    vec2 cell = texel * Block;\n    lumaUV = (floor(uv / cell) + vec2_splat(0.5)) * cell;\n    chromaUV = (floor(uv / (cell * 2.0)) + vec2_splat(0.5)) * cell * 2.0;\n}\nvec3 weights = vec3(0.299, 0.587, 0.114);\nfloat luma = dot(sgSceneColor(lumaUV), weights);\n// The camera's sharpening along the scan line: a halo either side of every edge.\nvec2 side = vec2(texel.x * max(Block, 1.0) * 1.5, 0.0);\nfloat around = 0.5 * (dot(sgSceneColor(lumaUV - side), weights) + dot(sgSceneColor(lumaUV + side), weights));\nluma += Sharpen * (luma - around);\n// The colour trails to the right: chroma averaged over the pixels to the left.\nvec2 chroma = vec2_splat(0.0);\nfor (int i = 0; i < 6; i++)\n{\n    vec3 tap = sgSceneColor(chromaUV - vec2(texel.x * Bleed * float(i) / 5.0, 0.0));\n    float y = dot(tap, weights);\n    chroma += vec2(tap.z - y, tap.x - y);\n}\nchroma = chroma / 6.0;\n// Blown highlights streak along the line instead of glowing.\nfloat streak = 0.0;\nfor (int k = 1; k <= 8; k++)\n{\n    float w = 1.0 - float(k) / 9.0;\n    vec2 o = vec2(texel.x * 3.0 * float(k), 0.0);\n    streak += w * (max(dot(sgSceneColor(uv - o), weights) - 0.82, 0.0) + max(dot(sgSceneColor(uv + o), weights) - 0.82, 0.0));\n}\nstreak = streak * Smear * 0.6;\nfloat r = luma + chroma.y;\nfloat b = luma + chroma.x;\nfloat g = (luma - 0.299 * r - 0.114 * b) / 0.587;\nvec3 color = vec3(r, g, b) + vec3(1.0, 0.93, 0.8) * streak;\n// Coloured noise, worst in the dark.\nvec2 pixel = floor(uv / texel);\nvec3 noise = vec3(fract(sin(dot(pixel + vec2_splat(Seed), vec2(12.9898, 78.233))) * 43758.5453),\n    fract(sin(dot(pixel + vec2_splat(Seed * 1.7), vec2(39.346, 11.135))) * 43758.5453),\n    fract(sin(dot(pixel + vec2_splat(Seed * 2.3), vec2(73.156, 52.235))) * 43758.5453)) - vec3_splat(0.5);\nfloat dark = 1.0 - clamp(luma * 1.6, 0.0, 1.0);\ncolor += noise * (Noise * (0.25 + dark * dark));\n// Compression: each macroblock sits a touch off its neighbours.\nif (Block > 0.5)\n{\n    vec2 blockId = floor(uv / (texel * Block * 8.0));\n    color += vec3_splat((fract(sin(dot(blockId + vec2_splat(Seed * 0.37), vec2(27.17, 91.31))) * 43758.5453) - 0.5) * 0.035);\n}\n// The camcorder's date and time, burned into the picture bottom right (Stamp on): two lines of\n// a chunky 3x5 font with a dark edge, \"JUL  4 2004\" over \"11:47:32 PM\".\nif (Stamp > 0.5)\n{\n    float month = floor(StampDate / 100.0);\n    float day = mod(StampDate, 100.0);\n    float monthCodes = 0.0;\n    if (month < 1.5) monthCodes = 19862.0;\n    else if (month < 2.5) monthCodes = 17933.0;\n    else if (month < 3.5) monthCodes = 21913.0;\n    else if (month < 4.5) monthCodes = 13081.0;\n    else if (month < 5.5) monthCodes = 21918.0;\n    else if (month < 6.5) monthCodes = 20374.0;\n    else if (month < 7.5) monthCodes = 20372.0;\n    else if (month < 8.5) monthCodes = 13202.0;\n    else if (month < 9.5) monthCodes = 27160.0;\n    else if (month < 10.5) monthCodes = 24027.0;\n    else if (month < 11.5) monthCodes = 23293.0;\n    else if (month < 12.5) monthCodes = 15886.0;\n    float clock = mod(StampClock, 86400.0);\n    float hours = floor(clock / 3600.0);\n    float minutes = floor(mod(clock, 3600.0) / 60.0);\n    float seconds = floor(mod(clock, 60.0));\n    float hours12 = mod(hours + 11.0, 12.0) + 1.0;\n    vec2 size = vec2(1.0, 1.0) / texel;\n    float px = max(floor(size.y / 160.0), 1.0);\n    vec2 cell = vec2(4.0, 7.0) * px;\n    vec2 origin = vec2(size.x * 0.93 - cell.x * 11.0, size.y * 0.92 - cell.y * 2.0);\n    float lit = 0.0;\n    float edge = 0.0;\n    for (int k = 0; k < 2; k++)\n    {\n        vec2 local = floor(uv / texel) - origin - (k == 0 ? vec2(px, px) : vec2_splat(0.0));\n        float textLine = floor(local.y / cell.y);\n        float column = floor(local.x / cell.x);\n        float gx = floor(mod(local.x, cell.x) / px);\n        float gy = floor(mod(local.y, cell.y) / px);\n        if (local.x < 0.0 || local.y < 0.0 || textLine > 1.5 || column > 10.5 || gx > 2.5 || gy > 4.5)\n        {\n            continue;\n        }\n        float code = 11.0;\n        if (textLine < 0.5)\n        {\n            if (column < 2.5) code = column < 0.5 ? floor(monthCodes / 1024.0) : column < 1.5 ? mod(floor(monthCodes / 32.0), 32.0) : mod(monthCodes, 32.0);\n            else if (column > 3.5 && column < 4.5) code = day < 9.5 ? 11.0 : floor(day / 10.0);\n            else if (column > 4.5 && column < 5.5) code = mod(day, 10.0);\n            else if (column > 6.5) code = mod(floor(StampYear / pow(10.0, 10.0 - column)), 10.0);\n        }\n        else\n        {\n            if (column < 0.5) code = hours12 < 9.5 ? 11.0 : 1.0;\n            else if (column < 1.5) code = mod(hours12, 10.0);\n            else if (column < 2.5 || (column > 4.5 && column < 5.5)) code = 10.0;\n            else if (column < 3.5) code = floor(minutes / 10.0);\n            else if (column < 4.5) code = mod(minutes, 10.0);\n            else if (column < 6.5) code = floor(seconds / 10.0);\n            else if (column < 7.5) code = mod(seconds, 10.0);\n            else if (column > 8.5 && column < 9.5) code = hours < 11.5 ? 12.0 : 24.0;\n            else if (column > 9.5) code = 21.0;\n        }\n        float glyph = 0.0;\n        if (code < 0.5) glyph = 31599.0;\n        else if (code < 1.5) glyph = 11415.0;\n        else if (code < 2.5) glyph = 29671.0;\n        else if (code < 3.5) glyph = 29391.0;\n        else if (code < 4.5) glyph = 23497.0;\n        else if (code < 5.5) glyph = 31183.0;\n        else if (code < 6.5) glyph = 31215.0;\n        else if (code < 7.5) glyph = 29330.0;\n        else if (code < 8.5) glyph = 31727.0;\n        else if (code < 9.5) glyph = 31695.0;\n        else if (code < 10.5) glyph = 1040.0;\n        else if (code < 11.5) glyph = 0.0;\n        else if (code < 12.5) glyph = 11245.0;\n        else if (code < 13.5) glyph = 27566.0;\n        else if (code < 14.5) glyph = 14627.0;\n        else if (code < 15.5) glyph = 27502.0;\n        else if (code < 16.5) glyph = 31143.0;\n        else if (code < 17.5) glyph = 31140.0;\n        else if (code < 18.5) glyph = 14699.0;\n        else if (code < 19.5) glyph = 4714.0;\n        else if (code < 20.5) glyph = 18727.0;\n        else if (code < 21.5) glyph = 24557.0;\n        else if (code < 22.5) glyph = 27501.0;\n        else if (code < 23.5) glyph = 11114.0;\n        else if (code < 24.5) glyph = 27556.0;\n        else if (code < 25.5) glyph = 27565.0;\n        else if (code < 26.5) glyph = 14478.0;\n        else if (code < 27.5) glyph = 29842.0;\n        else if (code < 28.5) glyph = 23407.0;\n        else if (code < 29.5) glyph = 23402.0;\n        else if (code < 30.5) glyph = 23186.0;\n        float on = mod(floor(glyph / exp2((4.0 - gy) * 3.0 + (2.0 - gx))), 2.0);\n        if (k == 0) edge = on; else lit = on;\n    }\n    color = mix(color, vec3_splat(0.05), edge * (1.0 - lit) * 0.8);\n    color = mix(color, vec3(0.95, 0.95, 0.9), lit);\n}\n// The tear's rainbow.\ncolor = mix(color, vec3(0.9, 0.25, 0.8) * fract(row * 0.37 + Seed * 0.11), band * Break * 0.5);\nColor = clamp(color, vec3_splat(0.0), vec3_splat(1.0));"
+			}
+		}
+	],
+	"Links": [
+		[
+			2,
+			"Out",
+			20,
+			"Bleed"
+		],
+		[
+			3,
+			"Out",
+			20,
+			"Sharpen"
+		],
+		[
+			4,
+			"Out",
+			20,
+			"Smear"
+		],
+		[
+			5,
+			"Out",
+			20,
+			"Block"
+		],
+		[
+			6,
+			"Out",
+			20,
+			"Noise"
+		],
+		[
+			7,
+			"Out",
+			20,
+			"Break"
+		],
+		[
+			8,
+			"Out",
+			20,
+			"Seed"
+		],
+		[
+			9,
+			"Out",
+			20,
+			"Stamp"
+		],
+		[
+			10,
+			"Out",
+			20,
+			"StampDate"
+		],
+		[
+			11,
+			"Out",
+			20,
+			"StampYear"
+		],
+		[
+			12,
+			"Out",
+			20,
+			"StampClock"
+		],
+		[
+			19,
+			"Out",
+			20,
+			"UV"
+		],
+		[
+			20,
+			"Color",
+			1,
+			"Color"
+		]
+	]
+}

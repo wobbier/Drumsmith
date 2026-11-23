@@ -36,6 +36,15 @@ ME_REFLECT_BEGIN( HideoutDrummer )
     ME_FIELD( FinishRoughness ).Range( 0.f, 1.f ).Tooltip( "How glossy the lacquer is (low: glossy)" );
 ME_REFLECT_END()
 
+ME_REFLECT_BEGIN( HideoutSpeaker )
+    ME_FIELD( LowCut ).Unit( Reflection::Unit::Hertz ).Range( 20.f, 2000.f ).Tooltip( "The lowest it plays, standing at it; 20 Hz is all of it" );
+    ME_FIELD( HighCut ).Unit( Reflection::Unit::Hertz ).Range( 1000.f, 20000.f ).Tooltip( "The highest it plays, standing at it; 20 kHz is all of it" );
+    ME_FIELD( Honk ).Unit( Reflection::Unit::Decibels ).Range( -12.f, 12.f ).Tooltip( "The box's bump in the mids, at HonkAt; 0 for none" );
+    ME_FIELD( HonkAt ).Unit( Reflection::Unit::Hertz ).Range( 200.f, 6000.f ).Tooltip( "Where the honk is" );
+    ME_FIELD( Width ).Range( 0.f, 1.f ).Tooltip( "Stereo width: 0 one cone (mono), 1 as recorded. Across the room it's this squared" );
+    ME_FIELD( Drive ).Range( 0.f, 0.9f ).Tooltip( "How hard the little amp breaks up; 0 clean" );
+ME_REFLECT_END()
+
 ME_REFLECT_ENUM( HideoutBandName::When, { { "Unnamed", HideoutBandName::When::Unnamed }, { "Named", HideoutBandName::When::Named } } )
 
 ME_REFLECT_BEGIN( HideoutBandName )
@@ -108,6 +117,17 @@ HideoutDrummer::HideoutDrummer()
 
 
 void HideoutDrummer::Init()
+{
+}
+
+
+HideoutSpeaker::HideoutSpeaker()
+    : Component( "HideoutSpeaker" )
+{
+}
+
+
+void HideoutSpeaker::Init()
 {
 }
 

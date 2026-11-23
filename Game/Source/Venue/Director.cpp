@@ -5,6 +5,8 @@
 #include "Venue/VenueTiming.h"
 #include "Components/Camera.h"
 #include "Components/Graphics/PostProcess.h"
+#include "Components/Lighting/Light.h"
+#include "Config/GameSettings.h"
 #include "Components/Transform.h"
 #include "Core/CommandLine.h"
 #include "Engine/World.h"
@@ -102,6 +104,8 @@ void Director::Clear()
     if( m_main ) m_main->MarkForDelete();
     if( m_feed ) m_feed->MarkForDelete();
     if( m_program ) m_program->MarkForDelete();
+    if( m_light ) m_light->MarkForDelete();
+    m_light = {};
     m_main = {};
     m_feed = {};
     m_program = {};
@@ -131,6 +135,13 @@ void Director::Clear()
     m_bigEnd = -1000.0;
     m_focus = 8.f;
     m_blur = 0.f;
+    m_footage = 0;
+    m_spotDevice.clear();
+    m_whiteBalance = 0.f;
+    m_whiteBalanceTarget = 0.f;
+    m_hunt = 0.f;
+    m_grainFrame = -1;
+    m_clipStart = 0.0;
 }
 
 
@@ -164,6 +175,15 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
     std::stable_sort( m_arrival.begin(), m_arrival.end(), []( const auto& a, const auto& b ) { return a.Tag < b.Tag; } );
     m_beats = inBeats;
     m_bpm = inBpm;
+    // Found footage: the live show as the guests filmed it. The music video keeps the real cameras.
+    // --venue-footage <broadcast | camcorder | phone | mixed | 0-3> tries it in any venue.
+    static const std::string forcedFootage = CommandLine::GetString( "--venue-footage", "" );
+    int footage = m_plan.Footage;
+    if( !forcedFootage.empty() )
+    {
+        footage = forcedFootage == "camcorder" ? 1 : forcedFootage == "phone" ? 2 : forcedFootage == "mixed" ? 3 : forcedFootage == "broadcast" ? 0 : std::atoi( forcedFootage.c_str() );
+    }
+    m_footage = inMusicVideo ? 0 : std::clamp( footage, 0, 3 );
     const bool mv = inMusicVideo && !inVenue.m_mvCameras.empty();
     const std::vector<TimedCueData>& cuts = mv ? inVenue.m_mvCameras : inVenue.m_cameras;
     for( size_t i = 0; i < cuts.size(); ++i )
@@ -186,8 +206,16 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
     {
         DropAbsent( cut.Shot );
     }
-    AddNeckShots( inVenue );
-    AddSpotCuts();
+    if( m_footage > 0 )
+    {
+        // No crew: no neck camera, no hero spots. Every cut is a guest's clip.
+        BuildGuestCuts();
+    }
+    else
+    {
+        AddNeckShots( inVenue );
+        AddSpotCuts();
+    }
     if( CommandLine::Has( "--highway-log" ) )
     {
         // The cut list as it will play, chart cuts and the director's own.
@@ -197,7 +225,16 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
         }
     }
     m_looks = mv && !inVenue.m_mvPostFx.empty() ? inVenue.m_mvPostFx : inVenue.m_postFx;
-    if( m_looks.empty() )
+    if( m_footage > 0 )
+    {
+        // The picture is whatever each guest's device makes of it, not the chart's looks.
+        m_looks.clear();
+        for( const Cut& cut : m_cuts )
+        {
+            m_looks.push_back( { cut.Time, cut.Shot.Device == 2 ? std::string( kPhoneLook ) : std::string( kCamcorderLook ) } );
+        }
+    }
+    else if( m_looks.empty() )
     {
         BuildFallbackLooks( inVenue );
     }
@@ -262,6 +299,15 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
     };
     m_feed = makeFeed( "Venue Feed Camera", kFeedTexture );
     m_program = makeFeed( "Venue Program Camera", kProgramTexture );
+    // The program feed is what the main camera shows, so it takes the main camera's image (after
+    // its post, before the highway and the UI) instead of rendering the venue again: one
+    // downsample instead of a second scene (ME-414, DRU-91). In footage venues the wall then shows
+    // the guest's camcorder picture, grade and scan lines included. Update still aims it, for the
+    // engine's fallback when the main camera has no offscreen image.
+    if( m_program && m_program->HasComponent<Camera>() )
+    {
+        m_program->GetComponent<Camera>().MirrorMainCamera = true;
+    }
 }
 
 
@@ -944,6 +990,8 @@ void Director::AddSpotCuts()
         const VenuePlan::CameraSpot& spot = m_plan.Cameras[i];
         if( spot.Shot != VenuePlan::CameraSpot::Kind::Close && spot.Shot != VenuePlan::CameraSpot::Kind::Custom ) continue;
         if( spot.Shot == VenuePlan::CameraSpot::Kind::Custom && ( StartsWith( spot.Tag, "peak/" ) || StartsWith( spot.Tag, "story/" ) ) ) continue;
+        // A guest's spot is only for the footage the guests shoot (BuildGuestCuts).
+        if( StartsWith( spot.Tag, "guest/" ) ) continue;
         int nearest = -1;
         float best = 0.35f;
         for( int member = 0; member < VenueData::MemberCount; ++member )
@@ -990,6 +1038,237 @@ void Director::AddSpotCuts()
             turn = pick + 1;
             break;
         }
+    }
+}
+
+
+int Director::DeviceFor( const VenuePlan::CameraSpot& inSpot ) const
+{
+    if( VenueTiming::Contains( inSpot.Tag, "@phone" ) ) return 2;
+    if( VenueTiming::Contains( inSpot.Tag, "@dv" ) || VenueTiming::Contains( inSpot.Tag, "@camcorder" ) ) return 1;
+    if( m_footage == 1 || m_footage == 2 ) return m_footage;
+    // Mixed: about one guest in three has only their phone.
+    uint32_t hash = 2166136261u;
+    for( char c : inSpot.Tag ) hash = ( hash ^ static_cast<uint8_t>( c ) ) * 16777619u;
+    return VenueTiming::Noise( hash, 141u ) < 0.35f ? 2 : 1;
+}
+
+
+void Director::BuildGuestCuts()
+{
+    // Nobody hired a crew: the show is the guests' clips. The chart's cuts still say when the
+    // picture changes (each one a different guest pressing REC), but where the camera stands is a
+    // guest/ spot (one aimed at the shot's subject when there is one), or someone in the crowd
+    // holding a camera up. Cuts closer than a clip can be are merged.
+    std::vector<int> guests;
+    std::vector<int> aimedAt;
+    m_spotDevice.assign( m_plan.Cameras.size(), 0 );
+    for( size_t i = 0; i < m_plan.Cameras.size(); ++i )
+    {
+        const VenuePlan::CameraSpot& spot = m_plan.Cameras[i];
+        if( !StartsWith( spot.Tag, "guest/" ) ) continue;
+        m_spotDevice[i] = DeviceFor( spot );
+        int nearest = -1;
+        float best = 0.4f;
+        for( int member = 0; member < VenueData::MemberCount; ++member )
+        {
+            if( !m_plan.HasMember( member ) ) continue;
+            const Vector3 toward = m_plan.Members[member].Feet + Vector3( 0.f, 1.3f, 0.f ) - spot.Eye;
+            const float along = toward.Dot( spot.Forward );
+            if( along <= 0.5f ) continue;
+            const float off = ( toward - spot.Forward * along ).Length() / along;
+            if( off < best )
+            {
+                best = off;
+                nearest = member;
+            }
+        }
+        guests.push_back( static_cast<int>( i ) );
+        aimedAt.push_back( nearest );
+    }
+    // The opening is a clip too.
+    if( m_cuts.empty() || m_cuts.front().Time > 0.01f )
+    {
+        Cut opening;
+        opening.Name = "guest_opening";
+        m_cuts.insert( m_cuts.begin(), opening );
+    }
+    constexpr float kShortestClip = 1.6f;
+    std::vector<Cut> clips;
+    for( const Cut& cut : m_cuts )
+    {
+        if( clips.empty() || cut.Time - clips.back().Time >= kShortestClip ) clips.push_back( cut );
+    }
+    int last = -1;
+    int previous = -1;
+    for( size_t i = 0; i < clips.size(); ++i )
+    {
+        const Plan asked = clips[i].Shot;
+        Plan shot;
+        shot.Handheld = true;
+        const uint32_t seed = static_cast<uint32_t>( i );
+        if( guests.empty() || VenueTiming::Noise( seed, 151u ) < 0.18f )
+        {
+            // Held up over the heads a few rows back.
+            shot.Frame = Framing::CrowdPov;
+            shot.Variant = asked.Variant;
+            shot.Subjects = asked.Subjects;
+            shot.Device = m_footage == 1 || m_footage == 2 ? m_footage : ( VenueTiming::Noise( seed, 152u ) < 0.6f ? 2 : 1 );
+            clips[i].Name = "guest_crowd";
+            clips[i].Shot = shot;
+            continue;
+        }
+        // Half the time a spot on the shot's subject; never the last two clips' guests when there's
+        // a choice. (The guests film what they like: the chart only nudges them.)
+        const bool follow = VenueTiming::Noise( seed, 154u ) < 0.5f;
+        std::vector<size_t> choices;
+        for( int pass = follow ? 0 : 1; pass < 3 && choices.empty(); ++pass )
+        {
+            for( size_t k = 0; k < guests.size(); ++k )
+            {
+                const int recent = static_cast<int>( k );
+                if( pass < 2 && guests.size() > 2 && ( recent == last || recent == previous ) ) continue;
+                if( pass == 2 && recent == last && guests.size() > 1 ) continue;
+                const bool onSubject = asked.Subjects.empty() || std::find( asked.Subjects.begin(), asked.Subjects.end(), aimedAt[k] ) != asked.Subjects.end();
+                if( pass > 0 || onSubject ) choices.push_back( k );
+            }
+        }
+        if( choices.empty() ) choices.push_back( 0 );
+        const size_t pick = choices[static_cast<size_t>( VenueTiming::Noise( seed, 153u ) * static_cast<float>( choices.size() ) ) % choices.size()];
+        previous = last;
+        last = static_cast<int>( pick );
+        shot.Frame = Framing::Spot;
+        shot.Variant = guests[pick];
+        if( aimedAt[pick] >= 0 ) shot.Subjects.push_back( aimedAt[pick] );
+        shot.Device = m_spotDevice[guests[pick]];
+        clips[i].Name = m_plan.Cameras[guests[pick]].Tag;
+        clips[i].Shot = shot;
+    }
+    m_cuts = clips;
+}
+
+
+Director::VideoLook Director::VideoFor( int inVideo )
+{
+    // In the picture's own pixels (the camera renders at the device's lines).
+    VideoLook look;
+    if( inVideo == 1 )
+    {
+        // MiniDV: colour smeared a few pixels right, a sharpened edge with a halo, highlights that
+        // clip and streak sideways, coloured noise in the dark, a tear when the tape starts.
+        look.Bleed = 4.f;
+        look.Sharpen = 0.7f;
+        look.Smear = 0.55f;
+        look.Noise = 0.07f;
+        look.Glitch = 0.6f;
+    }
+    else if( inVideo == 2 )
+    {
+        // A 2006 phone: QVGA at best, its colour a quarter of that, blocks wherever it moves.
+        look.Bleed = 2.f;
+        look.Sharpen = 0.25f;
+        look.Smear = 0.3f;
+        look.Block = 2.f;
+        look.Noise = 0.13f;
+    }
+    return look;
+}
+
+
+void Director::Operate( const Plan& inPlan, int inCutIndex, float inHeld, float inDeltaTime, float& ioFov )
+{
+    const uint32_t clip = static_cast<uint32_t>( std::max( inCutIndex, 0 ) );
+    const float held = std::max( inHeld, 0.f );
+    // The zoom rocker (camcorders; the phones have none): every few seconds the guest zooms in on
+    // something or back out, and the eased framing makes it a zoom. Some clips start on a zoom.
+    if( inPlan.Device == 1 )
+    {
+        const float every = 2.2f + 3.f * VenueTiming::Noise( clip, 161u );
+        const int step = static_cast<int>( held / every ) + ( VenueTiming::Noise( clip, 163u ) < 0.3f ? 1 : 0 );
+        if( step > 0 )
+        {
+            const float zoom = std::exp2( ( VenueTiming::Noise( clip * 16u + static_cast<uint32_t>( step ), 162u ) - 0.62f ) * 1.6f );
+            ioFov *= std::clamp( zoom, 0.4f, 1.25f );
+        }
+    }
+    // The auto exposure after REC: it opens up too far and hunts back. The phones take longer.
+    const bool phone = inPlan.Device == 2;
+    const float rate = phone ? 1.6f : 2.6f;
+    m_hunt = ( phone ? 0.9f : 0.6f ) * std::exp( -held * rate ) * std::cos( held * ( phone ? 5.f : 8.f ) );
+    // Getting bumped by someone dancing past.
+    if( VenueTiming::Noise( clip, 181u ) < 0.4f )
+    {
+        const float at = 0.8f + 4.f * VenueTiming::Noise( clip, 182u );
+        if( held >= at && held - std::max( inDeltaTime, 0.f ) < at )
+        {
+            Kick( 0.9f );
+        }
+    }
+}
+
+
+void Director::ApplyVideo( double inSeconds, float inHeld, const Vector3& inEye, const Vector3& inTarget )
+{
+    if( !m_main || !m_main->HasComponent<PostProcess>() )
+    {
+        return;
+    }
+    PostProcess& post = m_main->GetComponent<PostProcess>();
+    const bool video = m_grade.Video > 0;
+    const bool listed = !post.Graphs.empty() && post.Graphs.front().GetLocalPathString() == Path( kCamcorderGraph ).GetLocalPathString();
+    if( video != listed )
+    {
+        post.Graphs.clear();
+        if( video ) post.Graphs.push_back( Path( kCamcorderGraph ) );
+    }
+    if( video )
+    {
+        const VideoLook look = VideoFor( m_grade.Video );
+        // The REC break: the first couple of frames of a clip are black, then the tape tears for a
+        // moment as it gets up to speed (camcorders; a phone just starts).
+        const float held = std::max( inHeld, 0.f );
+        const float black = m_footage > 0 && held < 0.08f ? 1.f : 0.f;
+        const float tear = m_footage > 0 ? look.Glitch * std::max( 0.f, 1.f - ( held - 0.08f ) / 0.3f ) : 0.f;
+        const int frame = m_grainFrame >= 0 ? m_grainFrame : static_cast<int>( inSeconds * 30.0 );
+        Moonlight::ShaderGraphParams& params = post.GraphParams.ByGraph[Path( kCamcorderGraph ).GetLocalPathString()];
+        params.Set( "Bleed", Vector4( look.Bleed ) );
+        params.Set( "Sharpen", Vector4( look.Sharpen ) );
+        params.Set( "Smear", Vector4( look.Smear ) );
+        params.Set( "Block", Vector4( look.Block ) );
+        params.Set( "Noise", Vector4( look.Noise ) );
+        params.Set( "Break", Vector4( black > 0.f ? 1.f : std::min( tear, 0.98f ) ) );
+        params.Set( "Seed", Vector4( static_cast<float>( frame % 997 ) ) );
+        // The date stamp: camcorders only (the phones never stamped), when the player wants it.
+        static const bool kForceStamp = CommandLine::Has( "--venue-datestamp" );
+        const bool stamp = m_grade.Video == 1 && ( kForceStamp || GameSettings::GetInstance().VenueDateStamp );
+        params.Set( "Stamp", Vector4( stamp ? 1.f : 0.f ) );
+        params.Set( "StampDate", Vector4( m_stampDate ) );
+        params.Set( "StampYear", Vector4( m_stampYear ) );
+        params.Set( "StampClock", Vector4( std::floor( m_stampClock + static_cast<float>( std::max( inSeconds, 0.0 ) ) ) ) );
+    }
+    // The light on top of the camcorder: hot on whatever is a couple of metres off, gone by six.
+    if( m_grade.Light > 0.01f && !m_light && m_world )
+    {
+        m_light = m_world->CreateEntity( "Venue Camera Light" );
+        if( m_light )
+        {
+            m_light->AddComponent<Transform>( "Venue Camera Light" );
+            Light& light = m_light->AddComponent<Light>();
+            light.LightType = Moonlight::LightType::Spot;
+            light.Color = Vector3( 1.f, 0.9f, 0.74f );
+            light.Range = 6.5f;
+            light.InnerConeAngle = 14.f;
+            light.OuterConeAngle = 34.f;
+            light.CastShadows = false;
+        }
+    }
+    if( m_light )
+    {
+        m_light->GetComponent<Light>().Intensity = m_grade.Light;
+        Transform& transform = m_light->GetComponent<Transform>();
+        // Just above the lens, aimed with it.
+        transform.SetPosition( VenueLayout::kVenueOrigin + inEye + Vector3( 0.f, 0.06f, 0.f ) );
+        transform.LookAt( VenueLayout::kVenueOrigin + inTarget );
     }
 }
 
@@ -1568,6 +1847,43 @@ Director::Grade Director::GradeFor( const std::string& inLook )
     // Rock Band's post-processing looks, as the engine's grading can make them.
     Grade grade;
     const auto has = [&inLook]( const char* inWord ) { return inLook.find( inWord ) != std::string::npos; };
+    // Found footage's devices (and --venue-look dv_2004 / phone_2006 anywhere).
+    if( inLook == kCamcorderLook )
+    {
+        // A 2004 MiniDV camcorder at night: standard definition, gain cranked up, the blacks
+        // crushed but noisy, highlights clipping hard (they streak in the graph rather than glow),
+        // little vignette, and the light on top.
+        grade.Saturation = 0.9f;
+        grade.Contrast = 1.16f;
+        grade.Tint = 0.04f;
+        grade.Exposure = 0.3f;
+        grade.Bloom = 0.45f;
+        grade.BloomThreshold = 1.1f;
+        grade.Vignette = 0.12f;
+        grade.Grain = 0.05f;
+        grade.Video = 1;
+        grade.Lines = 480.f;
+        grade.Light = 30.f;
+        return grade;
+    }
+    if( inLook == kPhoneLook )
+    {
+        // A 2006 flip phone: fifteen frames a second, washed out and magenta, its gain pumping.
+        grade.Saturation = 0.72f;
+        grade.Contrast = 1.22f;
+        grade.Temperature = 0.08f;
+        grade.Tint = 0.2f;
+        grade.Exposure = 0.45f;
+        grade.Bloom = 0.6f;
+        grade.BloomThreshold = 0.9f;
+        grade.Vignette = 0.3f;
+        grade.Grain = 0.09f;
+        grade.ColorBits = 6;
+        grade.FrameRate = 15.f;
+        grade.Video = 2;
+        grade.Lines = 480.f;
+        return grade;
+    }
     if( inLook.empty() || StartsWith( inLook, "ProFilm_a" ) )
     {
         // The everyday look: a concert film's, a little contrast, the lights blooming, the
@@ -1634,16 +1950,44 @@ void Director::ApplyGrade( float inDeltaTime )
     toward( m_grade.Dither, m_gradeTarget.Dither );
     toward( m_grade.Lut, m_gradeTarget.Lut );
     toward( m_grade.Grain, m_gradeTarget.Grain );
+    toward( m_grade.BloomThreshold, m_gradeTarget.BloomThreshold );
+    // A camcorder's auto white balance settles on each new clip.
+    m_whiteBalance += ( m_whiteBalanceTarget - m_whiteBalance ) * ( 1.f - std::exp( -inDeltaTime * 3.f ) );
     m_grade.ColorBits = m_gradeTarget.ColorBits;
     m_grade.FrameRate = m_gradeTarget.FrameRate;
+    m_grade.Video = m_gradeTarget.Video;
+    m_grade.Lines = m_gradeTarget.Lines;
+    m_grade.Light = m_gradeTarget.Light;
     PostProcess& post = m_main->GetComponent<PostProcess>();
     post.Saturation = m_grade.Saturation;
+    // What the look leaves in colour: the venue's, or everything for a "lights" story shot. It
+    // snaps with a cut to such a shot and back (Earth and heaven share a scene), else eases.
+    const Vector3 keep = m_shotLights ? Vector3( 1.f, 1.f, 1.f ) : m_keepTarget;
+    m_keep = m_shotLights != m_keptLights ? keep : m_keep + ( keep - m_keep ) * ease;
+    m_keptLights = m_shotLights;
+    post.SaturationKeepRed = m_keep.x;
+    post.SaturationKeepBlue = m_keep.y;
+    post.SaturationKeepWarmth = m_keep.z;
     post.Contrast = m_grade.Contrast;
-    post.Temperature = m_grade.Temperature;
+    post.Temperature = m_grade.Temperature + m_whiteBalance;
     post.Tint = m_grade.Tint;
     post.BloomIntensity = 0.12f * m_grade.Bloom;
+    post.BloomThreshold = m_grade.BloomThreshold;
     post.VignetteIntensity = m_grade.Vignette;
-    post.ExposureCompensation = m_grade.Exposure + m_closeExposure;
+    post.ExposureCompensation = m_grade.Exposure + m_closeExposure + m_hunt;
+    // A home video's standard definition: the venue renders that many lines tall and is scaled up
+    // soft. (Changing the scale rebuilds the camera's targets, so only when it really changes.)
+    if( m_main->HasComponent<Camera>() )
+    {
+        Camera& camera = m_main->GetComponent<Camera>();
+        const float height = camera.GetViewportSize().y;
+        const float scale = m_grade.Lines > 0.f ? std::clamp( m_grade.Lines / std::max( height, 1.f ), 0.1f, 1.f ) : 1.f;
+        if( std::fabs( camera.RenderScale - scale ) > 0.02f || ( scale >= 1.f && camera.RenderScale != 1.f ) )
+        {
+            camera.RenderScale = scale;
+            camera.Upscale = Moonlight::UpscaleFilter::Bilinear;
+        }
+    }
     post.EraColorBits = m_grade.ColorBits;
     post.EraDither = m_grade.Dither;
     post.LutContribution = m_grade.Lut;
@@ -1682,6 +2026,7 @@ void Director::SetFeedStepRate( float inStepRate, float inFrameSeconds )
 
 void Director::SetGrainFrame( int inFrame )
 {
+    m_grainFrame = inFrame;
     for( EntityHandle* camera : { &m_main, &m_program } )
     {
         if( *camera && ( *camera )->HasComponent<PostProcess>() )
@@ -1783,6 +2128,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             }
             bool end = false;
             bool hand = false;
+            bool aerial = false;
+            bool lights = false;
             float seconds = -1.f;
             float focus = 0.f;
             int via = -1;
@@ -1794,6 +2141,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
                 const bool numbered = part.size() > 1 && ( std::isdigit( static_cast<unsigned char>( part[1] ) ) || part[1] == '.' );
                 if( part == "end" ) end = true;
                 else if( part == "hand" ) hand = true;
+                else if( part == "heli" ) aerial = true;
+                else if( part == "lights" ) lights = true;
                 else if( part[0] == 'w' && numbered ) via = std::atoi( part.c_str() + 1 );
                 else if( part[0] == 'f' && numbered ) focus = static_cast<float>( std::atof( part.c_str() + 1 ) );
                 else if( !part.empty() && ( std::isdigit( static_cast<unsigned char>( part[0] ) ) || part[0] == '.' ) ) seconds = static_cast<float>( std::atof( part.c_str() ) );
@@ -1812,6 +2161,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             }
             shot.Spot = static_cast<int>( i );
             shot.Handheld = hand;
+            shot.Aerial = aerial;
+            shot.Lights = lights;
             shot.FocusFrom = focus;
             if( seconds > 0.f ) hold = seconds;
         }
@@ -1831,6 +2182,11 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
 
 void Director::OnBigMoment( double inSeconds, float inHoldSeconds )
 {
+    // The hero shots are the crew's: the guests just keep filming.
+    if( m_footage > 0 )
+    {
+        return;
+    }
     m_bigStart = inSeconds;
     m_bigEnd = inSeconds + std::max( inHoldSeconds, 0.f );
 }
@@ -1938,6 +2294,11 @@ void Director::Update( double inSeconds, float inDeltaTime )
                 plan.Frame = Framing::Spot;
                 plan.Variant = static_cast<int>( it - spots.begin() );
                 plan.Static = true;
+                if( static_cast<size_t>( plan.Variant ) < m_spotDevice.size() && m_spotDevice[plan.Variant] > 0 )
+                {
+                    plan.Device = m_spotDevice[plan.Variant];
+                    plan.Handheld = true;
+                }
             }
         }
         DropAbsent( plan );
@@ -1947,7 +2308,15 @@ void Director::Update( double inSeconds, float inDeltaTime )
     else
     {
         auto it = std::upper_bound( m_cuts.begin(), m_cuts.end(), static_cast<float>( inSeconds ), []( float t, const Cut& c ) { return t < c.Time; } );
-        if( it == m_cuts.begin() )
+        if( it == m_cuts.begin() && m_footage > 0 && !m_cuts.empty() )
+        {
+            // The count-in: the first guest's already filming.
+            index = 0;
+            plan = m_cuts[0].Shot;
+            held = static_cast<float>( inSeconds ) + 10.f;
+            m_shotName = m_cuts[0].Name;
+        }
+        else if( it == m_cuts.begin() )
         {
             plan.Frame = Framing::Far;
             held = static_cast<float>( inSeconds ) + 10.f;
@@ -1963,7 +2332,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
         // A big moment gets a hero shot: the crane going up over the crowd, a run in to the
         // band, or over the band at the crowd, the same one for the same moment. The guitar's
         // neck camera keeps the screen.
-        if( inSeconds >= m_bigStart && inSeconds < m_bigEnd && plan.Frame != Framing::Neck )
+        if( inSeconds >= m_bigStart && inSeconds < m_bigEnd && plan.Frame != Framing::Neck && m_footage == 0 )
         {
             const uint32_t moment = static_cast<uint32_t>( std::max( 0.0, m_bigStart ) * 2.0 );
             const int pick = static_cast<int>( VenueTiming::Noise( moment, 91u ) * 3.f ) % 3;
@@ -1974,7 +2343,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
             held = static_cast<float>( inSeconds - m_bigStart );
             m_shotName = pick == 0 ? "big_moment_crane" : pick == 1 ? "big_moment_push" : "big_moment_reverse";
         }
-        if( m_accentPhase >= 0.f && m_accentPhase < 1.f && HasPeakShots() && plan.Frame != Framing::Neck )
+        if( m_accentPhase >= 0.f && m_accentPhase < 1.f && HasPeakShots() && plan.Frame != Framing::Neck && m_footage == 0 )
         {
             const size_t pick = std::min( static_cast<size_t>( m_accentPhase * m_peakSpots.size() ), m_peakSpots.size() - 1 );
             plan = Plan();
@@ -2024,6 +2393,8 @@ void Director::Update( double inSeconds, float inDeltaTime )
                 plan.Frame = Framing::Story;
                 plan.Variant = static_cast<int>( i );
                 plan.Handheld = shot.Handheld;
+                plan.Aerial = shot.Aerial;
+                plan.Lights = shot.Lights;
                 plan.Blur = shot.FocusFrom > 0.f || shot.FocusTo > 0.f ? 11.f : 0.f;
                 plan.Static = true;
                 index = -6 - static_cast<int>( i );
@@ -2031,6 +2402,14 @@ void Director::Update( double inSeconds, float inDeltaTime )
                 m_shotName = m_plan.Cameras[shot.Spot].Tag;
             }
         }
+    }
+    // Found footage: whatever takes the screen is still in some guest's hands, on the device the
+    // clip is being shot on.
+    if( m_footage > 0 && plan.Device == 0 )
+    {
+        const TimedCueData* clipLook = VenueTiming::CueAt( m_looks, inSeconds );
+        plan.Device = clipLook && clipLook->m_name == kPhoneLook ? 2 : 1;
+        plan.Handheld = plan.Frame != Framing::Neck;
     }
     // The shot's move runs on its own clock, a little faster when the show is worked up: started
     // from the time since the cut, so a seek lands mid-move. (A held shot follows the song clock,
@@ -2050,11 +2429,46 @@ void Director::Update( double inSeconds, float inDeltaTime )
     {
         m_moveTime += dt * ( 1.f + 0.5f * m_hype );
     }
+    if( cut )
+    {
+        // When this clip started: a shot that holds its own clock at zero (the surfer's) still ages.
+        m_clipStart = inSeconds - std::max( held, 0.f );
+    }
+    const float clipAge = static_cast<float>( inSeconds - m_clipStart );
     Vector3 eye;
     Vector3 target;
     float fov = 45.f;
     Vector3 up = Vector3::Up;
     Frame( plan, plan.Frame == Framing::Arrival ? m_arrivalElapsed : plan.Frame == Framing::Story ? held : m_moveTime, eye, target, fov, &up );
+    if( plan.Device > 0 )
+    {
+        if( cut )
+        {
+            // Each guest's camera has its own idea of white (the same guest, the same idea).
+            const uint32_t who = plan.Frame == Framing::Spot ? static_cast<uint32_t>( plan.Variant ) : 1000u + static_cast<uint32_t>( std::max( index, 0 ) );
+            m_whiteBalanceTarget = ( VenueTiming::Noise( who, 191u ) - 0.45f ) * 0.55f;
+            // Its clock: the night of the party, give or take a few minutes, unless nobody ever
+            // set it (blinking 12:00 since they took it out of the box).
+            if( VenueTiming::Noise( who, 201u ) < 0.3f )
+            {
+                m_stampDate = 101.f;
+                m_stampYear = 2000.f;
+                m_stampClock = 600.f * VenueTiming::Noise( who, 202u ) - static_cast<float>( m_clipStart );
+            }
+            else
+            {
+                m_stampDate = 704.f;
+                m_stampYear = 2004.f;
+                m_stampClock = ( 23.f * 60.f + 12.f + 6.f * VenueTiming::Noise( who, 203u ) ) * 60.f;
+            }
+        }
+        Operate( plan, index, clipAge, dt, fov );
+    }
+    else
+    {
+        m_hunt = 0.f;
+        m_whiteBalanceTarget = 0.f;
+    }
     // A fisheye swells the middle of the picture: the shot is taken that much wider, so what it
     // framed is still what's in the middle. The lens changes with the cut.
     const float lensLook = LensFor( plan );
@@ -2132,7 +2546,8 @@ void Director::Update( double inSeconds, float inDeltaTime )
     // the more the show is worked up.
     if( plan.Handheld && !bolted )
     {
-        const float sway = 0.7f + 0.9f * m_hype;
+        // A guest is shakier than a camera operator.
+        const float sway = ( 0.7f + 0.9f * m_hype ) * ( plan.Device > 0 ? 1.5f : 1.f );
         eye = eye + Vector3( 0.035f * Wander( t * 0.9f, 1u ) + 0.012f * Wander( t * 2.7f, 2u ), 0.028f * Wander( t * 1.1f, 3u ) + 0.01f * Wander( t * 3.1f, 4u ), 0.02f * Wander( t * 0.7f, 5u ) ) * sway;
         // The aim wanders with the distance: the same few degrees at any range.
         const float reach = std::clamp( ( target - eye ).Length(), 1.f, 40.f ) * 0.012f;
@@ -2157,6 +2572,57 @@ void Director::Update( double inSeconds, float inDeltaTime )
         if( across.Length() > 1e-3f )
         {
             up = ( up + across.Normalized() * std::tan( 2.2f * std::sin( step + 0.4f ) * kPi / 180.f ) ).Normalized();
+        }
+    }
+    m_shotLights = plan.Lights;
+    // From a helicopter (a story shot tagged "heli"): an operator in the door on a long lens.
+    // The aim hunts for the subject and overshoots, the airframe buzzes through the picture, the
+    // horizon rolls with the aircraft, and the zoom breathes and now and then punches in.
+    if( plan.Aerial && !bolted )
+    {
+        const float reach = std::clamp( ( target - eye ).Length(), 1.f, 80.f );
+        // The hunting is a share of the frame, so a tight lens keeps its subject in the picture.
+        const float hunt = std::min( fov * 0.09f, 1.8f ) * kPi / 180.f;
+        eye = eye + Vector3( 0.4f * Wander( t * 0.3f, 36u ), 0.3f * Wander( t * 0.4f, 37u ), 0.35f * Wander( t * 0.25f, 38u ) );
+        target = target + Vector3( Wander( t * 0.45f, 30u ) + 0.55f * Wander( t * 1.3f, 31u ) + 0.2f * Wander( t * 3.4f, 42u ),
+                                   0.7f * Wander( t * 0.55f, 32u ) + 0.45f * Wander( t * 1.6f, 33u ) + 0.2f * Wander( t * 3.9f, 43u ), 0.f ) * ( reach * hunt );
+        target = target + Vector3( Wander( t * 21.f, 34u ), Wander( t * 26.f, 35u ), 0.f ) * ( reach * hunt * 0.09f );
+        const Vector3 across = ( target - eye ).Normalized().Cross( up );
+        if( across.Length() > 1e-3f )
+        {
+            const float roll = ( 3.f * Wander( t * 0.35f, 39u ) + 0.8f * Wander( t * 1.9f, 40u ) + 0.25f * Wander( t * 17.f, 44u ) ) * kPi / 180.f;
+            up = ( up + across.Normalized() * std::tan( roll ) ).Normalized();
+        }
+        // The zoom: breathing all the time, and about one slot in three a quick punch in that
+        // eases back out.
+        const float slot = t / 2.7f;
+        const float since = ( slot - std::floor( slot ) ) * 2.7f;
+        const float punch = VenueTiming::Noise( static_cast<uint32_t>( static_cast<int32_t>( std::floor( slot ) ) ), 45u ) > 0.64f
+            ? std::min( since / 0.18f, 1.f ) * std::exp( -std::max( since - 0.18f, 0.f ) * 1.1f ) : 0.f;
+        fov *= 1.f + 0.07f * Wander( t * 0.5f, 41u ) - 0.22f * punch;
+    }
+    // The venue on the move (SetRide): the road comes up through whatever the camera is mounted
+    // on. A fine buzz, the slow heave and lean of the suspension, and every second or so a joint
+    // in the road: a knock that drops the picture and rings out.
+    m_ride += ( m_rideTarget - m_ride ) * ( 1.f - std::exp( -dt * 3.f ) );
+    if( m_ride > 0.01f && !bolted && !plan.Aerial )
+    {
+        const float reach = std::clamp( ( target - eye ).Length(), 1.f, 60.f );
+        const float slot = t / 0.87f;
+        const float cell = std::floor( slot );
+        const float since = ( slot - cell ) * 0.87f;
+        const float size = VenueTiming::Noise( static_cast<uint32_t>( static_cast<int32_t>( cell ) ), 28u );
+        const float bump = size > 0.35f ? ( size - 0.35f ) * 1.5f * std::exp( -since * 8.f ) * std::sin( since * 34.f ) : 0.f;
+        eye = eye + Vector3( 0.006f * Wander( t * 31.f, 20u ) + 0.03f * Wander( t * 0.8f, 25u ),
+                             0.007f * Wander( t * 37.f, 21u ) + 0.035f * Wander( t * 1.3f, 23u ) + 0.015f * Wander( t * 3.7f, 24u ) - 0.05f * bump,
+                             0.004f * Wander( t * 29.f, 22u ) ) * m_ride;
+        target = target + Vector3( 0.0022f * Wander( t * 27.f, 26u ) + 0.004f * Wander( t * 2.1f, 46u ),
+                                   0.0028f * Wander( t * 33.f, 27u ) + 0.005f * Wander( t * 1.7f, 47u ) + 0.012f * bump, 0.f ) * ( reach * m_ride );
+        const Vector3 across = ( target - eye ).Normalized().Cross( up );
+        if( across.Length() > 1e-3f )
+        {
+            const float roll = ( 0.6f * Wander( t * 1.1f, 48u ) + 0.25f * Wander( t * 4.3f, 49u ) + 0.12f * Wander( t * 23.f, 50u ) + 0.7f * bump ) * m_ride * kPi / 180.f;
+            up = ( up + across.Normalized() * std::tan( roll ) ).Normalized();
         }
     }
     // A jolt (Kick): a quick rattle that settles in under half a second.
@@ -2199,13 +2665,19 @@ void Director::Update( double inSeconds, float inDeltaTime )
     camera.SetFOV( fov );
 
     const TimedCueData* look = VenueTiming::CueAt( m_looks, inSeconds );
-    const std::string lookName = !forcedLook.empty() ? forcedLook : look ? look->m_name : std::string();
+    std::string lookName = !forcedLook.empty() ? forcedLook : look ? look->m_name : std::string();
+    if( forcedLook.empty() && plan.Device > 0 )
+    {
+        // Found footage: the picture is the device the clip is shot on.
+        lookName = plan.Device == 2 ? kPhoneLook : kCamcorderLook;
+    }
     if( lookName != m_lookName || m_lookName.empty() )
     {
         m_lookName = lookName;
         m_gradeTarget = GradeFor( lookName );
     }
     ApplyGrade( inDeltaTime );
+    ApplyVideo( inSeconds, clipAge, eye, target );
     UpdateFeed( inSeconds, inDeltaTime, index );
     if( m_program )
     {

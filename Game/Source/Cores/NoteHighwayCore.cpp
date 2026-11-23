@@ -60,16 +60,32 @@ namespace
     constexpr const char* kOpenHiHatPrefab = "Assets/Prefabs/Notes/CymbalRing.prefab";
     constexpr const char* kKickPrefab = "Assets/Prefabs/Notes/KickBar.prefab";
     // Where each model's top is, and how deep its top is front to back (for the technique markings).
-    constexpr float kGemTop = 0.29f;
+    constexpr float kGemTop = 0.25f;
     constexpr float kGemTopDepth = 0.2f;
     constexpr float kCymbalBellTop = 0.18f;
     constexpr float kCymbalBowTop = 0.06f;
     constexpr float kCymbalDepth = 0.5f;
-    // Heights above the lane (the highway's surface is at -0.06). The kick lies on the surface, the
-    // drums stand on it with the kick's top level with their base, and the cymbals float over both.
+    // Heights above the lane (the highway's surface is at -0.06). The kick lies on the surface
+    // (0.03 thick), the drums stand just clear of its top so a kick on their beat passes under
+    // them whole, and the cymbals float over both.
     constexpr float kKickBase = -0.055f;
-    constexpr float kGemBase = -0.05f;
+    constexpr float kGemBase = -0.02f;
     constexpr float kCymbalBase = 0.05f;
+    // The target pads at the strike line: centre height, thickness, depth front to back.
+    constexpr float kTargetPadY = -0.03f;
+    constexpr float kTargetPadHeight = 0.05f;
+    constexpr float kTargetPadDepth = 0.45f;
+    // The strike bar (Example.lvl's "Bar", lit orange by a kick): a thin line across the lanes,
+    // lying under the target pads and every note. It's shallower than a pad, so a pad hides it
+    // completely and it shows only in the gaps between the pads.
+    constexpr float kStrikeBarY = -0.05f;
+    constexpr float kStrikeBarHeight = 0.016f;
+    constexpr float kStrikeBarDepth = 0.12f;
+    static_assert( kStrikeBarY + kStrikeBarHeight * 0.5f < kTargetPadY + kTargetPadHeight * 0.5f, "the strike bar must stay under the target pads" );
+    static_assert( kStrikeBarDepth < kTargetPadDepth, "a target pad must cover the strike bar front to back" );
+    static_assert( kStrikeBarY + kStrikeBarHeight * 0.5f < kGemBase, "the strike bar must stay under the drum notes" );
+    static_assert( kStrikeBarY + kStrikeBarHeight * 0.5f < kKickBase + 0.03f, "the strike bar must stay under the kick (KickBar.obj is 0.03 thick)" );
+    static_assert( kStrikeBarY - kStrikeBarHeight * 0.5f >= -0.06f, "the strike bar must stay on the highway's surface (top at -0.06)" );
     // A note's colour is its glow: the models' textures leave only the pale base to the material's
     // own colour (kNoteTrim), and the rest to the emissive colour (the scene has no lights).
     constexpr float kNoteTrim = 0.85f;
@@ -664,8 +680,7 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     float kickSide = 0.f;
     if( kick )
     {
-        // Past the rails, so its points show even where notes cover the lanes.
-        width = m_highwayWidth + 0.3f;
+        width = m_highwayWidth;
         if( outState.Foot != KickFoot::Either )
         {
             kickSide = outState.Foot == KickFoot::Right ? 1.f : -1.f;
@@ -712,7 +727,7 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     const Vector3 white( 0.95f, 0.95f, 0.95f );
     if( kickSide != 0.f )
     {
-        AddDecoration( outState, lane, position, Vector3( -kickSide * m_highwayWidth * 0.5f, kKickBase + 0.015f, 0.f ), Vector3( m_highwayWidth * 0.5f, 0.03f, 0.07f ), baseColor );
+        AddDecoration( outState, lane, position, Vector3( -kickSide * m_highwayWidth * 0.5f, kKickBase + 0.012f, 0.f ), Vector3( m_highwayWidth * 0.5f, 0.024f, 0.07f ), baseColor );
     }
     switch( inNote.m_articulation )
     {
@@ -992,14 +1007,15 @@ void NoteHighwayCore::LayoutLanes()
         BRUH_FMT( "Highway: %d lanes (%s), spacing %.2f, width %.2f", count, layout.c_str(), m_laneSpacing, m_highwayWidth );
     }
 
-    // The strike bar spans the lanes.
+    // The strike bar spans the lanes, under the pads and notes.
     if( TrackMover )
     {
         if( Transform* bar = TrackMover->GetComponent<Transform>().GetChildByName( "Bar" ) )
         {
-            Vector3 scale = bar->GetScale();
-            scale.x = m_highwayWidth / kBarMeshWidth;
-            bar->SetScale( scale );
+            Vector3 position = bar->GetPosition();
+            position.y = kStrikeBarY;
+            bar->SetPosition( position );
+            bar->SetScale( Vector3( m_highwayWidth / kBarMeshWidth, kStrikeBarHeight / kBarMeshWidth, kStrikeBarDepth / kBarMeshWidth ) );
         }
     }
 }
@@ -1118,6 +1134,19 @@ void NoteHighwayCore::UpdateHighwayRests( float inDeltaTime )
         {
             target = 0.f;
         }
+    }
+    // The debug panel's Highway toggle hides it at once, and brings it back the same way.
+    if( m_highwayHidden )
+    {
+        m_highwayShown = 0.f;
+        m_highwayWasHidden = true;
+        m_venueShow.SetHighwayShown( 0.f );
+        return;
+    }
+    if( m_highwayWasHidden )
+    {
+        m_highwayWasHidden = false;
+        m_highwayShown = target;
     }
     const float step = std::clamp( inDeltaTime, 0.f, 0.25f ) / kRestFadeSeconds;
     m_highwayShown = target > m_highwayShown ? std::min( target, m_highwayShown + step ) : std::max( target, m_highwayShown - step );
@@ -1313,7 +1342,7 @@ void NoteHighwayCore::BuildHighway()
         TargetPad target;
         target.Lane = lane;
         target.Color = color;
-        target.Pad = SpawnBox( Vector3( x, -0.03f, 0.f ), Vector3( LaneWidth( pad ) * 0.86f, 0.05f, 0.45f ), color * 0.5f, color * 0.35f, mover );
+        target.Pad = SpawnBox( Vector3( x, kTargetPadY, 0.f ), Vector3( LaneWidth( pad ) * 0.86f, kTargetPadHeight, kTargetPadDepth ), color * 0.5f, color * 0.35f, mover );
         m_highwayParts.push_back( target.Pad );
         m_targetPads.push_back( target );
 
@@ -2399,9 +2428,11 @@ void NoteHighwayCore::Update( const UpdateContext& context )
         m_noFail = ui->ModelGetNumber( kModel, "debug_nofail" ) != 0;
         m_autoplay = static_cast<int>( ui->ModelGetNumber( kModel, "debug_autoplay" ) );
         m_autoplayPlain = ui->ModelGetNumber( kModel, "debug_plain" ) != 0;
+        m_highwayHidden = ui->ModelGetNumber( kModel, "debug_highway_hidden" ) != 0;
     }
     else
     {
+        m_highwayHidden = CommandLine::Has( "--hide-highway" );
         static const int kAutoplay = CommandLine::Has( "--highway-autoplay" ) ? ( CommandLine::Has( "--highway-autoplay-sloppy" ) ? 2 : 1 ) : 0;
         m_autoplay = kAutoplay;
         m_autoplayPlain = CommandLine::Has( "--highway-autoplay-plain" );

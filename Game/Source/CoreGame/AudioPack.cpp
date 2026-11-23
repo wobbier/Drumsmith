@@ -1,5 +1,8 @@
 #include "AudioPack.h"
 
+#include <algorithm>
+#include <cmath>
+
 #if USING( ME_FMOD )
 
 #include "Cores/AudioCore.h"
@@ -8,8 +11,7 @@
 #include "Resource/ResourceCache.h"
 #include <fmod.hpp>
 #include "Pointers.h"
-#include <algorithm>
-#include <cmath>
+#include <array>
 #include <utility>
 
 namespace
@@ -91,11 +93,13 @@ AudioPack& AudioPack::operator=( AudioPack&& other ) noexcept
     other.m_metronome = -1;
     m_syncGroup = other.m_syncGroup;
     m_speakerEq = other.m_speakerEq;
+    m_speakerDrive = other.m_speakerDrive;
     m_metering = other.m_metering;
 
     other.m_syncGroup = nullptr;
     other.m_metering = false;
     other.m_speakerEq = nullptr;
+    other.m_speakerDrive = nullptr;
 
     return *this;
 }
@@ -108,14 +112,17 @@ void AudioPack::Reset()
     m_drumTracks.clear();
     m_metronome = -1;
 
-    if( m_speakerEq )
+    for( FMOD::DSP** dsp : { &m_speakerEq, &m_speakerDrive } )
     {
-        if( m_syncGroup )
+        if( *dsp )
         {
-            m_syncGroup->removeDSP( m_speakerEq );
+            if( m_syncGroup )
+            {
+                m_syncGroup->removeDSP( *dsp );
+            }
+            ( *dsp )->release();
+            *dsp = nullptr;
         }
-        m_speakerEq->release();
-        m_speakerEq = nullptr;
     }
     if( m_syncGroup )
     {
@@ -162,24 +169,20 @@ float AudioPack::GetLevel()
 }
 
 
-void AudioPack::SetSpeaker( float inOpen, float inPan, float inLevel )
+void AudioPack::SetSpeaker( const RoomSpeaker& inSpeaker, float inOpen, float inPan, float inLevel )
 {
-#if USING( ME_FMOD )
     if( !m_syncGroup )
     {
         return;
     }
-    const float open = std::clamp( inOpen, 0.f, 1.f );
-    const float pan = std::clamp( inPan, -1.f, 1.f );
-    const float level = std::clamp( inLevel, 0.f, 1.f );
-    const bool off = open >= 0.999f && std::abs( pan ) < 0.001f && level >= 0.999f;
-    if( off && !m_speakerEq )
+    const RoomSpeaker::Mix mix = inSpeaker.Resolve( inOpen, inPan, inLevel );
+    if( mix.Off && !m_speakerEq )
     {
         return;
     }
+    FMOD::System* system = GetEngine().AudioThread->GetSystem();
     if( !m_speakerEq )
     {
-        FMOD::System* system = GetEngine().AudioThread->GetSystem();
         if( system->createDSPByType( FMOD_DSP_TYPE_MULTIBAND_EQ, &m_speakerEq ) != FMOD_OK || !m_speakerEq )
         {
             m_speakerEq = nullptr;
@@ -187,21 +190,52 @@ void AudioPack::SetSpeaker( float inOpen, float inPan, float inLevel )
         }
         m_speakerEq->setParameterInt( FMOD_DSP_MULTIBAND_EQ_A_FILTER, FMOD_DSP_MULTIBAND_EQ_FILTER_HIGHPASS_24DB );
         m_speakerEq->setParameterInt( FMOD_DSP_MULTIBAND_EQ_B_FILTER, FMOD_DSP_MULTIBAND_EQ_FILTER_LOWPASS_24DB );
+        m_speakerEq->setParameterInt( FMOD_DSP_MULTIBAND_EQ_C_FILTER, FMOD_DSP_MULTIBAND_EQ_FILTER_PEAKING );
+        m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_C_Q, 1.f );
         m_syncGroup->addDSP( FMOD_CHANNELCONTROL_DSP_TAIL, m_speakerEq );
+        // Also at the tail, so it comes first: the little amp breaks up, then the box shapes it.
+        if( system->createDSPByType( FMOD_DSP_TYPE_DISTORTION, &m_speakerDrive ) == FMOD_OK && m_speakerDrive )
+        {
+            m_syncGroup->addDSP( FMOD_CHANNELCONTROL_DSP_TAIL, m_speakerDrive );
+        }
+        else
+        {
+            m_speakerDrive = nullptr;
+        }
     }
-    // A small speaker passes about 300 Hz to 3 kHz; opening it widens both ends on a log scale.
-    const float highpass = 300.f * std::pow( 20.f / 300.f, open );
-    const float lowpass = 3000.f * std::pow( 20000.f / 3000.f, open );
-    m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_A_FREQUENCY, highpass );
-    m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_B_FREQUENCY, lowpass );
-    m_speakerEq->setBypass( open >= 0.999f );
-    m_syncGroup->setPan( pan );
-    m_syncGroup->setVolume( level );
-#else
-    (void)inOpen;
-    (void)inPan;
-    (void)inLevel;
-#endif
+    m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_A_FREQUENCY, mix.HighPass );
+    m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_B_FREQUENCY, mix.LowPass );
+    m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_C_FREQUENCY, mix.HonkAt );
+    m_speakerEq->setParameterFloat( FMOD_DSP_MULTIBAND_EQ_C_GAIN, mix.Honk );
+    m_speakerEq->setBypass( mix.HighPass <= 20.5f && mix.LowPass >= 19990.f && std::abs( mix.Honk ) < 0.05f );
+    if( m_speakerDrive )
+    {
+        m_speakerDrive->setParameterFloat( FMOD_DSP_DISTORTION_LEVEL, mix.Drive );
+        m_speakerDrive->setBypass( mix.Drive <= 0.f );
+    }
+    // The stereo pair through the group's matrix (width and pan); any other speakers of the mix
+    // pass as they are. The group mixes at the output's speaker mode, so the matrix is that wide.
+    int channels = 2;
+    int rawSpeakers = 0;
+    FMOD_SPEAKERMODE mode = FMOD_SPEAKERMODE_STEREO;
+    if( system->getSoftwareFormat( nullptr, &mode, &rawSpeakers ) == FMOD_OK && system->getSpeakerModeChannels( mode, &channels ) != FMOD_OK )
+    {
+        channels = rawSpeakers;
+    }
+    if( channels >= 2 && channels <= FMOD_MAX_CHANNEL_WIDTH )
+    {
+        std::array<float, FMOD_MAX_CHANNEL_WIDTH * FMOD_MAX_CHANNEL_WIDTH> matrix{};
+        for( int channel = 0; channel < channels; ++channel )
+        {
+            matrix[channel * channels + channel] = 1.f;
+        }
+        matrix[0] = mix.Matrix[0];
+        matrix[1] = mix.Matrix[1];
+        matrix[channels] = mix.Matrix[2];
+        matrix[channels + 1] = mix.Matrix[3];
+        m_syncGroup->setMixMatrix( matrix.data(), channels, channels );
+    }
+    m_syncGroup->setVolume( mix.Volume );
 }
 
 
@@ -814,3 +848,53 @@ float AudioPack::GetLevel()
 }
 
 #endif
+
+
+namespace
+{
+    // From inFrom to inTo on a log scale (frequencies), inT 0 to 1.
+    float LogLerp( float inFrom, float inTo, float inT )
+    {
+        return inFrom * std::pow( inTo / inFrom, inT );
+    }
+}
+
+
+RoomSpeaker::Mix RoomSpeaker::Resolve( float inOpen, float inPan, float inLevel ) const
+{
+    const float open = std::clamp( inOpen, 0.f, 1.f );
+    const float pan = std::clamp( inPan, -1.f, 1.f );
+    const float level = std::clamp( inLevel, 0.f, 1.f );
+    Mix mix;
+    // Up close, the speaker's own band. From across the room both ends go further, four tenths of
+    // the way from its band toward a small speaker's 300 Hz to 3 kHz.
+    const float low = std::clamp( LowCut, 20.f, 20000.f );
+    const float high = std::clamp( HighCut, low, 20000.f );
+    const float farLow = std::max( low, LogLerp( 300.f, low, 0.6f ) );
+    const float farHigh = std::min( high, LogLerp( 3000.f, high, 0.6f ) );
+    mix.HighPass = LogLerp( farLow, low, open );
+    mix.LowPass = LogLerp( farHigh, high, open );
+    mix.Honk = std::clamp( Honk, -24.f, 24.f );
+    mix.HonkAt = std::clamp( HonkAt, 20.f, 20000.f );
+    mix.Drive = std::clamp( Drive, 0.f, 0.9f );
+    // Its width up close, the square of that across the room: two cones close together blur into
+    // one from further off, a wide pair stays wide.
+    const float width = std::clamp( Width, 0.f, 1.f );
+    const float spread = width * ( width + ( 1.f - width ) * open );
+    const float same = 0.5f * ( 1.f + spread );
+    const float cross = 0.5f * ( 1.f - spread );
+    // Panned by balance: the side away from it quieter, neither louder than it was.
+    const float left = std::min( 1.f, std::sqrt( 1.f - pan ) );
+    const float right = std::min( 1.f, std::sqrt( 1.f + pan ) );
+    mix.Matrix[0] = left * same;
+    mix.Matrix[1] = left * cross;
+    mix.Matrix[2] = right * cross;
+    mix.Matrix[3] = right * same;
+    // FMOD's distortion is a waveshaper that lifts quiet passages by 1 + k (loud ones by less, as
+    // they saturate); half of that comes back off, so a cheap speaker isn't louder for it.
+    const float k = 2.f * mix.Drive / ( 1.f - mix.Drive );
+    mix.Volume = level / std::sqrt( 1.f + k );
+    mix.Off = mix.HighPass <= 20.5f && mix.LowPass >= 19990.f && std::abs( mix.Honk ) < 0.05f && mix.Drive <= 0.f && spread >= 0.999f
+        && std::abs( pan ) < 0.001f && level >= 0.999f;
+    return mix;
+}

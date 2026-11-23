@@ -102,7 +102,11 @@
      ],
      "Haze": 0.5,
      "SkyTime": 21.5,
-     "MoonBrightness": 0.8
+     "MoonBrightness": 0.8,
+     "CloudCoverage": 0.25,
+     "Ride": 1.0,
+     "RideUntil": "wreck",
+     "LightsFrom": "wreck"
     }
    ]
   },
@@ -37623,7 +37627,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -37655,7 +37659,7 @@
      "Type": "Transform",
      "Position": [
       0.45,
-      -0.32,
+      0.08,
       13.2
      ],
      "Rotation": [
@@ -37681,7 +37685,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -37711,7 +37715,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -37743,7 +37747,7 @@
      "Type": "Transform",
      "Position": [
       0.45,
-      -0.32,
+      0.08,
       13.2
      ],
      "Rotation": [
@@ -37769,7 +37773,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -37801,7 +37805,7 @@
      "Type": "Transform",
      "Position": [
       0.45,
-      -0.32,
+      0.08,
       13.2
      ],
      "Rotation": [
@@ -37827,7 +37831,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -37857,7 +37861,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -37889,7 +37893,7 @@
      "Type": "Transform",
      "Position": [
       0.45,
-      -0.32,
+      0.08,
       13.2
      ],
      "Rotation": [
@@ -37915,7 +37919,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -13.2
      ],
      "Rotation": [
@@ -38997,7 +39001,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -39908,7 +39912,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -40858,7 +40862,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -41769,7 +41773,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -42719,7 +42723,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -43630,7 +43634,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -44580,7 +44584,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -45491,7 +45495,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -47045,7 +47049,7 @@
      "Type": "Transform",
      "Position": [
       -0.45,
-      0.32,
+      -0.08,
       -0.2
      ],
      "Rotation": [
@@ -62255,7 +62259,7 @@
      "Type": "VenueCameraSpot",
      "Shot": "Custom",
      "FieldOfView": 44.0,
-     "Tag": "story/heli_chase/9/hand"
+     "Tag": "story/heli_chase/9/heli"
     }
    ]
   },
@@ -62575,7 +62579,7 @@
      "Type": "VenueCameraSpot",
      "Shot": "Custom",
      "FieldOfView": 34.0,
-     "Tag": "story/heli_again/8/hand"
+     "Tag": "story/heli_again/8/heli"
     }
    ]
   },

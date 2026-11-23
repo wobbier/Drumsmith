@@ -91,6 +91,10 @@ private:
     {
         bool Present = false;
         EntityHandle Group;    // at the member's spot, facing the crowd
+        // What stands on the floor at their spot (kit, rug, amp, wedges, mic stand, keyboard): a
+        // sibling of Group in the same frame. It stays down when they rise and isn't there
+        // while they float (SetStoryState).
+        EntityHandle Backline;
         Performer Body;
         int Model = -1;            // which character (People::kPeople)
         Performer::Pose Pose;
@@ -160,10 +164,13 @@ private:
         Vector3 Emissive;
         float Opacity = 1.f;
         bool Transparent = false;
+        float Rim = 0.f;
     };
     std::vector<GhostedMaterial> m_ghosted;
     // A member's group placed for a story pose (position, euler rotation, scale).
-    void StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale ) const;
+    void StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale, bool inBackline = false ) const;
+    // Adds the StandardMaterials under inRoot that m_ghosted doesn't have yet; true if any were new.
+    bool GatherGhosted( Transform& inRoot );
     float m_ghost = 0.f;
     std::array<std::vector<Stroke>, 4> m_strokes;       // per limb
     std::array<size_t, 4> m_strokeCursor{};

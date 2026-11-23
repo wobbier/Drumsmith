@@ -1266,9 +1266,9 @@
      "Venue": "StoryHell"
     },
     {
-     "Artist": "Led Zeppelin",
+     "Artist": "Heart",
      "Title": "Stairway to Heaven",
-     "Spotify": "https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc",
+     "Spotify": "https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt",
      "Flags": [
       "angels_turn"
      ],
@@ -1283,13 +1283,13 @@
        ]
       },
       {
-       "Cue": "section:intro_verse_a",
+       "Cue": "time:42.5",
        "Flags": [
         "eyes_meet"
        ]
       },
       {
-       "Cue": "section:verse_1a",
+       "Cue": "time:120",
        "Flags": [
         "horizon"
        ]
@@ -1302,7 +1302,7 @@
        ]
       },
       {
-       "Cue": "section:gtr_solo_a",
+       "Cue": "time:265",
        "Flags": [
         "choir"
        ]
@@ -1314,7 +1314,7 @@
        ]
       },
       {
-       "Cue": "section:gtr_solo_a+16",
+       "Cue": "time:265+16",
        "Flags": [
         "heaven_wide"
        ]
@@ -1355,6 +1355,42 @@
        "Cue": "section:verse_2",
        "Flags": [
         "cpr_close"
+       ]
+      },
+      {
+       "Cue": "section:verse_1+12",
+       "Flags": [
+        "earth_medics"
+       ]
+      },
+      {
+       "Cue": "section:chorus_1+16",
+       "Flags": [
+        "earth_road"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2",
+       "Flags": [
+        "earth_cop"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2+14",
+       "Flags": [
+        "earth_high"
+       ]
+      },
+      {
+       "Cue": "section:bridge+10",
+       "Flags": [
+        "earth_bass"
+       ]
+      },
+      {
+       "Cue": "section:verse_3",
+       "Flags": [
+        "earth_shoulder"
        ]
       },
       {

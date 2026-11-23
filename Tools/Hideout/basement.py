@@ -18,7 +18,7 @@ import random
 
 from hideoutgen import (flyer_name, band_name, band_name_text, sound, BLACK, BRASS, CHROME, CORK, GOLD, MARKER, OFFWHITE, PEN, STEEL, WHITE, WOOD, Scene,
                         boombox_display, clock_hands, drummer, dust, glow_light, light, look_rotation, motion, plank, poster, readout, rod, scrawl,
-                        setlist, slot, stand_in, station, tally, tape_outline, textured, view, when)
+                        setlist, slot, speaker, stand_in, station, tally, tape_outline, textured, view, when)
 
 H = 3.2        # half the width
 D = 6.0        # the back wall's face
@@ -296,7 +296,9 @@ def couch_corner(s, geo, items, stations, lights):
         motion(cone, "Bob", amount=0.012, speed=2.0, axis=(-1, 0, 0), music=True)
         s.box("Cone", cone, (0.0, 0.0, 0.0), (0.18, 0.012, 0.18), (0.06, 0.06, 0.06), rot=(0, 0, 90), shape="Cylinder", rough=0.7)
         s.box("Dust Cap", cone, (-0.008, 0.0, 0.0), (0.06, 0.012, 0.06), (0.2, 0.2, 0.2), rot=(0, 0, 90), shape="Cylinder")
-    station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.45, 0.05, -0.35), 40)
+    # It sounds like it looks: no bass, a honk, the cones a hand apart, the batteries going.
+    speaker(station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.45, 0.05, -0.35), 40),
+            low_cut=170.0, high_cut=5500.0, honk=5.0, honk_at=1300.0, width=0.3, drive=0.18)
     # Posters over the couch.
     poster(s, items, "Poster Death Squad", "PosterDeathSquad", (H - 0.012, 1.78, 1.55), 0.46, 0.69, "-x", tilt=3.0)
     poster(s, items, "Poster Magazine", "PosterMagazine", (H - 0.012, 1.86, 3.48), 0.3, 0.41, "-x", tilt=-4.0)

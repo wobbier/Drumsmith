@@ -292,6 +292,14 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
     plan.FogColor = info->FogColor;
     plan.SkyTime = std::clamp( info->SkyTime, 0.f, 24.f );
     plan.MoonBrightness = std::max( info->MoonBrightness, 0.f );
+    plan.CloudCoverage = std::clamp( info->CloudCoverage, 0.f, 1.f );
+    plan.HazeFroxels = info->HazeFroxels;
+    plan.Footage = static_cast<int>( info->Footage );
+    plan.Ride = std::max( info->Ride, 0.f );
+    plan.RideUntil = info->RideUntil;
+    plan.ColorKeep = Vector3( std::clamp( info->KeepRed, 0.f, 1.f ), std::clamp( info->KeepBlue, 0.f, 1.f ), std::clamp( info->KeepWarmth, 0.f, 1.f ) );
+    plan.LightsFrom = info->LightsFrom;
+    plan.LightsUntil = info->LightsUntil;
 
     // The stage as the band stands on it: its deck the lowest non-drummer's feet, the riser the
     // drummer's, the back wall behind the furthest back, wide enough for the widest.

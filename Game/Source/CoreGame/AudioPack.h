@@ -8,6 +8,37 @@
 namespace FMOD { class ChannelGroup; class DSP; }
 #endif
 
+// A speaker in a room playing the song (the hideout's radio; AudioPack::SetSpeaker): what it does
+// to the sound, heard standing at it. The defaults are the song as it is. A cheap box plays a
+// narrow band, honks in the mids, breaks up when pushed and has its two cones close together;
+// heard from across the room it is narrower still, at both ends and in stereo.
+struct RoomSpeaker
+{
+    float LowCut = 20.f;        // Hz: the lowest it plays
+    float HighCut = 20000.f;    // Hz: the highest
+    float Honk = 0.f;           // dB: the box's bump in the mids, at HonkAt
+    float HonkAt = 1500.f;      // Hz
+    float Width = 1.f;          // 0 one cone (mono), 1 the stereo as recorded
+    float Drive = 0.f;          // 0..0.9: how hard the little amp breaks up
+
+    // What SetSpeaker sets for the speaker heard from a place in the room.
+    struct Mix
+    {
+        bool Off = true;            // the song as it is: every effect bypassed
+        float HighPass = 20.f;      // Hz; 20 or under is none
+        float LowPass = 20000.f;    // Hz; 20000 or over is none
+        float Honk = 0.f;           // dB, at HonkAt
+        float HonkAt = 1500.f;
+        float Drive = 0.f;          // FMOD's distortion level
+        // The stereo pair out from the pair in: { left from left, left from right, right from left, right from right }.
+        float Matrix[4] = { 1.f, 0.f, 0.f, 1.f };
+        float Volume = 1.f;
+    };
+    // inOpen 0 is across the room, 1 standing at it; inPan -1 left to 1 right; inLevel 0 to 1 on
+    // top of the volume.
+    Mix Resolve( float inOpen, float inPan, float inLevel ) const;
+};
+
 class AudioPack
 {
 public:
@@ -60,10 +91,9 @@ public:
 
     bool IsReady() const;
     bool IsPlaying() const;
-    // The song as a speaker somewhere in a room plays it (the hideout's radio): inOpen 0 is a
-    // small speaker across the room (no lows, no highs), 1 the song as it is; inPan -1 left to 1
-    // right; inLevel 0 to 1 on top of the volume. 1, 0, 1 takes the effect off.
-    void SetSpeaker( float inOpen, float inPan, float inLevel );
+    // The song as inSpeaker plays it from somewhere in a room (the hideout's radio;
+    // RoomSpeaker::Resolve). A default RoomSpeaker with 1, 0, 1 takes the effect off.
+    void SetSpeaker( const RoomSpeaker& inSpeaker, float inOpen, float inPan, float inLevel );
     // How loud the pack is coming out right now: the RMS of its group's output, 0 (silence) to
     // about 1 (full scale), averaged over the channels. Turns FMOD's metering on at the first call.
     float GetLevel();
@@ -84,8 +114,9 @@ private:
 #if USING( ME_FMOD )
     // Add a channel group
     FMOD::ChannelGroup* m_syncGroup = nullptr;
-    // SetSpeaker's band limit, made on first use.
+    // SetSpeaker's band limit and honk, and its drive ahead of them, made on first use.
     FMOD::DSP* m_speakerEq = nullptr;
+    FMOD::DSP* m_speakerDrive = nullptr;
     // GetLevel's meter: the group's head DSP, metering its output.
     bool m_metering = false;
 #endif

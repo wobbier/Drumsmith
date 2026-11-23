@@ -139,24 +139,22 @@ def ellipse(half_width, half_depth, size, y, segments=40):
     return [(half_width * size * math.cos(i * math.tau / segments), y, half_depth * size * math.sin(i * math.tau / segments)) for i in range(segments)]
 
 
-def lozenge(half_width, half_depth, taper, inset, y):
-    """A bar with pointed ends. x is stretched several times over in game, so it insets less."""
+def bar(half_width, half_depth, inset, y):
+    """A rectangle. x is stretched several times over in game, so it insets less along x."""
     w, d = half_width - inset * 0.2, half_depth - inset
-    t = taper * d / half_depth
-    return [(w, y, 0.0), (w - t, y, d), (0.0, y, d), (-(w - t), y, d), (-w, y, 0.0), (-(w - t), y, -d), (0.0, y, -d), (w - t, y, -d)]
+    return [(w, y, 0.0), (w, y, d), (0.0, y, d), (-w, y, d), (-w, y, 0.0), (-w, y, -d), (0.0, y, -d), (w, y, -d)]
 
 
 def drum_gem():
-    """Snare and toms: a chunky rounded gem on a bright base."""
+    """Snare and toms: a hard-edged block with cut corners and a brighter line round its top. No
+    flange or bright line at the base: under a red snare that read as a kick lying beneath it."""
     mesh = Mesh('DrumGem')
-    ring = lambda inset, y: rounded_rect(0.5, 0.20, 0.11, inset, y)
-    mesh.band(ring(0.0, 0.0), ring(0.0, 0.06), (TRIM[0], 0.12), 1, 'out')
-    mesh.band(ring(0.0, 0.06), ring(0.015, 0.075), (0.12, TRIM[1]), 1, 'out')
-    mesh.band(ring(0.015, 0.075), ring(0.035, 0.075), SEAM, 2, 'up')
-    mesh.band(ring(0.035, 0.075), ring(0.075, 0.26), BODY, 3, 'out')
-    mesh.band(ring(0.075, 0.26), ring(0.095, 0.29), HOT, 4, 'out')
-    mesh.band(ring(0.095, 0.29), ring(0.125, 0.29), (PANEL[0], 0.85), 5, 'up')
-    mesh.cap(ring(0.125, 0.29), (0.0, 0.29, 0.0), (0.85, PANEL[1]), 5)
+    ring = lambda inset, y: rounded_rect(0.5, 0.20, 0.06, inset, y, segments=1)
+    mesh.band(ring(0.0, 0.0), ring(0.0, 0.03), TRIM, 1, 'out')
+    mesh.band(ring(0.0, 0.03), ring(0.045, 0.24), BODY, 3, 'out')
+    mesh.band(ring(0.045, 0.24), ring(0.06, 0.25), HOT, 4, 'out')
+    mesh.band(ring(0.06, 0.25), ring(0.10, 0.25), (PANEL[0], 0.85), 5, 'up')
+    mesh.cap(ring(0.10, 0.25), (0.0, 0.25, 0.0), (0.85, PANEL[1]), 5)
     mesh.write()
 
 
@@ -189,16 +187,16 @@ def cymbal_ring():
 
 
 def kick_bar():
-    """The kick: a low bar with pointed ends, lying on the highway under the other notes. Deeper
+    """The kick: a thin square-ended bar lying on the highway, under the other notes. Deeper
     front to back than they are, so it shows either side of a note that shares its beat."""
     mesh = Mesh('KickBar')
-    ring = lambda inset, y: lozenge(0.5, 0.25, 0.10, inset, y)
-    mesh.band(ring(0.0, 0.0), ring(0.0, 0.012), (TRIM[0], TRIM[1]), 0, 'out')
-    mesh.band(ring(0.0, 0.012), ring(0.07, 0.05), BODY, 1, 'out')
-    mesh.band(ring(0.07, 0.05), ring(0.10, 0.06), HOT, 2, 'up')
+    ring = lambda inset, y: bar(0.5, 0.25, inset, y)
+    mesh.band(ring(0.0, 0.0), ring(0.0, 0.008), TRIM, 0, 'out')
+    mesh.band(ring(0.0, 0.008), ring(0.05, 0.025), BODY, 1, 'out')
+    mesh.band(ring(0.05, 0.025), ring(0.08, 0.03), HOT, 2, 'up')
     # The top is the body ramp's dim end, so the bar reads as two bright edges, not a slab.
-    mesh.band(ring(0.10, 0.06), ring(0.15, 0.06), (0.50, 0.40), 3, 'up')
-    mesh.cap(ring(0.15, 0.06), (0.0, 0.06, 0.0), (0.40, 0.33), 3)
+    mesh.band(ring(0.08, 0.03), ring(0.13, 0.03), (0.50, 0.40), 3, 'up')
+    mesh.cap(ring(0.13, 0.03), (0.0, 0.03, 0.0), (0.40, 0.33), 3)
     mesh.write()
 
 
@@ -271,10 +269,14 @@ def textures():
     # Linear values, and the material multiplies the emissive ones several times over (its
     # EmissiveIntensity), so the trim and the crest go well past white and bloom while the body
     # keeps its colour. Diffuse: only the trim reflects.
-    gem_diffuse = banded([(0.55, 1.0), (0.01, 0.01), (0.03, 0.03), (0.2, 0.2), (0.03, 0.03)])
-    gem_emissive = banded([(0.40, 0.85), (0.0, 0.0), (0.055, 0.16), (0.36, 0.36), (0.17, 0.10)])
+    gem_diffuse = banded([(0.03, 0.03), (0.01, 0.01), (0.03, 0.03), (0.03, 0.03), (0.03, 0.03)])
+    # The drums and the kick are flat tones with crisp lines, not gradients: a hard block, where
+    # the cymbals below keep a soft sheen.
+    # The base is the darkest part and the crest only a little brighter than the top: anything much
+    # brighter than the body shifts hue (red goes orange) and reads as another note.
+    gem_emissive = banded([(0.05, 0.05), (0.0, 0.0), (0.085, 0.11), (0.22, 0.22), (0.17, 0.17)])
     write_png(TEXTURES / 'NoteGem_Diffuse.png', 256, 256, lambda u, v: ramp(gem_diffuse, v))
-    write_png(TEXTURES / 'NoteGem_Emissive.png', 256, 256, lambda u, v: ramp(gem_emissive, v) * sheen(u))
+    write_png(TEXTURES / 'NoteGem_Emissive.png', 256, 256, lambda u, v: ramp(gem_emissive, v))
 
     cymbal_diffuse = banded([(0.55, 1.0), (0.01, 0.01), (0.04, 0.04), (0.2, 0.2), (0.04, 0.04)])
     cymbal_emissive = banded([(0.40, 0.85), (0.0, 0.0), (0.16, 0.09), (0.36, 0.36), (0.14, 0.30)])

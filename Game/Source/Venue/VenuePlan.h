@@ -141,11 +141,26 @@ struct VenuePlan
     Vector3 ShotOffset{ 0.f, 0.f, 0.f };
     // The room's look. Background: the main camera's clear colour indoors, which also sets the
     // renderer's ambient light. FogColor: the light the fog scatters. Out of doors, the night
-    // sky's hour and how bright its moon is.
+    // sky's hour, how bright its moon is and how much of it is cloud (0: no cloud pass).
     Vector3 Background{ 0.f, 0.f, 0.f };
     Vector3 FogColor{ 0.01f, 0.01f, 0.015f };
     float SkyTime = 22.f;
     float MoonBrightness = 1.f;
+    float CloudCoverage = 0.25f;
+    // The show's haze from the froxel grid instead of the march (VenueInfo::HazeFroxels, DRU-78).
+    bool HazeFroxels = false;
+    // Who films the live show (VenueInfo::FootageKind as an int): 0 the crew; 1 camcorders, 2 flip
+    // phones, 3 both, held by guests at the venue's guest/ camera spots (Director, "Found footage").
+    int Footage = 0;
+    // The venue is on the move (VenueInfo::Ride): how hard the cameras take the road, and the
+    // story flag that ends it (empty: never).
+    float Ride = 0.f;
+    std::string RideUntil;
+    // What a desaturating look leaves in colour (VenueInfo::KeepRed...): x reds, y blues, z how
+    // far the reds reach into fire; and the story flags between which it keeps all three.
+    Vector3 ColorKeep = Vector3( 0.f, 0.f, 0.f );
+    std::string LightsFrom;
+    std::string LightsUntil;
     // The venue's name, for the logs (a scene's VenueInfo; the rooms leave it empty).
     std::string Name;
 

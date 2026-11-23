@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 #include "Config/GameSettings.h"
+#include "CoreGame/AudioPack.h"
 #include "CoreGame/Calibration.h"
 #include "CoreGame/ChartAdvice.h"
 #include "CoreGame/ClickTrack.h"
@@ -9,6 +10,7 @@
 #include "Midi/MidiDevice.h"
 #include "UI/MusicLinks.h"
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -320,4 +322,76 @@ TEST_CASE( "Music links search for the artist and title unless the chart has its
     CHECK( MusicLinks::Url( Service::Spotify, "A", "B", links ) == "https://open.spotify.com/track/abc" );
     // Only web links are handed to the browser; anything else falls back to the search.
     CHECK( MusicLinks::Url( Service::AppleMusic, "A", "B", links ) == "https://music.apple.com/search?term=A%20B" );
+}
+
+
+TEST_CASE( "A room's speaker: the defaults up close are the song as it is; a boombox narrows it, more so from across the room" )
+{
+    const RoomSpeaker clean;
+    const RoomSpeaker::Mix off = clean.Resolve( 1.f, 0.f, 1.f );
+    CHECK( off.Off );
+    CHECK( off.Matrix[0] == doctest::Approx( 1.f ) );
+    CHECK( off.Matrix[1] == doctest::Approx( 0.f ) );
+    CHECK( off.Matrix[2] == doctest::Approx( 0.f ) );
+    CHECK( off.Matrix[3] == doctest::Approx( 1.f ) );
+    CHECK( off.Volume == doctest::Approx( 1.f ) );
+    // Across the room even a clean pair loses both ends, but stays wide and doesn't honk.
+    const RoomSpeaker::Mix farClean = clean.Resolve( 0.f, 0.f, 1.f );
+    CHECK_FALSE( farClean.Off );
+    CHECK( farClean.HighPass > 50.f );
+    CHECK( farClean.LowPass < 10000.f );
+    CHECK( farClean.Honk == 0.f );
+    CHECK( farClean.Matrix[1] == doctest::Approx( 0.f ) );
+
+    RoomSpeaker boombox;
+    boombox.LowCut = 170.f;
+    boombox.HighCut = 5500.f;
+    boombox.Honk = 5.f;
+    boombox.HonkAt = 1300.f;
+    boombox.Width = 0.3f;
+    boombox.Drive = 0.18f;
+    const RoomSpeaker::Mix close = boombox.Resolve( 1.f, 0.f, 1.f );
+    CHECK_FALSE( close.Off );
+    CHECK( close.HighPass == doctest::Approx( 170.f ) );
+    CHECK( close.LowPass == doctest::Approx( 5500.f ) );
+    CHECK( close.Honk == doctest::Approx( 5.f ) );
+    CHECK( close.HonkAt == doctest::Approx( 1300.f ) );
+    CHECK( close.Drive == doctest::Approx( 0.18f ) );
+    // Width 0.3: each side keeps 0.65 of itself and takes 0.35 of the other.
+    CHECK( close.Matrix[0] == doctest::Approx( 0.65f ) );
+    CHECK( close.Matrix[1] == doctest::Approx( 0.35f ) );
+    // Half the drive's lift on quiet passages comes back off.
+    const float k = 2.f * 0.18f / ( 1.f - 0.18f );
+    CHECK( close.Volume == doctest::Approx( 1.f / std::sqrt( 1.f + k ) ) );
+    const RoomSpeaker::Mix across = boombox.Resolve( 0.f, 0.f, 1.f );
+    CHECK( across.HighPass > close.HighPass );
+    CHECK( across.LowPass < close.LowPass );
+    CHECK( across.HighPass <= 300.f );
+    CHECK( across.LowPass >= 3000.f );
+    CHECK( across.Matrix[1] > close.Matrix[1] );
+}
+
+
+TEST_CASE( "A room's speaker pans by balance: the far side quieter, neither side louder" )
+{
+    const RoomSpeaker clean;
+    const RoomSpeaker::Mix right = clean.Resolve( 1.f, 1.f, 1.f );
+    CHECK_FALSE( right.Off );
+    CHECK( right.Matrix[0] == doctest::Approx( 0.f ) );
+    CHECK( right.Matrix[3] == doctest::Approx( 1.f ) );
+    const RoomSpeaker::Mix left = clean.Resolve( 1.f, -0.5f, 0.8f );
+    CHECK( left.Matrix[0] == doctest::Approx( 1.f ) );
+    CHECK( left.Matrix[3] == doctest::Approx( std::sqrt( 0.5f ) ) );
+    CHECK( left.Volume == doctest::Approx( 0.8f ) );
+    RoomSpeaker narrow;
+    narrow.Width = 0.f;
+    for( float pan : { -1.f, -0.3f, 0.f, 0.6f, 1.f } )
+    {
+        const RoomSpeaker::Mix mix = narrow.Resolve( 0.5f, pan, 1.f );
+        for( float gain : mix.Matrix )
+        {
+            CHECK( gain <= 1.f );
+            CHECK( gain >= 0.f );
+        }
+    }
 }

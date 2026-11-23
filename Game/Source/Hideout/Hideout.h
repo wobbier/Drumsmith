@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreGame/AudioPack.h"
 #include "CoreGame/TrackList.h"
 #include "ECS/EntityHandle.h"
 #include "JSON.h"
@@ -92,7 +93,7 @@ private:
     Pose PoseOf( int inStation ) const;
     void ApplyCamera( float inDeltaTime );
     // The menu music as the radio in the room plays it: muffled and off to its side from across
-    // the room, the whole song once the camera is at it (TrackRadio::SetSpeaker).
+    // the room, all the room's speaker can play once the camera is at it (TrackRadio::SetSpeaker).
     void ApplyRadio( float inDeltaTime );
     // The band's name on the bedsheet and the kick (HideoutBandName), from PlayerProfile::BandName.
     void ApplyBandName();
@@ -145,6 +146,8 @@ private:
     std::vector<BoardRow> m_board;
     std::string m_status;
     float m_radioOpen = 0.f;
+    // What the room's radio plays through (HideoutSpeaker): better with each room.
+    RoomSpeaker m_speaker;
     // The hover light (a soft point light over the station whose label is under the pointer).
     int m_hover = -1;
     EntityHandle m_highlight;
@@ -161,7 +164,7 @@ private:
         float Seconds = 2.6f;
     };
     std::vector<Reveal> m_reveals;
-    int m_reveal = -1;          // the one being shown; -1 before the tour or after it
+    int m_reveal = -1;          // the one being shown; -1 before the tour, m_reveals.size() after it
     float m_revealAge = 0.f;
     Pose PoseOfReveal( const Reveal& inReveal ) const;
     // The first visit's camera move (HideoutView's IntroEye): seconds into it, < 0 when there's none.

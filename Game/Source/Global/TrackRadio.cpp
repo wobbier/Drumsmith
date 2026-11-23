@@ -130,20 +130,21 @@ float TrackRadio::GetLevel()
 }
 
 
-void TrackRadio::SetSpeaker( float inOpen, float inPan, float inLevel )
+void TrackRadio::SetSpeaker( const RoomSpeaker& inSpeaker, float inOpen, float inPan, float inLevel )
 {
+    m_speaker = inSpeaker;
     m_speakerOpen = inOpen;
     m_speakerPan = inPan;
     m_speakerLevel = inLevel;
-    m_audioPack.SetSpeaker( inOpen, inPan, inLevel );
-    m_fadingPack.SetSpeaker( inOpen, inPan, inLevel );
+    m_audioPack.SetSpeaker( inSpeaker, inOpen, inPan, inLevel );
+    m_fadingPack.SetSpeaker( inSpeaker, inOpen, inPan, inLevel );
 }
 
 
 void TrackRadio::Update( float dt )
 {
     // A new song's pack plays from the same place as the last.
-    m_audioPack.SetSpeaker( m_speakerOpen, m_speakerPan, m_speakerLevel );
+    m_audioPack.SetSpeaker( m_speaker, m_speakerOpen, m_speakerPan, m_speakerLevel );
     if( m_fadingTimer > 0.f )
     {
         m_fadingTimer -= dt;

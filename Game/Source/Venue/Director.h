@@ -44,6 +44,16 @@ public:
     void SetHype( float inHype ) { m_hype = inHype < 0.f ? 0.f : inHype > 1.f ? 1.f : inHype; }
     // A jolt (pyro, a CO2 jet, a big hit): the camera shakes and settles in under half a second.
     void Kick( float inAmount ) { if( inAmount > m_kick ) m_kick = inAmount; }
+    // The venue is on the move (VenueInfo::Ride; set every frame, 0 none): every camera rattles
+    // with the road, heaves on its springs and takes the bumps. Aerial shots don't.
+    void SetRide( float inRide ) { m_rideTarget = inRide < 0.f ? 0.f : inRide; }
+    // What a look that takes the colour out leaves in (set every frame): x reds, y blues (0 none,
+    // 1 all), z how far the reds reach into orange and yellow. A story shot tagged "lights"
+    // keeps all three whatever this says.
+    void SetColorKeep( const Vector3& inKeep ) { m_keepTarget = inKeep; }
+    // Found footage: the live show filmed only by the guests (VenuePlan::Footage, not in the music
+    // video): 1 camcorders, 2 flip phones, 3 both; 0 the crew.
+    int Footage() const { return m_footage; }
     // The show just went up a gear: a hero shot (a crane up over the crowd, a fast push to the
     // band, or over the band at the crowd; the same one for the same moment) takes the scheduled
     // cut's place for inHoldSeconds. The neck camera and the crowd surfer's shot keep the screen.
@@ -82,6 +92,11 @@ public:
     static constexpr const char* kConcertLut = "Assets/Textures/LUTs/ConcertScreen.cube";
     // The look charts' black-and-white looks map to, and quiet sections get when a chart has none.
     static constexpr const char* kConcertLook = "concert_bw";
+    // Found footage's devices: a 2004 MiniDV camcorder and a 2006 flip phone, and the post graph
+    // that makes both pictures (colour bleed, edge halos, highlight smear, blocks, the REC break).
+    static constexpr const char* kCamcorderLook = "dv_2004";
+    static constexpr const char* kPhoneLook = "phone_2006";
+    static constexpr const char* kCamcorderGraph = "Assets/ShaderGraphs/Venue/Camcorder.shadergraph";
 
 private:
     // Neck: mounted on the subject's headstock, looking down the frets (guitar solos).
@@ -107,11 +122,17 @@ private:
         std::vector<int> Subjects;     // members; empty is the whole band
         Framing Frame = Framing::Far;
         bool Handheld = false;
+        // Story: shot from a helicopter on a long lens (the tag's "heli").
+        bool Aerial = false;
+        // Story: the shot keeps reds, blues and fire through any look (the tag's "lights").
+        bool Lights = false;
         bool Static = false;
         // Bit 0 the side, bit 1 an alternate take, bits 2-3 the treatment (Vary).
         int Variant = 0;
         // Story: how soft the background goes (BlurFor's pixels; 0 sharp).
         float Blur = 0.f;
+        // Who's holding it in a footage venue: 0 the crew, 1 a guest's camcorder, 2 a guest's phone.
+        int Device = 0;
     };
 
     struct Cut
@@ -136,7 +157,26 @@ private:
         float Lut = 0.f;          // the concert LUT's contribution
         float Grain = 0.03f;      // film grain: a touch on every look
         float FrameRate = 0.f;    // venue steps a second (0: smooth); not eased
+        float BloomThreshold = 0.8f;
+        // Home video (not eased): 0 none, 1 a camcorder's picture, 2 a phone's (the camcorder
+        // graph and its settings, VideoFor); Lines the picture's height in lines (0: full size,
+        // the camera's RenderScale); Light the on-camera light's intensity.
+        int Video = 0;
+        float Lines = 0.f;
+        float Light = 0.f;
     };
+
+    // The camcorder graph's settings for a Video kind (Assets/ShaderGraphs/Venue/Camcorder.shadergraph).
+    struct VideoLook
+    {
+        float Bleed = 0.f;     // colour trailing to the right, in the picture's pixels
+        float Sharpen = 0.f;   // edge halos
+        float Smear = 0.f;     // blown highlights streaking sideways
+        float Block = 0.f;     // pixels per block (a phone's low resolution and compression; 0 off)
+        float Noise = 0.f;     // coloured noise in the shadows
+        float Glitch = 0.f;    // the tape's tear after a REC break
+    };
+    static VideoLook VideoFor( int inVideo );
 
     Plan PlanFor( const std::string& inName, int inIndex ) const;
     // Takes the members the plan leaves out off a shot; a shot only of them (or of the kit with
@@ -154,6 +194,16 @@ private:
     Vector3 SpotTarget( const VenuePlan::CameraSpot& inSpot, const Vector3* inSubject ) const;
     // Turns some of the cuts over to the venue's close and custom camera spots.
     void AddSpotCuts();
+    // Found footage: every cut becomes a guest's clip from a guest/ spot (or held up in the crowd),
+    // on that guest's device, and the looks follow the devices.
+    void BuildGuestCuts();
+    // The device a guest spot films on (1 camcorder, 2 phone): its tag's @dv / @phone, else the venue's.
+    int DeviceFor( const VenuePlan::CameraSpot& inSpot ) const;
+    // A guest working their camera through a clip (inHeld seconds in): the zoom rocker, exposure
+    // and focus hunting after the REC button, getting bumped. Changes the field of view.
+    void Operate( const Plan& inPlan, int inCutIndex, float inHeld, float inDeltaTime, float& ioFov );
+    // The home-video picture: the camcorder graph's settings, the REC break, the light on the camera.
+    void ApplyVideo( double inSeconds, float inHeld, const Vector3& inEye, const Vector3& inTarget );
     // Gives a chart's plain shot one of its treatments (a wide becomes a crane, a drone or the
     // long lens; a near shot a low hero angle...), by the plan's Variant.
     static void Vary( Plan& ioPlan );
@@ -195,6 +245,10 @@ private:
         int Spot = -1;
         int End = -1;
         bool Handheld = false;
+        // "heli": from a helicopter, an operator on a long lens hunting for the subject.
+        bool Aerial = false;
+        // "lights": reds, blues and fire stay in colour through a black and white look.
+        bool Lights = false;
         // Spots the move passes through between Spot and End, in order ("w1", "w2", ...).
         std::vector<int> Via;
         // The focus distance in metres at the start and the end ("f0.5"; 0: sharp throughout).
@@ -240,6 +294,12 @@ private:
     float m_moveTime = 0.f;
     float m_hype = 0.f;
     float m_kick = 0.f;        // a jolt, decaying
+    float m_rideTarget = 0.f;  // SetRide
+    float m_ride = 0.f;        // eased toward it
+    Vector3 m_keepTarget = Vector3( 0.f, 0.f, 0.f );   // SetColorKeep
+    Vector3 m_keep = Vector3( 0.f, 0.f, 0.f );
+    bool m_shotLights = false; // the shot on screen is tagged "lights"
+    bool m_keptLights = false; // and was when the grade was last applied
     // A big moment's hero shot (OnBigMoment), from m_bigStart until m_bigEnd.
     double m_bigStart = -1000.0;
     double m_bigEnd = -1000.0;
@@ -250,4 +310,20 @@ private:
     bool m_surferUp = false;
     Vector3 m_surferPosition;
     float m_surferSide = 1.f;
+    // Found footage (Footage()): the venue's kind, and each camera spot's device (0 not a guest's).
+    int m_footage = 0;
+    std::vector<int> m_spotDevice;
+    // The guest's camera: its light, the white balance it settled on for this clip (eased), the
+    // exposure it's hunting (stops), and the venue's step for the picture's noise.
+    EntityHandle m_light;
+    float m_whiteBalance = 0.f;
+    float m_whiteBalanceTarget = 0.f;
+    float m_hunt = 0.f;
+    int m_grainFrame = -1;
+    double m_clipStart = 0.0;
+    // This clip's camcorder clock (the date stamp): its date as month * 100 + day, its year, and
+    // the time of day (seconds) it showed at song time 0.
+    float m_stampDate = 704.f;
+    float m_stampYear = 2004.f;
+    float m_stampClock = 0.f;
 };

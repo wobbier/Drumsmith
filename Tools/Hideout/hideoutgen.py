@@ -36,6 +36,14 @@ def station(s, parent, name, kind, pos, view_offset, fov=45.0, label=""):
     return e
 
 
+def speaker(e, low_cut=20.0, high_cut=20000.0, honk=0.0, honk_at=1500.0, width=1.0, drive=0.0):
+    """HideoutSpeaker on the radio's station: what the radio plays through, heard standing at it.
+    The defaults are the song as it is; the radio gets better with the room."""
+    e.add({"Type": "HideoutSpeaker", "LowCut": _r(low_cut), "HighCut": _r(high_cut), "Honk": _r(honk), "HonkAt": _r(honk_at),
+           "Width": _r(width), "Drive": _r(drive)})
+    return e
+
+
 def slot(s, parent, name, slot_name, pos=(0, 0, 0), view=None):
     """An item's place. view: where the new items' tour camera stands, from the middle of the
     item's pieces (None: worked out, back toward the doorway)."""

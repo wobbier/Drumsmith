@@ -34,6 +34,7 @@
             <button class="debug-toggle" data-class-on="debug_nofail" data-event-click="debug_nofail">No fail: {{debug_nofail ? 'ON' : 'OFF'}}</button>
             <button class="debug-toggle" data-class-on="debug_autoplay > 0" data-event-click="debug_autoplay">Autoplay: {{debug_autoplay_label}}</button>
             <button class="debug-toggle" data-class-on="debug_plain" data-event-click="debug_plain">Strokes: {{debug_plain ? 'PLAIN' : 'CHART'}}</button>
+            <button class="debug-toggle" data-class-on="debug_highway_hidden" data-event-click="debug_highway">Highway: {{debug_highway_hidden ? 'HIDDEN' : 'SHOWN'}}</button>
             <span class="debug-clock">{{song_clock}}</span>
         </div>
         <input id="debug-seek" type="range" min="0" max="1000" step="1" data-attr-value="song_progress" data-event-change="debug_seek(ev.value)"/>

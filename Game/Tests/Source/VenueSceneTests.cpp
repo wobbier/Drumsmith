@@ -50,6 +50,8 @@ TEST_CASE( "Venue markers: defaults match the room the director assumes" )
     CHECK( info.FogColor.z == doctest::Approx( rooms.FogColor.z ) );
     CHECK( info.SkyTime == doctest::Approx( rooms.SkyTime ) );
     CHECK( info.MoonBrightness == doctest::Approx( rooms.MoonBrightness ) );
+    CHECK( info.CloudCoverage == doctest::Approx( rooms.CloudCoverage ) );
+    CHECK( info.HazeFroxels == rooms.HazeFroxels );
     CHECK( info.Haze == doctest::Approx( 1.f ) );
     CHECK( VenueCrowdArea().HeadCount == 60 );
     CHECK( VenueCrowdArea().Figures == VenueCrowdArea::Kind::Mob );
@@ -80,6 +82,8 @@ TEST_CASE( "Venue markers: fields survive a scene round trip" )
     info.Haze = 0.5f;
     info.SkyTime = 20.25f;
     info.MoonBrightness = 3.f;
+    info.CloudCoverage = 0.f;
+    info.HazeFroxels = true;
 
     EntityHandle spot = source->CreateEntity( "Guitarist" );
     Transform& spotTransform = spot->AddComponent<Transform>();
@@ -142,6 +146,8 @@ TEST_CASE( "Venue markers: fields survive a scene round trip" )
     CHECK( loadedInfo.Haze == doctest::Approx( 0.5f ) );
     CHECK( loadedInfo.SkyTime == doctest::Approx( 20.25f ) );
     CHECK( loadedInfo.MoonBrightness == doctest::Approx( 3.f ) );
+    CHECK( loadedInfo.CloudCoverage == doctest::Approx( 0.f ) );
+    CHECK( loadedInfo.HazeFroxels );
 
     const auto& children = roots[0]->GetComponent<Transform>().GetChildren();
     REQUIRE( children.size() == 5 );
@@ -229,6 +235,8 @@ TEST_CASE( "Venue scene: markers become a plan in venue space" )
     info.RoomHalfWidth = 9.f;
     info.BuildRig = true;
     info.SkyTime = 20.5f;
+    info.CloudCoverage = 0.6f;
+    info.HazeFroxels = true;
     AddMarker( *world, sceneRoot, "Drummer", Vector3( 0.f, 0.8f, 5.2f ) )->AddComponent<VenueSpot>().Member = VenueSpot::Role::Drummer;
     // Turned 30 degrees: the performer's own front swings toward +x with it.
     AddMarker( *world, sceneRoot, "Guitar", Vector3( -3.f, 0.5f, 2.f ), Vector3( 0.f, 30.f, 0.f ) )->AddComponent<VenueSpot>().Member = VenueSpot::Role::Guitar;
@@ -266,6 +274,9 @@ TEST_CASE( "Venue scene: markers become a plan in venue space" )
     CHECK_FALSE( plan.BuildStage );
     CHECK_FALSE( plan.BuildRoom );
     CHECK( plan.SkyTime == doctest::Approx( 20.5f ) );
+    // DRU-80: the cloud coverage passes through (clamped to 0-1).
+    CHECK( plan.CloudCoverage == doctest::Approx( 0.6f ) );
+    CHECK( plan.HazeFroxels );
     // Out of doors it dresses as the festival.
     CHECK( plan.Style == 2 );
 

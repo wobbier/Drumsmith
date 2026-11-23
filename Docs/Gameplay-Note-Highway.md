@@ -44,9 +44,9 @@ Colours come from `PadUtils::GetNoteColor`, pushed away from grey (`Vivid`). A n
 
 | Note | Shape |
 |------|-------|
-| Kick | A low orange bar with pointed ends, lying on the highway under the other notes and reaching just past the rails. It is deeper front to back than a gem, so it shows either side of a note on the same beat |
+| Kick | A thin, square-ended orange bar from rail to rail, lying on the highway. The drums stand just clear of its top and it is deeper front to back than they are, so a kick on a note's beat passes under it whole and shows either side |
 | Double bass kick | The bar on its foot's half of the highway (right foot right, left foot left), with a thin line across the other half |
-| Snare, toms | A rounded gem on a bright base (`DrumGem.obj`), standing on the highway |
+| Snare, toms | A hard-edged block with cut corners and flat tones (`DrumGem.obj`). The three toms have a colour each: blue, violet, green |
 | Hi-hat, crashes, ride, splash, china | A bowed disc with a bell (`CymbalGem.obj`), floating above the lane and the kick |
 | Open hi-hat | The disc with its middle open (`CymbalRing.obj`) |
 | Hi-hat pedal | A small kick-shaped bar in the hi-hat column, with its own small target pad |
@@ -73,6 +73,7 @@ Built per chart from `HighwayBox.prefab`:
 | Surface | Child of `TrackMover`, from 6 units behind the bar to 120 ahead | A near-black plane under the lanes |
 | Rails and dividers | Same | Brighter edge rails, faint lines between lanes |
 | Target pads | Same, at the bar | One per lane in its colour; a hit lights it, fading over 0.15 s. Kick hits flash the strike bar orange |
+| Strike bar | `Example.lvl`'s "Bar", resized by `LayoutLanes` | A thin line rail to rail (`kStrikeBar*`), under the target pads and every note. It's shallower than a pad, so it shows only in the gaps between pads (`static_assert`s hold the order: surface, bar, pads and kick, drums). A kick hit flashes it orange |
 | Beat lines | Song space (under the kick lane), at each beat's time | Faint beat lines, brighter and thicker measure lines |
 
 Beat and measure lines come from the chart's own tempo map: `notes.mid` next to the song, read with `smf::MidiFile` (tempo changes through `getTimeInSeconds`, measures from time-signature events, 4/4 until the first). Charts without a `notes.mid` (12 of the 20 in `Assets/DLC/` today, including every native chart) get none: `TrackData`'s BPM is a placeholder and wrong lines read worse than none.
@@ -164,10 +165,11 @@ The pause menu fires `InGamePauseCurrentTrack` / `InGameResumeCurrentTrack`; the
 
 ### Debug panel
 
-**F8** during a song shows a panel over the bottom of the highway (`Assets/UI/InGameMenu.rml`, `#debug-panel`; `InGameMenuController` owns the `debug`, `debug_nofail`, `debug_autoplay` (+ `debug_autoplay_label`) and `debug_plain` model keys, `NoteHighwayCore` fills `song_progress` and `song_clock`):
+**F8** during a song shows a panel over the bottom of the highway (`Assets/UI/InGameMenu.rml`, `#debug-panel`; `InGameMenuController` owns the `debug`, `debug_nofail`, `debug_autoplay` (+ `debug_autoplay_label`) `debug_plain` and `debug_highway_hidden` model keys, `NoteHighwayCore` fills `song_progress` and `song_clock`):
 
 - **Metronome.** With the Metronome setting on (or `--metronome`), a click stem written from the beat lines plays with the song (`UpdateMetronome`; `Docs/Audio.md` → Metronome).
 - **Calibration.** `--calibrate` (or Settings > Sound & Timing) plays the delay calibration's chart: hits are measured against the beat instead of judged, with the latency settings left out (`CalibrationHits`; `Docs/Latency-and-Responsiveness.md` → Calibration).
+- **Highway.** Hides the highway (board, notes, pads) at once to watch the venue, and brings it back; the song still plays and scores, and the HUD stays (`UpdateHighwayRests`). `--hide-highway` starts it hidden.
 - **No fail.** Misses still count in the results, but don't break the combo, mute the drum stems or deflate the crowd and lights (`ApplyJudgement`). There is no fail state yet; this is what a miss costs today. `--no-fail` starts it on.
 - **Autoplay** (OFF / PERFECT / SLOPPY, `NoteHighwayCore::GatherHits`). PERFECT hits every note on time with its chart pad and stroke. SLOPPY plays like a person: each note early or late by up to 75 ms (a triangle around on time: about 64% perfect, 32% great, 4% good) and about one note in twenty-five never hit. The jitter comes from a hash of the note's time and lane, so a run, a retry or a seek plays the same way. Hits go through the normal judging, so scoring, combo, drum muting, the crowd and the lights all react. The HUD shows `AUTOPLAY <mode>` and the results say *Autoplayed*, so a demo score isn't mistaken for a real one.
 - **Strokes** (CHART / PLAIN). With autoplay on, PLAIN hits as a kit that only sends plain strokes and one hi-hat note would: open hi-hats come in closed, rims and flams as plain hits. That exercises technique judging (`TechniqueStrictness`).

@@ -2,7 +2,7 @@
 
 > Verified against game commit 1714270, 2026-07-10. Engine submodule at 047f57b8.
 >
-> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the `TrackRadio` section and its caveats; later that day, Venue ambience (game commit 44f9469 plus the working tree). The rest is as last verified.
+> Updated 2026-11-17 against the working tree (the Linear ticket pass, DRU-14 to DRU-54, on game commit 4f29840; engine submodule at c5bb6135): the `TrackRadio` section and its caveats; later that day, Venue ambience (game commit 44f9469 plus the working tree). Updated 2026-11-18 (game commit 43ba35b plus the working tree): `SetSpeaker`'s room speaker. The rest is as last verified.
 
 The game's three audio systems — `AudioPack` (synchronized stem playback for gameplay and radio), `TrackRadio` (menu background music), and `Drumset` (pad hit sounds, currently dormant) — plus a venue's ambience before the song, and the FMOD facts underneath them.
 
@@ -68,7 +68,7 @@ A singleton state machine (`None → Loading → Seeking → Playing`) that owns
 
 `TrackRadioUtils` also fills the radio widget's model values (title, art, position/duration, visibility) and handles its `skip`/`seek` events — see `Docs/UI-and-Menus.md`.
 
-`SetSpeaker( open, pan, level )` makes the radio sound like a speaker somewhere in a room: `AudioPack::SetSpeaker` adds a multiband EQ to the pack's channel group (a high-pass and low-pass of about 300 Hz to 3 kHz at `open` 0, widening to the full range at 1, where the EQ is bypassed) and sets the group's pan and volume. The radio keeps the values and applies them to every new pack. The hideout sets them every frame from where its camera is, and sets 1, 0, 1 (off) when the main menu closes (`Docs/Hideout-and-Progression.md` → The radio in the room).
+`SetSpeaker( speaker, open, pan, level )` makes the radio sound like a speaker (a `RoomSpeaker`: its band, a honk in the mids, stereo width, drive) somewhere in a room: `AudioPack::SetSpeaker` adds a distortion and a multiband EQ to the tail of the pack's channel group, and sets the group's mix matrix (width and pan) and volume. `RoomSpeaker::Resolve` works out the settings. At `open` 1 the band is the speaker's own; at 0 it is narrower. A default `RoomSpeaker` with 1, 0, 1 bypasses everything. The radio keeps the values and applies them to every new pack. The hideout sets them every frame, with the room's speaker (better in each room) and where its camera is, and takes them off when the main menu closes (`Docs/Hideout-and-Progression.md` → The radio in the room).
 
 ### Venue ambience
 

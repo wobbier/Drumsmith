@@ -196,7 +196,7 @@ void Band::Clear()
 }
 
 
-void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale ) const
+void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale, bool inBackline ) const
 {
     const Member& member = m_members[inIndex];
     const float t = std::max( inSeconds, 0.f );
@@ -204,6 +204,13 @@ void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vecto
     outPosition = member.Spot;
     outRotation = Vector3( 0.f, member.Yaw, 0.f );
     outScale = 1.f;
+    // The gear on the floor doesn't leave it with them: it stays where it stands as they rise,
+    // and where they float there is no floor and no gear (it's back when they play again).
+    if( inBackline && ( inPose == StoryPose::Rising || inPose == StoryPose::Floating ) )
+    {
+        outScale = inPose == StoryPose::Floating ? 0.001f : 1.f;
+        return;
+    }
     switch( inPose )
     {
     case StoryPose::Hidden:
@@ -264,16 +271,25 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
         group.SetRotation( fromRotation + ( toRotation - fromRotation ) * u );
         const float scale = fromScale + ( toScale - fromScale ) * u;
         group.SetScale( Vector3( scale, scale, scale ) );
+        if( member.Backline )
+        {
+            StoryPlacement( index, inFrom, inFromSeconds, fromPosition, fromRotation, fromScale, true );
+            StoryPlacement( index, inTo, inToSeconds, toPosition, toRotation, toScale, true );
+            Transform& backline = member.Backline->GetComponent<Transform>();
+            backline.SetPosition( fromPosition + ( toPosition - fromPosition ) * u );
+            backline.SetRotation( fromRotation + ( toRotation - fromRotation ) * u );
+            const float gear = fromScale + ( toScale - fromScale ) * u;
+            backline.SetScale( Vector3( gear, gear, gear ) );
+        }
     }
 
-    // The ghost: every material under the band, see-through and glowing pale blue. Each material's
-    // own look is kept the first time, to go back to.
+    // The ghost: every material of the band and what they play, see-through, pale and glowing at
+    // its edges (StandardMaterial::Rim). Each material's own look is kept the first time, to go
+    // back to. The instruments' models load after the band is built, so while there is a ghost
+    // the band is looked over again for materials that have turned up since.
     inGhost = std::clamp( inGhost, 0.f, 1.f );
-    if( std::fabs( inGhost - m_ghost ) < 1e-3f )
-    {
-        return;
-    }
-    if( m_ghosted.empty() && inGhost > 0.f )
+    bool found = false;
+    if( inGhost > 0.f )
     {
         for( const Member& member : m_members )
         {
@@ -281,29 +297,19 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
             {
                 continue;
             }
-            std::vector<Transform*> open = { &member.Group->GetComponent<Transform>() };
-            while( !open.empty() )
+            found = GatherGhosted( member.Group->GetComponent<Transform>() ) || found;
+            if( member.Backline )
             {
-                Transform* at = open.back();
-                open.pop_back();
-                const EntityHandle& owner = at->Parent;
-                if( owner && owner->HasComponent<Mesh>() && owner->GetComponent<Mesh>().MeshMaterial )
-                {
-                    const SharedPtr<Moonlight::Material>& material = owner->GetComponent<Mesh>().MeshMaterial;
-                    if( StandardMaterial* standard = dynamic_cast<StandardMaterial*>( material.get() ) )
-                    {
-                        m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent } );
-                    }
-                }
-                for( Transform* child : at->GetChildren() )
-                {
-                    open.push_back( child );
-                }
+                found = GatherGhosted( member.Backline->GetComponent<Transform>() ) || found;
             }
         }
     }
+    if( !found && std::fabs( inGhost - m_ghost ) < 1e-3f )
+    {
+        return;
+    }
     m_ghost = inGhost;
-    const Vector3 glow( 0.35f, 0.55f, 0.85f );
+    const Vector3 glow( 0.45f, 0.7f, 1.f );
     for( const GhostedMaterial& entry : m_ghosted )
     {
         const SharedPtr<Moonlight::Material> material = entry.Material.lock();
@@ -313,9 +319,40 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
             continue;
         }
         material->SetRenderMode( inGhost > 0.f || entry.Transparent ? Moonlight::RenderingMode::Transparent : Moonlight::RenderingMode::Opaque );
-        standard->SetOpacity( entry.Opacity * ( 1.f - 0.55f * inGhost ) );
-        standard->SetEmissiveColor( entry.Emissive + ( glow - entry.Emissive ) * ( 0.6f * inGhost ) );
+        standard->SetOpacity( entry.Opacity * ( 1.f - 0.3f * inGhost ) );
+        // A faint glow all over; the rim carries the rest (more than this blooms the band into a blob in a dark scene).
+        standard->SetEmissiveColor( entry.Emissive + ( glow * 0.3f - entry.Emissive ) * inGhost );
+        standard->SetRim( entry.Rim + ( 1.f - entry.Rim ) * inGhost );
     }
+}
+
+
+bool Band::GatherGhosted( Transform& inRoot )
+{
+    bool found = false;
+    std::vector<Transform*> open = { &inRoot };
+    while( !open.empty() )
+    {
+        Transform* at = open.back();
+        open.pop_back();
+        const EntityHandle& owner = at->Parent;
+        if( owner && owner->HasComponent<Mesh>() && owner->GetComponent<Mesh>().MeshMaterial )
+        {
+            const SharedPtr<Moonlight::Material>& material = owner->GetComponent<Mesh>().MeshMaterial;
+            StandardMaterial* standard = dynamic_cast<StandardMaterial*>( material.get() );
+            const bool known = std::any_of( m_ghosted.begin(), m_ghosted.end(), [&material]( const GhostedMaterial& entry ) { return entry.Material.lock() == material; } );
+            if( standard && !known )
+            {
+                m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent, standard->Rim } );
+                found = true;
+            }
+        }
+        for( Transform* child : at->GetChildren() )
+        {
+            open.push_back( child );
+        }
+    }
+    return found;
 }
 
 
@@ -419,6 +456,11 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, 
         // Everything a member has (their kit, instrument, mic stand) is built in their own frame,
         // their front +z: it turns with them.
         group.SetRotation( Vector3( 0.f, member.Yaw, 0.f ) );
+        member.Backline = inKit.Group( "Backline", inStage, member.Spot );
+        if( member.Backline )
+        {
+            member.Backline->GetComponent<Transform>().SetRotation( Vector3( 0.f, member.Yaw, 0.f ) );
+        }
         // Each a character of their own in an atlas of their own, a different cast every song
         // (the same every time it's played): a step through each list that visits all of it
         // before repeating.
@@ -692,10 +734,20 @@ void Band::DeriveFallbacks( const std::vector<NoteData>& inNotes )
 }
 
 
+namespace
+{
+    // What stands on the floor is parented to the member's backline (their own group if it failed).
+    template<typename TMember>
+    Transform& FloorOf( TMember& ioMember )
+    {
+        return ( ioMember.Backline ? ioMember.Backline : ioMember.Group )->template GetComponent<Transform>();
+    }
+}
+
+
 void Band::BuildMicStand( VenueKit& inKit, Member& ioMember, const Vector3& inPosition, float inHeight )
 {
-    Transform& group = ioMember.Group->GetComponent<Transform>();
-    ioMember.MicStand = inKit.Group( "MicStand", &group, inPosition );
+    ioMember.MicStand = inKit.Group( "MicStand", &FloorOf( ioMember ), inPosition );
     if( !ioMember.MicStand ) return;
     Transform& stand = ioMember.MicStand->GetComponent<Transform>();
     // Runtime OBJ compensates for the importer Z flip; the mic faces the performer (-Z).
@@ -710,14 +762,16 @@ void Band::BuildDrums( VenueKit& inKit, Member& ioMember )
 {
     using Shape = Moonlight::MeshType;
     Transform& group = ioMember.Group->GetComponent<Transform>();
-    inKit.Box( Vector3( 0.05f, 0.005f, 0.45f ), Vector3( 2.2f, 0.01f, 2.f ), Vector3( 0.25f, 0.04f, 0.04f ), &group );
-    inKit.Prop( "Assets/Models/Instruments/Runtime/DrumHardware.obj", Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &group );
+    // The kit stands on the floor: the drummer leaves it there (SetStoryState). The sticks go with them.
+    Transform& floor = FloorOf( ioMember );
+    inKit.Box( Vector3( 0.05f, 0.005f, 0.45f ), Vector3( 2.2f, 0.01f, 2.f ), Vector3( 0.25f, 0.04f, 0.04f ), &floor );
+    inKit.Prop( "Assets/Models/Instruments/Runtime/DrumHardware.obj", Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &floor );
     // Each exported piece has a local origin for hit squash / cymbal wobble. The hardware
     // stays stationary, and head centres remain on the same IK strike targets.
     const auto piece = [&]( Piece inPiece, const char* inName, const glm::vec3& inCentre, bool inCymbal ) {
         KitPiece& part = m_kit[static_cast<int>( inPiece )];
         const std::string path = std::string( "Assets/Models/Instruments/Runtime/" ) + inName + ".obj";
-        part.Entity = inKit.Prop( path.c_str(), Vector3( inCentre ), 1.f, 0.f, &group );
+        part.Entity = inKit.Prop( path.c_str(), Vector3( inCentre ), 1.f, 0.f, &floor );
         part.Cymbal = inCymbal;
         part.Rest = Vector3( 0.f, 0.f, 0.f );
         part.Scale = Vector3( 1.f, 1.f, 1.f );
@@ -753,9 +807,10 @@ void Band::BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass )
         Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &guitar );
     // An amp behind them.
     const float side = inBass ? 1.f : -1.f;
-    inKit.Box( Vector3( side * 0.4f, 0.55f, -1.5f ), Vector3( 0.9f, 1.1f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &group );
-    inKit.Box( Vector3( side * 0.4f, 0.55f, -1.27f ), Vector3( 0.8f, 0.8f, 0.01f ), Vector3( 0.08f, 0.08f, 0.09f ), &group );
-    inKit.Box( Vector3( side * 0.4f, 1.03f, -1.27f ), Vector3( 0.06f, 0.03f, 0.01f ), Vector3( 1.f, 0.1f, 0.05f ), &group, Vector3( 2.f, 0.2f, 0.1f ) );
+    Transform& floor = FloorOf( ioMember );
+    inKit.Box( Vector3( side * 0.4f, 0.55f, -1.5f ), Vector3( 0.9f, 1.1f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &floor );
+    inKit.Box( Vector3( side * 0.4f, 0.55f, -1.27f ), Vector3( 0.8f, 0.8f, 0.01f ), Vector3( 0.08f, 0.08f, 0.09f ), &floor );
+    inKit.Box( Vector3( side * 0.4f, 1.03f, -1.27f ), Vector3( 0.06f, 0.03f, 0.01f ), Vector3( 1.f, 0.1f, 0.05f ), &floor, Vector3( 2.f, 0.2f, 0.1f ) );
     BuildMicStand( inKit, ioMember, Vector3( 0.f, 0.f, 0.55f ), 1.46f );
 }
 
@@ -794,7 +849,7 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
     }
     for( float x : { -0.6f, 0.6f } )
     {
-        EntityHandle wedge = inKit.Box( Vector3( x, 0.18f, 1.15f ), Vector3( 0.6f, 0.34f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &group );
+        EntityHandle wedge = inKit.Box( Vector3( x, 0.18f, 1.15f ), Vector3( 0.6f, 0.34f, 0.45f ), Vector3( 0.04f, 0.04f, 0.04f ), &FloorOf( ioMember ) );
         if( wedge ) wedge->GetComponent<Transform>().SetRotation( Vector3( 35.f, 0.f, 0.f ) );
     }
 }
@@ -802,9 +857,8 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
 
 void Band::BuildKeys( VenueKit& inKit, Member& ioMember )
 {
-    Transform& group = ioMember.Group->GetComponent<Transform>();
     inKit.Prop( "Assets/Models/Instruments/Runtime/Keyboard.obj",
-        Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &group );
+        Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &FloorOf( ioMember ) );
 }
 
 

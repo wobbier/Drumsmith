@@ -1,6 +1,6 @@
 # Hideout and Progression
 
-> Verified against the working tree on 2026-11-18 (game commit 7ee80ad plus the uncommitted rooms work). Engine submodule at f401189d. Headless (lavapipe) captures, editor UI automation and unit tests only: nothing here has been played with sticks or heard on speakers yet.
+> Verified against the working tree on 2026-11-18 (game commit 7ee80ad plus the uncommitted rooms work; the radio's room speakers against 43ba35b plus the working tree). Engine submodule at f401189d. Headless (lavapipe) captures, editor UI automation and unit tests only: nothing here has been played with sticks or heard on speakers yet.
 
 The main menu is a room, the hideout. It starts as a basement and moves up to a garage, a rehearsal space and a studio as the player plays gigs. A label floats over each thing in the room: the kit plays a song, the practice pad opens the lessons, and so on. What the player has done is kept in a profile. Data-driven rules turn that record into a room, items, lessons and venues. Library songs are never locked.
 
@@ -39,7 +39,7 @@ flowchart LR
 | `Design/Story-Mode-Setlists.md` | The story as written: every set's songs, staging and rewards |
 | `Game/Source/Hideout/Hideout.h/.cpp` | The room behind the main menu |
 | `Game/Source/Hideout/HideoutDebug.cpp` | The debug menu (F2) |
-| `Game/Source/Components/Hideout/HideoutMarkers.h/.cpp` | `HideoutStation`, `HideoutItemSlot`, `HideoutView`, `HideoutMotion`, `HideoutDrummer`, `HideoutBandName`, `HideoutWhen`, `HideoutReadout` |
+| `Game/Source/Components/Hideout/HideoutMarkers.h/.cpp` | `HideoutStation`, `HideoutItemSlot`, `HideoutView`, `HideoutMotion`, `HideoutDrummer`, `HideoutSpeaker`, `HideoutBandName`, `HideoutWhen`, `HideoutReadout` |
 | `Assets/Hideout/Basement.lvl`, `Garage.lvl`, `Rehearsal.lvl`, `Studio.lvl` | The rooms (generated) |
 | `Tools/Hideout/make_hideout.py` | Writes the rooms with `Tools/Venues/venuegen.py`: `basement.py`, `garage.py`, `rehearsal.py` and `studio.py` in `Tools/Hideout`, with helpers from `hideoutgen.py` |
 | `Tools/Hideout/make_textures.py` | Draws `Assets/Hideout/Textures/*.png` with ImageMagick: concrete, wood, cardboard, egg cartons, foam, blankets, rugs, the banners, the posters, the flyers, the screens, the whiteboard, the windows by day and night |
@@ -115,6 +115,7 @@ The gig board lists every gig: its description, venue, length and pass mark. An 
 
 - `HideoutView`: where the overview camera stands. It looks along local +Z with its `FieldOfView`.
 - `HideoutStation`: `Station` (Kit, PracticePad, Radio, Laptop, TrophyWall, Mixer, GigBoard, Door, Wishlist), an optional `Label`, and `ViewOffset` / `FieldOfView` for the camera once it is picked. The entity's position is what the camera looks at.
+- `HideoutSpeaker`: what the room's radio plays through (on the radio's station; see The radio in the room). A room without one plays the song clean.
 - `HideoutItemSlot`: `Slot`. If an item names the slot and isn't unlocked, the entity and its children are deleted. A slot no item names stays. With `WhenLocked` it's the other way round: a stand-in (tape round where the pad will go, a note saying the gold record goes here) shown only until the item comes.
 - `HideoutWhen`: `Day` or `Night` by the player's clock (day is 7:00 to 19:00), `MovingIn` only on the first visit after moving into the room, `Settled` on every visit after. The rest is deleted at load, as a locked slot is.
 
@@ -223,7 +224,24 @@ The overview is framed for 16:9; a narrower window widens its vertical field of 
 
 ### The radio in the room
 
-`Hideout::ApplyRadio` calls `TrackRadio::SetSpeaker( open, pan, level )` every frame. The radio keeps those values across songs and applies them to each pack (`AudioPack::SetSpeaker`). The effect is a multiband EQ DSP at the tail of the pack's channel group (a 24 dB high-pass and low-pass, from about 300 Hz to 3 kHz when shut, widened on a log scale to 20 Hz to 20 kHz when open, and bypassed when fully open), the group's pan, and its volume. Across the room `open` is at most 0.35, more as the camera nears the radio. Picking the radio eases it to 1 and the pan to the centre. The level goes from 0.7 to 1. The `Hideout` destructor (leaving the main menu) sets 1, 0, 1, which takes the effect off. This is not FMOD 3D positioning: the pan is worked out from the camera and the radio, on the stems' existing 2D group.
+`Hideout::ApplyRadio` calls `TrackRadio::SetSpeaker( speaker, open, pan, level )` every frame. The radio keeps those values across songs and applies them to each pack (`AudioPack::SetSpeaker`). Across the room `open` is at most 0.35, more as the camera nears the radio (from the overviews it is 0 to 0.04). Picking the radio eases it to 1 and the pan to the centre. The level goes from 0.7 to 1. The `Hideout` destructor (leaving the main menu) sets a default `RoomSpeaker` with 1, 0, 1, which takes the effect off. This is not FMOD 3D positioning: the pan is worked out from the camera and the radio, on the stems' existing 2D group.
+
+**The radio gets better with the room.** The speaker is the room's `HideoutSpeaker` (read at load into a `RoomSpeaker`): what the radio sounds like standing at it. `LowCut` and `HighCut` are its band, `Honk` a peak in dB at `HonkAt` (the box), `Width` its stereo (0 one cone, 1 as recorded), `Drive` how hard its amp breaks up (FMOD's distortion). `RoomSpeaker::Resolve` turns that, `open`, pan and level into settings:
+
+- The band at `open` 1 is the speaker's own. At 0 both ends move four tenths of the way (on a log scale) toward a small speaker's 300 Hz to 3 kHz, and `open` moves between the two on a log scale.
+- The width is `Width` up close and its square across the room, so a boombox blurs to mono from across the room and a wide pair stays wide. The pan is a balance: the far side quieter, neither side louder than it was.
+- The drive's waveshaper lifts quiet passages by 1 + k (k = 2·Drive / (1 − Drive), measured on FMOD 2.02.34); half of that comes back off the volume.
+
+| Room | Radio | Band up close | Honk | Width | Drive | From the overview |
+|------|-------|---------------|------|-------|-------|-------------------|
+| Basement | The boombox, cassette deck, batteries going | 170 Hz to 5.5 kHz | +5 dB at 1.3 kHz | 0.3 | 0.18 | 211 Hz to 4.4 kHz, near mono |
+| Garage | The same boombox, new batteries, off the floor | 120 Hz to 8 kHz | +3.5 dB at 1.2 kHz | 0.45 | 0.1 | 172 Hz to 5.4 kHz |
+| Rehearsal space | The big chrome boombox | 70 Hz to 13 kHz | +1.5 dB at 1 kHz | 0.7 | 0.04 | 125 Hz to 7.3 kHz |
+| Studio | The turntable and valve amp | the song as it is | none | 1 | 0 | 59 Hz to 9.4 kHz, full width |
+
+`Tools/Hideout/hideoutgen.py`'s `speaker()` puts the marker on the radio's station; each room's builder sets its values. `ProgressionTests.cpp` checks that each tier's room is no worse than the one before at every distance, better at both ends up close, and that the last room's radio, up close, is the song as it is.
+
+In `AudioPack::SetSpeaker` the effect is two DSPs at the tail of the pack's channel group: the distortion first, then a multiband EQ (A: a 24 dB high-pass, B: a 24 dB low-pass, C: the honk, a peaking filter with Q 1). Then the group's mix matrix does width and pan. The matrix is as wide as the output's speaker mode (the group mixes at it): an identity, with the stereo pair's 2×2 in its corner. Then the group's volume. Each DSP is bypassed when it does nothing, so a clean speaker up close costs nothing but the matrix. Measured offline through FMOD's WAV writer (2026-11-18): the peaking filter's gain and Q are as set, the matrix works on a stereo and a 5.1 group, and two DSPs added at the tail run in reverse order, so the last one added is first in the chain.
 
 ## How to Extend
 
@@ -243,6 +261,8 @@ The overview is framed for 16:9; a narrower window widens its vertical field of 
 - **The drummer is rebuilt for every radio song** (`Band::Build` loads the chart's notes on the main thread), so there may be a hitch at each change of song. Measure it on hardware. Each build goes through its own `VenueKit` (`m_bandKit`), cleared first, so the last song's drummer and kit go with it (before that they piled up, one frozen copy a song).
 - **The debug menu writes the real profile.** It keeps a copy first, but a change made by hand to `Profile.json` while a backup exists is lost on Restore.
 - **The room tone hasn't been heard**: headless runs play silently.
+- **The radio's room speakers haven't been heard.** Each room's settings were checked in the game, headless (each room's `HideoutSpeaker` reaches FMOD, the calls succeed, the studio's radio up close bypasses everything), and FMOD's effects were measured offline. Whether the basement sounds like a boombox, and the studio like a hi-fi, needs ears. The values are in the room builders.
+- **Before 2026-11-18 the radio was 3 dB quieter in the hideout than meant**: `setPan( 0 )` on a stereo group is a constant-power pan, 0.707 a side. The matrix replaced it, so the hideout's radio is up to 3 dB louder than it was, and the song at the radio is at full level.
 - **Gig difficulty is notes per second**, which says little about how hard a chart is.
 - **Story mode is missing pieces.** The chosen members on stage and in the hideout, the credits and the one-sitting rule for Retry (a retried song in a OneSitting run keeps the better take instead of ending the attempt) aren't built. 60 of the 65 songs are stand-ins (a click and a rock beat) until they're charted.
 - **Gating the venue changes free play for everyone with no profile**: a fresh profile gets the Backyard until Club Night, whatever the Venue setting says. `--unlock-all` lifts it. The Venue tab still lists every venue and doesn't mark locked ones.

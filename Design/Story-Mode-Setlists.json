@@ -3224,14 +3224,14 @@
           ]
         },
         {
-          "Spotify": "https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc",
-          "Artist": "Led Zeppelin",
+          "Spotify": "https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt",
+          "Artist": "Heart",
           "Title": "Stairway to Heaven",
-          "DurationSeconds": 483,
+          "DurationSeconds": 478,
           "Charted": false,
           "ChartStatus": "planned",
           "Alternates": [
-            "https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt"
+            "https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc"
           ],
           "PlayingNote": "Wait out the quiet opening; when the drums come in, play it big and patient under the choir.",
           "Venue": "StoryHeaven",
@@ -3262,7 +3262,7 @@
               "Do": "Inches from the side of the drummer's face, cloud and the others drifting in and out of focus."
             },
             {
-              "On": "section:intro_verse_a",
+              "On": "time:42.5",
               "StateAfter": [
                 "eyes_meet"
               ],
@@ -3270,7 +3270,7 @@
               "Do": "Another member looking down for the friend who fell beside them; their eyes meet."
             },
             {
-              "On": "section:verse_1a",
+              "On": "time:120",
               "StateAfter": [
                 "horizon"
               ],
@@ -3287,12 +3287,12 @@
               "Do": "The highway is back; the camera pulls back as the band touches down on a floor of cloud."
             },
             {
-              "On": "section:gtr_solo_a",
+              "On": "time:265",
               "StateAfter": [
                 "choir"
               ],
               "Shot": "story/choir",
-              "Do": "The distant arch opens its eyes: rings and wings, then a whole choir of angels, the band small at the bottom of the frame."
+              "Do": "A cut, and they are there: the distant arch is an angel of eyed rings and wings, a whole choir round and above it and one vast one behind, the band small at the bottom of the frame."
             },
             {
               "On": "last_note+4",
@@ -3303,7 +3303,7 @@
               "Do": "From the celestial wide all the way back to a close shot of the sticks."
             },
             {
-              "On": "section:gtr_solo_a+16",
+              "On": "time:265+16",
               "StateAfter": [
                 "heaven_wide"
               ],
@@ -3369,6 +3369,54 @@
               ],
               "Shot": "story/cpr_close",
               "Do": "The cop's attention stays on the person in front of him."
+            },
+            {
+              "On": "section:verse_1+12",
+              "StateAfter": [
+                "earth_medics"
+              ],
+              "Shot": "story/earth_medics",
+              "Do": "Earth: a medic at the guitar player's chest, the ambulance's lights behind."
+            },
+            {
+              "On": "section:chorus_1+16",
+              "StateAfter": [
+                "earth_road"
+              ],
+              "Shot": "story/earth_road",
+              "Do": "Earth, along the asphalt: the drummer's still hand and the stick, the cruiser's lights beyond."
+            },
+            {
+              "On": "section:chorus_2",
+              "StateAfter": [
+                "earth_cop"
+              ],
+              "Shot": "story/earth_cop",
+              "Do": "Earth: up the drummer's body at the cop, still working."
+            },
+            {
+              "On": "section:chorus_2+14",
+              "StateAfter": [
+                "earth_high"
+              ],
+              "Shot": "story/earth_high",
+              "Do": "Earth from high over the shoulder, coming down: each of them with somebody at their side."
+            },
+            {
+              "On": "section:bridge+10",
+              "StateAfter": [
+                "earth_bass"
+              ],
+              "Shot": "story/earth_bass",
+              "Do": "Earth: the bass player by the fire, a medic over them."
+            },
+            {
+              "On": "section:verse_3",
+              "StateAfter": [
+                "earth_shoulder"
+              ],
+              "Shot": "story/earth_shoulder",
+              "Do": "Earth, over the cop's shoulder: the drummer's face. The last look before God comes down."
             },
             {
               "On": "section:chorus_3",

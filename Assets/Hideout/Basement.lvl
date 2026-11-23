@@ -12994,6 +12994,15 @@
       -0.35
      ],
      "FieldOfView": 40
+    },
+    {
+     "Type": "HideoutSpeaker",
+     "LowCut": 170.0,
+     "HighCut": 5500.0,
+     "Honk": 5.0,
+     "HonkAt": 1300.0,
+     "Width": 0.3,
+     "Drive": 0.18
     }
    ]
   },

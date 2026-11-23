@@ -102,7 +102,11 @@
      ],
      "Haze": 0.1,
      "SkyTime": 22.0,
-     "MoonBrightness": 1.0
+     "MoonBrightness": 1.0,
+     "CloudCoverage": 0.25,
+     "KeepRed": 1.0,
+     "KeepWarmth": 0.3,
+     "LightsUntil": "fell"
     }
    ]
   },

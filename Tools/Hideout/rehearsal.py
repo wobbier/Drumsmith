@@ -20,7 +20,7 @@ import random
 
 from hideoutgen import (flyer_name, band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
-                        stand_in, station, tally, tape_outline, textured, view, when)
+                        speaker, stand_in, station, tally, tape_outline, textured, view, when)
 
 H = 3.9        # half the width
 D = 7.4        # the back wall's face
@@ -407,7 +407,9 @@ def lounge(s, geo, items, stations, lights):
         motion(cone, "Bob", amount=0.012, speed=2.0, axis=(-1, 0, 0), music=True)
         s.box("Cone", cone, (0.0, 0.0, 0.0), (0.2, 0.012, 0.2), (0.06, 0.06, 0.06), rot=(0, 0, 90), shape="Cylinder", rough=0.7)
         s.box("Dust Cap", cone, (-0.008, 0.0, 0.0), (0.07, 0.012, 0.07), CHROME, rot=(0, 0, 90), shape="Cylinder", metallic=0.9)
-    station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.25, 0.4, -0.3), 40)
+    # The big boombox: real bass, most of the top, the cones apart, a touch of its box left.
+    speaker(station(s, stations, "Radio", "Radio", (rx, ry, rz), (-1.25, 0.4, -0.3), 40),
+            low_cut=70.0, high_cut=13000.0, honk=1.5, honk_at=1000.0, width=0.7, drive=0.04)
     # The whiteboard: the week, with the band's nights in it; the gear list taped to its corner.
     wz = 4.05
     textured(s.box("Whiteboard", items, (H - 0.025, 1.55, wz), (0.03, 1.0, 1.6), (1, 1, 1), rough=0.25, metallic=0.05), "Whiteboard")

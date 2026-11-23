@@ -16997,7 +16997,10 @@
      ],
      "Haze": 0.72,
      "SkyTime": 20.66,
-     "MoonBrightness": 1.35
+     "MoonBrightness": 1.35,
+     "CloudCoverage": 0.0,
+     "HazeFroxels": true,
+     "Footage": "Mixed"
     }
    ]
   },
@@ -21640,6 +21643,352 @@
      ],
      "Intensity": 2.0,
      "Range": 8.6
+    }
+   ]
+  },
+  {
+   "GUID": "2b3347ad93a7be9b",
+   "Name": "Guest cameras",
+   "DestroyOnLoad": true,
+   "Parent": "6c9e994a874e02d5",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Rotation": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "GUID": "09057bc360ad9463",
+   "Name": "guest front-rail@dv",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      0.5,
+      1.78,
+      -1.15
+     ],
+     "Rotation": [
+      4.6762,
+      -21.3179,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 46.0,
+     "Tag": "guest/front-rail@dv"
+    }
+   ]
+  },
+  {
+   "GUID": "2e35a443b6a55ce9",
+   "Name": "guest over-heads@phone",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.4,
+      2.05,
+      -7.4
+     ],
+     "Rotation": [
+      0.8189,
+      -7.6668,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 46.0,
+     "Tag": "guest/over-heads@phone"
+    }
+   ]
+  },
+  {
+   "GUID": "580f2ac021575133",
+   "Name": "guest amp-crush@dv",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -6.8,
+      1.62,
+      -4.0
+     ],
+     "Rotation": [
+      1.3694,
+      25.8444,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 42.0,
+     "Tag": "guest/amp-crush@dv"
+    }
+   ]
+  },
+  {
+   "GUID": "4c65cb4f125f63fa",
+   "Name": "guest bass-side@phone",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      5.0,
+      1.55,
+      -2.4
+     ],
+     "Rotation": [
+      1.6631,
+      -14.5742,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 48.0,
+     "Tag": "guest/bass-side@phone"
+    }
+   ]
+  },
+  {
+   "GUID": "6731fefd991b688a",
+   "Name": "guest pool-steps@dv",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      11.0,
+      1.45,
+      -6.6
+     ],
+     "Rotation": [
+      -1.3426,
+      -47.4424,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 38.0,
+     "Tag": "guest/pool-steps@dv"
+    }
+   ]
+  },
+  {
+   "GUID": "559ce0f8d3d5bbe7",
+   "Name": "guest back-gate@dv",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      3.4,
+      1.7,
+      -17.2
+     ],
+     "Rotation": [
+      -0.2785,
+      -10.9276,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 34.0,
+     "Tag": "guest/back-gate@dv"
+    }
+   ]
+  },
+  {
+   "GUID": "1a19a4f646f882c3",
+   "Name": "guest sofa@phone",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -1.9,
+      1.05,
+      -19.6
+     ],
+     "Rotation": [
+      -2.2481,
+      3.9725,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 46.0,
+     "Tag": "guest/sofa@phone"
+    }
+   ]
+  },
+  {
+   "GUID": "725e0542da6af792",
+   "Name": "guest roof@phone",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      8.8,
+      6.95,
+      9.6
+     ],
+     "Rotation": [
+      23.4512,
+      -131.0548,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 48.0,
+     "Tag": "guest/roof@phone"
+    }
+   ]
+  },
+  {
+   "GUID": "7b246cdf7f237ef2",
+   "Name": "guest behind-kit@dv",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      1.2,
+      1.7,
+      7.0
+     ],
+     "Rotation": [
+      0.874,
+      -172.5498,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 50.0,
+     "Tag": "guest/behind-kit@dv"
+    }
+   ]
+  },
+  {
+   "GUID": "3e5ee3d84dab3368",
+   "Name": "guest keys-corner@dv",
+   "DestroyOnLoad": true,
+   "Parent": "2b3347ad93a7be9b",
+   "Components": [
+    {
+     "Type": "Transform",
+     "Position": [
+      -7.2,
+      1.6,
+      1.0
+     ],
+     "Rotation": [
+      1.2668,
+      54.9042,
+      0.0
+     ],
+     "Scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "Type": "VenueCameraSpot",
+     "Shot": "Custom",
+     "FieldOfView": 46.0,
+     "Tag": "guest/keys-corner@dv"
     }
    ]
   }

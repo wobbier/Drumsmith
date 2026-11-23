@@ -6,6 +6,7 @@ ME_REFLECT_ENUM( VenueCameraSpot::Kind, { { "Wide", VenueCameraSpot::Kind::Wide 
 ME_REFLECT_ENUM( VenueStory::Motion, { { "Show", VenueStory::Motion::Show }, { "Play", VenueStory::Motion::Play }, { "SlowMotion", VenueStory::Motion::SlowMotion } } )
 ME_REFLECT_ENUM( VenueCrowdArea::Kind, { { "Mob", VenueCrowdArea::Kind::Mob }, { "Posed", VenueCrowdArea::Kind::Posed } } )
 ME_REFLECT_ENUM( VenueScreen::Feed, { { "Stage", VenueScreen::Feed::Stage }, { "Program", VenueScreen::Feed::Program }, { "Lyrics", VenueScreen::Feed::Lyrics } } )
+ME_REFLECT_ENUM( VenueInfo::FootageKind, { { "Broadcast", VenueInfo::FootageKind::Broadcast }, { "Camcorder", VenueInfo::FootageKind::Camcorder }, { "Phone", VenueInfo::FootageKind::Phone }, { "Mixed", VenueInfo::FootageKind::Mixed } } )
 ME_REFLECT_ENUM( VenueShowLight::Role, { { "Wash", VenueShowLight::Role::Wash }, { "Beam", VenueShowLight::Role::Beam }, { "Spot", VenueShowLight::Role::Spot }, { "Blinder", VenueShowLight::Role::Blinder }, { "Strobe", VenueShowLight::Role::Strobe }, { "Static", VenueShowLight::Role::Static } } )
 
 ME_REFLECT_BEGIN( VenueInfo )
@@ -25,6 +26,16 @@ ME_REFLECT_BEGIN( VenueInfo )
     ME_FIELD( Haze ).Category( "Look" ).Unit( Reflection::Unit::Multiplier ).Range( 0.f, 4.f ).Tooltip( "How thick the haze hangs (1 the usual; out of doors it is already under half that)" );
     ME_FIELD( SkyTime ).Category( "Look" ).Unit( Reflection::Unit::Hours ).Range( 0.f, 24.f ).Tooltip( "Out of doors: the night sky's hour (20 is dusk, 22 night)" );
     ME_FIELD( MoonBrightness ).Category( "Look" ).Unit( Reflection::Unit::Multiplier ).Range( 0.f, 10.f ).Tooltip( "Out of doors: how bright the moon is" );
+    ME_FIELD( CloudCoverage ).Category( "Look" ).Unit( Reflection::Unit::Percent ).Range( 0.f, 1.f ).Tooltip( "Out of doors: how much of the sky is cloud. 0 runs no cloud pass (a dark night sky shows its clouds only as missing stars)" );
+    ME_FIELD( HazeFroxels ).Category( "Look" ).Display( "Haze Froxels" ).Tooltip( "Light the show's haze from a grid of cells instead of the per-pixel march: far cheaper, softer on narrow beams. Suits an outdoor haze; a club full of crisp beams looks better without" );
+    ME_FIELD( Ride ).Category( "Cameras" ).Unit( Reflection::Unit::Multiplier ).Range( 0.f, 3.f ).Tooltip( "The venue is on the move: every camera but an aerial story shot rattles, heaves and takes the road's bumps this hard (0 none, 1 a fast highway)" );
+    ME_FIELD( RideUntil ).Category( "Cameras" ).Tooltip( "The story flag that ends the ride (the crash). Empty: it never stops" );
+    ME_FIELD( KeepRed ).Category( "Look" ).Unit( Reflection::Unit::Percent ).Range( 0.f, 1.f ).Tooltip( "How much red a black and white (or any desaturating) look leaves in colour here" );
+    ME_FIELD( KeepBlue ).Category( "Look" ).Unit( Reflection::Unit::Percent ).Range( 0.f, 1.f ).Tooltip( "The same for blue" );
+    ME_FIELD( KeepWarmth ).Category( "Look" ).Range( 0.f, 1.f ).Tooltip( "How far the kept reds reach: 0 pure red, 1 through orange to yellow (fire)" );
+    ME_FIELD( LightsFrom ).Category( "Look" ).Tooltip( "From this story flag (empty: from the start, if Lights Until is set) every look keeps reds, blues and fire: police lights at a crash" );
+    ME_FIELD( LightsUntil ).Category( "Look" ).Tooltip( "Until this story flag (empty: to the end, if Lights From is set)" );
+    ME_FIELD( Footage ).Category( "Cameras" ).Tooltip( "Who filmed the live show: the crew (Broadcast), or only the guests' camcorders, flip phones or both, from the guest/ camera spots. The music video keeps the real cameras" );
 ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( VenueSpot )
@@ -55,7 +66,7 @@ ME_REFLECT_END()
 ME_REFLECT_BEGIN( VenueCameraSpot )
     ME_FIELD( Shot ).Tooltip( "What kind of shot this position is for. The camera looks along local +Z" );
     ME_FIELD( FieldOfView ).Unit( Reflection::Unit::Degrees ).Range( 5.f, 140.f ).Tooltip( "Vertical field of view" );
-    ME_FIELD( Tag ).Tooltip( "Free text to tell Custom shots apart" );
+    ME_FIELD( Tag ).Tooltip( "Free text to tell Custom shots apart. guest/<name> is a party guest's camera (footage venues); add @dv or @phone to pick the device" );
 ME_REFLECT_END()
 
 ME_REFLECT_BEGIN( VenueScreen )

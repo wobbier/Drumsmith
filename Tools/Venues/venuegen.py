@@ -116,10 +116,12 @@ class Scene:
 
     # ---- lights ----------------------------------------------------------------------------
     def light(self, name, parent, pos, kind="Point", color=(1, 1, 1), intensity=1.0, range_=10.0,
-              rot=(0, 0, 0), inner=20.0, outer=30.0, shadows=False, show=None, group=0):
+              rot=(0, 0, 0), inner=20.0, outer=30.0, shadows=False, show=None, group=0, fog=1.0):
         """An engine Light. show = None for a plain light, or a VenueShowLight role name.
         intensity is the engine's (a point or spot falls off as intensity / d^2: a few hundred
-        lights a band from 3-4 m); for a cued light it is its level at full."""
+        lights a band from 3-4 m); for a cued light it is its level at full. fog: how strongly it
+        shows in the volumetric haze (Light::VolumetricMultiplier); 0 leaves it out of the haze,
+        which the fog pass then skips entirely (small practicals)."""
         e = self.entity(name, parent, pos, rot)
         comp = {"Type": "Light", "LightType": kind, "Color": vec(color), "Intensity": _r(intensity),
                 "Range": _r(range_)}
@@ -130,6 +132,8 @@ class Scene:
             comp["DirectionalSource"] = "Manual"
         if shadows:
             comp["CastShadows"] = True
+        if fog != 1.0:
+            comp["VolumetricMultiplier"] = _r(fog)
         e.add(comp)
         if show is not None:
             e.add({"Type": "VenueShowLight", "Kind": show, "Group": int(group)})
@@ -139,17 +143,41 @@ class Scene:
     def info(self, parent, name, author, outdoor=False, room_back=-1000.0, room_ceiling=1000.0,
              half_width=30.0, desk_z=-22.0, build_stage=False, build_set=False, build_rig=False,
              build_fx=False, entity_name="VenueInfo", ambient=(0.0, 0.0, 0.0),
-             fog_color=(0.01, 0.01, 0.015), haze=1.0, sky_time=22.0, moon=1.0):
+             fog_color=(0.01, 0.01, 0.015), haze=1.0, sky_time=22.0, moon=1.0, clouds=0.25,
+             haze_froxels=False, footage="Broadcast", ride=0.0, ride_until="",
+             keep_red=0.0, keep_blue=0.0, keep_warmth=0.0, lights_from="", lights_until=""):
         """The room and its look. ambient: indoors, the colour behind everything (it also lights
         the room a little). fog_color: the light the haze scatters. haze: its thickness (1 the
-        usual). sky_time / moon: out of doors, the night sky's hour and the moon's brightness."""
+        usual). sky_time / moon / clouds: out of doors, the night sky's hour, the moon's brightness
+        and the cloud coverage (0 runs no cloud pass). haze_froxels: light the haze from the froxel
+        grid (cheaper, softer beams).
+        footage: who films the live show, Broadcast (the crew) | Camcorder | Phone | Mixed (the
+        guests, from the guest/ camera spots). ride: the venue is on the move, every camera takes
+        the road this hard (1 a fast highway) until the story flag ride_until is set.
+        keep_red / keep_blue / keep_warmth: what a black and white look leaves in colour (reds,
+        blues, how far the reds reach into fire); between the story flags lights_from and
+        lights_until it keeps all of it (police lights and fire)."""
         e = self.entity(entity_name, parent)
         e.add({"Type": "VenueInfo", "Name": name, "Author": author, "Outdoor": bool(outdoor),
                "RoomBack": _r(room_back), "RoomCeiling": _r(room_ceiling),
                "RoomHalfWidth": _r(half_width), "DeskZ": _r(desk_z),
                "BuildStage": build_stage, "BuildSet": build_set, "BuildRig": build_rig,
                "BuildFx": build_fx, "AmbientColor": vec(ambient), "FogColor": vec(fog_color),
-               "Haze": _r(haze), "SkyTime": _r(sky_time), "MoonBrightness": _r(moon)})
+               "Haze": _r(haze), "SkyTime": _r(sky_time), "MoonBrightness": _r(moon),
+               "CloudCoverage": _r(clouds)})
+        if haze_froxels:
+            e.components[-1]["HazeFroxels"] = True
+        if footage != "Broadcast":
+            e.components[-1]["Footage"] = footage
+        if ride > 0:
+            e.components[-1]["Ride"] = _r(ride)
+            e.components[-1]["RideUntil"] = ride_until
+        for key, value in (("KeepRed", keep_red), ("KeepBlue", keep_blue), ("KeepWarmth", keep_warmth)):
+            if value > 0:
+                e.components[-1][key] = _r(value)
+        for key, value in (("LightsFrom", lights_from), ("LightsUntil", lights_until)):
+            if value:
+                e.components[-1][key] = value
         return e
 
     def spot(self, parent, member, pos, yaw=0.0):

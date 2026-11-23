@@ -18,7 +18,7 @@ import random
 
 from hideoutgen import (flyer_name, band_name, band_name_text, BLACK, BRASS, CHROME, GOLD, MARKER, OFFWHITE, STEEL, WHITE, WOOD, Scene, boombox_display, cat,
                         clock_hands, drummer, dust, glow_light, light, look_rotation, motion, poster, readout, rod, scrawl, setlist, slot, sound,
-                        stand_in, station, tally, tape_outline, textured, view, when)
+                        speaker, stand_in, station, tally, tape_outline, textured, view, when)
 
 H = 4.6        # half the width
 D = 8.2        # the back wall's face
@@ -356,7 +356,8 @@ def lounge(s, geo, items, stations, lights):
         motion(needle, "Sway", amount=22.0, speed=0.6, axis=(1, 0, 0), music=True, phase=0.5 * k)
         s.box("Needle", needle, (0.0, 0.025, 0.0), (0.002, 0.05, 0.003), BLACK, shadows=False)
     boombox_display(s, radio, (rx - 0.302, 0.6, rz), "-x", width=0.36)
-    station(s, stations, "Radio", "Radio", (rx, 0.85, rz), (-1.4, 0.55, -0.4), 40)
+    # The hi-fi: the song as it is, standing at it.
+    speaker(station(s, stations, "Radio", "Radio", (rx, 0.85, rz), (-1.4, 0.55, -0.4), 40))
     shelf = slot(s, items, "Records", "Shelf")
     for i in range(12):
         s.box(f"Sleeve {i}", shelf, (rx - 0.05, 0.3, rz - 0.4 + i * 0.065), (0.32, 0.31, 0.02),

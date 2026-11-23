@@ -4,7 +4,7 @@ Five songs follow one band from a highway chase to an audience with God. On Eart
 
 **Playback.** Starting the set starts one continuous show. The last playable note of each chart leads directly into the next recording, even across a change of venue. Save the results screen and the decision about what to play next for after the rescue. Campaign placement and the rules for resuming an interrupted run are open.
 
-**Recordings.** The set is listed under `ProposedSets` in `Story-Mode-Setlists.json`, so it is outside the campaign until it is placed. Every song has a stand-in (a click and a rock beat) in `Assets/DLC/Story/<Artist - Title>/`, tied to the recording by its Spotify link. Put the real audio and chart in that folder and keep the link. Free Bird and Bat Country share their stand-ins with the Stadium and Steel Mill sets, so they must stay the same recordings.
+**Recordings.** The set is listed under `ProposedSets` in `Story-Mode-Setlists.json`, so it is outside the campaign until it is placed. Every song has a stand-in (a click and a rock beat) in `Assets/DLC/Story/<Artist - Title>/`, tied to the recording by its Spotify link. Put the real song in a folder of its own directly under `Assets/DLC` (Convert Custom DLC reads only those, not `Story/`; Opus stems need Ogg copies first) and give its `TrackData.txt` the same Spotify link; the story takes it over the stand-in. Free Bird and Bat Country share their stand-ins with the Stadium and Steel Mill sets, so they must stay the same recordings.
 
 | Song | Recording | Length |
 |---|---|---|
@@ -12,8 +12,8 @@ Five songs follow one band from a highway chase to an audience with God. On Eart
 | Lynyrd Skynyrd — Free Bird | [studio](https://open.spotify.com/track/5EWPGh7jbTNO2wakv8LjUI) | 9:07 |
 | Avenged Sevenfold — Bat Country | [*City of Evil*](https://open.spotify.com/track/3sHH7lklbfpcraDDvYnjo7) | 5:12 |
 | Atreyu — Right Side of the Bed (backup) | [*The Curse*](https://open.spotify.com/track/2cxbNLOKc9CtQ7hcH88ma3) | about 3:42 |
-| Led Zeppelin — Stairway to Heaven (in use) | [*Led Zeppelin IV*, remaster](https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc) | 8:03 |
-| Heart — Stairway to Heaven (the plan's) | [Live At The Kennedy Center Honors](https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt) | 7:58 |
+| Heart — Stairway to Heaven | [Live At The Kennedy Center Honors](https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt) | 7:58 |
+| Led Zeppelin — Stairway to Heaven (alternate, played until 2026-11-22) | [*Led Zeppelin IV*, remaster](https://open.spotify.com/track/5CQ30WqJwcep0pYcV4AMNc) | 8:03 |
 | Foo Fighters — My Hero | [*The Colour and the Shape*](https://open.spotify.com/track/4dVbhS6OiYvFikshyaQaCN) | 4:20 |
 
 ## 1. Mötley Crüe — Kickstart My Heart
@@ -92,9 +92,9 @@ Every beat in this plan is a moment in the manifest (a cue and a flag). The venu
 
 **The chase.** The road goes by at 48 m/s and swerves under the rig; bridges pass overhead; oncoming traffic comes down the far lane and the slow lane falls behind; a police helicopter holds off the left bow; chains drag sparks off the deck's back corners and fire goes up from the stacks and the deck on the peaks. Three stunts, each a moment with its own shot: `cruiser_flips` (a cruiser goes over and over and is left burning), `roadblock` (two cruisers, barrels and trestles across the road, hit 3.9 s after the flag), `big_air` (the rig leaves the road and lands in sparks). Their cues are shares of the song (0.3, 0.47, 0.68); bind them to Kickstart's sections on the real chart.
 
-**Camera beats beyond the plan.** Five moments were added for coverage: Free Bird's `crash_survey` (along the shoulder to the burning rig), `the_slit` (straight up the shaft) and `hell_wide` (high over the lava); Bat Country's `cavern_orbit`; Stairway's `heaven_wide` (the whole choir). Their cues are shares of the song or an offset from a bound section; move them once Free Bird has a chart.
+**Camera beats beyond the plan.** Five moments were added for coverage: Free Bird's `crash_survey` (along the shoulder to the burning rig), `the_slit` (straight up the shaft) and `hell_wide` (high over the lava); Bat Country's `cavern_orbit`; Stairway's `heaven_wide` (the whole choir). Their cues are shares of the song or an offset from a bound section; move them once Free Bird has a chart. My Hero has six more cuts to Earth between the CPR match cut and God's descent, so the crash site is never off screen for long: `earth_medics` (verse 1 + 12 s, a medic at the guitar player's chest), `earth_road` (chorus 1 + 16 s, the drummer's still hand and the stick), `earth_cop` (chorus 2), `earth_high` (chorus 2 + 14 s, the whole site from above), `earth_bass` (bridge + 10 s, the bass player by the fire) and `earth_shoulder` (verse 3, over the cop's shoulder). The medics kneel at their patients' chests as the cop does (`beside_chest` in `make_story_afterlife.py`).
 
-**Cue timing.** Kickstart My Heart, Bat Country and My Hero are bound to their charts' sections (for example the CPR match cut at My Hero's `verse_riff`, God's descent at `chorus_3`). So is Stairway to Heaven, the Zeppelin chart. Free Bird is still a stand-in, so its cues are shares of the song (`at:0.46` for the fall, `at:0.57` for the landing); bind them to sections once its chart exists.
+**Cue timing.** Kickstart My Heart, Bat Country and My Hero are bound to their charts' sections (for example the CPR match cut at My Hero's `verse_riff`, God's descent at `chorus_3`). Stairway to Heaven's chart has no sections, so its cues are times in the Heart recording, read off its separated vocals: eyes meet at the first sung line (`time:42.5`), the horizon at the verse after the 1:55 break (`time:120`), the choir at 4:25 (`time:265`; a cut to the angels already there, no fade), the choir wide 16 s on; the touchdown is still the first drum note (`drums_in-1.5`, 2:54). Free Bird's cues are still shares of the song (`at:0.46` for the fall, `at:0.57` for the landing), written for the 9:07 recording; bind them to its chart's sections.
 
 **The band and the motion.**
 - The live band is the ghost band: `band_ghost` from Free Bird on (see-through, glowing pale).
@@ -116,8 +116,9 @@ Every beat in this plan is a moment in the manifest (a cue and a flag). The venu
 
 **Recordings in use.**
 - Kickstart My Heart, Bat Country and My Hero are Harmonix charts.
-- Stairway to Heaven is Led Zeppelin's (4EverfreeBrony's chart, converted with `Tools/Story/chart_to_drumsmith.py`), not Heart's. Its cues are bound to that chart's sections: the touchdown at the drum entrance (258.7 s), the choir on the guitar solo.
-- Free Bird is still the stand-in.
+- Free Bird is the Harmonix chart too (Rock Band 3's, 9:42).
+- Stairway to Heaven is Heart's, from a 6:56 recording of the broadcast (clapping before the song and an ovation after it), charted by ChartGen and trimmed to the drum part (2:55.6 to 5:33.9) so the crowd isn't charted. The last note leaves Ann's closing line to the song's tail. Until 2026-11-22 the set played Led Zeppelin's (4EverfreeBrony's chart, converted with `Tools/Story/chart_to_drumsmith.py`); its stand-in is still in `Assets/DLC/Story/`.
+- None of these charts are in the repository: each machine needs them in its own `Assets/DLC`. Without one, the song's stand-in plays.
 
 **Still open.**
 - The sets have only been seen as stills on a Windows debug build (`--venue-only` captures on a test track): the camera moves, the loops' joins and the frame rate in a Profile build want a look in motion, on the real songs.

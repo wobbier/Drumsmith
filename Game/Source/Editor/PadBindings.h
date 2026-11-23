@@ -183,6 +183,8 @@ namespace PadUtils
         case PadId::HighTom:
             return 0xFFC38839;
         case PadId::MidTom:
+            // Its own colour: between the high tom's blue and the floor tom's green it read as either.
+            return 0xFFF06E8F;
         case PadId::Crash1:
         case PadId::Crash2:
         case PadId::FloorTom:

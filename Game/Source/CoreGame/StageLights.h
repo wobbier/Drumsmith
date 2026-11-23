@@ -192,5 +192,6 @@ private:
     int m_fogSteps = 0;
     float m_fogDistance = 0.f;
     int m_fogLightSamples = 0;
+    bool m_fogFroxels = false;
     float m_hazeLevel = 0.f;
 };

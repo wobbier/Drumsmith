@@ -212,7 +212,7 @@ Hideout::~Hideout()
 {
     if( m_ready )
     {
-        TrackRadio::GetInstance().SetSpeaker( 1.f, 0.f, 1.f );
+        TrackRadio::GetInstance().SetSpeaker( RoomSpeaker(), 1.f, 0.f, 1.f );
     }
     m_band.Clear();
     m_bandKit.Clear();
@@ -595,7 +595,8 @@ void Hideout::ApplyRadio( float inDeltaTime )
     }
     const bool atRadio = m_chosen == static_cast<int>( radio - m_stations.begin() );
     // From across the room a small speaker, a little more of the song the nearer the camera is;
-    // at the radio, all of it.
+    // at the radio, all the room's speaker can play (m_speaker: a boombox in the basement, a
+    // hi-fi in the studio).
     const float distance = Distance( m_current.Eye, radio->Position );
     const float goal = atRadio ? 1.f : 0.35f * std::clamp( 1.f - ( distance - 1.5f ) / 4.f, 0.f, 1.f );
     m_radioOpen += ( goal - m_radioOpen ) * ( 1.f - std::exp( -inDeltaTime * 3.f ) );
@@ -610,7 +611,7 @@ void Hideout::ApplyRadio( float inDeltaTime )
         const float rightX = forward.z / flat, rightZ = -forward.x / flat;
         pan = ( toRadio.x * rightX + toRadio.z * rightZ ) / toLength * 0.7f * ( 1.f - m_radioOpen );
     }
-    TrackRadio::GetInstance().SetSpeaker( m_radioOpen, pan, 0.7f + 0.3f * m_radioOpen );
+    TrackRadio::GetInstance().SetSpeaker( m_speaker, m_radioOpen, pan, 0.7f + 0.3f * m_radioOpen );
 }
 
 
@@ -809,6 +810,7 @@ bool Hideout::Load( bool inEvaluate )
 
     bool hasView = false;
     m_hasIntro = false;
+    m_speaker = RoomSpeaker();
     for( Entity* entity : entities )
     {
         Transform* transform = entity->TryGetComponent<Transform>();
@@ -848,6 +850,15 @@ bool Hideout::Load( bool inEvaluate )
             station.ViewOffset = marker->ViewOffset;
             station.FieldOfView = marker->FieldOfView;
             m_stations.push_back( station );
+        }
+        if( HideoutSpeaker* speaker = entity->TryGetComponent<HideoutSpeaker>() )
+        {
+            m_speaker.LowCut = speaker->LowCut;
+            m_speaker.HighCut = speaker->HighCut;
+            m_speaker.Honk = speaker->Honk;
+            m_speaker.HonkAt = speaker->HonkAt;
+            m_speaker.Width = speaker->Width;
+            m_speaker.Drive = speaker->Drive;
         }
     }
     // Every slot, the locked ones' too (their entities go at the end of the frame, so they're
@@ -1327,7 +1338,8 @@ bool Hideout::Back()
         m_naming = false;
         return true;
     }
-    if( m_reveal >= 0 )
+    // Only while the tour is playing: once it ends m_reveal stays at m_reveals.size(), not -1.
+    if( m_reveal >= 0 && m_reveal < static_cast<int>( m_reveals.size() ) )
     {
         m_reveal = static_cast<int>( m_reveals.size() );
         return true;

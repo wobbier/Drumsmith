@@ -4,7 +4,7 @@
     <link type="text/rcss" href="Drumsmith.rcss"/>
     <link type="text/rcss" href="Library.rcss"/>
 </head>
-<body class="library-page" data-model="song_library">
+<body class="library-page song-library" data-model="song_library">
     <div class="library-backdrop"></div>
     <div class="library-header">
         <button id="library-back" class="library-link" onclick="load-scene:Assets/MainMenu.lvl"><img src="img/Esc_Key_Light.png"/><span>Main Menu</span></button>
@@ -21,14 +21,19 @@
         <div data-for="track : tracks">
             <h2 class="track-category" data-if="track.category != ''">{{track.category}}</h2>
             <div class="song-row" data-class-selected="selected == track.index" data-event-mouseover="select(track.index)">
-                <button class="art-button" data-event-click="play(track.index)" data-event-focus="select(track.index)"><img class="song-art" data-attr-src="track.art"/></button>
-                <button class="song-description" data-event-click="select(track.index)" data-event-focus="select(track.index)">
-                    <span class="song-title">{{track.title}}</span>
-                    <span class="song-artist">{{track.artist}}</span>
-                    <span class="song-year">{{track.year}}</span>
-                    <span class="song-badges"><span class="badge source" data-if="track.badge != ''">{{track.badge}}</span></span>
+                <button class="row-play" data-event-click="play(track.index)" data-event-focus="select(track.index)">
+                    <img class="song-art" data-attr-src="track.art"/>
+                    <span class="row-text">
+                        <span class="song-title">{{track.title}}</span>
+                        <span class="song-artist">{{track.artist}}</span>
+                    </span>
+                    <span class="row-meta">
+                        <span class="badge source" data-if="track.badge != ''">{{track.badge}}</span>
+                        <span class="song-year">{{track.year}}</span>
+                        <span class="song-notes">{{track.notes}} notes</span>
+                    </span>
+                    <span class="row-go">PLAY</span>
                 </button>
-                <span class="song-notes">Note Count: {{track.notes}}</span>
                 <button class="favorite-toggle" data-class-on="track.favorite" data-event-click="favorite(track.index)" data-event-focus="select(track.index)"><span data-if="track.favorite">&#x2605;</span><span data-if="!track.favorite">&#x2606;</span></button>
             </div>
         </div>
@@ -38,27 +43,28 @@
         <div class="detail-copy">
             <h1>{{detail_title}}</h1>
             <h2>{{detail_artist}}</h2>
-            <p>{{detail_album}}</p>
-            <p>{{detail_genre}}</p>
-            <p>{{detail_year}}</p>
+            <p class="detail-meta">{{detail_album}}</p>
+            <p class="detail-meta"><span>{{detail_genre}}</span><span class="detail-sep" data-if="detail_genre != ''"> / </span><span>{{detail_year}}</span></p>
+            <p class="detail-meta">{{detail_notes}} notes</p>
             <p class="detail-best" data-if="detail_best != ''">{{detail_best}}</p>
             <p class="detail-badges"><span class="badge source" data-if="detail_badge != ''">{{detail_badge}}</span><span class="badge ds-ready" data-if="detail_ds_ready">DS READY</span></p>
-            <p class="detail-notes">Note Count: {{detail_notes}}</p>
+            <button id="play-selected" class="detail-play" data-event-click="play(selected)">PLAY</button>
+            <div class="detail-chips">
+                <button class="chip" data-event-click="preview(selected)">Preview</button>
+                <button class="chip" data-class-on="detail_favorite" data-event-click="favorite(selected)"><span data-if="detail_favorite">&#x2605; Favorited</span><span data-if="!detail_favorite">&#x2606; Favorite</span></button>
+                <button class="chip" data-event-click="stats">Stats</button>
+                <button id="edit-selected" class="chip" data-if="tools" data-event-click="edit">Edit chart (F4)</button>
+            </div>
             <div class="detail-advice">
                 <p data-for="line : advice">{{line.text}}</p>
             </div>
-            <button id="play-selected" class="detail-action green" data-event-click="play(selected)">PLAY</button>
-            <button class="detail-action" data-event-click="preview(selected)">Preview</button>
-            <button class="detail-action pink" data-event-click="favorite(selected)"><span data-if="detail_favorite">&#x2605; Unfavorite</span><span data-if="!detail_favorite">&#x2606; Favorite</span></button>
-            <button class="detail-action" data-event-click="stats">View Stats</button>
-            <button id="edit-selected" class="detail-action" data-if="tools" data-event-click="edit">Edit chart (F4)</button>
             <p class="listen-caption">Hear the original on</p>
             <div class="listen-links">
                 <button class="listen-link" data-event-click="listen(0)">Spotify</button>
                 <button class="listen-link" data-event-click="listen(1)">Apple Music</button>
                 <button class="listen-link" data-event-click="listen(2)">YouTube Music</button>
             </div>
-            <button id="remove-selected" class="detail-action red" data-if="!detail_confirm_remove" data-event-click="remove">Remove</button>
+            <button id="remove-selected" class="detail-remove" data-if="!detail_confirm_remove" data-event-click="remove">Remove from library</button>
             <p class="detail-state" data-if="detail_confirm_remove">Remove this song? Its folder is deleted from this computer.</p>
             <button id="remove-confirm" class="detail-action red" data-if="detail_confirm_remove" data-event-click="remove_confirm">Yes, remove it</button>
             <button id="remove-cancel" class="detail-action" data-if="detail_confirm_remove" data-event-click="remove_cancel">Keep it</button>

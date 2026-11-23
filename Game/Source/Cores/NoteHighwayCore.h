@@ -364,6 +364,9 @@ private:
 	std::unique_ptr<EventSubscription> m_seekTrackSubscription;
 	// Debug no-fail (the F8 panel, or --no-fail): misses count but cost nothing.
 	bool m_noFail = false;
+	// The debug panel's Highway toggle: hidden outright, to watch the venue (UpdateHighwayRests).
+	bool m_highwayHidden = false;
+	bool m_highwayWasHidden = false;
 	// Playing the calibration's chart: the latency settings are left out (they are what is being
 	// measured), and hits go to Calibration instead of the judge.
 	bool m_calibrating = false;

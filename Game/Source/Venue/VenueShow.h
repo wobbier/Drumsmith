@@ -164,8 +164,6 @@ private:
         bool WhenSet = true;
         float Fade = 0.75f;
         Vector3 Scale;
-        // The plain Lights under it (not show lights: the rig drives those), at full.
-        std::vector<std::pair<EntityHandle, float>> Lights;
         float Shown = -1.f;     // 0 hidden to 1 shown; -1 before the first update (it snaps)
         VenueStory::Motion Mode = VenueStory::Motion::Show;
         float Speed = 0.3f;
@@ -193,6 +191,16 @@ private:
         float Written = -1.f;   // what was left in the Light after dimming
     };
     std::vector<StoryShowLight> m_storyShowLights;
+    // A scene light (not the rig's) under Show props, and its own intensity: it shines by the
+    // least shown of every prop above it. (One group nested in another: a light of the fall is
+    // out until they fall, though its inner "until they land" group is showing all along.)
+    struct StoryLight
+    {
+        EntityHandle Entity;
+        float Intensity = 0.f;
+        std::vector<size_t> Props;
+    };
+    std::vector<StoryLight> m_storyLights;
     void DimStoryShowLights();
     void UpdateStoryMotion( StoryProp& ioProp, bool inSet );
     // The band_ story flags on the band (Band::SetStoryState).
@@ -268,4 +276,5 @@ private:
     // The highway camera as it was.
     bool m_savedHighway = false;
     bool m_highwayFog = false;
+    bool m_highwaySunShadows = true;
 };

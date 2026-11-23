@@ -153,7 +153,7 @@ def build():
     for i,(x,c) in enumerate(((15.68,PINK),(16.32,BLUE))): point(f'Kerb flash {i}',(x,1.58,17.9),c,390,16,'Strobe',i)
 
     s.info(marks,'Backyard Party','Drumsmith',outdoor=True,room_back=-25,half_width=14.4,desk_z=-19.7,
-           fog_color=(.055,.035,.083),haze=.72,sky_time=20.66,moon=1.35)
+           fog_color=(.055,.035,.083),haze=.72,sky_time=20.66,moon=1.35,clouds=0,haze_froxels=True,footage='Mixed')
     for p in layout['band']: s.spot(marks,{'drums':'Drummer','vocals':'Vocals','keys':'Keys','bass':'Bass','guitar':'Guitar'}[p['id']],p['position'])
     for name,x0,x1,z0,z1,y,n,yaw in [
         ('Front rail',-5.66,3.25,-4.64,-1.4,0,45,0),('Crush by the amp',-6.38,-1.87,-7.56,-5.02,0,19,0),
@@ -181,7 +181,25 @@ def build():
         ((3.04,1.78,-18.65),(-.58,2.46,4.26),56),((3.78,1.88,-17.96),(-.45,2.46,4.79),54)]):
         s.camera_spot(f'Arrival {i+1:02}',cams,eye,aim,'Custom',lens,f'arrival/{i+1:02}')
     stage_drop(s,root,marks)
+    guest_cameras(s,marks)
     return s
+
+
+# The live show as the guests filmed it (VenueInfo Footage, Docs/Venue-Authoring.md): where someone
+# at the party stands with a camcorder (@dv) or a flip phone (@phone). Eye height for whoever's
+# holding it, aimed at what they'd film. Added last so the scene's other GUIDs stay put.
+GUESTS=[
+    ('front-rail@dv',(.5,1.78,-1.15),(-.3,1.6,.9),46),('over-heads@phone',(1.4,2.05,-7.4),(0,1.9,3.0),46),
+    ('amp-crush@dv',(-6.8,1.62,-4.0),(-3.7,1.45,2.4),42),('bass-side@phone',(5.0,1.55,-2.4),(3.7,1.4,2.6),48),
+    ('pool-steps@dv',(11.0,1.45,-6.6),(0,1.8,3.5),38),('back-gate@dv',(3.4,1.7,-17.2),(-.5,1.8,3.0),34),
+    ('sofa@phone',(-1.9,1.05,-19.6),(-.4,1.9,2.0),46),('roof@phone',(8.8,6.95,9.6),(-.5,1.6,1.5),48),
+    ('behind-kit@dv',(1.2,1.7,7.0),(-.5,1.5,-6.0),50),('keys-corner@dv',(-7.2,1.6,1.0),(-3.5,1.5,3.6),46)]
+
+
+def guest_cameras(s,marks):
+    guests=s.group('Guest cameras',marks)
+    for tag,eye,aim,lens in GUESTS:
+        s.camera_spot(f'guest {tag}',guests,eye,aim,'Custom',lens,f'guest/{tag}')
 
 
 if __name__=='__main__':

@@ -1,12 +1,15 @@
 #include <doctest/doctest.h>
 #include "Config/PlayerProfile.h"
+#include "CoreGame/AudioPack.h"
 #include "CoreGame/GigSession.h"
 #include "CoreGame/Practice.h"
 #include "CoreGame/Progression.h"
 #include "CoreGame/TrackList.h"
 #include "Venue/VenueRegistry.h"
+#include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <set>
 #include <sstream>
 
@@ -291,6 +294,91 @@ TEST_CASE( "Progression: the shipped journey names only lessons, items and gigs 
     {
         CHECK( progression.VenueOpen( venue, profile ) );
     }
+}
+
+
+TEST_CASE( "Hideout: the radio sounds better in each room than in the one before" )
+{
+    std::filesystem::path root = std::filesystem::current_path();
+    for( int up = 0; up < 8 && !std::filesystem::exists( root / "Assets/Progression/Progression.json" ) && root.has_parent_path() && root != root.parent_path(); ++up )
+    {
+        root = root.parent_path();
+    }
+    std::ifstream file( root / "Assets/Progression/Progression.json" );
+    if( !file )
+    {
+        MESSAGE( "Progression.json not reachable from the test's working folder; skipped" );
+        return;
+    }
+    std::stringstream text;
+    text << file.rdbuf();
+    const Progression progression( json::parse( text.str() ) );
+
+    // Each room's HideoutSpeaker, in the order the player moves through them.
+    std::vector<RoomSpeaker> speakers;
+    for( const ProgressionTier& tier : progression.Tiers() )
+    {
+        CAPTURE( tier.Scene );
+        std::ifstream scene( root / tier.Scene );
+        REQUIRE( scene );
+        std::stringstream sceneText;
+        sceneText << scene.rdbuf();
+        RoomSpeaker speaker;
+        int found = 0;
+        const std::function<void( const json& )> find = [&]( const json& inNode ) {
+            if( inNode.is_object() )
+            {
+                if( inNode.contains( "Type" ) && inNode["Type"].is_string() && inNode["Type"].get<std::string>() == "HideoutSpeaker" )
+                {
+                    ++found;
+                    speaker.LowCut = inNode.value( "LowCut", speaker.LowCut );
+                    speaker.HighCut = inNode.value( "HighCut", speaker.HighCut );
+                    speaker.Honk = inNode.value( "Honk", speaker.Honk );
+                    speaker.HonkAt = inNode.value( "HonkAt", speaker.HonkAt );
+                    speaker.Width = inNode.value( "Width", speaker.Width );
+                    speaker.Drive = inNode.value( "Drive", speaker.Drive );
+                }
+                for( const auto& item : inNode.items() )
+                {
+                    find( item.value() );
+                }
+            }
+            else if( inNode.is_array() )
+            {
+                for( const json& child : inNode )
+                {
+                    find( child );
+                }
+            }
+        };
+        find( json::parse( sceneText.str() ) );
+        CHECK( found == 1 );
+        speakers.push_back( speaker );
+    }
+    REQUIRE( speakers.size() >= 2 );
+    for( size_t room = 1; room < speakers.size(); ++room )
+    {
+        CAPTURE( room );
+        for( float open : { 0.f, 0.35f, 1.f } )
+        {
+            CAPTURE( open );
+            const RoomSpeaker::Mix was = speakers[room - 1].Resolve( open, 0.f, 1.f );
+            const RoomSpeaker::Mix now = speakers[room].Resolve( open, 0.f, 1.f );
+            CHECK( now.HighPass <= was.HighPass );
+            CHECK( now.LowPass >= was.LowPass );
+            CHECK( std::abs( now.Honk ) <= std::abs( was.Honk ) );
+            CHECK( now.Drive <= was.Drive );
+            // Less of each side in the other: wider.
+            CHECK( now.Matrix[1] <= was.Matrix[1] );
+        }
+        // And by more than nothing: more of the song at both ends, standing at it.
+        const RoomSpeaker::Mix was = speakers[room - 1].Resolve( 1.f, 0.f, 1.f );
+        const RoomSpeaker::Mix now = speakers[room].Resolve( 1.f, 0.f, 1.f );
+        CHECK( now.HighPass < was.HighPass );
+        CHECK( now.LowPass > was.LowPass );
+    }
+    // The last room's radio, up close, is the song as it is.
+    CHECK( speakers.back().Resolve( 1.f, 0.f, 1.f ).Off );
 }
 
 

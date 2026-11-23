@@ -204,6 +204,7 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
         m_fogSteps = post.VolumetricSteps;
         m_fogDistance = post.VolumetricDistance;
         m_fogLightSamples = post.VolumetricLightSamples;
+        m_fogFroxels = post.FroxelFog;
         post.Fog = true;
         post.VolumetricFog = true;
         post.VolumetricSteps = std::max( post.VolumetricSteps, 64 );
@@ -212,6 +213,9 @@ void StageLights::Build( World& inWorld, Transform* inParent, const EntityHandle
         post.FogSunIntensity = kHazeScatter;
         post.FogLocalAnisotropy = 0.2f;
         post.VolumetricLightSamples = CommandLine::GetInt( "--haze-light-samples", kHazeLightSamples );
+        // A venue's broad haze can light from the froxel grid instead (VenueInfo::HazeFroxels,
+        // DRU-78): several times cheaper, softer on narrow beams.
+        post.FroxelFog = inPlan.HazeFroxels || m_fogFroxels;
         m_hazeLevel = 0.f;
     }
     m_bandCentre = inPlan.MemberCentre();
@@ -525,6 +529,7 @@ void StageLights::Clear()
         post.VolumetricSteps = m_fogSteps;
         post.VolumetricDistance = m_fogDistance;
         post.VolumetricLightSamples = m_fogLightSamples;
+        post.FroxelFog = m_fogFroxels;
     }
     m_savedFog = false;
     m_camera = {};

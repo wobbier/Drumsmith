@@ -79,12 +79,15 @@ def band(s, marks, y):
     s.spot(marks, 'Vocals', (VOCALS[0], y, VOCALS[1]))
 
 
-def shot(s, marks, flag, eye, target, fov=50.0, hold=None, hand=False, end=None, via=(), focus=False):
+def shot(s, marks, flag, eye, target, fov=50.0, hold=None, hand=False, end=None, via=(), focus=False, heli=False):
     """The story shot for flag: from eye at target; end (eye, target, fov) is where it moves to,
-    by way of via [(eye, target, fov), ...]. focus: pull focus to the target (and soften the rest)."""
+    by way of via [(eye, target, fov), ...]. focus: pull focus to the target (and soften the rest).
+    heli: shot from a helicopter on a long lens (the aim hunts, the zoom punches in). A shot on
+    Earth (far out along x, beyond heaven's sky) is tagged lights: the police lights and the fire
+    stay in colour through a black and white look."""
     def f(e, t):
         return f'/f{math.dist(e, t):.2f}' if focus else ''
-    tag = 'story/' + flag + (f'/{hold:g}' if hold else '') + ('/hand' if hand else '') + f(eye, target)
+    tag = 'story/' + flag + (f'/{hold:g}' if hold else '') + ('/hand' if hand else '') + ('/heli' if heli else '') + ('/lights' if eye[0] > 1000 else '') + f(eye, target)
     s.camera_spot('Story ' + flag, marks, eye, target, 'Custom', fov, tag)
     views = [[list(eye), list(target), fov]]
     for i, (e, t, v) in enumerate(via):
@@ -215,6 +218,22 @@ def burning_wreck(s, parent, venue, o):
     return g
 
 
+# How high a cruiser's driver sits (the figure's feet), so the head is under the roof.
+SEAT_Y = -0.08
+# Who lies where at the crash site, relative to it: (x, z, yaw), the feet at (x, z).
+LYING = {'drummer': (-1.0, 1.0, 200), 'guitar': (-5.0, 4.0, 140), 'bass': (4.5, -1.5, 260), 'vocals': (-3.5, -3.0, 30)}
+# The side of each of the others their medic kneels on (the bass player's is away from the wreck).
+MEDICS = (('guitar', -1), ('bass', 1), ('vocals', 1))
+
+
+def beside_chest(lying, side, out=0.75, up_body=1.3):
+    """Where someone kneels at the chest of a body lying at (x, z, yaw), and the yaw that faces
+    them across it: up_body from the feet toward the head, out to one side (+1 or -1)."""
+    bx, bz, byaw = lying
+    d = P_rot((side * out, 0, -up_body), byaw)
+    return (bx + d[0], bz + d[2]), byaw - side * 90
+
+
 def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, lying=None, wreck_at=(3.0, 0.0, -2.0)):
     """The crash site around o: the wreck (burning), the band on the asphalt and a dropped stick.
     flags: the flags the figures change at ('wake': the drummer opens their eyes, 'nod': the cop
@@ -227,7 +246,7 @@ def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, ly
     g = s.group('Crash site', parent, o)
     # The band on the asphalt: the drummer nearest the shoulder, a stick beyond the fingers.
     looks = {'drummer': ('Son_01', '01_A'), 'guitar': ('Daughter_01', '02_C'), 'bass': ('Mother_01', '03_A'), 'vocals': ('SchoolBoy_01', '04_C')}
-    where = lying or {'drummer': (-1.0, 1.0, 200), 'guitar': (-5.0, 4.0, 140), 'bass': (4.5, -1.5, 260), 'vocals': (-3.5, -3.0, 30)}
+    where = lying or LYING
     lying = {who: (looks[who][0], looks[who][1], (x, 0, z), yaw) for who, (x, z, yaw) in where.items()}
     for who, (body, variant, at, yaw) in lying.items():
         model = P.figure(venue, f'Body_{who}', body, variant, P.STANDING, f'the {who} on the asphalt')
@@ -263,13 +282,19 @@ def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, ly
         medic = P.figure(venue, 'Medic', 'Son_01', '02_A', P.KNEEL_CPR, 'an EMS worker')
         work = P.clip(venue, 'MedicWorking', 45, [P.track('Rotation', [(0, (0, 0, 0)), (20, (6, 4, 0)), (45, (0, 0, 0))], 'SmoothStep')])
         look = P.figure(venue, 'Medic_looks', 'Son_01', '02_A', P.KNEEL_LOOK, 'an EMS worker sees them stir')
-        for i, (at, yaw) in enumerate((((-4.3, -0.08, 4.9), 210), ((4.0, -0.08, -2.4), 290), ((-2.8, -0.08, -3.6), 130))):
+        # Each kneels at their patient's chest as the cop does at the drummer's: 1.3 m up the body
+        # from the feet, 0.75 m out to one side, facing across it.
+        for i, (who, side) in enumerate(MEDICS):
+            bx, bz, byaw = where[who]
+            (mx, mz), yaw = beside_chest(where[who], side)
+            at = (mx, -0.08, mz)
             if i == 0 and flags.get('wake'):
                 P.place(s, P.looping(s, P.between(s, g, 'Medic working', None, flags['wake'], 0.2, at), 'Working', work, at, rot=(0, yaw, 0)), 'Medic', medic, (0, 0, 0), 0)
                 P.place(s, P.between(s, g, 'Medic sees', flags['wake'], None, 0.2, at), 'Medic looking', look, at, yaw)
             else:
                 P.place(s, P.looping(s, g, f'Medic {i}', work, at, speed=0.8 + 0.15 * i, rot=(0, yaw, 0)), 'Medic', medic, (0, 0, 0), 0)
-            s.box('Kit bag', g, (at[0] + 0.5, 0.15, at[2] + 0.4), (0.5, 0.3, 0.3), (0.75, 0.1, 0.08), rot=(0, yaw, 0))
+            bag = P_rot((side * 1.25, 0, -2.0), byaw)       # out past the patient's shoulder, on the medic's side
+            s.box('Kit bag', g, (bx + bag[0], 0.15, bz + bag[2]), (0.5, 0.3, 0.3), (0.75, 0.1, 0.08), rot=(0, yaw + 20, 0))
         amb = s.entity('Ambulance', g, (-9, 0, 8), (0, 160, 0))
         A.model(s, amb, 'Body', A.ambulance(venue))
         lightbar(s, amb, venue, (0, 3.1, 2.2))
@@ -335,7 +360,7 @@ def highway():
     s.venue = V
     root = s.group('Highway to the Afterlife: the highway')
     marks = s.group('Markers', root)
-    s.info(marks, 'The Highway', 'Drumsmith', outdoor=True, half_width=60, desk_z=-30, sky_time=21.5, moon=0.8, haze=0.5)
+    s.info(marks, 'The Highway', 'Drumsmith', outdoor=True, half_width=60, desk_z=-30, sky_time=21.5, moon=0.8, haze=0.5, ride=1.0, ride_until='wreck', lights_from='wreck')
     deck_y = 1.25
     band(s, marks, deck_y)
     s.camera_spot('Camera Wide', marks, (7.5, 2.2, -7.5), (0, 2.4, 4), 'Wide', 60)
@@ -509,7 +534,9 @@ def highway():
     # its place behind the rig, so the shots through its windscreen hold theirs.)
     car_at = (0.0, 0.0, -13.0)
     cruiser(s, world, V, car_at)
-    seat = (car_at[0] - 0.45, 0.32, car_at[2] - 0.2)
+    # The seated figure is 1.51 tall from its feet and the roof's underside is at 1.49: sat with its
+    # feet under the floor line, its head clears the roof and its face is in the windscreen.
+    seat = (car_at[0] - 0.45, SEAT_Y, car_at[2] - 0.2)
     for flag_after, flag_before, pose, label in ((None, 'cop_radio', P.DRIVING, 'Cop_driving'), ('cop_radio', 'cop_nods', P.RADIO, 'Cop_radio'),
                                                  ('cop_nods', None, P.NODDING, 'Cop_nodding')):
         model = P.figure(V, label, 'ShopKeeper_01', '04_B', pose, 'the highway cop')
@@ -521,7 +548,7 @@ def highway():
 
     def manned(parent, name, yaw=0.0):
         car = cruiser(s, parent, V, (0, 0, 0), yaw, name=name)
-        P.place(s, car, 'Cop', driver, (-0.45, 0.32, -0.2), 0)
+        P.place(s, car, 'Cop', driver, (-0.45, SEAT_Y, -0.2), 0)
         s.box('Steering wheel', car, (-0.45, 0.98, 0.3), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
         return car
 
@@ -659,13 +686,13 @@ def highway():
          end=((1.6, 4.6, 9.4), (0, 1.3, -5.5), 62))
     cop_face = (seat[0], 1.28, seat[2] + 0.1)
     shot(s, marks, 'cop_watching', (seat[0] + 0.3, 1.4, car_at[2] + 2.3), cop_face, 38, 6, focus=True, end=((seat[0] + 0.1, 1.36, car_at[2] + 1.75), cop_face, 30))
-    shot(s, marks, 'heli_chase', heli, (0, 1.0, -6), 44, 9, hand=True,
+    shot(s, marks, 'heli_chase', heli, (0, 1.0, -6), 44, 9, heli=True,
          via=[((heli[0] + 1.5, heli[1] - 0.4, heli[2] + 2.5), (1.5, 1.0, 26), 7), ((heli[0] + 2.5, heli[1] - 0.6, heli[2] + 4.5), (0.4, 2.2, 8.5), 6.5)],
          end=((heli[0] + 4, heli[1] - 1, heli[2] + 7), (0, 2.4, 5.2), 8))
     shot(s, marks, 'foot_on_monitor', (-0.3, 1.42, -1.75), (-1.9, 2.7, 2.5), 34, 5, hand=True, end=((0.5, 1.5, -1.9), (-1.8, 2.6, 2.5), 30))
     shot(s, marks, 'cop_radio', (seat[0] + 1.75, 1.3, seat[2] + 0.75), cop_face, 34, 5, focus=True, end=((seat[0] + 1.5, 1.28, seat[2] + 0.5), cop_face, 28))
     shot(s, marks, 'cop_nods', (seat[0] - 0.2, 1.38, car_at[2] + 1.9), cop_face, 30, 5, focus=True, end=((seat[0] - 0.05, 1.34, car_at[2] + 1.5), cop_face, 22))
-    shot(s, marks, 'heli_again', (40, 26, 22), (0, 1.5, 0), 34, 8, hand=True, via=[((44, 24, 2), (0, 1.5, 0), 26)], end=((36, 22, -20), (0, 1.5, 2), 20))
+    shot(s, marks, 'heli_again', (40, 26, 22), (0, 1.5, 0), 34, 8, heli=True, via=[((44, 24, 2), (0, 1.5, 0), 26)], end=((36, 22, -20), (0, 1.5, 2), 20))
     shot(s, marks, 'cruiser_flips', (-3.5, 2.7, -0.4), (-7.6, 1.0, -11.0), 64, 5, hand=True, end=((-3.3, 2.9, -0.8), (-11.0, 1.6, -70.0), 40))
     shot(s, marks, 'roadblock', (0.6, 5.9, 9.2), (0, 1.0, 90.0), 58, 5.5, hand=True, end=((1.4, 6.0, 8.6), (0, 0.5, 24.0), 74))
     shot(s, marks, 'big_air', (5.0, 0.4, 10.5), (0, 1.6, 4.5), 70, 4, hand=True, end=((4.7, 0.3, 2.5), (0, 2.2, 5.0), 64))
@@ -686,7 +713,8 @@ def hell():
     root = s.group('Highway to the Afterlife: hell')
     marks = s.group('Markers', root)
     s.info(marks, 'Hell', 'Drumsmith', outdoor=False, room_back=-40, room_ceiling=60, half_width=22, desk_z=-14,
-           ambient=(0.012, 0.002, 0.0015), fog_color=(0.016, 0.01, 0.009), haze=0.1)
+           ambient=(0.012, 0.002, 0.0015), fog_color=(0.016, 0.01, 0.009), haze=0.1,
+           keep_red=1.0, keep_warmth=0.3, lights_until='fell')
     band(s, marks, 0.0)
     s.camera_spot('Camera Wide', marks, (0, 4.6, -11.5), (0, 2.2, 4), 'Wide', 58)
     s.camera_spot('Camera Crane', marks, (8, 9, -9), (0, 1.6, 4), 'Crane', 55)
@@ -1029,30 +1057,31 @@ def hell():
 
 
 # ---- heaven -------------------------------------------------------------------------------------
-def angel(s, parent, venue, centre, scale, eyes_flag=None, name='Angel', turn_flag=None, look_at=None):
+def angel(s, parent, venue, centre, scale, eyes_flag=None, name='Angel', turn_flag=None, look_at=None, fade=2.5, bright=1.0):
     """Wheels within wheels turning about a great eye, eyes all round their rims, and three pairs of
     wings behind; it faces +z (the band). eyes_flag: until then it is only gold rings, an arch
-    standing in the cloud. turn_flag: it turns to look at look_at then."""
+    standing in the cloud (fade: how long the change takes; 0 for a cut). turn_flag: it turns to
+    look at look_at then. bright: its glow, turned up for one far off in the haze."""
     g = s.group(name, parent, centre)
     if turn_flag and look_at:
         flat = math.hypot(look_at[0] - centre[0], look_at[2] - centre[2])
         g = P.play(s, g, 'Turn', turn_flag, P.turn_clip(venue, P.wrap(P.yaw_to(centre, look_at)), 2.5, math.degrees(math.atan2(centre[1] - look_at[1], flat))))
     r = 3.2 * scale
-    gold = A.mat(venue, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=1.3, metallic=0.6, rough=0.35)
+    gold = A.mat(venue, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=1.3 * bright, metallic=0.6, rough=0.35)
     spin_a = P.clip(venue, 'RingSpinA', 900, [P.track('Rotation', [(0, (0, 0, 0)), (300, (0, 0, 120)), (600, (0, 0, 240)), (900, (0, 0, 359.9))])])
     spin_b = P.clip(venue, 'RingSpinB', 1200, [P.track('Rotation', [(0, (0, 0, 0)), (400, (0, 120, 0)), (800, (0, 240, 0)), (1200, (0, 359.9, 0))])])
     spin_c = P.clip(venue, 'RingSpinC', 1000, [P.track('Rotation', [(0, (0, 0, 0)), (333, (120, 0, 0)), (666, (240, 0, 0)), (1000, (359.9, 0, 0))])])
-    awake = P.between(s, g, 'Awake', eyes_flag, None, 2.5) if eyes_flag else g
+    awake = P.between(s, g, 'Awake', eyes_flag, None, fade) if eyes_flag else g
     if eyes_flag:
-        asleep = P.between(s, g, 'Asleep', None, eyes_flag, 2.5)
+        asleep = P.between(s, g, 'Asleep', None, eyes_flag, fade)
         plain = A.torus(venue, 'PlainRing', 1.0, 0.11)
         A.model(s, asleep, 'Ring', plain, (0, 0, 0), (0, 0, 0), r, gold, shadows=False)
         A.model(s, asleep, 'Ring', plain, (0, 0, 0), (0, 0, 14), r * 0.86, gold, shadows=False)
     A.model(s, P.looping(s, awake, 'Wheel A', spin_a), 'Wheel', A.angel_ring(venue, 'AngelRingA', 1.0, 0.11, 14, 'z'), (0, 0, 0), (0, 0, 0), r, gold, shadows=False)
     A.model(s, P.looping(s, awake, 'Wheel B', spin_b, speed=0.8), 'Wheel', A.angel_ring(venue, 'AngelRingB', 1.0, 0.1, 12, 'out'), (0, 0, 0), (0, 0, 0), r * 0.86, gold, shadows=False)
     A.model(s, P.looping(s, awake, 'Wheel C', spin_c, speed=0.7), 'Wheel', A.angel_ring(venue, 'AngelRingB', 1.0, 0.1, 12, 'out'), (0, 0, 0), (0, 90, 0), r * 0.72, gold, shadows=False)
-    A.model(s, awake, 'Heart eye', A.angel_eye(venue), (0, 0, 0), (0, 0, 0), 0.95 * scale, A.mat(venue, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=1.6), shadows=False)
-    feather = A.mat(venue, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=0.85, both=True)
+    A.model(s, awake, 'Heart eye', A.angel_eye(venue), (0, 0, 0), (0, 0, 0), 0.95 * scale, A.mat(venue, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=1.6 * bright), shadows=False)
+    feather = A.mat(venue, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=0.85 * bright, both=True)
     for i, (ang, length, rest) in enumerate(((34, 1.7, 0), (2, 2.0, 6), (-30, 1.5, 12))):
         beat = P.clip(venue, f'WingBeat{i}', 110 + 20 * i, [P.track('Rotation', [(0, (0, 0, 0)), (55 + 10 * i, (0, 0, 9 - 2 * i)), (110 + 20 * i, (0, 0, 0))], 'SmoothStep')])
         for side in (-1, 1):
@@ -1162,6 +1191,44 @@ def heaven():
     A.particles(s, floor, 'Motes', (0, 5, -6), Shape='Box', BoxSize=[50, 10, 60], Lifetime=[5.0, 9.0], Speed=[0.05, 0.3], Size=[0.025, 0.06],
                 StartColor=[1.0, 0.9, 0.6], StartColor2=[1.0, 1.0, 0.9], EndColor=[1.0, 0.85, 0.5], Intensity=3.0, Gravity=-0.01, Drag=0.2, NoiseStrength=0.4,
                 Blend='Additive', EmissionRate=40, MaxParticles=320, FadeIn=0.2)
+    # The way they came, behind the band: gold arches standing in the cloud like the far one, out
+    # to where the wide shots pull back to.
+    arch_gold = A.mat(V, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=1.2, metallic=0.7, rough=0.3)
+    for k in range(6):
+        z = 24.0 + 10.0 * k
+        A.model(s, floor, 'Way arch', A.torus(V, 'WayArch', 1.0, 0.04), (0, -0.6, z), (0, 0, 0), 7.0 + 0.5 * k, arch_gold, shadows=False)
+        for side in (-1, 1):
+            A.model(s, floor, 'Way cloud', clouds_m[(k + side) % 4], (side * (7.4 + 0.5 * k), -1.3, z), (0, k * 70, 0), (3.4, 1.7, 3.4), cloud_mat, shadows=False)
+    # Round temples out on the cloud to either side, each with its own light.
+    temple_gold = A.mat(V, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=0.9, metallic=0.8, rough=0.3)
+    for i, (x, z, sc) in enumerate(((-30, -14, 1.0), (30, -14, 1.0), (-52, 6, 1.25), (52, 6, 1.25), (-38, 34, 1.1), (38, 34, 1.1), (-66, -36, 1.4), (66, -36, 1.4))):
+        base = 1.2 + 0.8 * (i // 2 % 2)
+        textured(s.box('Temple floor', floor, (x, base - 0.25, z), (11.0 * sc, 0.5, 11.0 * sc), (1, 1, 1), rough=0.12, metallic=0.25, shape='Cylinder'), V, 'Marble', (3, 3))
+        for k in range(8):
+            a = 2 * math.pi * (k + 0.5) / 8
+            A.model(s, floor, 'Temple column', col, (x + 4.6 * sc * math.cos(a), base, z + 4.6 * sc * math.sin(a)), (0, 0, 0), sc, marble)
+        A.model(s, floor, 'Temple ring', A.torus(V, 'Entablature', 1.0, 0.035, 'gold', 48, 6, 'y'), (x, base + 8.2 * sc, z), (0, 0, 0), 4.9 * sc, temple_gold, shadows=False)
+        A.model(s, floor, 'Temple halo', A.torus(V, 'Halo', 1.0, 0.07), (x, base + 11.5 * sc, z), (90, 0, 0), 2.6 * sc, A.mat(V, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=2.5), shadows=False)
+        A.glow_card(s, floor, V, 'Temple light', (x, base + 4.5 * sc, z), 7.0 * sc, (1.0, 0.9, 0.65), 0.5, look_rotation((x, 0, z), (0, 0, 40)))
+        A.model(s, floor, 'Temple cloud', clouds_m[i % 4], (x, base - 2.6, z), (0, i * 50, 0), (9.0 * sc, 2.6, 9.0 * sc), cloud_mat, shadows=False)
+    # Cumulus piled high at the edges of the floor, and temples adrift over them, to close the sides in.
+    for i in range(14):
+        side = -1 if i % 2 else 1
+        a = math.radians(rng.uniform(28, 150))
+        r = rng.uniform(58, 80)
+        x, z = side * math.sin(a) * r, -8 + math.cos(a) * r
+        sc = rng.uniform(11, 19)
+        A.model(s, floor, 'Cloud tower, near', clouds_m[i % 4], (x, -3.0, z), (0, rng.uniform(0, 360), 0), (sc, sc * rng.uniform(1.3, 2.4), sc),
+                cloud_gold if i % 4 == 0 else cloud_mat, shadows=False)
+    for i, (x, y, z, sc) in enumerate(((-44, 26, -24, 2.6), (47, 31, -18, 2.9), (-58, 44, 2, 3.4), (60, 40, 10, 3.2), (-36, 52, -40, 2.4), (38, 56, -44, 2.6),
+                                       (-50, 30, 40, 3.0), (48, 36, 46, 3.2), (-24, 62, 30, 2.2), (26, 66, 22, 2.4))):
+        drift = P.looping(s, floor, f'Adrift {i}', P.clip(V, f'IslandDrift{i % 3}', 420 + 90 * (i % 3), [P.track('Position', [(0, (0, 0, 0)), (210 + 45 * (i % 3), (0, 1.2, 0)), (420 + 90 * (i % 3), (0, 0, 0))], 'SmoothStep')]))
+        A.model(s, drift, 'Temple adrift', A.island(V, 1 + i % 3), (x, y, z), (0, rng.uniform(0, 360), 0), sc,
+                A.mat(V, 'Palette', (1, 1, 1), glow=(0.95, 0.93, 1.0), power=0.7), shadows=False)
+    # Light coming down through the sky onto the floor.
+    for i, (x, z, w) in enumerate(((-34, -30, 16), (36, -24, 18), (-14, -62, 14), (16, -58, 15), (-52, 14, 20), (54, 20, 20), (-20, 44, 16), (22, 50, 17))):
+        A.shaft(s, floor, V, f'Sunbeam {i}', (x * 0.35, 118, z * 0.35 - 30), (x, -2, z), w, (1.0, 0.9, 0.68), 0.16)
+
     # God: on the platform until the final chorus, then down the stairs to the band's level.
     god_robe = P.figure(V, 'God', 'Rigged', '01_C', P.ROBED, 'God')
     god_at = (0.0, top_y + 0.9, zt - 13.0)
@@ -1183,11 +1250,12 @@ def heaven():
     # with the choir and turning to the drummer as the song resolves.
     drummer_head = (DRUMMER[0], 1.3, DRUMMER[1])
     arch_at = (0, top_y + 17, zt - 30)
-    angel(s, floor, V, arch_at, 3.2, 'choir', 'Arch angel', 'angels_turn', drummer_head)
+    angel(s, floor, V, arch_at, 3.2, 'choir', 'Arch angel', 'angels_turn', drummer_head, fade=0.0)
 
     # The choir: angels in an arc round and above the platform, and rank on rank behind them out
-    # of sight; two banks of wings in front part to show the crash site.
-    choir = P.between(s, root, 'The choir', 'choir', None, 3.0, (0, top_y + 10, zt - 20))
+    # of sight; two banks of wings in front part to show the crash site. It is there all at once:
+    # the choir shot cuts to it (no fade).
+    choir = P.between(s, root, 'The choir', 'choir', None, 0.0, (0, top_y + 10, zt - 20))
     for i, (x, y, z, sc) in enumerate(((-30, 22, -52, 2.2), (30, 22, -52, 2.2), (-50, 30, -40, 1.9), (50, 30, -40, 1.9), (-19, 38, -62, 1.7), (19, 38, -62, 1.7), (0, 47, -68, 2.0))):
         angel(s, choir, V, (x, y, z), sc, None, f'Angel {i}', 'angels_turn', drummer_head)
     far_m = A.angel_far(V)
@@ -1202,6 +1270,30 @@ def heaven():
         at = (math.sin(a) * r, y, zt - 4 - math.cos(a) * r * 0.72)
         sc = 3.0 + 0.5 * ring
         A.model(s, ranks[i % 3], 'Angel of the choir', far_m, at, look_rotation(at, drummer_head), sc, far_mat, shadows=False)
+    # Higher and nearer, more of them over the platform and out to either side, and two flocks
+    # wheeling slowly round it all.
+    for i in range(44):
+        tier = i % 4
+        a = math.radians(-112 + 224 * ((i // 4) + 0.5 * (tier % 2)) / 10.5)
+        r = 40 + 7 * tier + rng.uniform(-3, 3)
+        at = (math.sin(a) * r, 44 + 11 * tier + rng.uniform(-4, 4), zt - 8 - math.cos(a) * r * 0.8)
+        A.model(s, ranks[i % 3], 'Angel of the choir', far_m, at, look_rotation(at, drummer_head), 1.5 + 0.3 * tier, far_mat, shadows=False)
+    wheel_at = (0, 0, zt - 10)
+    for k, (r, y, count, frames, sc) in enumerate(((34, 58, 9, 5400, 1.3), (56, 78, 13, 7800, 1.7))):
+        turn_y = 359.9 if k == 0 else -359.9
+        circling = P.clip(V, f'FlockWheel{k}', frames, [P.track('Rotation', [(0, (0, 0, 0)), (frames // 3, (0, turn_y / 3, 0)), (2 * frames // 3, (0, 2 * turn_y / 3, 0)), (frames, (0, turn_y, 0))])])
+        flock = P.looping(s, choir, f'Flock {k}', circling, wheel_at)
+        for i in range(count):
+            a = 2 * math.pi * i / count
+            at = (math.sin(a) * r, y + 5 * math.sin(3 * a), math.cos(a) * r)
+            A.model(s, flock, 'Angel on the wing', far_m, at, look_rotation(at, (0, y - 30, 0)), sc, far_mat, shadows=False)
+    # Behind and over all of them, one vast enough to be taken for the sky: the wheels and wings
+    # of it loom through the haze, its glory behind it.
+    great_at = (0, 70, zt - 62)
+    angel(s, choir, V, great_at, 8.0, None, 'The great angel', 'angels_turn', drummer_head, bright=2.2)
+    A.model(s, P.looping(s, choir, 'Great glory', burst_spin, (great_at[0], great_at[1], great_at[2] - 4)), 'Sunburst', A.sunburst(V), (0, 0, 0), (0, 0, 0), 62.0,
+            A.mat(V, 'Palette', (0, 0, 0), glow=(1.0, 0.86, 0.5), power=0.55, additive=True, both=True), shadows=False)
+    A.glow_card(s, choir, V, 'Great radiance', (great_at[0], great_at[1], great_at[2] - 3), 70.0, (1.0, 0.92, 0.7), 0.45)
     # Two banks of wings close in front of the platform's back; on angels_part they fold aside.
     feather = A.mat(V, 'Palette', (1, 1, 1), glow=(1, 1, 1), power=0.85, both=True)
     for side in (-1, 1):
@@ -1263,8 +1355,10 @@ def heaven():
          via=[((-7.0, 3.5, 4.0), (2, -6, -40), 52)], end=((-9.5, 5.0, -4.0), (30, -30, -200), 64))
     shot(s, marks, 'touchdown', (face[0] + 0.7, face[1] + 0.1, face[2] - 0.5), face, 40, 9,
          via=[((2.6, 0.5, 0.8), (0, 0.4, 4.0), 50), ((5.5, 2.0, -5.0), (0, 2.0, 3), 54)], end=((2.5, 6.5, -4.5), (0, top_y, zt - 6), 62))
-    shot(s, marks, 'choir', (0.8, 1.7, 8.2), (0, top_y + 12, zt - 26), 34, 14,
-         via=[((1.5, 3.0, 13.0), (0, top_y + 16, zt - 30), 52), ((0, 9.0, 26.0), (0, top_y + 20, zt - 30), 70)], end=((0, 22.0, 44.0), (0, top_y + 24, zt - 40), 84))
+    # The reveal is a cut: the choir is whole in the first frame, from low behind the band, and
+    # the camera only rises and widens from there.
+    shot(s, marks, 'choir', (1.4, 2.6, 13.5), (0, top_y + 22, zt - 34), 66, 16,
+         via=[((0.6, 8.0, 25.0), (0, top_y + 24, zt - 36), 74)], end=((0, 22.0, 44.0), (0, top_y + 26, zt - 40), 84))
     shot(s, marks, 'heaven_wide', (0, 12, 36), (0, 20, -50), 60, 12, via=[((10, 20, 52), (0, 24, -50), 66)], end=((0, 32, 74), (0, 28, -50), 72))
     shot(s, marks, 'angels_turn', (3.5, 6, -9), arch_at, 40, 7, end=((2.0, 3.0, -1.0), (0, top_y + 14, zt - 28), 52))
     shot(s, marks, 'sticks_close', (2.5, 5, -3), (0, 1.2, 4.6), 44, 20, focus=True, via=[((1.2, 1.9, 2.6), (0, 1.0, 4.4), 36)],
@@ -1277,6 +1371,38 @@ def heaven():
     shot(s, marks, 'earth_wide', (E[0] - 6.5, 0.9, E[2] - 4.0), (E[0] + 2.0, 1.2, E[2] + 9), 44, 8, end=((E[0] - 5.0, 1.6, E[2] - 6.0), (E[0] + 2.5, 1.0, E[2] + 9), 38))
     shot(s, marks, 'cpr_close', (cop_head[0] + 1.5, 0.8, cop_head[2] + 0.75), cop_head, 22, 5, hand=True, focus=True,
          end=((cop_head[0] + 1.35, 0.85, cop_head[2] + 0.55), cop_head, 17))
+    # More of Earth through the song: the medics at the others, the road, the cop, the whole site.
+    site = (E[0], 0.0, E[2] + 6)
+
+    def on_site(x, y, z):
+        return (site[0] + x, y, site[2] + z)
+
+    def chest(who):
+        return beside_chest(LYING[who], 0, 0.0)[0]
+    medic = {who: beside_chest(LYING[who], side)[0] for who, side in MEDICS}
+    gc, gm = chest('guitar'), medic['guitar']
+    feet = LYING['guitar']
+    # From past the guitar player's feet, low: the medic over them, the ambulance's lights behind.
+    shot(s, marks, 'earth_medics', on_site(feet[0] + (feet[0] - gc[0]) * 0.9 + 0.5, 0.45, feet[1] + (feet[1] - gc[1]) * 0.9), on_site(gm[0], 0.85, gm[1]), 40, 6, hand=True, focus=True,
+         end=(on_site(feet[0] + (feet[0] - gc[0]) * 0.5 + 0.4, 0.6, feet[1] + (feet[1] - gc[1]) * 0.5), on_site(gm[0], 0.9, gm[1]), 36))
+    # Along the asphalt from out beyond the drummer's still hand and the stick: the cop working past them.
+    shot(s, marks, 'earth_road', add3(hand, P_rot((1.5, 0.12, 0.5), LYING['drummer'][2])), (hand[0], 0.1, hand[2]), 38, 6, focus=True,
+         end=(add3(hand, P_rot((1.15, 0.2, 0.1), LYING['drummer'][2])), (hand[0], 0.1, hand[2]), 34))
+    # Up the drummer's body from beyond their head at the cop, working.
+    dc = chest('drummer')
+    df = LYING['drummer']
+    beyond = add3(on_site(df[0] + (dc[0] - df[0]) * 2.9, 0.55, df[1] + (dc[1] - df[1]) * 2.9), P_rot((-0.7, 0, 0), df[2]))
+    shot(s, marks, 'earth_cop', beyond, cop_head, 36, 7, hand=True, focus=True, end=(add3(beyond, P_rot((-0.5, 0.15, 0.3), df[2])), cop_head, 30))
+    # High over the shoulder, coming down: every one of them with somebody at their side.
+    shot(s, marks, 'earth_high', on_site(-2.5, 13.0, -9.0), on_site(-0.5, 0.0, 1.5), 56, 8, end=(on_site(-1.5, 7.5, -5.5), on_site(-0.8, 0.3, 1.5), 50))
+    # The bass player by the fire, the medic between the lens and the flames.
+    bc, bm = chest('bass'), medic['bass']
+    shot(s, marks, 'earth_bass', on_site(bc[0] + (bm[0] - bc[0]) * 4.2 + 1.8, 0.9, bc[1] + (bm[1] - bc[1]) * 4.2), on_site(bc[0], 0.5, bc[1]), 40, 6, hand=True, focus=True,
+         end=(on_site(bc[0] + (bm[0] - bc[0]) * 3.4 + 1.5, 0.75, bc[1] + (bm[1] - bc[1]) * 3.4), on_site(bc[0], 0.5, bc[1]), 36))
+    # Over the cop's shoulder, down at the drummer's face.
+    face_down = on_site(df[0] + (dc[0] - df[0]) * 1.22, 0.22, df[1] + (dc[1] - df[1]) * 1.22)
+    shot(s, marks, 'earth_shoulder', add3((cop_eye[0], 0, cop_eye[2]), P_rot((0.75, 1.75, -1.6), cop_at[1])), face_down, 40, 7, hand=True, focus=True,
+         end=(add3((cop_eye[0], 0, cop_eye[2]), P_rot((0.6, 1.6, -1.2), cop_at[1])), face_down, 34))
     shot(s, marks, 'god_descends', (3.2, top_y + 1.6, zt + 2.5), (0, top_y + 3.2, zt - 13), 40, 8, via=[((6.5, top_y * 0.6, z0 - 4), (0, top_y * 0.6 + 2.5, zt + 4), 46)],
          end=((5.5, 1.6, 0.5), (0, 2.6, -4.5), 44))
     shot(s, marks, 'angels_part', (1.2, 1.7, 7.4), (0, 4, -4), 46, 8, via=[((0.5, 3.0, 2.0), window, 40)], end=((0, top_y + 5.5, zt - 9), window, 30))

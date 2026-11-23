@@ -84,7 +84,7 @@ void InGameMenuController::Update( float inDeltaTime )
     if( !m_modelReady )
     {
         ui->ModelEnsure( "in_game" );
-        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_seek", "master_volume", "cal_apply", "metronome", "gig_next", "gig_leave" } )
+        for( const char* event : { "resume", "options", "back", "exit", "save", "audio_delay", "video_delay", "highway_speed", "retry", "debug_nofail", "debug_autoplay", "debug_plain", "debug_highway", "debug_seek", "master_volume", "cal_apply", "metronome", "gig_next", "gig_leave" } )
             ui->ModelRegisterEvent( "in_game", event );
         ui->ModelSetString( "in_game", "status", "" );
         ui->ModelSetString( "in_game", "pause_hint", kPauseHint );
@@ -97,6 +97,8 @@ void InGameMenuController::Update( float inDeltaTime )
         ui->ModelSetNumber( "in_game", "debug_autoplay", autoplay );
         ui->ModelSetString( "in_game", "debug_autoplay_label", kAutoplayLabels[autoplay] );
         ui->ModelSetNumber( "in_game", "debug_plain", CommandLine::Has( "--highway-autoplay-plain" ) ? 1 : 0 );
+        // Hides the highway to watch the venue; the song still plays and scores (--hide-highway).
+        ui->ModelSetNumber( "in_game", "debug_highway_hidden", CommandLine::Has( "--hide-highway" ) ? 1 : 0 );
         // The karaoke line (NoteHighwayCore::UpdateLyrics), registered up front so setting it
         // later doesn't reload the document.
         ui->ModelSetNumber( "in_game", "lyrics_shown", 0 );
@@ -275,6 +277,10 @@ void InGameMenuController::Update( float inDeltaTime )
         else if( event == "debug_plain" )
         {
             ui->ModelSetNumber( "in_game", "debug_plain", ui->ModelGetNumber( "in_game", "debug_plain" ) == 0 );
+        }
+        else if( event == "debug_highway" )
+        {
+            ui->ModelSetNumber( "in_game", "debug_highway_hidden", ui->ModelGetNumber( "in_game", "debug_highway_hidden" ) == 0 );
         }
         else if( event == "debug_seek" )
         {

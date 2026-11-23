@@ -1,0 +1,19 @@
+{
+ "Title": "Stairway to Heaven",
+ "Artist": "Heart",
+ "Album": "Story mode stand-in",
+ "Genre": "Story: Highway to the Afterlife",
+ "Year": 0,
+ "Icon": "",
+ "AlbumArtFileName": "",
+ "DLCSource": "story-stub",
+ "NoteSpeed": 10.0,
+ "Duration": 478.0,
+ "BPM": 120.0,
+ "TrackFileName": "song.ogg",
+ "PreviewPercent": 0.25,
+ "Links": {
+  "Spotify": "https://open.spotify.com/track/6gOgTWY8trzXja4ZfmqFKt"
+ },
+ "NoteCount": 2838
+}

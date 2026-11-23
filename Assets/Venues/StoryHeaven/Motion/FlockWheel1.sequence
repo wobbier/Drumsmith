@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "FlockWheel1",
+ "FrameRate": 30,
+ "DurationFrames": 7800,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 2600,
+     "Value": [
+      0.0,
+      -0.8658799,
+      0.0,
+      0.5002519
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 5200,
+     "Value": [
+      0.0,
+      -0.8663161,
+      0.0,
+      -0.4994961
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 7800,
+     "Value": [
+      0.0,
+      -0.0008727,
+      0.0,
+      -0.9999996
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}
