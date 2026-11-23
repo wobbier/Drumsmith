@@ -103,11 +103,16 @@ void GigSession::ApplyVenue() const
 
 void GigSession::StageStory( const ProgressionStorySet& inSet, int inSong )
 {
-    VenueRegistry::StoryStage& stage = VenueRegistry::Story();
-    stage = VenueRegistry::StoryStage();
+    VenueRegistry::Story() = MakeStage( inSet, inSong );
+}
+
+
+VenueRegistry::StoryStage GigSession::MakeStage( const ProgressionStorySet& inSet, int inSong )
+{
+    VenueRegistry::StoryStage stage;
     if( inSong < 0 || inSong >= static_cast<int>( inSet.Songs.size() ) )
     {
-        return;
+        return stage;
     }
     stage.Set = inSet.Id;
     stage.Song = inSong;
@@ -158,6 +163,7 @@ void GigSession::StageStory( const ProgressionStorySet& inSet, int inSong )
             stage.Moments.push_back( std::move( staged ) );
         }
     }
+    return stage;
 }
 
 

@@ -2,6 +2,7 @@
 #include "CoreGame/BeatGrid.h"
 #include "CoreGame/CustomTrackDefineTest.h"
 #include "CoreGame/TrackList.h"
+#include "Venue/VenueShow.h"
 #include "JSON.h"
 #include "MidiFile.h"
 #include <algorithm>
@@ -39,6 +40,7 @@ namespace
         venue.m_bonusFx = { 3.f };
         venue.m_spotlights = { { 1.f, 2.f, 3 } };
         venue.m_sections = cues;
+        venue.m_story = cues;
         venue.m_crowd = cues;
         venue.m_cameras = cues;
         venue.m_mvCameras = cues;
@@ -336,4 +338,19 @@ TEST_CASE( "BeatGrid: without a tempo map the grid is the BPM in 4/4" )
     CHECK( made[0].m_measure );
     CHECK_FALSE( made[1].m_measure );
     CHECK( made[3].m_measure );
+}
+
+
+TEST_CASE( "Story cues: a chart's own Story cue moves a set's moment, the rest keep the set's cue" )
+{
+    VenueData venue;
+    venue.m_sections = { { 20.f, "verse_1" }, { 60.f, "chorus_1" } };
+    // The set says the chorus; nothing in the chart says otherwise.
+    CHECK( VenueShow::StoryMomentTime( venue, { "loading" }, "section:chorus_1", 200.0, 5.0, 190.0 ) == doctest::Approx( 60.0 ) );
+    CHECK( VenueShow::StoryCueTime( venue, "section:chorus_1+2.5", 200.0, 5.0, 190.0 ) == doctest::Approx( 62.5 ) );
+    CHECK( VenueShow::StoryCueTime( venue, "section:bre|at:0.5", 200.0, 5.0, 190.0 ) == doctest::Approx( 100.0 ) );
+    // The Track Editor's Story track has it somewhere else: any of the moment's flags names it.
+    venue.m_story = { { 71.5f, "loading" } };
+    CHECK( VenueShow::StoryMomentTime( venue, { "band_ghost", "loading" }, "section:chorus_1", 200.0, 5.0, 190.0 ) == doctest::Approx( 71.5 ) );
+    CHECK( VenueShow::StoryMomentTime( venue, { "defib" }, "last_note+0.5", 200.0, 5.0, 190.0 ) == doctest::Approx( 190.5 ) );
 }

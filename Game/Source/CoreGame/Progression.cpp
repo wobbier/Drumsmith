@@ -418,6 +418,26 @@ const ProgressionStorySet* Progression::FindStorySet( const std::string& inId ) 
 }
 
 
+const ProgressionStorySet* Progression::FindStorySong( const TrackData& inTrack, int& outSong ) const
+{
+    const std::vector<TrackData> one = { inTrack };
+    for( const std::vector<ProgressionStorySet>* sets : { &m_story, &m_proposed } )
+    {
+        for( const ProgressionStorySet& set : *sets )
+        {
+            const std::vector<int> setlist = StorySetlist( set, one );
+            const auto it = std::find( setlist.begin(), setlist.end(), 0 );
+            if( it != setlist.end() )
+            {
+                outSong = static_cast<int>( it - setlist.begin() );
+                return &set;
+            }
+        }
+    }
+    return nullptr;
+}
+
+
 const ProgressionAudition* Progression::FindAudition( const std::string& inId ) const
 {
     const auto it = std::find_if( m_auditions.begin(), m_auditions.end(), [&inId]( const ProgressionAudition& inAudition ) { return inAudition.Id == inId; } );

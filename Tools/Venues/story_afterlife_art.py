@@ -138,8 +138,10 @@ def _draw(name, path):
             if y > 236 and (x // 16) % 2:
                 c = (0.95, 0.7, 0.2)
             return c
-    elif name in ('Billboard', 'MileMarker'):
-        if name == 'Billboard':
+    elif name in ('Billboard', 'MileMarker', 'Emergency'):
+        if name == 'Emergency':
+            lit, bg, fg, small = text_mask(['EMERGENCY'], S, S, 4), (0.6, 0.03, 0.03), (0.95, 0.95, 0.95), set()
+        elif name == 'Billboard':
             lit, bg, fg = text_mask(['PREPARE', 'TO MEET GOD'], S, S, 3), (0.02, 0.03, 0.12), (0.95, 0.93, 0.8)
             small = text_mask(['', '', '', '', '', 'NEXT EXIT'], S, S, 2)
         else:
@@ -236,6 +238,13 @@ def light_card(venue):
 def glow_card(s, parent, venue, name, pos, size, color, power, euler=(0, 0, 0)):
     return model(s, parent, name, light_card(venue), pos, euler, (size, size, 1),
                  mat(venue, 'Glow', (0, 0, 0), glow=color, power=power, additive=True, both=True), shadows=False)
+
+
+def headlights(s, parent, x, y, z, level, reach, inner=16, outer=36, name='Headlight'):
+    """A vehicle's two headlight beams, one from each lamp at (-x and +x, y, z), sharing level
+    between them: a single light on the centre line shines out of the grille."""
+    for side, dx in (('left', -x), ('right', x)):
+        s.light(f'{name} {side}', parent, (dx, y, z), 'Spot', (1.0, 0.95, 0.85), level / 2, reach, rot=(5, 0, 0), inner=inner, outer=outer)
 
 
 def ray(venue):
@@ -380,39 +389,19 @@ def wheel(venue):
     return prop(venue, 'Wheel', lambda m: _wheel(m, (0, 0, 0)))
 
 
-def _cruiser(m, door_open=False):
-    """A police cruiser facing +z."""
-    m.box((0, 0.62, 0), (1.9, 0.5, 4.8), 'navy')
-    m.box((0, 0.95, 1.75), (1.8, 0.2, 1.3), 'navy', taper=0.92)
-    m.box((0, 0.95, -1.85), (1.8, 0.2, 1.1), 'navy', taper=0.92)
-    # The cabin is open (a roof on pillars, a rear window): the cop is seen through the glass, which
-    # the generator adds as see-through panes.
-    m.box((0, 1.52, -0.25), (1.42, 0.06, 1.5), 'black')
-    for x in (-0.74, 0.74):
-        m.tube([(x * 1.12, 0.9, 1.02), (x, 1.5, 0.5)], 0.035, 'black', 4)
-        m.tube([(x * 1.12, 0.9, -1.5), (x, 1.5, -1.0)], 0.035, 'black', 4)
-        m.tube([(x * 1.14, 0.9, -0.25), (x, 1.5, -0.25)], 0.03, 'black', 4)
-    m.box((0, 1.2, -1.27), (1.5, 0.62, 0.04), 'black', euler=(38, 0, 0))
-    m.box((0, 0.6, -0.9), (1.5, 0.5, 0.5), 'black')
-    for x in (-0.96, 0.96):
-        m.box((x, 0.72, -0.25), (0.03, 0.42, 2.1), 'white')
-        for z in (-1.5, 1.5):
-            _wheel(m, (x * 0.93, 0.34, z), 0.34, 0.24)
-        m.box((x * 0.65, 0.72, 2.41), (0.38, 0.16, 0.05), 'lamp')
-        m.box((x * 0.65, 0.75, -2.41), (0.38, 0.14, 0.05), 'red_lamp')
-        m.tube([(x * 0.6, 0.4, 2.45), (x * 0.6, 0.4, 2.62), (x * 0.6, 0.95, 2.62)], 0.03, 'steel_dark', 5)
-    m.box((0, 0.7, 2.62), (1.3, 0.05, 0.05), 'steel_dark')
-    m.box((0, 0.45, 2.44), (1.95, 0.18, 0.1), 'black')
-    m.box((0, 0.45, -2.44), (1.95, 0.18, 0.1), 'black')
-    m.box((0, 1.56, -0.25), (1.3, 0.08, 0.3), 'black')
-    if door_open:
-        hinge = (-0.96, 0.9, 0.55)
-        for p, size, ink in (((0, 0, -0.55), (0.05, 0.75, 1.05), 'white'), ((0, 0.45, -0.55), (0.04, 0.3, 0.95), 'glass')):
-            m.box(add(hinge, rot(p, (0, -62, 0))), size, ink, euler=(0, -62, 0))
+# The patrol cruiser (Assets/Models/CopCar, exported from its .blend by export_patrol_cruiser.py):
+# 5.4 m long facing +z, its wheels on y = 0, the driver's side at -x. One model for all three
+# venues. Where its lamps are on one side (mirror x for the other).
+PATROL_HEADLAMP = (0.71, 0.78, 2.66)
+PATROL_TAIL_LAMP = (0.58, 0.81, -2.6)
+PATROL_BEACON = (0.513, 1.74, -0.2)
 
 
-def cruiser(venue, door_open=False):
-    return prop(venue, 'CruiserOpen' if door_open else 'Cruiser', lambda m: _cruiser(m, door_open))
+def patrol_cruiser(s, parent, name='Body', door_open=False):
+    """The patrol cruiser's model under parent: drawn by the Model itself, a part for each material."""
+    e = s.entity(name, parent)
+    e.add({'Type': 'Model', 'ModelPath': 'Assets/Models/CopCar/PatrolCruiser%s.fbx' % ('DoorOpen' if door_open else ''), 'Compact': True})
+    return e
 
 
 def car(venue, ink):
@@ -733,17 +722,19 @@ def lava(venue, size=150.0):
 
 
 def terraces(venue, centre=(0.0, 0.0, 2.0)):
-    """Three rock tiers round each side of the arena for the crowd; returns (path, [(radius, y)])."""
-    tiers = [(18.5, 1.3), (22.5, 2.9), (26.5, 4.6)]
+    """Nine rock tiers round each side of the arena for the crowd, one for each circle of hell;
+    returns (path, [(radius, y, first degree, last degree)]). The upper tiers sweep less far, to
+    stay inside the cavern behind the band and clear of the lake's fires by the stairs."""
+    tiers = [(18.5 + TIER_STEP * k, 1.3 + 1.45 * k, TERRACE_ARC[0] + 4.0 * k, TERRACE_ARC[1] - 3.0 * k) for k in range(9)]
 
     def build(m):
         for side in (-1, 1):
-            for k, (r0, y) in enumerate(tiers):
-                r1, y_below = r0 + 4.4, (tiers[k - 1][1] if k else -1.5)
+            for k, (r0, y, arc0, arc1) in enumerate(tiers):
+                r1, y_below = r0 + TIER_STEP + 0.4, (tiers[k - 1][1] if k else -1.5)
                 seg = 14
                 top_in, top_out, bot = [], [], []
                 for i in range(seg + 1):
-                    a = math.radians(TERRACE_ARC[0] + (TERRACE_ARC[1] - TERRACE_ARC[0]) * i / seg)
+                    a = math.radians(arc0 + (arc1 - arc0) * i / seg)
                     wob = 0.5 * (fbm3(i * 0.7, k, side, 6) - 0.5)
                     dx, dz = side * math.cos(a), math.sin(a) * -1
                     top_in.append((centre[0] + dx * (r0 + wob), y, centre[2] + dz * (r0 + wob)))
@@ -754,7 +745,7 @@ def terraces(venue, centre=(0.0, 0.0, 2.0)):
                     q = [top_in[i], top_in[i + 1], top_out[i + 1], top_out[i]]
                     m.face(q, uvs=[uv(p) for p in q], outward=(0, 1, 0))
                     q = [bot[i], bot[i + 1], top_in[i + 1], top_in[i]]
-                    a = math.radians(TERRACE_ARC[0] + (TERRACE_ARC[1] - TERRACE_ARC[0]) * i / seg)
+                    a = math.radians(arc0 + (arc1 - arc0) * i / seg)
                     m.face(q, uvs=[(i * 0.4, 0), (i * 0.4 + 0.4, 0), (i * 0.4 + 0.4, 0.5), (i * 0.4, 0.5)], outward=(-side * math.cos(a), 0.2, math.sin(a)))
     return prop(venue, 'Terraces', build, 'Rock'), tiers
 
@@ -762,6 +753,7 @@ def terraces(venue, centre=(0.0, 0.0, 2.0)):
 # The terraces' sweep each side of the arena, in degrees: 0 is straight out to the side, -90 is
 # behind the band, +90 would be the stairs.
 TERRACE_ARC = (-80.0, 38.0)
+TIER_STEP = 2.6     # from one tier's lip out to the next
 
 
 def terrace_point(centre, side, radius, degrees, y=0.0):
@@ -999,6 +991,22 @@ def cloud(venue, seed):
     return prop(venue, f'Cloud{seed}', build, smooth_=True)
 
 
+def cloud_layer(venue, name, count, r0, r1, size0, size1, period, seed):
+    """Cumulus scattered round the origin between r0 and r1 from it, in one mesh that repeats
+    every period metres of height (three periods of it), to stream past on a loop."""
+    def build(m):
+        rng = random.Random(seed)
+        for _ in range(count):
+            a, r, y, size = rng.uniform(0, 2 * math.pi), rng.uniform(r0, r1), rng.uniform(0, period), rng.uniform(size0, size1)
+            puffs = [(rng.uniform(0, 6.28), rng.uniform(0.25, 0.7) if i else 0.0, rng.uniform(0.26, 0.46) if i else 0.62, rng.uniform(0.0, 0.35) if i else 0.12, rng.randrange(999))
+                     for i in range(6)]
+            for copy in (-1, 0, 1):
+                for pa, pr, ps, pl, ph in puffs:
+                    m.blob((math.sin(a) * r + size * pr * math.cos(pa), y + copy * period + size * 0.8 * (ps * 0.6 + pl), math.cos(a) * r + size * pr * math.sin(pa) * 0.8),
+                           size * ps, 'cloud', 1, 0.07, 1.4, ph, (1.1, 0.92 * 0.8, 1.0))
+    return prop(venue, name, build, smooth_=True)
+
+
 def cloud_floor(venue, half=75.0, clear=None):
     """The floor of cloud: billows right out to the edge, level where the band and the stairs stand.
     clear(x, z) -> 0..1: how flat to keep it there."""
@@ -1046,7 +1054,8 @@ def column(venue):
         m.lathe((0, 0.3, 0), [(0.68, 0), (0.68, 0.18), (0.56, 0.3)], 'gold', 12)
         rings = []
         for y in (0.6, 7.2):
-            rings.append([((0.5 if i % 2 else 0.44) * math.cos(2 * math.pi * i / 24), y, (0.5 if i % 2 else 0.44) * math.sin(2 * math.pi * i / 24)) for i in range(24)])
+            # Wound the way lathe winds its rings (z = -sin), so loft faces the flutes outward.
+            rings.append([((0.5 if i % 2 else 0.44) * math.cos(2 * math.pi * i / 24), y, (0.5 if i % 2 else 0.44) * -math.sin(2 * math.pi * i / 24)) for i in range(24)])
         m.loft(rings, 'marble')
         m.lathe((0, 7.2, 0), [(0.52, 0), (0.62, 0.2), (0.82, 0.45), (0.82, 0.55)], 'gold', 12)
         m.box((0, 7.88, 0), (1.8, 0.26, 1.8), 'marble')

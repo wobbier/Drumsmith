@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "GurneyIn",
+ "FrameRate": 30,
+ "DurationFrames": 66,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 66,
+     "Value": [
+      0,
+      0,
+      2.6,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

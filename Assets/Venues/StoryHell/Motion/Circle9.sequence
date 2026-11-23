@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "Circle9",
+ "FrameRate": 30,
+ "DurationFrames": 225,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 225,
+     "Value": [
+      0,
+      75.0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

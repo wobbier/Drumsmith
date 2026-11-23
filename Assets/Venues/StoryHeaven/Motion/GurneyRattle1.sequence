@@ -1,0 +1,102 @@
+{
+ "Version": 1,
+ "Name": "GurneyRattle1",
+ "FrameRate": 30,
+ "DurationFrames": 86,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.05,
+      0,
+      0.1,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      -0.05,
+      0,
+      -0.14,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 86,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      -5.03e-05,
+      0.0191974,
+      0.0026175,
+      0.9998123
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 56,
+     "Value": [
+      -5.03e-05,
+      -0.0191974,
+      -0.0026175,
+      0.9998123
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 86,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

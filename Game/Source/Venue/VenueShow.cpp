@@ -138,6 +138,7 @@ void VenueShow::Clear()
     m_kick = 0.f;
     m_peaks.clear();
     m_finale = 1e9f;
+    m_beatProps.clear();
     m_storyProps.clear();
     m_storyParticles.clear();
     m_storyShowLights.clear();
@@ -145,6 +146,7 @@ void VenueShow::Clear()
     m_storyMoments.clear();
     m_storyLanding.clear();
     m_storyCaptions.clear();
+    m_shotSkyOn = false;
     m_bandStoried = false;
     m_storyCue = -1.0;
     m_venue.Clear();
@@ -1053,7 +1055,9 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
         && ( m_plan.LightsFrom.empty() || StoryFlagSet( m_plan.LightsFrom, seconds ) ) && ( m_plan.LightsUntil.empty() || !StoryFlagSet( m_plan.LightsUntil, seconds ) );
     m_director.SetColorKeep( lights ? Vector3( 1.f, 1.f, 1.f ) : m_plan.ColorKeep );
     m_director.Update( seconds, inDeltaTime );
+    UpdateShotSky();
     UpdateStory( seconds, inDeltaTime );
+    UpdateBeats( seconds );
     UpdateStoryBand( seconds, inDeltaTime );
     m_lights.SetCrowdEnergy( CrowdUp() ? m_crowd.Energy() : 0.6f );
     UpdateHype( seconds, inDeltaTime );
@@ -1256,8 +1260,36 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
 }
 
 
-double VenueShow::StoryCueTime( const std::string& inCue, double inLength, double inFirstNote, double inLastNote ) const
+double VenueShow::StoryCueTime( const VenueData& inVenue, const std::string& inCue, double inLength, double inFirstNote, double inLastNote )
 {
+    // "a|b": cue a when the chart has the section it names, else b ("section:bre+5|at:0.96"), so
+    // a set bound to one chart's sections still plays in order on a stand-in that has none.
+    const size_t bar = inCue.find( '|' );
+    if( bar != std::string::npos )
+    {
+        const std::string first = inCue.substr( 0, bar );
+        bool found = true;
+        if( first.rfind( "section:", 0 ) == 0 )
+        {
+            std::string name = first.substr( 8 );
+            const size_t moved = name.find_last_of( "+-" );
+            if( moved != std::string::npos && moved > 0 && moved + 1 < name.size() )
+            {
+                char* end = nullptr;
+                std::strtod( name.c_str() + moved, &end );
+                if( end && *end == '\0' )
+                {
+                    name.resize( moved );
+                }
+            }
+            found = false;
+            for( const TimedCueData& section : inVenue.m_sections )
+            {
+                found = found || VenueTiming::Contains( section.m_name, name.c_str() );
+            }
+        }
+        return StoryCueTime( inVenue, found ? first : inCue.substr( bar + 1 ), inLength, inFirstNote, inLastNote );
+    }
     // Any cue can be moved by seconds: "last_note+2", "song_end-4.5".
     const size_t sign = inCue.find_last_of( "+-" );
     if( sign != std::string::npos && sign > 0 && sign + 1 < inCue.size() )
@@ -1266,7 +1298,7 @@ double VenueShow::StoryCueTime( const std::string& inCue, double inLength, doubl
         const double offset = std::strtod( inCue.c_str() + sign, &end );
         if( end && *end == '\0' )
         {
-            return std::clamp( StoryCueTime( inCue.substr( 0, sign ), inLength, inFirstNote, inLastNote ) + offset, 0.0, inLength + 30.0 );
+            return std::clamp( StoryCueTime( inVenue, inCue.substr( 0, sign ), inLength, inFirstNote, inLastNote ) + offset, 0.0, inLength + 30.0 );
         }
     }
     // "at:<share>" and "time:<seconds>" place it by hand (until a chart has sections to bind to);
@@ -1295,7 +1327,7 @@ double VenueShow::StoryCueTime( const std::string& inCue, double inLength, doubl
     if( inCue.rfind( "section:", 0 ) == 0 )
     {
         const std::string name = inCue.substr( 8 );
-        for( const TimedCueData& section : m_venue.m_sections )
+        for( const TimedCueData& section : inVenue.m_sections )
         {
             if( VenueTiming::Contains( section.m_name, name.c_str() ) )
             {
@@ -1307,7 +1339,7 @@ double VenueShow::StoryCueTime( const std::string& inCue, double inLength, doubl
     if( inCue == "song_end" || inCue == "end" )
     {
         double at = std::max( inLength - 6.0, 0.0 );
-        for( const TimedCueData& event : m_venue.m_songEvents )
+        for( const TimedCueData& event : inVenue.m_songEvents )
         {
             if( event.m_name == "music_end" || event.m_name == "end" ) at = event.m_time;
         }
@@ -1328,7 +1360,7 @@ double VenueShow::StoryCueTime( const std::string& inCue, double inLength, doubl
         {
             continue;
         }
-        for( const TimedCueData& section : m_venue.m_sections )
+        for( const TimedCueData& section : inVenue.m_sections )
         {
             if( VenueTiming::Contains( section.m_name, rule.Section ) )
             {
@@ -1338,6 +1370,19 @@ double VenueShow::StoryCueTime( const std::string& inCue, double inLength, doubl
         return inLength * rule.Share;
     }
     return inLength * 0.5;
+}
+
+
+double VenueShow::StoryMomentTime( const VenueData& inVenue, const std::set<std::string>& inFlags, const std::string& inCue, double inLength, double inFirstNote, double inLastNote )
+{
+    for( const TimedCueData& cue : inVenue.m_story )
+    {
+        if( inFlags.count( cue.m_name ) > 0 )
+        {
+            return std::clamp( static_cast<double>( cue.m_time ), 0.0, inLength + 30.0 );
+        }
+    }
+    return StoryCueTime( inVenue, inCue, inLength, inFirstNote, inLastNote );
 }
 
 
@@ -1364,6 +1409,18 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
         }
     }
     const std::vector<EntityHandle> noMarkers;
+    m_beatProps.clear();
+    for( const EntityHandle& entity : m_scene.IsLoaded() ? m_scene.GetMarkers().Beats : noMarkers )
+    {
+        if( entity && entity->HasComponent<VenueBeat>() )
+        {
+            m_beatProps.push_back( { entity, entity->GetComponent<Transform>().GetPosition() } );
+        }
+    }
+    if( !m_beatProps.empty() && CommandLine::Has( "--highway-log" ) )
+    {
+        BRUH_FMT( "Venue: %d beat markers", static_cast<int>( m_beatProps.size() ) );
+    }
     m_storyParticles.clear();
     m_storyShowLights.clear();
     m_storyLights.clear();
@@ -1393,6 +1450,16 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
             Transform* at = open.back();
             open.pop_back();
             const EntityHandle& owner = at->Parent;
+            // A one-shot group inside another has its own flag: what is under it is its own to
+            // play (a circle of hell that arrives on one flag inside the group that leaves on the next).
+            if( prop.Mode == VenueStory::Motion::Play && at != &transform && owner )
+            {
+                const VenueStory* inner = owner->TryGetComponent<VenueStory>();
+                if( inner && inner->Mode == VenueStory::Motion::Play )
+                {
+                    continue;
+                }
+            }
             if( owner && prop.Mode == VenueStory::Motion::Show && owner->HasComponent<Light>() && !owner->HasComponent<VenueShowLight>() )
             {
                 auto found = lightIndex.find( at );
@@ -1451,7 +1518,7 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
     std::vector<std::pair<std::string, double>> landing;
     if( stage.Active() )
     {
-        m_storyCue = StoryCueTime( stage.Cue, inLength, inFirstNote, inLastNote );
+        m_storyCue = StoryMomentTime( m_venue, stage.AtCue, stage.Cue, inLength, inFirstNote, inLastNote );
         static const float kCueAt = CommandLine::GetFloat( "--story-cue-at", -1.f );
         if( kCueAt >= 0.f )
         {
@@ -1463,7 +1530,7 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
         }
         for( const VenueRegistry::StoryStage::Moment& moment : stage.Moments )
         {
-            const double at = StoryCueTime( moment.Cue, inLength, inFirstNote, inLastNote );
+            const double at = StoryMomentTime( m_venue, moment.Flags, moment.Cue, inLength, inFirstNote, inLastNote );
             m_storyMoments.emplace_back( at, moment.Flags );
             for( const std::string& flag : moment.Flags )
             {
@@ -1616,6 +1683,77 @@ void VenueShow::DimStoryShowLights()
 }
 
 
+void VenueShow::UpdateShotSky()
+{
+    // A story shot tagged "sky<hour>" is under the procedural sky (clouds and sun) at that hour,
+    // whatever the venue has behind it; the venue's own comes back with the next shot.
+    const float hour = m_director.ShotSky();
+    const EntityHandle& main = m_director.MainCamera();
+    if( !main || ( hour < 0.f ) == !m_shotSkyOn )
+    {
+        return;
+    }
+    Camera& camera = main->GetComponent<Camera>();
+    if( hour >= 0.f )
+    {
+        m_shotSkyClear = static_cast<int>( camera.ClearType );
+        m_shotSkySaved = camera.ProceduralSky;
+        camera.ClearType = Moonlight::ClearColorType::Procedural;
+        // A low winter sun (due -z at midday, about ten degrees up), so it stands in a window;
+        // broken cloud going over.
+        camera.ProceduralSky.Time = hour;
+        camera.ProceduralSky.Latitude = 62.f;
+        camera.ProceduralSky.Month = 10;
+        camera.ProceduralSky.CloudCoverage = 0.32f;
+        camera.ProceduralSky.WindSpeed = 14.f;
+    }
+    else
+    {
+        camera.ClearType = static_cast<Moonlight::ClearColorType>( m_shotSkyClear );
+        camera.ProceduralSky = m_shotSkySaved;
+    }
+    m_shotSkyOn = hour >= 0.f;
+}
+
+
+void VenueShow::UpdateBeats( double inSeconds )
+{
+    if( m_beatProps.empty() )
+    {
+        return;
+    }
+    double beat = 0.0;
+    int measureBeat = 0;
+    VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
+    for( const BeatProp& prop : m_beatProps )
+    {
+        const VenueBeat* marker = prop.Entity ? prop.Entity->TryGetComponent<VenueBeat>() : nullptr;
+        if( !marker )
+        {
+            continue;
+        }
+        const double turns = ( beat - marker->Phase ) / std::max( marker->Every, 0.05f );
+        const float at = static_cast<float>( turns - std::floor( turns ) );
+        float amount = 0.f;
+        if( marker->Sway )
+        {
+            amount = std::sin( at * 6.2831853f );
+        }
+        else if( marker->Sharp )
+        {
+            amount = std::exp( -at * 5.f );
+        }
+        else
+        {
+            // Out on the beat and easing back, then gathering for the next over the last of it.
+            const float gather = VenueTiming::Smooth( ( at - 0.8f ) / 0.2f );
+            amount = std::max( std::exp( -at * 4.f ), gather );
+        }
+        prop.Entity->GetComponent<Transform>().SetPosition( prop.Rest + marker->Offset * amount );
+    }
+}
+
+
 void VenueShow::UpdateStoryMotion( StoryProp& ioProp, bool inSet )
 {
     const bool first = ioProp.Shown < 0.f;
@@ -1660,7 +1798,7 @@ void VenueShow::UpdateStoryBand( double inSeconds, float inDeltaTime )
     // before it over kBlendSeconds; band_ghost turns them to ghosts over a couple of seconds.
     static const std::pair<const char*, Band::StoryPose> kPoses[] = { { "band_playing", Band::StoryPose::Playing }, { "band_hidden", Band::StoryPose::Hidden },
         { "band_falling", Band::StoryPose::Falling }, { "band_rising", Band::StoryPose::Rising }, { "band_down", Band::StoryPose::Down },
-        { "band_floating", Band::StoryPose::Floating } };
+        { "band_floating", Band::StoryPose::Floating }, { "band_aloft", Band::StoryPose::Aloft } };
     constexpr double kBlendSeconds = 2.5;
     (void)inDeltaTime;
     // The poses landed by now, in order.

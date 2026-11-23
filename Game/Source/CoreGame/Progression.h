@@ -225,6 +225,9 @@ public:
 
     const ProgressionGig* FindGig( const std::string& inId ) const;
     const ProgressionStorySet* FindStorySet( const std::string& inId ) const;
+    // The story set (a proposed one too) that plays inTrack, and which of its songs it is (as
+    // StorySetlist matches them: the recording's link, else artist and title); null when none does.
+    const ProgressionStorySet* FindStorySong( const TrackData& inTrack, int& outSong ) const;
     const ProgressionAudition* FindAudition( const std::string& inId ) const;
     const ProgressionItem* FindItem( const std::string& inId ) const;
     const ProgressionTier* TierAt( int inTier ) const;

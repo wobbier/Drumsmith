@@ -55,6 +55,14 @@ ME_REFLECT_BEGIN( VenueAccent )
     ME_FIELD( Particles ).Range( 0, 512 ).Tooltip( "Burst on the attached ParticleSystem at a peak. Ordinary lifts get half." );
 ME_REFLECT_END()
 
+ME_REFLECT_BEGIN( VenueBeat )
+    ME_FIELD( Offset ).Tooltip( "Where the entity is at the peak of each move, from its resting position (metres, in its parent's space)" );
+    ME_FIELD( Every ).Range( 0.25f, 16.f ).Tooltip( "One move every this many beats" );
+    ME_FIELD( Phase ).Range( 0.f, 16.f ).Tooltip( "How many beats late the move starts (0.5: on the off-beat)" );
+    ME_FIELD( Sway ).Tooltip( "Off: out on the beat and back, like a nod. On: smoothly to Offset and to its opposite, like a sway" );
+    ME_FIELD( Sharp ).Tooltip( "Out at once on the beat and straight back, with no gathering before the next: a blip, like a heart monitor's trace" );
+ME_REFLECT_END()
+
 ME_REFLECT_BEGIN( VenueStory )
     ME_FIELD( Flag ).Tooltip( "The story flag (Design/Story-Mode-Setlists.json StateFlags) this entity follows" );
     ME_FIELD( WhenSet ).Tooltip( "On: shown once the flag is set. Off: shown until it is set (the thing that moves away)" );

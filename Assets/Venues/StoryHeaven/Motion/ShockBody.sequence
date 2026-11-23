@@ -1,0 +1,112 @@
+{
+ "Version": 1,
+ "Name": "ShockBody",
+ "FrameRate": 30,
+ "DurationFrames": 16,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 2,
+     "Value": [
+      0,
+      0.17,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 5,
+     "Value": [
+      0,
+      0.02,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0,
+      0.05,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 2,
+     "Value": [
+      -0.0697565,
+      0.0,
+      0.0,
+      0.9975641
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      0.0174524,
+      0.0,
+      0.0,
+      0.9998477
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

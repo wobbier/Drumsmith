@@ -65,6 +65,10 @@ struct VenueData
     std::vector<SpotlightData> m_spotlights;
     std::vector<TimedCueData> m_sections;     // EVENTS "[section x]"
     std::vector<TimedCueData> m_crowd;        // EVENTS "[crowd_x]"
+    // Story mode: when a set's moments land in this chart, each named by its story flag (the Track
+    // Editor's Story track). One named here lands at this time instead of at the set's own cue
+    // (VenueShow::StoryMomentTime); the rest keep the set's.
+    std::vector<TimedCueData> m_story;
 
     // The band (Docs/Venue-and-Band.md). Members in the order of m_bandStates.
     enum Member : int { Drums = 0, Guitar, Bass, Vocals, Keys, MemberCount };
@@ -128,7 +132,7 @@ struct VenueData
             && m_guitarStrums.empty() && m_bassStrums.empty() && m_keysStrums.empty() && m_vocalNotes.empty()
             && m_guitarFrets.empty() && m_bassFrets.empty() && m_guitarSolos.empty() && m_songEvents.empty()
             && m_lyrics.empty() && m_vocalPhrases.empty() && m_vocalPercussion.empty() && m_vocalCues.empty() && m_harmonyNotes[0].empty() && m_harmonyNotes[1].empty()
-            && m_harmonyNotes[2].empty() && m_guitarMaps.empty() && m_bassMaps.empty();
+            && m_harmonyNotes[2].empty() && m_guitarMaps.empty() && m_bassMaps.empty() && m_story.empty();
     }
     static const char* MemberName( int inMember );
     void Clear() { *this = VenueData(); }

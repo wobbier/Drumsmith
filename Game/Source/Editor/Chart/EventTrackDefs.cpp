@@ -457,6 +457,10 @@ std::vector<std::unique_ptr<IEventTrack>> EventTracks::Build( TrackData& inChart
     cues( "Sections", TrackGroup::Structure, ChartDomain::Venue, 0xFFE0C080, venue.m_sections,
         { "intro", "verse_1", "prechorus_1", "chorus_1", "verse_2", "chorus_2", "bridge", "breakdown", "solo", "chorus_3", "outro" } );
     cues( "Song Events", TrackGroup::Structure, ChartDomain::Venue, 0xFFC0C0E0, venue.m_songEvents, { "music_start", "music_end", "end", "coda" } );
+    // Story mode: when a set's moments land in this chart, each named by its story flag. One here
+    // beats the set's own cue (VenueShow::StoryMomentTime). Story > Place the Set's Moments lays
+    // them out where the set puts them.
+    cues( "Story", TrackGroup::Structure, ChartDomain::Venue, 0xFF70A0FF, venue.m_story );
     tracks.push_back( std::make_unique<BeatTrack>( inChart.m_beats ) );
 
     cues( "Lighting", TrackGroup::Venue, ChartDomain::Venue, 0xFF50C8FF, venue.m_lighting,

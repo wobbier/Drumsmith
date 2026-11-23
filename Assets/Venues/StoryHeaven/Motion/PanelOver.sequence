@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "PanelOver",
+ "FrameRate": 30,
+ "DurationFrames": 20,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      0,
+      0,
+      -3.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

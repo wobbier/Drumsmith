@@ -1,6 +1,8 @@
 #include "TrackEditor.h"
 #include "CoreGame/BeatGrid.h"
 #include "CoreGame/Drumset.h"
+#include "CoreGame/GigSession.h"
+#include "CoreGame/Progression.h"
 #include "CoreGame/TrackList.h"
 #include "Cores/AudioCore.h"
 #include "Engine/Engine.h"
@@ -8,6 +10,7 @@
 #include "Events/HavanaEvents.h"
 #include "Events/SceneEvents.h"
 #include "Cores/VenuePreviewCore.h"
+#include "Venue/VenueShow.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "optick.h"
 #include <algorithm>
@@ -307,6 +310,57 @@ void TrackEditor::Render()
 }
 
 
+void TrackEditor::PlaceStoryMoments()
+{
+    int song = 0;
+    const ProgressionStorySet* set = Progression::GetInstance().FindStorySong( m_document.Chart, song );
+    const int track = m_document.FindTrack( "Story" );
+    if( !set || track < 0 )
+    {
+        return;
+    }
+    const TrackData& chart = m_document.Chart;
+    float lastNote = 0.f;
+    for( const NoteData& note : chart.m_noteData ) lastNote = std::max( lastNote, note.m_triggerTime );
+    float firstNote = lastNote;
+    for( const NoteData& note : chart.m_noteData ) firstNote = std::min( firstNote, note.m_triggerTime );
+    const double length = std::max( lastNote + 4.f, chart.m_duration );
+    // As the show reads them (VenueShow::BuildStory): the song's own flags at its cue, then its moments.
+    const VenueRegistry::StoryStage stage = GigSession::MakeStage( *set, song );
+    std::vector<TimedCueData> placed;
+    const auto place = [&]( const std::set<std::string>& inFlags, const std::string& inCue, const std::vector<std::string>& inOrder ) {
+        for( const TimedCueData& cue : chart.m_venue.m_story )
+        {
+            if( inFlags.count( cue.m_name ) > 0 ) return;
+        }
+        // Named by the first of its flags as the set lists them that isn't the band's pose.
+        std::string name;
+        for( const std::string& flag : inOrder )
+        {
+            if( inFlags.count( flag ) > 0 && ( name.empty() || name.rfind( "band_", 0 ) == 0 ) ) name = flag;
+        }
+        if( !name.empty() )
+        {
+            placed.push_back( TimedCueData{ static_cast<float>( VenueShow::StoryCueTime( chart.m_venue, inCue, length, firstNote, lastNote ) ), name } );
+        }
+    };
+    const ProgressionStorySong& entry = set->Songs[song];
+    place( stage.AtCue, stage.Cue, entry.Flags );
+    for( const VenueRegistry::StoryStage::Moment& moment : stage.Moments )
+    {
+        place( moment.Flags, moment.Cue, std::vector<std::string>( moment.Flags.begin(), moment.Flags.end() ) );
+    }
+    if( placed.empty() )
+    {
+        return;
+    }
+    m_document.BeginEdit( track );
+    std::vector<TimedCueData>& cues = m_document.Chart.m_venue.m_story;
+    cues.insert( cues.end(), placed.begin(), placed.end() );
+    m_document.CommitEdit( "Place Story Moments" );
+}
+
+
 void TrackEditor::DrawMenuBar()
 {
     if( !ImGui::BeginMenuBar() )
@@ -340,6 +394,28 @@ void TrackEditor::DrawMenuBar()
         ImGui::Separator();
         if( ImGui::MenuItem( "Select All", "Ctrl+A" ) ) ExecuteAction( "Edit.SelectAll" );
         if( ImGui::MenuItem( "Snap Selection to Grid", nullptr, false, any ) ) m_document.SnapSelection( m_timeline.SnapDivision );
+        ImGui::EndMenu();
+    }
+    if( ImGui::BeginMenu( "Story", open ) )
+    {
+        int song = 0;
+        const ProgressionStorySet* set = Progression::GetInstance().FindStorySong( m_document.Chart, song );
+        if( set )
+        {
+            ImGui::TextDisabled( "%s, song %d", set->Name.c_str(), song + 1 );
+        }
+        else
+        {
+            ImGui::TextDisabled( "This song isn't in a story set." );
+        }
+        if( ImGui::MenuItem( "Place the Set's Moments", nullptr, false, set != nullptr ) )
+        {
+            PlaceStoryMoments();
+        }
+        if( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+        {
+            ImGui::SetTooltip( "Puts each of the set's story moments for this song on the Story track (Structure), where the set's own cue has it.\nDrag one to move when it lands in this chart; delete one to give it back to the set's cue.\nThe Game Preview plays the story when its venue is Song's Venue." );
+        }
         ImGui::EndMenu();
     }
     if( ImGui::BeginMenu( "View", open ) )

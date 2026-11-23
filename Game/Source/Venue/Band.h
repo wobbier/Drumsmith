@@ -35,7 +35,7 @@ public:
     // backs), Floating (drifting and bobbing in place). inTo has held inToSeconds; it blends in
     // from inFrom (held inFromSeconds when inTo came) by inBlend, 0 to 1. inGhost 0 to 1 turns
     // them see-through and pale, glowing: a ghost of themselves.
-    enum class StoryPose : int { Playing = 0, Hidden, Falling, Rising, Down, Floating };
+    enum class StoryPose : int { Playing = 0, Hidden, Falling, Rising, Down, Floating, Aloft };
     void SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo, float inToSeconds, float inBlend, float inGhost );
 
     // Venue-space points for the director and the lights: a member's head, chest and hands (for

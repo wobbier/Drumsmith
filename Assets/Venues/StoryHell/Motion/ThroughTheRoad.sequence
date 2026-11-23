@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "ThroughTheRoad",
+ "FrameRate": 30,
+ "DurationFrames": 48,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      -150,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0,
+      -80,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0,
+      -30,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

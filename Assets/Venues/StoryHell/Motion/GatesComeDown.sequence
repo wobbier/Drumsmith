@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "GatesComeDown",
+ "FrameRate": 30,
+ "DurationFrames": 1020,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      250,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 400,
+     "Value": [
+      0,
+      120,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 800,
+     "Value": [
+      0,
+      35,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 1020,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

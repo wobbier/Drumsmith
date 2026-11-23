@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "Circle4",
+ "FrameRate": 30,
+ "DurationFrames": 175,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 175,
+     "Value": [
+      0,
+      70.0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

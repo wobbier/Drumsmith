@@ -77,6 +77,10 @@ private:
     std::string m_venue;
     std::string m_appliedVenue;
     bool m_reloadVenue = false;
+    // Song's Venue on a song of a story set: its story is staged (VenueRegistry::Story) and the
+    // set's venue built, as a play of the set would. Returns the venue to build.
+    std::string StageStory( const ChartDocument& inDocument );
+    bool m_stagedStory = false;
     bool m_scannedVenues = false;
 };
 

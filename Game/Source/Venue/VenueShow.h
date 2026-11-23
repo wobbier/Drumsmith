@@ -13,6 +13,7 @@
 #include "Venue/VenueScene.h"
 #include "Components/Venue/VenueMarkers.h"
 #include "ECS/EntityHandle.h"
+#include "Camera/ProceduralSkySettings.h"
 #include <chrono>
 #include <cstdint>
 #include <set>
@@ -100,6 +101,14 @@ public:
     const Director& GetDirector() const { return m_director; }
     // A story moment's caption showing at inSeconds (a line said on screen), else empty.
     std::string StoryCaption( double inSeconds ) const;
+    // When a story cue falls in a chart (seconds): a song cue ("intro", "solo", "song_end"...),
+    // "section:<name>", "at:<share of the song>", "time:<seconds>", "drums_in" (the first note),
+    // "last_note" or "start", each optionally moved by "+<seconds>" or "-<seconds>". An unknown
+    // one is halfway.
+    static double StoryCueTime( const VenueData& inVenue, const std::string& inCue, double inLength, double inFirstNote, double inLastNote );
+    // When a story moment lands: where the chart's own Story cues put one of its flags
+    // (VenueData::m_story, the Track Editor's Story track), else at the set's cue.
+    static double StoryMomentTime( const VenueData& inVenue, const std::set<std::string>& inFlags, const std::string& inCue, double inLength, double inFirstNote, double inLastNote );
 
 private:
     // Whether a show goes up at all (the Venue setting, --no-venue, a practice lesson).
@@ -128,11 +137,6 @@ private:
     // in, and each frame shown or hidden by the story's flags (VenueRegistry::Story).
     void BuildStory( double inLength, double inFirstNote, double inLastNote );
     void UpdateStory( double inSeconds, float inDeltaTime );
-    // When a story cue falls in this song (seconds): a song cue ("intro", "solo", "song_end"...),
-    // "section:<name>", "at:<share of the song>", "time:<seconds>", "drums_in" (the first note),
-    // "last_note" or "start", each optionally moved by "+<seconds>" or "-<seconds>". An unknown
-    // one is halfway.
-    double StoryCueTime( const std::string& inCue, double inLength, double inFirstNote, double inLastNote ) const;
     // Whether a story flag is set at inSeconds: before the song, at its cue, or at a moment.
     bool StoryFlagSet( const std::string& inFlag, double inSeconds ) const;
 
@@ -157,6 +161,14 @@ private:
     // The venue scene showing (none in a procedural room), and its registry id.
     VenueScene m_scene;
     std::string m_sceneId;
+    // Entities with a VenueBeat marker, and where each rests.
+    struct BeatProp
+    {
+        EntityHandle Entity;
+        Vector3 Rest;
+    };
+    std::vector<BeatProp> m_beatProps;
+    void UpdateBeats( double inSeconds );
     struct StoryProp
     {
         EntityHandle Entity;
@@ -202,6 +214,11 @@ private:
     };
     std::vector<StoryLight> m_storyLights;
     void DimStoryShowLights();
+    // A story shot's own sky (Director::ShotSky): on the main camera while the shot holds.
+    void UpdateShotSky();
+    bool m_shotSkyOn = false;
+    int m_shotSkyClear = 0;
+    Moonlight::ProceduralSkySettings m_shotSkySaved;
     void UpdateStoryMotion( StoryProp& ioProp, bool inSet );
     // The band_ story flags on the band (Band::SetStoryState).
     void UpdateStoryBand( double inSeconds, float inDeltaTime );

@@ -1138,6 +1138,12 @@
        ]
       },
       {
+       "Cue": "at:0.02",
+       "Flags": [
+        "crash_survey"
+       ]
+      },
+      {
        "Cue": "at:0.04",
        "Flags": [
         "ghosts_stand",
@@ -1157,45 +1163,228 @@
        ]
       },
       {
-       "Cue": "at:0.46",
+       "Cue": "section:verse_1|at:0.13",
        "Flags": [
-        "fell",
-        "band_falling"
+        "ascent",
+        "band_aloft"
        ]
       },
       {
-       "Cue": "at:0.5",
+       "Cue": "section:verse_1+18|at:0.165",
+       "Flags": [
+        "clouds"
+       ]
+      },
+      {
+       "Cue": "section:chorus_1|at:0.23",
+       "Flags": [
+        "heavens_light"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2|at:0.435",
+       "Flags": [
+        "gates"
+       ]
+      },
+      {
+       "Cue": "section:fast_part-3.2|at:0.5-3.2",
+       "Flags": [
+        "denied",
+        "band_falling"
+       ],
+       "Caption": "Denied.",
+       "CaptionSeconds": 2.5
+      },
+      {
+       "Cue": "section:fast_part|at:0.5",
+       "Flags": [
+        "fell"
+       ]
+      },
+      {
+       "Cue": "section:fast_part+6|at:0.5+6",
        "Flags": [
         "tumbling"
        ]
       },
       {
-       "Cue": "at:0.57",
+       "Cue": "section:gtr_solo|at:0.522",
+       "Flags": [
+        "circle_1"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo+6|at:0.522+6",
+       "Flags": [],
+       "Caption": "The First Circle: Limbo",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo+12|at:0.522+12",
+       "Flags": [
+        "in_circle_1"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_a|at:0.568",
+       "Flags": [
+        "circle_2"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_a+6|at:0.568+6",
+       "Flags": [],
+       "Caption": "The Second Circle: Lust",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_a+12|at:0.568+12",
+       "Flags": [
+        "in_circle_2"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_c|at:0.634",
+       "Flags": [
+        "circle_3"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_c+6|at:0.634+6",
+       "Flags": [],
+       "Caption": "The Third Circle: Gluttony",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_c+12|at:0.634+12",
+       "Flags": [
+        "in_circle_3"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_d|at:0.688",
+       "Flags": [
+        "circle_4"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_d+6|at:0.688+6",
+       "Flags": [],
+       "Caption": "The Fourth Circle: Greed",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_d+12|at:0.688+12",
+       "Flags": [
+        "in_circle_4"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_e|at:0.732",
+       "Flags": [
+        "circle_5"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_e+6|at:0.732+6",
+       "Flags": [],
+       "Caption": "The Fifth Circle: Wrath",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_e+12|at:0.732+12",
+       "Flags": [
+        "in_circle_5"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_f|at:0.775",
+       "Flags": [
+        "circle_6"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_f+6|at:0.775+6",
+       "Flags": [],
+       "Caption": "The Sixth Circle: Heresy",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_f+12|at:0.775+12",
+       "Flags": [
+        "in_circle_6"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_g|at:0.818",
+       "Flags": [
+        "circle_7"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_g+6|at:0.818+6",
+       "Flags": [],
+       "Caption": "The Seventh Circle: Violence",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_g+12|at:0.818+12",
+       "Flags": [
+        "in_circle_7"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_h|at:0.862",
+       "Flags": [
+        "circle_8"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_h+6|at:0.862+6",
+       "Flags": [],
+       "Caption": "The Eighth Circle: Fraud",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_h+12|at:0.862+12",
+       "Flags": [
+        "in_circle_8"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_i|at:0.907",
+       "Flags": [
+        "circle_9"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_i+6|at:0.907+6",
+       "Flags": [],
+       "Caption": "The Ninth Circle: Treachery",
+       "CaptionSeconds": 4
+      },
+      {
+       "Cue": "section:gtr_solo_i+12|at:0.907+12",
+       "Flags": [
+        "in_circle_9"
+       ]
+      },
+      {
+       "Cue": "section:bre|at:0.95",
        "Flags": [
         "landed",
         "band_playing"
        ]
       },
       {
-       "Cue": "at:0.58",
+       "Cue": "section:bre+4|at:0.957",
        "Flags": [
         "stairs_reveal"
        ]
       },
       {
-       "Cue": "at:0.02",
-       "Flags": [
-        "crash_survey"
-       ]
-      },
-      {
-       "Cue": "at:0.48",
-       "Flags": [
-        "the_slit"
-       ]
-      },
-      {
-       "Cue": "at:0.63",
+       "Cue": "section:bre+17|at:0.979",
        "Flags": [
         "hell_wide"
        ]
@@ -1348,49 +1537,25 @@
       {
        "Cue": "section:chorus_1",
        "Flags": [
-        "earth_wide"
-       ]
-      },
-      {
-       "Cue": "section:verse_2",
-       "Flags": [
-        "cpr_close"
-       ]
-      },
-      {
-       "Cue": "section:verse_1+12",
-       "Flags": [
-        "earth_medics"
-       ]
-      },
-      {
-       "Cue": "section:chorus_1+16",
-       "Flags": [
-        "earth_road"
+        "loading"
        ]
       },
       {
        "Cue": "section:chorus_2",
        "Flags": [
-        "earth_cop"
+        "ambulance_run"
        ]
       },
       {
-       "Cue": "section:chorus_2+14",
+       "Cue": "section:verse_3-6.2",
        "Flags": [
-        "earth_high"
-       ]
-      },
-      {
-       "Cue": "section:bridge+10",
-       "Flags": [
-        "earth_bass"
+        "defib"
        ]
       },
       {
        "Cue": "section:verse_3",
        "Flags": [
-        "earth_shoulder"
+        "shock"
        ]
       },
       {
@@ -1406,9 +1571,9 @@
        ]
       },
       {
-       "Cue": "last_note+8",
+       "Cue": "section:chorus_3+24",
        "Flags": [
-        "cop_nod_final"
+        "gurney"
        ]
       }
      ],

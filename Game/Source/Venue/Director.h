@@ -47,6 +47,9 @@ public:
     // The venue is on the move (VenueInfo::Ride; set every frame, 0 none): every camera rattles
     // with the road, heaves on its springs and takes the bumps. Aerial shots don't.
     void SetRide( float inRide ) { m_rideTarget = inRide < 0.f ? 0.f : inRide; }
+    // The hour of the procedural sky the shot on screen asks for (a story shot tagged
+    // "sky<hour>"), or -1: VenueShow puts the sky behind the venue while it holds.
+    float ShotSky() const { return m_shotSky; }
     // What a look that takes the colour out leaves in (set every frame): x reds, y blues (0 none,
     // 1 all), z how far the reds reach into orange and yellow. A story shot tagged "lights"
     // keeps all three whatever this says.
@@ -126,6 +129,11 @@ private:
         bool Aerial = false;
         // Story: the shot keeps reds, blues and fire through any look (the tag's "lights").
         bool Lights = false;
+        // Story: the camera is bolted to something on the move for this shot alone (the tag's
+        // "ride"; as SetRide, 1 a fast highway).
+        float Ride = 0.f;
+        // Story: the hour of the procedural sky this shot is under (the tag's "sky"; -1 none).
+        float Sky = -1.f;
         bool Static = false;
         // Bit 0 the side, bit 1 an alternate take, bits 2-3 the treatment (Vary).
         int Variant = 0;
@@ -249,6 +257,10 @@ private:
         bool Aerial = false;
         // "lights": reds, blues and fire stay in colour through a black and white look.
         bool Lights = false;
+        // "ride" / "ride<amount>": the camera takes the road for this shot (an ambulance, a gurney).
+        float Ride = 0.f;
+        // "sky<hour>": the shot is under the procedural sky at that hour (-1: the venue's own).
+        float Sky = -1.f;
         // Spots the move passes through between Spot and End, in order ("w1", "w2", ...).
         std::vector<int> Via;
         // The focus distance in metres at the start and the end ("f0.5"; 0: sharp throughout).
@@ -299,6 +311,7 @@ private:
     Vector3 m_keepTarget = Vector3( 0.f, 0.f, 0.f );   // SetColorKeep
     Vector3 m_keep = Vector3( 0.f, 0.f, 0.f );
     bool m_shotLights = false; // the shot on screen is tagged "lights"
+    float m_shotSky = -1.f;    // the shot on screen is tagged "sky<hour>" (-1: it isn't)
     bool m_keptLights = false; // and was when the grade was last applied
     // A big moment's hero shot (OnBigMoment), from m_bigStart until m_bigEnd.
     double m_bigStart = -1000.0;

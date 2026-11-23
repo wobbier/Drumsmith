@@ -167,6 +167,29 @@ public:
 ME_REGISTER_COMPONENT_FOLDER( VenueStory, "Venue" )
 
 
+// Moves its entity in time with the song (VenueShow::UpdateBeats): out by Offset on the beat and
+// back before the next, like a head nodding or a body dipping; with Sway, smoothly from side to
+// side instead. For set dressing that should feel the music: figures baked into a mesh, a lamp
+// on a chain. The entity's own position is where it rests.
+class VenueBeat : public Component<VenueBeat>
+{
+    ME_REFLECTABLE( VenueBeat )
+public:
+    VenueBeat() : Component( "VenueBeat" ) {}
+    void Init() final {}
+    // Where it is at the peak of the move, from its resting position, in its parent's space.
+    Vector3 Offset = Vector3( 0.f, -0.08f, 0.f );
+    // One move every this many beats, and how many beats late it starts.
+    float Every = 1.f;
+    float Phase = 0.f;
+    bool Sway = false;
+    // Out at once on the beat and straight back, with no gathering before the next: a blip (the
+    // trace on a heart monitor), not a nod.
+    bool Sharp = false;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueBeat, "Venue" )
+
+
 class VenueCameraSpot
     : public Component<VenueCameraSpot>
 {

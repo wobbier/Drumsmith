@@ -31,6 +31,7 @@
 //   track-preview-mode <highway|scene|both>
 //   track-preview-venue <id|room|path.lvl>  the venue the preview builds; "song" for the song's pick
 //   track-preview-reload-venue              reads the venue from disk again and rebuilds it
+//   track-place-story                       Story > Place the Set's Moments (a song of a story set)
 //   track-assert-count <track> | <n>
 //   track-assert-time <track> | <item> | <seconds>
 //   track-assert-row <track> | <item> | <row>
@@ -196,6 +197,10 @@ bool TrackEditor::ExecuteAutomation( const std::string& inCommand, const std::st
     else if( inCommand == "track-preview-reload-venue" )
     {
         m_preview.ReloadVenue();
+    }
+    else if( inCommand == "track-place-story" )
+    {
+        PlaceStoryMoments();
     }
     else if( inCommand == "track-select" )
     {

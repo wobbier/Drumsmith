@@ -1,0 +1,122 @@
+{
+ "Version": 1,
+ "Name": "AmbulanceRock",
+ "FrameRate": 30,
+ "DurationFrames": 96,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      0.1,
+      0.02,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 72,
+     "Value": [
+      -0.1,
+      0.02,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 96,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      0.0026179,
+      -2.06e-05,
+      -0.0078539,
+      0.9999657
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 48,
+     "Value": [
+      -0.002618,
+      0.0,
+      0.0,
+      0.9999966
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 72,
+     "Value": [
+      0.0026179,
+      2.06e-05,
+      0.0078539,
+      0.9999657
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 96,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

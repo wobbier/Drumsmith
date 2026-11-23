@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "Circle7",
+ "FrameRate": 30,
+ "DurationFrames": 193,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 193,
+     "Value": [
+      0,
+      90.0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

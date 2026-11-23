@@ -1,0 +1,145 @@
+{
+ "Version": 1,
+ "Name": "Swing2",
+ "FrameRate": 30,
+ "DurationFrames": 60,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.0911202,
+      0.0021069,
+      -0.0230202,
+      0.9955716
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 5,
+     "Value": [
+      -0.1044444,
+      0.0040256,
+      -0.0383034,
+      0.9937847
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      -0.08989,
+      0.0039223,
+      -0.0434162,
+      0.9949972
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -0.0512823,
+      0.0018986,
+      -0.0369482,
+      0.9979987
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      0.0011736,
+      -2.4e-05,
+      -0.0204869,
+      0.9997894
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 25,
+     "Value": [
+      0.0533478,
+      8.1e-05,
+      0.0015163,
+      0.9985748
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0.0911202,
+      0.0021069,
+      0.0230202,
+      0.9955716
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 35,
+     "Value": [
+      0.1044444,
+      0.0040256,
+      0.0383034,
+      0.9937847
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 40,
+     "Value": [
+      0.08989,
+      0.0039223,
+      0.0434162,
+      0.9949972
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      0.0512823,
+      0.0018986,
+      0.0369482,
+      0.9979987
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 50,
+     "Value": [
+      -0.0011736,
+      -2.4e-05,
+      0.0204869,
+      0.9997894
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 55,
+     "Value": [
+      -0.0533478,
+      8.1e-05,
+      -0.0015163,
+      0.9985748
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 60,
+     "Value": [
+      -0.0911202,
+      0.0021069,
+      -0.0230202,
+      0.9955716
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

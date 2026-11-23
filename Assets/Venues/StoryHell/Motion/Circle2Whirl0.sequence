@@ -1,0 +1,55 @@
+{
+ "Version": 1,
+ "Name": "Circle2Whirl0",
+ "FrameRate": 30,
+ "DurationFrames": 150,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 50,
+     "Value": [
+      0.0,
+      0.8660254,
+      0.0,
+      0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 100,
+     "Value": [
+      -0.0,
+      0.8660254,
+      -0.0,
+      -0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 150,
+     "Value": [
+      -0.0,
+      0.0008727,
+      -0.0,
+      -0.9999996
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

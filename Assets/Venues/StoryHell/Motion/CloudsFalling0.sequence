@@ -1,0 +1,35 @@
+{
+ "Version": 1,
+ "Name": "CloudsFalling0",
+ "FrameRate": 30,
+ "DurationFrames": 300,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      0,
+      -90.0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

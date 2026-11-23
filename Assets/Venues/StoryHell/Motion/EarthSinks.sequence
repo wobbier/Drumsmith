@@ -1,0 +1,65 @@
+{
+ "Version": 1,
+ "Name": "EarthSinks",
+ "FrameRate": 30,
+ "DurationFrames": 1080,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0,
+      -1.5,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 240,
+     "Value": [
+      0,
+      -10,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 480,
+     "Value": [
+      0,
+      -45,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 1080,
+     "Value": [
+      0,
+      -220.0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

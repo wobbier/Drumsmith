@@ -1,6 +1,8 @@
 #include "Editor/Chart/PreviewSession.h"
 #include "Editor/Chart/ChartDocument.h"
 #include "Editor/Chart/Transport.h"
+#include "CoreGame/GigSession.h"
+#include "CoreGame/Progression.h"
 #include "Cores/NoteHighwayCore.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -54,8 +56,38 @@ NoteHighwayCore* PreviewSession::FindCore() const
 }
 
 
+std::string PreviewSession::StageStory( const ChartDocument& inDocument )
+{
+    // A gig that is really playing has staged its own.
+    if( GigSession::GetInstance().IsActive() )
+    {
+        return m_venue;
+    }
+    int song = 0;
+    const ProgressionStorySet* set = m_venue.empty() ? Progression::GetInstance().FindStorySong( inDocument.Chart, song ) : nullptr;
+    if( !set )
+    {
+        if( m_stagedStory )
+        {
+            VenueRegistry::Story() = VenueRegistry::StoryStage();
+            m_stagedStory = false;
+        }
+        return m_venue;
+    }
+    GigSession::StageStory( *set, song );
+    m_stagedStory = true;
+    const std::string& venue = set->Songs[song].Venue.empty() ? set->Venue : set->Songs[song].Venue;
+    return venue.empty() ? m_venue : venue;
+}
+
+
 void PreviewSession::ReleaseVenue()
 {
+    if( m_stagedStory )
+    {
+        VenueRegistry::Story() = VenueRegistry::StoryStage();
+        m_stagedStory = false;
+    }
     VenueShow::SetOverride( std::string() );
     m_appliedVenue.clear();
     m_reloadVenue = false;
@@ -189,7 +221,7 @@ void PreviewSession::Update( ChartDocument& inDocument, Transport& inTransport )
         if( core && core->CanPreview() )
         {
             // The venue picked here, not the song's (when one is picked).
-            VenueShow::SetOverride( m_venue );
+            VenueShow::SetOverride( StageStory( inDocument ) );
             m_appliedVenue = m_venue;
             m_reloadVenue = false;
             core->BeginPreview( inDocument.Chart );
@@ -267,7 +299,7 @@ void PreviewSession::Update( ChartDocument& inDocument, Transport& inTransport )
     if( m_reloadVenue || m_appliedVenue != m_venue )
     {
         // Another venue picked, or this one reloaded from disk: rebuilt now, not after a delay.
-        VenueShow::SetOverride( m_venue );
+        VenueShow::SetOverride( StageStory( inDocument ) );
         m_appliedVenue = m_venue;
         m_reloadVenue = false;
         m_venueWait = -1.f;
@@ -361,7 +393,7 @@ void PreviewSession::DrawVenueControls( ChartDocument& inDocument )
                 ImGui::SetTooltip( "%s", inTooltip );
             }
         };
-        option( "Song's Venue", std::string(), "The venue a play of this song would get: the song's own, the player's pick, the Venue Style setting." );
+        option( "Song's Venue", std::string(), "The venue a play of this song would get: the song's own, the player's pick, the Venue Style setting.\nA song of a story set gets the set's venue and its story: the flags of the songs before it, and its own moments on their cues (or where the Story track has them)." );
         ImGui::Separator();
         for( int style = 0; style < VenueRegistry::kStyleCount; ++style )
         {

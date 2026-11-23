@@ -1,6 +1,7 @@
 #pragma once
 #include "Singleton.h"
 #include "CoreGame/Progression.h"
+#include "Venue/VenueRegistry.h"
 #include <string>
 #include <vector>
 
@@ -35,6 +36,8 @@ public:
     // Story mode's venue state for song inSong of inSet (VenueRegistry::Story): the flags of the
     // songs before it from the start, its own at its cue. A song out of range clears it.
     static void StageStory( const ProgressionStorySet& inSet, int inSong );
+    // What StageStory stages: the flags set before inSong of inSet, and its own cue and moments.
+    static VenueRegistry::StoryStage MakeStage( const ProgressionStorySet& inSet, int inSong );
     // Plays from song inSong instead (the debug menu's song buttons, --story-song). False when
     // there is no such song.
     bool JumpTo( int inSong );

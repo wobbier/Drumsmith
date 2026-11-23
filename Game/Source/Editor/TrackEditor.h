@@ -53,6 +53,9 @@ private:
     void ExecuteAction( const std::string& inId );
 
     void DrawMenuBar();
+    // Story mode: puts each moment of the story set this song plays in on the Story track, where
+    // the set's own cue has it (those already there are left); one undo step.
+    void PlaceStoryMoments();
     void DrawToolbar();
     // Play from the toolbar or Space: the game preview comes up first, then the song starts.
     void TogglePlay();

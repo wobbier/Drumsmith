@@ -1,0 +1,45 @@
+{
+ "Version": 1,
+ "Name": "RotorSpin",
+ "FrameRate": 30,
+ "DurationFrames": 6,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      -0.0,
+      0.0008727,
+      -0.0,
+      -0.9999996
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

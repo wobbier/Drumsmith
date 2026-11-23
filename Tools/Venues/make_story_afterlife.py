@@ -7,12 +7,13 @@ proposed story set highway-afterlife in Design/Story-Mode-Setlists.json:
   StoryHighway  Kickstart My Heart: the band on a flatbed trailer down a night highway that scrolls
                 past, the cruiser behind with its lightbar going; the wreck on a marked stretch of
                 shoulder, and the band's bodies on the asphalt.
-  StoryHell     Free Bird and Bat Country: the crash site, the fall down a shaft, and hell: a
-                cavern over a lake of lava, the island the band lands on, the crowd on its
-                terraces, the staircase, and Satan's throne under a horned skull.
+  StoryHell     Free Bird and Bat Country: the crash site, the fall down a shaft and through
+                Dante's nine circles (story_afterlife_circles), and hell: a cavern over a lake of
+                lava, the island the band lands on, the crowd on its nine tiers, the staircase,
+                and Satan's throne under a horned skull.
   StoryHeaven   Stairway to Heaven and My Hero: the ascent through cloud, the cloud floor, the
                 stairs, the gates and God's platform, the angel choir; and, far off in the same
-                scene, the crash site on Earth for the rescue cut-aways.
+                scene, the rescue on Earth that My Hero cuts away to (story_afterlife_rescue).
 
 The set is built from story_afterlife_art's props (meshes and textures drawn by
 story_afterlife_mesh), posed figures (story_afterlife_people), particles and looping clips. Every
@@ -32,7 +33,9 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import story_afterlife_art as A  # noqa: E402
+import story_afterlife_circles as CIR  # noqa: E402
 import story_afterlife_people as P  # noqa: E402
+import story_afterlife_rescue as RES  # noqa: E402
 from venuegen import Scene, look_rotation, repo_root, write_venue_json  # noqa: E402
 
 # Colours.
@@ -79,15 +82,17 @@ def band(s, marks, y):
     s.spot(marks, 'Vocals', (VOCALS[0], y, VOCALS[1]))
 
 
-def shot(s, marks, flag, eye, target, fov=50.0, hold=None, hand=False, end=None, via=(), focus=False, heli=False):
+def shot(s, marks, flag, eye, target, fov=50.0, hold=None, hand=False, end=None, via=(), focus=False, heli=False, ride=0.0, sky=None):
     """The story shot for flag: from eye at target; end (eye, target, fov) is where it moves to,
     by way of via [(eye, target, fov), ...]. focus: pull focus to the target (and soften the rest).
-    heli: shot from a helicopter on a long lens (the aim hunts, the zoom punches in). A shot on
+    heli: shot from a helicopter on a long lens (the aim hunts, the zoom punches in). ride: the
+    camera is bolted to something on the move and takes the road this hard (1 a fast highway). sky: the
+    hour of the procedural sky the shot is under, whatever the venue has behind it. A shot on
     Earth (far out along x, beyond heaven's sky) is tagged lights: the police lights and the fire
     stay in colour through a black and white look."""
     def f(e, t):
         return f'/f{math.dist(e, t):.2f}' if focus else ''
-    tag = 'story/' + flag + (f'/{hold:g}' if hold else '') + ('/hand' if hand else '') + ('/heli' if heli else '') + ('/lights' if eye[0] > 1000 else '') + f(eye, target)
+    tag = 'story/' + flag + (f'/{hold:g}' if hold else '') + ('/hand' if hand else '') + ('/heli' if heli else '') + (f'/ride{ride:g}' if ride else '') + (f'/sky{sky:g}' if sky is not None else '') + ('/lights' if eye[0] > 1000 else '') + f(eye, target)
     s.camera_spot('Story ' + flag, marks, eye, target, 'Custom', fov, tag)
     views = [[list(eye), list(target), fov]]
     for i, (e, t, v) in enumerate(via):
@@ -170,18 +175,28 @@ def add3(a, b):
     return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
 
 
+def beacons(s, parent, venue, red=450.0, blue=600.0, reach=60.0, speed=1.0, glare=(0.6, 2.0)):
+    """The patrol cruiser's two roof beacons turning: a glare going round each, and (red / blue
+    above 0) a spot light sweeping from each at those levels, opposite one another."""
+    spin = P.clip(venue, 'LightbarSpin', 24, [P.track('Rotation', [(0, (0, 0, 0)), (12, (0, 180, 0)), (24, (0, 359.9, 0))])])
+    x, y, z = A.PATROL_BEACON
+    for side, yaw, name, c, lamp, level in ((-1, 0, 'red', (1.0, 0.06, 0.05), (1.0, 0.05, 0.05), red), (1, 180, 'blue', (0.12, 0.25, 1.0), (0.1, 0.25, 1.0), blue)):
+        body = P.looping(s, parent, f'Beacon {name}', spin, (side * x, y, z), speed=speed)
+        if level > 0:
+            s.light(f'Sweep {name}', body, (0, 0, 0), 'Spot', lamp, level, reach, rot=(10, yaw, 0), inner=14, outer=32)
+        A.glow_card(s, body, venue, 'Glare', P_rot((0, 0, 0.14), yaw), glare[0], c, glare[1], (0, yaw, 0))
+
+
 def cruiser(s, parent, venue, at, yaw=0.0, name='Cruiser', door_open=False, beams=True):
     """A police car facing +z at yaw 0, its centre at at (on the road). Returns its group."""
     g = s.entity(name, parent, at, (0, yaw, 0))
-    A.model(s, g, 'Body', A.cruiser(venue, door_open))
-    see_through(s.box('Windshield', g, (0, 1.2, 0.76), (1.5, 0.74, 0.02), (0.5, 0.6, 0.7), rot=(-40, 0, 0), rough=0.05, shadows=False), 0.12)
-    for x in (-0.86, 0.86):
-        see_through(s.box('Side glass', g, (x, 1.2, -0.25), (0.02, 0.56, 2.2), (0.5, 0.6, 0.7), rough=0.05, shadows=False), 0.12)
-    for x in (-0.62, 0.62):
-        s.box('Headlight', g, (x, 0.72, 2.45), (0.36, 0.14, 0.04), (1, 1, 0.9), emissive=(1, 1, 0.85), emissive_intensity=4.0, shadows=False)
-        A.glow_card(s, g, venue, 'Headlight glare', (x, 0.72, 2.5), 0.5, (1.0, 0.95, 0.8), 1.2)
-    s.light('Headlights', g, (0, 0.8, 2.6), 'Spot', (1.0, 0.95, 0.85), 1500.0, 60, rot=(5, 0, 0), inner=16, outer=36)
-    lightbar(s, g, venue, (0, 1.65, -0.3))
+    # The patrol cruiser brings its own glass, lamps and beacons: only their light is added.
+    A.patrol_cruiser(s, g, door_open=door_open)
+    hx, hy, hz = A.PATROL_HEADLAMP
+    for x in (-hx, hx):
+        A.glow_card(s, g, venue, 'Headlight glare', (x, hy, hz + 0.05), 0.5, (1.0, 0.95, 0.8), 1.2)
+    A.headlights(s, g, hx, hy, hz + 0.15, 1500.0, 60)
+    beacons(s, g, venue)
     return g
 
 
@@ -234,11 +249,12 @@ def beside_chest(lying, side, out=0.75, up_body=1.3):
     return (bx + d[0], bz + d[2]), byaw - side * 90
 
 
-def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, lying=None, wreck_at=(3.0, 0.0, -2.0)):
+def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, lying=None, wreck_at=(3.0, 0.0, -2.0), ambulance=True):
     """The crash site around o: the wreck (burning), the band on the asphalt and a dropped stick.
     flags: the flags the figures change at ('wake': the drummer opens their eyes, 'nod': the cop
-    nods). cop: (x, yaw, z) where the cop kneels giving CPR (None: no cop). ems: the medics and the
-    ambulance. lying: who lies where ({member: (x, z, yaw)} relative to o) instead of the usual
+    nods, 'lifted': the drummer is off the road, on the gurney, and the cop with them). cop: (x, yaw,
+    z) where the cop kneels giving CPR (None: no cop). ems: the medics and (ambulance) their
+    ambulance and stretcher. lying: who lies where ({member: (x, z, yaw)} relative to o) instead of the usual
     spread. Returns the drummer's hand in venue space."""
     ox, oy, oz = o
     if burning:
@@ -252,7 +268,7 @@ def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, ly
         model = P.figure(venue, f'Body_{who}', body, variant, P.STANDING, f'the {who} on the asphalt')
         if who == 'drummer':
             woke = P.figure(venue, 'Body_drummer_tapping', body, variant, P.TAPPING, 'the drummer, eyes open, tapping two fingers')
-            P.lie(s, P.between(s, g, 'Drummer still', None, flags.get('wake'), 0.3, at), 'Drummer', model, at, yaw)
+            P.lie(s, P.between(s, g, 'Drummer still', None, flags.get('lifted') or flags.get('wake'), 0.0 if flags.get('lifted') else 0.3, at), 'Drummer', model, at, yaw)
             if flags.get('wake'):
                 P.lie(s, P.between(s, g, 'Drummer awake', flags['wake'], None, 0.3, at), 'Drummer awake', woke, at, yaw)
         else:
@@ -274,7 +290,7 @@ def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, ly
         # Compressions, about 110 a minute (in slow motion under a SlowMotion group).
         cpr = P.clip(venue, 'Compressions', 16, [P.track('Position', [(0, (0, 0, 0)), (5, (0, -0.07, 0.03)), (16, (0, 0, 0))], 'SmoothStep'),
                                                   P.track('Rotation', [(0, (0, 0, 0)), (5, (7, 0, 0)), (16, (0, 0, 0))], 'SmoothStep')])
-        pumping = P.looping(s, P.between(s, g, 'Cop CPR', flags.get('cop'), flags.get('nod'), 0.2, cpos), 'CPR', cpr, cpos, rot=(0, cop[1], 0))
+        pumping = P.looping(s, P.between(s, g, 'Cop CPR', flags.get('cop'), flags.get('lifted') or flags.get('nod'), 0.0 if flags.get('lifted') else 0.2, cpos), 'CPR', cpr, cpos, rot=(0, cop[1], 0))
         P.place(s, pumping, 'Cop', kneel, (0, 0, 0), 0)
         if flags.get('nod'):
             P.place(s, P.between(s, g, 'Cop nod', flags['nod'], None, 0.2, cpos), 'Cop nodding', nod, cpos, cop[1])
@@ -295,21 +311,27 @@ def crash_site(s, parent, venue, o, flags, cop=None, ems=False, burning=True, ly
                 P.place(s, P.looping(s, g, f'Medic {i}', work, at, speed=0.8 + 0.15 * i, rot=(0, yaw, 0)), 'Medic', medic, (0, 0, 0), 0)
             bag = P_rot((side * 1.25, 0, -2.0), byaw)       # out past the patient's shoulder, on the medic's side
             s.box('Kit bag', g, (bx + bag[0], 0.15, bz + bag[2]), (0.5, 0.3, 0.3), (0.75, 0.1, 0.08), rot=(0, yaw + 20, 0))
-        amb = s.entity('Ambulance', g, (-9, 0, 8), (0, 160, 0))
-        A.model(s, amb, 'Body', A.ambulance(venue))
-        lightbar(s, amb, venue, (0, 3.1, 2.2))
-        s.light('Ambulance work light', amb, (0, 2.6, -3.2), 'Spot', (1.0, 0.97, 0.9), 700.0, 22, rot=(35, 180, 0), inner=30, outer=55)
-        s.box('Stretcher', g, (-6.2, 0.45, 4.2), (0.6, 0.08, 1.9), (0.85, 0.85, 0.2), rot=(0, 150, 0))
-        s.box('Stretcher frame', g, (-6.2, 0.22, 4.2), (0.5, 0.4, 1.7), (0.4, 0.42, 0.45), rot=(0, 150, 0), metallic=0.8, rough=0.4)
+        if ambulance:
+            amb = s.entity('Ambulance', g, (-9, 0, 8), (0, 160, 0))
+            A.model(s, amb, 'Body', A.ambulance(venue))
+            lightbar(s, amb, venue, (0, 3.1, 2.2))
+            s.light('Ambulance work light', amb, (0, 2.6, -3.2), 'Spot', (1.0, 0.97, 0.9), 700.0, 22, rot=(35, 180, 0), inner=30, outer=55)
+            s.box('Stretcher', g, (-6.2, 0.45, 4.2), (0.6, 0.08, 1.9), (0.85, 0.85, 0.2), rot=(0, 150, 0))
+            s.box('Stretcher frame', g, (-6.2, 0.22, 4.2), (0.5, 0.4, 1.7), (0.4, 0.42, 0.45), rot=(0, 150, 0), metallic=0.8, rough=0.4)
     return (ox + hand[0], oy + hand[1], oz + hand[2])
 
 
-def roadside(s, parent, venue, centre, half=60.0, shoulder_x=14.0, torn_z=None, trees=True):
+def night_sky(s, parent, venue, centre):
+    A.model(s, parent, 'Night sky', A.sky_dome(venue, 'NightDome', 'Night', 170.0, 3), (centre[0], centre[1] - 8, centre[2]), (0, 0, 0), 1.0,
+            A.mat(venue, 'Night', (0, 0, 0), glow=(1, 1, 1), power=1.0), shadows=False)
+
+
+def roadside(s, parent, venue, centre, half=60.0, shoulder_x=14.0, torn_z=None, trees=True, sky=True):
     """The night around a stretch of road at centre: the stars, the treeline, the guardrails (torn
     open at torn_z on the +x side), flares set out across the lanes."""
     cx, cy, cz = centre
-    A.model(s, parent, 'Night sky', A.sky_dome(venue, 'NightDome', 'Night', 170.0, 3), (cx, cy - 8, cz), (0, 0, 0), 1.0,
-            A.mat(venue, 'Night', (0, 0, 0), glow=(1, 1, 1), power=1.0), shadows=False)
+    if sky:
+        night_sky(s, parent, venue, centre)
     s.slab('Ground', parent, cx - 170, cx + 170, cy - 1.2, cy - 0.3, cz - 170, cz + 170, (0.02, 0.03, 0.02), rough=1.0, shadows=False)
     s.slab('Shoulder R', parent, cx + shoulder_x, cx + shoulder_x + 6, -0.25, -0.02, cz - half, cz + half, GRAVEL)
     s.slab('Shoulder L', parent, cx - shoulder_x - 6, cx - shoulder_x, -0.25, -0.02, cz - half, cz + half, GRAVEL)
@@ -474,7 +496,7 @@ def highway():
             s.box('Tail lamp', g, (x, 0.75 if not long_ else 1.0, tail), (0.34, 0.12, 0.04), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=5.0, shadows=False)
             s.box('Head lamp', g, (x * (1.45 if long_ else 1.0), 0.7 if not long_ else 1.15, nose), (0.34, 0.14, 0.04), (1, 1, 0.9), emissive=(1, 1, 0.85), emissive_intensity=8.0, shadows=False)
         if lights:
-            s.light('Headlights', g, (0, 0.9, nose + 0.2), 'Spot', (1.0, 0.95, 0.85), 2200.0, 70, rot=(5, 0, 0), inner=14, outer=34)
+            A.headlights(s, g, 0.65 * (1.45 if long_ else 1.0), 0.7 if not long_ else 1.15, nose + 0.2, 2200.0, 70, inner=14, outer=34)
         return g
 
     oncoming = P.looping(s, swerving, 'Oncoming', P.clip(V, 'RoadOncoming', 240, [P.track('Position', [(0, (0, 0, 0)), (240, (0, 0, -624))])]))
@@ -541,7 +563,6 @@ def highway():
                                                  ('cop_nods', None, P.NODDING, 'Cop_nodding')):
         model = P.figure(V, label, 'ShopKeeper_01', '04_B', pose, 'the highway cop')
         P.place(s, P.between(s, world, label, flag_after, flag_before, 0.05, seat), 'Cop', model, seat, 0)
-    s.box('Steering wheel', world, (seat[0], 0.98, seat[2] + 0.5), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
     s.light('Dash glow', world, (seat[0], 1.0, seat[2] + 0.6), 'Point', (0.4, 0.6, 1.0), 2.5, 2.5)
     s.light('Stage spill on the cop', world, (seat[0] + 0.3, 1.5, car_at[2] + 1.3), 'Point', (1.0, 0.7, 0.6), 3.5, 3.5)
     driver = P.figure(V, 'Cop_driving', 'ShopKeeper_01', '04_B', P.DRIVING, 'the highway cop')
@@ -549,7 +570,6 @@ def highway():
     def manned(parent, name, yaw=0.0):
         car = cruiser(s, parent, V, (0, 0, 0), yaw, name=name)
         P.place(s, car, 'Cop', driver, (-0.45, SEAT_Y, -0.2), 0)
-        s.box('Steering wheel', car, (-0.45, 0.98, 0.3), (0.34, 0.03, 0.34), (0.03, 0.03, 0.03), rot=(-65, 0, 0), shape='Cylinder', shadows=False)
         return car
 
     # The rest of the pursuit: four more cruisers strung out behind, fighting for a way past: they
@@ -601,7 +621,7 @@ def highway():
         P.track('Position', [(0, (0, 0, 0)), (12, (-1.0, 0, -3)), (24, (-2.2, 1.4, -9)), (36, (-3.0, 2.6, -18)), (48, (-3.6, 1.9, -30)), (60, (-4.0, 1.6, -45)), (90, (-4.4, 1.6, -90)), (400, (-4.6, 1.6, -586))]),
         P.track('Rotation', [(0, (0, 0, 0)), (12, (0, -35, 0)), (24, (0, -70, 70)), (36, (20, -100, 170)), (48, (0, -130, 280)), (60, (0, -150, 350)), (72, (0, -165, 80)), (90, (0, -170, 178)), (400, (0, -170, 180))])])
     tumbling = P.play(s, P.between(s, swerving, 'Flipped cruiser', 'cruiser_flips', None, 0.01, flip_at), 'Cruiser flips', 'cruiser_flips', flip, flip_at)
-    A.model(s, tumbling, 'Body', A.cruiser(V))
+    A.patrol_cruiser(s, tumbling)
     sparks(tumbling, 'Flip sparks', (0, 0.6, 0), rate=140, speed=(4, 16), cone=80)
     fire(s, tumbling, V, (0, 0.6, 0.8), 0.9, 500.0, smoke=False, name='Flip fire')
 
@@ -720,13 +740,23 @@ def hell():
     s.camera_spot('Camera Crane', marks, (8, 9, -9), (0, 1.6, 4), 'Crane', 55)
     s.camera_spot('Camera Desk', marks, (-1.5, 2.8, -10), (0, 2.0, 4), 'Desk', 30)
 
-    # 1. The crash site, until they fall.
-    crash = P.between(s, root, 'The crash site', None, 'fell', 2.5)
+    # 1. The crash site, until they go through the road. The tease: from 'ascent' the ghosts rise
+    # (the Earth sinks away under them, EARTH_DROP metres), through cloud, into a light from above,
+    # up to the gates; at 'denied' the light goes out and they plummet: the Earth comes back up at
+    # them and they go through the road at 'fell', PLUNGE seconds later.
+    EARTH_DROP, PLUNGE = 220.0, 3.2
+    crash = P.between(s, root, 'The crash site', None, 'fell', 0.0)
+    night_sky(s, crash, V, (0, 0, 0))
     # Each place has its own rig (a VenueShowLight under a story group is cued only while it shows).
     for i, x in enumerate((-3.5, 3.5, -1.2, 1.2)):
         s.light(f'Crash wash {i}', crash, (x, 7, -3), 'Spot', (0.7, 0.8, 1.0), 700.0, 18, rot=look_rotation((x, 7, -3), (x * 0.4, 1, 3.5)), inner=22, outer=42, show='Wash', group=i)
+    sink = P.clip(V, 'EarthSinks', 1080, [P.track('Position', [(0, (0, 0, 0)), (90, (0, -1.5, 0)), (240, (0, -10, 0)), (480, (0, -45, 0)), (1080, (0, -EARTH_DROP, 0))])])
+    hit = int(PLUNGE * 30)
+    plunge = P.clip(V, 'EarthComesBack', hit + 45, [P.track('Position', [(0, (0, 0, 0)), (30, (0, 12, 0)), (60, (0, 60, 0)), (hit, (0, EARTH_DROP, 0)), (hit + 45, (0, EARTH_DROP + 190, 0))])])
+    # (From here on 'crash' is the Earth: everything on it goes down with it and comes back.)
+    crash = P.play(s, P.play(s, crash, 'The Earth sinks away', 'ascent', sink), 'The Earth comes back', 'denied', plunge)
     road(s, crash, V, -14, 14, -70, 70)
-    roadside(s, crash, V, (0, 0, 0), 70.0, 14.0, torn_z=6.0)
+    roadside(s, crash, V, (0, 0, 0), 70.0, 14.0, torn_z=6.0, sky=False)
     s.light('Moon', crash, (0, 40, -20), 'Directional', (0.4, 0.5, 0.8), 2.4, 300, rot=(42, 150, 0), shadows=True)
     for x, z in ((-30, -30), (30, 30), (-30, 40), (30, -40)):
         s.light('Night fill', crash, (x, 26, z), 'Point', (0.3, 0.4, 0.75), 2600.0, 90)
@@ -749,53 +779,112 @@ def hell():
     P.place(s, runner, 'Cop', cop_run, (0, 0, 0), 0)
     P.place(s, P.between(s, crash, 'Cop kneeling', 'cop_kneels', None, 0.3, kneel_at), 'Cop', kneel, kneel_at, 90)
 
-    # 2. The fall: a shaft of rock streaming upward past the band, embers and ash racing up, the
-    # road a slit of light above and the glow of the pit below.
-    fall = P.between(s, P.between(s, root, 'The fall', 'fell', None, 1.5), 'Falling', None, 'landed', 0.3)
+    # 1b. The way up. Cloud streaming down past them in three depths (each one mesh).
+    tease = P.between(s, root, 'The way up', 'ascent', 'fell', 0.0)
+    cloud_mat = A.mat(V, 'Palette', (1, 1, 1), glow=(0.5, 0.6, 0.85), power=0.6, rough=1.0)
+    clouds = P.gated(s, P.gated(s, tease, 'Clouds', 'clouds', True, 6.0, (0, 320, 3)), 'Clouds (until denied)', 'denied', False, 0.8, (0, 500, 3))
+    for depth, (count, r0, r1, size0, size1, period, frames) in enumerate(((16, 5, 14, 2.0, 4.5, 90.0, 300), (16, 16, 40, 6.0, 12.0, 160.0, 800), (10, 46, 80, 14.0, 24.0, 240.0, 2400))):
+        clip = P.clip(V, f'CloudsFalling{depth}', frames, [P.track('Position', [(0, (0, 0, 0)), (frames, (0, -period, 0))])])
+        A.model(s, P.looping(s, clouds, f'Clouds {depth}', clip), 'Clouds', A.cloud_layer(V, f'CloudLayer{depth}', count, r0, r1, size0, size1, period, 40 + depth), (0, 0, 3),
+                (0, 0, 0), 1.0, cloud_mat, shadows=False)
+    A.particles(s, clouds, 'Wisps', (0, 14, 3), Shape='Box', BoxSize=[26, 4, 26], Lifetime=[2.5, 4.0], Speed=[0.0, 0.5], Size=[1.5, 3.5], EndSize=1.8,
+                StartColor=[0.7, 0.78, 1.0], StartColor2=[0.55, 0.62, 0.85], EndColor=[0.7, 0.78, 1.0], StartAlpha=0.2, EndAlpha=0.0, Gravity=0.75, Drag=0.0,
+                NoiseStrength=0.4, NoiseFrequency=0.3, Blend='Alpha', EmissionRate=18, MaxParticles=100, Texture=A.tex(V, 'Puff'), FadeIn=0.25, AngularVelocity=[-10, 10])
+    # The light from above, growing; then the gates themselves coming down to meet them.
+    glory = P.gated(s, P.gated(s, tease, 'The light from above', 'heavens_light', True, 9.0, (0, 320, 3)), 'The light (until denied)', 'denied', False, 0.12, (0, 320, 3))
+    gold = (1.0, 0.86, 0.58)
+    A.glow_card(s, glory, V, 'Glory', (0, 135, 3), 120.0, gold, 2.6, (90, 0, 0))
+    for i in range(7):
+        a = 2 * math.pi * i / 7 + 0.3
+        x, z = math.cos(a) * 16, math.sin(a) * 16
+        A.shaft(s, glory, V, f'Sunbeam {i}', (x * 0.25, 150, z * 0.25 + 3), (x, -30, z + 3), 7.0, gold, 0.14)
+    s.light('Glory light', glory, (0, 34, 3), 'Point', gold, 5200.0, 80, fog=CIR.FOG)
+    for i, x in enumerate((-5.0, 5.0)):
+        at = (x, 9, -6)
+        s.light(f'Glory key {i}', glory, at, 'Spot', gold, 1500.0, 26, rot=look_rotation(at, (x * 0.2, 2.4, 3.5)), inner=20, outer=38, fog=CIR.FOG)
+    A.particles(s, glory, 'Motes', (0, 4, 3), Shape='Box', BoxSize=[18, 14, 18], Lifetime=[3.0, 6.0], Speed=[0.1, 0.5], Size=[0.02, 0.05],
+                StartColor=[1.0, 0.9, 0.6], StartColor2=[1.0, 1.0, 0.9], EndColor=[1.0, 0.85, 0.5], Intensity=3.0, Gravity=0.25, Drag=0.2, NoiseStrength=0.5,
+                Blend='Additive', EmissionRate=30, MaxParticles=160, FadeIn=0.2)
+    gates = P.gated(s, P.gated(s, tease, 'The gates', 'gates', True, 2.0, (0, 420, 3)), 'The gates (until denied)', 'denied', False, 0.12, (0, 60, 3))
+    gates = P.play(s, gates, 'The gates come down to them', 'gates', P.clip(V, 'GatesComeDown', 1020, [P.track('Position', [(0, (0, 250, 0)), (400, (0, 120, 0)), (800, (0, 35, 0)), (1020, (0, 0, 0))])]))
+    # Lying open overhead, so that they rise up into the opening.
+    A.model(s, gates, 'The gates', A.gate(V), (0, 30, 3 - 14.3), (90, 0, 0), 2.2, A.mat(V, 'Palette', (1, 1, 1), glow=(1.0, 0.9, 0.6), power=1.3, metallic=0.7, rough=0.3), shadows=False)
+    burst_spin = P.clip(V, 'GlorySpin', 1800, [P.track('Rotation', [(0, (0, 0, 0)), (600, (0, 120, 0)), (1200, (0, 240, 0)), (1800, (0, 359.9, 0))])])
+    A.model(s, P.looping(s, gates, 'Glory', burst_spin, (0, 44, 3)), 'Sunburst', A.sunburst(V), (0, 0, 0), (90, 0, 0), 46.0,
+            A.mat(V, 'Palette', (0, 0, 0), glow=gold, power=1.6, additive=True, both=True), shadows=False)
+    # Denied: the light is gone at a stroke, and what comes down instead is red.
+    no = P.between(s, root, 'Denied', 'denied', 'fell', 0.05)
+    A.glow_card(s, no, V, 'The refusal', (0, 60, 3), 150.0, (1.0, 0.08, 0.03), 3.5, (90, 0, 0))
+    s.light('Refusal', no, (0, 18, 3), 'Point', (1.0, 0.12, 0.06), 7000.0, 70, fog=CIR.FOG)
+    bolt = [(0.0, 60.0), (2.2, 44.0), (-1.4, 33.0), (1.8, 22.0), (-0.9, 13.0), (0.4, 4.5)]
+    for i, ((x0, y0), (x1, y1)) in enumerate(zip(bolt, bolt[1:])):
+        length = math.hypot(x1 - x0, y1 - y0)
+        s.box(f'Bolt {i}', no, ((x0 + x1) / 2, (y0 + y1) / 2, 3.2), (0.3, length + 0.2, 0.3), (1, 0.9, 0.85), rot=(0, 0, math.degrees(math.asin((x0 - x1) / length))),
+              emissive=(1.0, 0.35, 0.25), emissive_intensity=40, shadows=False)
+
+    # 2. The fall. First the shaft under the road: rock streaming upward past the band, embers and
+    # ash racing up, the road a slit of light above and a glow below. Then Dante's nine circles,
+    # one after another (story_afterlife_circles), all the way down: they land only as the song
+    # ends, on the floor under the ninth.
+    fall = P.between(s, P.between(s, root, 'The fall', 'fell', None, 0.0), 'Falling', None, 'landed', 0.3)
     rock_glow = A.mat(V, 'Rock', (1, 1, 1), glow=(0.5, 0.1, 0.03), power=0.5, tiling=None)
     shaft_glow = A.mat(V, 'Rock', (0.6, 0.5, 0.5), glow=(1.0, 0.22, 0.06), power=0.8, tiling=(2, 2))
     # The walls' shape repeats every SHAFT_PERIOD metres, so the loop never jumps.
     wall_clip = P.clip(V, 'ShaftWalls', 80, [P.track('Position', [(0, (0, 0, 0)), (80, (0, A.SHAFT_PERIOD, 0))])])
-    walls = P.looping(s, fall, 'Walls', wall_clip)
-    A.model(s, walls, 'Shaft', A.shaft_walls(V, 15.0, 390.0), (0, 0, 3), (0, 0, 0), 1.0, shaft_glow, shadows=False)
+    # Behind every circle, and all there is between two of them: the same rock, further off.
+    A.model(s, P.looping(s, fall, 'Deep shaft', wall_clip), 'Shaft', A.shaft_walls(V, 15.0, 390.0), (0, 0, 3), (0, 40, 0), (1.9, 1.0, 1.9),
+            A.mat(V, 'Rock', (0.45, 0.4, 0.38), glow=(0.75, 0.4, 0.28), power=1.7, tiling=(3, 2)), shadows=False)
+    # The shaft under the road. It comes up with the road as they go through it (the road was at
+    # their feet; it ends a slit of light far above), and goes on up as the first circle comes.
+    upper = P.gated(s, fall, 'The shaft under the road', CIR.flag(2), False, 1.0, (0, 3 * CIR.travel(1), 3))
+    upper = P.play(s, upper, 'The shaft goes on up', CIR.flag(1), CIR.arrives(V, 1)[1])
+    upper = P.play(s, upper, 'Through the road', 'fell', P.clip(V, 'ThroughTheRoad', 48, [P.track('Position', [(0, (0, -150, 0)), (15, (0, -80, 0)), (30, (0, -30, 0)), (48, (0, 0, 0))])]))
+    A.particles(s, fall, 'Asphalt', (0, 1.0, 3), Shape='Sphere', ShapeRadius=3.5, Lifetime=[0.8, 1.8], Speed=[10, 34], Size=[0.08, 0.3], StartColor=[0.12, 0.12, 0.13],
+                StartColor2=[0.3, 0.28, 0.25], EndColor=[0.05, 0.05, 0.05], Gravity=-1.5, Drag=0.2, NoiseStrength=1.0, Blend='Alpha', Lit=False, EmissionRate=0, BurstCount=140,
+                MaxParticles=160, Looping=False, Duration=30.0)
+    walls = P.looping(s, upper, 'Walls', wall_clip)
+    # (A little wider than it was built, so that no part of it comes inside the Wide camera.)
+    A.model(s, walls, 'Shaft', A.shaft_walls(V, 15.0, 390.0), (0, 0, 3), (0, 0, 0), (1.14, 1.0, 1.14), shaft_glow, shadows=False)
     # Crags off the walls, faster than the walls (nearer): the same few every 24 m.
     ledge_clip = P.clip(V, 'ShaftLedges', 20, [P.track('Position', [(0, (0, 0, 0)), (20, (0, 24, 0))])])
-    ledges = P.looping(s, fall, 'Ledges', ledge_clip)
+    ledges = P.looping(s, upper, 'Ledges', ledge_clip)
     rng = random.Random(11)
     crag = A.spikes(V, 'Crag', 5, 1.4, (2.5, 6.0), 4)
     base = [(rng.uniform(0, 2 * math.pi), rng.uniform(0, 24), rng.uniform(70, 110), rng.uniform(1.0, 2.0)) for _ in range(6)]
     for k in range(-4, 4):
         for a, y, tilt, size in base:
             A.model(s, ledges, 'Crag', crag, (math.sin(a) * 12.5, k * 24 + y, math.cos(a) * 12.5 + 3), (tilt, math.degrees(a) + 180, 0), size, shaft_glow, shadows=False)
-    A.particles(s, fall, 'Embers racing up', (0, -30, 3), Shape='Box', BoxSize=[24, 6, 24], Lifetime=[1.6, 2.6], Speed=[24, 40], Size=[0.04, 0.1],
+    A.particles(s, upper, 'Embers racing up', (0, -30, 3), Shape='Box', BoxSize=[24, 6, 24], Lifetime=[1.6, 2.6], Speed=[24, 40], Size=[0.04, 0.1],
                 StartColor=[1.0, 0.7, 0.3], StartColor2=[1.0, 0.35, 0.08], EndColor=[1.0, 0.2, 0.03], Intensity=6.0, Gravity=0.0, Drag=0.0, NoiseStrength=1.5,
                 NoiseFrequency=0.4, Blend='Additive', EmissionRate=110, MaxParticles=320, Alignment='Stretched', StretchFactor=0.06, FadeIn=0.05)
-    A.particles(s, fall, 'Smoke racing up', (0, -30, 3), Shape='Box', BoxSize=[22, 4, 22], Lifetime=[2.2, 3.2], Speed=[18, 26], Size=[2.0, 4.0], EndSize=1.6,
+    A.particles(s, upper, 'Smoke racing up', (0, -30, 3), Shape='Box', BoxSize=[22, 4, 22], Lifetime=[2.2, 3.2], Speed=[18, 26], Size=[2.0, 4.0], EndSize=1.6,
                 StartColor=[0.25, 0.08, 0.04], StartColor2=[0.1, 0.06, 0.05], EndColor=[0.06, 0.05, 0.05], StartAlpha=0.22, EndAlpha=0.0, Gravity=0.0, Drag=0.0,
                 NoiseStrength=0.8, Blend='Alpha', EmissionRate=14, MaxParticles=60, Texture=A.tex(V, 'Puff'), FadeIn=0.2)
     ash_clip = P.clip(V, 'AshRising', 30, [P.track('Position', [(0, (0, 0, 0)), (30, (0, 10, 0))])])
-    ash = P.looping(s, fall, 'Ash', ash_clip)
+    ash = P.looping(s, upper, 'Ash', ash_clip)
     flakes = [(rng.uniform(0, 2 * math.pi), rng.uniform(2.5, 12), rng.uniform(0, 10), rng.uniform(0, 90), rng.uniform(0, 90)) for _ in range(22)]
     for copy in range(-3, 3):
         for a, r, y, rx, ry in flakes:
             s.box('Ash', ash, (math.sin(a) * r, copy * 10 + y, math.cos(a) * r + 3), (0.05, 0.05, 0.05), (0.5, 0.48, 0.45),
                   emissive=(0.5, 0.25, 0.15), emissive_intensity=2.0, shadows=False, rot=(rx, ry, 0))
-    s.box('The road, far above', fall, (0, 150, 3), (9, 0.5, 0.5), WHITE, emissive=(1, 0.95, 0.85), emissive_intensity=30, shadows=False)
-    A.model(s, fall, 'The road, its glow', A.light_card(V), (0, 149, 3), (-90, 0, 0), (26, 7, 1), A.mat(V, 'Glow', (0, 0, 0), glow=(0.9, 0.92, 1.0), power=3.0, additive=True, both=True), shadows=False)
-    s.light('Slit light', fall, (0, 70, 3), 'Spot', (0.85, 0.9, 1.0), 60000.0, 110, rot=(90, 0, 0), inner=5, outer=11)
-    s.light('Pit glow', fall, (0, -14, 3), 'Point', (1.0, 0.3, 0.08), 2600.0, 40)
+    s.box('The road, far above', upper, (0, 150, 3), (9, 0.5, 0.5), WHITE, emissive=(1, 0.95, 0.85), emissive_intensity=30, shadows=False)
+    A.model(s, upper, 'The road, its glow', A.light_card(V), (0, 149, 3), (-90, 0, 0), (26, 7, 1), A.mat(V, 'Glow', (0, 0, 0), glow=(0.9, 0.92, 1.0), power=3.0, additive=True, both=True), shadows=False)
+    s.light('Slit light', upper, (0, 70, 3), 'Spot', (0.85, 0.9, 1.0), 60000.0, 110, rot=(90, 0, 0), inner=5, outer=11)
+    s.light('Pit glow', upper, (0, -14, 3), 'Point', (1.0, 0.3, 0.08), 2600.0, 40)
+    A.glow_card(s, upper, V, 'The pit', (0, -70, 3), 60.0, (1.0, 0.22, 0.03), 3.0, (90, 0, 0))
     for i, x in enumerate((-3.0, 3.0)):
-        s.light(f'Fall wash {i}', fall, (x, -7, -1), 'Spot', (1.0, 0.35, 0.1), 1500.0, 22, rot=look_rotation((x, -7, -1), (x * 0.4, 1.5, 3.5)), inner=22, outer=42, show='Wash', group=i)
-        s.light(f'Fall wash {i + 2}', fall, (x * 0.5, 12, -2), 'Spot', (0.75, 0.82, 1.0), 1500.0, 24, rot=look_rotation((x * 0.5, 12, -2), (x * 0.3, 1.5, 3.5)), inner=18, outer=36, show='Wash', group=i + 2)
-    A.glow_card(s, fall, V, 'The pit', (0, -70, 3), 60.0, (1.0, 0.22, 0.03), 3.0, (90, 0, 0))
+        s.light(f'Fall wash {i}', fall, (x, -7, -1), 'Spot', (1.0, 0.35, 0.1), 1500.0, 22, rot=look_rotation((x, -7, -1), (x * 0.4, 1.5, 3.5)), inner=22, outer=42, show='Wash', group=i, fog=CIR.FOG)
+        s.light(f'Fall wash {i + 2}', fall, (x * 0.5, 12, -2), 'Spot', (0.75, 0.82, 1.0), 1500.0, 24, rot=look_rotation((x * 0.5, 12, -2), (x * 0.3, 1.5, 3.5)), inner=18, outer=36, show='Wash', group=i + 2, fog=CIR.FOG)
+    CIR.build(s, fall, V)
 
     # 3. Hell.
     h = P.between(s, root, 'Hell', 'landed', None, 0.4)
     C = (0.0, 0.0, 2.0)                       # the arena's centre
     steps, rise, run, z0 = 12, 0.75, 1.5, -7.0
+    CAVERN = 64.0                             # its radius: room for the nine tiers of the stands
     top_y = steps * rise
     zt = z0 - steps * run
-    A.model(s, h, 'Cavern', A.cavern(V, (0.0, 0.0, -6.0), 60.0, 44.0), (0, 0, 0), (0, 0, 0), 1.0, A.mat(V, 'Rock', (1, 1, 1), glow=(0.55, 0.09, 0.03), power=0.2), shadows=False)
+    A.model(s, h, 'Cavern', A.cavern(V, (0.0, 0.0, -6.0), CAVERN, 44.0), (0, 0, 0), (0, 0, 0), 1.0, A.mat(V, 'Rock', (1, 1, 1), glow=(0.55, 0.09, 0.03), power=0.2), shadows=False)
     A.model(s, h, 'Lava lake', A.lava(V, 160.0), (0, -1.9, -6), (0, 0, 0), 1.0, A.mat(V, 'Lava', (0.2, 0.05, 0.02), glow=(1, 1, 1), power=2.0), shadows=False)
     drift = P.clip(V, 'LavaDrift', 900, [P.track('Position', [(0, (0, 0, 0)), (450, (9, 0, 6)), (900, (0, 0, 0))], 'SmoothStep')])
     A.model(s, P.looping(s, h, 'Lava shimmer', drift), 'Lava crust', A.lava(V, 160.0), (3, -1.86, -9), (0, 37, 0), 1.3,
@@ -847,12 +936,12 @@ def hell():
     for i in range(26):
         a, r = rng.uniform(0, 2 * math.pi), rng.uniform(6, 46)
         x, z = math.cos(a) * r, -6 + math.sin(a) * r
-        roof = -6 + 50 * math.sqrt(max(0.0, 1 - min(1.0, (r / 60.0) ** (1 / 0.75)) ** 2))
+        roof = -6 + 50 * math.sqrt(max(0.0, 1 - min(1.0, (r / CAVERN) ** (1 / 0.75)) ** 2))
         A.model(s, h, 'Stalactites', (stal_a, stal_b)[i % 2], (x, roof + 2, z), (180, rng.uniform(0, 360), 0), rng.uniform(1.6, 3.2), rock_glow, shadows=False)
     for i in range(22):
         a, r = rng.uniform(0, 2 * math.pi), rng.uniform(24, 50)
         x, z = math.cos(a) * r, -6 + math.sin(a) * r
-        if abs(x) < 13 and -44 < z < -4 or math.hypot(x - C[0], z - C[2]) < 32 and z > -6 and abs(x) > 12:
+        if abs(x) < 13 and -44 < z < -4 or math.hypot(x - C[0], z - C[2]) < 45 and z > -22 and abs(x) > 12:
             continue
         A.model(s, h, 'Spires', (stal_a, stal_b)[i % 2], (x, -2.5, z), (0, rng.uniform(0, 360), 0), rng.uniform(1.5, 4.2), rock_glow, shadows=False)
     for i in range(16):
@@ -881,7 +970,7 @@ def hell():
                     Blend='Additive', EmissionRate=9, MaxParticles=30, Alignment='Stretched', StretchFactor=0.08, FadeIn=0.02)
         s.light('Brazier light', h, (top[0], top[1] + 0.8, top[2]), 'Point', (1.0, 0.45, 0.15), 240.0, 13)
     # Fire out of the lake, and the jets that go up on the big moments.
-    for i, (x, z, size) in enumerate(((-30, -22, 3.0), (31, -18, 2.6), (-36, 14, 2.4), (37, 20, 3.2), (-12, -44, 3.4), (13, -45, 3.0))):
+    for i, (x, z, size) in enumerate(((-30, -24, 3.0), (31, -24, 2.6), (-47, 6, 2.4), (47, 12, 3.2), (-12, -44, 3.4), (13, -45, 3.0))):
         fire(s, h, V, (x, -1.6, z), size, 700.0, smoke=False, name=f'Lake fire {i}')
     for i, (x, z) in enumerate(((-11.5, -5.5), (11.5, -5.5), (-13.5, 9.5), (13.5, 9.5))):
         jet = A.particles(s, h, f'Fire jet {i}', (x, 0.2, z), Shape='Cone', ConeAngle=6, ShapeRadius=0.25, Lifetime=[0.5, 0.9], Speed=[16, 24], Size=[0.7, 1.3], EndSize=0.4,
@@ -979,21 +1068,35 @@ def hell():
         yaw = math.degrees(math.atan2(-at[0], DRUMMER[1] - 1.5 - at[2])) + rng.uniform(-20, 20)
         b, _ = bodies[i % len(bodies)]
         demon(h, at, yaw, b, ('cheer', 'fists', 'stand')[rng.randrange(3)])
+    # The stands: nine tiers, one for each circle they fell through, the first circle's at the top.
+    # The three by the floor are demons like the floor's; above them each tier's crowd is three
+    # blocks of one mesh each (bobbing out of step), and every tier's torches burn its circle's colour.
     for side in (-1, 1):
-        for k, (r0, y) in enumerate(tiers):
+        for k, (r0, y, arc0, arc1) in enumerate(tiers):
             n = 12 + 3 * k
+            spots = []
             for i in range(n):
-                deg = A.TERRACE_ARC[0] + 6 + (A.TERRACE_ARC[1] - A.TERRACE_ARC[0] - 12) * (i + rng.uniform(0.1, 0.9)) / n
-                at = A.terrace_point(C, side, r0 + rng.uniform(0.7, 3.2), deg, y)
+                deg = arc0 + 6 + (arc1 - arc0 - 12) * (i + rng.uniform(0.1, 0.9)) / n
+                at = A.terrace_point(C, side, r0 + rng.uniform(0.5, 2.0), deg, y)
                 yaw = math.degrees(math.atan2(C[0] - at[0], C[2] + 1.5 - at[2])) + rng.uniform(-15, 15)
-                b, _ = bodies[(i + k) % len(bodies)]
-                demon(h, at, yaw, b, ('cheer', 'fists', 'cheer', 'stand')[rng.randrange(4)], turns=False, scale=1.0 + 0.12 * k)
-            # Torches along each tier.
-            for deg in (-60, -20, 20):
-                at = A.terrace_point(C, side, r0 + 4.0, deg, y)
+                if k < 3:
+                    b, _ = bodies[(i + k) % len(bodies)]
+                    demon(h, at, yaw, b, ('cheer', 'fists', 'cheer', 'stand')[rng.randrange(4)], turns=False, scale=1.0 + 0.12 * k)
+                else:
+                    spots.append((at, yaw))
+            for j in range(3 if spots else 0):
+                block = CIR.stands_crowd(V, f'Stands_{k}_{0 if side < 0 else 1}_{j}', spots[j::3], 1.3 + 0.07 * k, 500 + k * 10 + j + (side > 0) * 5)
+                A.model(s, P.looping(s, h, f'Tier {k + 1} crowd', bounce[(j + k) % 3], speed=0.85 + 0.07 * ((j * 3 + k) % 5)), 'Demons', block, (0, 0, 0), (0, 0, 0), 1.0,
+                        A.mat(V, 'Palette', (1, 1, 1), glow=(1.0, 0.45, 0.25), power=0.45), shadows=False)
+            # Torches along each tier, their flames its circle's colour (the three tiers by the floor are lit by theirs).
+            colour = CIR.tier_colour(k)
+            flame_mat = A.mat(V, 'Palette', (0, 0, 0), glow=(0.25 + 0.75 * colour[0], 0.25 + 0.75 * colour[1], 0.25 + 0.75 * colour[2]), power=6.0, additive=True, both=True)
+            for deg in ((-60, -20, 20) if k < 3 else (arc0 + 14, arc1 - 10)):
+                at = A.terrace_point(C, side, r0 + A.TIER_STEP - 0.25, deg, y)
                 s.box('Torch pole', h, (at[0], y + 1.3, at[2]), (0.1, 2.6, 0.1), (0.1, 0.08, 0.06), shape='Cylinder', shadows=False)
-                A.model(s, h, 'Torch flame', A.flame(V), (at[0], y + 2.6, at[2]), (0, deg, 0), (0.6, 1.1, 0.6), A.mat(V, 'Palette', (0, 0, 0), glow=(1.0, 0.5, 0.12), power=6.0, additive=True, both=True), shadows=False)
-                s.light('Torch light', h, (at[0], y + 3.2, at[2]), 'Point', (1.0, 0.45, 0.15), 170.0, 12)
+                A.model(s, h, 'Torch flame', A.flame(V), (at[0], y + 2.6, at[2]), (0, deg, 0), (0.6, 1.1, 0.6) if k < 3 else (1.0, 2.0, 1.0), flame_mat, shadows=False)
+                if k < 3:
+                    s.light('Torch light', h, (at[0], y + 3.2, at[2]), 'Point', (1.0, 0.45, 0.15), 170.0, 12)
     # The demon on the steps who catches a fill.
     step3 = (1.4, 3 * rise, z0 - 2.5 * run)
     catch = P.figure(V, 'Demon_catch', 'Daughter_01', '01_C', P.CROUCH_CATCH, 'the demon catching a fill')
@@ -1025,7 +1128,12 @@ def hell():
          end=(beside_hand(hand, 180, 2.0, 1.8, 1.0), (hand[0] + 0.3, 1.1, hand[2] + 0.2), 42))
     shot(s, marks, 'crash_survey', (-11.5, 1.25, -15.5), (-6.5, 1.3, -8.5), 38, 8, hand=True,
          via=[((-9.5, 1.5, -11.0), (4.0, 1.2, 2.0), 42)], end=((-4.5, 2.3, -9.5), (10.5, 2.0, 5.5), 46))
-    shot(s, marks, 'the_slit', (0.9, 1.1, 1.6), (0, 30, 3.4), 64, 8, hand=True, end=((0.5, 1.4, 2.4), (0, 148, 3), 26))
+    # The tease: down past the drummer to the cop as the road drops away; up into the light; the
+    # gates overhead; then straight down at the Earth coming back.
+    shot(s, marks, 'ascent', (1.6, 5.5, 1.0), (kneel_at[0], -5, kneel_at[2]), 50, 10, hand=True, end=((1.0, 8.0, 0.5), (kneel_at[0], -40, kneel_at[2]), 40))
+    shot(s, marks, 'heavens_light', (-3.5, 0.8, -2.5), (0.5, 12, 4), 52, 9, end=((-2.5, 1.2, -4.0), (0, 40, 3), 60))
+    shot(s, marks, 'gates', (0.9, 1.1, 1.6), (0, 60, 3), 60, 9, hand=True, end=((0.5, 1.4, 2.4), (0, 120, 3), 40))
+    shot(s, marks, 'denied', (1.5, 9.0, -3.0), (0, -80, 3), 72, PLUNGE, hand=True, end=((1.0, 6.0, -2.0), (0, -30, 3), 80))
     shot(s, marks, 'hell_wide', (27, 21, 27), (0, 5, -10), 58, 12, via=[((35, 19, 6), (0, 6, -14), 60)], end=((24, 13, -15), (-2, 8, -24), 62))
     shot(s, marks, 'cavern_orbit', (7.0, 1.3, 10.8), (0, 4.5, -12), 40, 10, via=[((0.5, 1.0, 12.5), (0, 5.0, -14), 42)], end=((-7.0, 1.8, 10.8), (0, 5.5, -16), 44))
     shot(s, marks, 'ghosts_stand', (-6.5, 0.5, -3.5), (0.5, 1.2, 3.4), 40, 11,
@@ -1034,9 +1142,22 @@ def hell():
     shot(s, marks, 'cop_runs', (-8.6, 1.0, -1.5), (car_door[0], 1.1, car_door[2]), 40, 3.2, hand=True, end=((-4.4, 1.3, 3.0), (kneel_at[0], 0.8, kneel_at[2]), 44))
     shot(s, marks, 'cop_kneels', (-3.2, 0.55, DRUMMER[1] - 0.6), (0.2, 1.3, DRUMMER[1] + 0.9), 38, 7, hand=True, focus=True,
          end=((-3.0, 0.8, kneel_at[2] - 1.6), (kneel_at[0] + 0.3, 0.7, kneel_at[2]), 30))
-    shot(s, marks, 'fell', (1.5, 0.6, -1.0), (0, 1.4, 4.0), 60, 8, hand=True, via=[((1.3, 0.8, -1.2), (0, 30, 4.5), 74)], end=((1.0, 1.0, -1.4), (0, 140, 3.2), 50))
+    shot(s, marks, 'fell', (1.5, 0.6, -1.0), (0, 1.4, 4.0), 60, 6, hand=True, via=[((1.3, 0.8, -1.2), (0, 30, 4.5), 74)], end=((1.0, 1.0, -1.4), (0, 140, 3.2), 50))
     shot(s, marks, 'tumbling', (-3.6, 2.0, 0.6), (-2.0, 1.6, 2.6), 42, 7, hand=True, focus=True, via=[((-5.5, 3.5, -4.0), (0, 1.5, 3.5), 52)],
          end=((0.0, 9.0, -8.0), (0, 0.5, 3.6), 62))
+    # The circles: no cut as one comes (the swap is the show); a slow look round at what stands on
+    # its ledges once it is about them (in_circle_<k>, TRAVEL seconds or so after its flag).
+    for k, (eye, target, fov, end) in enumerate((
+            ((-2.5, 4.0, -5.0), (1, 0, 10), 60, ((-5.5, 2.4, -5.5), (2.5, 3.0, 13), 54)),
+            ((4.6, 2.6, -3.0), (0, 1.8, 3.8), 64, ((-1.5, 2.2, -5.4), (0.3, 2.0, 4.0), 62)),
+            ((-2.8, 1.6, -5.2), (0.3, 0, 14), 58, ((-2.2, 2.6, -5.6), (0, 8, 14), 56)),
+            ((5.5, 3.5, -3.5), (-2, -3, 11), 60, ((5.6, 1.6, -4.6), (-4.5, 1.0, 14), 54)),
+            ((-5.8, 1.6, -2.6), (4, -2, 13), 60, ((-3.6, 3.4, -5.6), (2.5, 4.5, 14), 54)),
+            ((0.4, 5.0, -5.5), (0, -2, 10), 62, ((0, 3.0, -7.4), (0, 3.0, 14), 58)),
+            ((2.0, 2.4, -6.2), (-1, -2, 13), 58, ((-3.0, 3.8, -6.0), (1.0, 0.5, 12), 56)),
+            ((-5.6, 3.6, -3.2), (2, -3, 11), 60, ((-5.4, 1.8, -4.8), (4.5, 1.5, 14), 54)),
+            ((2.5, 4.4, -5.8), (0, 0, 11), 62, ((4.4, 2.2, -6.4), (-2.5, 6.0, 15), 56))), 1):
+        shot(s, marks, f'in_circle_{k}', eye, target, fov, 10, end=end)
     shot(s, marks, 'landed', (1.1, 0.3, 2.2), (0.0, 0.42, 4.2), 44, 4, focus=True, end=((1.6, 0.45, 1.2), (0.0, 0.6, 4.2), 50))
     shot(s, marks, 'stairs_reveal', (0.6, 0.5, -2.6), (0, 1.6, z0 - 3), 46, 13,
          via=[((1.2, 3.2, z0 - 3.0), (-1.0, 5.2, z0 - 8.0), 48), ((-1.2, top_y - 1.0, zt + 6.5), (0, top_y + 3.0, zt - 5.0), 44),
@@ -1316,24 +1437,9 @@ def heaven():
     gaze_from = (0, top_y + 15, zt - 26)
     s.light('Gaze', turn, gaze_from, 'Spot', (1, 0.95, 0.75), 9000.0, 90, rot=look_rotation(gaze_from, (0, 1.2, 5.2)), inner=5, outer=12)
 
-    # Earth, far off in the same scene (beyond the sky): the crash site at night, the rescue.
-    E = (1600.0, 0.0, 0.0)
-    earth_root = s.group('Earth', root)
-    # Slow motion (the fire, the lights, the compressions) until the drummer wakes.
-    earth = P.slow_motion(s, earth_root, 'Slow motion', 'resurrection', 0.25)
-    road(s, earth, V, E[0] - 14, E[0] + 14, E[2] - 70, E[2] + 70)
-    roadside(s, earth, V, E, 70.0, 14.0, torn_z=E[2] + 10.0)
-    A.model(s, earth, 'Mile marker', A.sign_face(V, 'MileMarker'), (E[0] + 15.6, 1.6, E[2] + 20), (0, 180, 0), (0.45, 0.6, 1), A.mat(V, 'MileMarker', glow=(1, 1, 1), power=0.5), shadows=False)
-    s.box('Mile marker post', earth, (E[0] + 15.6, 0.5, E[2] + 20.04), (0.08, 1.0, 0.05), STEEL)
-    cruiser(s, earth, V, (E[0] - 7.5, 0, E[2] - 9), 24, door_open=True)
-    # The cop kneels at the drummer's chest (the body lies at yaw 200 from its feet at (-1, 1)), facing across it.
-    cop_at = (-1.26, 110, 2.48)
-    hand = crash_site(s, earth, V, (E[0], 0, E[2] + 6), {'wake': 'resurrection', 'cop': None, 'nod': 'cop_nod_final'}, cop=cop_at, ems=True, wreck_at=(4.0, 0, -2.0))
-    cop_eye = (E[0] + cop_at[0], 1.0, E[2] + 6 + cop_at[2])
-    for i, (x, z, yaw) in enumerate(((-9.5, -20, 20), (-3.0, -24, -30), (4.5, -22, 60), (-12.0, 12, 80))):
-        A.flare(s, earth, V, f'Flare {i}', (E[0] + x, 0, E[2] + z), yaw)
-    ground_fog(s, earth, V, (E[0], 0.5, E[2]), (46, 1.0, 60), 12)
-    s.light('Earth moon', earth, (E[0], 30, E[2] - 10), 'Spot', (0.4, 0.48, 0.75), 9000.0, 70, rot=(80, 0, 0), inner=35, outer=65)
+    # Earth, far off in the same scene (beyond the sky): the rescue, a place for each cut to it
+    # (story_afterlife_rescue), with its own shots.
+    RES.build(s, root, marks, V, sys.modules[__name__])
 
     # A few more places to shoot the show from.
     s.camera_spot('Camera behind the band', marks, (5.2, 2.6, 10.5), (0, top_y - 2, zt - 6), 'Custom', 44, 'behind')
@@ -1364,52 +1470,9 @@ def heaven():
     shot(s, marks, 'sticks_close', (2.5, 5, -3), (0, 1.2, 4.6), 44, 20, focus=True, via=[((1.2, 1.9, 2.6), (0, 1.0, 4.4), 36)],
          end=((0.45, 1.05, DRUMMER[1] - 1.9), (0.0, 0.85, DRUMMER[1] - 1.3), 34))
     shot(s, marks, 'drum_open', (0.9, 1.4, DRUMMER[1] - 2.0), (0, 1.1, DRUMMER[1] - 0.6), 36, 7, focus=True, end=((-1.3, 1.6, DRUMMER[1] - 2.4), (0, 1.25, DRUMMER[1] - 0.3), 40))
-    cop_head = add3((cop_eye[0], 0, cop_eye[2]), P_rot((0, 0.95, 0.45), cop_at[1]))      # he leans over the drummer as he pumps
-    cop_hands = add3((cop_eye[0], 0, cop_eye[2]), P_rot((0, 0.3, 0.75), cop_at[1]))
-    shot(s, marks, 'cpr', (cop_hands[0] + 0.9, 0.3, cop_hands[2] - 1.5), cop_hands, 34, 8, hand=True, focus=True,
-         end=((cop_eye[0] + 1.5, 0.75, cop_eye[2] - 1.0), (cop_eye[0], 1.0, cop_eye[2]), 30))
-    shot(s, marks, 'earth_wide', (E[0] - 6.5, 0.9, E[2] - 4.0), (E[0] + 2.0, 1.2, E[2] + 9), 44, 8, end=((E[0] - 5.0, 1.6, E[2] - 6.0), (E[0] + 2.5, 1.0, E[2] + 9), 38))
-    shot(s, marks, 'cpr_close', (cop_head[0] + 1.5, 0.8, cop_head[2] + 0.75), cop_head, 22, 5, hand=True, focus=True,
-         end=((cop_head[0] + 1.35, 0.85, cop_head[2] + 0.55), cop_head, 17))
-    # More of Earth through the song: the medics at the others, the road, the cop, the whole site.
-    site = (E[0], 0.0, E[2] + 6)
-
-    def on_site(x, y, z):
-        return (site[0] + x, y, site[2] + z)
-
-    def chest(who):
-        return beside_chest(LYING[who], 0, 0.0)[0]
-    medic = {who: beside_chest(LYING[who], side)[0] for who, side in MEDICS}
-    gc, gm = chest('guitar'), medic['guitar']
-    feet = LYING['guitar']
-    # From past the guitar player's feet, low: the medic over them, the ambulance's lights behind.
-    shot(s, marks, 'earth_medics', on_site(feet[0] + (feet[0] - gc[0]) * 0.9 + 0.5, 0.45, feet[1] + (feet[1] - gc[1]) * 0.9), on_site(gm[0], 0.85, gm[1]), 40, 6, hand=True, focus=True,
-         end=(on_site(feet[0] + (feet[0] - gc[0]) * 0.5 + 0.4, 0.6, feet[1] + (feet[1] - gc[1]) * 0.5), on_site(gm[0], 0.9, gm[1]), 36))
-    # Along the asphalt from out beyond the drummer's still hand and the stick: the cop working past them.
-    shot(s, marks, 'earth_road', add3(hand, P_rot((1.5, 0.12, 0.5), LYING['drummer'][2])), (hand[0], 0.1, hand[2]), 38, 6, focus=True,
-         end=(add3(hand, P_rot((1.15, 0.2, 0.1), LYING['drummer'][2])), (hand[0], 0.1, hand[2]), 34))
-    # Up the drummer's body from beyond their head at the cop, working.
-    dc = chest('drummer')
-    df = LYING['drummer']
-    beyond = add3(on_site(df[0] + (dc[0] - df[0]) * 2.9, 0.55, df[1] + (dc[1] - df[1]) * 2.9), P_rot((-0.7, 0, 0), df[2]))
-    shot(s, marks, 'earth_cop', beyond, cop_head, 36, 7, hand=True, focus=True, end=(add3(beyond, P_rot((-0.5, 0.15, 0.3), df[2])), cop_head, 30))
-    # High over the shoulder, coming down: every one of them with somebody at their side.
-    shot(s, marks, 'earth_high', on_site(-2.5, 13.0, -9.0), on_site(-0.5, 0.0, 1.5), 56, 8, end=(on_site(-1.5, 7.5, -5.5), on_site(-0.8, 0.3, 1.5), 50))
-    # The bass player by the fire, the medic between the lens and the flames.
-    bc, bm = chest('bass'), medic['bass']
-    shot(s, marks, 'earth_bass', on_site(bc[0] + (bm[0] - bc[0]) * 4.2 + 1.8, 0.9, bc[1] + (bm[1] - bc[1]) * 4.2), on_site(bc[0], 0.5, bc[1]), 40, 6, hand=True, focus=True,
-         end=(on_site(bc[0] + (bm[0] - bc[0]) * 3.4 + 1.5, 0.75, bc[1] + (bm[1] - bc[1]) * 3.4), on_site(bc[0], 0.5, bc[1]), 36))
-    # Over the cop's shoulder, down at the drummer's face.
-    face_down = on_site(df[0] + (dc[0] - df[0]) * 1.22, 0.22, df[1] + (dc[1] - df[1]) * 1.22)
-    shot(s, marks, 'earth_shoulder', add3((cop_eye[0], 0, cop_eye[2]), P_rot((0.75, 1.75, -1.6), cop_at[1])), face_down, 40, 7, hand=True, focus=True,
-         end=(add3((cop_eye[0], 0, cop_eye[2]), P_rot((0.6, 1.6, -1.2), cop_at[1])), face_down, 34))
     shot(s, marks, 'god_descends', (3.2, top_y + 1.6, zt + 2.5), (0, top_y + 3.2, zt - 13), 40, 8, via=[((6.5, top_y * 0.6, z0 - 4), (0, top_y * 0.6 + 2.5, zt + 4), 46)],
          end=((5.5, 1.6, 0.5), (0, 2.6, -4.5), 44))
     shot(s, marks, 'angels_part', (1.2, 1.7, 7.4), (0, 4, -4), 46, 8, via=[((0.5, 3.0, 2.0), window, 40)], end=((0, top_y + 5.5, zt - 9), window, 30))
-    shot(s, marks, 'resurrection', (hand[0] - 0.9, 1.3, hand[2] - 1.8), (hand[0] + 0.4, 0.2, hand[2] + 0.4), 40, 9, focus=True,
-         end=(beside_hand(hand, 200, 0.95, 0.6, 0.12), (hand[0], 0.05, hand[2]), 28))
-    shot(s, marks, 'cop_nod_final', (cop_head[0] + 1.3, 0.7, cop_head[2] - 1.9), cop_head, 30, 30, focus=True,
-         end=((cop_head[0] + 1.0, 0.8, cop_head[2] - 1.4), cop_head, 22))
     write(s, V, 'Heaven')
 
 

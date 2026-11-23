@@ -987,6 +987,7 @@ void VenueData::Save( json& outJson ) const
     outJson = json::object();
     if( !m_lighting.empty() ) SaveCues( m_lighting, outJson["Lighting"] );
     if( !m_sections.empty() ) SaveCues( m_sections, outJson["Sections"] );
+    if( !m_story.empty() ) SaveCues( m_story, outJson["Story"] );
     if( !m_crowd.empty() ) SaveCues( m_crowd, outJson["Crowd"] );
     if( !m_keyframes.empty() )
     {
@@ -1085,6 +1086,7 @@ void VenueData::Load( const json& inJson )
 {
     LoadCues( inJson, "Lighting", m_lighting );
     LoadCues( inJson, "Sections", m_sections );
+    LoadCues( inJson, "Story", m_story );
     LoadCues( inJson, "Crowd", m_crowd );
     const auto rows = [&inJson]( const char* inKey ) -> const json* {
         return inJson.contains( inKey ) && inJson[inKey].is_array() ? &inJson[inKey] : nullptr;

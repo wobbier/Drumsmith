@@ -2130,6 +2130,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             bool hand = false;
             bool aerial = false;
             bool lights = false;
+            float ride = 0.f;
+            float sky = -1.f;
             float seconds = -1.f;
             float focus = 0.f;
             int via = -1;
@@ -2143,6 +2145,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
                 else if( part == "hand" ) hand = true;
                 else if( part == "heli" ) aerial = true;
                 else if( part == "lights" ) lights = true;
+                else if( part.compare( 0, 3, "sky" ) == 0 && part.size() > 3 ) sky = static_cast<float>( std::atof( part.c_str() + 3 ) );
+                else if( part.compare( 0, 4, "ride" ) == 0 ) ride = part.size() > 4 ? static_cast<float>( std::atof( part.c_str() + 4 ) ) : 1.f;
                 else if( part[0] == 'w' && numbered ) via = std::atoi( part.c_str() + 1 );
                 else if( part[0] == 'f' && numbered ) focus = static_cast<float>( std::atof( part.c_str() + 1 ) );
                 else if( !part.empty() && ( std::isdigit( static_cast<unsigned char>( part[0] ) ) || part[0] == '.' ) ) seconds = static_cast<float>( std::atof( part.c_str() ) );
@@ -2163,6 +2167,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             shot.Handheld = hand;
             shot.Aerial = aerial;
             shot.Lights = lights;
+            shot.Ride = ride;
+            shot.Sky = sky;
             shot.FocusFrom = focus;
             if( seconds > 0.f ) hold = seconds;
         }
@@ -2395,6 +2401,8 @@ void Director::Update( double inSeconds, float inDeltaTime )
                 plan.Handheld = shot.Handheld;
                 plan.Aerial = shot.Aerial;
                 plan.Lights = shot.Lights;
+                plan.Ride = shot.Ride;
+                plan.Sky = shot.Sky;
                 plan.Blur = shot.FocusFrom > 0.f || shot.FocusTo > 0.f ? 11.f : 0.f;
                 plan.Static = true;
                 index = -6 - static_cast<int>( i );
@@ -2575,6 +2583,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
         }
     }
     m_shotLights = plan.Lights;
+    m_shotSky = plan.Sky;
     // From a helicopter (a story shot tagged "heli"): an operator in the door on a long lens.
     // The aim hunts for the subject and overshoots, the airframe buzzes through the picture, the
     // horizon rolls with the aircraft, and the zoom breathes and now and then punches in.
@@ -2605,7 +2614,9 @@ void Director::Update( double inSeconds, float inDeltaTime )
     // on. A fine buzz, the slow heave and lean of the suspension, and every second or so a joint
     // in the road: a knock that drops the picture and rings out.
     m_ride += ( m_rideTarget - m_ride ) * ( 1.f - std::exp( -dt * 3.f ) );
-    if( m_ride > 0.01f && !bolted && !plan.Aerial )
+    // A story shot's own ride ("ride") is there from its first frame: it is a cut.
+    const float ride = std::max( m_ride, plan.Ride );
+    if( ride > 0.01f && !bolted && !plan.Aerial )
     {
         const float reach = std::clamp( ( target - eye ).Length(), 1.f, 60.f );
         const float slot = t / 0.87f;
@@ -2615,13 +2626,13 @@ void Director::Update( double inSeconds, float inDeltaTime )
         const float bump = size > 0.35f ? ( size - 0.35f ) * 1.5f * std::exp( -since * 8.f ) * std::sin( since * 34.f ) : 0.f;
         eye = eye + Vector3( 0.006f * Wander( t * 31.f, 20u ) + 0.03f * Wander( t * 0.8f, 25u ),
                              0.007f * Wander( t * 37.f, 21u ) + 0.035f * Wander( t * 1.3f, 23u ) + 0.015f * Wander( t * 3.7f, 24u ) - 0.05f * bump,
-                             0.004f * Wander( t * 29.f, 22u ) ) * m_ride;
+                             0.004f * Wander( t * 29.f, 22u ) ) * ride;
         target = target + Vector3( 0.0022f * Wander( t * 27.f, 26u ) + 0.004f * Wander( t * 2.1f, 46u ),
-                                   0.0028f * Wander( t * 33.f, 27u ) + 0.005f * Wander( t * 1.7f, 47u ) + 0.012f * bump, 0.f ) * ( reach * m_ride );
+                                   0.0028f * Wander( t * 33.f, 27u ) + 0.005f * Wander( t * 1.7f, 47u ) + 0.012f * bump, 0.f ) * ( reach * ride );
         const Vector3 across = ( target - eye ).Normalized().Cross( up );
         if( across.Length() > 1e-3f )
         {
-            const float roll = ( 0.6f * Wander( t * 1.1f, 48u ) + 0.25f * Wander( t * 4.3f, 49u ) + 0.12f * Wander( t * 23.f, 50u ) + 0.7f * bump ) * m_ride * kPi / 180.f;
+            const float roll = ( 0.6f * Wander( t * 1.1f, 48u ) + 0.25f * Wander( t * 4.3f, 49u ) + 0.12f * Wander( t * 23.f, 50u ) + 0.7f * bump ) * ride * kPi / 180.f;
             up = ( up + across.Normalized() * std::tan( roll ) ).Normalized();
         }
     }

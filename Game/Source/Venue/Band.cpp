@@ -225,6 +225,13 @@ void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vecto
         outRotation.y += settle * ( inIndex % 2 == 0 ? 1.f : -1.f ) * 40.f * t / ( 1.f + t * 0.2f );
         outRotation.z += settle * 40.f * std::cos( t * 0.7f + phase );
         outPosition = outPosition + Vector3( settle * 1.4f * std::sin( t * 0.5f + phase ), 1.2f + settle * 1.5f * std::sin( t * 0.8f + phase * 2.f ), settle * 1.f * std::cos( t * 0.6f + phase ) );
+        // A long fall (Free Bird's, down through the circles) never comes to rest: once they
+        // have their places they still ride the air, each a little out of step with the others.
+        const float riding = 1.f - settle;
+        outPosition.y += riding * 0.22f * std::sin( t * 0.7f + phase );
+        outPosition.x += riding * 0.12f * std::sin( t * 0.31f + phase * 1.3f );
+        outRotation.x += riding * 3.5f * std::sin( t * 0.45f + phase );
+        outRotation.z += riding * 4.f * std::cos( t * 0.38f + phase );
         break;
     }
     case StoryPose::Rising:
@@ -236,6 +243,14 @@ void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vecto
         // On their backs where they stand, the drummer and kit tipped over with them.
         outRotation.x += inIndex == VenueData::Drums ? -70.f : -86.f;
         outPosition.y += 0.18f;
+        break;
+    case StoryPose::Aloft:
+        // Lifted off the ground with everything they play, and riding the air there (what
+        // Falling settles into, without the tumble first).
+        outPosition.y += 1.2f + 0.22f * std::sin( t * 0.7f + phase );
+        outPosition.x += 0.12f * std::sin( t * 0.31f + phase * 1.3f );
+        outRotation.x += 3.5f * std::sin( t * 0.45f + phase );
+        outRotation.z += 4.f * std::cos( t * 0.38f + phase );
         break;
     case StoryPose::Floating:
         outPosition.y += 0.6f + 0.25f * std::sin( t * 0.6f + phase );
