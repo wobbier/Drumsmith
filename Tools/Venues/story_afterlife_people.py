@@ -1,7 +1,13 @@
-"""Highway to the Afterlife's cast (Design/Highway-to-the-Afterlife.md): posed figures baked into
-OBJs from the crowd's rigid pieces (Assets/Models/People/Crowd/<body>/, read in place), dressed in
-a PolygonTown atlas variant, written to the venue's own Models/People/. The posing is
-story_legion_people's (Pose, the arm bend, the seated legs); only the output folder differs.
+"""Highway to the Afterlife's cast (Design/Highway-to-the-Afterlife.md). Two kinds of figure:
+
+- Baked (figure, place, lie): posed in OBJs from the crowd's rigid pieces
+  (Assets/Models/People/Crowd/<body>/, read in place), dressed in a PolygonTown atlas variant,
+  written to the venue's own Models/People/. The posing is story_legion_people's (Pose, the arm
+  bend, the seated legs). For the many: demons, the damned, drivers behind glass, the band lying
+  on the road.
+- Skinned (actor, arm, leg, ftrack, gait): a VenueFigure marker the game poses through the rigged
+  character's skeleton, hands and feet by inverse kinematics. For the few a shot is about: the
+  cop, the EMS crews, the nurse.
 
 A figure faces +z at yaw 0. A lying figure is a standing one turned onto its back by the entity
 (lie()), its head toward the entity's -z.
@@ -17,12 +23,6 @@ from story_legion_mesh import cross, dot, save, sub, unit
 ROOT = Path(__file__).resolve().parents[2]
 
 # Poses (see story_legion_people.Pose: torso / head Euler; arms (shoulder Euler, elbow bend)).
-DRIVING = Pose(True, (2, 0, 0), (0, 0, 0), ((-40, 0, 8), 70), ((-40, 0, -8), 70))
-RADIO = Pose(True, (2, 8, 0), (6, 12, 0), ((-100, 0, 40), 140), ((-40, 0, -8), 70))
-NODDING = Pose(True, (2, 0, 0), (14, 0, 0), ((-40, 0, 8), 70), ((-40, 0, -8), 70))
-KNEEL_CPR = Pose(True, (38, 0, 0), (18, 0, 0), ((-58, 0, 12), 10), ((-58, 0, -12), 10))
-KNEEL_LOOK = Pose(True, (24, -18, 0), (-8, -30, 0), ((-40, 0, 10), 30), ((-30, 0, -10), 40))
-KNEEL_NOD = Pose(True, (30, 0, 0), (24, 8, 0), ((-58, 0, 12), 10), ((-58, 0, -12), 10))
 THRONE = Pose(True, (-6, 0, 0), (4, 0, 0), ((-30, 0, 20), 60), ((-30, 0, -20), 60))
 BECKON = Pose(True, (-4, -6, 0), (0, 10, 0), ((-30, 0, 20), 60), ((-75, 10, -30), 55))
 AIR_DRUMS = Pose(True, (6, 0, 0), (12, 0, 0), ((-55, 0, 18), 80), ((-70, 0, -18), 95))
@@ -110,6 +110,169 @@ def looping(s, parent, label, clip_path, pos=(0, 0, 0), speed=1.0, rot=(0, 0, 0)
     root.add({'Type': 'Sequence', 'Clip': clip_path, 'PlayOnStart': True, 'Loop': True, 'Speed': round(speed, 4),
               'Bindings': [{'Slot': 'Body', 'Target': body.guid}]})
     return body
+
+
+# ---- skinned figures (VenueFigure: Docs/Venue-Authoring.md -> People) ----------------------
+# The few people a shot is about are the rigged character itself, posed in the game through its
+# skeleton, where the figures above are its rigid crowd pieces baked into a mesh. Everything is in
+# the figure's own space: its feet (kneeling: the floor under its knees) at the origin, facing +z,
+# its right hand +x.
+def arm(lift=5.0, spread=8.0, elbow=12.0, hand=None, pole=None, fingers=None, palm=None, grip=0.15):
+    """An arm by angles (lift forward from hanging, spread to the side, elbow bend), or with hand
+    set the point its palm reaches (pole: the way the elbow bends; fingers / palm: the hand's turn)."""
+    d = {'Raise': float(lift), 'Spread': float(spread), 'Elbow': float(elbow), 'Grip': float(grip)}
+    if hand is not None:
+        d['Reach'] = True
+        d['Hand'] = [round(float(c), 4) for c in hand]
+    for key, v in (('Pole', pole), ('Fingers', fingers), ('Palm', palm)):
+        if v is not None:
+            d[key] = [round(float(c), 4) for c in v]
+    return d
+
+
+def leg(spread=3.0, toe=0.0, foot=None, knee=None):
+    """A leg planted (out by spread), or with foot set the point its sole reaches."""
+    d = {'Spread': float(spread), 'Toe': float(toe)}
+    if foot is not None:
+        d['Reach'] = True
+        d['Foot'] = [round(float(c), 4) for c in foot]
+    if knee is not None:
+        d['Knee'] = [round(float(c), 4) for c in knee]
+    return d
+
+
+def actor(s, parent, label, body, variant, pos, yaw=0.0, stance='Standing', motion=None, speed=1.0, once=False, dress=None, **pose):
+    """A skinned figure: body in PolygonTown_variant at pos, facing yaw. pose: VenueFigure's
+    fields (Bow, Lean, Turn, Nod, HeadTurn, Crouch, SeatHeight, LeftArm=arm(...), RightLeg=leg(...)).
+    motion: a clip of ftrack()s, looping from the start (once: played by a VenueStory Play group
+    above it when its flag lands). dress: 'Drummer', 'Guitar', 'Bass' or 'Vocals' to wear that
+    band member's look as cast for the song instead (body and variant are then only a stand-in)."""
+    e = s.entity(label, parent, pos, (0, yaw, 0))
+    comp = {'Type': 'VenueFigure', 'Character': f'Assets/Models/People/BodyType1_{body}.fbx',
+            'Atlas': f'Assets/Models/Venue/PolygonTown_{variant}.png', 'Stand': stance}
+    if dress:
+        comp['As'] = dress
+    comp.update(pose)
+    e.add(comp)
+    if motion:
+        e.add({'Type': 'Sequence', 'Clip': motion, 'PlayOnStart': not once, 'Loop': not once, 'Speed': round(speed, 4),
+               'Bindings': [{'Slot': 'Body', 'Target': e.guid}]})
+    return e
+
+
+def ftrack(prop, keys, interp='Linear'):
+    """A track on the bound figure's VenueFigure: prop is a field (Bow, LeftArm.Hand,
+    RightLeg.Foot ...), keys (frame, value) with value a number or a point."""
+    out = []
+    for frame, value in keys:
+        v = [round(float(c), 5) for c in value] + [0] if isinstance(value, (tuple, list)) else [round(float(value), 5), 0, 0, 0]
+        out.append({'Frame': frame, 'Value': v, 'Interpolation': interp})
+    return {'Binding': 'Body', 'Component': 'VenueFigure', 'Property': prop, 'Keys': out}
+
+
+def to_figure(pos, yaw, point):
+    """A point in the figure's parent's space, in the space of a figure standing at pos facing yaw."""
+    a = math.radians(yaw)
+    dx, dy, dz = point[0] - pos[0], point[1] - pos[1], point[2] - pos[2]
+    return (dx * math.cos(a) - dz * math.sin(a), dy, dx * math.sin(a) + dz * math.cos(a))
+
+
+def turn_to(pos, yaw, point, most=70.0):
+    """The degrees a figure standing at pos facing yaw turns its head (to its right) to face point."""
+    x, _, z = to_figure(pos, yaw, point)
+    return max(-most, min(most, math.degrees(math.atan2(x, z))))
+
+
+def kneeling_over(reach=0.53, top=0.29, bow=35.0, nod=15.0):
+    """VenueFigure fields for someone on their knees with both hands, one on the other, on the
+    chest of a patient lying across in front of them: reach ahead of the knees, top off the floor."""
+    return dict(stance='Kneeling', Bow=bow, Lean=15.0, Nod=nod, LeftLeg=leg(8), RightLeg=leg(8),
+                LeftArm=arm(hand=(-0.015, top, reach), pole=(-1, -0.1, -0.3), fingers=(0.35, 0, 1), palm=(0, -1, 0), grip=0.1),
+                RightArm=arm(hand=(0.015, top + 0.03, reach), pole=(1, -0.1, -0.3), fingers=(-0.35, 0, 1), palm=(0, -1, 0), grip=0.3))
+
+
+def compressions(venue, reach=0.53, top=0.29, bow=35.0, frames=16):
+    """Chest compressions for kneeling_over (about 110 a minute at 16 frames): the shoulders come
+    down over the hands and the hands go 5 cm into the chest."""
+    def down(x, y):
+        return [(0, (x, y, reach)), (5, (x, y - 0.05, reach)), (frames, (x, y, reach))]
+    return clip(venue, 'Compressions', frames, [ftrack('Bow', [(0, bow), (5, bow + 6), (frames, bow)], 'SmoothStep'),
+                                                ftrack('Nod', [(0, 15), (6, 19), (frames, 15)], 'SmoothStep'),
+                                                ftrack('LeftArm.Hand', down(-0.015, top), 'SmoothStep'),
+                                                ftrack('RightArm.Hand', down(0.015, top + 0.03), 'SmoothStep')])
+
+
+def gait(venue, name, frames, stride, lift, bob=0.03, swing=35.0, elbow=80.0, arms=('Left', 'Right'), hip=0.09, cycles=0):
+    """A stride on the spot (the ground goes by, or the figure's parent moves): each foot lands
+    stride/2 ahead, pushes off as far behind, kicks up by lift and comes through; the body drops
+    onto each landing. frames: one cycle (two steps). arms: the ones swung by angles (leave out a
+    hand that holds something). cycles: 0 a loop; else a one-shot of that many cycles (and four
+    frames more: it starts from standing)."""
+    half = stride / 2.0
+    # (share of the cycle, forward, height, toes down)
+    path = ((0.0, half, 0.0, -8.0), (0.32, -half, 0.02, 35.0), (0.48, -half * 1.15, lift, 65.0), (0.72, half * 0.15, lift * 0.75, 15.0),
+            (0.9, half * 1.05, lift * 0.3, -10.0), (1.0, half, 0.0, -8.0))
+    cycle = []      # (property, keys, interpolation) over one cycle
+    for side, x, late in (('Left', -hip, 0.0), ('Right', hip, 0.5)):
+        feet, toes = [], []
+        for k in range(-1, 2):
+            for share, z, y, toe in path:
+                f = round((share + late + k) * frames)
+                if 0 <= f <= frames and not (feet and feet[-1][0] == f):
+                    feet.append((f, (x, y, z)))
+                    toes.append((f, toe))
+        # The ends of the cycle: the same point, taken from where the wrapped path crosses them.
+        for keys, at in ((feet, lambda u: _along(path, u, x)), (toes, lambda u: _toe(path, u))):
+            if keys[0][0] != 0:
+                keys.insert(0, (0, at((0.0 - late) % 1.0)))
+            if keys[-1][0] != frames:
+                keys.append((frames, at((1.0 - late) % 1.0)))
+        cycle += [(f'{side}Leg.Foot', feet, 'Linear'), (f'{side}Leg.Toe', toes, 'Linear')]
+        if side in arms:
+            # The arm opposite the leading foot is forward.
+            a, b = (swing, -swing * 0.6) if side == 'Right' else (-swing * 0.6, swing)
+            cycle.append((f'{side}Arm.Raise', [(0, a), (frames // 2, b), (frames, a)], 'SmoothStep'))
+            cycle.append((f'{side}Arm.Elbow', [(0, elbow), (frames, elbow)], 'Linear'))
+    q = frames / 4.0
+    cycle.append(('Offset', [(0, (0, -bob, 0)), (round(q), (0, 0, 0)), (round(2 * q), (0, -bob, 0)), (round(3 * q), (0, 0, 0)), (frames, (0, -bob, 0))], 'SmoothStep'))
+    cycle.append(('Side', [(0, -2.0), (frames // 2, 2.0), (frames, -2.0)], 'SmoothStep'))
+    # A one-shot starts from standing still (where a Play group holds it until its flag), four
+    # frames before the first stride.
+    lead = 4 if cycles else 0
+    still = {'LeftLeg.Foot': (-hip, 0, 0), 'RightLeg.Foot': (hip, 0, 0), 'LeftLeg.Toe': 0.0, 'RightLeg.Toe': 0.0, 'LeftArm.Raise': 5.0, 'RightArm.Raise': 5.0,
+             'Offset': (0, 0, 0), 'Side': 0.0}
+    tracks = []
+    for prop, keys, interp in cycle:
+        tiled = [(f + lead, v) for f, v in keys]
+        for c in range(1, max(cycles, 1)):
+            tiled += [(f + lead + c * frames, v) for f, v in keys[1:]]
+        if lead:
+            tiled.insert(0, (0, still.get(prop, keys[0][1])))
+        tracks.append(ftrack(prop, tiled, interp))
+    return clip(venue, name, lead + frames * max(cycles, 1), tracks)
+
+
+def striding(stride, **pose):
+    """VenueFigure fields for a figure that gait() moves: both feet sent where the clip says (the
+    first frame's, until it plays)."""
+    return dict(dict(LeftLeg=leg(foot=(-0.09, 0, stride / 2.0)), RightLeg=leg(foot=(0.09, 0, -stride / 2.0), toe=35.0)), **pose)
+
+
+def _span(path, u):
+    for (u0, *a), (u1, *b) in zip(path, path[1:]):
+        if u0 <= u <= u1:
+            return (u - u0) / (u1 - u0), a, b
+    return 0.0, path[0][1:], path[0][1:]
+
+
+def _along(path, u, x):
+    w, a, b = _span(path, u)
+    return (x, a[1] + (b[1] - a[1]) * w, a[0] + (b[0] - a[0]) * w)
+
+
+def _toe(path, u):
+    w, a, b = _span(path, u)
+    return a[2] + (b[2] - a[2]) * w
 
 
 def frame(s, group, pivot):

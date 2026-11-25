@@ -1,0 +1,434 @@
+{
+ "Version": 1,
+ "Name": "RunL",
+ "FrameRate": 30,
+ "DurationFrames": 20,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftLeg.Foot",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.09,
+      0.0,
+      0.45,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      -0.09,
+      0.02,
+      -0.45,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      -0.09,
+      0.32,
+      -0.5175,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 14,
+     "Value": [
+      -0.09,
+      0.24,
+      0.0675,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      -0.09,
+      0.096,
+      0.4725,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      -0.09,
+      0.0,
+      0.45,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftLeg.Toe",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -8.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      35.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      65.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 14,
+     "Value": [
+      15.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      -10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      -8.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftArm.Raise",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -21.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      35.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      -21.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftArm.Elbow",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      80.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      80.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "RightLeg.Foot",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.09,
+      0.32,
+      -0.5175,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 4,
+     "Value": [
+      0.09,
+      0.24,
+      0.0675,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0.09,
+      0.096,
+      0.4725,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      0.09,
+      0.0,
+      0.45,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      0.09,
+      0.02,
+      -0.45,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      0.09,
+      0.32,
+      -0.5175,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "RightLeg.Toe",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      65.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 4,
+     "Value": [
+      15.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      -10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      -8.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      35.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      65.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Offset",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      -0.035,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 5,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      0.0,
+      -0.035,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      0.0,
+      -0.035,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Side",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -2.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      2.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      -2.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

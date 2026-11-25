@@ -14,6 +14,7 @@
 #include "Components/Venue/VenueMarkers.h"
 #include "ECS/EntityHandle.h"
 #include "Camera/ProceduralSkySettings.h"
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <set>
@@ -78,6 +79,10 @@ public:
     void OnMiss();
     // The player's form: 0 struggling .. 1 on a long streak (the crowd reads it).
     void SetPerformance( float inPerformance ) { m_performance = inPerformance; }
+    // How well the player is playing, for the set's dressing (VenueMood, VenueBeat::Calm): 0 at
+    // their worst .. 1 at their best, from their recent hits and misses and their streak; 0.8
+    // until they have played a note (a preview, a venue capture); --venue-mood <0..1> holds it.
+    float Mood() const;
     void OnStreak( int inCombo );
 
     // What reaches the screen: the highway over the venue (a play), or one of them alone (the
@@ -166,24 +171,81 @@ private:
     {
         EntityHandle Entity;
         Vector3 Rest;
+        Quaternion RestRotation;
+        // How far out it is this frame (0 at rest, 1 at the peak): a figure's nod reads it.
+        float Amount = 0.f;
     };
     std::vector<BeatProp> m_beatProps;
     void UpdateBeats( double inSeconds );
+    // Entities with a VenueMood marker: where each rests, its own size and its Sequence's speed,
+    // and the mood it is following (eased by its Seconds) and how far it shows.
+    struct MoodProp
+    {
+        EntityHandle Entity;
+        Vector3 Rest;
+        Vector3 Scale;
+        float Speed = 1.f;
+        float Followed = -1.f;
+        float Shown = -1.f;
+    };
+    std::vector<MoodProp> m_moodProps;
+    void UpdateMoods( float inDeltaTime );
+    // The mood the beat markers' Calm reads, eased over about a second.
+    float m_moodEased = 0.8f;
+    // The player's hits and misses for Mood(): a running share of notes hit (each note counts
+    // for about a tenth), the hits since the last miss, and whether a note has been judged yet.
+    float m_moodHitShare = 1.f;
+    int m_moodStreak = 0;
+    bool m_moodPlayed = false;
+    // The song time of the player's last hit, last crash or kick hit, and last miss (VenueBeat's
+    // Trigger), -1e9 before any.
+    double m_lastHitAt = -1e9;
+    double m_lastAccentAt = -1e9;
+    double m_lastMissAt = -1e9;
     // Turns each entity with a VenueAim marker onto its point.
     void UpdateAims( double inSeconds );
+    // The scene's VenueSound markers whose flag lands this song: a voice each, started once when
+    // the song reaches At.
+    struct StorySound
+    {
+        EntityHandle Voice;
+        double At = 0.0;
+        bool Started = false;
+    };
+    std::vector<StorySound> m_storySounds;
+    void BuildSounds( const std::vector<std::pair<std::string, double>>& inLanding );
+    void UpdateSounds( double inSeconds );
+    // The scene's people (VenueFigure markers): each a Performer under its marker, built with the
+    // show and posed from the marker's fields every frame it is in view of the story.
+    struct Figure
+    {
+        EntityHandle Entity;
+        Performer Body;
+        // Its entity's VenueBeat (an index into m_beatProps), for the nod on the beat; -1 none.
+        int Beat = -1;
+    };
+    std::vector<Figure> m_figures;
+    void BuildFigures();
+    void UpdateFigures();
+    // The band's spots that ride something that moves (a VenueSpot under a swaying trailer):
+    // each member goes where their marker is now (Band::Carry).
+    void CarrySpots( float inDeltaTime );
     struct StoryProp
     {
         EntityHandle Entity;
         std::string Flag;
+        std::string Unless;     // a flag that takes Flag back while it is set (VenueStory::Unless)
         bool WhenSet = true;
         float Fade = 0.75f;
         Vector3 Scale;
         float Shown = -1.f;     // 0 hidden to 1 shown; -1 before the first update (it snaps)
         VenueStory::Motion Mode = VenueStory::Motion::Show;
         float Speed = 0.3f;
-        // Mode Play / SlowMotion: the entities with a Sequence under it, and whether it's played.
+        // Mode Play / SlowMotion / Clock: the entities with a Sequence under it, and whether it's played.
         std::vector<EntityHandle> Sequences;
         bool Played = false;
+        // Mode Clock: when its flag lands, in song seconds.
+        double Landed = 0.0;
     };
     // A ParticleSystem under Show props: it emits only while every one of them is shown (a hidden
     // prop is only scaled away, which would leave its fire burning at its pivot), and starts over
@@ -223,15 +285,28 @@ private:
     Moonlight::ProceduralSkySettings m_shotSkySaved;
     // The sky_ story flags: the main camera under the procedural sky, its hour turning from one
     // flag to the next (sky_<hour> is the hour as that flag lands, past 24 for the next day;
-    // sky_off gives the venue's own background back).
+    // sky_off gives the venue's own background back). Under it, alt_<metres> flags are how high
+    // the sky is seen from (Moonlight::ProceduralSkySettings::ViewerAltitude: the set stays where
+    // it is and the cloud comes down to it, round it and away below), and cover_<percent> flags
+    // how much of the sky is cloud; both turn from one flag to the next like the hour. Inside a
+    // cloud the scene is fogged by how thick the cloud is there. towers_<percent> (the sky's
+    // Convection: heaped tops, cumulonimbus far off) and clear_<percent> (CloudClearing: the gap
+    // in the layer round the camera they climb through) turn the same way.
     void UpdateStorySky( double inSeconds );
     struct StorySkyKey
     {
         double At = 0.0;
-        float Hour = 0.f;
+        float Hour = 0.f;       // the key's value: an hour, metres or a percentage
         bool Off = false;
     };
     std::vector<StorySkyKey> m_storySky;
+    std::vector<StorySkyKey> m_storyAltitude;
+    std::vector<StorySkyKey> m_storyCover;
+    std::vector<StorySkyKey> m_storyTowers;
+    std::vector<StorySkyKey> m_storyClearing;
+    // The value of a track of keys at a time (held before the first and after the last); false
+    // when it has none.
+    static bool StoryTrackAt( const std::vector<StorySkyKey>& inKeys, double inSeconds, float& outValue );
     bool m_storySkyOn = false;
     int m_storySkyClear = 0;
     Moonlight::ProceduralSkySettings m_storySkySaved;
@@ -239,7 +314,9 @@ private:
     float m_storySkyFogOpacity = 0.f;
     float m_storySkyFogFalloff = 0.f;
     float m_storySkyFar = 0.f;
-    void UpdateStoryMotion( StoryProp& ioProp, bool inSet );
+    void UpdateStoryMotion( StoryProp& ioProp, bool inSet, double inSeconds );
+    // When the flag lands this song, in song seconds (0: set before it, or never).
+    double StoryFlagTime( const std::string& inFlag ) const;
     // The band_ story flags on the band (Band::SetStoryState).
     void UpdateStoryBand( double inSeconds, float inDeltaTime );
     // Every flag landing this song (flags set before it at -1e9), for the band's pose.
@@ -261,6 +338,8 @@ private:
     // How much of the highway shows (SetHighwayShown), as last put on its camera.
     float m_highwayShown = 1.f;
     Band m_band;
+    // Which members' spots have moved since the scene was read (CarrySpots carries those).
+    std::array<bool, 5> m_carried{};
     Crowd m_crowd;
     Director m_director;
     StageLights m_lights;

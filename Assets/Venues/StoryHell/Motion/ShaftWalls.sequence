@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "ShaftWalls",
  "FrameRate": 30,
- "DurationFrames": 80,
+ "DurationFrames": 43,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 80,
+     "Frame": 43,
      "Value": [
       0,
       65.0,

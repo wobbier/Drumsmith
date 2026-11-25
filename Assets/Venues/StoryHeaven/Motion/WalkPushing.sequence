@@ -1,0 +1,390 @@
+{
+ "Version": 1,
+ "Name": "WalkPushing",
+ "FrameRate": 30,
+ "DurationFrames": 30,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftLeg.Foot",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.09,
+      0.0,
+      0.25,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      -0.09,
+      0.02,
+      -0.25,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 14,
+     "Value": [
+      -0.09,
+      0.1,
+      -0.2875,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      -0.09,
+      0.075,
+      0.0375,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 27,
+     "Value": [
+      -0.09,
+      0.03,
+      0.2625,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      -0.09,
+      0.0,
+      0.25,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftLeg.Toe",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -8.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 10,
+     "Value": [
+      35.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 14,
+     "Value": [
+      65.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      15.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 27,
+     "Value": [
+      -10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      -8.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "RightLeg.Foot",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.09,
+      0.09792,
+      -0.26042,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 7,
+     "Value": [
+      0.09,
+      0.075,
+      0.0375,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      0.09,
+      0.03,
+      0.2625,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.09,
+      0.0,
+      0.25,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 25,
+     "Value": [
+      0.09,
+      0.02,
+      -0.25,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 29,
+     "Value": [
+      0.09,
+      0.1,
+      -0.2875,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0.09,
+      0.09792,
+      -0.26042,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "RightLeg.Toe",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      60.83333,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 7,
+     "Value": [
+      15.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      -10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -8.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 25,
+     "Value": [
+      35.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 29,
+     "Value": [
+      65.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      60.83333,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Offset",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      -0.015,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 8,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.0,
+      -0.015,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 22,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0.0,
+      -0.015,
+      0.0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Side",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -2.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      2.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      -2.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

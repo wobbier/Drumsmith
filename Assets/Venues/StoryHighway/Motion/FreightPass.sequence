@@ -1,0 +1,102 @@
+{
+ "Version": 1,
+ "Name": "FreightPass",
+ "FrameRate": 30,
+ "DurationFrames": 300,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 300,
+     "Value": [
+      0,
+      0,
+      -760,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 86,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 100,
+     "Value": [
+      0.0021814,
+      -0.0139621,
+      3.05e-05,
+      0.9999001
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 107,
+     "Value": [
+      0.001401,
+      -0.0095861,
+      0.0096113,
+      0.9999069
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 119,
+     "Value": [
+      -0.0017213,
+      0.0061154,
+      -0.0039162,
+      0.9999722
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 135,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

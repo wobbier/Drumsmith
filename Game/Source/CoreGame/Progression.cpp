@@ -339,6 +339,7 @@ void Progression::LoadStory( const json& inRoot )
                     }
                 }
                 song.Venue = value.value( "Venue", std::string() );
+                song.OutroSeconds = std::clamp( value.value( "OutroSeconds", 0.0 ), 0.0, 60.0 );
                 set.Songs.push_back( std::move( song ) );
             }
         }

@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "WheelSpin",
  "FrameRate": 30,
- "DurationFrames": 4,
+ "DurationFrames": 15,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,17 +20,27 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 2,
+     "Frame": 5,
      "Value": [
-      1.0,
+      0.8660254,
       0.0,
       0.0,
-      0.0
+      0.5
      ],
      "Interpolation": "Linear"
     },
     {
-     "Frame": 4,
+     "Frame": 10,
+     "Value": [
+      0.8660254,
+      0.0,
+      -0.0,
+      -0.5
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
      "Value": [
       0.0008727,
       0.0,

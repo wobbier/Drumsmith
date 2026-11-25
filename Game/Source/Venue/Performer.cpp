@@ -22,6 +22,11 @@ namespace
     constexpr float kWristLimit = 70.f;
     // The palm's centre under the hand bone, metres: where a stick or a mic sits in the fist.
     constexpr float kPalmDepth = 0.045f;
+    // Kneeling: how high the knee joint and the ankle sit off the floor, and how far the foot is
+    // laid back from standing (its sole up, the toes trailing).
+    constexpr float kKneeOnFloor = 0.06f;
+    constexpr float kAnkleOnFloor = 0.065f;
+    constexpr float kFootLaidBack = 150.f;
 
     const glm::quat kIdentity( 1.f, 0.f, 0.f, 0.f );
     const glm::vec3 kX( 1.f, 0.f, 0.f );
@@ -61,7 +66,7 @@ namespace
     // Whether two poses put everything but the arms (and the mouth) in the same place.
     bool SameStance( const Performer::Pose& inA, const Performer::Pose& inB )
     {
-        bool same = inA.Offset == inB.Offset && inA.Crouch == inB.Crouch && inA.Lean == inB.Lean && inA.Side == inB.Side && inA.Turn == inB.Turn
+        bool same = inA.Offset == inB.Offset && inA.Thrown == inB.Thrown && inA.Crouch == inB.Crouch && inA.Bow == inB.Bow && inA.Kneeling == inB.Kneeling && inA.Lean == inB.Lean && inA.Side == inB.Side && inA.Turn == inB.Turn
             && inA.Nod == inB.Nod && inA.HeadTurn == inB.HeadTurn && inA.HeadTilt == inB.HeadTilt && inA.Seated == inB.Seated && inA.SeatHeight == inB.SeatHeight;
         for( int side = 0; side < 2 && same; ++side )
         {
@@ -77,6 +82,15 @@ namespace
 Transform* Performer::Root() const
 {
     return m_root ? &m_root->GetComponent<Transform>() : nullptr;
+}
+
+
+void Performer::Show( bool inShown )
+{
+    if( m_root && m_root->IsActiveSelf() != inShown )
+    {
+        m_root->SetActive( inShown );
+    }
 }
 
 
@@ -412,7 +426,9 @@ void Performer::PoseBody( const Pose& inPose )
     // Everything is in the root's (scaled) space: the figure is posed at a scale of 1.
     const float invScale = 1.f / std::max( 0.01f, m_look.Height );
     const glm::vec3 offset = inPose.Offset * invScale;
-    const glm::quat hipsTurn = Axis( inPose.Turn * 0.3f, kY );
+    const glm::quat hipsTurn = Axis( inPose.Turn * 0.3f, kY ) * Axis( inPose.Bow, kX );
+    const float thighLength = glm::length( Of( 0, Shin ).Offset );
+    const float shinLength = glm::length( Of( 0, Foot ).Offset );
     const glm::quat spineTurn = Axis( inPose.Turn * 0.7f, kY ) * Axis( inPose.Lean, kX ) * Axis( -inPose.Side, kZ );
     const glm::quat headTurn = Axis( inPose.HeadTurn, kY ) * Axis( inPose.Nod, kX ) * Axis( -inPose.HeadTilt, kZ );
 
@@ -433,6 +449,13 @@ void Performer::PoseBody( const Pose& inPose )
             ankles[side] = leg.Target * invScale + glm::vec3( 0.f, ankle.y, 0.f );
             knees[side] = glm::dot( leg.Pole, leg.Pole ) > 1e-8f ? glm::normalize( leg.Pole ) : kZ;
         }
+        else if( inPose.Kneeling )
+        {
+            // The knee comes down under the hip (out by the spread), the shin back from it.
+            const float out = hip.x + s * thighLength * std::sin( leg.Spread * kDeg );
+            ankles[side] = glm::vec3( out, kAnkleOnFloor, hip.z - shinLength ) + offset;
+            knees[side] = glm::normalize( glm::vec3( 0.f, -0.5f, 1.f ) );
+        }
         else if( inPose.Seated )
         {
             // Feet flat on the floor ahead of the seat.
@@ -441,14 +464,16 @@ void Performer::PoseBody( const Pose& inPose )
         }
         else
         {
-            // Planted: out to the side by the spread, and turned out a little with it.
+            // Planted: out to the side by the spread, and turned out a little with it (a wide
+            // stance's knees out over the feet).
             ankles[side] = glm::vec3( hip.x + s * m_leg * std::sin( leg.Spread * kDeg ), ankle.y, ankle.z ) + offset;
-            knees[side] = glm::normalize( glm::vec3( s * 0.25f, 0.f, 1.f ) );
+            knees[side] = glm::normalize( glm::vec3( s * ( 0.25f + 0.04f * std::max( leg.Spread - 14.f, 0.f ) ), 0.f, 1.f ) );
             yaw = Axis( s * leg.Spread * 0.5f, kY );
         }
-        feet[side] = yaw * Axis( leg.Toe, kX );
+        const bool laidBack = inPose.Kneeling && !leg.Reach;
+        feet[side] = yaw * Axis( laidBack ? kFootLaidBack + leg.Toe : leg.Toe, kX );
         toes[side] = feet[side];
-        if( leg.Toe > 0.f )
+        if( leg.Toe > 0.f && !laidBack )
         {
             // A pedal stroke: the heel lifts about the ball of the foot, which stays down with
             // the toes.
@@ -464,8 +489,15 @@ void Performer::PoseBody( const Pose& inPose )
     {
         hips.Position.y = inPose.SeatHeight * invScale + ( hips.BindPosition.y - Of( 0, Thigh ).BindPosition.y ) + offset.y;
     }
+    else if( inPose.Kneeling )
+    {
+        // The thighs upright over the knees; a crouch sits back toward the heels.
+        hips.Position.y = kKneeOnFloor + thighLength * 0.99f + ( hips.BindPosition.y - Of( 0, Thigh ).BindPosition.y ) + offset.y - inPose.Crouch;
+    }
     else
     {
+        // (Thrown: the feet were placed without it, so the legs take it up.)
+        hips.Position += inPose.Thrown * invScale;
         hips.Position.y -= inPose.Crouch;
         float sink = 0.f;
         for( int side = 0; side < 2; ++side )
@@ -508,6 +540,7 @@ void Performer::PoseBody( const Pose& inPose )
     }
     m_chest = ( m_shoulders[0] + m_shoulders[1] ) * 0.5f + m_spine * glm::vec3( 0.f, 0.f, 0.1f ) * m_look.Height;
     m_headPos = ( m_bones[Head].Position + m_headRotation * glm::vec3( 0.f, 0.105f, 0.03f ) ) * m_look.Height;
+    m_mouthPos = ( m_bones[Head].Position + m_headRotation * m_look.Mouth.InternalVector ) * m_look.Height;
     m_spineBase = ( hips.Position + glm::vec3( 0.f, 0.07f, 0.f ) ) * m_look.Height;
 }
 
@@ -522,6 +555,7 @@ void Performer::PoseUnbound( const Pose& inPose )
     m_spineBase = base;
     m_chest = base + glm::vec3( 0.f, 0.45f, 0.1f ) * m_look.Height;
     m_headPos = base + glm::vec3( 0.f, 0.73f, 0.03f ) * m_look.Height;
+    m_mouthPos = m_headPos + glm::vec3( 0.f, -0.11f, 0.1f ) * m_look.Height;
     for( int side = 0; side < 2; ++side )
     {
         const float s = side == 0 ? -1.f : 1.f;

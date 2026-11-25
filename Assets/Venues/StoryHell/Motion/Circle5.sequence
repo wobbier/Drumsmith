@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Circle5",
  "FrameRate": 30,
- "DurationFrames": 139,
+ "DurationFrames": 27,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 139,
+     "Frame": 27,
      "Value": [
       0,
       65.0,

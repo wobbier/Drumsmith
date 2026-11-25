@@ -2,7 +2,9 @@
 #include "Components/Venue/VenueMarkers.h"
 #include "Venue/VenuePlan.h"
 #include "ECS/EntityHandle.h"
+#include "Math/Quaternion.h"
 #include "JSON.h"
+#include <array>
 #include <string>
 #include <vector>
 
@@ -50,8 +52,19 @@ public:
         std::vector<EntityHandle> Story;
         // Entities with a VenueBeat marker.
         std::vector<EntityHandle> Beats;
+        // Entities with a VenueMood marker.
+        std::vector<EntityHandle> Moods;
         // Entities with a VenueAim marker.
         std::vector<EntityHandle> Aims;
+        // Entities with a VenueSound marker.
+        std::vector<EntityHandle> Sounds;
+        // Entities with a VenueFigure marker.
+        std::vector<EntityHandle> Figures;
+        // Each member's VenueSpot (VenueData::Member order) and its turn in venue space as the
+        // scene was read: a spot under something that moves (a trailer swaying on its hitch)
+        // carries its member with it (VenueShow::CarrySpots).
+        std::array<EntityHandle, 5> SpotMarkers;
+        std::array<Quaternion, 5> SpotRest;
         // The scene lights itself with a directional (a sun or moon of its own).
         bool HasDirectional = false;
         int Spots = 0;

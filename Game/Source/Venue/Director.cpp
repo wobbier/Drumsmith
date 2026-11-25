@@ -8,6 +8,7 @@
 #include "Components/Lighting/Light.h"
 #include "Config/GameSettings.h"
 #include "Components/Transform.h"
+#include <array>
 #include "Core/CommandLine.h"
 #include "Engine/World.h"
 #include "CLog.h"
@@ -31,6 +32,11 @@ namespace
     constexpr float kArrivalOvershoot = 0.12f; // how far past (of the zoom, in log space)
     constexpr float kArrivalHold = 1.5f;       // after the peak: the pull back, the hunt, the hold
     constexpr float kArrivalTail = kArrivalZoomStart + kArrivalZoomPeak + kArrivalHold;
+    // In a story: how far out of the middle a group shot turns the band (a share of the 60% a
+    // one-member shot turns its subject: the kit, at their middle, clear of the highway), and how
+    // short a chart cut next to a story shot can be before it is a flash and is left out.
+    constexpr float kStoryGroupLead = 0.8f;
+    constexpr double kStoryCutGuard = 1.2;
 
     bool StartsWith( const std::string& inText, const char* inPrefix )
     {
@@ -215,6 +221,7 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
     {
         AddNeckShots( inVenue );
         AddSpotCuts();
+        KeepToOwnSpots();
     }
     if( CommandLine::Has( "--highway-log" ) )
     {
@@ -234,7 +241,7 @@ void Director::Build( World& inWorld, const VenuePlan& inPlan, const VenueData& 
             m_looks.push_back( { cut.Time, cut.Shot.Device == 2 ? std::string( kPhoneLook ) : std::string( kCamcorderLook ) } );
         }
     }
-    else if( m_looks.empty() )
+    else if( m_looks.empty() && m_plan.QuietLook )
     {
         BuildFallbackLooks( inVenue );
     }
@@ -1042,6 +1049,90 @@ void Director::AddSpotCuts()
 }
 
 
+void Director::KeepToOwnSpots()
+{
+    // The spots tagged own/ and whom each is aimed at (as AddSpotCuts finds it).
+    std::array<std::vector<int>, VenueData::MemberCount> owned;
+    std::vector<int> any;
+    for( size_t i = 0; i < m_plan.Cameras.size(); ++i )
+    {
+        const VenuePlan::CameraSpot& spot = m_plan.Cameras[i];
+        if( !StartsWith( spot.Tag, "own/" ) ) continue;
+        int nearest = -1;
+        float best = 0.35f;
+        for( int member = 0; member < VenueData::MemberCount; ++member )
+        {
+            if( !m_plan.HasMember( member ) ) continue;
+            const Vector3 toward = m_plan.Members[member].Feet + Vector3( 0.f, 1.3f, 0.f ) - spot.Eye;
+            const float along = toward.Dot( spot.Forward );
+            if( along <= 0.5f ) continue;
+            const float off = ( toward - spot.Forward * along ).Length() / along;
+            if( off < best )
+            {
+                best = off;
+                nearest = member;
+            }
+        }
+        if( nearest >= 0 )
+        {
+            owned[nearest].push_back( static_cast<int>( i ) );
+            any.push_back( static_cast<int>( i ) );
+        }
+    }
+    if( any.empty() )
+    {
+        return;
+    }
+    // Every close framing of such a member (and a close one of nobody in particular, which would
+    // be the singer's or a point on a stage) becomes the next of their spots in turn.
+    std::array<size_t, VenueData::MemberCount> turn{};
+    size_t anyTurn = 0;
+    for( Cut& cut : m_cuts )
+    {
+        Plan& shot = cut.Shot;
+        switch( shot.Frame )
+        {
+        case Framing::Near: case Framing::Behind: case Framing::CloseHead: case Framing::CloseHand:
+        case Framing::Profile: case Framing::LowHero: case Framing::Push:
+            break;
+        default:
+            continue;
+        }
+        int member = -1;
+        for( int subject : shot.Subjects )
+        {
+            if( subject >= 0 && subject < VenueData::MemberCount && !owned[subject].empty() )
+            {
+                member = subject;
+                break;
+            }
+        }
+        int pick = -1;
+        if( member >= 0 )
+        {
+            pick = owned[member][turn[member]++ % owned[member].size()];
+        }
+        else if( shot.Subjects.empty() && ( shot.Frame == Framing::CloseHead || shot.Frame == Framing::CloseHand || shot.Frame == Framing::LowHero ) )
+        {
+            pick = any[anyTurn++ % any.size()];
+            for( int who = 0; who < VenueData::MemberCount; ++who )
+            {
+                if( std::find( owned[who].begin(), owned[who].end(), pick ) != owned[who].end() ) member = who;
+            }
+        }
+        if( pick < 0 )
+        {
+            continue;
+        }
+        shot.Frame = Framing::Spot;
+        shot.Variant = pick;
+        shot.Handheld = false;
+        shot.Static = false;
+        shot.Subjects.assign( 1, member );
+    }
+}
+
+
 int Director::DeviceFor( const VenuePlan::CameraSpot& inSpot ) const
 {
     if( VenueTiming::Contains( inSpot.Tag, "@phone" ) ) return 2;
@@ -1273,6 +1364,12 @@ void Director::ApplyVideo( double inSeconds, float inHeld, const Vector3& inEye,
 }
 
 
+float Director::BandLift() const
+{
+    return m_band ? m_band->Lift() : 0.f;
+}
+
+
 Vector3 Director::SubjectPoint( const Plan& inPlan, bool inHead ) const
 {
     if( inPlan.Subjects.empty() || !m_band )
@@ -1352,7 +1449,7 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
         return;
     }
     // The drummer's shots are placed for a drummer facing the crowd and turn with their spot.
-    const Vector3 drums = m_plan.SpotOf( VenueData::Drums ).Feet;
+    const Vector3 drums = m_plan.SpotOf( VenueData::Drums ).Feet + Vector3( 0.f, BandLift(), 0.f );
     switch( inPlan.Frame )
     {
     case Framing::Arrival:
@@ -1704,11 +1801,13 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
     }
     case Framing::Story:
     {
-        // A story shot: its spot, moving to its end spot over the hold (eased at both ends).
+        // A story shot: its spot, moving to its end spot over the hold (eased at both ends, or
+        // tagged "lin" at one speed throughout).
         const StoryShot& shot = m_storyShots[static_cast<size_t>( std::max( inPlan.Variant, 0 ) ) % std::max<size_t>( m_storyShots.size(), 1 )];
         const VenuePlan::CameraSpot& a = m_plan.Cameras[shot.Spot];
         const VenuePlan::CameraSpot& b = m_plan.Cameras[shot.End >= 0 ? shot.End : shot.Spot];
-        const float u = VenueTiming::Smooth( held / std::max( static_cast<float>( shot.Until - shot.From ), 0.1f ) );
+        const float share = held / std::max( static_cast<float>( shot.Until - shot.From ), 0.1f );
+        const float u = shot.Linear ? std::clamp( share, 0.f, 1.f ) : VenueTiming::Smooth( share );
         Vector3 forward;
         if( shot.Via.empty() )
         {
@@ -1728,10 +1827,25 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
             const float along = u * static_cast<float>( last );
             const int k = std::clamp( static_cast<int>( along ), 0, last - 1 );
             const float t = along - static_cast<float>( k );
-            const VenuePlan::CameraSpot& p0 = *path[std::max( k - 1, 0 )];
             const VenuePlan::CameraSpot& p1 = *path[k];
             const VenuePlan::CameraSpot& p2 = *path[k + 1];
-            const VenuePlan::CameraSpot& p3 = *path[std::min( k + 2, last )];
+            // The neighbours past either end: the end itself (the move eases out of and into
+            // rest), or for a move at one speed the next step carried on, so evenly spaced spots
+            // in a line are passed at exactly that speed from the first frame to the last.
+            VenuePlan::CameraSpot p0 = *path[std::max( k - 1, 0 )];
+            VenuePlan::CameraSpot p3 = *path[std::min( k + 2, last )];
+            if( shot.Linear && k == 0 )
+            {
+                p0.Eye = p1.Eye * 2.f - p2.Eye;
+                p0.Forward = p1.Forward * 2.f - p2.Forward;
+                p0.FieldOfView = 2.f * p1.FieldOfView - p2.FieldOfView;
+            }
+            if( shot.Linear && k + 2 > last )
+            {
+                p3.Eye = p2.Eye * 2.f - p1.Eye;
+                p3.Forward = p2.Forward * 2.f - p1.Forward;
+                p3.FieldOfView = 2.f * p2.FieldOfView - p1.FieldOfView;
+            }
             const float t2 = t * t;
             const float t3 = t2 * t;
             const float w0 = 0.5f * ( -t3 + 2.f * t2 - t );
@@ -1787,6 +1901,31 @@ void Director::Frame( const Plan& inPlan, float inHeld, Vector3& outEye, Vector3
 
 float Director::LeadSideFor( const Plan& inPlan, const Vector3& inEye, const Vector3& inTarget ) const
 {
+    // In a story the band is the story, under a highway that is up nearly all song: the director's
+    // own group shots turn the band a third of the way out to one side (their middle, the kit,
+    // clear of the highway; the side by the cut), and the drummer's own shots (the kick, over the
+    // kit, low through the cymbals) all the way, as a one-member shot is. A concert keeps those
+    // framed as they are. (Only as far as the highway is up as the cut is taken: in a rest they
+    // stay centred.)
+    if( !m_storyShots.empty() && m_highwayShown > 0.f )
+    {
+        const bool whole = inPlan.Subjects.empty();
+        const float side = ( inPlan.Variant % 2 == 0 ? 1.f : -1.f ) * m_highwayShown;
+        if( inPlan.Frame == Framing::Kick || inPlan.Frame == Framing::DrumTop || inPlan.Frame == Framing::DrumLow )
+        {
+            return side;
+        }
+        if( whole && ( inPlan.Frame == Framing::Far || inPlan.Frame == Framing::LongLens || inPlan.Frame == Framing::Drone || inPlan.Frame == Framing::Orbit
+            || inPlan.Frame == Framing::Behind || inPlan.Frame == Framing::Spot ) )
+        {
+            return side * kStoryGroupLead;
+        }
+        // One of the venue's own spots on one member: as a one-member shot.
+        if( inPlan.Frame == Framing::Spot && inPlan.Subjects.size() == 1 )
+        {
+            return side;
+        }
+    }
     // One member, framed on them: not wide group shots, the guitar's neck camera (bolted on),
     // from behind, the kick drum or the crowd.
     const bool framed = inPlan.Frame == Framing::Near || inPlan.Frame == Framing::CloseHead || inPlan.Frame == Framing::CloseHand || inPlan.Frame == Framing::Far
@@ -1836,8 +1975,9 @@ Vector3 Director::LeadRoom( const Vector3& inEye, const Vector3& inTarget, float
     const Vector3 forward = ahead * ( 1.f / reach );
     const Vector3 across = forward.Cross( Vector3::Up ).Normalized();
     const float halfWidth = std::tan( inFov * 0.5f * 3.14159265f / 180.f ) * std::max( inAspect, 0.1f );
-    const float angle = std::atan( kOut * halfWidth );
-    const Vector3 turned = ( forward * std::cos( angle ) + across * ( inSide * std::sin( angle ) ) ) * reach;
+    // (A side short of 1 turns that share of the way: a lead easing in.)
+    const float angle = std::atan( kOut * halfWidth ) * std::min( std::fabs( inSide ), 1.f );
+    const Vector3 turned = ( forward * std::cos( angle ) + across * ( ( inSide < 0.f ? -1.f : 1.f ) * std::sin( angle ) ) ) * reach;
     return inEye + Vector3( turned.x, toward.y, turned.z );
 }
 
@@ -2132,6 +2272,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             bool hand = false;
             bool aerial = false;
             bool lights = false;
+            bool linear = false;
+            float lead = 0.f;
             float ride = 0.f;
             float sky = -1.f;
             float seconds = -1.f;
@@ -2147,6 +2289,9 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
                 else if( part == "hand" ) hand = true;
                 else if( part == "heli" ) aerial = true;
                 else if( part == "lights" ) lights = true;
+                else if( part == "lin" ) linear = true;
+                else if( part == "leadl" ) lead = -1.f;
+                else if( part == "leadr" ) lead = 1.f;
                 else if( part.compare( 0, 3, "sky" ) == 0 && part.size() > 3 ) sky = static_cast<float>( std::atof( part.c_str() + 3 ) );
                 else if( part.compare( 0, 4, "ride" ) == 0 ) ride = part.size() > 4 ? static_cast<float>( std::atof( part.c_str() + 4 ) ) : 1.f;
                 else if( part[0] == 'w' && numbered ) via = std::atoi( part.c_str() + 1 );
@@ -2169,6 +2314,8 @@ void Director::SetStoryShots( const std::vector<std::pair<std::string, double>>&
             shot.Handheld = hand;
             shot.Aerial = aerial;
             shot.Lights = lights;
+            shot.Linear = linear;
+            shot.Lead = lead;
             shot.Ride = ride;
             shot.Sky = sky;
             shot.FocusFrom = focus;
@@ -2260,7 +2407,12 @@ void Director::ApplyFocus( const Plan& inPlan, const Vector3& inEye, const Vecto
     // out, so the nearer the subject the further the lens is stopped down (eased with the focus).
     m_closeExposure = -1.1f * ( 1.f - VenueTiming::Smooth( ( m_focus - 1.5f ) / 10.f ) );
     PostProcess& post = m_main->GetComponent<PostProcess>();
-    post.DepthOfField = m_blur > 0.3f;
+    // Ghosts are see-through, and what is see-through takes the blur of whatever is behind it
+    // (Engine/Docs/Depth-of-Field.md): a lens focused on a ghost leaves the ghost soft. So the
+    // director's own shots of a ghost band keep everything sharp; a story shot's focus is its
+    // author's, on something solid.
+    const bool ghosts = m_band && m_band->Ghosted() && inPlan.Frame != Framing::Story;
+    post.DepthOfField = m_blur > 0.3f && !ghosts;
     if( !post.DepthOfField )
     {
         return;
@@ -2333,6 +2485,23 @@ void Director::Update( double inSeconds, float inDeltaTime )
         else
         {
             index = static_cast<int>( it - m_cuts.begin() ) - 1;
+            // A cut that would show for less than kStoryCutGuard before a story shot takes the
+            // screen is a flash: the shot before it holds on instead (and the one before that,
+            // when it is as close).
+            for( bool flash = true; flash && index > 0; )
+            {
+                flash = false;
+                const double start = m_cuts[index].Time;
+                for( const StoryShot& shot : m_storyShots )
+                {
+                    if( shot.From > start && shot.From - start < kStoryCutGuard )
+                    {
+                        flash = true;
+                        --index;
+                        break;
+                    }
+                }
+            }
             plan = m_cuts[index].Shot;
             held = static_cast<float>( inSeconds ) - m_cuts[index].Time;
             m_shotName = m_cuts[index].Name;
@@ -2395,7 +2564,15 @@ void Director::Update( double inSeconds, float inDeltaTime )
         for( size_t i = 0; i < m_storyShots.size(); ++i )
         {
             const StoryShot& shot = m_storyShots[i];
-            if( inSeconds >= shot.From && inSeconds < shot.Until )
+            // A chart cut coming less than kStoryCutGuard after the story shot ends would show the
+            // cut already in progress for a moment: the story shot holds (at its end) until it.
+            double until = shot.Until;
+            const auto next = std::upper_bound( m_cuts.begin(), m_cuts.end(), static_cast<float>( shot.Until ), []( float t, const Cut& c ) { return t < c.Time; } );
+            if( next != m_cuts.end() && next->Time - shot.Until < kStoryCutGuard )
+            {
+                until = next->Time;
+            }
+            if( inSeconds >= shot.From && inSeconds < until )
             {
                 plan = Plan();
                 plan.Frame = Framing::Story;
@@ -2405,6 +2582,7 @@ void Director::Update( double inSeconds, float inDeltaTime )
                 plan.Lights = shot.Lights;
                 plan.Ride = shot.Ride;
                 plan.Sky = shot.Sky;
+                plan.Bolted = shot.Linear;
                 plan.Blur = shot.FocusFrom > 0.f || shot.FocusTo > 0.f ? 11.f : 0.f;
                 plan.Static = true;
                 index = -6 - static_cast<int>( i );
@@ -2515,6 +2693,20 @@ void Director::Update( double inSeconds, float inDeltaTime )
     {
         target = LeadRoom( eye, target, m_leadSide, fov, m_main->GetComponent<Camera>().GetAspectRatio() );
     }
+    // A story shot tagged leadl / leadr: its subject (the middle of its view) is turned out to that
+    // side of the picture as far as the highway is over it, eased, so the drums coming in after a
+    // rest turn the camera rather than jump it. (LeadRoom's side is the way the aim turns, across
+    // the forward and up: the picture's left, so the subject goes to the right.)
+    if( plan.Frame == Framing::Story && !m_storyShots.empty() )
+    {
+        const StoryShot& shot = m_storyShots[static_cast<size_t>( std::max( plan.Variant, 0 ) ) % m_storyShots.size()];
+        const float want = shot.Lead * m_highwayShown;
+        m_storyLead = cut ? want : m_storyLead + ( want - m_storyLead ) * ( 1.f - std::exp( -dt * 1.5f ) );
+        if( std::fabs( m_storyLead ) > 1e-3f )
+        {
+            target = LeadRoom( eye, target, m_storyLead, fov, m_main->GetComponent<Camera>().GetAspectRatio() );
+        }
+    }
     // The framing tracks the members' live positions, which bob, headbang and strum: following
     // them exactly shakes the whole picture. Ease toward it instead (the aim a little quicker
     // than the dolly), and snap on a cut.
@@ -2527,11 +2719,13 @@ void Director::Update( double inSeconds, float inDeltaTime )
         m_up = up;
         m_fov = fov;
     }
-    else if( plan.Frame == Framing::Neck || plan.Frame == Framing::Arrival )
+    else if( plan.Frame == Framing::Neck || plan.Frame == Framing::Arrival || plan.Bolted )
     {
         // The neck camera is bolted to the guitar, like a GoPro on the headstock: no easing, it
         // moves exactly as the guitar does. The guitar floats on its strap (Band::SwingInstrument),
-        // which is what keeps the picture from snapping.
+        // which is what keeps the picture from snapping. A story shot that keeps pace with
+        // something ("lin": riding a ledge of hell up past the band at 32 m/s) is bolted too:
+        // eased, it trails what it rides with by metres.
         m_eye = eye;
         m_target = target;
         m_up = up;

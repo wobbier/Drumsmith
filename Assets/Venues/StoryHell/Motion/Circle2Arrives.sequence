@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Circle2Arrives",
  "FrameRate": 30,
- "DurationFrames": 360,
+ "DurationFrames": 150,
  "Tracks": [
   {
    "Binding": "Body",
@@ -13,14 +13,14 @@
      "Frame": 0,
      "Value": [
       0,
-      -315.0,
+      -387.5,
       0,
       0
      ],
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 360,
+     "Frame": 150,
      "Value": [
       0,
       0,

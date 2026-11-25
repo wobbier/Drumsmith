@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "JumpLanding",
  "FrameRate": 30,
- "DurationFrames": 70,
+ "DurationFrames": 86,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 50,
+     "Frame": 59,
      "Value": [
       0,
       -4000,
@@ -30,7 +30,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 51,
+     "Frame": 60,
      "Value": [
       0,
       0,
@@ -40,7 +40,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 62,
+     "Frame": 71,
      "Value": [
       0,
       0,
@@ -50,7 +50,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 63,
+     "Frame": 72,
      "Value": [
       0,
       -4000,
@@ -60,7 +60,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 70,
+     "Frame": 86,
      "Value": [
       0,
       -4000,

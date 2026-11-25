@@ -71,6 +71,9 @@ def song(entry):
         out["Moments"] = moments
     if scene_there(entry.get("Venue")):
         out["Venue"] = entry["Venue"]
+    # A continuous show holds the venue this long after the last note before the next song.
+    if entry.get("OutroSeconds"):
+        out["OutroSeconds"] = entry["OutroSeconds"]
     return out
 
 

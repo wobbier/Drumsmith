@@ -1,0 +1,470 @@
+{
+ "Version": 1,
+ "Name": "CerberusGallop",
+ "FrameRate": 30,
+ "DurationFrames": 18,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0,
+      0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      0,
+      0.30311,
+      0.21651,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      0,
+      -0.30311,
+      0.21651,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      0,
+      -0.0,
+      0.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      0,
+      0.30311,
+      -0.21651,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0,
+      -0.30311,
+      -0.21651,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      0,
+      -0.0,
+      -0.0,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0348995,
+      0.0,
+      0.0,
+      0.9993908
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      0.0174524,
+      0.0,
+      0.0,
+      0.9998477
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      -0.0174524,
+      0.0,
+      0.0,
+      0.9998477
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      -0.0348995,
+      0.0,
+      0.0,
+      0.9993908
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      -0.0174524,
+      0.0,
+      0.0,
+      0.9998477
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.0174524,
+      0.0,
+      0.0,
+      0.9998477
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      0.0348995,
+      0.0,
+      0.0,
+      0.9993908
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "FrontLeft",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      0.2832535,
+      0.0,
+      0.0,
+      0.9590451
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      0.2832535,
+      0.0,
+      0.0,
+      0.9590451
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      -0.2832535,
+      0.0,
+      0.0,
+      0.9590451
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -0.2832535,
+      0.0,
+      0.0,
+      0.9590451
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      -0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "FrontRight",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.1590769,
+      0.0,
+      0.0,
+      0.9872662
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      0.3254994,
+      0.0,
+      0.0,
+      0.9455423
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      0.1709406,
+      0.0,
+      0.0,
+      0.9852813
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      -0.1590769,
+      0.0,
+      0.0,
+      0.9872662
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      -0.3254994,
+      0.0,
+      0.0,
+      0.9455423
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      -0.1709406,
+      0.0,
+      0.0,
+      0.9852813
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      0.1590769,
+      0.0,
+      0.0,
+      0.9872662
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "BackLeft",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      -0.2541366,
+      0.0,
+      0.0,
+      0.9671683
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      -0.2541366,
+      0.0,
+      0.0,
+      0.9671683
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      -0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      0.2541366,
+      0.0,
+      0.0,
+      0.9671683
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.2541366,
+      0.0,
+      0.0,
+      0.9671683
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "BackRight",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.1424529,
+      0.0,
+      0.0,
+      0.9898016
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 3,
+     "Value": [
+      -0.2923095,
+      0.0,
+      0.0,
+      0.9563238
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 6,
+     "Value": [
+      -0.1530972,
+      0.0,
+      0.0,
+      0.9882111
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 9,
+     "Value": [
+      0.1424529,
+      0.0,
+      0.0,
+      0.9898016
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      0.2923095,
+      0.0,
+      0.0,
+      0.9563238
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 15,
+     "Value": [
+      0.1530972,
+      0.0,
+      0.0,
+      0.9882111
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 18,
+     "Value": [
+      -0.1424529,
+      0.0,
+      0.0,
+      0.9898016
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

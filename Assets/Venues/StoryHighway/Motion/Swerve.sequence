@@ -79,20 +79,40 @@
     {
      "Frame": 22,
      "Value": [
-      0.0,
-      -0.0139622,
-      0.0,
-      0.9999025
+      -4.87e-05,
+      -0.0139621,
+      -0.0034903,
+      0.9998964
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 44,
+     "Value": [
+      -3.2e-05,
+      -0.0026178,
+      -0.012217,
+      0.9999219
      ],
      "Interpolation": "SmoothStep"
     },
     {
      "Frame": 78,
      "Value": [
-      0.0,
-      0.0130896,
-      0.0,
-      0.9999143
+      -4.57e-05,
+      0.0130895,
+      0.0034904,
+      0.9999082
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 106,
+     "Value": [
+      -4.87e-05,
+      0.0034903,
+      0.0139621,
+      0.9998964
      ],
      "Interpolation": "SmoothStep"
     },
@@ -107,12 +127,22 @@
      "Interpolation": "SmoothStep"
     },
     {
+     "Frame": 158,
+     "Value": [
+      -2.74e-05,
+      -0.0034905,
+      -0.0078539,
+      0.9999631
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
      "Frame": 185,
      "Value": [
-      0.0,
+      -1.52e-05,
       0.0043633,
-      0.0,
-      0.9999905
+      0.0034906,
+      0.9999844
      ],
      "Interpolation": "SmoothStep"
     },

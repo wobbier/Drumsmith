@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "ShaftLedges",
  "FrameRate": 30,
- "DurationFrames": 20,
+ "DurationFrames": 16,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 20,
+     "Frame": 16,
      "Value": [
       0,
       24,

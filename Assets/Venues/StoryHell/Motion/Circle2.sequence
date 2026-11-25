@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Circle2",
  "FrameRate": 30,
- "DurationFrames": 89,
+ "DurationFrames": 38,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,7 +20,7 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 89,
+     "Frame": 38,
      "Value": [
       0,
       65.0,

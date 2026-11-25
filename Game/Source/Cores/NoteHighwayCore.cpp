@@ -1082,8 +1082,16 @@ void NoteHighwayCore::UpdateShowTail()
     // The tail's over when the audio stops (or ran out long ago). A long one is cut short with a
     // fade, the next song starting under it.
     const double lengthMs = static_cast<double>( m_currentTrackPack.GetLength() );
+    // The song's outro (ProgressionStorySong::OutroSeconds): the venue has that long after the
+    // last note whatever the recording has left.
+    const ProgressionStorySong* storySong = GigSession::GetInstance().CurrentStorySong();
+    const double outroMs = storySong ? storySong->OutroSeconds * 1000.0 : 0.0;
+    if( m_songTimeMs < m_lastNoteMs + outroMs )
+    {
+        return;
+    }
     const bool over = !m_currentTrackPack.IsPlaying() || m_songTimeMs > lengthMs + 2000.0;
-    const bool tooLong = m_songTimeMs > m_lastNoteMs + kShowMaxTailMs;
+    const bool tooLong = m_songTimeMs > m_lastNoteMs + std::max( kShowMaxTailMs, outroMs );
     if( !over && !tooLong )
     {
         return;
@@ -1567,8 +1575,16 @@ void NoteHighwayCore::UpdateSongClock( float inDeltaTime )
         // FMOD's position moves once per mixer block; between moves the clock runs on frame
         // time. Each move measures the gap, and the frames after it close the gap a little at a
         // time, so the clock never steps (a few ms at once is a visible hitch on the highway).
+        // Past the end of the recording there is no audio to keep time by (FMOD's position is back
+        // at the start by then): the clock runs on frame time alone, through a show's outro
+        // (ProgressionStorySong::OutroSeconds).
         const unsigned int audioMs = m_currentTrackPack.GetPositionMs();
-        if( audioMs != m_lastAudioPositionMs )
+        if( !m_currentTrackPack.IsPlaying() )
+        {
+            m_lastAudioPositionMs = audioMs;
+            m_clockErrorMs = 0.0;
+        }
+        else if( audioMs != m_lastAudioPositionMs )
         {
             m_lastAudioPositionMs = audioMs;
             const double error = static_cast<double>( audioMs ) - m_songTimeMs;

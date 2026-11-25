@@ -6,26 +6,63 @@
  "Tracks": [
   {
    "Binding": "Body",
-   "Component": "Transform",
-   "Property": "Rotation",
+   "Component": "VenueFigure",
+   "Property": "Bow",
    "Keys": [
     {
      "Frame": 0,
      "Value": [
-      0.0,
-      0.0,
-      0.0,
-      1.0
+      28.0,
+      0,
+      0,
+      0
      ],
      "Interpolation": "SmoothStep"
     },
     {
      "Frame": 20,
      "Value": [
-      0.0523041,
-      0.0348517,
-      -0.0018265,
-      0.9980212
+      34.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      28.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Turn",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 20,
+     "Value": [
+      7.0,
+      0,
+      0,
+      0
      ],
      "Interpolation": "SmoothStep"
     },
@@ -33,9 +70,46 @@
      "Frame": 45,
      "Value": [
       0.0,
-      0.0,
-      0.0,
-      1.0
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Nod",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      18.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 26,
+     "Value": [
+      10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      18.0,
+      0,
+      0,
+      0
      ],
      "Interpolation": "SmoothStep"
     }

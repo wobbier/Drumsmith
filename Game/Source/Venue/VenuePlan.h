@@ -23,6 +23,10 @@ struct VenuePlan
         // crowd. The drum kit is built as one unit in the drummer's frame (Band's kStrike) and
         // turns with it.
         float Yaw = 180.f;
+        float SeatHeight = 0.f;
+        // VenueSpot's: planted wide with nowhere to walk; the amp, wedges and mic stand.
+        bool PowerStance = false;
+        bool Gear = true;
         // False: nobody stands here. No body, instrument, follow spot or shot of the spot.
         bool Present = true;
     };
@@ -161,6 +165,8 @@ struct VenuePlan
     Vector3 ColorKeep = Vector3( 0.f, 0.f, 0.f );
     std::string LightsFrom;
     std::string LightsUntil;
+    // A chart without looks gets the concert look in its quiet sections (VenueInfo::QuietLook).
+    bool QuietLook = true;
     // The venue's name, for the logs (a scene's VenueInfo; the rooms leave it empty).
     std::string Name;
 

@@ -20,30 +20,10 @@
      "Interpolation": "Linear"
     },
     {
-     "Frame": 30,
-     "Value": [
-      0,
-      0.12,
-      4.5,
-      0
-     ],
-     "Interpolation": "Linear"
-    },
-    {
-     "Frame": 60,
-     "Value": [
-      0,
-      0,
-      9.0,
-      0
-     ],
-     "Interpolation": "Linear"
-    },
-    {
      "Frame": 90,
      "Value": [
       0,
-      0.12,
+      0,
       15.10029,
       0
      ],

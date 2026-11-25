@@ -37,6 +37,10 @@ namespace
     constexpr float kMicStandZ = 0.42f;
     constexpr float kMicStandHeight = 1.47f;
     const glm::vec3 kMicGrip( 0.f, kMicStandHeight - 0.05f, kMicStandZ );
+    // The hand mic: its grille's centre up the handle from the palm, and how far that sits off
+    // the lips (the grille's 3.1 cm radius leaves about 2 cm).
+    constexpr float kHandMicGrille = 0.11f;
+    constexpr float kHandMicLips = 0.05f;
 
     glm::quat Axis( float inDegrees, const glm::vec3& inAxis )
     {
@@ -209,9 +213,15 @@ void Band::Clear()
     m_endTime = 1e9f;
     m_ghosted.clear();
     m_ghost = 0.f;
+    m_backlit = 0.f;
     m_fall = 0.f;
     m_fallSeconds = 0.f;
     m_dive = 0.f;
+    m_air = 0.f;
+    m_reach = 0.f;
+    m_shield = 0.f;
+    m_reachSeconds = 0.f;
+    m_storied = false;
 }
 
 
@@ -266,10 +276,16 @@ void Band::StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vecto
     case StoryPose::Aloft:
         // Lifted off the ground with everything they play, and riding the air there (what
         // Falling settles into, without the tumble first).
-        outPosition.y += 1.2f + 0.22f * std::sin( t * 0.7f + phase );
-        outPosition.x += 0.12f * std::sin( t * 0.31f + phase * 1.3f );
-        outRotation.x += 3.5f * std::sin( t * 0.45f + phase );
-        outRotation.z += 4.f * std::cos( t * 0.38f + phase );
+        // (Gently: the last chorus is shot close on each of them, from where they hang.)
+        outPosition.y += 1.2f + 0.16f * std::sin( t * 0.7f + phase );
+        outPosition.x += 0.06f * std::sin( t * 0.31f + phase * 1.3f );
+        outRotation.x += 2.5f * std::sin( t * 0.45f + phase );
+        outRotation.z += 2.5f * std::cos( t * 0.38f + phase );
+        break;
+    case StoryPose::Reach:
+    case StoryPose::Shield:
+        // Aloft and holding still: they hang there (the singer's hands do the work: UpdateVocals).
+        outPosition.y += 1.2f;
         break;
     case StoryPose::Floating:
         outPosition.y += 0.6f + 0.25f * std::sin( t * 0.6f + phase );
@@ -294,6 +310,21 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
     m_fall = ( inTo == StoryPose::Falling ? u : 0.f ) + ( inFrom == StoryPose::Falling ? 1.f - u : 0.f );
     m_fallSeconds = std::max( inTo == StoryPose::Falling ? inToSeconds : inFrom == StoryPose::Falling ? inFromSeconds : 0.f, 0.f );
     m_dive = m_fall * VenueTiming::Smooth( ( m_fallSeconds - 2.f ) / 7.f );
+    // In the air with what they play (a fall, or carried aloft): no floor under them, so nothing
+    // that only stands on one comes along. The rug and the mic stands are gone, the singer's mic
+    // is in their hand.
+    const auto airborne = []( StoryPose inPose ) { return inPose == StoryPose::Falling || inPose == StoryPose::Aloft || inPose == StoryPose::Reach || inPose == StoryPose::Shield; };
+    m_air = ( airborne( inTo ) ? u : 0.f ) + ( airborne( inFrom ) ? 1.f - u : 0.f );
+    // The singer's plea: the free hand goes up toward the light over about a second and a half
+    // (Reach), then comes across in front of the eyes in about half a second (Shield); whatever
+    // follows takes it down again as it blends in.
+    const auto up = []( StoryPose inPose, float inHeld ) { return inPose == StoryPose::Shield ? 1.f : inPose == StoryPose::Reach ? VenueTiming::Smooth( inHeld / 1.6f ) : 0.f; };
+    const auto shade = []( StoryPose inPose, float inHeld ) { return inPose == StoryPose::Shield ? VenueTiming::Smooth( inHeld / 0.6f ) : 0.f; };
+    const bool pleading = inTo == StoryPose::Reach || inTo == StoryPose::Shield;
+    m_reach = pleading ? up( inTo, inToSeconds ) : up( inFrom, inFromSeconds ) * ( 1.f - u );
+    m_shield = pleading ? shade( inTo, inToSeconds ) : shade( inFrom, inFromSeconds ) * ( 1.f - u );
+    m_reachSeconds = inToSeconds;
+    m_storied = true;
     for( int index = 0; index < VenueData::MemberCount; ++index )
     {
         Member& member = m_members[index];
@@ -312,7 +343,8 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
             const Vector3 rotation = fromRotation + ( toRotation - fromRotation ) * u;
             const float scale = fromScale + ( toScale - fromScale ) * u;
             ioTransform.SetScale( Vector3( scale, scale, scale ) );
-            if( inPitch == 0.f )
+            const Member& carried = m_members[index];
+            if( inPitch == 0.f && !carried.Carried )
             {
                 ioTransform.SetPosition( position );
                 ioTransform.SetRotation( rotation );
@@ -321,8 +353,17 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
             const glm::quat upright = Quaternion::FromEulerDegrees( rotation ).InternalQuat;
             const glm::quat dived = upright * Axis( inPitch, kX );
             const glm::vec3 hips( 0.f, 1.f, 0.f );
-            ioTransform.SetPosition( Vector3( position.InternalVector + upright * hips - dived * hips ) );
-            ioTransform.SetRotation( Quaternion( dived ) );
+            glm::vec3 at = position.InternalVector + upright * hips - dived * hips;
+            glm::quat turn = dived;
+            if( carried.Carried )
+            {
+                // On whatever carries their spot: the pose turned with it about the spot.
+                const glm::vec3 spot = carried.Spot.InternalVector;
+                at = spot + carried.CarryTurn * ( at - spot ) + ( inBackline ? glm::vec3( 0.f ) : carried.Jolt );
+                turn = carried.CarryTurn * turn;
+            }
+            ioTransform.SetPosition( Vector3( at ) );
+            ioTransform.SetRotation( Quaternion( turn ) );
         };
         place( member.Group->GetComponent<Transform>(), false, pitch );
         if( member.Backline )
@@ -352,37 +393,48 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
         }
         if( member.MicStand )
         {
-            const float stand = std::max( 0.001f, 1.f - m_fall );
+            const float stand = std::max( 0.001f, 1.f - m_air );
             member.MicStand->GetComponent<Transform>().SetScale( Vector3( stand, stand, stand ) );
+        }
+        if( member.Rug )
+        {
+            const float rug = std::max( 0.001f, 1.f - m_air );
+            member.Rug->GetComponent<Transform>().SetScale( Vector3( 1.1f * rug, 0.005f, 1.f * rug ) );
         }
     }
 
     // The ghost: every material of the band and what they play, see-through, pale and glowing at
-    // its edges (StandardMaterial::Rim). Each material's own look is kept the first time, to go
+    // its edges (StandardMaterial::Rim), only its outermost surface drawn (Shell). Each material's own look is kept the first time, to go
     // back to. The instruments' models load after the band is built, so while there is a ghost
     // the band is looked over again for materials that have turned up since.
     inGhost = std::clamp( inGhost, 0.f, 1.f );
     bool found = false;
     if( inGhost > 0.f )
     {
-        for( const Member& member : m_members )
+        for( size_t index = 0; index < m_members.size(); ++index )
         {
+            const Member& member = m_members[index];
             if( !member.Present || !member.Group )
             {
                 continue;
             }
-            found = GatherGhosted( member.Group->GetComponent<Transform>() ) || found;
+            found = GatherGhosted( member.Group->GetComponent<Transform>(), index == static_cast<size_t>( VenueData::Vocals ) ) || found;
             if( member.Backline )
             {
                 found = GatherGhosted( member.Backline->GetComponent<Transform>() ) || found;
             }
         }
     }
-    if( !found && std::fabs( inGhost - m_ghost ) < 1e-3f )
+    // Through the plea the singer's hand is up against the light from heaven and seen from their
+    // own eyes: backlit, they are a dark, nearly solid shape with the light breaking round the
+    // fingers, not a pale glow lost in it.
+    const float backlit = std::clamp( std::max( m_reach, m_shield ), 0.f, 1.f );
+    if( !found && std::fabs( inGhost - m_ghost ) < 1e-3f && std::fabs( backlit - m_backlit ) < 1e-3f )
     {
         return;
     }
     m_ghost = inGhost;
+    m_backlit = backlit;
     const Vector3 glow( 0.45f, 0.7f, 1.f );
     for( const GhostedMaterial& entry : m_ghosted )
     {
@@ -393,23 +445,36 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
             continue;
         }
         material->SetRenderMode( inGhost > 0.f || entry.Transparent ? Moonlight::RenderingMode::Transparent : Moonlight::RenderingMode::Opaque );
-        standard->SetOpacity( entry.Opacity * ( 1.f - 0.3f * inGhost ) );
         // A faint glow all over; the rim carries the rest (more than this blooms the band into a blob in a dark scene).
-        standard->SetEmissiveColor( entry.Emissive + ( glow * 0.7f - entry.Emissive ) * inGhost );
-        standard->SetRim( entry.Rim + ( 1.f - entry.Rim ) * inGhost );
+        float opacity = entry.Opacity * ( 1.f - 0.3f * inGhost );
+        Vector3 emissive = entry.Emissive + ( glow * 0.7f - entry.Emissive ) * inGhost;
+        float rim = entry.Rim + ( 1.f - entry.Rim ) * inGhost;
+        if( entry.Singer && backlit > 0.f )
+        {
+            opacity += ( entry.Opacity * 0.97f - opacity ) * backlit;
+            emissive = emissive * ( 1.f - 0.92f * backlit );
+            rim *= 1.f - 0.6f * backlit;
+        }
+        standard->SetOpacity( opacity );
+        standard->SetEmissiveColor( emissive );
+        standard->SetRim( rim );
+        // Only the ghost's outside shows (StandardMaterial::Shell): not the far side of a body
+        // through its near side, the arm behind the chest, a guitar's back through its front.
+        // (What was see-through before it was a ghost stays as it was drawn.)
+        standard->SetShell( inGhost > 0.f && !entry.Transparent ? true : entry.Shell );
     }
 }
 
 
-bool Band::GatherGhosted( Transform& inRoot )
+bool Band::GatherGhosted( Transform& inRoot, bool inSinger )
 {
     bool found = false;
-    const auto gather = [this, &found]( const SharedPtr<Moonlight::Material>& material ) {
+    const auto gather = [this, &found, inSinger]( const SharedPtr<Moonlight::Material>& material ) {
         StandardMaterial* standard = material ? dynamic_cast<StandardMaterial*>( material.get() ) : nullptr;
         const bool known = std::any_of( m_ghosted.begin(), m_ghosted.end(), [&material]( const GhostedMaterial& entry ) { return entry.Material.lock() == material; } );
         if( standard && !known )
         {
-            m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent, standard->Rim } );
+            m_ghosted.push_back( { material, standard->EmissiveColor, standard->Opacity, material->RenderMode == Moonlight::RenderingMode::Transparent, standard->Rim, standard->Shell, inSinger } );
             found = true;
         }
     };
@@ -467,6 +532,9 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, 
         member.Phase = VenueTiming::Noise( 17u, static_cast<uint32_t>( index ) ) * 6.f;
         member.Spot = inPlan.SpotOf( index ).Feet;
         member.Yaw = inPlan.SpotOf( index ).Yaw;
+        member.SeatHeight = inPlan.SpotOf( index ).SeatHeight;
+        member.PowerStance = inPlan.SpotOf( index ).PowerStance;
+        member.Gear = inPlan.SpotOf( index ).Gear;
     }
     m_members[VenueData::Guitar].Strums = inVenue.m_guitarStrums;
     m_members[VenueData::Bass].Strums = inVenue.m_bassStrums;
@@ -561,6 +629,7 @@ void Band::Build( VenueKit& inKit, Transform* inStage, const VenuePlan& inPlan, 
         look.TexturePath = VenueKit::Skin( pick( VenueKit::SkinCount(), 0u ) );
         member.Model = static_cast<int>( pick( static_cast<uint32_t>( People::kCount ), 7u ) );
         look.ModelPath = People::kPeople[member.Model].Model;
+        member.Skin = look.TexturePath;
         look.Mouth = Vector3( People::kPeople[member.Model].Mouth );
         member.Body.Build( inKit, &group, Vector3( 0.f, 0.f, 0.f ), 0.f, look );
         switch( index )
@@ -834,6 +903,7 @@ namespace
 
 void Band::BuildMicStand( VenueKit& inKit, Member& ioMember, const Vector3& inPosition, float inHeight )
 {
+    if( ioMember.SeatHeight > 0.f || !ioMember.Gear ) return;
     ioMember.MicStand = inKit.Group( "MicStand", &FloorOf( ioMember ), inPosition );
     if( !ioMember.MicStand ) return;
     Transform& stand = ioMember.MicStand->GetComponent<Transform>();
@@ -851,7 +921,7 @@ void Band::BuildDrums( VenueKit& inKit, Member& ioMember )
     Transform& group = ioMember.Group->GetComponent<Transform>();
     // The kit stands on the floor: the drummer leaves it there (SetStoryState). The sticks go with them.
     Transform& floor = FloorOf( ioMember );
-    inKit.Box( Vector3( 0.05f, 0.005f, 0.45f ), Vector3( 2.2f, 0.01f, 2.f ), Vector3( 0.25f, 0.04f, 0.04f ), &floor );
+    ioMember.Rug = inKit.Box( Vector3( 0.05f, 0.005f, 0.45f ), Vector3( 2.2f, 0.01f, 2.f ), Vector3( 0.25f, 0.04f, 0.04f ), &floor );
     inKit.Prop( "Assets/Models/Instruments/Runtime/DrumHardware.obj", Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &floor );
     // Each exported piece has a local origin for hit squash / cymbal wobble. The hardware
     // stays stationary, and head centres remain on the same IK strike targets.
@@ -892,6 +962,7 @@ void Band::BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass )
     ioMember.NeckLength = inBass ? 0.86f : 0.62f;
     inKit.Prop( inBass ? "Assets/Models/Instruments/Runtime/Bass.obj" : "Assets/Models/Instruments/Runtime/Guitar.obj",
         Vector3( 0.f, 0.f, 0.f ), 1.f, 0.f, &guitar );
+    if( ioMember.SeatHeight > 0.f || !ioMember.Gear ) return;
     // An amp behind them.
     const float side = inBass ? 1.f : -1.f;
     Transform& floor = FloorOf( ioMember );
@@ -915,6 +986,17 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
     BuildMicStand( inKit, ioMember, Vector3( 0.f, 0.f, kMicStandZ ), kMicStandHeight );
     // A pair of monitor wedges at the singer's feet.
     Transform& group = ioMember.Group->GetComponent<Transform>();
+    // A mic for their hand: the stand doesn't come with them into the air (hidden until then).
+    ioMember.HandMic = inKit.Group( "HandMic", &group );
+    if( ioMember.HandMic )
+    {
+        using Shape = Moonlight::MeshType;
+        Transform& mic = ioMember.HandMic->GetComponent<Transform>();
+        inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.f, 0.f ), Vector3( 0.032f, 0.17f, 0.032f ), Vector3( 0.05f, 0.05f, 0.06f ), &mic );
+        inKit.Piece( Shape::Sphere, Vector3( 0.f, kHandMicGrille, 0.f ), Vector3( 0.062f, 0.062f, 0.062f ), Vector3( 0.4f, 0.4f, 0.42f ), &mic );
+        mic.SetScale( Vector3( 0.001f, 0.001f, 0.001f ) );
+    }
+    if( ioMember.SeatHeight > 0.f || !ioMember.Gear ) return;
     // Percussion for the vocal part's tambourine and cowbell sections, hidden until played. In
     // its own space a tambourine's disc lies flat (y up), a cowbell's mouth points down -y.
     if( !m_percussion.empty() )
@@ -952,16 +1034,7 @@ void Band::BuildVocals( VenueKit& inKit, Member& ioMember )
             ioMember.Loose.push_back( { wedge, wedgeAt, Axis( 35.f, kX ), x < 0.f ? 0.13f : 0.59f } );
         }
     }
-    // A mic for their hand: the stand doesn't come with them in a fall (hidden until then).
-    ioMember.HandMic = inKit.Group( "HandMic", &group );
-    if( ioMember.HandMic )
-    {
-        using Shape = Moonlight::MeshType;
-        Transform& mic = ioMember.HandMic->GetComponent<Transform>();
-        inKit.Piece( Shape::Cylinder, Vector3( 0.f, 0.f, 0.f ), Vector3( 0.032f, 0.17f, 0.032f ), Vector3( 0.05f, 0.05f, 0.06f ), &mic );
-        inKit.Piece( Shape::Sphere, Vector3( 0.f, 0.11f, 0.f ), Vector3( 0.062f, 0.062f, 0.062f ), Vector3( 0.4f, 0.4f, 0.42f ), &mic );
-        mic.SetScale( Vector3( 0.001f, 0.001f, 0.001f ) );
-    }
+
 }
 
 
@@ -1528,6 +1601,24 @@ void Band::UpdateStringed( Member& ioMember, int inIndex, double inSeconds, doub
         pose.Offset += ( glm::vec3( 0.f, 0.f, 0.12f ) - pose.Offset ) * atMic;
         pose.Turn *= 1.f - atMic;
     }
+    if( ioMember.SeatHeight > 0.f )
+    {
+        pose.Seated = true;
+        pose.SeatHeight = ioMember.SeatHeight;
+        pose.Offset = glm::vec3( 0.f );
+    }
+    else if( ioMember.PowerStance )
+    {
+        // Planted wide where there's nowhere to walk (a solo is played where they stand): the
+        // feet well apart, the knees bent and dipping on the beat, leaning back into it and
+        // the head banging.
+        pose.Legs[0].Spread = pose.Legs[1].Spread = 30.f + 4.f * energy;
+        pose.Crouch = 0.13f + 0.05f * energy + 0.05f * pulse * energy;
+        pose.Lean = -9.f + 12.f * energy * pulse + 4.f * soloing * pulse;
+        pose.Nod = ( 6.f + 30.f * energy ) * pulse - 10.f;
+        pose.Offset = glm::vec3( 0.f );
+    }
+    CarryPose( ioMember, pose );
     DivePose( ioMember, pose, false );
     ioMember.Body.Stand( pose );
 
@@ -1781,7 +1872,8 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     const bool singing = Singing( VenueData::Vocals, inSeconds, &open );
     // At the mic through a line; out working the crowd between lines.
     uint32_t gap = 0;
-    const float away = AwayFromMic( inSeconds, &gap );
+    const bool seated = ioMember.SeatHeight > 0.f;
+    const float away = seated ? 0.f : AwayFromMic( inSeconds, &gap );
     const bool atMic = away < 0.2f;
     const bool out = away > 0.85f;
     pose.Offset = glm::vec3( away * 1.3f * std::sin( t * 0.27f + ioMember.Phase ), 0.f, -away * 0.5f );
@@ -1792,6 +1884,8 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
         const float hop = static_cast<float>( measure - std::floor( measure ) );
         pose.Offset.y = 0.35f * std::max( 0.f, std::sin( hop * kPi * 2.f ) ) * ( hop < 0.5f ? 1.f : 0.f );
     }
+    // Nobody walks out front or jumps in mid air: aloft or falling, they keep to their place.
+    pose.Offset *= 1.f - m_air;
     pose.Mouth = open;
     pose.Lean = atMic ? 8.f : 2.f + 6.f * pulse;
     pose.Nod = singing ? -6.f + 3.f * open : atMic ? 4.f * pulse - 3.f : 10.f * pulse - 4.f;
@@ -1862,7 +1956,7 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     }
     // Percussion sections (the vocal part's tambourine, cowbell or clap), struck on the chart's
     // hits. The free hand plays, and the mic hand helps when it isn't on the mic.
-    const PercussionSpan* percussion = singing ? nullptr : PercussionAt( inSeconds );
+    const PercussionSpan* percussion = singing || seated ? nullptr : PercussionAt( inSeconds );
     const float strike = percussion ? PercussionStrike( inSeconds, inBeat ) : 0.f;
     if( percussion && percussion->Kind == Percussion::Clap )
     {
@@ -1897,20 +1991,45 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
             micArm.Grip = 0.8f;
         }
     }
-    // In a fall there's no stand: the mic is in their hand, up at their mouth, and as the dive
-    // comes the other arm stretches out ahead of them.
-    const bool handheld = m_fall > 0.5f;
+    // In the air there's no stand: the mic is in their hand, up at their mouth, and as a fall's
+    // dive comes the other arm stretches out ahead of them.
+    const bool handheld = seated || m_air > 0.5f;
+    if( seated )
+    {
+        pose.Seated = true;
+        pose.SeatHeight = ioMember.SeatHeight;
+        freeArm = Performer::Arm();
+        freeArm.Reach = true;
+        freeArm.Target = glm::vec3( -0.16f, ioMember.SeatHeight + 0.36f, 0.44f );
+        freeArm.Pole = glm::vec3( -1.f, -1.f, 0.f );
+        freeArm.Grip = 0.85f;
+    }
+    // Free Bird's plea (the Reach and Shield poses): the head goes back to look up into the light
+    // and they hang still under it (shielding, the chin comes down a little behind the hand).
+    const float plea = std::max( m_reach, m_shield );
+    if( plea > 0.f )
+    {
+        pose.Nod += ( -32.f + 12.f * m_shield - pose.Nod ) * plea;
+        pose.Lean += ( -8.f - pose.Lean ) * plea;
+        pose.HeadTurn *= 1.f - plea;
+        pose.Side *= 1.f - plea;
+        pose.Offset *= 1.f - plea;
+    }
+    CarryPose( ioMember, pose );
     DivePose( ioMember, pose, false );
     if( handheld )
     {
         ioMember.Body.Stand( pose );
+        // The handle comes up at 40 degrees from below and in front of the chin, the grille a
+        // couple of centimetres off the lips; the fist closes round it, the thumb toward the
+        // grille, the palm turned in toward their throat.
         const glm::quat head = ioMember.Body.HeadRotation();
         micArm = Performer::Arm();
         micArm.Reach = true;
-        micArm.Target = ioMember.Body.HeadCentre() + head * glm::vec3( 0.03f, -0.1f, 0.2f );
+        micArm.Target = ioMember.Body.Mouth() - head * ( Axis( -50.f, kX ) * kY ) * ( kHandMicGrille + kHandMicLips );
         micArm.Pole = glm::vec3( 1.f, -1.f, 0.f );
-        micArm.Fingers = head * glm::vec3( -0.4f, 0.2f, 0.2f );
-        micArm.Palm = head * glm::vec3( 0.f, 0.3f, -1.f );
+        micArm.Fingers = head * glm::vec3( -0.79f, 0.47f, 0.4f );
+        micArm.Palm = head * glm::vec3( -0.61f, -0.61f, -0.51f );
         micArm.Grip = 0.9f;
         if( !percussion )
         {
@@ -1919,14 +2038,49 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
             freeArm.Elbow += ( 8.f - freeArm.Elbow ) * m_dive;
         }
     }
+    if( plea > 0.f && !seated )
+    {
+        // The free (left) hand: from hanging at their side up to full stretch ahead and above them
+        // (where they are looking, up into the light), open, its back to their eyes and straining
+        // a little further; then pulled in a little and turned flat across the light, between it
+        // and their eyes, the palm to their face, the fingers across toward the other side.
+        ioMember.Body.Stand( pose );
+        const glm::vec3 eyes = ioMember.Body.HeadCentre();
+        const float strain = static_cast<float>( m_reachSeconds );
+        const glm::vec3 tremble( 0.012f * std::sin( strain * 31.f ), 0.02f * std::sin( strain * 0.9f ) + 0.008f * std::sin( strain * 23.f ), 0.01f * std::sin( strain * 27.f ) );
+        const glm::vec3 hanging = eyes + glm::vec3( -0.3f, -0.85f, 0.05f );
+        const glm::vec3 overhead = eyes + glm::vec3( -0.05f, 0.45f, 0.45f ) + tremble * ( 1.f - m_shield );
+        const glm::vec3 brow = eyes + glm::vec3( -0.07f, 0.3f, 0.33f );
+        freeArm = Performer::Arm();
+        freeArm.Reach = true;
+        freeArm.Target = hanging + ( overhead - hanging ) * m_reach;
+        freeArm.Target += ( brow - freeArm.Target ) * m_shield;
+        freeArm.Pole = glm::normalize( glm::vec3( -1.f, -0.6f * m_shield, 0.3f ) );
+        const glm::vec3 fingersUp( 0.f, 0.8f, 0.6f );
+        const glm::vec3 palmUp( 0.1f, -0.6f, 0.8f );
+        const glm::vec3 fingersAcross( 1.f, 0.27f, 0.f );
+        const glm::vec3 palmAcross( 0.19f, -0.73f, -0.65f );
+        freeArm.Fingers = glm::normalize( fingersUp + ( fingersAcross - fingersUp ) * m_shield );
+        freeArm.Palm = glm::normalize( palmUp + ( palmAcross - palmUp ) * m_shield );
+        freeArm.Grip = 0.05f + 0.1f * m_shield;
+    }
     ioMember.Body.Apply( pose );
     if( ioMember.HandMic )
     {
         ioMember.HandMic->GetComponent<Transform>().SetScale( handheld ? Vector3( 1.f, 1.f, 1.f ) : Vector3( 0.001f, 0.001f, 0.001f ) );
         if( handheld )
         {
-            // Its head tipped back toward their mouth.
-            Puppet::PlacePiece( ioMember.HandMic, ioMember.Body.Hand( 1 ), ioMember.Body.HeadRotation() * Axis( -50.f, kX ) );
+            // From wherever the hand got to, the grille toward their mouth.
+            const glm::vec3 hand = ioMember.Body.Hand( 1 );
+            const glm::vec3 toMouth = ioMember.Body.Mouth() - hand;
+            if( glm::dot( toMouth, toMouth ) > 1e-6f )
+            {
+                Puppet::PlacePiece( ioMember.HandMic, hand, Puppet::FromTo( kY, glm::normalize( toMouth ) ) );
+            }
+            else
+            {
+                Puppet::PlacePiece( ioMember.HandMic, hand, ioMember.Body.HeadRotation() * Axis( -50.f, kX ) );
+            }
         }
     }
     // The instrument in the playing hand; hidden (shrunk) the rest of the time.
@@ -1942,6 +2096,19 @@ void Band::UpdateVocals( Member& ioMember, double inSeconds, double inBeat, floa
     // cowbell by its handle.
     hold( ioMember.Tambourine, percussion && percussion->Kind == Percussion::Tambourine, Axis( 75.f, kX ) * Axis( 25.f * strike, kZ ), glm::vec3( 0.f, 0.f, 0.11f ) );
     hold( ioMember.Cowbell, percussion && percussion->Kind == Percussion::Cowbell, Axis( 20.f, kX ), glm::vec3( 0.f, 0.04f, 0.f ) );
+}
+
+
+void Band::CarryPose( const Member& inMember, Performer::Pose& ioPose ) const
+{
+    // (Under a story pose SetStoryState places the group with the whole throw instead.)
+    if( m_storied || !inMember.Carried || !inMember.Planted || ioPose.Seated || ioPose.Kneeling )
+    {
+        return;
+    }
+    ioPose.Thrown += inMember.Thrown;
+    ioPose.Lean += inMember.ThrownLean;
+    ioPose.Side += inMember.ThrownSide;
 }
 
 
@@ -2000,6 +2167,7 @@ void Band::UpdateKeys( Member& ioMember, double inSeconds, double inBeat, float 
         arm.Palm = -kY;
         arm.Grip = 0.3f;
     }
+    CarryPose( ioMember, pose );
     DivePose( ioMember, pose, true );
     ioMember.Body.Apply( pose );
     (void)inEnergy;
@@ -2067,7 +2235,127 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
         default: break;
         }
     }
+    // (Once a story pose has them, SetStoryState places everyone, carried or not.)
+    for( int index = 0; index < VenueData::MemberCount && !m_storied; ++index )
+    {
+        if( m_members[index].Present && m_members[index].Carried )
+        {
+            PlaceCarried( index );
+        }
+    }
     m_lastSeconds = inSeconds;
+}
+
+
+void Band::Carry( int inMember, const Vector3& inFeet, const glm::quat& inTurn, float inDeltaTime )
+{
+    if( !HasMember( inMember ) )
+    {
+        return;
+    }
+    Member& member = m_members[inMember];
+    const glm::vec3 feet = inFeet.InternalVector;
+    const glm::vec3 moved = feet - member.Spot.InternalVector;
+    const float dt = std::clamp( inDeltaTime, 0.f, 0.1f );
+    if( !member.Carried || dt <= 0.f || glm::length( moved ) > 0.5f )
+    {
+        // The first carry, a pause, or a jump (a seek, the scene put back): at rest on the spot.
+        member.Jolt = glm::vec3( 0.f );
+        member.JoltVelocity = glm::vec3( 0.f );
+    }
+    else
+    {
+        // The body has weight and sits on the deck through a soft spring (legs, a seat): when
+        // the deck moves, the body goes on as it was going (Jolt is where it is off the spot),
+        // then the spring pulls it back after the deck, overshooting a little, and the damping
+        // is against the deck's own motion. Stepped finely so any frame rate rides the same.
+        constexpr float kStiffness = 210.f;     // about 2.3 Hz
+        constexpr float kDamping = 9.f;         // a third of critical: a bounce and a half
+        const glm::vec3 deck = moved / dt;
+        const int steps = std::max( 1, static_cast<int>( std::ceil( dt * 240.f ) ) );
+        const float step = dt / static_cast<float>( steps );
+        for( int i = 0; i < steps; ++i )
+        {
+            member.Jolt += ( member.JoltVelocity - deck ) * step;
+            member.JoltVelocity += ( -kStiffness * member.Jolt - kDamping * ( member.JoltVelocity - deck ) ) * step;
+        }
+        // Thrown up off the deck but never far through it; swayed but not off their feet.
+        member.Jolt.y = std::clamp( member.Jolt.y, -0.03f, 0.18f );
+        const glm::vec2 sway( member.Jolt.x, member.Jolt.z );
+        const float most = 0.12f;
+        if( glm::length( sway ) > most )
+        {
+            const glm::vec2 held = sway * ( most / glm::length( sway ) );
+            member.Jolt.x = held.x;
+            member.Jolt.z = held.y;
+        }
+    }
+    member.Spot = inFeet;
+    member.CarryTurn = inTurn;
+    member.Carried = true;
+}
+
+
+void Band::PlaceCarried( int inIndex )
+{
+    Member& member = m_members[inIndex];
+    if( !member.Group )
+    {
+        return;
+    }
+    const glm::quat facing = member.CarryTurn * Axis( member.Yaw, kY );
+    // A body bounces more than the deck under it (its knees and its seat are springs of their
+    // own): the spring's throw, made more of. It sways with it too: tipped toward where it has
+    // been thrown (its top lags the deck's lurch), about its feet. A drummer on a throne, holding
+    // sticks over a kit that stays put, rides it half as hard.
+    const float give = inIndex == VenueData::Drums ? 1.1f : 2.2f;
+    glm::vec3 jolt = member.Jolt * give;
+    jolt.y = std::clamp( jolt.y, -0.04f, 0.2f );
+    const glm::vec3 sideways( jolt.x, 0.f, jolt.z );
+    const float lean = std::min( glm::length( sideways ) * 90.f, 8.f );
+    glm::quat tip( 1.f, 0.f, 0.f, 0.f );
+    if( lean > 0.01f )
+    {
+        tip = glm::angleAxis( lean * kDeg, glm::normalize( glm::cross( glm::vec3( 0.f, 1.f, 0.f ), sideways ) ) );
+    }
+    Transform& group = member.Group->GetComponent<Transform>();
+    member.Planted = member.SeatHeight <= 0.f && inIndex != VenueData::Drums;
+    if( member.Planted )
+    {
+        // On their feet on the deck (the guitarist on a cab's roof): the feet stay put and the
+        // legs take the throw (CarryPose), the body tipping over them.
+        const glm::vec3 local = glm::inverse( facing ) * jolt;
+        const float most = std::max( std::fabs( local.x ), std::fabs( local.z ) );
+        const float scale = most > 1e-5f ? lean / ( most * 90.f ) : 0.f;
+        member.Thrown = local;
+        member.ThrownLean = local.z * 90.f * scale;
+        member.ThrownSide = local.x * 90.f * scale;
+        group.SetPosition( member.Spot );
+        group.SetRotation( Quaternion( facing ) );
+    }
+    else
+    {
+        group.SetPosition( Vector3( member.Spot.InternalVector + jolt ) );
+        group.SetRotation( Quaternion( tip * facing ) );
+    }
+    if( member.Backline )
+    {
+        Transform& backline = member.Backline->GetComponent<Transform>();
+        backline.SetPosition( member.Spot );
+        backline.SetRotation( Quaternion( facing ) );
+    }
+}
+
+
+bool Band::LookOf( int inMember, std::string& outModel, std::string& outSkin ) const
+{
+    if( !HasMember( inMember ) || m_members[inMember].Model < 0 || m_members[inMember].Model >= People::kCount )
+    {
+        return false;
+    }
+    outModel = People::kPeople[m_members[inMember].Model].Model;
+    outSkin = m_members[inMember].Skin;
+    return true;
 }
 
 
@@ -2121,7 +2409,24 @@ Vector3 Band::HandsOf( int inMember ) const
 
 Vector3 Band::FeetOf( int inMember ) const
 {
-    return m_members[std::clamp( inMember, 0, 4 )].Spot;
+    return m_members[std::clamp( inMember, 0, 4 )].Spot + Vector3( 0.f, Lift(), 0.f );
+}
+
+
+float Band::Lift() const
+{
+    // How far a story pose has the band off the floor: the drummer's height over their spot,
+    // else anyone's (the drummer doesn't dive, so theirs is the steadiest).
+    for( int index : { static_cast<int>( VenueData::Drums ), 0, 1, 2, 3, 4 } )
+    {
+        const Member& member = m_members[index];
+        if( member.Present && member.Group )
+        {
+            // (Not the spring's bounce on a carried spot: that is the deck's, not a pose's.)
+            return std::max( member.Group->GetComponent<Transform>().GetPosition().y - member.Jolt.y - member.Spot.y, 0.f );
+        }
+    }
+    return 0.f;
 }
 
 

@@ -13,9 +13,11 @@
 #include "CoreGame/GigSession.h"
 #include "CoreGame/Progression.h"
 #include "Core/CommandLine.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Graphics/DynamicSky.h"
 #include "Graphics/Texture.h"
+#include "Renderer.h"
 #include "Materials/StandardMaterial.h"
 #include "Resource/ResourceCache.h"
 #include "Dementia.h"
@@ -125,6 +127,7 @@ void VenueShow::Clear()
     m_director.Clear();
     m_crowd.Clear();
     m_band.Clear();
+    m_figures.clear();
     m_lyricBoard.Clear();
     m_lyrics.Clear();
     m_accentPlaying = false;
@@ -154,6 +157,7 @@ void VenueShow::Clear()
     m_storyMoments.clear();
     m_storyLanding.clear();
     m_storyCaptions.clear();
+    m_storySounds.clear();
     m_shotSkyOn = false;
     m_storySky.clear();
     m_storySkyOn = false;
@@ -411,7 +415,21 @@ void VenueShow::BuildShow( World& inWorld, const TrackData& inTrack, const Entit
 
     float lastNote = 0.f;
     for( const NoteData& note : inTrack.m_noteData ) lastNote = std::max( lastNote, note.m_triggerTime );
+    // A story set is one band from its first song to its last, and their bodies on the road are
+    // theirs: the cast comes from the set (FNV-1a of its id, the same on every platform), not
+    // from the song. (--story stages a set for a preview only in BuildStory, later.)
+    {
+        static const std::string kPreviewSet = CommandLine::GetString( "--story" );
+        const std::string& set = VenueRegistry::Story().Active() ? VenueRegistry::Story().Set : kPreviewSet;
+        uint32_t hash = 2166136261u;
+        for( const char c : set )
+        {
+            hash = ( hash ^ static_cast<uint8_t>( c ) ) * 16777619u;
+        }
+        m_band.CastSeed = set.empty() ? -1 : static_cast<int>( hash & 0x7fffffffu );
+    }
     m_band.Build( m_kit, &root, m_plan, m_venue, inTrack.m_noteData, m_beats, m_bpm );
+    m_carried = {};
     if( setting >= 2 && m_plan.BuildCrowd )
     {
         // Each room holds a different crowd: the plan's posed areas' heads.
@@ -603,7 +621,14 @@ void VenueShow::ApplyPresentation()
     camera.OverlayTopFade = kHighwayTopFade;
     // The dark board lets the stage show through; notes, lines and pads stay solid.
     camera.OverlayDarkOpacity = kHighwayBoardOpacity;
-    if( m_presentation == Presentation::VenueOnly || CommandLine::Has( "--venue-only" ) )
+    if( CommandLine::Has( "--venue-capture-highway" ) )
+    {
+        // A venue capture that judges framing against the highway: all of it, board and rails.
+        camera.OverlayFadeStart = kHighwayFadeStart;
+        camera.OverlayFadeEnd = kHighwayFadeEnd;
+        camera.OverlayOpacity = 1.f;
+    }
+    else if( m_presentation == Presentation::VenueOnly || CommandLine::Has( "--venue-only" ) )
     {
         // Fade the whole highway out, to frame the venue.
         camera.OverlayFadeStart = 0.f;
@@ -1060,9 +1085,16 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     Vector3 surfer;
     const bool surferUp = m_crowd.SurferUp( surfer );
     m_director.FollowSurfer( surferUp, surfer );
+    CarrySpots( inDeltaTime );
     m_band.Update( seconds, inDeltaTime, CrowdUp() ? m_crowd.Energy() : 0.6f );
     m_lyricBoard.Update( seconds );
     m_director.SetHype( m_hype );
+    // How much of the highway is over the picture, for the story shots that turn their subject
+    // clear of it: none when the venue alone is on screen (--venue-capture-highway: all of it).
+    // (--venue-lead: the turn as if all of it were there, without drawing it.)
+    static const bool kCaptureHighway = CommandLine::Has( "--venue-capture-highway" ) || CommandLine::Has( "--venue-lead" );
+    const bool venueAlone = m_presentation != Presentation::Both || m_highwayAlone || ( CommandLine::Has( "--venue-only" ) && !kCaptureHighway );
+    m_director.SetHighwayShown( kCaptureHighway ? 1.f : venueAlone ? 0.f : m_highwayShown );
     // A venue on the move (VenueInfo::Ride): the cameras take the road until its flag lands.
     m_director.SetRide( m_plan.Ride > 0.f && ( m_plan.RideUntil.empty() || !StoryFlagSet( m_plan.RideUntil, seconds ) ) ? m_plan.Ride : 0.f );
     // What a black and white look leaves in colour here (VenueInfo::KeepRed...), and all of it
@@ -1073,8 +1105,11 @@ void VenueShow::Update( double inSongTimeMs, float inDeltaTime )
     m_director.Update( seconds, inDeltaTime );
     UpdateShotSky();
     UpdateStory( seconds, inDeltaTime );
+    UpdateMoods( inDeltaTime );
     UpdateBeats( seconds );
     UpdateAims( seconds );
+    UpdateSounds( seconds );
+    UpdateFigures();
     UpdateStoryBand( seconds, inDeltaTime );
     UpdateStorySky( seconds );
     m_lights.SetCrowdEnergy( CrowdUp() ? m_crowd.Energy() : 0.6f );
@@ -1192,6 +1227,21 @@ void VenueShow::UpdateAmbience( double inSongTimeMs )
 
 void VenueShow::SetAmbiencePaused( bool inPaused )
 {
+    for( StorySound& sound : m_storySounds )
+    {
+        if( sound.Started && sound.Voice && sound.Voice->HasComponent<AudioSource>() )
+        {
+            AudioSource& source = sound.Voice->GetComponent<AudioSource>();
+            if( inPaused )
+            {
+                source.Pause();
+            }
+            else
+            {
+                source.Resume();
+            }
+        }
+    }
     if( !m_ambience || !m_ambience->HasComponent<AudioSource>() )
     {
         return;
@@ -1278,6 +1328,32 @@ void VenueShow::UpdateHype( double inSeconds, float inDeltaTime )
 }
 
 
+namespace
+{
+    // The chart section a story cue names: the one called exactly that, else the first with that
+    // in its name ("verse" finds verse_1). Exact first, so "verse_1" is not Bat Country's
+    // preverse_1, which comes before it.
+    const TimedCueData* SectionCalled( const VenueData& inVenue, const std::string& inName )
+    {
+        for( const TimedCueData& section : inVenue.m_sections )
+        {
+            if( section.m_name == inName )
+            {
+                return &section;
+            }
+        }
+        for( const TimedCueData& section : inVenue.m_sections )
+        {
+            if( VenueTiming::Contains( section.m_name, inName.c_str() ) )
+            {
+                return &section;
+            }
+        }
+        return nullptr;
+    }
+}
+
+
 double VenueShow::StoryCueTime( const VenueData& inVenue, const std::string& inCue, double inLength, double inFirstNote, double inLastNote )
 {
     // "a|b": cue a when the chart has the section it names, else b ("section:bre+5|at:0.96"), so
@@ -1300,11 +1376,7 @@ double VenueShow::StoryCueTime( const VenueData& inVenue, const std::string& inC
                     name.resize( moved );
                 }
             }
-            found = false;
-            for( const TimedCueData& section : inVenue.m_sections )
-            {
-                found = found || VenueTiming::Contains( section.m_name, name.c_str() );
-            }
+            found = SectionCalled( inVenue, name ) != nullptr;
         }
         return StoryCueTime( inVenue, found ? first : inCue.substr( bar + 1 ), inLength, inFirstNote, inLastNote );
     }
@@ -1320,8 +1392,8 @@ double VenueShow::StoryCueTime( const VenueData& inVenue, const std::string& inC
         }
     }
     // "at:<share>" and "time:<seconds>" place it by hand (until a chart has sections to bind to);
-    // "section:<name>" is the first chart section with that in its name; "drums_in" the first
-    // note and "last_note" the last.
+    // "section:<name>" is the chart section of that name, else the first with that in its name;
+    // "drums_in" the first note and "last_note" the last.
     if( inCue == "last_note" )
     {
         return inLastNote;
@@ -1344,15 +1416,8 @@ double VenueShow::StoryCueTime( const VenueData& inVenue, const std::string& inC
     }
     if( inCue.rfind( "section:", 0 ) == 0 )
     {
-        const std::string name = inCue.substr( 8 );
-        for( const TimedCueData& section : inVenue.m_sections )
-        {
-            if( VenueTiming::Contains( section.m_name, name.c_str() ) )
-            {
-                return section.m_time;
-            }
-        }
-        return inLength * 0.5;
+        const TimedCueData* section = SectionCalled( inVenue, inCue.substr( 8 ) );
+        return section ? section->m_time : inLength * 0.5;
     }
     if( inCue == "song_end" || inCue == "end" )
     {
@@ -1432,12 +1497,30 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
     {
         if( entity && entity->HasComponent<VenueBeat>() )
         {
-            m_beatProps.push_back( { entity, entity->GetComponent<Transform>().GetPosition() } );
+            m_beatProps.push_back( { entity, entity->GetComponent<Transform>().GetPosition(), entity->GetComponent<Transform>().GetRotation() } );
         }
     }
-    if( !m_beatProps.empty() && CommandLine::Has( "--highway-log" ) )
+    m_moodProps.clear();
+    for( const EntityHandle& entity : m_scene.IsLoaded() ? m_scene.GetMarkers().Moods : noMarkers )
+    {
+        if( entity && entity->HasComponent<VenueMood>() )
+        {
+            MoodProp prop;
+            prop.Entity = entity;
+            prop.Rest = entity->GetComponent<Transform>().GetPosition();
+            prop.Scale = entity->GetComponent<Transform>().GetScale();
+            if( const Sequence* sequence = entity->TryGetComponent<Sequence>() )
+            {
+                prop.Speed = sequence->Speed;
+            }
+            m_moodProps.push_back( prop );
+        }
+    }
+    BuildFigures();
+    if( ( !m_beatProps.empty() || !m_moodProps.empty() ) && CommandLine::Has( "--highway-log" ) )
     {
         BRUH_FMT( "Venue: %d beat markers", static_cast<int>( m_beatProps.size() ) );
+        BRUH_FMT( "Venue: %d mood markers", static_cast<int>( m_moodProps.size() ) );
     }
     m_storyParticles.clear();
     m_storyShowLights.clear();
@@ -1455,6 +1538,7 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
         StoryProp prop;
         prop.Entity = entity;
         prop.Flag = marker->Flag;
+        prop.Unless = marker->Unless;
         prop.WhenSet = marker->WhenSet;
         prop.Fade = std::max( marker->FadeSeconds, 0.f );
         prop.Mode = marker->Mode;
@@ -1470,10 +1554,10 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
             const EntityHandle& owner = at->Parent;
             // A one-shot group inside another has its own flag: what is under it is its own to
             // play (a circle of hell that arrives on one flag inside the group that leaves on the next).
-            if( prop.Mode == VenueStory::Motion::Play && at != &transform && owner )
+            if( ( prop.Mode == VenueStory::Motion::Play || prop.Mode == VenueStory::Motion::Clock ) && at != &transform && owner )
             {
                 const VenueStory* inner = owner->TryGetComponent<VenueStory>();
-                if( inner && inner->Mode == VenueStory::Motion::Play )
+                if( inner && ( inner->Mode == VenueStory::Motion::Play || inner->Mode == VenueStory::Motion::Clock ) )
                 {
                     continue;
                 }
@@ -1568,8 +1652,26 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
     m_storyLanding.insert( m_storyLanding.end(), landing.begin(), landing.end() );
     // The sky's hours (UpdateStorySky), in the order they land.
     m_storySky.clear();
+    m_storyAltitude.clear();
+    m_storyCover.clear();
+    m_storyTowers.clear();
+    m_storyClearing.clear();
     for( const auto& [flag, at] : m_storyLanding )
     {
+        // How high the sky is seen from, how much of it is cloud, how convective, and the gap
+        // round the camera.
+        std::vector<StorySkyKey>* track = flag.rfind( "alt_", 0 ) == 0 ? &m_storyAltitude
+            : flag.rfind( "cover_", 0 ) == 0 ? &m_storyCover
+            : flag.rfind( "towers_", 0 ) == 0 ? &m_storyTowers
+            : flag.rfind( "clear_", 0 ) == 0 ? &m_storyClearing : nullptr;
+        if( track )
+        {
+            StorySkyKey key;
+            key.At = at;
+            key.Hour = static_cast<float>( std::atof( flag.c_str() + flag.find( '_' ) + 1 ) );
+            track->push_back( key );
+            continue;
+        }
         if( flag.rfind( "sky_", 0 ) != 0 )
         {
             continue;
@@ -1580,8 +1682,12 @@ void VenueShow::BuildStory( double inLength, double inFirstNote, double inLastNo
         key.Hour = key.Off ? 0.f : static_cast<float>( std::atof( flag.c_str() + 4 ) );
         m_storySky.push_back( key );
     }
-    std::stable_sort( m_storySky.begin(), m_storySky.end(), []( const StorySkyKey& a, const StorySkyKey& b ) { return a.At < b.At; } );
+    for( std::vector<StorySkyKey>* keys : { &m_storySky, &m_storyAltitude, &m_storyCover, &m_storyTowers, &m_storyClearing } )
+    {
+        std::stable_sort( keys->begin(), keys->end(), []( const StorySkyKey& a, const StorySkyKey& b ) { return a.At < b.At; } );
+    }
     m_director.SetStoryShots( landing );
+    BuildSounds( landing );
     INFO_FMT( "[Venues]", "story: %d props, set '%s' song %d, %d flags set, %d at the cue (%s, %.1f s), %d moments, %d story shots", static_cast<int>( m_storyProps.size() ), stage.Set.c_str(), stage.Song + 1,
         static_cast<int>( stage.Flags.size() ), static_cast<int>( stage.AtCue.size() ), stage.Cue.c_str(), m_storyCue, static_cast<int>( m_storyMoments.size() ), m_director.StoryShotCount() );
     if( CommandLine::Has( "--highway-log" ) )
@@ -1624,10 +1730,10 @@ void VenueShow::UpdateStory( double inSeconds, float inDeltaTime )
         {
             continue;
         }
-        const bool set = StoryFlagSet( prop.Flag, inSeconds );
+        const bool set = StoryFlagSet( prop.Flag, inSeconds ) && ( prop.Unless.empty() || !StoryFlagSet( prop.Unless, inSeconds ) );
         if( prop.Mode != VenueStory::Motion::Show )
         {
-            UpdateStoryMotion( prop, set == prop.WhenSet );
+            UpdateStoryMotion( prop, set == prop.WhenSet, inSeconds );
             continue;
         }
         const float target = set == prop.WhenSet ? 1.f : 0.f;
@@ -1758,6 +1864,39 @@ namespace
     constexpr float kDayHazeScale = 0.022f;
     constexpr float kDayHazeFalloff = 0.004f;
     constexpr float kDayHazeOpacity = 0.97f;
+    // A story sky that is climbed through (alt_ flags): a low, shallow layer, so that the climb
+    // from the ground to over its tops is a few hundred metres and can be taken slowly. Inside a
+    // cloud the scene's own haze is the cloud: this thick (a haze scale) where the cloud is full.
+    constexpr float kClimbCloudBase = 400.f;
+    constexpr float kClimbCloudThickness = 600.f;
+    constexpr float kCloudHazeScale = 3.5f;
+    // The gap in it they climb through (clear_ flags), and how far under the stage the set's
+    // ground lies under the cloud: the sky's cloud is laid over it, so it shows through the gaps.
+    constexpr float kClimbClearingRadius = 380.f;
+    constexpr float kClimbGroundBelow = -30.f;
+}
+
+
+bool VenueShow::StoryTrackAt( const std::vector<StorySkyKey>& inKeys, double inSeconds, float& outValue )
+{
+    if( inKeys.empty() )
+    {
+        return false;
+    }
+    size_t next = 0;
+    while( next < inKeys.size() && inKeys[next].At <= inSeconds )
+    {
+        ++next;
+    }
+    if( next == 0 || next == inKeys.size() )
+    {
+        outValue = inKeys[next == 0 ? 0 : next - 1].Hour;
+        return true;
+    }
+    const StorySkyKey& from = inKeys[next - 1];
+    const StorySkyKey& to = inKeys[next];
+    outValue = from.Hour + ( to.Hour - from.Hour ) * std::clamp( static_cast<float>( ( inSeconds - from.At ) / std::max( to.At - from.At, 1e-3 ) ), 0.f, 1.f );
+    return true;
 }
 
 
@@ -1815,8 +1954,30 @@ void VenueShow::UpdateStorySky( double inSeconds )
         camera.ProceduralSky.MoonPhase = 0.5f;
         camera.ProceduralSky.MoonBrightness = m_plan.MoonBrightness;
         camera.ProceduralSky.CloudCoverage = m_plan.CloudCoverage;
+        if( !m_storyAltitude.empty() )
+        {
+            camera.ProceduralSky.CloudAltitude = kClimbCloudBase;
+            camera.ProceduralSky.CloudThickness = kClimbCloudThickness;
+        }
         m_storySkyOn = true;
     }
+    float altitude = 0.f;
+    StoryTrackAt( m_storyAltitude, inSeconds, altitude );
+    camera.ProceduralSky.ViewerAltitude = std::max( altitude, 0.f );
+    float cover = 0.f;
+    if( StoryTrackAt( m_storyCover, inSeconds, cover ) )
+    {
+        camera.ProceduralSky.CloudCoverage = std::clamp( cover * 0.01f, 0.f, 1.f );
+    }
+    float towers = 0.f;
+    StoryTrackAt( m_storyTowers, inSeconds, towers );
+    camera.ProceduralSky.Convection = std::clamp( towers * 0.01f, 0.f, 1.f );
+    float clearing = 0.f;
+    StoryTrackAt( m_storyClearing, inSeconds, clearing );
+    camera.ProceduralSky.CloudClearing = std::clamp( clearing * 0.01f, 0.f, 1.f );
+    camera.ProceduralSky.CloudClearingRadius = kClimbClearingRadius;
+    camera.ProceduralSky.SceneUnderClouds = !m_storyAltitude.empty();
+    camera.ProceduralSky.SceneUnderCloudsBelow = kClimbGroundBelow;
     const StorySkyKey& from = m_storySky[latest];
     float hour = from.Hour;
     if( latest + 1 < static_cast<int>( m_storySky.size() ) && !m_storySky[latest + 1].Off )
@@ -1845,7 +2006,32 @@ void VenueShow::UpdateStorySky( double inSeconds )
         post->FogMaxOpacity = m_storySkyFogOpacity + ( kDayHazeOpacity - m_storySkyFogOpacity ) * dawn;
         post->FogHeightFalloff = m_storySkyFogFalloff + ( kDayHazeFalloff - m_storySkyFogFalloff ) * dawn;
     }
-    m_lights.SetHazeScale( m_plan.HazeScale + ( kDayHazeScale - m_plan.HazeScale ) * dawn );
+    float haze = m_plan.HazeScale + ( kDayHazeScale - m_plan.HazeScale ) * dawn;
+    // Inside a cloud (the sky's own clouds are drawn behind the scene, so they can't veil it): the
+    // haze is the cloud, as thick as the cloud is where the camera is, the same all the way up
+    // and down, and lit like the inside of one: moonlit at night, grey at dawn, white by day.
+    if( camera.ProceduralSky.ViewerAltitude > 0.f )
+    {
+        // Up there the day's haze has no country to lie over (it would paint out the cloud below
+        // the horizon, which is sky to the renderer): gone by a few hundred metres up.
+        haze *= 1.f - VenueTiming::Smooth( camera.ProceduralSky.ViewerAltitude / 300.f );
+        const SharedPtr<Moonlight::DynamicSky> sky = GetEngine().GetRenderer().GetSky();
+        const Vector3 at = main->GetComponent<Transform>().GetWorldPosition();
+        const float density = sky ? sky->SampleCloudDensity( camera.GetSkySettings( 0.f ), bx::Vec3( at.x, at.y, at.z ) ) : 0.f;
+        const float cloud = VenueTiming::Smooth( density * 2.f );
+        haze += ( kCloudHazeScale - haze ) * cloud;
+        if( post )
+        {
+            const Vector3 dark( 0.035f, 0.05f, 0.09f );
+            const Vector3 grey( 0.36f, 0.33f, 0.34f );
+            const Vector3 white( 0.82f, 0.85f, 0.9f );
+            const Vector3 inside = dark + ( grey + ( white - grey ) * day - dark ) * dawn;
+            post->FogColor = post->FogColor + ( inside - post->FogColor ) * cloud;
+            post->FogMaxOpacity += ( 1.f - post->FogMaxOpacity ) * cloud;
+            post->FogHeightFalloff *= 1.f - cloud;
+        }
+    }
+    m_lights.SetHazeScale( haze );
     // The camera sees that far as soon as there is light to see by (a night's show stops at the
     // dark), and daylight needs less of the bloom a night's lamps are given.
     camera.Far = m_storySkyFar + ( std::max( kDayFar, m_storySkyFar ) - m_storySkyFar ) * std::clamp( dawn * 4.f, 0.f, 1.f );
@@ -1862,31 +2048,182 @@ void VenueShow::UpdateBeats( double inSeconds )
     double beat = 0.0;
     int measureBeat = 0;
     VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
-    for( const BeatProp& prop : m_beatProps )
+    for( BeatProp& prop : m_beatProps )
     {
         const VenueBeat* marker = prop.Entity ? prop.Entity->TryGetComponent<VenueBeat>() : nullptr;
         if( !marker )
         {
             continue;
         }
-        const double turns = ( beat - marker->Phase ) / std::max( marker->Every, 0.05f );
-        const float at = static_cast<float>( turns - std::floor( turns ) );
         float amount = 0.f;
-        if( marker->Sway )
+        if( marker->Trigger != VenueBeat::Cue::Beat )
         {
-            amount = std::sin( at * 6.2831853f );
-        }
-        else if( marker->Sharp )
-        {
-            amount = std::exp( -at * 5.f );
+            // Out at once on the player's hit (big note, miss) and easing back over half a second;
+            // a seek back before the last one leaves it at rest.
+            const double at = marker->Trigger == VenueBeat::Cue::Hit ? m_lastHitAt : marker->Trigger == VenueBeat::Cue::Accent ? m_lastAccentAt : m_lastMissAt;
+            const double since = inSeconds - at;
+            amount = since >= 0.0 && since < 3.0 ? std::exp( -static_cast<float>( since ) * 6.f ) * VenueTiming::Smooth( static_cast<float>( since ) / 0.06f ) : 0.f;
         }
         else
         {
-            // Out on the beat and easing back, then gathering for the next over the last of it.
-            const float gather = VenueTiming::Smooth( ( at - 0.8f ) / 0.2f );
-            amount = std::max( std::exp( -at * 4.f ), gather );
+            const double turns = ( beat - marker->Phase ) / std::max( marker->Every, 0.05f );
+            const float at = static_cast<float>( turns - std::floor( turns ) );
+            if( marker->Sway )
+            {
+                amount = std::sin( at * 6.2831853f );
+            }
+            else if( marker->Sharp )
+            {
+                amount = std::exp( -at * 5.f );
+            }
+            else
+            {
+                // Out on the beat and easing back, then gathering for the next over the last of it.
+                const float gather = VenueTiming::Smooth( ( at - 0.8f ) / 0.2f );
+                amount = std::max( std::exp( -at * 4.f ), gather );
+            }
         }
-        prop.Entity->GetComponent<Transform>().SetPosition( prop.Rest + marker->Offset * amount );
+        // Held back by poor playing (Calm: what is left of the move at the worst).
+        const float calm = std::clamp( marker->Calm, 0.f, 1.f );
+        amount *= calm + ( 1.f - calm ) * m_moodEased;
+        prop.Amount = amount;
+        Transform& transform = prop.Entity->GetComponent<Transform>();
+        transform.SetPosition( prop.Rest + marker->Offset * amount );
+        if( marker->Turn.x != 0.f || marker->Turn.y != 0.f || marker->Turn.z != 0.f )
+        {
+            transform.SetRotation( prop.RestRotation * Quaternion::FromEulerDegrees( marker->Turn * amount ) );
+        }
+    }
+}
+
+
+float VenueShow::Mood() const
+{
+    static const float kForced = CommandLine::GetFloat( "--venue-mood", -1.f );
+    if( kForced >= 0.f )
+    {
+        return std::min( kForced, 1.f );
+    }
+    if( !m_moodPlayed )
+    {
+        return 0.8f;
+    }
+    // A miss costs the streak's half at once and about a tenth of the share of notes hit; thirty
+    // clean notes in a row win it all back.
+    return std::clamp( 0.55f * m_moodHitShare + 0.45f * std::min( 1.f, static_cast<float>( m_moodStreak ) / 30.f ), 0.f, 1.f );
+}
+
+
+void VenueShow::UpdateMoods( float inDeltaTime )
+{
+    const float mood = Mood();
+    const float dt = std::clamp( inDeltaTime, 0.f, 0.25f );
+    m_moodEased += ( mood - m_moodEased ) * ( 1.f - std::exp( -dt * 1.5f ) );
+    for( MoodProp& prop : m_moodProps )
+    {
+        const VenueMood* marker = prop.Entity ? prop.Entity->TryGetComponent<VenueMood>() : nullptr;
+        if( !marker )
+        {
+            continue;
+        }
+        // The first frame, it is where it should be at once; then it follows over its Seconds.
+        if( prop.Followed < 0.f )
+        {
+            prop.Followed = mood;
+        }
+        else
+        {
+            prop.Followed += ( mood - prop.Followed ) * ( 1.f - std::exp( -dt / std::max( marker->Seconds, 0.05f ) ) );
+        }
+        Transform& transform = prop.Entity->GetComponent<Transform>();
+        if( marker->Offset.x != 0.f || marker->Offset.y != 0.f || marker->Offset.z != 0.f )
+        {
+            transform.SetPosition( prop.Rest + marker->Offset * ( 1.f - prop.Followed ) );
+        }
+        if( marker->Show != VenueMood::Shown::Always )
+        {
+            // Switched on the mood itself (not the followed one), then scaled in or out over a
+            // third of a second, so a good crowd and its bad twin cross over and never both stand.
+            const bool good = mood >= marker->Threshold;
+            const float target = ( good == ( marker->Show == VenueMood::Shown::Good ) ) ? 1.f : 0.f;
+            prop.Shown = prop.Shown < 0.f ? target : target > prop.Shown ? std::min( target, prop.Shown + dt / 0.35f ) : std::max( target, prop.Shown - dt / 0.35f );
+            const float eased = prop.Shown * prop.Shown * ( 3.f - 2.f * prop.Shown );
+            transform.SetScale( prop.Scale * std::max( eased, 0.0001f ) );
+        }
+        if( Sequence* sequence = prop.Entity->TryGetComponent<Sequence>(); sequence && marker->Speed != 1.f )
+        {
+            sequence->Speed = prop.Speed * ( marker->Speed + ( 1.f - marker->Speed ) * prop.Followed );
+        }
+    }
+}
+
+
+void VenueShow::BuildSounds( const std::vector<std::pair<std::string, double>>& inLanding )
+{
+    m_storySounds.clear();
+    if( !m_root || !m_scene.IsLoaded() )
+    {
+        return;
+    }
+    for( const EntityHandle& entity : m_scene.GetMarkers().Sounds )
+    {
+        const VenueSound* marker = entity ? entity->TryGetComponent<VenueSound>() : nullptr;
+        if( !marker || marker->Flag.empty() || marker->Sound.empty() )
+        {
+            continue;
+        }
+        // Only a flag that lands this song: one set before it has had its sound.
+        const auto landed = std::find_if( inLanding.begin(), inLanding.end(), [marker]( const std::pair<std::string, double>& inFlag ) { return inFlag.first == marker->Flag; } );
+        if( landed == inLanding.end() )
+        {
+            continue;
+        }
+        StorySound sound;
+        sound.Voice = m_kit.Group( "Venue sound", &m_root->GetComponent<Transform>() );
+        if( !sound.Voice )
+        {
+            continue;
+        }
+        sound.At = landed->second + std::max( marker->Delay, 0.f );
+        // Streamed and 2D, as the ambience is; UpdateSounds starts it once it is open.
+        AudioSource& source = sound.Voice->AddComponent<AudioSource>( marker->Sound );
+        source.Stream = true;
+        source.Loop = false;
+        source.Volume = std::clamp( marker->Volume, 0.f, 2.f );
+        m_storySounds.push_back( sound );
+        if( CommandLine::Has( "--highway-log" ) )
+        {
+            BRUH_FMT( "Venue: sound %s at %.1f s (flag %s)", marker->Sound.c_str(), sound.At, marker->Flag.c_str() );
+        }
+    }
+}
+
+
+void VenueShow::UpdateSounds( double inSeconds )
+{
+    for( StorySound& sound : m_storySounds )
+    {
+        if( !sound.Voice || !sound.Voice->HasComponent<AudioSource>() )
+        {
+            continue;
+        }
+        AudioSource& source = sound.Voice->GetComponent<AudioSource>();
+        if( sound.Started )
+        {
+            // Scrubbed back to before it: it can play again.
+            if( inSeconds < sound.At - 0.25 )
+            {
+                source.Stop();
+                sound.Started = false;
+            }
+            continue;
+        }
+        // (A song picked up well after the moment doesn't play it late.)
+        if( inSeconds >= sound.At && inSeconds < sound.At + 1.0 && source.SoundInstance && !source.SoundInstance->HasFailed() && source.IsLoaded() )
+        {
+            source.Play( false );
+            sound.Started = true;
+        }
     }
 }
 
@@ -1924,10 +2261,199 @@ void VenueShow::UpdateAims( double inSeconds )
 }
 
 
-void VenueShow::UpdateStoryMotion( StoryProp& ioProp, bool inSet )
+void VenueShow::BuildFigures()
+{
+    m_figures.clear();
+    if( !m_scene.IsLoaded() )
+    {
+        return;
+    }
+    for( const EntityHandle& entity : m_scene.GetMarkers().Figures )
+    {
+        const VenueFigure* marker = entity ? entity->TryGetComponent<VenueFigure>() : nullptr;
+        if( !marker )
+        {
+            continue;
+        }
+        Performer::Look look;
+        look.ModelPath = marker->Character;
+        look.TexturePath = marker->Atlas;
+        look.Height = std::clamp( marker->Height, 0.2f, 3.f );
+        // Dressed as one of the band: whoever plays that part, as cast for the song (their own
+        // look when nobody does).
+        if( marker->As != VenueFigure::Dress::Own )
+        {
+            m_band.LookOf( static_cast<int>( marker->As ) - 1, look.ModelPath, look.TexturePath );
+        }
+        m_figures.emplace_back();
+        m_figures.back().Entity = entity;
+        for( size_t beat = 0; beat < m_beatProps.size(); ++beat )
+        {
+            if( m_beatProps[beat].Entity && m_beatProps[beat].Entity.Get() == entity.Get() )
+            {
+                m_figures.back().Beat = static_cast<int>( beat );
+            }
+        }
+        m_figures.back().Body.Build( m_kit, &entity->GetComponent<Transform>(), Vector3( 0.f, 0.f, 0.f ), 0.f, look );
+    }
+    if( !m_figures.empty() )
+    {
+        INFO_FMT( "[Venues]", "Venue: %d skinned figures in the scene", static_cast<int>( m_figures.size() ) );
+    }
+}
+
+
+void VenueShow::UpdateFigures()
+{
+    const auto arm = []( const VenueFigure::Arm& inArm ) {
+        Performer::Arm out;
+        out.Raise = inArm.Raise;
+        out.Spread = inArm.Spread;
+        out.Elbow = inArm.Elbow;
+        out.Reach = inArm.Reach;
+        out.Target = inArm.Hand.InternalVector;
+        out.Pole = inArm.Pole.InternalVector;
+        out.Fingers = inArm.Fingers.InternalVector;
+        out.Palm = inArm.Palm.InternalVector;
+        out.Grip = inArm.Grip;
+        return out;
+    };
+    const auto leg = []( const VenueFigure::Leg& inLeg ) {
+        Performer::Leg out;
+        out.Spread = inLeg.Spread;
+        out.Toe = inLeg.Toe;
+        out.Reach = inLeg.Reach;
+        out.Target = inLeg.Foot.InternalVector;
+        out.Pole = inLeg.Knee.InternalVector;
+        return out;
+    };
+    for( Figure& figure : m_figures )
+    {
+        const VenueFigure* marker = figure.Entity ? figure.Entity->TryGetComponent<VenueFigure>() : nullptr;
+        if( !marker )
+        {
+            continue;
+        }
+        // A story group hides what is under it by scale: a figure shrunk away isn't drawn or
+        // posed at all (twenty people waiting for their scene would each be a skinned draw).
+        const bool shown = figure.Entity->GetComponent<Transform>().GetWorldScale().y > 0.01f;
+        figure.Body.Show( shown );
+        if( !shown )
+        {
+            continue;
+        }
+        Performer::Pose pose;
+        pose.Offset = marker->Offset.InternalVector;
+        pose.Crouch = marker->Crouch;
+        pose.Bow = marker->Bow;
+        pose.Lean = marker->Lean;
+        pose.Side = marker->Side;
+        pose.Turn = marker->Turn;
+        pose.Nod = marker->Nod;
+        if( figure.Beat >= 0 && figure.Beat < static_cast<int>( m_beatProps.size() ) )
+        {
+            const BeatProp& beat = m_beatProps[figure.Beat];
+            if( const VenueBeat* nodding = beat.Entity ? beat.Entity->TryGetComponent<VenueBeat>() : nullptr )
+            {
+                pose.Nod += nodding->Nod * beat.Amount;
+            }
+        }
+        pose.HeadTurn = marker->HeadTurn;
+        pose.HeadTilt = marker->HeadTilt;
+        pose.Mouth = marker->Mouth;
+        pose.Seated = marker->Stand == VenueFigure::Stance::Seated;
+        pose.Kneeling = marker->Stand == VenueFigure::Stance::Kneeling;
+        pose.SeatHeight = marker->SeatHeight;
+        pose.Arms = { arm( marker->LeftArm ), arm( marker->RightArm ) };
+        pose.Legs = { leg( marker->LeftLeg ), leg( marker->RightLeg ) };
+        figure.Body.Apply( pose );
+    }
+}
+
+
+void VenueShow::CarrySpots( float inDeltaTime )
+{
+    if( !m_scene.IsLoaded() || !m_root )
+    {
+        return;
+    }
+    Transform& root = m_root->GetComponent<Transform>();
+    const VenueScene::Markers& markers = m_scene.GetMarkers();
+    const glm::quat toVenue = glm::inverse( root.GetWorldRotation().InternalQuat );
+    for( int member = 0; member < VenueData::MemberCount; ++member )
+    {
+        const EntityHandle& entity = markers.SpotMarkers[member];
+        if( !entity || !m_band.HasMember( member ) )
+        {
+            continue;
+        }
+        Transform& spot = entity->GetComponent<Transform>();
+        // Hidden with what carries it (a story group shrunk away, the rig gone at the wreck): the
+        // member stays where they were last.
+        if( spot.GetWorldScale().y < 0.5f )
+        {
+            continue;
+        }
+        const glm::quat turn = toVenue * spot.GetWorldRotation().InternalQuat * glm::inverse( markers.SpotRest[member].InternalQuat );
+        // A spot that has never moved is left to the plan (every spot of a venue on the ground).
+        const Vector3 feet = root.InverseTransformPoint( spot.GetWorldPosition() );
+        if( !m_carried[member] )
+        {
+            const Vector3 rest = m_plan.SpotOf( member ).Feet;
+            const glm::quat still( 1.f, 0.f, 0.f, 0.f );
+            if( glm::length( feet.InternalVector - rest.InternalVector ) < 1e-4f && std::fabs( glm::dot( turn, still ) ) > 0.999999f )
+            {
+                continue;
+            }
+            m_carried[member] = true;
+        }
+        m_band.Carry( member, feet, turn, inDeltaTime );
+    }
+}
+
+
+double VenueShow::StoryFlagTime( const std::string& inFlag ) const
+{
+    // The latest entry wins, as the flags set before the song (long ago) come first.
+    double at = 0.0;
+    for( const auto& [flag, landed] : m_storyLanding )
+    {
+        if( flag == inFlag )
+        {
+            at = std::max( landed, 0.0 );
+        }
+    }
+    return at;
+}
+
+
+void VenueShow::UpdateStoryMotion( StoryProp& ioProp, bool inSet, double inSeconds )
 {
     const bool first = ioProp.Shown < 0.f;
     ioProp.Shown = inSet ? 1.f : 0.f;
+    if( ioProp.Mode == VenueStory::Motion::Clock )
+    {
+        // Held to the song's clock from the flag's landing, whatever the frame rate, a pause or a
+        // seek did: where a loop is in its lap is then known to whoever times a shot against it
+        // (the camera that waits on a ledge of hell for the band to fall past).
+        if( first || inSet != ioProp.Played )
+        {
+            ioProp.Landed = StoryFlagTime( ioProp.Flag );
+        }
+        for( const EntityHandle& entity : ioProp.Sequences )
+        {
+            Sequence* sequence = entity ? entity->TryGetComponent<Sequence>() : nullptr;
+            const double duration = sequence ? static_cast<double>( sequence->GetDuration() ) : 0.0;
+            if( duration <= 0.0 )
+            {
+                continue;
+            }
+            const double since = inSet ? std::max( inSeconds - ioProp.Landed, 0.0 ) : 0.0;
+            sequence->Seek( static_cast<float>( sequence->Loop ? std::fmod( since, duration ) : std::min( since, duration ) ) );
+        }
+        ioProp.Played = inSet;
+        return;
+    }
     for( const EntityHandle& entity : ioProp.Sequences )
     {
         Sequence* sequence = entity ? entity->TryGetComponent<Sequence>() : nullptr;
@@ -1968,7 +2494,8 @@ void VenueShow::UpdateStoryBand( double inSeconds, float inDeltaTime )
     // before it over kBlendSeconds; band_ghost turns them to ghosts over a couple of seconds.
     static const std::pair<const char*, Band::StoryPose> kPoses[] = { { "band_playing", Band::StoryPose::Playing }, { "band_hidden", Band::StoryPose::Hidden },
         { "band_falling", Band::StoryPose::Falling }, { "band_rising", Band::StoryPose::Rising }, { "band_down", Band::StoryPose::Down },
-        { "band_floating", Band::StoryPose::Floating }, { "band_aloft", Band::StoryPose::Aloft } };
+        { "band_floating", Band::StoryPose::Floating }, { "band_aloft", Band::StoryPose::Aloft },
+        { "band_reach", Band::StoryPose::Reach }, { "band_shield", Band::StoryPose::Shield } };
     constexpr double kBlendSeconds = 2.5;
     (void)inDeltaTime;
     // The poses landed by now, in order.
@@ -2138,6 +2665,14 @@ void VenueShow::OnHit( PadId inPad )
 {
     m_lights.OnHit( inPad );
     if( inPad == PadId::Bass ) m_kick = 1.f;
+    m_moodPlayed = true;
+    m_moodHitShare += ( 1.f - m_moodHitShare ) * 0.1f;
+    ++m_moodStreak;
+    m_lastHitAt = m_lastSeconds;
+    if( inPad == PadId::Bass || inPad == PadId::Crash1 || inPad == PadId::Crash2 || inPad == PadId::China || inPad == PadId::Splash )
+    {
+        m_lastAccentAt = m_lastSeconds;
+    }
 }
 
 
@@ -2145,6 +2680,10 @@ void VenueShow::OnMiss()
 {
     m_lights.OnMiss();
     m_crowd.OnMiss();
+    m_moodPlayed = true;
+    m_moodHitShare -= m_moodHitShare * 0.1f;
+    m_moodStreak = 0;
+    m_lastMissAt = m_lastSeconds;
 }
 
 

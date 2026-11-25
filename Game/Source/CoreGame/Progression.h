@@ -130,6 +130,10 @@ struct ProgressionStorySong
     std::string Cue;                    // where in the song its own flags land ("first_chorus"...)
     std::vector<Moment> Moments;        // flags landing at their own cues, after the song too
     std::string Venue;                  // this song's venue; empty: the set's
+    // A continuous show: the venue plays on at least this long after the song's last note before
+    // the next song takes over, however short the recording's tail is (the wreck burning, the
+    // bodies on the road). Its moments can land in it ("last_note+6"). 0: as the recording ends.
+    double OutroSeconds = 0.0;
 };
 
 // A booking of story mode (Design/Story-Mode-Setlists.md): five songs at one venue, played in

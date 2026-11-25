@@ -3,12 +3,16 @@ Fighters - My Hero"), far off along +x in heaven's scene. Each cut to Earth is t
 happens to the band, one place at a time, each on its own story flag:
 
   cpr            the crash site at night: the cop's hands on the drummer's chest (slow motion)
+  innocent       the same road, a medic on the compressions now: the cop's partner holds a sheet
+                 off the dispatch up to him, INNOCENT across it, and he looks from it to the drummer
   loading        the same road: the drummer on a gurney going into the back of an ambulance
   ambulance_run  the highway: the ambulance at speed inside an escort of cruisers, a helicopter over it
   defib          inside that ambulance: paddles on the drummer's chest, everything on a hook or a
                  strap swinging; the shock itself is the flag 'shock'
   gurney         a hospital corridor: the four of them rushed down it on gurneys, shot from the
                  foot of the drummer's
+  surgery        an operating theatre: the drummer on the table under the lamps, the team's hands
+                 at work, the next theatre through the glass and the cop at the doors' window
   resurrection   a ward of the hospital in daylight: the four of them sitting up in their beds,
                  looking out of the window at the sky (the engine's procedural sky: the shot is
                  tagged sky), shot from behind them as the song rings out
@@ -34,6 +38,7 @@ from venuegen import look_rotation
 E = (1600.0, 0.0, 0.0)      # the crash site's stretch of road (the site itself is 6 m up it)
 R = (2100.0, 0.0, 0.0)      # the highway run: the ambulance stands here and the road goes by
 H = (2600.0, 0.0, 0.0)      # the hospital corridor: the drummer's gurney stands here
+O = (3600.0, 0.0, 0.0)      # the operating theatre: the floor under the middle of the drummer's table
 W = (3100.0, 0.0, 0.0)      # the hospital ward: the ground under the middle of its floor
 
 SKY_HOUR = 12.0             # the hour of the sky out of the ward's window (VenueShow::UpdateShotSky)
@@ -41,23 +46,17 @@ STEP = 1.6                  # metres of road a frame on the run (48 m/s, as the 
 RUN = 0.15                  # metres of corridor a frame (4.5 m/s: a run with a gurney)
 AMB_X = 2.7                 # the ambulance's lane on the run
 FLOOR = 0.72                # an ambulance's floor above the road
-ROOM_Y = 7.2                # the ward's floor above the ground (the third storey)
+ROOM_Y = 26.0               # the ward's floor above the ground (the eighth storey: a hospital is tall)
+MONITOR = (-0.84, 1.86, 0.02)   # the ambulance's heart monitor: its screen's middle, on the wall over the patient's chest
+MONITOR_YAW = 62.0          # the way it faces: out from the wall (90) and turned to the bulkhead, where the camera is
 
 LOOKS = {'drummer': ('Son_01', '01_A'), 'guitar': ('Daughter_01', '02_C'), 'bass': ('Mother_01', '03_A'), 'vocals': ('SchoolBoy_01', '04_C')}
 MEDIC = ('Son_01', '02_A')
 COP = ('ShopKeeper_01', '04_B')
 NURSE = ('Mother_02', '01_C')
+PARTNER = ('Mother_01', '04_B')         # the cop's partner: his uniform
 
 # Poses (story_legion_people.Pose: seated; torso / head Euler; arms (shoulder Euler, elbow bend)).
-PUSH = P.Pose(False, (14, 0, 0), (-4, 0, 0), ((-62, 0, 8), 25), ((-62, 0, -8), 25))
-PADDLES = P.Pose(False, (30, 0, 0), (12, 0, 0), ((-52, 0, 12), 12), ((-52, 0, -12), 12))
-BAGGING = P.Pose(True, (22, 0, 0), (16, 0, 0), ((-48, 0, 16), 40), ((-48, 0, -16), 40))
-COP_BENCH = P.Pose(True, (20, 0, 0), (10, 22, 0), ((-34, 0, 10), 55), ((-34, 0, -10), 55))
-COP_HOPES = P.Pose(True, (8, 0, 0), (-8, 26, 0), ((-34, 0, 10), 55), ((-60, 0, -10), 30))
-COP_WATCH = P.Pose(False, (4, 0, 0), (10, -18, 0), ((-18, 0, 10), 20), ((-72, 0, -14), 30))
-COP_RUNS = P.Pose(False, (12, 0, 0), (6, -28, 0), ((-48, 0, 10), 75), ((28, 0, -10), 70))
-COP_CHAIR = P.Pose(True, (4, 0, 0), (-10, 0, 0), ((-30, 0, 8), 55), ((-30, 0, -8), 55))
-IV_HELD = P.Pose(False, (10, 0, 0), (2, 22, 0), ((-150, 0, 12), 25), ((-34, 0, -10), 60))
 AT_WALL = P.Pose(False, (-3, 0, 0), (4, 30, 0), ((-6, 0, 22), 10), ((-6, 0, -22), 10))
 
 
@@ -136,7 +135,9 @@ def ambulance_fittings(venue, cot):
         for z in (-2.2, -1.4, -0.6, 0.2, 1.0):
             m.box((-0.815, 2.5, z), (0.02, 0.5, 0.04), 'steel')
         m.box((-1.0, 1.0, 1.0), (0.3, 0.56, 1.2), 'white')
-        m.box((-0.95, 1.75, -0.9), (0.3, 0.48, 0.62), 'steel_dark')
+        # The monitor's housing, on a bracket that turns it toward the front of the box.
+        m.box(add(MONITOR, rot((0, 0, -0.13), (0, MONITOR_YAW, 0))), (0.62, 0.48, 0.24), 'steel_dark', euler=(0, MONITOR_YAW, 0))
+        m.box((-1.08, MONITOR[1], MONITOR[2]), (0.16, 0.1, 0.1), 'steel')
         m.box((0.82, 1.31, 0.25), (0.36, 0.26, 0.3), 'cone')
         m.box((0.82, 1.45, 0.25), (0.2, 0.03, 0.2), 'black')
         m.lathe((-0.95, FLOOR, -2.4), [(0.1, 0), (0.1, 0.8), (0.04, 0.9)], 'sign_green', 8)
@@ -262,6 +263,7 @@ def strip_sign(venue, which, band):
 
 WARD = (3.4, 3.4, -3.6, 5.7)      # the ward: half its width, its height, the window wall's z and the back wall's
 WARD_ROWS = (-2.45, -0.45)        # its two rows of beds (z): hard by the window, and the row behind
+SILL = 0.42                       # the window's sill above the floor: low, to look down on the town from
 BED_TOP = 0.62                    # a ward bed's mattress above the floor
 
 
@@ -278,12 +280,12 @@ def ward(venue):
         for x in (-1, 1):
             m.box((x * (half + 0.05), high / 2, mid), (0.1, high, deep + 0.2), 'paper')
             m.box((x * (half - 0.005), 1.0, mid), (0.02, 0.22, deep), 'sky')
-        m.box((0, 0.525, z0 - 0.05), (2 * half + 0.2, 1.05, 0.2), 'paper')
+        m.box((0, SILL / 2, z0 - 0.05), (2 * half + 0.2, SILL, 0.2), 'paper')
         m.box((0, high - 0.1, z0 - 0.05), (2 * half + 0.2, 0.2, 0.2), 'paper')
-        m.box((0, 1.07, z0 + 0.1), (2 * half, 0.04, 0.4), 'white')
+        m.box((0, SILL + 0.02, z0 + 0.1), (2 * half, 0.04, 0.4), 'white')
         # Three panes (no post up the middle: that is where the sun stands).
         for k in range(4):
-            m.box((-half + k * 2 * half / 3, high / 2 + 0.42, z0 - 0.05), (0.1, high - 1.25, 0.12), 'white')
+            m.box((-half + k * 2 * half / 3, (SILL + high - 0.2) / 2, z0 - 0.05), (0.1, high - 0.2 - SILL, 0.12), 'white')
         m.box((1.6, 1.05, z1 - 0.02), (1.0, 2.1, 0.05), 'wood')
     return A.prop(venue, 'Ward', build)
 
@@ -373,6 +375,11 @@ def dangle(s, parent, V, name, pivot, length, kind, k):
 
 
 M_see = None        # make_story_afterlife.see_through, set by build()
+CHARGE = 6.2        # the seconds from the flag defib to the flag shock (Tools/Story: 'section:verse_3-6.2')
+# VenueFigure fields for someone sat bent over, elbows on the knees, face in both hands.
+COP_CANT_WATCH = dict(Bow=34.0, Lean=24.0, Nod=26.0,
+                      LeftArm=P.arm(hand=(-0.055, 1.0, 0.5), pole=(-0.5, -1, 0.2), fingers=(0.1, 1, 0.15), palm=(0.25, 0, -1), grip=0.1),
+                      RightArm=P.arm(hand=(0.055, 1.0, 0.5), pole=(0.5, -1, 0.2), fingers=(-0.1, 1, 0.15), palm=(-0.25, 0, -1), grip=0.1))
 
 
 def monitor(s, parent, name, where, yaw, beats=None, every=1.0, scale=1.0):
@@ -392,13 +399,14 @@ def monitor(s, parent, name, where, yaw, beats=None, every=1.0, scale=1.0):
     return m
 
 
-def beacon(s, parent, V, where, red=0.0, blue=0.0, reach=20.0, speed=1.0):
+def beacon(s, parent, V, where, red=0.0, blue=0.0, reach=20.0, speed=1.0, housings=True):
     """A lightbar at where: red and blue lamps, their glare turning, and (red / blue above 0) two
     spot lights sweeping round at those levels. make_story_afterlife.lightbar's, with the levels
     to choose: a dozen of the crash site's would burn the run out."""
     spin = P.clip(V, 'LightbarSpin', 24, [P.track('Rotation', [(0, (0, 0, 0)), (12, (0, 180, 0)), (24, (0, 359.9, 0))])])
-    s.box('Lamp red', parent, at(where, (-0.4, 0.06, 0)), (0.45, 0.14, 0.24), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=8.0, shadows=False)
-    s.box('Lamp blue', parent, at(where, (0.4, 0.06, 0)), (0.45, 0.14, 0.24), (0.1, 0.2, 1), emissive=(0.1, 0.2, 1), emissive_intensity=8.0, shadows=False)
+    if housings:
+        s.box('Lamp red', parent, at(where, (-0.4, 0.06, 0)), (0.45, 0.14, 0.24), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=8.0, shadows=False)
+        s.box('Lamp blue', parent, at(where, (0.4, 0.06, 0)), (0.45, 0.14, 0.24), (0.1, 0.2, 1), emissive=(0.1, 0.2, 1), emissive_intensity=8.0, shadows=False)
     turning = P.looping(s, parent, 'Sweep', spin, at(where, (0, 0.2, 0)), speed=speed)
     if red > 0:
         s.light('Sweep red', turning, (0, 0, 0), 'Spot', (1.0, 0.05, 0.05), red, reach, rot=(10, 0, 0), inner=14, outer=32)
@@ -407,11 +415,19 @@ def beacon(s, parent, V, where, red=0.0, blue=0.0, reach=20.0, speed=1.0):
         A.glow_card(s, turning, V, 'Glare', rot((0, 0.05, 0.3), (0, yaw, 0)), 0.5, c, 1.2, (0, yaw, 0))
 
 
-def runner(s, parent, V, name, model, pos, yaw, k):
-    """A figure running on the spot (the corridor goes by): a bob and a roll from foot to foot."""
-    clip = P.clip(V, 'RunBob', 10, [P.track('Position', [(0, (0, 0, 0)), (3, (0, 0.06, 0)), (5, (0, 0, 0)), (8, (0, 0.06, 0)), (10, (0, 0, 0))], 'SmoothStep'),
-                                     P.track('Rotation', [(0, (0, 0, -2.5)), (5, (0, 0, 2.5)), (10, (0, 0, -2.5))], 'SmoothStep')])
-    return P.place(s, P.looping(s, parent, name, clip, pos, speed=0.9 + 0.07 * (k % 4), rot=(0, yaw, 0)), name, model, (0, 0, 0), 0)
+def runner(s, parent, V, name, look, pos, yaw, k, arms=('Left', 'Right'), **pose):
+    """A skinned figure running on the spot (the corridor goes by). arms: the ones that swing."""
+    clip = P.gait(V, 'Run' + ''.join(a[0] for a in arms), 20, 0.9, 0.32, 0.035, arms=arms)
+    fields = dict(dict(Lean=10.0, Crouch=0.05), **pose)
+    return P.actor(s, parent, name, look[0], look[1], pos, yaw, motion=clip, speed=0.9 + 0.07 * (k % 4), **P.striding(0.9, **fields))
+
+
+def pushing(lean=12.0):
+    """VenueFigure fields for someone 0.45 m behind the end of a gurney (the frame's corners at
+    +-0.24 across, 0.86 up), a hand on each."""
+    return dict(Lean=lean, Bow=6.0, Nod=-4.0,
+                LeftArm=P.arm(hand=(-0.24, 0.9, 0.46), pole=(-1, -0.6, -0.4), palm=(0, -1, 0), grip=0.85),
+                RightArm=P.arm(hand=(0.24, 0.9, 0.46), pole=(1, -0.6, -0.4), palm=(0, -1, 0), grip=0.85))
 
 
 def patient(s, parent, V, who, deck=0.92, head=1):
@@ -435,7 +451,7 @@ def crash(s, root, marks, V, M):
     M.cruiser(s, earth, V, (E[0] - 7.5, 0, E[2] - 9), 24, door_open=True)
     # The cop kneels at the drummer's chest (the body lies at yaw 200 from its feet at (-1, 1)), facing across it.
     cop_at = (-1.26, 110, 2.48)
-    hand = M.crash_site(s, earth, V, site, {'lifted': 'loading', 'cop': None}, cop=cop_at, ems=True, wreck_at=(4.0, 0, -2.0), ambulance=False)
+    hand = M.crash_site(s, earth, V, site, {'lifted': 'loading', 'relieved': 'innocent', 'cop': None}, cop=cop_at, ems=True, wreck_at=(4.0, 0, -2.0), ambulance=False)
     cop_eye = (E[0] + cop_at[0], 1.0, E[2] + 6 + cop_at[2])
     for i, (x, z, yaw) in enumerate(((-9.5, -20, 20), (-3.0, -24, -30), (4.5, -22, 60), (-12.0, 12, 80))):
         A.flare(s, earth, V, f'Flare {i}', (E[0] + x, 0, E[2] + z), yaw)
@@ -454,53 +470,115 @@ def crash(s, root, marks, V, M):
 
     def w(p):
         return at(amb_at, rot(p, (0, amb_yaw, 0)))
-    A.model(s, amb, 'Body', ambulance_shell(V, False))
-    A.model(s, amb, 'Fittings', ambulance_fittings(V, False))
-    M.lightbar(s, amb, V, (0, 3.1, 1.4))
-    s.box('Ceiling light', amb, (0, 2.925, -1.0), (0.5, 0.03, 1.6), (1, 1, 1), emissive=(0.95, 0.97, 1.0), emissive_intensity=2.0, shadows=False)
-    s.light('Ambulance inside', amb, (0, 2.5, -1.0), 'Point', (0.9, 0.95, 1.0), 9.0, 6)
-    s.light('Ambulance work light', amb, (0, 2.9, -3.1), 'Spot', (1.0, 0.97, 0.9), 240.0, 16, rot=(62, 180, 0), inner=34, outer=60)
-    for k, (pivot, length, kind) in enumerate((((0.1, 2.82, -2.3), 0.3, 'strap'), ((0.1, 2.82, -1.2), 0.3, 'strap'), ((-0.5, 2.9, -0.4), 0.35, 'iv'))):
-        dangle(s, amb, V, f'Hanging {k}', pivot, length, kind, k)
+    braun(s, amb, 'Body')
+    braun(s, amb, 'OpenDoors')
+    braun_hanging(s, amb, V)
+    beacon(s, amb, V, (0, 2.11, 1.97), 450, 600, 60, housings=False)
+    s.light('Ambulance inside', amb, (0, 2.45, -1.0), 'Point', (0.9, 0.95, 1.0), 9.0, 6)
+    s.light('Ambulance work light', amb, (0, 2.58, -3.1), 'Spot', (1.0, 0.97, 0.9), 240.0, 16, rot=(62, 180, 0), inner=34, outer=60)
     start = (0, 0, -4.9)
     waiting = P.between(s, amb, 'Gurney waiting', None, 'loading', 0.0, start)
     stood = s.entity('Gurney', waiting, (-0.9, 0, -5.3), (0, -22, 0))
-    A.model(s, stood, 'Top', gurney(V))
-    A.model(s, stood, 'Legs', gurney_legs(V), (0, 0.78, 0))
+    braun(s, stood, 'Deck')
+    for legs, z in [('FrontLegs', 0.57), ('RearLegs', -0.61)]:
+        braun(s, stood, legs, (0, 0.774, z))
     s.box('Blanket, folded', stood, (0, 0.96, -0.3), (0.5, 0.08, 0.5), (0.6, 0.72, 0.84), rough=1.0)
     # loading: the gurney runs in head first (2.6 m: its foot still out of the doors at the end),
     # its legs folding up under it as they reach the bumper.
     loading = P.between(s, amb, 'Loading', 'loading', None, 0.0, start)
     go_in = P.clip(V, 'GurneyIn', 66, [P.track('Position', [(0, (0, 0, 0)), (66, (0, 0, 2.6))], 'SmoothStep')])
-    fold = P.clip(V, 'GurneyFold', 66, [P.track('Scale', [(0, (1, 1, 1)), (14, (1, 1, 1)), (34, (1, 0.05, 1)), (66, (1, 0.05, 1))], 'SmoothStep')])
     moving = P.play(s, loading, 'Gurney goes in', 'loading', go_in, start)
-    A.model(s, moving, 'Top', gurney(V))
-    A.model(s, P.play(s, moving, 'Legs fold', 'loading', fold, (0, 0.78, 0)), 'Legs', gurney_legs(V))
+    braun(s, moving, 'Deck')
+    for legs, z, first, last in [('FrontLegs', 0.57, 10, 28), ('RearLegs', -0.61, 30, 59)]:
+        rest, stowed = (0, 0, 0), (97, 0, 0)
+        fold = P.clip(V, 'Braun' + legs, 66, [P.track('Rotation', [(0, rest), (first, rest), (last, stowed), (66, stowed)], 'SmoothStep')])
+        hinge = P.play(s, moving, legs + ' fold', 'loading', fold, (0, 0.774, z))
+        braun(s, hinge, legs)
     patient(s, moving, V, 'drummer')
     dangle(s, moving, V, 'IV bag', (0.33, 1.95, 0.85), 0.1, 'iv', 1)
-    P.place(s, moving, 'Medic at the foot', P.figure(V, 'Medic_push', MEDIC[0], MEDIC[1], PUSH, 'an EMS worker pushing a gurney'), (0, 0, -1.6), 0)
-    P.place(s, loading, 'Medic inside', P.figure(V, 'Medic', MEDIC[0], MEDIC[1], P.KNEEL_CPR, 'an EMS worker'), (0.55, FLOOR - 0.08, -1.2), 200)
-    P.place(s, loading, 'Cop', P.figure(V, 'Cop_watches', COP[0], COP[1], COP_WATCH, 'the cop, a hand out as they take the drummer'), (-1.6, 0, -4.2), 75)
+    # The people are skinned (P.actor): the medic walks the gurney in with a hand on each corner of
+    # its foot, another kneels inside with both arms out for its head, the cop stands by, a hand out.
+    walk = P.gait(V, 'WalkPushing', 30, 0.5, 0.1, 0.015, arms=())
+    P.actor(s, moving, 'Medic at the foot', MEDIC[0], MEDIC[1], (0, 0, -1.45), 0, motion=walk, **P.striding(0.5, **pushing(8.0)))
+    P.actor(s, loading, 'Medic inside', MEDIC[0], MEDIC[1], (0.55, FLOOR, -1.2), 200, 'Kneeling', Bow=14.0, Lean=8.0, Nod=10.0, HeadTurn=-15.0,
+            LeftArm=P.arm(62, 6, 25, grip=0.3), RightArm=P.arm(62, 6, 25, grip=0.3), LeftLeg=P.leg(8), RightLeg=P.leg(8))
+    cop_stands = (-1.6, 0, -4.2)
+    P.actor(s, loading, 'Cop', COP[0], COP[1], cop_stands, 75, Lean=4.0, Nod=8.0, HeadTurn=P.turn_to(cop_stands, 75, (0, 1.0, -3.4), 50.0),
+            LeftArm=P.arm(8, 10, 18), RightArm=P.arm(68, 12, 28, grip=0.05))
+
+    innocent(s, earth, marks, V, M, site)
 
     cop_ground = (cop_eye[0], 0, cop_eye[2])
     cop_head = at(cop_ground, M.P_rot((0, 0.95, 0.45), cop_at[1]))      # he leans over the drummer as he pumps
     cop_hands = at(cop_ground, M.P_rot((0, 0.3, 0.75), cop_at[1]))
-    M.shot(s, marks, 'cpr', (cop_hands[0] + 0.9, 0.3, cop_hands[2] - 1.5), cop_hands, 34, 8, hand=True, focus=True,
-           end=((cop_eye[0] + 1.5, 0.75, cop_eye[2] - 1.0), (cop_eye[0], 1.0, cop_eye[2]), 30))
+    # From low beside his hands up to his face, so the driver from the chase is known; both to the
+    # left of the picture while the highway is up. (The holds of the cuts to Earth run on just past
+    # the chart's next camera cut, 34.3, 56.2, 74.1, 220.7 and 233.2 s in the Harmonix chart: ended
+    # before it, the director put up the cut in progress for a fraction of a second.)
+    M.shot(s, marks, 'cpr', (cop_hands[0] + 0.9, 0.3, cop_hands[2] - 1.5), cop_hands, 34, 9.5, hand=True, focus=True, lead='l',
+           end=((cop_eye[0] + 1.5, 0.75, cop_eye[2] - 1.0), cop_head, 30))
     # From the road beside the gurney as it starts to move, up to the open doors as it goes in.
-    M.shot(s, marks, 'loading', w((2.7, 0.9, -5.9)), w((0, 1.1, -4.0)), 42, 8.2, hand=True, focus=True,
+    M.shot(s, marks, 'loading', w((2.7, 0.9, -5.9)), w((0, 1.1, -4.0)), 42, 8.7, hand=True, focus=True, lead='r',
            end=(w((1.7, 1.55, -5.9)), w((-0.05, 1.25, -1.9)), 36))
     return hand, cop_head
 
 
+def innocent(s, earth, marks, V, M, site):
+    """The cop and his partner on the road up beyond the drummer's head, from the flag innocent
+    until the loading: a medic has the compressions (make_story_afterlife.crash_site,
+    'relieved'), the cop is on his feet facing the drummer, and his partner holds a sheet off the
+    dispatch up to him. They stand on the far side of the site from the cruiser and the
+    ambulances, so the sheet's face is away from every headlight and beacon (lit from in front it
+    burns out to white) and those are the lights behind the drummer when the camera finds them.
+    Everything is placed in the cop's space: his feet at the origin, the drummer straight ahead."""
+    stands = at(site, (-0.2, 0, 9.8))
+    chest = at(site, (-0.55, 0.3, 2.2))                     # the drummer's, where the medic's hands are
+    yaw = P.yaw_to(stands, chest)
+
+    def w(p):
+        return at(stands, rot(p, (0, yaw, 0)))
+    g = P.between(s, earth, 'Innocent', 'innocent', 'loading', 0.0, stands)
+    sheet = (0.26, 1.37, 0.52)                               # its middle: between them, at his chest
+    partner = (0.4, 0, 1.02)
+    partner_yaw = P.yaw_to(partner, (0, 0, 0))
+    # The cop reads it, then (a one-shot on the flag, in the site's slow motion) looks up from it
+    # at the drummer.
+    read = P.turn_to((0, 0, 0), 0, sheet)
+    looks_up = P.clip(V, 'CopLooksUp', 60, [P.ftrack('HeadTurn', [(0, read), (22, read), (42, 0.0), (60, 0.0)], 'SmoothStep'),
+                                            P.ftrack('Nod', [(0, 17), (22, 17), (42, 3), (60, 3)], 'SmoothStep')])
+    cop = P.actor(s, g, 'Cop', COP[0], COP[1], stands, yaw, motion=looks_up, once=True, Lean=3.0, Nod=17.0, HeadTurn=read,
+                  LeftArm=P.arm(6, 8, 14), RightArm=P.arm(24, 10, 48, grip=0.3))
+    cop.add({'Type': 'VenueStory', 'Flag': 'innocent', 'WhenSet': True, 'FadeSeconds': 0.0, 'Mode': 'Play', 'Speed': 1.0})
+    # The partner holds it up by its bottom edge, the palm behind it, the face of it to the cop.
+    held = P.to_figure(partner, partner_yaw, at(sheet, (0.0, -0.16, 0.03)))
+    P.actor(s, g, 'Partner', PARTNER[0], PARTNER[1], w(partner), yaw + partner_yaw, Lean=4.0, Nod=4.0,
+            LeftArm=P.arm(6, 8, 14), RightArm=P.arm(hand=held, pole=(1, -1, -0.2), fingers=(0, 1, 0), palm=(0, 0, 1), grip=0.5))
+    A.model(s, g, 'Sheet', A.sign_face(V, 'Innocent'), w(sheet), (-10, yaw + 172, 0), (0.14, 0.11, 1),
+            A.mat(V, 'Innocent', (0.8, 0.8, 0.8), glow=(1, 1, 1), power=0.12, both=True, rough=1.0), shadows=False)
+    s.light('Sheet light', g, w((0.7, 1.9, -0.9)), 'Point', (1.0, 0.92, 0.8), 3.0, 3.0, fog=0.0)
+    # Over his right shoulder onto the sheet; then back and across behind his head to his left
+    # shoulder, the focus going out to the drummer under the medic's hands. While the highway is
+    # up, the sheet and then the drummer are on the right of the picture and his head on the left
+    # (the lens wide enough at the start for the whole sheet to fit there).
+    M.shot(s, marks, 'innocent', w((0.44, 1.6, -0.42)), w(sheet), 34, 8.3, hand=True, focus=True, lead='r',
+           end=(w((-0.5, 1.66, -1.2)), chest, 20))
+
+
 # ---- the highway run and the inside of the ambulance: ambulance_run, defib, shock -----------
+def braun(s, parent, part, pos=(0, 0, 0)):
+    return A.model(s, parent, 'Braun ' + part, 'Assets/Models/Vehicles/Braun' + part + '.fbx', pos)
+
+
+def braun_hanging(s, amb, V):
+    for k, (part, pos) in enumerate((('IV', (-0.49, 2.49, -0.83)), ('Strap', (0.096, 2.45, 1.23)),
+                                     ('Strap', (0.096, 2.45, -0.94)), ('Strap', (0.096, 2.45, -2.26)))):
+        hook = P.looping(s, amb, part + ' hook', swing(V, k), pos, speed=0.85 + 0.11 * k)
+        braun(s, hook, part)
+
+
 def inside(s, amb, V):
     """Who and what is in the back of the ambulance on the run (amb: its space, facing +z)."""
-    for z in (-1.7, 0.3):
-        s.box('Ceiling light', amb, (0, 2.925, z), (0.5, 0.03, 1.0), (1, 1, 1), emissive=(0.9, 0.95, 1.0), emissive_intensity=1.0, shadows=False)
-    s.light('Ambulance inside', amb, (0, 2.5, -0.7), 'Point', (0.85, 0.92, 1.0), 4.0, 5.5)
-    for x in (-0.6, 0.6):
-        M_see(s.box('Rear glass', amb, (x, 2.3, -2.9), (0.7, 0.6, 0.02), (0.5, 0.6, 0.7), rough=0.05, shadows=False), 0.12)
+    s.light('Ambulance inside', amb, (0, 2.45, -0.7), 'Point', (0.85, 0.92, 1.0), 4.0, 5.5)
     # The drummer on the cot, head to the front; the shock lifts them off it.
     chest = (-0.3, 1.29, -0.3)
     jolt = P.clip(V, 'ShockBody', 16, [P.track('Position', [(0, (0, 0, 0)), (2, (0, 0.17, 0)), (5, (0, 0.02, 0)), (8, (0, 0.05, 0)), (16, (0, 0, 0))], 'SmoothStep'),
@@ -508,31 +586,88 @@ def inside(s, amb, V):
     lifted = P.play(s, amb, 'The shock', 'shock', jolt, chest)
     lying = s.entity('On the cot', lifted, (0, -1.29, -0.2))
     patient(s, lying, V, 'drummer', 1.29)
-    for dx, dz in ((0.1, 0.42), (-0.1, 0.2)):
-        s.box('Paddle', lifted, (dx, 0.33, dz), (0.1, 0.05, 0.13), (0.9, 0.35, 0.05))
-        s.box('Paddle grip', lifted, (dx, 0.39, dz), (0.03, 0.08, 0.1), (0.05, 0.05, 0.06))
+    # The paddles, and the medic who stands in the aisle with one in each fist (the people are
+    # skinned, P.actor, their hands sent to what they hold). From the cut he rubs them together,
+    # face to face, in small circles; parts them and holds them over the chest; and brings them
+    # down onto it just before the shock (he comes off them with the recoil). It is all one clip a
+    # hand and one a paddle, the length of the wait between the flags defib and shock.
+    stands = (0.27, FLOOR, 0.0)
+    rest = ((-0.1, 0.33, 0.2), (0.1, 0.33, 0.42))            # on the chest: left hand's, right hand's
+    over = [at(p, (0.04, 0.3, 0)) for p in rest]            # held over it
+    rub_at, gap, r, turn = (-0.02, 0.6, 0.46), 0.028, 0.035, 14
+    rub_end, apart, down, total = 112, 132, 170, int(round(CHARGE * 30))
+    hold = 0.12                                             # a palm above a paddle's middle, on its grip
+
+    def circle(f, side):
+        a = 2 * math.pi * f / turn + (math.pi if side else 0.0)
+        return at(rub_at, (r * math.cos(a), r * math.sin(a), (gap if side else -gap)))
+
+    def to_medic(p):
+        return P.to_figure(stands, 270, at(chest, p))
+
+    hands = []
+    for side, name in enumerate(('Left', 'Right')):
+        sign = 1 if side else -1                            # which way along z the grip sticks out, face to face
+        frames = list(range(0, rub_end + 1, 2))
+        where = [(f, circle(f, side)) for f in frames] + [(apart, over[side]), (down - 12, over[side]), (down, rest[side]), (total, rest[side])]
+        faced = (sign * 90, 0, 0)
+        turned = [(0, faced), (rub_end, faced), (apart, (0, 0, 0)), (total, (0, 0, 0))]
+        clip = P.clip(V, 'Paddle' + name, total, [P.track('Position', where, 'Linear'), P.track('Rotation', turned, 'SmoothStep')])
+        paddle = P.play(s, lifted, name + ' paddle', 'defib', clip)
+        braun(s, paddle, 'Paddle', (0, 0.02, 0))
+        grip = [(f, to_medic(at(p, (0, 0, sign * hold)))) for f, p in where[:len(frames)]] + [(f, to_medic(at(p, (0, hold, 0)))) for f, p in where[len(frames):]]
+        palm = [(0, (-sign, 0, 0)), (rub_end, (-sign, 0, 0)), (apart, (0, -1, 0)), (total, (0, -1, 0))]
+        hands += [P.ftrack(name + 'Arm.Hand', grip, 'Linear'), P.ftrack(name + 'Arm.Palm', palm, 'SmoothStep')]
+    hands += [P.ftrack('Bow', [(0, 12), (rub_end, 12), (apart, 16), (down - 12, 16), (down, 24), (total, 24)], 'SmoothStep'),
+              P.ftrack('Nod', [(0, 22), (rub_end, 22), (apart, 16), (total, 16)], 'SmoothStep')]
+    charging = P.clip(V, 'PaddlesRub', total, hands)
     recoil = P.clip(V, 'ShockRecoil', 24, [P.track('Rotation', [(0, (0, 0, 0)), (3, (-9, 0, 0)), (24, (0, 0, 0))], 'SmoothStep')])
-    P.place(s, P.play(s, amb, 'Medic recoils', 'shock', recoil, (0.42, FLOOR, 0.0), (0, 270, 0)), 'Medic with the paddles',
-            P.figure(V, 'Medic_paddles', MEDIC[0], MEDIC[1], PADDLES, 'an EMS worker with the paddles down'), (0, 0, 0), 0)
-    P.place(s, amb, 'Medic at the head', P.figure(V, 'Medic_bagging', MEDIC[0], MEDIC[1], BAGGING, 'an EMS worker breathing for the drummer'), (-0.3, FLOOR, 1.12), 180)
+    first = [to_medic(at(circle(0, side), (0, 0, (1 if side else -1) * hold))) for side in (0, 1)]
+    medic = P.actor(s, P.play(s, amb, 'Medic recoils', 'shock', recoil, stands, (0, 270, 0)), 'Medic with the paddles', MEDIC[0], MEDIC[1], (0, 0, 0), 0,
+                    motion=charging, once=True, Bow=12.0, Lean=14.0, Nod=22.0, LeftLeg=P.leg(9), RightLeg=P.leg(9),
+                    LeftArm=P.arm(hand=first[0], pole=(-1, -0.3, -0.4), palm=(1, 0, 0), grip=0.9), RightArm=P.arm(hand=first[1], pole=(1, -0.3, -0.4), palm=(-1, 0, 0), grip=0.9))
+    # (His clip is a one-shot of his own, on the flag defib: the recoil above him is the shock's.)
+    medic.add({'Type': 'VenueStory', 'Flag': 'defib', 'WhenSet': True, 'FadeSeconds': 0.0, 'Mode': 'Play', 'Speed': 1.0})
+    # Another on the seat at the drummer's head, squeezing a bag over their face.
+    sits = (-0.3, FLOOR, 1.12)
+    mask = (-0.3, 1.63, 0.24)
+    held = P.to_figure(sits, 180, mask)
+    squeeze = P.clip(V, 'BagSqueeze', 90, [P.ftrack('RightArm.Grip', [(0, 0.3), (12, 0.85), (30, 0.3), (90, 0.3)], 'SmoothStep'),
+                                           P.ftrack('Lean', [(0, 10), (14, 13), (40, 10), (90, 10)], 'SmoothStep')])
+    P.actor(s, amb, 'Medic at the head', MEDIC[0], MEDIC[1], sits, 180, 'Seated', SeatHeight=0.5, Bow=30.0, Lean=10.0, Nod=22.0, motion=squeeze,
+            LeftArm=P.arm(hand=(held[0] - 0.07, held[1] - 0.04, held[2] + 0.02), pole=(-1, -0.3, -0.2), palm=(0.3, -1, 0), grip=0.5),
+            RightArm=P.arm(hand=(held[0] + 0.07, held[1] + 0.06, held[2] - 0.12), pole=(1, -0.3, -0.2), palm=(-0.4, -1, 0), grip=0.3))
+    s.box('Mask', amb, mask, (0.11, 0.06, 0.13), (0.75, 0.85, 0.9), rough=0.4, shadows=False)
+    s.box('Bag', amb, at(mask, (0, 0.07, 0.14)), (0.11, 0.11, 0.2), (0.25, 0.45, 0.8), rough=0.6, shape='Sphere', shadows=False)
+    # The cop on the bench, bent over with his elbows on his knees and his face in his hands: he
+    # can't watch. After the shock, sat up, his eyes on the monitor.
     seat = (0.84, FLOOR, -1.45)
-    P.place(s, P.between(s, amb, 'Cop waits', None, 'shock', 0.0, seat), 'Cop', P.figure(V, 'Cop_bench', COP[0], COP[1], COP_BENCH, 'the cop on the bench, watching'), seat, 270)
-    P.place(s, P.between(s, amb, 'Cop hopes', 'shock', None, 0.0, seat), 'Cop', P.figure(V, 'Cop_hopes', COP[0], COP[1], COP_HOPES, 'the cop, looking up at the monitor'), seat, 270)
+    P.actor(s, P.between(s, amb, 'Cop waits', None, 'shock', 0.0, seat), 'Cop', COP[0], COP[1], seat, 270, 'Seated', SeatHeight=0.55, **COP_CANT_WATCH)
+    P.actor(s, P.between(s, amb, 'Cop hopes', 'shock', None, 0.0, seat), 'Cop', COP[0], COP[1], seat, 270, 'Seated', SeatHeight=0.55, Bow=6.0, Lean=2.0, Nod=-12.0,
+            HeadTurn=P.turn_to(seat, 270, MONITOR, 60.0), Turn=P.turn_to(seat, 270, MONITOR, 20.0),
+            LeftArm=P.arm(hand=(-0.14, 0.6, 0.36), pole=(-1, 0, -0.5), palm=(0, -1, 0), grip=0.3), RightArm=P.arm(52, 4, 105, grip=0.9))
     # The flash: a light and a glare that are far overhead except for the three frames of the shock.
     flash = P.clip(V, 'ShockFlash', 6, [P.track('Position', [(0, (0, 0, 0)), (1, (0, -60, 0)), (4, (0, -60, 0)), (5, (0, 0, 0)), (6, (0, 0, 0))])])
     lit = P.play(s, amb, 'Flash', 'shock', flash, at(chest, (0, 60.6, 0)))
     s.light('Shock', lit, (0, 0, 0), 'Point', (0.8, 0.9, 1.0), 140.0, 6)
     A.glow_card(s, lit, V, 'Shock glare', (0, -0.3, 0), 0.9, (0.8, 0.9, 1.0), 5.0, (90, 0, 0))
     # The monitor: a flat line until the shock; after it a spike on every beat of the song.
-    monitor(s, amb, 'Monitor', (-0.795, 1.75, -0.9), 90, 'shock', scale=1.35)
-    # Everything on a hook, a strap or a lanyard.
-    hung = (((-0.45, 2.9, -0.9), 0.3, 'iv'), ((-0.15, 2.9, -0.1), 0.38, 'iv'), ((-0.5, 2.9, 0.55), 0.26, 'iv'), ((0.1, 2.82, -2.3), 0.3, 'strap'),
-            ((0.1, 2.82, -1.5), 0.3, 'strap'), ((0.1, 2.82, -0.7), 0.3, 'strap'), ((0.1, 2.82, 0.2), 0.3, 'strap'), ((0.1, 2.82, 1.0), 0.3, 'strap'),
-            ((-0.78, 2.1, -1.9), 0.3, 'mask'), ((-0.78, 2.1, 0.45), 0.22, 'steth'), ((-0.78, 2.1, 0.9), 0.3, 'cuff'), ((0.62, 2.9, -1.9), 0.5, 'shears'),
-            ((0.0, 2.6, 1.62), 0.12, 'clip'), ((0.55, 2.7, 1.62), 0.2, 'tree'), ((1.04, 2.0, -2.2), 0.28, 'buckle'), ((1.04, 2.0, -1.0), 0.28, 'buckle'),
-            ((1.04, 2.0, 0.1), 0.28, 'buckle'), ((0.75, 2.9, -2.2), 0.62, 'tags'), ((-0.2, 2.9, -2.0), 0.45, 'iv'), ((0.45, 2.9, -0.4), 0.2, 'mask'))
-    for k, (pivot, length, kind) in enumerate(hung):
+    live = P.between(s, amb, 'Monitor beating', 'shock', None, 0.0)
+    # The waveform is authored in vehicle space. Move it through the CRT face on its normal.
+    normal = (math.sin(math.radians(MONITOR_YAW)), 0, math.cos(math.radians(MONITOR_YAW)))
+    pulse = braun(s, live, 'Pulse', tuple(-0.025 * n for n in normal))
+    pulse.add({'Type': 'VenueBeat', 'Offset': [0.029 * n for n in normal], 'Every': 1.0,
+               'Phase': 0.0, 'Sway': False, 'Sharp': True})
+    braun_hanging(s, amb, V)
+    loose = [(8, (-0.78, 2.1, -1.9), 0.3, 'mask'), (9, (-0.78, 2.1, -0.75), 0.22, 'steth'),
+             (10, (-0.78, 2.1, 1.15), 0.25, 'cuff'), (11, (0.62, 2.48, -1.9), 0.5, 'shears'),
+             (12, (0.0, 2.48, 1.62), 0.12, 'clip'), (13, (0.55, 2.48, 1.62), 0.2, 'tree'),
+             (14, (1.04, 2.0, -2.2), 0.28, 'buckle'), (15, (1.04, 2.0, -1.0), 0.28, 'buckle'),
+             (16, (1.04, 2.0, 0.1), 0.28, 'buckle'), (17, (0.75, 2.48, -2.2), 0.62, 'tags'),
+             (19, (0.45, 2.48, -0.4), 0.2, 'mask')]
+    for k, pivot, length, kind in loose:
         dangle(s, amb, V, f'Hanging {k}: {kind}', pivot, length, kind, k)
+
 
 
 def run(s, root, marks, V, M):
@@ -588,17 +723,19 @@ def run(s, root, marks, V, M):
                                            P.track('Rotation', [(0, (0, 0, 0)), (24, (0.3, 0, -0.9)), (48, (-0.3, 0, 0)), (72, (0.3, 0, 0.9)), (96, (0, 0, 0))], 'SmoothStep')])
     amb_at = at(R, (AMB_X, 0, 0))
     amb = P.looping(s, g, 'Ambulance', rock, amb_at)
-    A.model(s, amb, 'Body', ambulance_shell(V, True))
-    A.model(s, amb, 'Fittings', ambulance_fittings(V, True))
-    beacon(s, amb, V, (0, 3.1, 1.4), 70.0, 95.0, 12.0)
-    for x in (-0.82, 0.82):
-        A.glow_card(s, amb, V, 'Headlight glare', (x, 0.9, 3.22), 0.7, (1.0, 0.95, 0.8), 3.0)
-        s.box('Tail lamp', amb, (x * 1.16, 1.1, -2.96), (0.2, 0.3, 0.02), (1, 0.05, 0.05), emissive=(1, 0.05, 0.05), emissive_intensity=5.0, shadows=False)
-    A.headlights(s, amb, 0.82, 0.9, 3.4, 380.0, 45, inner=14, outer=34, name='Ambulance headlight')
+    for part in ('Body', 'Doors', 'Cot'):
+        braun(s, amb, part)
+    beacon(s, amb, V, (0, 2.11, 1.97), 70.0, 95.0, 12.0, housings=False)
+    for x in (-0.836, 0.836):
+        A.glow_card(s, amb, V, 'Headlight glare', (x, 1.035, 3.65), 0.7, (1.0, 0.95, 0.8), 3.0)
+    A.headlights(s, amb, 0.836, 1.035, 3.65, 380.0, 45, inner=14, outer=34, name='Ambulance headlight')
+    A.exhaust(s, amb, V, (0.85, 0.4, -3.15), size=1.3)
     inside(s, amb, V)
 
     # The escort: cruisers ahead, alongside and behind (the two on the outside lane Trail Dusters),
-    # each weaving in its lane.
+    # each weaving in its lane. From the helicopter a cruiser's tail could be its nose, so each
+    # says which way it is going: the wheels turn, the driver has the window down and an arm
+    # out on the door, and its exhaust trails behind it (the ambulance's too).
     escort = ((AMB_X, 17.0, True), (-2.7, 11.0, True), (-2.7, -2.0, False), (8.1, 4.0, False), (AMB_X, -12.5, True), (-2.7, -16.0, True), (8.1, -11.0, False))
     for i, (x, z, full) in enumerate(escort):
         frames = 150 + 40 * (i % 3)
@@ -607,11 +744,12 @@ def run(s, root, marks, V, M):
                                                          P.track('Rotation', [(0, (0, 0, 0)), (frames // 8, (0, side * 5, 0)), (3 * frames // 8, (0, -side * 6, 0)), (5 * frames // 8, (0, side * 4, 0)), (frames, (0, 0, 0))], 'SmoothStep')])
         car = P.looping(s, g, f'Escort {i}', weave, at(R, (x, 0, z)))
         kind = 'TrailDuster' if x > 5 else None
+        M.rolling(s, car, V, kind)
+        M.driver(s, car, kind, LeftArm=M.window_arm(kind))
+        A.exhaust(s, car, V, A.tailpipe(kind))
         if kind:
-            A.vehicle(s, car, kind)
             (hx, hy, hz), tail = A.lamp(kind, 'Headlamp'), A.lamp(kind, 'TailLamp')
         else:
-            A.patrol_cruiser(s, car)
             (hx, hy, hz), tail = A.PATROL_HEADLAMP, A.PATROL_TAIL_LAMP
         for dx in (-hx, hx):
             A.glow_card(s, car, V, 'Headlight glare', (dx, hy, hz + 0.05), 0.45, (1.0, 0.95, 0.8), 0.8)
@@ -619,25 +757,31 @@ def run(s, root, marks, V, M):
         if full:
             A.headlights(s, car, hx, hy, hz + 0.15, 260.0, 32)
         M.beacons(s, car, V, 110.0 if full else 0.0, 150.0, 22.0, 1.0 + 0.1 * i, glare=(0.5, 1.2), kind=kind)
-    # The helicopter over them, its searchlight held on the ambulance's roof. (Until the cut to the
-    # inside: nothing here casts a shadow but the sun, so the light would be on the cot.)
-    copter_at = at(R, (-9.0, 13.7, 12.0))
-    M.police_helicopter(s, P.between(s, g, 'Helicopter', None, 'defib', 0.0, copter_at), V, 'AS350', copter_at, (12, 10, -6), at(amb_at, (0, 2, 0)), 1500.0, 40,
-                        wander=1.2, inner=5, outer=10)
-
-    # From the road ahead of the lead cruisers, back at the ambulance coming on; then up and over
-    # the escort to look down on the whole run from behind.
-    M.shot(s, marks, 'ambulance_run', at(R, (-0.6, 0.8, 31.0)), at(R, (AMB_X, 1.7, 2.0)), 32, 7.3, ride=0.6,
-           via=[(at(R, (-8.6, 3.4, 13.0)), at(R, (AMB_X, 1.5, 0.0)), 46)], end=(at(R, (-9.5, 15.0, -27.0)), at(R, (AMB_X - 0.5, 0.5, 3.0)), 56))
-    # Inside, from up in the corner by the bulkhead: the drummer under the paddles, the cop, and
-    # the escort's lights in the back windows. Handheld, on the road.
-    M.shot(s, marks, 'defib', at(amb_at, (0.74, 2.52, 1.3)), at(amb_at, (-0.28, 1.4, -0.7)), 74, 9.9, hand=True, ride=1.2,
-           end=(at(amb_at, (0.58, 2.25, 0.85)), at(amb_at, (-0.3, 1.42, -0.35)), 62))
+    # The run is seen from a helicopter following it: astern and off to the left, high, an operator
+    # in the door on a long lens. The whole escort first, then the lens goes in on the ambulance as
+    # the helicopter gains on it. Aimed at the ambulance throughout: while the highway is up it is
+    # on the right of the picture, the cars ahead of it above it toward the middle, and the lens
+    # stops at 11 degrees so the operator's hunting doesn't carry it onto the highway.
+    heli = at(R, (-30.0, 34.0, -44.0))
+    M.shot(s, marks, 'ambulance_run', heli, at(R, (AMB_X, 1.5, 0.5)), 26, 7.3, heli=True, lead='r',
+           via=[(at(heli, (3.0, -1.0, 6.0)), at(R, (AMB_X, 1.5, 0.5)), 14)], end=(at(heli, (8.0, -3.0, 14.0)), at(R, (AMB_X, 1.5, 0.5)), 11))
+    # The helicopter itself, just above and behind that camera, so its searchlight on the
+    # ambulance's roof comes from where the picture is taken. (Until the cut to the inside: nothing
+    # here casts a shadow but the sun, so the light would be on the cot.)
+    copter_at = at(heli, (-2.5, 5.0, -9.0))
+    M.police_helicopter(s, P.between(s, g, 'Helicopter', None, 'defib', 0.0, copter_at), V, 'AS350', copter_at, (10, 34, 4), at(amb_at, (0, 2, 0)), 16000.0, 100,
+                        wander=1.2, inner=3, outer=6)
+    # Inside, from up by the bulkhead over the medic at the head: aimed at the drummer's chest under
+    # the paddles, which the highway's lead keeps on the right of the picture with the monitor at
+    # its edge, the cop on the bench in the middle and the escort's lights in the back windows
+    # beyond him. Handheld, on the road.
+    M.shot(s, marks, 'defib', at(amb_at, (0.35, 2.5, 1.25)), at(amb_at, (-0.3, 1.29, -0.3)), 70, 9.9, hand=True, ride=1.2, lead='r',
+           end=(at(amb_at, (0.3, 2.25, 0.8)), at(amb_at, (-0.32, 1.35, -0.25)), 60))
 
 
 # ---- the corridor: gurney -------------------------------------------------------------------
 def rush(s, root, marks, V, M):
-    g = place_at(s, root, 'The hospital corridor', 'gurney', 'resurrection', H)
+    g = place_at(s, root, 'The hospital corridor', 'gurney', 'surgery', H)
     # The rest of the building over and round the corridor (it keeps heaven's sun out).
     s.slab('Storey above', g, H[0] - 14, H[0] + 14, 3.0, 5.0, H[2] - 60, H[2] + 60, (0.5, 0.5, 0.5))
     for side in (-1, 1):
@@ -667,26 +811,350 @@ def rush(s, root, marks, V, M):
     # cop and a nurse with the drip running alongside; the others behind in a line.
     rattle = [P.clip(V, f'GurneyRattle{i}', 70 + 16 * i, [P.track('Position', [(0, (0, 0, 0)), (18 + 4 * i, (0.03 + 0.02 * i, 0, 0.1 * i)), (40 + 8 * i, (-0.03 - 0.02 * i, 0, -0.14 * i)), (70 + 16 * i, (0, 0, 0))], 'SmoothStep'),
                                                           P.track('Rotation', [(0, (0, 0, 0)), (20 + 4 * i, (0, 1.2 + i, 0.3)), (48 + 8 * i, (0, -1.2 - i, -0.3)), (70 + 16 * i, (0, 0, 0))], 'SmoothStep')]) for i in range(4)]
-    pusher = P.figure(V, 'Medic_push', MEDIC[0], MEDIC[1], PUSH, 'an EMS worker pushing a gurney')
     for i, (who, x) in enumerate((('drummer', 0.0), ('guitar', 0.42), ('bass', -0.4), ('vocals', 0.36))):
         cart = P.looping(s, g, f'Gurney: {who}', rattle[i], at(H, (x, 0, -3.5 * i)))
         A.model(s, cart, 'Top', gurney(V), (0, 0, 0), (0, 180, 0))
         A.model(s, cart, 'Legs', gurney_legs(V), (0, 0.78, 0))
         patient(s, cart, V, who, 0.92, -1)
         dangle(s, cart, V, 'IV bag', (-0.33, 1.95, -0.85), 0.1, 'iv', i)
-        runner(s, cart, V, 'Medic pushing', pusher, (0, 0, -1.62), 0, i)
+        runner(s, cart, V, 'Medic pushing', MEDIC, (0, 0, -1.45), 0, i, arms=(), **pushing())
         if i:
             dangle(s, cart, V, 'Chart', (0.31, 0.98, 0.3), 0.04, 'clip', i + 2)
-    runner(s, g, V, 'Cop', P.figure(V, 'Cop_runs', COP[0], COP[1], COP_RUNS, 'the cop running beside the gurney'), at(H, (0.82, 0, -0.55)), 0, 1)
-    runner(s, g, V, 'Nurse with the drip', P.figure(V, 'Nurse_drip', NURSE[0], NURSE[1], IV_HELD, 'a nurse running with the drip held up'), at(H, (-0.82, 0, -0.9)), 0, 2)
-    M.shot(s, marks, 'gurney', at(H, (0.28, 1.7, 1.12)), at(H, (0.0, 1.05, -0.72)), 56, 8.5, hand=True, ride=0.9,
+    # The cop runs beside the drummer, his eyes on them; a nurse on the other side holds the drip up.
+    runner(s, g, V, 'Cop', COP, at(H, (0.82, 0, -0.55)), 0, 1, Nod=10.0, HeadTurn=-38.0, Turn=-10.0)
+    # (The nurse runs level with the foot, near the lens: further up the gurney she was in the
+    # middle of the picture, under the highway.)
+    runner(s, g, V, 'Nurse with the drip', NURSE, at(H, (-1.0, 0, 0.3)), 0, 2, arms=('Left',), HeadTurn=34.0,
+           RightArm=P.arm(hand=(0.44, 1.86, 0.05), pole=(1, 0, 0.4), grip=0.8))
+    M.shot(s, marks, 'gurney', at(H, (0.28, 1.7, 1.12)), at(H, (0.0, 1.05, -0.72)), 56, 9.6, hand=True, ride=0.9, lead='l',
            end=(at(H, (0.44, 1.92, 1.36)), at(H, (-0.04, 1.05, -0.8)), 62))
+
+# ---- the operating theatre: surgery ---------------------------------------------------------
+ROOM = (-3.6, 3.6, -3.4, 3.6, 3.0)    # the drummer's theatre: x from and to, z from and to, its height
+NEXT = 6.6                             # the next theatre's table, along x (the glass between is at x 3.6)
+TABLE = 0.85                           # an operating table's top above the floor
+GLASS = (-2.2, 2.2, 1.0, 2.3)          # the window between the theatres: z from and to, y from and to
+DOOR = (0.8, 2.1)                      # a leaf of the doors (at the head end, -z): its width and height
+SCRUBS = (0.42, 0.95, 0.88)            # theatre green: what a staff atlas's cloth is drawn in
+
+
+def scrubs(venue, body, variant):
+    """body's PolygonTown atlas with everything but its skin in theatre green (the hair too: a
+    cap), for the theatre's staff. The skin is the colours the head and the arms both use (the
+    crowd's pieces of the body have the character's UVs), so a hood and sleeves of one cloth keep
+    their colour too: Son_01's are blue. Drawn with ffmpeg the first time and kept."""
+    name = f'Scrubs_{body}_{variant}.png'
+    path = os.path.join(A.ROOT, 'Assets', 'Venues', venue, 'Textures', name)
+    if not os.path.isfile(path):
+        import subprocess
+        source = os.path.join(A.ROOT, 'Assets', 'Models', 'Venue', f'PolygonTown_{variant}.png')
+        size = 256
+        raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', source, '-vf', f'scale={size}:{size}:flags=neighbor', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
+                             check=True, capture_output=True).stdout
+
+        def colours(piece):
+            _, uvs, faces = P._read(body, piece, False)
+            found = set()
+            for f in faces:
+                u = sum(uvs[t - 1][0] for _, t in f) / len(f)
+                v = sum(uvs[t - 1][1] for _, t in f) / len(f)
+                x, y = min(size - 1, max(0, int(u * size))), min(size - 1, max(0, int((1.0 - v) * size)))
+                found.add(tuple(raw[(y * size + x) * 3:(y * size + x) * 3 + 3]))
+            return found
+        skin = colours('Head') & (colours('ArmL') | colours('ArmR'))
+        near = '+'.join(f"lt(abs(r(X\\,Y)-{r})+abs(g(X\\,Y)-{g})+abs(b(X\\,Y)-{b})\\,14)" for r, g, b in sorted(skin)) or '0'
+        grey = "(40+0.75*(0.3*r(X\\,Y)+0.59*g(X\\,Y)+0.11*b(X\\,Y)))"
+        geq = ':'.join(f"{c}='if({near}\\,{c}(X\\,Y)\\,{k}*{grey})'" for c, k in zip('rgb', SCRUBS))
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', source, '-vf', 'format=gbrp,geq=' + geq, '-frames:v', '1', path], check=True)
+    return f'Assets/Venues/{venue}/Textures/{name}'
+
+
+def staff(s, parent, V, name, look, pos, yaw, **kw):
+    """One of the theatre's team: a skinned figure (P.actor) in scrubs."""
+    e = P.actor(s, parent, name, look[0], look[1], pos, yaw, **kw)
+    for c in e.components:
+        if c.get('Type') == 'VenueFigure':
+            c['Atlas'] = scrubs(V, look[0], look[1])
+    return e
+
+
+def theatre_walls(venue):
+    """The walls of two theatres side by side and of the lobby outside the first one's doors, all
+    in white (the material tints them): closed all round, to keep heaven's sun out. The first
+    theatre's floor is the origin; the doors' opening is in its -z wall, the glass in its +x wall."""
+    x0, x1, z0, z1, high = ROOM
+    far = NEXT + 3.0
+
+    def build(m):
+        mid_x, wide = (x0 + far) / 2, far - x0 + 0.2
+        mid_z, deep = (z0 + z1) / 2, z1 - z0
+        m.box((x0 - 0.05, high / 2, mid_z), (0.1, high, deep + 0.2), 'white')
+        m.box((far + 0.05, high / 2, mid_z), (0.1, high, deep + 0.2), 'white')
+        m.box((mid_x, high / 2, z1 + 0.05), (wide, high, 0.1), 'white')
+        # The head wall, round the doors.
+        m.box(((x0 - DOOR[0]) / 2, high / 2, z0 - 0.05), (-DOOR[0] - x0, high, 0.1), 'white')
+        m.box(((far + DOOR[0]) / 2, high / 2, z0 - 0.05), (far - DOOR[0], high, 0.1), 'white')
+        m.box((0, (high + DOOR[1]) / 2, z0 - 0.05), (2 * DOOR[0], high - DOOR[1], 0.1), 'white')
+        # The wall between the theatres, round its glass.
+        g0, g1, y0, y1 = GLASS
+        m.box((x1 + 0.05, y0 / 2, mid_z), (0.1, y0, deep), 'white')
+        m.box((x1 + 0.05, (high + y1) / 2, mid_z), (0.1, high - y1, deep), 'white')
+        m.box((x1 + 0.05, (y0 + y1) / 2, (z0 + g0) / 2), (0.1, y1 - y0, g0 - z0), 'white')
+        m.box((x1 + 0.05, (y0 + y1) / 2, (z1 + g1) / 2), (0.1, y1 - y0, z1 - g1), 'white')
+        # The lobby.
+        for x in (-1.65, 1.65):
+            m.box((x, high / 2, z0 - 0.8), (0.1, high, 1.4), 'white')
+        m.box((0, high / 2, z0 - 1.55), (3.4, high, 0.1), 'white')
+    return A.prop(venue, 'TheatreWalls', build)
+
+
+def theatre_shell(venue):
+    """What goes with theatre_walls in its own colours: the floor, the ceiling, the doors (each
+    leaf with a tall window), the frame of the glass, the scrub-up trough and the clock."""
+    x0, x1, z0, z1, high = ROOM
+    far = NEXT + 3.0
+
+    def build(m):
+        mid_x, wide = (x0 + far) / 2, far - x0 + 0.2
+        m.box((mid_x, -0.05, (z0 + z1) / 2 - 0.8), (wide, 0.1, z1 - z0 + 1.8), 'marble_shade')
+        m.box((mid_x, high + 0.05, (z0 + z1) / 2 - 0.8), (wide, 0.1, z1 - z0 + 1.8), 'white')
+        # A band of darker floor round each table.
+        for x in (0.0, NEXT):
+            m.box((x, 0.003, 0), (2.6, 0.004, 3.6), 'steel')
+            m.box((x, 0.005, 0), (2.5, 0.004, 3.5), 'marble_shade')
+        # The doors: a leaf each side of the middle, its window from 1.0 to 1.9 up.
+        w, h = DOOR
+        for side in (-1, 1):
+            for a, b, y, tall in ((0.0, 0.24, h / 2, h), (0.56, w, h / 2, h), (0.24, 0.56, 0.5, 1.0), (0.24, 0.56, (1.9 + h) / 2, h - 1.9)):
+                m.box((side * (a + b) / 2, y, z0 - 0.02), (b - a - 0.004, tall, 0.05), 'steel')
+            m.box((side * 0.4, 0.2, z0 + 0.008), (0.7, 0.36, 0.006), 'chrome')
+            m.box((side * 0.09, 1.05, z0 + 0.02), (0.04, 0.3, 0.03), 'chrome')
+        m.box((0, h + 0.04, z0 + 0.01), (2 * w + 0.16, 0.08, 0.06), 'steel_dark')
+        for side in (-1, 1):
+            m.box((side * (w + 0.04), h / 2, z0 + 0.01), (0.08, h, 0.06), 'steel_dark')
+        # The frame of the glass.
+        g0, g1, y0, y1 = GLASS
+        for y in (y0, y1):
+            m.box((x1 + 0.05, y, (g0 + g1) / 2), (0.16, 0.06, g1 - g0 + 0.06), 'steel')
+        for z in (g0, (g0 + g1) / 2, g1):
+            m.box((x1 + 0.05, (y0 + y1) / 2, z), (0.16, y1 - y0, 0.06), 'steel')
+        # A scrub trough on the far wall and a clock on the head wall.
+        m.box((x0 + 0.3, 0.95, 2.0), (0.5, 0.3, 1.6), 'steel')
+        m.box((x0 + 0.3, 1.09, 2.0), (0.4, 0.04, 1.5), 'steel_dark')
+        for z in (1.5, 2.5):
+            m.tube([(x0 + 0.06, 1.1, z), (x0 + 0.06, 1.45, z), (x0 + 0.3, 1.45, z), (x0 + 0.3, 1.36, z)], 0.015, 'chrome', 5)
+        m.box((-2.2, 2.45, z0 + 0.02), (0.42, 0.42, 0.03), 'black')
+        m.box((-2.2, 2.45, z0 + 0.04), (0.36, 0.36, 0.02), 'white')
+        m.box((-2.2, 2.51, z0 + 0.053), (0.015, 0.13, 0.006), 'black')
+        m.box((-2.15, 2.45, z0 + 0.053), (0.1, 0.015, 0.006), 'black')
+    return A.prop(venue, 'TheatreShell', build)
+
+
+def op_table(venue):
+    """An operating table along z, the head at -z: a pedestal and a narrow padded top at TABLE."""
+    def build(m):
+        m.box((0, 0.04, 0.1), (0.62, 0.08, 1.0), 'steel_dark')
+        m.box((0, 0.42, 0.1), (0.26, 0.7, 0.36), 'steel')
+        m.box((0, TABLE - 0.07, 0), (0.56, 0.05, 2.0), 'steel')
+        m.box((0, TABLE - 0.025, 0.1), (0.54, 0.05, 1.76), 'black')
+        m.box((0, TABLE - 0.02, -0.9), (0.3, 0.06, 0.26), 'black')
+        for x in (-0.29, 0.29):
+            m.tube([(x, TABLE - 0.07, -0.7), (x, TABLE - 0.07, 0.9)], 0.012, 'chrome', 5)
+    return A.prop(venue, 'OpTable', build)
+
+
+LAMPS = ((-0.28, 2.05, -0.42, 0.36), (0.44, 2.22, 0.58, 0.3))      # an operating lamp's two heads: x, the face's y, z, its radius
+
+
+def op_lamp(venue):
+    """The pair of lamps over a table, on arms from one mount in the ceiling (the origin is the
+    floor under the table's middle). Their glowing faces are LAMPS (the generator puts them there)."""
+    def build(m):
+        high = ROOM[4]
+        m.box((0, high - 0.08, 0.1), (0.34, 0.16, 0.34), 'white')
+        m.tube([(0, high - 0.1, 0.1), (0, high - 0.45, 0.1)], 0.045, 'white', 8)
+        for k, (x, y, z, r) in enumerate(LAMPS):
+            elbow = (x * 2.2, high - 0.42 - 0.08 * k, z * 1.3 + 0.1)
+            m.tube([(0, high - 0.42 - 0.08 * k, 0.1), elbow, (x, y + 0.3, z), (x, y + 0.1, z)], 0.028, 'white', 6)
+            m.lathe((x, y, z), [(r * 0.96, 0.0), (r, 0.03), (r * 0.8, 0.11), (0.1, 0.14), (0.0, 0.14)], 'white', 20, 'y')
+            m.tube([(x + r, y + 0.03, z - 0.05), (x + r + 0.1, y + 0.03, z - 0.05), (x + r + 0.1, y + 0.03, z + 0.05), (x + r, y + 0.03, z + 0.05)], 0.01, 'chrome', 4)
+    return A.prop(venue, 'OpLamp', build)
+
+
+def theatre_kit(venue):
+    """What stands round the drummer's table (the origin is the floor under its middle, the head
+    at -z): the anaesthetic machine and a stool at the head, a drip stand, the instrument stand
+    over the legs, a back table, a kick bucket, the monitor's trolley and a light box of films."""
+    def build(m):
+        # The anaesthetic machine, right of the head: a cart, its monitor, bottles on the back.
+        ax, az = 1.0, -1.55
+        m.box((ax, 0.5, az), (0.6, 0.8, 0.55), 'white')
+        m.box((ax, 0.06, az), (0.66, 0.08, 0.6), 'steel_dark')
+        for y in (0.3, 0.5, 0.7):
+            m.box((ax, y, az + 0.28), (0.5, 0.16, 0.01), 'marble_shade')
+            m.box((ax, y + 0.03, az + 0.29), (0.14, 0.02, 0.01), 'chrome')
+        m.box((ax, 0.92, az), (0.62, 0.04, 0.57), 'steel')
+        m.box((ax, 1.25, az - 0.12), (0.56, 0.6, 0.26), 'white')
+        m.box((ax - 0.1, 1.33, az + 0.012), (0.26, 0.2, 0.01), 'glass')
+        for k in range(3):
+            m.tube([(ax + 0.14 + 0.05 * k, 1.12, az + 0.02), (ax + 0.14 + 0.05 * k, 1.46, az + 0.02)], 0.014, ('sky', 'hivis', 'chrome')[k], 5)
+        for k, ink in enumerate(('sign_green', 'sky')):
+            m.tube([(ax - 0.12 + 0.24 * k, 0.12, az - 0.36), (ax - 0.12 + 0.24 * k, 0.95, az - 0.36)], 0.07, ink, 8)
+        m.tube([(ax - 0.28, 1.0, az + 0.2), (ax - 0.5, 1.2, az + 0.5), (ax - 0.75, 1.05, az + 0.62)], 0.014, 'sky', 5)
+        # A drip stand, left of the head.
+        dx, dz = -0.72, -1.25
+        m.tube([(dx, 0.03, dz), (dx, 2.0, dz)], 0.014, 'chrome', 5)
+        m.tube([(dx - 0.13, 1.99, dz), (dx + 0.13, 1.99, dz)], 0.01, 'chrome', 4)
+        for a in range(5):
+            t = 2 * math.pi * a / 5
+            m.tube([(dx, 0.05, dz), (dx + 0.26 * math.cos(t), 0.03, dz + 0.26 * math.sin(t))], 0.012, 'steel_dark', 4)
+        # The instrument stand: a tray over the patient's shins on one leg.
+        m.tube([(0.98, 0.03, 0.9), (0.98, TABLE + 0.42, 0.9), (0.72, TABLE + 0.42, 0.9)], 0.018, 'chrome', 5)
+        m.box((0.98, 0.03, 0.9), (0.5, 0.04, 0.5), 'steel_dark')
+        m.box((0.36, TABLE + 0.43, 0.9), (0.74, 0.02, 0.44), 'chrome')
+        m.box((0.36, TABLE + 0.445, 0.9), (0.68, 0.012, 0.38), 'sign_green')
+        for k in range(7):
+            m.box((0.1 + 0.075 * k, TABLE + 0.456, 0.9 + 0.03 * (k % 3 - 1)), (0.016, 0.008, 0.16 + 0.02 * (k % 2)), 'chrome', euler=(0, 6 * (k % 3 - 1), 0))
+        # A back table along the far wall, draped, with basins.
+        m.box((-2.7, 0.45, -0.6), (0.7, 0.9, 1.7), 'sign_green')
+        m.box((-2.7, 0.91, -0.6), (0.74, 0.02, 1.74), 'sign_green')
+        for z, r in ((-1.1, 0.16), (-0.6, 0.12), (-0.15, 0.1)):
+            m.lathe((-2.7, 0.92, z), [(r * 0.7, 0.0), (r, 0.09), (r * 0.92, 0.09), (r * 0.64, 0.01)], 'chrome', 10, 'y')
+        # A kick bucket and the surgeon's stool.
+        m.lathe((-1.0, 0.0, 0.75), [(0.0, 0.02), (0.15, 0.02), (0.18, 0.3), (0.16, 0.3), (0.13, 0.04)], 'steel', 10, 'y')
+        m.lathe((0.25, 0.0, -2.2), [(0.0, 0.5), (0.17, 0.5), (0.17, 0.56), (0.0, 0.56)], 'black', 10, 'y')
+        m.tube([(0.25, 0.02, -2.2), (0.25, 0.5, -2.2)], 0.02, 'chrome', 5)
+        # The monitor's trolley, left of the head: the screen is the generator's (monitor()).
+        mx, mz = -1.45, -1.7
+        m.tube([(mx, 0.03, mz), (mx, 1.45, mz)], 0.02, 'chrome', 5)
+        m.box((mx, 0.03, mz), (0.44, 0.04, 0.44), 'steel_dark')
+        m.box((mx, 1.62, mz - 0.07), (0.6, 0.46, 0.12), 'steel_dark')
+        m.box((mx, 1.1, mz), (0.4, 0.03, 0.34), 'steel')
+        # A light box on the head wall with two films up.
+        m.box((2.1, 1.7, ROOM[2] + 0.03), (1.0, 0.56, 0.05), 'steel_dark')
+    return A.prop(venue, 'TheatreKit', build)
+
+
+def on_table(s, parent, V, who):
+    """A band member on an operating table under parent (the floor under the table's middle; the
+    head at -z), draped in green from the collar down, a tube taped at the mouth."""
+    P.lie(s, parent, who.capitalize(), body_of(V, who), (0, TABLE, 0.88), 0)
+    green = A.mat(V, 'Palette', (0.2, 0.8, 0.62), rough=1.0)
+    A.model(s, parent, 'Drape', blanket(V), (0, TABLE, 0.36), (0, 0, 0), (1.2, 0.8, 1.55), green)
+    s.box('Drape, chest', parent, (0, TABLE + 0.16, -0.37), (0.74, 0.3, 0.5), (0.09, 0.5, 0.57), rough=1.0)
+    s.box('Cap', parent, (0, TABLE + 0.19, -0.9), (0.22, 0.2, 0.17), (0.5, 0.8, 0.78), rough=1.0, shape='Sphere', shadows=False)
+
+
+def operating(venue, k, hands):
+    """A surgeon's small movements over the table: the hands (left, right: the points they rest
+    at, in the figure's space) working a few centimetres about them, the head following."""
+    frames = (50, 64, 58)[k % 3]
+    tracks = []
+    for side, (x, y, z) in zip(('Left', 'Right'), hands):
+        sign = -1 if side == 'Left' else 1
+        keys = [(0, (x, y, z)), (frames // 4, (x + 0.02 * sign, y + 0.015, z + 0.03)), (frames // 2, (x - 0.015 * sign, y, z - 0.02)),
+                (3 * frames // 4, (x + 0.01, y + 0.025, z + 0.015)), (frames, (x, y, z))]
+        tracks.append(P.ftrack(f'{side}Arm.Hand', keys, 'SmoothStep'))
+    tracks.append(P.ftrack('Nod', [(0, 24), (frames // 2, 28), (frames, 24)], 'SmoothStep'))
+    return P.clip(venue, f'Operating{k % 3}', frames, tracks)
+
+
+def surgeon(s, parent, V, name, look, pos, yaw, work, k, **pose):
+    """One of the team stood at the table, both hands down at work (a point in parent's space)."""
+    local = P.to_figure(pos, yaw, work)
+    hands = [(local[0] + dx, local[1], local[2]) for dx in (-0.07, 0.07)]
+    fields = dict(Bow=20.0, Lean=8.0, Nod=24.0, LeftLeg=P.leg(6), RightLeg=P.leg(6),
+                  LeftArm=P.arm(hand=hands[0], pole=(-1, -0.5, -0.3), fingers=(0.2, -0.3, 1), palm=(0, -1, 0), grip=0.5),
+                  RightArm=P.arm(hand=hands[1], pole=(1, -0.5, -0.3), fingers=(-0.2, -0.3, 1), palm=(0, -1, 0), grip=0.5))
+    fields.update(pose)
+    return staff(s, parent, V, name, look, pos, yaw, motion=operating(V, k, hands), speed=0.8 + 0.13 * k, **fields)
+
+
+def surgery(s, root, marks, V, M):
+    x0, x1, z0, z1, high = ROOM
+    g = s.entity('Theatre', place_at(s, root, 'The operating theatre', 'surgery', 'resurrection', O), O)
+
+    def out(p):
+        return at(O, p)
+    A.model(s, g, 'Walls', theatre_walls(V), material=A.mat(V, 'Palette', (0.56, 0.78, 0.72), rough=0.6))
+    A.model(s, g, 'Room', theatre_shell(V), material=A.mat(V, 'Palette', rough=0.7))
+    A.model(s, g, 'Kit', theatre_kit(V), material=A.mat(V, 'Palette', rough=0.6))
+    M_see(s.box('Glass', g, (x1 + 0.05, (GLASS[2] + GLASS[3]) / 2, 0), (0.02, GLASS[3] - GLASS[2], GLASS[1] - GLASS[0]), (0.6, 0.8, 0.85), rough=0.1, shadows=False), 0.1)
+    glow = A.mat(V, 'Palette', (1, 1, 1), glow=(0.9, 0.98, 1.0), power=2.2, glow_tex=False)
+    # The room's own light is low and cool; the lamps make a pool of the table (no light here
+    # casts a shadow: a pool is all a lamp can be).
+    for x in (0.0, NEXT):
+        for z in (-2.2, 2.4):
+            for dx in (-1.9, 1.9):
+                A.model(s, g, 'Ceiling panel', panel(V), (x + dx, high - 0.01, z), material=glow, shadows=False)
+        s.light('Theatre light', g, (x, 2.6, 2.3), 'Point', (0.8, 0.95, 1.0), 5.0, 7, fog=0.0)
+        s.light('Theatre light', g, (x, 2.6, -2.3), 'Point', (0.8, 0.95, 1.0), 5.0, 7, fog=0.0)
+        table = s.entity('Table', g, (x, 0, 0))
+        A.model(s, table, 'Table', op_table(V), material=A.mat(V, 'Palette', rough=0.5))
+        A.model(s, table, 'Lamps', op_lamp(V), material=A.mat(V, 'Palette', rough=0.4))
+        for lx, ly, lz, r in LAMPS:
+            s.box('Lamp face', table, (lx, ly - 0.004, lz), (1.84 * r, 0.008, 1.84 * r), (1, 1, 1), emissive=(1.0, 0.97, 0.9), emissive_intensity=7.0, shadows=False, shape='Cylinder')
+            s.light('Lamp', table, (lx, ly - 0.05, lz), 'Spot', (1.0, 0.97, 0.9), 4.0, 3.5, rot=look_rotation((lx, ly, lz), (0, TABLE + 0.2, -0.3)), inner=24, outer=44, fog=0.0)
+        on_table(s, table, V, 'drummer' if x == 0 else 'guitar')
+    s.light('Lobby light', g, (-0.2, 2.2, z0 - 0.2), 'Point', (1.0, 0.95, 0.85), 5.0, 3.0, fog=0.0)
+    s.box('Light box', g, (2.1, 1.7, z0 + 0.06), (0.92, 0.48, 0.01), (1, 1, 1), emissive=(0.85, 0.93, 1.0), emissive_intensity=2.5, shadows=False)
+    for dx in (-0.23, 0.23):
+        s.box('Film', g, (2.1 + dx, 1.7, z0 + 0.068), (0.36, 0.42, 0.004), (0.03, 0.04, 0.06), emissive=(0.25, 0.3, 0.36), emissive_intensity=1.0, shadows=False)
+        s.box('Film: ribs', g, (2.1 + dx, 1.72, z0 + 0.071), (0.2, 0.26, 0.003), (0.1, 0.12, 0.14), emissive=(0.6, 0.68, 0.75), emissive_intensity=1.4, shadows=False)
+
+    # The drummer's team. The surgeon and the assistant face each other across the chest; the
+    # anaesthetist stands at the head with the bag; the scrub nurse is at the instrument stand.
+    work = (0.0, TABLE + 0.35, -0.32)
+    surgeon(s, g, V, 'Surgeon', MEDIC, (-0.6, 0, -0.34), 90, at(work, (-0.05, 0, 0)), 0)
+    surgeon(s, g, V, 'Assistant', ('SchoolGirl_01', '01_C'), (0.6, 0, -0.2), 270, at(work, (0.07, 0, 0.12)), 1, Bow=16.0)
+    stands = (0.0, 0, -1.62)
+    mask = (0.0, TABLE + 0.33, -0.86)
+    held = P.to_figure(stands, 0, mask)
+    squeeze = P.clip(V, 'BagSqueeze', 90, [P.ftrack('RightArm.Grip', [(0, 0.3), (12, 0.85), (30, 0.3), (90, 0.3)], 'SmoothStep'),
+                                           P.ftrack('Lean', [(0, 10), (14, 13), (40, 10), (90, 10)], 'SmoothStep')])
+    staff(s, g, V, 'Anaesthetist', NURSE, stands, 0, Bow=26.0, Lean=10.0, Nod=24.0, motion=squeeze,
+          LeftArm=P.arm(hand=(held[0] - 0.07, held[1] - 0.04, held[2] - 0.02), pole=(-1, -0.3, -0.2), palm=(0.3, -1, 0), grip=0.5),
+          RightArm=P.arm(hand=(held[0] + 0.07, held[1] + 0.06, held[2] - 0.14), pole=(1, -0.3, -0.2), palm=(-0.4, -1, 0), grip=0.3))
+    s.box('Mask', g, mask, (0.11, 0.06, 0.13), (0.75, 0.85, 0.9), rough=0.4, shadows=False)
+    s.box('Bag', g, at(mask, (0, 0.07, -0.14)), (0.11, 0.11, 0.2), (0.25, 0.45, 0.8), rough=0.6, shape='Sphere', shadows=False)
+    tray = (0.42, TABLE + 0.5, 0.9)
+    nurse_at = (0.95, 0, 0.3)
+    nurse_yaw = P.yaw_to(nurse_at, (0.3, 0, 0.75))
+    reach = P.to_figure(nurse_at, nurse_yaw, tray)
+    staff(s, g, V, 'Scrub nurse', ('SchoolGirl_01', '02_A'), nurse_at, nurse_yaw, Bow=10.0, Nod=16.0, HeadTurn=P.turn_to(nurse_at, nurse_yaw, work, 50.0),
+          LeftArm=P.arm(hand=(reach[0] - 0.12, reach[1], reach[2]), pole=(-1, -0.5, -0.3), palm=(0, -1, 0), grip=0.6), RightArm=P.arm(40, 8, 70, grip=0.6))
+    dangle(s, g, V, 'Drip', (-0.72, 1.99, -1.25), 0.1, 'iv', 3)
+    # The monitor on its trolley, turned to the room: a spike on every beat of the song.
+    monitor(s, g, 'Heart monitor', (-1.45, 1.62, -1.7), 14, scale=1.3)
+    s.light('Monitor glow', g, (-1.4, 1.6, -1.45), 'Point', (0.3, 1.0, 0.5), 0.5, 1.5, fog=0.0)
+    # Through the glass, the next theatre: the guitarist's, another team at work.
+    there = (NEXT, 0, 0)
+    surgeon(s, g, V, 'Surgeon, next theatre', NURSE, at(there, (-0.6, 0, -0.3)), 90, at(there, at(work, (-0.05, 0, 0))), 2)
+    surgeon(s, g, V, 'Assistant, next theatre', MEDIC, at(there, (0.6, 0, -0.25)), 270, at(there, at(work, (0.07, 0, 0.1))), 1, Bow=24.0)
+    # The cop in the lobby, at the window of the left-hand door, as near as they will let him.
+    cop_at = (-0.4, 0, z0 - 0.42)
+    P.actor(s, g, 'Cop', COP[0], COP[1], cop_at, 0, Lean=5.0, Nod=6.0, HeadTurn=P.turn_to(cop_at, 0, (0, 1.2, -0.5), 30.0),
+            LeftArm=P.arm(6, 8, 14), RightArm=P.arm(hand=(0.2, 1.5, 0.36), pole=(1, -1, -0.2), fingers=(0, 1, 0), palm=(0, 0, 1), grip=0.0))
+
+    # From high over the drummer's chest, down between the surgeons' heads (over them: lower, the
+    # assistant's head hides the face) onto the face under the mask; then back down the table and
+    # up, to the whole theatre from beyond its foot: the lamps, the team, the glass and the next
+    # table on the left, the doors and the cop at the far end.
+    M.shot(s, marks, 'surgery', out((0.04, 2.15, 0.1)), out((0.0, TABLE + 0.2, -0.8)), 42, 8.1, hand=True, lead='l',
+           via=[(out((0.02, 2.25, 0.9)), out((0.0, TABLE + 0.2, -0.8)), 46)], end=(out((-1.6, 2.3, 3.2)), out((0.6, 1.05, -0.9)), 54))
 
 
 # ---- out of the ward's window ---------------------------------------------------------------
 # Everything here is in the window's own space: x across it, the ground at y 0, and depth the
-# metres out from the glass (z = -depth). The eye in the ward is 8.8 m up and the sill hides the
-# ground nearer than about 140 m, so close to the hospital only what stands tall shows.
+# metres out from the glass (z = -depth). The eye in the ward is 27.6 m up, eight storeys, and
+# from the back of the room the sill hides whatever is more than 8 degrees under the horizon
+# (CUT: the drop a metre out): the ground nearer than 200 m, and at 150 m all but the top of a
+# five-storey block. So the town starts 150 m out and is looked down on, its roofs under the
+# horizon; only the towers, the spire and the hills stand above it. The picture is 23 degrees
+# either side of straight out (the side walls): what is to be seen stands inside that.
+EYE = ROOM_Y + 1.6
+CUT = 0.14
+CHURCH = (-36.0, 205.0, 1.25)      # the church: across, metres out, its size
 STOREY = 3.1
 TOWN_REACH = 540.0          # the town's edge from the window; the hills stand beyond it
 WALLS = ('paper', 'marble_shade', 'bone', 'stone_red', 'bone_dark', 'rail', 'marble', 'paper', 'marble_shade', 'bone_dark')
@@ -791,7 +1259,13 @@ def _house(m, rng, proud):
 
 
 def _church(m, rng, proud):
-    """A stone church along x: nave, a square tower at one end and its spire."""
+    """A stone church along x: nave, a square tower at one end and its spire (CHURCH's size)."""
+    one = Mesh('church')
+    _church_1(one, rng, proud / CHURCH[2])
+    m.merge(one, scale=CHURCH[2])
+
+
+def _church_1(m, rng, proud):
     m.box((3, 4.5, 0), (24, 9, 11), 'marble')
     _gable(m, 24, 11, 9.0, 5.5, 0.4, 'steel_dark', 'marble')
     for i in range(5):
@@ -839,13 +1313,19 @@ LANDMARKS = {'church': _church, 'tower': _water_tower, 'stack': _stack, 'mast': 
 
 def town_plan():
     """What stands out of the window. Returns (lots, trees): a lot is (depth of its street, kind,
-    x, z, yaw, seed, w, d, floors); a tree is (x, z). Streets run across the view: flats and
+    x, z, yaw, seed, w, d, floors); a tree is (x, z, scale). Streets run across the view: flats and
     offices in the middle of each (the far ones taller, towers off to the sides of the sun),
-    houses out on the flanks, a landmark here and there, trees in the gaps."""
+    houses out on the flanks, a landmark here and there, trees in the gaps. The nearest street
+    is broken by two parks, and the church stands behind the left one in its yard, nothing
+    between it and the window but the park's trees."""
     rng = random.Random(404)
     lots, trees = [], []
-    marks = {150: (-96, 'church'), 330: (150, 'tower'), 410: (-215, 'stack'), 500: (84, 'mast')}
-    for depth in (105, 150, 200, 260, 330, 410, 500):
+    cx, cz, k = CHURCH
+    yard = (cx - 17.0 * k - 9.0, cx + 16.0 * k + 9.0)             # the church's ground, across
+    parks = {150: (yard, (24.0, 62.0)), 200: (yard,)}
+    marks = {330: (150, 'tower'), 410: (-215, 'stack'), 500: (84, 'mast')}
+    lots.append((200, 'church', cx, -cz, 0.0, rng.randrange(1 << 30), 0, 0, 0))
+    for depth in (150, 200, 260, 330, 410, 500):
         reach = min(1.1 * depth + 20, 300)
         x = -reach
         mark = marks.get(depth)
@@ -855,17 +1335,21 @@ def town_plan():
                 x, mark = x + 40, None
                 continue
             w, d = rng.uniform(13, 26), rng.uniform(12, 18)
-            cx, z = x + w / 2, -(depth + rng.uniform(-8, 8))
-            tall = depth >= 260 and abs(cx) > 60 and rng.random() < 0.2
+            open_ = next((p for p in parks.get(depth, ()) if x + w > p[0] and x < p[1]), None)
+            if open_:
+                x = open_[1] + rng.uniform(2, 5)
+                continue
+            mid, z = x + w / 2, -(depth + rng.uniform(-8, 8))
+            tall = depth >= 260 and abs(mid) > 60 and rng.random() < 0.2
             if tall or (depth >= 200 and rng.random() < 0.18):
                 kind, floors = 'office', rng.randint(9, 15) if tall else rng.randint(4, 8)
             else:
-                kind, floors = 'apartment', rng.randint(2, 4) if depth < 130 else rng.randint(3, 5 if depth < 180 else 8)
-            if math.hypot(cx, depth) < TOWN_REACH:
-                lots.append((depth, kind, cx, z, rng.uniform(-4, 4), rng.randrange(1 << 30), w, d, floors))
+                kind, floors = 'apartment', rng.randint(3, 5 if depth < 180 else 8)
+            if math.hypot(mid, depth) < TOWN_REACH:
+                lots.append((depth, kind, mid, z, rng.uniform(-4, 4), rng.randrange(1 << 30), w, d, floors))
             gap = rng.choice((4, 5, 6, 8, 22))      # 22: a side street, a tree on its corner
             if gap > 20 and depth <= 260:
-                trees.append((x + w + gap / 2 + rng.uniform(-3, 3), z + rng.uniform(2, 9)))
+                trees.append((x + w + gap / 2 + rng.uniform(-3, 3), z + rng.uniform(2, 9), rng.uniform(0.85, 1.2)))
             x += w + gap
         for side in (-1, 1):
             x = reach + 14
@@ -874,8 +1358,19 @@ def town_plan():
                     z = -(depth + row + rng.uniform(-4, 4))
                     lots.append((depth, 'house', side * x, z, rng.choice((0, 90)) + rng.uniform(-8, 8), rng.randrange(1 << 30), 0, 0, 0))
                     if rng.random() < 0.3 and depth <= 260:
-                        trees.append((side * (x + 8.5), z + rng.uniform(-6, 6)))
+                        trees.append((side * (x + 8.5), z + rng.uniform(-6, 6), rng.uniform(0.85, 1.2)))
                 x += rng.uniform(15, 21)
+    # The parks: trees in the open ground of the nearest street, small in front of the church
+    # (they stand between it and the window) and tall to either side of it; and the churchyard's.
+    for x0, x1 in parks[150]:
+        x = x0 + 4.0
+        while x < x1 - 3.0:
+            before = yard[0] + 8 < x < yard[1] - 8 and (x0, x1) == yard
+            for depth in ((142,) if before else (136, 158, 178)):
+                trees.append((x + rng.uniform(-2.5, 2.5), -(depth + rng.uniform(-5, 5)), rng.uniform(0.55, 0.7) if before else rng.uniform(1.0, 1.3)))
+            x += rng.uniform(9, 13)
+    for x in (yard[0] + 3, yard[0] + 9, yard[1] - 8, yard[1] - 2):
+        trees.append((x, -(cz + rng.uniform(-10, 4)), rng.uniform(1.0, 1.25)))
     return lots, trees
 
 
@@ -912,29 +1407,18 @@ def country(venue):
 
 
 def outside(s, parent, V, origin):
-    """The view from the ward: origin is the ground under the window's middle. Trees close by on
-    the hospital's lawn, standing either side of where the sun is; the town; the hills."""
+    """The view from the ward: origin is the ground under the window's middle. The town, the
+    trees in it, the hills."""
     g = s.entity('Out of the window', parent, origin)
     A.model(s, g, 'Country', country(V), material=A.mat(V, 'Palette', color=(0.2, 0.3, 0.16), rough=1.0), shadows=False)
-    for name, depths in (('WardTownNear', (105, 150)), ('WardTownMid', (200, 260)), ('WardTownFar', (330, 410, 500))):
+    for name, depths in (('WardTownNear', (150,)), ('WardTownMid', (200, 260)), ('WardTownFar', (330, 410, 500))):
         A.model(s, g, name, town(V, name, depths), material=A.mat(V, 'Palette', rough=0.85), shadows=False)
     kinds = [tree(V, *t) for t in TREES]
-    maple_a, maple_b, gnarl, pine, birch, oak = kinds
     rng = random.Random(77)
-    # (across, metres out, which, scale): the nearest stand tall at the sides of the window and
-    # the middle is kept low, under the sun.
-    lawn = [(-19, 20, maple_a, 1.15), (17, 24, maple_b, 1.2), (-27, 34, pine, 1.0), (25, 40, birch, 1.0), (-11, 46, oak, 1.0),
-            (9, 52, maple_a, 1.0), (-38, 30, gnarl, 1.1), (36, 28, maple_b, 1.05), (31, 60, pine, 0.95), (-33, 62, birch, 1.05),
-            (1, 80, oak, 1.1), (-52, 44, maple_b, 1.2), (50, 48, gnarl, 1.15)]
-    x = -130.0
-    while x < 130:
-        if abs(x) > 14:
-            lawn.append((x, rng.uniform(64, 96), rng.choice(kinds), rng.uniform(0.85, 1.15)))
-        x += rng.uniform(13, 21)
-    for x, z in town_plan()[1]:
-        lawn.append((x, -z, rng.choice(kinds), rng.uniform(0.85, 1.2)))
-    for i, (x, depth, path, scale) in enumerate(lawn):
-        A.model(s, g, f'Tree {i + 1}', path, (x, 0, -depth), (0, rng.uniform(0, 360), 0), scale)
+    # (The hospital's own lawn is out of sight under the sill from eight storeys up: the trees
+    # are the town's, in its parks, its churchyard and on its corners.)
+    for i, (x, z, scale) in enumerate(town_plan()[1]):
+        A.model(s, g, f'Tree {i + 1}', rng.choice(kinds), (x, 0, z), (0, rng.uniform(0, 360), 0), scale)
     return g
 
 
@@ -983,7 +1467,8 @@ def morning_after(s, root, marks, V, M):
     # A chair by each of the back row; the cop in one, hat in his lap, looking out with them.
     for side in (-1, 1):
         A.model(s, g, 'Chair', chair, (side * (half - 1.3), 0, back + 1.25), (0, 180, 0))
-    P.place(s, g, 'Cop', P.figure(V, 'Cop_chair', COP[0], COP[1], COP_CHAIR, 'the cop in the chair by the bed, looking out of the window'), (-half + 1.3, 0.48 - SEATED_HIP, back + 1.2), 180)
+    P.actor(s, g, 'Cop', COP[0], COP[1], (-half + 1.3, 0, back + 1.2), 180, 'Seated', SeatHeight=0.57, Lean=4.0, Nod=-8.0,
+            LeftArm=P.arm(hand=(-0.08, 0.66, 0.28), pole=(-1, -0.3, -0.4), palm=(0, -1, 0), grip=0.4), RightArm=P.arm(hand=(0.08, 0.66, 0.28), pole=(1, -0.3, -0.4), palm=(0, -1, 0), grip=0.4))
 
     # Out of the window: the hospital's trees, the town beyond them, hills, and the sky (the
     # shot's own: tagged sky).
@@ -1005,5 +1490,6 @@ def build(s, root, marks, V, M):
     hand, _ = crash(s, earth, marks, V, M)
     run(s, earth, marks, V, M)
     rush(s, earth, marks, V, M)
+    surgery(s, earth, marks, V, M)
     morning_after(s, earth, marks, V, M)
     return hand

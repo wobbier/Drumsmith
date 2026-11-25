@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "EarthComesBack",
  "FrameRate": 30,
- "DurationFrames": 141,
+ "DurationFrames": 208,
  "Tracks": [
   {
    "Binding": "Body",
@@ -13,47 +13,77 @@
      "Frame": 0,
      "Value": [
       0,
-      0,
-      0,
-      0
-     ],
-     "Interpolation": "Linear"
-    },
-    {
-     "Frame": 30,
-     "Value": [
-      0,
-      12,
+      0.0,
       0,
       0
      ],
      "Interpolation": "Linear"
     },
     {
-     "Frame": 60,
+     "Frame": 33,
      "Value": [
       0,
-      60,
+      53.49922,
       0,
       0
      ],
      "Interpolation": "Linear"
     },
     {
-     "Frame": 96,
+     "Frame": 65,
      "Value": [
       0,
-      220.0,
+      127.24332,
       0,
       0
      ],
      "Interpolation": "Linear"
     },
     {
-     "Frame": 141,
+     "Frame": 98,
      "Value": [
       0,
-      410.0,
+      211.22682,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 122,
+     "Value": [
+      0,
+      279.18146,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 143,
+     "Value": [
+      0,
+      340.92852,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 163,
+     "Value": [
+      0,
+      400.0,
+      0,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 208,
+     "Value": [
+      0,
+      535.0,
       0,
       0
      ],

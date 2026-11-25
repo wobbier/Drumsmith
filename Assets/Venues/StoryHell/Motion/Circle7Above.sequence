@@ -2,7 +2,7 @@
  "Version": 1,
  "Name": "Circle7Above",
  "FrameRate": 30,
- "DurationFrames": 360,
+ "DurationFrames": 150,
  "Tracks": [
   {
    "Binding": "Body",
@@ -20,10 +20,10 @@
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 360,
+     "Frame": 150,
      "Value": [
       0,
-      345.0,
+      515.0,
       0,
       0
      ],

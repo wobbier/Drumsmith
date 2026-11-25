@@ -1,0 +1,65 @@
+{
+ "Version": 1,
+ "Name": "Flasher1",
+ "FrameRate": 30,
+ "DurationFrames": 24,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Scale",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.001,
+      0.001,
+      0.001,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 11,
+     "Value": [
+      0.001,
+      0.001,
+      0.001,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      1,
+      1,
+      1,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 23,
+     "Value": [
+      1,
+      1,
+      1,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 24,
+     "Value": [
+      0.001,
+      0.001,
+      0.001,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

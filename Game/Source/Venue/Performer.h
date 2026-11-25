@@ -67,7 +67,11 @@ public:
     struct Pose
     {
         glm::vec3 Offset{ 0.f };   // the whole figure (a bounce, a jump, a step)
+        // Standing: the hips and all above them off the feet, which stay where they are (a body
+        // thrown about on a moving deck, its feet planted on it).
+        glm::vec3 Thrown{ 0.f };
         float Crouch = 0.f;        // metres the hips drop, the knees bending to suit
+        float Bow = 0.f;           // the whole trunk forward from the hips, degrees (bent over a patient)
         float Lean = 0.f;          // the spine forward, degrees
         float Side = 0.f;          // the spine to the figure's right, degrees
         float Turn = 0.f;          // the chest toward the figure's right (+x), degrees; HeadTurn the same way
@@ -76,6 +80,9 @@ public:
         float HeadTilt = 0.f;
         float Mouth = 0.f;         // 0 shut, 1 wide open
         bool Seated = false;       // the hip joints at SeatHeight
+        // On the knees: each knee on the floor under its hip, the shin laid back along the floor
+        // (a leg that reaches goes where it is told instead). The root is under the knees.
+        bool Kneeling = false;
         float SeatHeight = 0.67f;
         std::array<Arm, 2> Arms;   // 0 left, 1 right
         std::array<Leg, 2> Legs;
@@ -89,6 +96,8 @@ public:
     // The model has loaded and its skeleton is bound, so Apply poses it (until then it stands in
     // its bind pose).
     bool IsReady() { return Ready(); }
+    // Off: not drawn and not skinned (a figure waiting for its scene). Apply still works.
+    void Show( bool inShown );
 
     Transform* Root() const;
     // Performer-space points after Apply.
@@ -102,6 +111,8 @@ public:
     glm::quat SpineRotation() const { return m_spine; }
     // The head's turn from facing straight ahead: the face looks along its +z.
     glm::quat HeadRotation() const { return m_headRotation; }
+    // The middle of the lips (HeadCentre is up at the eyes).
+    glm::vec3 Mouth() const { return m_mouthPos; }
     // Just above the hips.
     glm::vec3 SpineBase() const { return m_spineBase; }
 
@@ -184,6 +195,7 @@ private:
 
     glm::vec3 m_chest{ 0.f, 1.35f, 0.f };
     glm::vec3 m_headPos{ 0.f, 1.67f, 0.f };
+    glm::vec3 m_mouthPos{ 0.f, 1.56f, 0.13f };
     glm::quat m_spine{ 1.f, 0.f, 0.f, 0.f };
     glm::quat m_headRotation{ 1.f, 0.f, 0.f, 0.f };
     glm::vec3 m_spineBase{ 0.f, 0.95f, 0.f };

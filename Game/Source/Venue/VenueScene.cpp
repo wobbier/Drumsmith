@@ -203,6 +203,11 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
                 place.Yaw = YawOf( AxisIn( inVenueRoot, *transform, Vector3( 0.f, 0.f, -1.f ) ) );
                 if( place.Yaw < 0.f ) place.Yaw += 360.f;
                 place.Present = true;
+                place.SeatHeight = spot->SeatHeight;
+                place.PowerStance = spot->PowerStance;
+                place.Gear = spot->Gear;
+                outMarkers.SpotMarkers[member] = transform->Parent;
+                outMarkers.SpotRest[member] = Quaternion( glm::inverse( inVenueRoot.GetWorldRotation().InternalQuat ) * transform->GetWorldRotation().InternalQuat );
                 ++outMarkers.Spots;
             }
             else if( member >= 0 )
@@ -213,7 +218,10 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
         if( entity->HasComponent<VenueAccent>() ) outMarkers.Accents.push_back( transform->Parent );
         if( entity->HasComponent<VenueStory>() ) outMarkers.Story.push_back( transform->Parent );
         if( entity->HasComponent<VenueBeat>() ) outMarkers.Beats.push_back( transform->Parent );
+        if( entity->HasComponent<VenueMood>() ) outMarkers.Moods.push_back( transform->Parent );
         if( entity->HasComponent<VenueAim>() ) outMarkers.Aims.push_back( transform->Parent );
+        if( entity->HasComponent<VenueSound>() ) outMarkers.Sounds.push_back( transform->Parent );
+        if( entity->HasComponent<VenueFigure>() ) outMarkers.Figures.push_back( transform->Parent );
         if( VenueCrowdArea* area = entity->TryGetComponent<VenueCrowdArea>() )
         {
             areas.push_back( { area, transform } );
@@ -302,6 +310,7 @@ bool VenueScene::Collect( const std::vector<EntityHandle>& inRoots, Transform& i
     plan.ColorKeep = Vector3( std::clamp( info->KeepRed, 0.f, 1.f ), std::clamp( info->KeepBlue, 0.f, 1.f ), std::clamp( info->KeepWarmth, 0.f, 1.f ) );
     plan.LightsFrom = info->LightsFrom;
     plan.LightsUntil = info->LightsUntil;
+    plan.QuietLook = info->QuietLook;
 
     // The stage as the band stands on it: its deck the lowest non-drummer's feet, the riser the
     // drummer's, the back wall behind the furthest back, wide enough for the widest.

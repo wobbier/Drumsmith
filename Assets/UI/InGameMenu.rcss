@@ -23,7 +23,8 @@
 #hud-lyrics .lyric-line { font-size: 32dp; white-space: pre; font-effect: outline( 2dp #000000d0 ); }
 #hud-lyrics .lyric-sung { color: #ffc840; }
 #hud-lyrics .lyric-rest { color: #ffffff; }
-#hud-caption { position: absolute; top: 120dp; left: 50%; width: 900dp; max-width: 60vw; transform: translateX(-50%); text-align: center; font-size: 30dp; font-style: italic; color: #ffe2c8; font-effect: outline( 2dp #000000e0 ); }
+/* A story moment's caption. Upright: only Inter Regular is loaded, and an italic face that isn't there draws nothing. */
+#hud-caption { position: absolute; top: 120dp; left: 50%; width: 900dp; max-width: 60vw; transform: translateX(-50%); text-align: center; font-size: 30dp; color: #ffe2c8; font-effect: outline( 2dp #000000e0 ); }
 #hud-lyrics .lyric-next { font-size: 22dp; margin-top: 4dp; white-space: pre; color: #ffffff80; font-effect: outline( 2dp #000000b0 ); }
 #hud-autoplay { font-size: 16dp; color: #ff9933; margin-top: 6dp; }
 #hud-judgement { position: absolute; top: 30%; left: 0; width: 100%; text-align: center; }

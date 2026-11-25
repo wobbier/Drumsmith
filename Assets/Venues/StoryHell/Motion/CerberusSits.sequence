@@ -1,0 +1,62 @@
+{
+ "Version": 1,
+ "Name": "CerberusSits",
+ "FrameRate": 30,
+ "DurationFrames": 423,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Position",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      3.72699,
+      -717.73684,
+      16.90933,
+      0
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 423,
+     "Value": [
+      3.72699,
+      104.76316,
+      16.90933,
+      0
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.0,
+      -0.9914449,
+      0.0,
+      0.1305262
+     ],
+     "Interpolation": "Linear"
+    },
+    {
+     "Frame": 423,
+     "Value": [
+      0.0,
+      -0.9914449,
+      0.0,
+      0.1305262
+     ],
+     "Interpolation": "Linear"
+    }
+   ]
+  }
+ ]
+}

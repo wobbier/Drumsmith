@@ -145,7 +145,7 @@ class Scene:
              build_fx=False, entity_name="VenueInfo", ambient=(0.0, 0.0, 0.0),
              fog_color=(0.01, 0.01, 0.015), haze=1.0, sky_time=22.0, moon=1.0, clouds=0.25,
              haze_froxels=False, footage="Broadcast", ride=0.0, ride_until="",
-             keep_red=0.0, keep_blue=0.0, keep_warmth=0.0, lights_from="", lights_until=""):
+             keep_red=0.0, keep_blue=0.0, keep_warmth=0.0, lights_from="", lights_until="", quiet_look=True):
         """The room and its look. ambient: indoors, the colour behind everything (it also lights
         the room a little). fog_color: the light the haze scatters. haze: its thickness (1 the
         usual). sky_time / moon / clouds: out of doors, the night sky's hour, the moon's brightness
@@ -156,7 +156,8 @@ class Scene:
         the road this hard (1 a fast highway) until the story flag ride_until is set.
         keep_red / keep_blue / keep_warmth: what a black and white look leaves in colour (reds,
         blues, how far the reds reach into fire); between the story flags lights_from and
-        lights_until it keeps all of it (police lights and fire)."""
+        lights_until it keeps all of it (police lights and fire). quiet_look: off, a chart with
+        no looks of its own doesn't play its quiet sections in black and white here."""
         e = self.entity(entity_name, parent)
         e.add({"Type": "VenueInfo", "Name": name, "Author": author, "Outdoor": bool(outdoor),
                "RoomBack": _r(room_back), "RoomCeiling": _r(room_ceiling),
@@ -178,12 +179,23 @@ class Scene:
         for key, value in (("LightsFrom", lights_from), ("LightsUntil", lights_until)):
             if value:
                 e.components[-1][key] = value
+        if not quiet_look:
+            e.components[-1]["QuietLook"] = False
         return e
 
-    def spot(self, parent, member, pos, yaw=0.0):
-        """member: Drummer | Guitar | Bass | Vocals | Keys. pos is the feet; yaw 0 faces the crowd."""
+    def spot(self, parent, member, pos, yaw=0.0, seat_height=0.0, power=False, gear=True):
+        """member: Drummer | Guitar | Bass | Vocals | Keys. pos is the feet; yaw 0 faces the crowd.
+        power: planted wide with nowhere to walk; gear False: no amp, wedges or mic stand. A spot
+        under something that moves carries its member with it."""
         e = self.entity(f"Spot_{member}", parent, pos, yaw_rotation(yaw))
-        e.add({"Type": "VenueSpot", "Member": member})
+        spot = {"Type": "VenueSpot", "Member": member}
+        if seat_height:
+            spot["SeatHeight"] = seat_height
+        if power:
+            spot["PowerStance"] = True
+        if not gear:
+            spot["Gear"] = False
+        e.add(spot)
         return e
 
     def crowd(self, name, parent, center, width, depth, heads, jitter=0.5, yaw=0.0, figures="Mob"):
@@ -210,13 +222,17 @@ class Scene:
         e.add({"Type": "VenueScreen", "Source": feed, "Emissive": _r(emissive)})
         return e
 
-    def story(self, name, parent, flag, when_set=True, fade=0.75, pos=(0, 0, 0)):
+    def story(self, name, parent, flag, when_set=True, fade=0.75, pos=(0, 0, 0), unless=None):
         """A story-mode group (VenueStory): its children show only while the story flag is set
         (when_set False: only until it is set). They grow from the group's pivot, so put pos where
         the thing stands. Plain Lights under it dim with it; a VenueShowLight under it is cued only
         while it shows, and a ParticleSystem under it emits only while it shows."""
         e = self.entity(name, parent, pos)
-        e.add({"Type": "VenueStory", "Flag": flag, "WhenSet": bool(when_set), "FadeSeconds": _r(fade)})
+        data = {"Type": "VenueStory", "Flag": flag, "WhenSet": bool(when_set), "FadeSeconds": _r(fade)}
+        if unless:
+            # A later flag that takes this one back (with when_set False: gone from flag until unless).
+            data["Unless"] = unless
+        e.add(data)
         return e
 
     def camera(self, name, parent, eye, target, fov=55.0, far=400.0):

@@ -74,6 +74,10 @@ public:
     float KeepWarmth = 0.f;
     std::string LightsFrom;
     std::string LightsUntil;
+    // A chart with no looks of its own plays its quiet sections (intro, bridge, breakdown) in the
+    // black and white concert look (Director::BuildFallbackLooks). Off: this venue stays in
+    // colour through them (a set that tells a story with its police lights and its fire).
+    bool QuietLook = true;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueInfo, "Venue" )
 
@@ -94,6 +98,13 @@ public:
     virtual void Init() final;
 
     Role Member = Role::Drummer;
+    float SeatHeight = 0.f;
+    // Planted wide with nowhere to walk (legs apart, knees bent, leaning back into it): a
+    // guitarist or bassist up on something, like a truck's roof.
+    bool PowerStance = false;
+    // The amp, wedges and mic stand that go up at a stage spot. Off: only the player and what
+    // they hold.
+    bool Gear = true;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueSpot, "Venue" )
 
@@ -154,11 +165,14 @@ class VenueStory : public Component<VenueStory>
 {
     ME_REFLECTABLE( VenueStory )
 public:
-    enum class Motion : int { Show = 0, Play, SlowMotion };
+    enum class Motion : int { Show = 0, Play, SlowMotion, Clock };
 
     VenueStory() : Component( "VenueStory" ) {}
     void Init() final {}
     std::string Flag;
+    // Another flag that takes Flag back: while it is set, Flag counts as not set (with WhenSet
+    // off: hidden from Flag until Unless, the thing that goes away for a while and comes back).
+    std::string Unless;
     bool WhenSet = true;
     float FadeSeconds = 0.75f;
     Motion Mode = Motion::Show;
@@ -186,8 +200,48 @@ public:
     // Out at once on the beat and straight back, with no gathering before the next: a blip (the
     // trace on a heart monitor), not a nod.
     bool Sharp = false;
+    // Turned this far at the peak of the move (degrees, about its own origin, on top of its own
+    // rotation): a cage swinging from its chain, a tree lashing from its root, a push leaning in.
+    Vector3 Turn = Vector3( 0.f, 0.f, 0.f );
+    // A VenueFigure on the same entity nods its head this far at the peak (degrees, on top of its
+    // own Nod): a cop at the wheel banging his head to the band.
+    float Nod = 0.f;
+    // How much of the move there is while the player is playing at their worst (VenueShow's mood:
+    // 1, the same whatever the playing; 0.2, a wallflower who hardly moves unless they play well).
+    float Calm = 1.f;
+    // What sets it off. Beat: the song's beats (Every, Phase). Hit: each note the player hits.
+    // Accent: each crash or kick they hit (the big notes). Miss: each note they miss (a stumble, a
+    // bump). On an event it goes out at once and eases back.
+    enum class Cue : int { Beat = 0, Hit, Accent, Miss };
+    Cue Trigger = Cue::Beat;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueBeat, "Venue" )
+
+
+// Answers to how well the player is playing (VenueShow::Mood: 0 at their worst, 1 at their best,
+// from their recent hits and misses and their streak). Offset moves its entity there at the
+// worst playing (Cerberus falling behind the band), lerped back to where it rests at the best.
+// Show Good / Bad shows it (by scale, from its pivot, like a VenueStory) only while the mood is
+// at or over Threshold / under it: a crowd that dances when the drums are right and one that is
+// thrown about when they aren't. Its own Sequence runs at Speed at the worst playing (1 at the
+// best). Particles and lights under it are not switched: keep a Good or Bad group to meshes and
+// motion.
+class VenueMood : public Component<VenueMood>
+{
+    ME_REFLECTABLE( VenueMood )
+public:
+    enum class Shown : int { Always = 0, Good, Bad };
+
+    VenueMood() : Component( "VenueMood" ) {}
+    void Init() final {}
+    Vector3 Offset = Vector3( 0.f, 0.f, 0.f );
+    Shown Show = Shown::Always;
+    float Threshold = 0.5f;
+    // About how long it takes to follow a change in the playing.
+    float Seconds = 1.f;
+    float Speed = 1.f;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueMood, "Venue" )
 
 
 // Keeps its entity's local +Z on a point in the venue however its parents move
@@ -208,6 +262,101 @@ public:
     float Seconds = 3.f;
 };
 ME_REGISTER_COMPONENT_FOLDER( VenueAim, "Venue" )
+
+
+// Plays a sound once when a story flag lands (VenueShow::UpdateSounds): a crash, a siren winding
+// down, what a song's outro is heard by (ProgressionStorySong::OutroSeconds). 2D, at Volume, and
+// gone with the venue: keep it shorter than what is left of the song.
+class VenueSound : public Component<VenueSound>
+{
+    ME_REFLECTABLE( VenueSound )
+public:
+    VenueSound() : Component( "VenueSound" ) {}
+    void Init() final {}
+    std::string Flag;
+    // The sound file's asset path.
+    std::string Sound;
+    float Volume = 1.f;
+    // How long after the flag it starts.
+    float Delay = 0.f;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueSound, "Venue" )
+
+
+// A person in the scene: one of the band's rigged characters (Performer), skinned and posed from
+// these fields every frame, so a hand lands where it is sent and a shoulder bends as a shoulder.
+// The entity is the figure's feet (kneeling: the floor under its knees) and it faces local +Z;
+// every point and direction below is in that space, in metres. A Sequence can key any of the
+// numbers and vectors (LeftArm.Hand, Bow, RightLeg.Foot ...): chest compressions, a run.
+// Each is a skinned draw of its own, so this is for the few people a shot is about; a crowd stays
+// in baked or instanced pieces. One hidden by a VenueStory group costs nothing until it shows.
+class VenueFigure : public Component<VenueFigure>
+{
+    ME_REFLECTABLE( VenueFigure )
+public:
+    enum class Stance : int { Standing = 0, Seated, Kneeling };
+    // Whose look the figure wears: its own (Character and Atlas), or a band member's, as cast for
+    // the song (Band), so that the band's own bodies are theirs.
+    enum class Dress : int { Own = 0, Drummer, Guitar, Bass, Vocals, Keys };
+
+    struct Arm
+    {
+        ME_REFLECTABLE( Arm )
+    public:
+        // By angles, in degrees: Raise swings the arm forward from hanging (90 ahead, 180 up),
+        // Spread out to the side, Elbow bends the forearm forward.
+        float Raise = 5.f;
+        float Spread = 8.f;
+        float Elbow = 12.f;
+        // Reach: the palm goes to Hand instead, the elbow bending toward Pole (a direction).
+        bool Reach = false;
+        Vector3 Hand = Vector3( 0.f, 0.f, 0.f );
+        Vector3 Pole = Vector3( 0.f, -1.f, 0.f );
+        // Which way the fingers point and what the palm faces (zero: left to the arm).
+        Vector3 Fingers = Vector3( 0.f, 0.f, 0.f );
+        Vector3 Palm = Vector3( 0.f, 0.f, 0.f );
+        float Grip = 0.15f;
+    };
+
+    struct Leg
+    {
+        ME_REFLECTABLE( Leg )
+    public:
+        float Spread = 3.f;
+        float Toe = 0.f;
+        // Reach: the sole goes to Foot instead of the floor under the hip, the knee bending
+        // toward Knee (a direction).
+        bool Reach = false;
+        Vector3 Foot = Vector3( 0.f, 0.f, 0.f );
+        Vector3 Knee = Vector3( 0.f, 0.4f, 1.f );
+    };
+
+    VenueFigure() : Component( "VenueFigure" ) {}
+    void Init() final {}
+
+    // A T-posed Rigify character (Assets/Models/People) and the atlas its UVs index.
+    std::string Character = "Assets/Models/People/BodyType1_Rigged.fbx";
+    std::string Atlas = "Assets/Models/Venue/PolygonTown_01_A.png";
+    Dress As = Dress::Own;
+    float Height = 1.f;
+    Stance Stand = Stance::Standing;
+    float SeatHeight = 0.67f;
+    Vector3 Offset = Vector3( 0.f, 0.f, 0.f );
+    float Crouch = 0.f;
+    float Bow = 0.f;
+    float Lean = 0.f;
+    float Side = 0.f;
+    float Turn = 0.f;
+    float Nod = 0.f;
+    float HeadTurn = 0.f;
+    float HeadTilt = 0.f;
+    float Mouth = 0.f;
+    Arm LeftArm;
+    Arm RightArm;
+    Leg LeftLeg;
+    Leg RightLeg;
+};
+ME_REGISTER_COMPONENT_FOLDER( VenueFigure, "Venue" )
 
 
 class VenueCameraSpot

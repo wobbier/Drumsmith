@@ -1,0 +1,45 @@
+{
+ "Version": 1,
+ "Name": "SatanWingR",
+ "FrameRate": 30,
+ "DurationFrames": 90,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "Transform",
+   "Property": "Rotation",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.018677,
+      0.2626986,
+      -0.1041108,
+      0.9590628
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 45,
+     "Value": [
+      -0.0042865,
+      0.3633529,
+      0.1531624,
+      0.9189655
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      -0.018677,
+      0.2626986,
+      -0.1041108,
+      0.9590628
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

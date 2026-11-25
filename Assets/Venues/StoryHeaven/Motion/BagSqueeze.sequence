@@ -1,0 +1,102 @@
+{
+ "Version": 1,
+ "Name": "BagSqueeze",
+ "FrameRate": 30,
+ "DurationFrames": 90,
+ "Tracks": [
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "RightArm.Grip",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.3,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 12,
+     "Value": [
+      0.85,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 30,
+     "Value": [
+      0.3,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      0.3,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "Lean",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 14,
+     "Value": [
+      13.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 40,
+     "Value": [
+      10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 90,
+     "Value": [
+      10.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  }
+ ]
+}

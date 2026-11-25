@@ -1063,6 +1063,12 @@
        ]
       },
       {
+       "Cue": "section:verse_1a|at:0.19",
+       "Flags": [
+        "driver_window"
+       ]
+      },
+      {
        "Cue": "section:chorus_1",
        "Flags": [
         "foot_on_monitor"
@@ -1081,9 +1087,39 @@
        ]
       },
       {
+       "Cue": "section:bridge|at:0.56",
+       "Flags": [
+        "freight_pass"
+       ]
+      },
+      {
        "Cue": "section:gtr_solo",
        "Flags": [
         "heli_again"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_a|at:0.79",
+       "Flags": [
+        "roof_solo"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_c",
+       "Flags": [
+        "pedal_jammed"
+       ]
+      },
+      {
+       "Cue": "section:ending",
+       "Flags": [
+        "hood_surf"
+       ]
+      },
+      {
+       "Cue": "section:big_rock_ending",
+       "Flags": [
+        "hood_wind"
        ]
       },
       {
@@ -1093,7 +1129,7 @@
        ]
       },
       {
-       "Cue": "last_note+1",
+       "Cue": "last_note+7.5",
        "Flags": [
         "bodies",
         "band_hidden"
@@ -1112,13 +1148,26 @@
        ]
       },
       {
+       "Cue": "at:0.68-6",
+       "Flags": [
+        "ramp_ahead"
+       ]
+      },
+      {
        "Cue": "at:0.68",
        "Flags": [
         "big_air"
        ]
+      },
+      {
+       "Cue": "at:0.68+4.0",
+       "Flags": [
+        "jump_clear"
+       ]
       }
      ],
-     "Venue": "StoryHighway"
+     "Venue": "StoryHighway",
+     "OutroSeconds": 16
     },
     {
      "Artist": "Lynyrd Skynyrd",
@@ -1168,52 +1217,159 @@
        "Flags": [
         "ascent",
         "band_aloft",
-        "sky_21.5"
+        "sky_21.5",
+        "alt_0",
+        "cover_25",
+        "towers_0"
        ]
       },
       {
        "Cue": "section:verse_1+18|at:0.165",
        "Flags": [
         "clouds",
-        "sky_28.5"
+        "sky_30.2",
+        "alt_330",
+        "cover_60",
+        "towers_100",
+        "clear_0"
+       ]
+      },
+      {
+       "Cue": "section:verse_1+26|at:0.165+8",
+       "Flags": [
+        "clear_100"
        ]
       },
       {
        "Cue": "section:chorus_1|at:0.23",
        "Flags": [
         "heavens_light",
-        "sky_31"
+        "sky_31",
+        "alt_1050",
+        "cover_48"
        ]
       },
       {
        "Cue": "section:chorus_2|at:0.435",
        "Flags": [
         "gates",
-        "sky_34"
+        "sky_34",
+        "alt_1250"
        ]
       },
       {
-       "Cue": "section:fast_part-3.2|at:0.5-3.2",
+       "Cue": "section:chorus_2+0.99|at:0.435+0.99",
        "Flags": [
-        "denied",
-        "band_falling",
-        "sky_36"
+        "chorus_singer"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2+8.97|at:0.435+8.97",
+       "Flags": [
+        "chorus_guitar"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2+16.54|at:0.435+16.54",
+       "Flags": [
+        "chorus_bass"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2+23.84|at:0.435+23.84",
+       "Flags": [
+        "chorus_drums"
+       ]
+      },
+      {
+       "Cue": "section:chorus_2+31.55|at:0.435+31.55",
+       "Flags": [
+        "reach",
+        "band_reach"
+       ]
+      },
+      {
+       "Cue": "section:fast_part-1.2|at:0.5-1.2",
+       "Flags": [
+        "band_shield"
+       ]
+      },
+      {
+       "Cue": "section:fast_part|at:0.5",
+       "Flags": [
+        "denied"
        ],
        "Caption": "Denied.",
        "CaptionSeconds": 2.5
       },
       {
-       "Cue": "section:fast_part|at:0.5",
+       "Cue": "section:fast_part+1.47|at:0.5+1.47",
        "Flags": [
-        "fell",
-        "sky_21.5",
-        "sky_off"
+        "apex",
+        "band_falling",
+        "sky_36",
+        "alt_1400"
        ]
       },
       {
-       "Cue": "section:fast_part+6|at:0.5+6",
+       "Cue": "section:fast_part+2.7|at:0.5+2.7",
        "Flags": [
-        "tumbling"
+        "alt_1390",
+        "clear_100"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-7.6|at:0.522-7.6",
+       "Flags": [
+        "alt_1000",
+        "sky_31",
+        "clear_0"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-6.18|at:0.522-6.18",
+       "Flags": [
+        "free_fall",
+        "earth_lost"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-5.62|at:0.522-5.62",
+       "Flags": [
+        "earth_back",
+        "alt_400",
+        "sky_29.85"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-3.2|at:0.522-3.2",
+       "Flags": [
+        "alt_340",
+        "sky_29.75"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-2.42|at:0.522-2.42",
+       "Flags": [
+        "crash_returns",
+        "sky_29.7",
+        "alt_310"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-0.5|at:0.522-0.5",
+       "Flags": [
+        "sky_28.8",
+        "alt_305"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo-0.18|at:0.522-0.18",
+       "Flags": [
+        "fell",
+        "sky_21.5",
+        "alt_0",
+        "sky_off"
        ]
       },
       {
@@ -1223,15 +1379,21 @@
        ]
       },
       {
-       "Cue": "section:gtr_solo+6|at:0.522+6",
+       "Cue": "section:gtr_solo+2|at:0.522+2",
        "Flags": [],
        "Caption": "The First Circle: Limbo",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo+12|at:0.522+12",
+       "Cue": "section:gtr_solo+8.221|at:0.522+8.221",
        "Flags": [
         "in_circle_1"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo+18.837|at:0.522+18.837",
+       "Flags": [
+        "in_circle_1_b"
        ]
       },
       {
@@ -1241,152 +1403,248 @@
        ]
       },
       {
-       "Cue": "section:gtr_solo_a+6|at:0.568+6",
+       "Cue": "section:gtr_solo_a+2|at:0.568+2",
        "Flags": [],
        "Caption": "The Second Circle: Lust",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_a+12|at:0.568+12",
+       "Cue": "section:gtr_solo_a+5.971|at:0.568+5.971",
        "Flags": [
         "in_circle_2"
        ]
       },
       {
-       "Cue": "section:gtr_solo_c|at:0.634",
+       "Cue": "section:gtr_solo_a+11.5|at:0.568+11.5",
+       "Flags": [
+        "in_circle_2_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_b|at:0.601",
        "Flags": [
         "circle_3"
        ]
       },
       {
-       "Cue": "section:gtr_solo_c+6|at:0.634+6",
+       "Cue": "section:gtr_solo_b+2|at:0.601+2",
        "Flags": [],
        "Caption": "The Third Circle: Gluttony",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_c+12|at:0.634+12",
+       "Cue": "section:gtr_solo_b+6.262|at:0.601+6.262",
        "Flags": [
         "in_circle_3"
        ]
       },
       {
-       "Cue": "section:gtr_solo_d|at:0.688",
+       "Cue": "section:gtr_solo_b+9.787|at:0.601+9.787",
+       "Flags": [
+        "in_circle_3_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_b+13.087|at:0.601+13.087",
+       "Flags": [
+        "in_circle_3_c"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_c|at:0.634",
        "Flags": [
         "circle_4"
        ]
       },
       {
-       "Cue": "section:gtr_solo_d+6|at:0.688+6",
+       "Cue": "section:gtr_solo_c+2|at:0.634+2",
        "Flags": [],
        "Caption": "The Fourth Circle: Greed",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_d+12|at:0.688+12",
+       "Cue": "section:gtr_solo_c+9.671|at:0.634+9.671",
        "Flags": [
         "in_circle_4"
        ]
       },
       {
-       "Cue": "section:gtr_solo_e|at:0.732",
+       "Cue": "section:gtr_solo_c+22.008|at:0.634+22.008",
+       "Flags": [
+        "in_circle_4_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_d|at:0.688",
        "Flags": [
         "circle_5"
        ]
       },
       {
-       "Cue": "section:gtr_solo_e+6|at:0.732+6",
+       "Cue": "section:gtr_solo_d+2|at:0.688+2",
        "Flags": [],
        "Caption": "The Fifth Circle: Wrath",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_e+12|at:0.732+12",
+       "Cue": "section:gtr_solo_d+7.751|at:0.688+7.751",
        "Flags": [
         "in_circle_5"
        ]
       },
       {
-       "Cue": "section:gtr_solo_f|at:0.775",
+       "Cue": "section:gtr_solo_d+17.585|at:0.688+17.585",
+       "Flags": [
+        "in_circle_5_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_e|at:0.732",
        "Flags": [
         "circle_6"
        ]
       },
       {
-       "Cue": "section:gtr_solo_f+6|at:0.775+6",
+       "Cue": "section:gtr_solo_e+2|at:0.732+2",
        "Flags": [],
        "Caption": "The Sixth Circle: Heresy",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_f+12|at:0.775+12",
+       "Cue": "section:gtr_solo_e+8.38|at:0.732+8.38",
        "Flags": [
         "in_circle_6"
        ]
       },
       {
-       "Cue": "section:gtr_solo_g|at:0.818",
+       "Cue": "section:gtr_solo_e+17.342|at:0.732+17.342",
+       "Flags": [
+        "in_circle_6_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_f|at:0.775",
        "Flags": [
         "circle_7"
        ]
       },
       {
-       "Cue": "section:gtr_solo_g+6|at:0.818+6",
+       "Cue": "section:gtr_solo_f+2|at:0.775+2",
        "Flags": [],
        "Caption": "The Seventh Circle: Violence",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_g+12|at:0.818+12",
+       "Cue": "section:gtr_solo_f+8.214|at:0.775+8.214",
        "Flags": [
         "in_circle_7"
        ]
       },
       {
-       "Cue": "section:gtr_solo_h|at:0.862",
+       "Cue": "section:gtr_solo_f+17.776|at:0.775+17.776",
+       "Flags": [
+        "in_circle_7_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_g|at:0.818",
        "Flags": [
         "circle_8"
        ]
       },
       {
-       "Cue": "section:gtr_solo_h+6|at:0.862+6",
+       "Cue": "section:gtr_solo_g+2|at:0.818+2",
        "Flags": [],
        "Caption": "The Eighth Circle: Fraud",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_h+12|at:0.862+12",
+       "Cue": "section:gtr_solo_g+6.575|at:0.818+6.575",
        "Flags": [
         "in_circle_8"
        ]
       },
       {
-       "Cue": "section:gtr_solo_i|at:0.907",
+       "Cue": "section:gtr_solo_g+9.835|at:0.818+9.835",
+       "Flags": [
+        "in_circle_8_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_g+13|at:0.818+13",
        "Flags": [
         "circle_9"
        ]
       },
       {
-       "Cue": "section:gtr_solo_i+6|at:0.907+6",
+       "Cue": "section:gtr_solo_g+15|at:0.818+15",
        "Flags": [],
        "Caption": "The Ninth Circle: Treachery",
        "CaptionSeconds": 4
       },
       {
-       "Cue": "section:gtr_solo_i+12|at:0.907+12",
+       "Cue": "section:gtr_solo_g+18.791|at:0.818+18.791",
        "Flags": [
         "in_circle_9"
        ]
       },
       {
-       "Cue": "section:bre|at:0.95",
+       "Cue": "section:gtr_solo_g+21.993|at:0.818+21.993",
+       "Flags": [
+        "in_circle_9_b"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_h|at:0.862",
        "Flags": [
         "landed",
         "band_playing"
        ]
       },
       {
-       "Cue": "section:bre+4|at:0.957",
+       "Cue": "section:gtr_solo_h+4|at:0.862+4",
+       "Flags": [
+        "frozen_wide"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_h+14|at:0.862+14",
+       "Flags": [
+        "satan_faces"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_i-6|at:0.907-6",
+       "Flags": [
+        "thaw_1"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_i|at:0.907",
+       "Flags": [
+        "thaw_2"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_i+8|at:0.907+8",
+       "Flags": [
+        "thaw_3"
+       ]
+      },
+      {
+       "Cue": "section:gtr_solo_i+17|at:0.907+17",
+       "Flags": [
+        "thaw_4"
+       ]
+      },
+      {
+       "Cue": "section:bre|at:0.95",
+       "Flags": [
+        "thawed"
+       ]
+      },
+      {
+       "Cue": "section:bre+8|at:0.95+8",
        "Flags": [
         "stairs_reveal"
        ]
@@ -1457,6 +1715,18 @@
        "Cue": "at:0.42",
        "Flags": [
         "cavern_orbit"
+       ]
+      },
+      {
+       "Cue": "section:verse_2",
+       "Flags": [
+        "closer_1"
+       ]
+      },
+      {
+       "Cue": "section:verse_3",
+       "Flags": [
+        "closer_2"
        ]
       }
      ],
@@ -1542,6 +1812,12 @@
        ]
       },
       {
+       "Cue": "section:verse_1+7.5",
+       "Flags": [
+        "innocent"
+       ]
+      },
+      {
        "Cue": "section:chorus_1",
        "Flags": [
         "loading"
@@ -1581,6 +1857,12 @@
        "Cue": "section:chorus_3+24",
        "Flags": [
         "gurney"
+       ]
+      },
+      {
+       "Cue": "section:chorus_3+38",
+       "Flags": [
+        "surgery"
        ]
       }
      ],

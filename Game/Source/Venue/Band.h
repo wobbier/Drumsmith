@@ -37,9 +37,18 @@ public:
     // loose beside them, the mic stands are gone and the singer has a mic in hand. inTo has held
     // inToSeconds; it blends in
     // from inFrom (held inFromSeconds when inTo came) by inBlend, 0 to 1. inGhost 0 to 1 turns
-    // them see-through and pale, glowing: a ghost of themselves.
-    enum class StoryPose : int { Playing = 0, Hidden, Falling, Rising, Down, Floating, Aloft };
+    // them see-through and pale, glowing: a ghost of themselves. Reach and Shield are Aloft
+    // with the singer's free hand at work: up toward the light overhead, the fingers spread
+    // (Reach), then brought across in front of the eyes against it (Shield).
+    enum class StoryPose : int { Playing = 0, Hidden, Falling, Rising, Down, Floating, Aloft, Reach, Shield };
     void SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo, float inToSeconds, float inBlend, float inGhost );
+    // A member's spot on something that moves (a trailer on its hitch, a truck on the road):
+    // where its marker is now (venue space) and how far it has turned since the scene was read.
+    // The member and their gear go with it, and their body rides it on a spring: a jolt of the
+    // deck throws them a little off it and they come down again, swaying against the lurch.
+    void Carry( int inMember, const Vector3& inFeet, const glm::quat& inTurn, float inDeltaTime );
+    // The member's character and clothes as cast for this song (a VenueFigure dressed as them).
+    bool LookOf( int inMember, std::string& outModel, std::string& outSkin ) const;
 
     // Venue-space points for the director and the lights: a member's head, chest and hands (for
     // a member who isn't there, points over their spot).
@@ -48,7 +57,13 @@ public:
     Vector3 GazeOf( int inMember ) const;
     Vector3 ChestOf( int inMember ) const;
     Vector3 HandsOf( int inMember ) const;
+    // Where their feet stand: their spot, and as far over it as a story pose has the band lifted.
     Vector3 FeetOf( int inMember ) const;
+    // How far off the floor a story pose has the band (0 on it): the director's floor-placed
+    // cameras ride up with them.
+    float Lift() const;
+    // The band are ghosts (see-through: they write no depth, so a lens focused on them can't be).
+    bool Ghosted() const { return m_ghost > 0.f; }
     // A guitarist's or bassist's instrument in venue space, for the neck camera: the headstock,
     // the middle of the body, the fretboard's facing and the neck's upper edge (toward the
     // player's head). False for anyone without one.
@@ -108,7 +123,8 @@ private:
             float Seed = 0.f;
         };
         std::vector<LoosePiece> Loose;
-        EntityHandle HandMic;      // the singer's, in their hand through a fall (hidden otherwise)
+        EntityHandle HandMic;      // the singer's, in their hand while in the air (hidden otherwise)
+        EntityHandle Rug;          // the drummer's: it stays behind when the kit leaves the floor
         Performer Body;
         int Model = -1;            // which character (People::kPeople)
         Performer::Pose Pose;
@@ -134,9 +150,28 @@ private:
         float Phase = 0.f;         // a per-member offset for idle motion
         float Energy = 0.f;        // eased
         float Solo = 0.f;          // 0 to 1 out front for a play_solo, eased
-        Vector3 Spot;              // the plan's, whether they're there or not
+        Vector3 Spot;              // the plan's, whether they're there or not (where Carry has it)
         float Yaw = 180.f;
+        float SeatHeight = 0.f;
+        bool PowerStance = false;
+        bool Gear = true;
+        std::string Skin;          // the atlas they wear
+        // Carried (Carry): the spot's turn since the scene was read, and the spring between the
+        // deck and the body: how far the body is off its spot, and its own velocity.
+        bool Carried = false;
+        glm::quat CarryTurn{ 1.f, 0.f, 0.f, 0.f };
+        glm::vec3 Jolt{ 0.f };
+        glm::vec3 JoltVelocity{ 0.f };
+        // Standing on what carries them (not seated, not the drummer): the feet stay planted on
+        // the deck and the throw goes into the body above them (CarryPose), in their own space,
+        // and the degrees it tips them forward and to their right.
+        bool Planted = false;
+        glm::vec3 Thrown{ 0.f };
+        float ThrownLean = 0.f;
+        float ThrownSide = 0.f;
     };
+    // A carried member's group and backline placed on their spot, the body off it by the spring.
+    void PlaceCarried( int inIndex );
 
     void BuildDrums( VenueKit& inKit, Member& ioMember );
     void BuildStringed( VenueKit& inKit, Member& ioMember, bool inBass );
@@ -161,6 +196,8 @@ private:
     void UpdateKit( float inDeltaTime );
     // A fall's dive (m_dive) laid over a playing pose, before the body stands in it: the back
     // arched, the head up to see where they're going, the legs trailing and kicking.
+    // A planted carried member's throw (PlaceCarried) put into their pose: the body off the feet.
+    void CarryPose( const Member& inMember, Performer::Pose& ioPose ) const;
     void DivePose( const Member& inMember, Performer::Pose& ioPose, bool inKeepLean ) const;
 
     // Where a piece is struck (the drummer's space): its middle, or where a hand's (0 left, 1
@@ -182,18 +219,32 @@ private:
         float Opacity = 1.f;
         bool Transparent = false;
         float Rim = 0.f;
+        bool Shell = false;
+        // The singer's own (their body, not what they play): backlit through Free Bird's plea.
+        bool Singer = false;
     };
     std::vector<GhostedMaterial> m_ghosted;
+    // How far the singer is a dark shape against the light (the plea's hand up into it, 0 to 1),
+    // as last applied.
+    float m_backlit = 0.f;
     // A member's group placed for a story pose (position, euler rotation, scale).
     void StoryPlacement( int inIndex, StoryPose inPose, float inSeconds, Vector3& outPosition, Vector3& outRotation, float& outScale, bool inBackline = false ) const;
     // Adds the StandardMaterials under inRoot that m_ghosted doesn't have yet; true if any were new.
-    bool GatherGhosted( Transform& inRoot );
+    bool GatherGhosted( Transform& inRoot, bool inSinger = false );
     float m_ghost = 0.f;
+    // SetStoryState has the band (it places the members from then on).
+    bool m_storied = false;
     // SetStoryState's fall as last set: how much of the band's hold is Falling (0 to 1), how long
     // the fall has lasted, and how far into the dive they are (0 the tumble, 1 head first).
     float m_fall = 0.f;
     float m_fallSeconds = 0.f;
     float m_dive = 0.f;
+    float m_air = 0.f;          // how far the band is in the air with its gear (a fall, or aloft)
+    // The singer's plea (StoryPose Reach, Shield) as last set: how far the free hand is up toward
+    // the light (0 to 1), how far it has come across the eyes, and how long the pose has held.
+    float m_reach = 0.f;
+    float m_shield = 0.f;
+    float m_reachSeconds = 0.f;
     std::array<std::vector<Stroke>, 4> m_strokes;       // per limb
     std::array<size_t, 4> m_strokeCursor{};
     std::array<KitPiece, 10> m_kit;                     // by DrumPiece

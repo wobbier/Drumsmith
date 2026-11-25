@@ -52,6 +52,9 @@ public:
     float ShotSky() const { return m_shotSky; }
     // How much of a day the scene is under (0 a night, 1 broad daylight): daylight takes less bloom.
     void SetDaylight( float inDay ) { m_daylight = inDay; }
+    // How much of the note highway is over the picture (0 none, 1 all of it): a story shot tagged
+    // leadl / leadr turns its subject clear of it only as far as it is there.
+    void SetHighwayShown( float inShown ) { m_highwayShown = inShown < 0.f ? 0.f : inShown > 1.f ? 1.f : inShown; }
     // What a look that takes the colour out leaves in (set every frame): x reds, y blues (0 none,
     // 1 all), z how far the reds reach into orange and yellow. A story shot tagged "lights"
     // keeps all three whatever this says.
@@ -71,7 +74,7 @@ public:
     // end of the hold (a pull back, a zoom), by way of any spots tagged "story/<flag>/w1", "/w2",
     // ... (a crane up the stairs, a zoom that overshoots and comes back). "f<metres>" on the
     // spot or its end pulls focus to that distance and softens the rest (a rack focus when the two
-    // differ). Flags with no spot get no shot.
+    // differ). "lin" runs the move at one speed, not eased. Flags with no spot get no shot.
     void SetStoryShots( const std::vector<std::pair<std::string, double>>& inLanding );
     int StoryShotCount() const { return static_cast<int>( m_storyShots.size() ); }
     bool HasPeakShots() const { return !m_peakSpots.empty(); }
@@ -136,6 +139,9 @@ private:
         float Ride = 0.f;
         // Story: the hour of the procedural sky this shot is under (the tag's "sky"; -1 none).
         float Sky = -1.f;
+        // Story: the camera is exactly where its move puts it (the tag's "lin"): the framing's
+        // easing would leave a camera that keeps pace with something trailing behind it.
+        bool Bolted = false;
         bool Static = false;
         // Bit 0 the side, bit 1 an alternate take, bits 2-3 the treatment (Vary).
         int Variant = 0;
@@ -195,15 +201,22 @@ private:
     // A point placed for the drummer facing the crowd, turned with the drummer's spot (the kit
     // is built in their frame).
     Vector3 AtDrums( const Vector3& inPoint ) const { return m_plan.TurnWith( VenueData::Drums, inPoint ); }
+    // How far a story pose has the band off the floor (Band::Lift): every camera placed for a
+    // band standing on it rides up with them, so a shot of the kick drum isn't of the air under it.
+    float BandLift() const;
     Plan PlanAuto( const std::string& inConstraints, int inIndex, float inTime ) const;
     // A point placed for the procedural rooms' stage, moved to this venue's (VenuePlan::ShotOffset).
-    Vector3 OnStage( const Vector3& inPoint ) const { return inPoint + m_plan.ShotOffset; }
+    // It goes up with a band lifted off the floor (BandLift).
+    Vector3 OnStage( const Vector3& inPoint ) const { return inPoint + m_plan.ShotOffset + Vector3( 0.f, BandLift(), 0.f ); }
     // The venue's camera spots: the inPick'th of a kind (wrapping), null when it has none.
     const VenuePlan::CameraSpot* SpotFor( VenuePlan::CameraSpot::Kind inKind, int inPick ) const;
     // Where a camera spot looks: along its aim, as far off as inSubject (or the band's middle).
     Vector3 SpotTarget( const VenuePlan::CameraSpot& inSpot, const Vector3* inSubject ) const;
     // Turns some of the cuts over to the venue's close and custom camera spots.
     void AddSpotCuts();
+    // A member the venue has own/ camera spots for (boxed into a truck's cab, where the close
+    // framings placed for a stage would be in its walls) is shot close only from those.
+    void KeepToOwnSpots();
     // Found footage: every cut becomes a guest's clip from a guest/ spot (or held up in the crowd),
     // on that guest's device, and the looks follow the devices.
     void BuildGuestCuts();
@@ -259,6 +272,9 @@ private:
         bool Aerial = false;
         // "lights": reds, blues and fire stay in colour through a black and white look.
         bool Lights = false;
+        // "lin": the move runs at one speed from its first frame to its last, not eased (a camera
+        // that keeps pace with something: riding a ledge of hell as it streams up past the band).
+        bool Linear = false;
         // "ride" / "ride<amount>": the camera takes the road for this shot (an ambulance, a gurney).
         float Ride = 0.f;
         // "sky<hour>": the shot is under the procedural sky at that hour (-1: the venue's own).
@@ -268,6 +284,9 @@ private:
         // The focus distance in metres at the start and the end ("f0.5"; 0: sharp throughout).
         float FocusFrom = 0.f;
         float FocusTo = 0.f;
+        // "leadl" / "leadr": the side of the picture the middle of the view (the subject) is
+        // turned to while the highway is up (-1 left, 1 right, 0 centred).
+        float Lead = 0.f;
     };
     std::vector<StoryShot> m_storyShots;
     float m_accentPhase = -1.f;
@@ -304,6 +323,8 @@ private:
     int m_framedCut = -2;
     std::string m_framedShot;
     float m_leadSide = 0.f;    // this shot's lead room (LeadSideFor), chosen on the cut
+    float m_highwayShown = 0.f;     // SetHighwayShown
+    float m_storyLead = 0.f;        // a story shot's lead, eased with the highway coming and going
     // How long the shot's move has run: the time since the cut, running faster with the hype.
     float m_moveTime = 0.f;
     float m_hype = 0.f;

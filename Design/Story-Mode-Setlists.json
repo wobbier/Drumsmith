@@ -2892,10 +2892,11 @@
             "bass",
             "vocals"
           ],
+          "OutroSeconds": 16,
           "Cue": {
             "On": "last_note+0.5",
             "Shot": "story/wreck",
-            "Do": "The trailer slews across the lane, crashes and erupts in flame. The helicopter holds wide on the fire."
+            "Do": "The trailer slews across the lane, crashes and erupts in flame. The helicopter holds wide on the fire for the seven seconds after the song's last chord: the outro (OutroSeconds) is heard by the venue's own sound, the blast, the fire, ears ringing and the pursuit's sirens."
           },
           "StateAfter": [
             "wreck"
@@ -2926,12 +2927,20 @@
               "Do": "The helicopter: wide on both vehicles, then the operator zooms past the trailer and corrects back onto the drummer."
             },
             {
+              "On": "section:verse_1a|at:0.19",
+              "StateAfter": [
+                "driver_window"
+              ],
+              "Shot": "story/driver_window",
+              "Do": "Track alongside the driver window as the singer works the wheel."
+            },
+            {
               "On": "section:chorus_1",
               "StateAfter": [
                 "foot_on_monitor"
               ],
               "Shot": "story/foot_on_monitor",
-              "Do": "On the deck: a band member braces a foot against a monitor."
+              "Do": "Ride up the passenger door to the bassist, then pull back over the roof guitarist."
             },
             {
               "On": "section:verse_2",
@@ -2950,12 +2959,52 @@
               "Do": "One small involuntary nod in time."
             },
             {
+              "On": "section:bridge|at:0.56",
+              "StateAfter": [
+                "freight_pass"
+              ],
+              "Shot": "story/freight_pass",
+              "Do": "Look forward past the driver mirror as a Pacific Freight cabover bears down. Swing with its trailer as it flashes past."
+            },
+            {
               "On": "section:gtr_solo",
               "StateAfter": [
                 "heli_again"
               ],
               "Shot": "story/heli_again",
               "Do": "The helicopter again, both vehicles in frame."
+            },
+            {
+              "On": "section:gtr_solo_a|at:0.79",
+              "StateAfter": [
+                "roof_solo"
+              ],
+              "Shot": "story/roof_solo",
+              "Do": "Climb past the stacks and arc above the guitarist sitting on the cab roof."
+            },
+            {
+              "On": "section:gtr_solo_c",
+              "StateAfter": [
+                "pedal_jammed"
+              ],
+              "Shot": "story/pedal_jammed",
+              "Do": "Down in the footwell: a mic stand jammed onto the gas pedal, wedged against the seat back. Rise up it to the empty seat and the wheel nobody is holding, and out through the windscreen to the singer climbing out onto the bonnet. This is what kills them."
+            },
+            {
+              "On": "section:ending",
+              "StateAfter": [
+                "hood_surf"
+              ],
+              "Shot": "story/hood_surf",
+              "Do": "Beside the bonnet, low: the singer on it, one foot on the bonnet and the other at the foot of the windscreen, leaning into the wind with a mic stand in both hands. Swing round ahead of the nose onto their face."
+            },
+            {
+              "On": "section:big_rock_ending",
+              "StateAfter": [
+                "hood_wind"
+              ],
+              "Shot": "story/hood_wind",
+              "Do": "Low ahead of the grille looking back up at the singer, rise up the side and settle behind their shoulder over the cab, the road and the oncoming lights ahead."
             },
             {
               "On": "last_note-5",
@@ -2966,13 +3015,13 @@
               "Do": "In the closing bars the trailer slews across a lane; the last hits with the kit still in view."
             },
             {
-              "On": "last_note+1",
+              "On": "last_note+7.5",
               "StateAfter": [
                 "bodies",
                 "band_hidden"
               ],
               "Shot": "story/bodies",
-              "Do": "Road level: the band lies on the asphalt, one drumstick just beyond the drummer's fingers. Held into Free Bird."
+              "Do": "Road level, once the helicopter has had its look: the band lies on the asphalt, one drumstick just beyond the drummer's fingers. Held through the rest of the outro, the fire and the sirens, into Free Bird."
             },
             {
               "On": "at:0.3",
@@ -2991,12 +3040,27 @@
               "Do": "Two cruisers nose to nose across the road, barrels and trestles: seen from over the cab, the rig goes straight through."
             },
             {
+              "On": "at:0.68-6",
+              "StateAfter": [
+                "ramp_ahead"
+              ],
+              "Shot": "story/ramp_ahead",
+              "Do": "Over the cab: road works coming up the middle lanes. ROAD WORK AHEAD signs, barrels with flashing lamps, and under the lighting masts a ramp of spoil and steel plates."
+            },
+            {
               "On": "at:0.68",
               "StateAfter": [
                 "big_air"
               ],
               "Shot": "story/big_air",
-              "Do": "From the verge, low: the whole rig leaves the road and comes down in sparks."
+              "Do": "From the verge, low: the rig goes up the ramp, the whole of it leaves the road and comes down in sparks. The cruiser behind takes the ramp after it."
+            },
+            {
+              "On": "at:0.68+4.0",
+              "StateAfter": [
+                "jump_clear"
+              ],
+              "Do": "The rig clears the works and the slow lane opens again."
             }
           ]
         },
@@ -3019,7 +3083,7 @@
           "Cue": {
             "On": "last_note+1",
             "Shot": "story/encore_called",
-            "Do": "The crowd turns to the throne. Satan rolls one hand toward the band for another song."
+            "Do": "The crowd turns to the throne. Satan lifts his right hand toward the band and rolls it at them, twice: another song."
           },
           "StateAfter": [
             "encore_called"
@@ -3074,7 +3138,10 @@
               "StateAfter": [
                 "ascent",
                 "band_aloft",
-                "sky_21.5"
+                "sky_21.5",
+                "alt_0",
+                "cover_25",
+                "towers_0"
               ],
               "Shot": "story/ascent",
               "Do": "Their feet leave the road. Down past the drummer to the cop at the body, the crash site dropping away: they are going up."
@@ -3083,272 +3150,532 @@
               "On": "section:verse_1+18|at:0.165",
               "StateAfter": [
                 "clouds",
-                "sky_28.5"
+                "sky_30.2",
+                "alt_330",
+                "cover_60",
+                "towers_100",
+                "clear_0"
               ],
-              "Do": "Cloud comes down round them, streaming past in the moonlight. The night starts to turn: by the time the light opens it is dawn."
+              "Do": "The cloud base comes down to them out of the night and closes round them: the sky's own cloud, grey going by the lens, for a few seconds. The night starts to turn: by the time they are over it, it is dawn, and far off the thunderheads stand up out of the cloud sea."
+            },
+            {
+              "On": "section:verse_1+26|at:0.165+8",
+              "StateAfter": [
+                "clear_100"
+              ],
+              "Do": "The cloud opens round them: they rise up a gap in it, its walls going by, and the Earth still there below them down the gap, the crash still burning. From over the tops it shows through the breaks in the cloud sea."
             },
             {
               "On": "section:chorus_1|at:0.23",
               "StateAfter": [
                 "heavens_light",
-                "sky_31"
+                "sky_31",
+                "alt_1050",
+                "cover_48"
               ],
               "Shot": "story/heavens_light",
-              "Do": "A light opens above them, gold, growing, and the sun is up: the higher they go the more of a day it is. From low among them, up into it."
+              "Do": "They come up out of the cloud tops into a light opening above them, gold, growing, and the sun is up: a sea of cloud below, and from here they rise slowly. From low among them, up into it."
             },
             {
               "On": "section:chorus_2|at:0.435",
               "StateAfter": [
                 "gates",
-                "sky_34"
+                "sky_34",
+                "alt_1250"
               ],
-              "Shot": "story/gates",
-              "Do": "The gates themselves, standing open overhead and coming down to meet them: straight up from among the band."
+              "Do": "The gates themselves, standing open far overhead, start down to meet them as the last chorus starts. From here the shots leave the whole band and go to each of them alone."
             },
             {
-              "On": "section:fast_part-3.2|at:0.5-3.2",
+              "On": "section:chorus_2+0.99|at:0.435+0.99",
               "StateAfter": [
-                "denied",
-                "band_falling",
-                "sky_36"
+                "chorus_singer"
               ],
-              "Shot": "story/denied",
-              "Do": "Denied. The light goes out at a stroke, a red bolt comes down instead, and they drop: straight down at the Earth coming back up, the day running backwards to the night they left as they fall.",
-              "Caption": "Denied.",
-              "CaptionSeconds": 2.5
+              "Shot": "story/chorus_singer",
+              "Do": "'And this bird you'll never change': the singer alone, close, from under their chin: the face turned up, the light and the open gates far above."
+            },
+            {
+              "On": "section:chorus_2+8.97|at:0.435+8.97",
+              "StateAfter": [
+                "chorus_guitar"
+              ],
+              "Shot": "story/chorus_guitar",
+              "Do": "'And a bird you cannot change': the guitarist alone, close, the light behind their head."
+            },
+            {
+              "On": "section:chorus_2+16.54|at:0.435+16.54",
+              "StateAfter": [
+                "chorus_bass"
+              ],
+              "Shot": "story/chorus_bass",
+              "Do": "'And this bird you cannot change': the bassist alone, close, looking up into it."
+            },
+            {
+              "On": "section:chorus_2+23.84|at:0.435+23.84",
+              "StateAfter": [
+                "chorus_drums"
+              ],
+              "Shot": "story/chorus_drums",
+              "Do": "'Lord knows I can't change': on the drummer at the kit, then tilt up off them into the light, the gates close over them now."
+            },
+            {
+              "On": "section:chorus_2+31.55|at:0.435+31.55",
+              "StateAfter": [
+                "reach",
+                "band_reach"
+              ],
+              "Shot": "story/reach",
+              "Do": "'Lord help me I can't change': through the singer's eyes, straight up into the light: their own pale hand reaches up into it, the light pouring through the fingers."
+            },
+            {
+              "On": "section:fast_part-1.2|at:0.5-1.2",
+              "StateAfter": [
+                "band_shield"
+              ],
+              "Do": "The hand comes across the eyes against the light. That is the refusal: what follows is its answer."
             },
             {
               "On": "section:fast_part|at:0.5",
               "StateAfter": [
+                "denied"
+              ],
+              "Shot": "story/denied",
+              "Do": "Denied, as the tempo breaks. The light goes out at a stroke and a red bolt comes down instead.",
+              "Caption": "Denied.",
+              "CaptionSeconds": 2.5
+            },
+            {
+              "On": "section:fast_part+1.47|at:0.5+1.47",
+              "StateAfter": [
+                "apex",
+                "band_falling",
+                "sky_36",
+                "alt_1400"
+              ],
+              "Shot": "story/apex",
+              "Do": "'Lord I can't change': the top of the climb. Wide and held: they hang there in the red, stop, and turn over, and the day starts to run backwards to the night they left."
+            },
+            {
+              "On": "section:fast_part+2.7|at:0.5+2.7",
+              "StateAfter": [
+                "alt_1390",
+                "clear_100"
+              ],
+              "Do": "Still hanging, just. Under them the gap they came up starts to close."
+            },
+            {
+              "On": "section:gtr_solo-7.6|at:0.522-7.6",
+              "StateAfter": [
+                "alt_1000",
+                "sky_31",
+                "clear_0"
+              ],
+              "Do": "Falling: down into the tops of the cloud, closed over now."
+            },
+            {
+              "On": "section:gtr_solo-6.18|at:0.522-6.18",
+              "StateAfter": [
+                "free_fall",
+                "earth_lost"
+              ],
+              "Shot": "story/free_fall",
+              "Do": "'Won't you fly-y': free fall, head first, out of the cloud: below them the night, and the crash they left, still burning, coming up."
+            },
+            {
+              "On": "section:gtr_solo-5.62|at:0.522-5.62",
+              "StateAfter": [
+                "earth_back",
+                "alt_400",
+                "sky_29.85"
+              ],
+              "Do": "Out of the bottom of the cloud, and the Earth is there again: the crash site, still burning, coming up fast."
+            },
+            {
+              "On": "section:gtr_solo-3.2|at:0.522-3.2",
+              "StateAfter": [
+                "alt_340",
+                "sky_29.75"
+              ],
+              "Do": "Still falling: the crash growing under them."
+            },
+            {
+              "On": "section:gtr_solo-2.42|at:0.522-2.42",
+              "StateAfter": [
+                "crash_returns",
+                "sky_29.7",
+                "alt_310"
+              ],
+              "Shot": "story/crash_returns",
+              "Do": "'Free bird': back on the ground at the crash, behind the burning truck, looking up past the fire as they come down at it, faster and faster."
+            },
+            {
+              "On": "section:gtr_solo-0.5|at:0.522-0.5",
+              "StateAfter": [
+                "sky_28.8",
+                "alt_305"
+              ],
+              "Do": "The last of the blue before the dark: the night and the ground's haze close over them as they hit (the sky's height is held over 300 m until here, so the haze doesn't hide the crash on the way down)."
+            },
+            {
+              "On": "section:gtr_solo-0.18|at:0.522-0.18",
+              "StateAfter": [
                 "fell",
                 "sky_21.5",
+                "alt_0",
                 "sky_off"
               ],
               "Shot": "story/fell",
-              "Do": "Through the road on the first beat of the fast part and on down: the road overhead shrinks to a bright slit."
-            },
-            {
-              "On": "section:fast_part+6|at:0.5+6",
-              "StateAfter": [
-                "tumbling"
-              ],
-              "Shot": "story/tumbling",
-              "Do": "Tumbling past one another, pulling back into their places."
+              "Do": "'Yeah': they smash through the road, the asphalt bursting round them, and straight on down into the first circle as the riff takes off."
             },
             {
               "On": "section:gtr_solo|at:0.522",
               "StateAfter": [
                 "circle_1"
               ],
-              "Do": "Limbo comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Straight out from under the road into Limbo: it comes up round them as the shaft goes on up, one move, no cut. They fall through it at 45 m/s."
             },
             {
-              "On": "section:gtr_solo+6|at:0.522+6",
+              "On": "section:gtr_solo+2|at:0.522+2",
               "StateAfter": [],
               "Caption": "The First Circle: Limbo",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo+12|at:0.522+12",
+              "On": "section:gtr_solo+8.221|at:0.522+8.221",
               "StateAfter": [
                 "in_circle_1"
               ],
               "Shot": "story/in_circle_1",
-              "Do": "The rock opens into grey twilight: Limbo. Ruined colonnades, the castle's seven gates, shades standing about under them."
+              "Do": "Low along the lip of Limbo's colonnade, the shades packed two deep down the line of it, a wall of sad watchers: weeping, hands to their faces, swaying and holding back (dancing when the drums are good); the band drops past them and is gone."
+            },
+            {
+              "On": "section:gtr_solo+18.837|at:0.522+18.837",
+              "StateAfter": [
+                "in_circle_1_b"
+              ],
+              "Shot": "story/in_circle_1_b",
+              "Do": "Over the colonnade, the castle's gates above it: the shades in droves along the ledge, watching them go by."
             },
             {
               "On": "section:gtr_solo_a|at:0.568",
               "StateAfter": [
                 "circle_2"
               ],
-              "Do": "Lust comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Lust comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 52 m/s."
             },
             {
-              "On": "section:gtr_solo_a+6|at:0.568+6",
+              "On": "section:gtr_solo_a+2|at:0.568+2",
               "StateAfter": [],
               "Caption": "The Second Circle: Lust",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_a+12|at:0.568+12",
+              "On": "section:gtr_solo_a+5.971|at:0.568+5.971",
               "StateAfter": [
                 "in_circle_2"
               ],
               "Shot": "story/in_circle_2",
-              "Do": "The hurricane: the lustful flung round and round the band, some two by two."
+              "Do": "In the storm among the lustful along the wall, swimming up against the wind that drags them down (dancing in it when the drums are good, flung about by it when not): the band streaks down past them."
             },
             {
-              "On": "section:gtr_solo_c|at:0.634",
+              "On": "section:gtr_solo_a+11.5|at:0.568+11.5",
+              "StateAfter": [
+                "in_circle_2_b"
+              ],
+              "Shot": "story/in_circle_2_b",
+              "Do": "Round and round the band with the hurricane, as one of the lustful: the others flung past the lens (whipped round faster, and away up the shaft, when the drums go wrong), the band turning in the eye of it."
+            },
+            {
+              "On": "section:gtr_solo_b|at:0.601",
               "StateAfter": [
                 "circle_3"
               ],
-              "Do": "Gluttony comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Gluttony comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 59 m/s."
             },
             {
-              "On": "section:gtr_solo_c+6|at:0.634+6",
+              "On": "section:gtr_solo_b+2|at:0.601+2",
               "StateAfter": [],
               "Caption": "The Third Circle: Gluttony",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_c+12|at:0.634+12",
+              "On": "section:gtr_solo_b+6.262|at:0.601+6.262",
               "StateAfter": [
                 "in_circle_3"
               ],
               "Shot": "story/in_circle_3",
-              "Do": "Rain and hail on the gluttons in their mire. Cerberus comes up out of the dark behind the drummer, three heads, and goes by."
+              "Do": "Low over the mire, the gluttons sunk to the waist in it, fat, still feasting, rocking to the music under the rain: the band falls past them."
             },
             {
-              "On": "section:gtr_solo_d|at:0.688",
+              "On": "section:gtr_solo_b+9.787|at:0.601+9.787",
+              "StateAfter": [
+                "in_circle_3_b"
+              ],
+              "Shot": "story/in_circle_3_b",
+              "Do": "Over Cerberus's shoulder on the ledge: the band catches his eye; he stops dead, all three heads cocked, ears up, like a dog, as they drop past his noses."
+            },
+            {
+              "On": "section:gtr_solo_b+13.087|at:0.601+13.087",
+              "StateAfter": [
+                "in_circle_3_c"
+              ],
+              "Shot": "story/in_circle_3_c",
+              "Do": "Cerberus gives chase: off the ledge and head first down the shaft after them, round the outside of the fall, keeping level with the band (falling behind while the drums go wrong)."
+            },
+            {
+              "On": "section:gtr_solo_c|at:0.634",
               "StateAfter": [
                 "circle_4"
               ],
-              "Do": "Greed comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Greed comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 66 m/s."
             },
             {
-              "On": "section:gtr_solo_d+6|at:0.688+6",
+              "On": "section:gtr_solo_c+2|at:0.634+2",
               "StateAfter": [],
               "Caption": "The Fourth Circle: Greed",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_d+12|at:0.688+12",
+              "On": "section:gtr_solo_c+9.671|at:0.634+9.671",
               "StateAfter": [
                 "in_circle_4"
               ],
               "Shot": "story/in_circle_4",
-              "Do": "Gold in every wall. The hoarders and the wasters roll their great weights round the ring, one crowd each way."
+              "Do": "Side on to a team of the hoarders from out in the shaft, a little below them: three men shoving a boulder up the slope with their chests, heaving on the big notes (in step when the drums are good, bumping into each other when not); the band falls past behind."
             },
             {
-              "On": "section:gtr_solo_e|at:0.732",
+              "On": "section:gtr_solo_c+22.008|at:0.634+22.008",
+              "StateAfter": [
+                "in_circle_4_b"
+              ],
+              "Shot": "story/in_circle_4_b",
+              "Do": "Along the wasters' road, up the slope: the whole column of boulders and pushers winding up it into the distance."
+            },
+            {
+              "On": "section:gtr_solo_d|at:0.688",
               "StateAfter": [
                 "circle_5"
               ],
-              "Do": "Wrath comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Wrath comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 73 m/s."
             },
             {
-              "On": "section:gtr_solo_e+6|at:0.732+6",
+              "On": "section:gtr_solo_d+2|at:0.688+2",
               "StateAfter": [],
               "Caption": "The Fifth Circle: Wrath",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_e+12|at:0.732+12",
+              "On": "section:gtr_solo_d+7.751|at:0.688+7.751",
               "StateAfter": [
                 "in_circle_5"
               ],
               "Shot": "story/in_circle_5",
-              "Do": "The Styx: the wrathful tearing at each other in the black marsh, the watchtower's two fires, the ferryman's boat."
+              "Do": "Waist deep in the Styx among the wrathful: the river is a pool party and a mosh pit, shoving each other about on the beat (it dies down when the drums are wrong): the band falls past the watchtower's fires."
             },
             {
-              "On": "section:gtr_solo_f|at:0.775",
+              "On": "section:gtr_solo_d+17.585|at:0.688+17.585",
+              "StateAfter": [
+                "in_circle_5_b"
+              ],
+              "Shot": "story/in_circle_5_b",
+              "Do": "The pit from over the reeds on its other side, rings and a ball bobbing in it: the band drops through the marsh gas."
+            },
+            {
+              "On": "section:gtr_solo_e|at:0.732",
               "StateAfter": [
                 "circle_6"
               ],
-              "Do": "Heresy comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Heresy comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 81 m/s."
             },
             {
-              "On": "section:gtr_solo_f+6|at:0.775+6",
+              "On": "section:gtr_solo_e+2|at:0.732+2",
               "StateAfter": [],
               "Caption": "The Sixth Circle: Heresy",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_f+12|at:0.775+12",
+              "On": "section:gtr_solo_e+8.38|at:0.732+8.38",
               "StateAfter": [
                 "in_circle_6"
               ],
               "Shot": "story/in_circle_6",
-              "Do": "The iron wall of Dis, red hot, and inside it the open tombs, each with its fire."
+              "Do": "Out among the chains hung from the wall of Dis, beside a maiden as she swings, the face of the damned screaming out of her window, the line of them going on round the ring: swinging to the music when the drums are good, hanging still and red hot when not. The band drops past."
             },
             {
-              "On": "section:gtr_solo_g|at:0.818",
+              "On": "section:gtr_solo_e+17.342|at:0.732+17.342",
+              "StateAfter": [
+                "in_circle_6_b"
+              ],
+              "Shot": "story/in_circle_6_b",
+              "Do": "Looking down past the maidens to the heretics' burning tombs under them: swinging in time when the drums are good, hanging still while the fires flare up the chains at them when not. The band falls through the smoke."
+            },
+            {
+              "On": "section:gtr_solo_f|at:0.775",
               "StateAfter": [
                 "circle_7"
               ],
-              "Do": "Violence comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Violence comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 89 m/s."
             },
             {
-              "On": "section:gtr_solo_g+6|at:0.818+6",
+              "On": "section:gtr_solo_f+2|at:0.775+2",
               "StateAfter": [],
               "Caption": "The Seventh Circle: Violence",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_g+12|at:0.818+12",
+              "On": "section:gtr_solo_f+8.214|at:0.775+8.214",
               "StateAfter": [
                 "in_circle_7"
               ],
               "Shot": "story/in_circle_7",
-              "Do": "The river of boiling blood and its centaurs, the wood of the suicides, the burning sand under a rain of fire."
+              "Do": "From behind the wood of the suicides, the river glowing beyond it: the twisted trees lashing at the harpies and driving them off over the river when the drums are good, the harpies in them tearing at them when not. The band falls past the branches."
             },
             {
-              "On": "section:gtr_solo_h|at:0.862",
+              "On": "section:gtr_solo_f+17.776|at:0.775+17.776",
+              "StateAfter": [
+                "in_circle_7_b"
+              ],
+              "Shot": "story/in_circle_7_b",
+              "Do": "On the bank of Phlegethon, the murderers in the boiling blood to the waist rocking out and the skeletons on the burning sand up and dancing (under the blood and lying dead when the drums are bad): the band comes down through the rain of fire."
+            },
+            {
+              "On": "section:gtr_solo_g|at:0.818",
               "StateAfter": [
                 "circle_8"
               ],
-              "Do": "Fraud comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Fraud comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 97 m/s."
             },
             {
-              "On": "section:gtr_solo_h+6|at:0.862+6",
+              "On": "section:gtr_solo_g+2|at:0.818+2",
               "StateAfter": [],
               "Caption": "The Eighth Circle: Fraud",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_h+12|at:0.862+12",
+              "On": "section:gtr_solo_g+6.575|at:0.818+6.575",
               "StateAfter": [
                 "in_circle_8"
               ],
               "Shot": "story/in_circle_8",
-              "Do": "Malebolge, ditch under ditch: fiends with hooks over the boiling pitch, the hypocrites filing by in gilded cloaks, thieves among the serpents, counsellors turned to flame."
+              "Do": "The fifth ditch of Malebolge, a Malebranche's hook jabbing in the near side and the grafters coming up out of the boiling pitch: the band falls past the ditches stacked down the spiral."
             },
             {
-              "On": "section:gtr_solo_i|at:0.907",
+              "On": "section:gtr_solo_g+9.835|at:0.818+9.835",
+              "StateAfter": [
+                "in_circle_8_b"
+              ],
+              "Shot": "story/in_circle_8_b",
+              "Do": "The first ditch: the panderers and seducers filing round, a horned demon cracking his whip at them on the beat."
+            },
+            {
+              "On": "section:gtr_solo_g+13|at:0.818+13",
               "StateAfter": [
                 "circle_9"
               ],
-              "Do": "Treachery comes up from under them as the circle above goes on up: one move, twelve seconds, no cut."
+              "Do": "Treachery comes up from under them as the circle above goes on up: one move, 5 seconds, no cut. They fall through it at 105 m/s."
             },
             {
-              "On": "section:gtr_solo_i+6|at:0.907+6",
+              "On": "section:gtr_solo_g+15|at:0.818+15",
               "StateAfter": [],
               "Caption": "The Ninth Circle: Treachery",
               "CaptionSeconds": 4,
               "Do": "Its name, as it closes round them."
             },
             {
-              "On": "section:gtr_solo_i+12|at:0.907+12",
+              "On": "section:gtr_solo_g+18.791|at:0.818+18.791",
               "StateAfter": [
                 "in_circle_9"
               ],
               "Shot": "story/in_circle_9",
-              "Do": "The heat goes out of it. Chained giants round the well, and under them Cocytus: the traitors frozen in the lake to their necks."
+              "Do": "Low over the ice of Caina among the traitors frozen in it to the chest: they still rock out, heads banging, when the drums are good (stiff as the ice when not). The band drops through the snow."
             },
             {
-              "On": "section:bre|at:0.95",
+              "On": "section:gtr_solo_g+21.993|at:0.818+21.993",
+              "StateAfter": [
+                "in_circle_9_b"
+              ],
+              "Shot": "story/in_circle_9_b",
+              "Do": "Deeper, in Judecca: only faces left out of the ice, and a hand making the horns (clawing at nothing when the drums are bad): the band presses on down toward the heart of hell."
+            },
+            {
+              "On": "section:gtr_solo_h|at:0.862",
               "StateAfter": [
                 "landed",
                 "band_playing"
               ],
               "Shot": "story/landed",
-              "Do": "Out of the ninth circle onto the floor of hell as the song comes to its end: the kick drum hits stone at the foot of a staircase."
+              "Do": "Out of the bottom of the ninth circle onto the floor of hell, and it is frozen: the kick drum hits the snow on the island and it goes up round the kit, frost blowing past. Low by the kick drum."
             },
             {
-              "On": "section:bre+4|at:0.957",
+              "On": "section:gtr_solo_h+4|at:0.862+4",
+              "StateAfter": [
+                "frozen_wide"
+              ],
+              "Shot": "story/frozen_wide",
+              "Do": "Wide, from over the band: the nine tiers of the amphitheatre under snow, every demon in them frozen stiff in ice, the lake a sheet of ice, and Satan, the size of the stands, frozen to the waist on his rock-and-roll throne, his wings beating, the wind of them blowing snow down the stairs."
+            },
+            {
+              "On": "section:gtr_solo_h+14|at:0.862+14",
+              "StateAfter": [
+                "satan_faces"
+              ],
+              "Shot": "story/satan_faces",
+              "Do": "His three faces, close: red in front, yellow-white on his right, black on his left, the eyes cold."
+            },
+            {
+              "On": "section:gtr_solo_i-6|at:0.907-6",
+              "StateAfter": [
+                "thaw_1"
+              ],
+              "Shot": "story/thaw_1",
+              "Do": "The playing gets to him: a glow kindles in his chest, his heart, beating with the song."
+            },
+            {
+              "On": "section:gtr_solo_i|at:0.907",
+              "StateAfter": [
+                "thaw_2"
+              ],
+              "Shot": "story/thaw_2",
+              "Do": "The ice cracks red and starts to melt back off him; he nods. The demons on the floor thaw, then the tiers above them one at a time, each statue of ice sliding off the demon dancing inside it."
+            },
+            {
+              "On": "section:gtr_solo_i+8|at:0.907+8",
+              "StateAfter": [
+                "thaw_3"
+              ],
+              "Shot": "story/thaw_3",
+              "Do": "The thaw goes on up the stands; the lake's ice breaks up over the lava; he rocks his shoulders."
+            },
+            {
+              "On": "section:gtr_solo_i+17|at:0.907+17",
+              "StateAfter": [
+                "thaw_4"
+              ],
+              "Shot": "story/thaw_4",
+              "Do": "The top tiers thaw, the braziers catch, and he air-drums with the player's hits, the band low in the picture and him over them."
+            },
+            {
+              "On": "section:bre|at:0.95",
+              "StateAfter": [
+                "thawed"
+              ],
+              "Shot": "story/thawed",
+              "Do": "The big ending: fire and brimstone at a stroke. The lake erupts, the lava falls and the jets go, the bats are back, the rig goes red, and the spirits they fell past drop into the stands for the party. High and wide over the lake."
+            },
+            {
+              "On": "section:bre+8|at:0.95+8",
               "StateAfter": [
                 "stairs_reveal"
               ],
               "Shot": "story/stairs_reveal",
-              "Do": "Up the stairs past the demons on the balustrades to Satan on the throne."
+              "Do": "Up the stairs past the demons on the balustrades to Satan on his throne, the ice gone."
             },
             {
               "On": "section:bre+17|at:0.979",
@@ -3356,7 +3683,7 @@
                 "hell_wide"
               ],
               "Shot": "story/hell_wide",
-              "Do": "High over the lake of lava: the island, the terraces of demons, the stairs and the skull over the throne."
+              "Do": "High over the lake of lava: the island, the nine tiers of the party, the stairs and Satan over them."
             }
           ]
         },
@@ -3403,7 +3730,7 @@
                 "band_ghost"
               ],
               "Shot": "story/throne_view",
-              "Do": "From the throne looking down on the stage."
+              "Do": "From his throne looking down, over his shoulder: the band small on the island below, the stands' party all round."
             },
             {
               "On": "section:verse_1",
@@ -3419,7 +3746,7 @@
                 "satan_nods"
               ],
               "Shot": "story/satan_nods",
-              "Do": "Satan head-on, the cop's distance: nodding along."
+              "Do": "Satan head-on, his three faces: nodding along."
             },
             {
               "On": "section:bridge_1",
@@ -3427,7 +3754,7 @@
                 "satan_air_drums"
               ],
               "Shot": "story/satan_air_drums",
-              "Do": "Satan finishing the fill on the armrests."
+              "Do": "Satan finishing the fill on the arms of his throne, the amp cabinets, his fists coming down on the player's hits."
             },
             {
               "On": "section:outro",
@@ -3435,7 +3762,7 @@
                 "satan_stands"
               ],
               "Shot": "story/satan_stands",
-              "Do": "By the closing passage he is on his feet."
+              "Do": "By the closing passage he is on his feet in front of the throne, the whole height of him."
             },
             {
               "On": "last_note+1.5",
@@ -3459,7 +3786,23 @@
                 "cavern_orbit"
               ],
               "Shot": "story/cavern_orbit",
-              "Do": "Round the back of the band, low: the kit against the crowd, the stairs and the throne beyond."
+              "Do": "Round the back of the band, low: the kit against the crowd, the stairs and Satan beyond."
+            },
+            {
+              "On": "section:verse_2",
+              "StateAfter": [
+                "closer_1"
+              ],
+              "Shot": "story/closer_1",
+              "Do": "Back to the riff, a step closer to him: from behind the kit, the band low and Satan over them."
+            },
+            {
+              "On": "section:verse_3",
+              "StateAfter": [
+                "closer_2"
+              ],
+              "Shot": "story/closer_2",
+              "Do": "Back to the riff again, closer: from halfway up the stairs, Satan over the top of them."
             }
           ]
         },
@@ -3594,6 +3937,14 @@
               "Do": "Match cut on a stick stroke: the cop's hands giving CPR on Earth, slow motion, the trailer still burning, red and blue across his face."
             },
             {
+              "On": "section:verse_1+7.5",
+              "StateAfter": [
+                "innocent"
+              ],
+              "Shot": "story/innocent",
+              "Do": "Earth, the same road, a medic on the compressions now. Over the cop’s shoulder: his partner holds up a sheet off the dispatch, INNOCENT stamped across it. The camera goes back behind his head as he looks up from it, and the focus goes out to the drummer under the medic’s hands."
+            },
+            {
               "On": "section:chorus_1",
               "StateAfter": [
                 "loading"
@@ -3647,6 +3998,14 @@
               ],
               "Shot": "story/gurney",
               "Do": "After the angels part. The four of them rushed down a hospital corridor on gurneys, shot from the foot of the drummer's: the ceiling lights going over, the cop running alongside."
+            },
+            {
+              "On": "section:chorus_3+38",
+              "StateAfter": [
+                "surgery"
+              ],
+              "Shot": "story/surgery",
+              "Do": "An operating theatre. From over the drummer’s chest, down onto the face under the mask and the team’s hands; then back down the table and up to the whole room: the lamps, the monitor beating in time, the next theatre through the glass, the cop at the window of the doors."
             }
           ]
         }

@@ -10,7 +10,7 @@ import math
 import os
 import random
 
-from story_afterlife_mesh import (Mesh, Tile, add, cells, ink_uv, lerp, mix, mul, palette_png, part, rot, save_bytes, smooth,  # noqa: F401
+from story_afterlife_mesh import (FONT, Mesh, Tile, add, cells, ink_uv, lerp, mix, mul, palette_png, part, rot, save_bytes, smooth,  # noqa: F401
                                   sub, text_mask, texture, unit, write_mtl, fbm3)
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -144,9 +144,13 @@ def _draw(name, path):
             if y > 236 and (x // 16) % 2:
                 c = (0.95, 0.7, 0.2)
             return c
-    elif name in ('Billboard', 'MileMarker', 'Emergency'):
+    elif name in ('Billboard', 'BillboardHell', 'RoadWork', 'MileMarker', 'Emergency'):
         if name == 'Emergency':
             lit, bg, fg, small = text_mask(['EMERGENCY'], S, S, 4), (0.6, 0.03, 0.03), (0.95, 0.95, 0.95), set()
+        elif name == 'BillboardHell':
+            lit, bg, fg, small = text_mask(['HELL', 'IS REAL'], S, S, 5), (0.012, 0.012, 0.012), (0.95, 0.95, 0.95), set()
+        elif name == 'RoadWork':
+            lit, bg, fg, small = text_mask(['ROAD', 'WORK', 'AHEAD'], S, S, 6), (0.95, 0.42, 0.04), (0.02, 0.02, 0.02), set()
         elif name == 'Billboard':
             lit, bg, fg = text_mask(['PREPARE', 'TO MEET GOD'], S, S, 3), (0.02, 0.03, 0.12), (0.95, 0.93, 0.8)
             small = text_mask(['', '', '', '', '', 'NEXT EXIT'], S, S, 2)
@@ -161,6 +165,29 @@ def _draw(name, path):
             if min(x, y, S - 1 - x, S - 1 - y) in (6, 7, 8):
                 return fg
             return bg
+    elif name == 'Innocent':
+        # The sheet the cop is shown at the crash site (My Hero): a line or two of a typed
+        # dispatch, and across the middle of it, as tall as will go, the one word.
+        typed = text_mask(['STATE POLICE DISPATCH', '', 'RE. PURSUIT MILE 66', '', '', '', '', '', '', '', '',
+                           'WRONG VEHICLE', 'CALL OFF PURSUIT', ''], S, S, 2)
+        word, px, py = set(), 5, 11
+        for ci, ch in enumerate('INNOCENT'):
+            bits = FONT[ch]
+            for r in range(7):
+                for c in range(5):
+                    if bits[r * 5 + c] == '1':
+                        for dy in range(py):
+                            for dx in range(px):
+                                word.add((10 + (ci * 6 + c) * px + dx, 92 + r * py + dy))
+
+        def f(x, y):
+            if (x, y) in word:
+                return (0.5, 0.0, 0.0)
+            if 78 <= y <= 182 and (y < 83 or y > 177):
+                return (0.5, 0.0, 0.0)
+            if (x, y) in typed:
+                return (0.2, 0.2, 0.22)
+            return (0.93, 0.92, 0.86)
     else:
         raise KeyError(name)
     texture(path, S, f, alpha=(name == 'Puff'))
@@ -296,6 +323,28 @@ def fire_fx(s, parent, venue, name, pos, size=1.0, smoke=True):
                   Texture=tex(venue, 'Puff'), AngularVelocity=[-20, 20])
 
 
+def tailpipe(kind=None):
+    """Where a police car's exhaust comes out (the patrol cruiser's, or kind's of the fleet): under
+    the back bumper on the passenger's side. (None of the models has a pipe: this is where one
+    would be.)"""
+    facts = VEHICLES[kind or 'PatrolCruiser']
+    if kind:
+        return (round(0.6 * facts['Max'][0], 3), 0.4, round(facts['Min'][2] + 0.05, 3))
+    return (round(0.57 * _PS, 3), round(0.3 * _PS, 3), round(-2.66 * _PS, 3))
+
+
+def exhaust(s, parent, venue, at, name='Exhaust', size=1.0, alpha=0.5):
+    """The exhaust of a vehicle at speed, from at under parent (its group, facing +z): pale puffs
+    blown straight back down the road, swelling and thinning out over about five metres. On the
+    afterlife's roads the vehicles stand and the road goes by, so the trail is what says which end
+    is the back. Lit, so it shows in the headlights and beacons of whatever follows (alpha: thinner
+    where those are bright). Under a story group it stops with the group."""
+    return particles(s, parent, name, at, (-86, 0, 0), Shape='Cone', ConeAngle=5, ShapeRadius=0.04 * size, Lifetime=[0.45, 0.75], Speed=[7, 10],
+                     Size=[0.2 * size, 0.3 * size], EndSize=4.5, StartColor=[0.8, 0.8, 0.82], StartColor2=[0.6, 0.6, 0.63], EndColor=[0.5, 0.5, 0.52],
+                     StartAlpha=alpha, EndAlpha=0.0, FadeIn=0.08, Intensity=1.0, Gravity=-0.04, Drag=0.1, NoiseStrength=0.5, NoiseFrequency=0.8,
+                     Blend='Alpha', Lit=True, EmissionRate=40, MaxParticles=48, Texture=tex(venue, 'Puff'), AngularVelocity=[-40, 40])
+
+
 # ---- shared prop parts ----------------------------------------------------------------------
 def _wheel(m, c, r=0.55, w=0.4, axis='x'):
     m.lathe(c, [(r * 0.5, -w / 2), (r, -w * 0.42), (r, w * 0.42), (r * 0.5, w / 2)], 'rubber', 12, axis)
@@ -396,13 +445,8 @@ def wheel(venue):
 
 
 # The patrol cruiser (Assets/Models/CopCar, exported from its .blend by export_patrol_cruiser.py):
-# 5.4 m long facing +z, its wheels on y = 0, the driver's side at -x. One model for all three
-# venues. Where its lamps are on one side (mirror x for the other).
-PATROL_HEADLAMP = (0.71, 0.78, 2.66)
-PATROL_TAIL_LAMP = (0.58, 0.81, -2.6)
-PATROL_BEACON = (0.513, 1.74, -0.2)
-
-
+# 5.9 m long facing +z (a tenth larger than modelled, like the fleet), its wheels on y = 0, the
+# driver's side at -x. One model for all three venues.
 def patrol_cruiser(s, parent, name='Body', door_open=False):
     """The patrol cruiser's model under parent: drawn by the Model itself, a part for each material."""
     e = s.entity(name, parent)
@@ -418,6 +462,12 @@ def patrol_cruiser(s, parent, name='Body', door_open=False):
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'story_vehicles.json'), encoding='utf-8') as _f:
     VEHICLES = json.load(_f)
 TRAFFIC = ('Caprice', 'Civic', 'Corvette', 'Caravan', 'C10')
+# The patrol cruiser's own (its export writes Scale, Seat, Heel and SteeringWheel; the lamps are
+# as modelled, times the scale it is exported at).
+_PS = VEHICLES['PatrolCruiser']['Scale']
+PATROL_HEADLAMP = (round(0.71 * _PS, 3), round(0.78 * _PS, 3), round(2.66 * _PS, 3))
+PATROL_TAIL_LAMP = (round(0.58 * _PS, 3), round(0.81 * _PS, 3), round(-2.6 * _PS, 3))
+PATROL_BEACON = (round(0.513 * _PS, 3), round(1.74 * _PS, 3), round(-0.2 * _PS, 3))
 
 
 def vehicle(s, parent, kind, name='Body'):
@@ -425,6 +475,16 @@ def vehicle(s, parent, kind, name='Body'):
     or TailRotor after it): drawn by the Model itself, a part for each material."""
     e = s.entity(name, parent)
     e.add({'Type': 'Model', 'ModelPath': f'Assets/Models/Vehicles/{kind}.fbx', 'Compact': True})
+    return e
+
+
+def rolling_part(s, parent, kind, part, name, rot=(0, 0, 0)):
+    """A driving police car's model under parent (kind: None the patrol cruiser, or TrailDuster;
+    part: Rolling, the body without wheels and the driver's window down, or Wheel, the driver's
+    side front wheel about its hub)."""
+    e = s.entity(name, parent, (0, 0, 0), rot)
+    path = f'Assets/Models/Vehicles/{kind}{part}.fbx' if kind else f'Assets/Models/CopCar/PatrolCruiser{part}.fbx'
+    e.add({'Type': 'Model', 'ModelPath': path, 'Compact': True})
     return e
 
 
@@ -481,6 +541,51 @@ def overpass(venue, half=22.0):
             m.box((x, 7.06, 0), (0.5, 0.06, 6.0), 'lamp')
         m.box((6.5, 8.2, -4.56), (7.0, 1.6, 0.06), 'sign_green')
     return prop(venue, 'Overpass', build)
+
+def work_zone(venue, width=9.6, length=12.0, height=1.7):
+    """Road works in the middle lanes, what the rig takes off from: a ramp of spoil under steel
+    plates, its foot across z = 0 and its lip height up at z = length (the rig comes at it from
+    -z), the heap falling away behind the lip, a line of barrels down each side leading up to it,
+    an excavator parked beyond on the left and two lighting masts on that side. Its lamps and signs are
+    the venue's own."""
+    def build(m):
+        w = width / 2
+        m.face([(-w, 0.02, 0), (w, 0.02, 0), (w, height, length), (-w, height, length)], 'steel', outward=(0, 1, 0))
+        for k in range(1, 4):       # the plates' joints
+            z = length * k / 4
+            y = 0.02 + (height - 0.02) * k / 4 + 0.012
+            m.face([(-w, y, z - 0.05), (w, y, z - 0.05), (w, y + 0.014, z + 0.05), (-w, y + 0.014, z + 0.05)], 'steel_dark', outward=(0, 1, 0))
+        for sx in (-1, 1):
+            m.face([(sx * w, 0, 0), (sx * w, height, length), (sx * w, 0, length)], 'deck_dark', outward=(sx, 0, 0))
+            m.face([(sx * w, height, length), (sx * w, 0, length + 3.5), (sx * w, 0, length)], 'deck_dark', outward=(sx, 0, 0))
+            # A yellow kerb up each edge of the plates.
+            m.face([(sx * w, 0.05, 0), (sx * (w - 0.3), 0.05, 0), (sx * (w - 0.3), height + 0.03, length), (sx * w, height + 0.03, length)], 'hivis', outward=(0, 1, 0))
+            # Spoil heaped against the sides.
+            for k, (z, r) in enumerate(((length * 0.45, 1.0), (length * 0.8, 1.4), (length + 1.5, 1.3))):
+                m.blob((sx * (w + 0.7), 0.1, z), r, 'deck_dark', 1, 0.3, 1.0, 40 + k + (7 if sx > 0 else 0), (0.9, 0.55, 1.5), floor=0.0)
+            # Barrels down each side, from 100 m out.
+            for k in range(11):
+                x, z = sx * (w + 0.55), -4.0 - k * 9.6
+                m.lathe((x, 0, z), [(0.3, 0.0), (0.33, 0.45), (0.29, 1.0)], 'cone', 8)
+                m.lathe((x, 0, z), [(0.335, 0.5), (0.335, 0.66)], 'white', 8)
+                m.box((x, 0.03, z), (0.8, 0.06, 0.8), 'rubber')
+        m.face([(-w, height, length), (w, height, length), (w, 0, length + 3.5), (-w, 0, length + 3.5)], 'deck_dark', outward=(0, 1, 1))
+        # Two lighting masts, on the oncoming side (the verge side is where the jump is shot from).
+        for z in (1.0, 10.0):
+            m.box((-(w + 3.2), 3.6, z), (0.16, 7.2, 0.16), 'post')
+            m.box((-(w + 3.2), 0.25, z), (1.6, 0.5, 1.2), 'steel_dark')
+            m.box((-(w + 3.0), 7.2, z), (1.5, 0.5, 0.25), 'steel_dark', euler=(0, 20, 0))
+        # The excavator: tracks, house, cab, boom, stick and bucket.
+        ex, ez = -(w + 4.6), length + 5.0
+        for dx in (-1.0, 1.0):
+            m.box((ex + dx, 0.4, ez), (0.6, 0.8, 4.2), 'rubber')
+        m.box((ex, 1.45, ez - 0.3), (2.5, 1.3, 3.2), 'brass')
+        m.box((ex - 0.6, 2.5, ez + 0.6), (1.1, 1.0, 1.4), 'glass')
+        m.box((ex + 0.5, 3.4, ez + 2.6), (0.45, 0.55, 4.6), 'brass', euler=(-48, 0, 0))
+        m.box((ex + 0.5, 3.9, ez + 5.6), (0.36, 0.42, 3.4), 'brass', euler=(52, 0, 0))
+        m.box((ex + 0.5, 2.3, ez + 6.9), (1.0, 0.9, 0.9), 'steel_dark', euler=(25, 0, 0))
+    return prop(venue, 'WorkZone', build)
+
 
 def ambulance(venue):
     def build(m):
@@ -801,13 +906,14 @@ def wreck(venue):
     """The jackknifed tractor, the flatbed on its side, its truss folded, and the band's gear
     thrown across the road. Around the origin: the flatbed lies along +z at x = 2.5."""
     def build(m):
-        t = Mesh('t')
-        _tractor(t)
-        m.merge(t, (6.8, 1.2, 13.6), (0, 118, 84))
-        f = Mesh('f')
-        _flatbed(f, wheels=True)
-        _truss(f, bent=0.9)
-        m.merge(f, (4.4, 3.0, 2.0), (0, 24, -102))
+        if venue != 'StoryHighway':
+            t = Mesh('t')
+            _tractor(t)
+            m.merge(t, (6.8, 1.2, 13.6), (0, 118, 84))
+            f = Mesh('f')
+            _flatbed(f, wheels=True)
+            _truss(f, bent=0.9)
+            m.merge(f, (4.4, 3.0, 2.0), (0, 24, -102))
         # The kit.
         _drum(m, (-0.6, 0.3, 6.6), 0.3, 0.45, (74, 30, 0))
         _drum(m, (0.9, 0.36, 4.6), 0.36, 0.42, (8, 0, 88))
@@ -1131,24 +1237,35 @@ def banner(venue):
     return prop(venue, 'Banner', build, 'Banner')
 
 
-def bats(venue, count=14, seed=3):
-    """A ring of bats 1 across, flying anticlockwise seen from above; turn the entity to fly them."""
+def bats(venue, count=14, seed=3, part='Bodies'):
+    """A ring of bats 1 across, flying anticlockwise seen from above; turn the entity to fly them.
+    part: 'Bodies' (each a small dark body along its line of flight) or 'Wings' (their wings, each
+    pair hinged along the body's line, the tips raised): every bat's body is on the ring's plane,
+    so a scale of the Wings ring's height through 1 and below 0 beats the wings about their roots
+    and leaves the bodies where they are. (A ring is one height: stack a few for a flock.)"""
     def build(m):
         rng = random.Random(seed)
         for i in range(count):
             a = 2 * math.pi * i / count + rng.uniform(-0.2, 0.2)
             r = rng.uniform(0.75, 1.0)
-            c = (r * math.cos(a), rng.uniform(-0.08, 0.08), r * math.sin(a))
+            c = (r * math.cos(a), 0.0, r * math.sin(a))
             fwd = (-math.sin(a), 0, math.cos(a))
             out = (math.cos(a), 0, math.sin(a))
             sz = rng.uniform(0.018, 0.03)
-            flap = rng.uniform(-0.6, 0.9) * sz
-            m.blob(c, sz * 0.35, 'black', 0)
+            if part == 'Bodies':
+                m.blob(add(c, mul(fwd, sz * 0.1)), sz * 0.35, 'black', 0)
+                m.blob(add(c, mul(fwd, sz * 0.5)), sz * 0.2, 'black', 0)        # the head
+                continue
+            lift = rng.uniform(0.35, 0.8) * sz                                  # the tips' rest above the body
             for side in (-1, 1):
-                tip = add(c, add(mul(out, side * sz * 1.6), (0, flap, 0)))
-                m.face([add(c, mul(fwd, sz * 0.5)), tip, add(c, mul(fwd, -sz * 0.4))], 'black', both=True)
-                m.face([add(c, mul(fwd, -sz * 0.4)), tip, add(tip, mul(fwd, -sz * 0.7))], 'wing_dark', both=True)
-    return prop(venue, 'Bats', build)
+                wrist = add(c, add(mul(out, side * sz * 0.8), (0, lift * 0.55, 0)))
+                tip = add(c, add(mul(out, side * sz * 1.7), (0, lift, 0)))
+                root_f, root_b = add(c, mul(fwd, sz * 0.3)), add(c, mul(fwd, -sz * 0.35))
+                m.face([root_f, wrist, root_b], 'black', both=True)
+                m.face([root_f, add(tip, mul(fwd, sz * 0.15)), wrist], 'wing_dark', both=True)
+                m.face([root_b, wrist, add(tip, mul(fwd, -sz * 0.75))], 'wing_dark', both=True)
+                m.face([wrist, add(tip, mul(fwd, sz * 0.15)), add(tip, mul(fwd, -sz * 0.75))], 'wing_dark', both=True)
+    return prop(venue, 'Bats' if part == 'Bodies' else 'BatWings', build)
 
 
 def road_break(venue, half_long=15.0, wide=2.3):
@@ -1236,22 +1353,6 @@ def cloud(venue, seed):
             lift = rng.uniform(0.0, 0.35) if i else 0.12
             m.blob((r * math.cos(a), size * 0.6 + lift, r * math.sin(a) * 0.8), size, 'cloud', 2, 0.07, 1.4, seed * 31 + i, (1.1, 0.92, 1.0), floor=0.0)
     return prop(venue, f'Cloud{seed}', build, smooth_=True)
-
-
-def cloud_layer(venue, name, count, r0, r1, size0, size1, period, seed):
-    """Cumulus scattered round the origin between r0 and r1 from it, in one mesh that repeats
-    every period metres of height (three periods of it), to stream past on a loop."""
-    def build(m):
-        rng = random.Random(seed)
-        for _ in range(count):
-            a, r, y, size = rng.uniform(0, 2 * math.pi), rng.uniform(r0, r1), rng.uniform(0, period), rng.uniform(size0, size1)
-            puffs = [(rng.uniform(0, 6.28), rng.uniform(0.25, 0.7) if i else 0.0, rng.uniform(0.26, 0.46) if i else 0.62, rng.uniform(0.0, 0.35) if i else 0.12, rng.randrange(999))
-                     for i in range(6)]
-            for copy in (-1, 0, 1):
-                for pa, pr, ps, pl, ph in puffs:
-                    m.blob((math.sin(a) * r + size * pr * math.cos(pa), y + copy * period + size * 0.8 * (ps * 0.6 + pl), math.cos(a) * r + size * pr * math.sin(pa) * 0.8),
-                           size * ps, 'cloud', 1, 0.07, 1.4, ph, (1.1, 0.92 * 0.8, 1.0))
-    return prop(venue, name, build, smooth_=True)
 
 
 def cloud_floor(venue, half=75.0, clear=None):

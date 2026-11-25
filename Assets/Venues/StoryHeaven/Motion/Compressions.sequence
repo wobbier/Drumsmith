@@ -6,13 +6,13 @@
  "Tracks": [
   {
    "Binding": "Body",
-   "Component": "Transform",
-   "Property": "Position",
+   "Component": "VenueFigure",
+   "Property": "Bow",
    "Keys": [
     {
      "Frame": 0,
      "Value": [
-      0,
+      35.0,
       0,
       0,
       0
@@ -22,9 +22,9 @@
     {
      "Frame": 5,
      "Value": [
+      41.0,
       0,
-      -0.07,
-      0.03,
+      0,
       0
      ],
      "Interpolation": "SmoothStep"
@@ -32,7 +32,7 @@
     {
      "Frame": 16,
      "Value": [
-      0,
+      35.0,
       0,
       0,
       0
@@ -43,36 +43,110 @@
   },
   {
    "Binding": "Body",
-   "Component": "Transform",
-   "Property": "Rotation",
+   "Component": "VenueFigure",
+   "Property": "Nod",
    "Keys": [
     {
      "Frame": 0,
      "Value": [
-      0.0,
-      0.0,
-      0.0,
-      1.0
+      15.0,
+      0,
+      0,
+      0
      ],
      "Interpolation": "SmoothStep"
     },
     {
-     "Frame": 5,
+     "Frame": 6,
      "Value": [
-      0.0610485,
-      0.0,
-      0.0,
-      0.9981348
+      19.0,
+      0,
+      0,
+      0
      ],
      "Interpolation": "SmoothStep"
     },
     {
      "Frame": 16,
      "Value": [
-      0.0,
-      0.0,
-      0.0,
-      1.0
+      15.0,
+      0,
+      0,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "LeftArm.Hand",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      -0.015,
+      0.29,
+      0.53,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 5,
+     "Value": [
+      -0.015,
+      0.24,
+      0.53,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      -0.015,
+      0.29,
+      0.53,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    }
+   ]
+  },
+  {
+   "Binding": "Body",
+   "Component": "VenueFigure",
+   "Property": "RightArm.Hand",
+   "Keys": [
+    {
+     "Frame": 0,
+     "Value": [
+      0.015,
+      0.32,
+      0.53,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 5,
+     "Value": [
+      0.015,
+      0.27,
+      0.53,
+      0
+     ],
+     "Interpolation": "SmoothStep"
+    },
+    {
+     "Frame": 16,
+     "Value": [
+      0.015,
+      0.32,
+      0.53,
+      0
      ],
      "Interpolation": "SmoothStep"
     }

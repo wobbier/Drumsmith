@@ -8,10 +8,21 @@ Writes Assets/Models/Vehicles/<Name>.fbx, each the whole vehicle joined into one
 engine draws one part for each material, not one for each panel's), turned to face +z in the
 engine with its wheels or skids on y = 0 and the driver's side at -x. A helicopter's main and tail
 rotors go to <Name>Rotor.fbx and <Name>TailRotor.fbx, each about its own hub, for the venue to
-spin. Where each vehicle's lamps, beacons, steering wheel and hubs ended up is written to
+spin. Where each vehicle's lamps, beacons, steering wheel (its centre, rim radius and axis) and hubs ended up is written to
 Tools/Venues/story_vehicles.json, which story_afterlife_art reads (A.vehicle): the venues never
 carry a hand-copied lamp position. Delete the .assbin beside an FBX after exporting it again, or
 the engine keeps the old cook (this script does it).
+
+The road vehicles are exported a tenth larger than they were modelled (SCALE; the helicopters as
+they are), and the police trucks' front seats are lowered until a driver's head clears the roof
+lining (fit_driver): the band's character is 1.82 m, 1.08 m from the seat to the top of the cap,
+and sat with only a head above the sill. Where the driver's hips and heels go is written with the
+rest (Seat, Heel). A vehicle the story shows driving (ROLLING) also gets <Name>Rolling.fbx (no
+wheels, the driver's window wound down) and <Name>Wheel.fbx (the driver's side front wheel about
+its hub, for the venue to spin at each corner: turned half round for the other side), with the
++x side's hubs and the driver's window sill in the facts (WheelFront, WheelRear, Sill). The patrol
+cruiser has its own script (export_patrol_cruiser.py) and the same
+rules.
 
 The .blend files have the nose along -x, z up, the driver's side at -y, the wheels on z = 0, and a
 'Review studio' collection (backdrop, cameras, softboxes) that is left out. Their window glass is
@@ -25,6 +36,7 @@ import sys
 
 import bpy
 from mathutils import Matrix, Vector
+from mathutils.bvhtree import BVHTree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ART = os.path.abspath(os.path.join(HERE, '..', '..', 'Art', 'Vehicles'))
@@ -58,6 +70,34 @@ GLASS = {'Window glass': 0.22}
 # tick, knob and wheel nut are a third of a car's vertices and nothing a venue's camera can see.
 SMALL_CABIN = 0.11
 SMALL = 0.045
+# How much larger than modelled the road vehicles are exported, and which are helicopters (not).
+SCALE = 1.1
+AIRCRAFT = ('JetRanger', 'AS350')
+# What a seated driver needs from the cushion to the roof lining, in exported metres.
+SITS = 1.11
+# The vehicles the story puts a driver in: the front seats' parts (they all go down), and of those
+# the cushion and the backrest (which stretches down, its top staying put).
+DRIVERS = {
+    'TrailDuster': {'seat': r'^Front (cushion|backrest|seat runner)', 'cushion': r'^Front cushion', 'back': r'^Front backrest'},
+    'Ranger': {'seat': r'^Front seat', 'cushion': r'^Front seat cushion', 'back': r'^Front seatback'},
+}
+
+
+# The vehicles also exported rolling, the assemblies that are their wheels, and the driver's glass.
+ROLLING = ('TrailDuster',)
+TIRE = re.compile(r'^Assembly \| ([LR]) (front|rear) tire')
+WINDOW = 'L door glazing'
+
+
+def copies(objects):
+    """Copies of objects (write() consumes what it is given)."""
+    out = []
+    for o in objects:
+        c = o.copy()
+        c.data = o.data.copy()
+        bpy.context.scene.collection.objects.link(c)
+        out.append(c)
+    return out
 
 
 def engine(p):
@@ -82,6 +122,21 @@ def box(objects):
     return lo, hi
 
 
+def steering(rim):
+    """A steering wheel's rim (after FACE_Z): the radius of its centreline, and its axis, the
+    unit vector out of the wheel's face toward the driver."""
+    import numpy as np
+    pts = np.array([list(v.co) for o in rim for v in o.data.vertices])
+    centre = (pts.min(0) + pts.max(0)) / 2
+    axis = np.linalg.svd(pts - centre)[2][2]
+    if axis[1] > 0:
+        axis = -axis
+    flat = (pts - centre) - np.outer((pts - centre) @ axis, axis)
+    spans = np.linalg.norm(flat, axis=1)
+    radius = (spans.max() + np.percentile(spans, 60)) / 2 if len(spans) else 0.0
+    return round(float(radius), 3), Vector([float(c) for c in axis])
+
+
 def prepare_materials():
     for m in bpy.data.materials:
         shader = m.node_tree.nodes.get('Principled BSDF') if m.use_nodes and m.node_tree else None
@@ -100,8 +155,9 @@ def prepare_materials():
             m.blend_method = 'BLEND'
 
 
-def gather():
-    """Every drawn object as a mesh in the engine's facing, with what it was: (object, source)."""
+def gather(scale, exclude=()):
+    """Every drawn object as a mesh in the engine's facing, scale times its size, with what it
+    was: (object, source)."""
     studio = bpy.data.collections.get('Review studio')
     skip = set(studio.all_objects) if studio else set()
     cabin = bpy.data.collections.get('Cabin')
@@ -110,14 +166,14 @@ def gather():
     parts = []
     dropped = 0
     for src in list(bpy.data.objects):
-        if src in skip or src.type not in ('MESH', 'CURVE', 'FONT') or src.hide_render:
+        if src in skip or src.name in exclude or src.type not in ('MESH', 'CURVE', 'FONT') or src.hide_render:
             continue
         mesh = bpy.data.meshes.new_from_object(src.evaluated_get(deps), depsgraph=deps)
         if not mesh.polygons:
             bpy.data.meshes.remove(mesh)
             continue
         o = bpy.data.objects.new('part', mesh)
-        mesh.transform(FACE_Z @ src.matrix_world)
+        mesh.transform(Matrix.Scale(scale, 4) @ FACE_Z @ src.matrix_world)
         if src.matrix_world.determinant() < 0:
             mesh.flip_normals()
         lo, hi = box([o])
@@ -129,6 +185,46 @@ def gather():
         bpy.context.scene.collection.objects.link(o)
         parts.append((o, src))
     return parts, dropped
+
+
+def fit_driver(name, parts):
+    """Lowers the front seats of a vehicle the story puts a driver in until SITS clears the roof
+    lining over the driver's (the -x) seat. parts are in the engine's facing (x right, y to the
+    nose, z up), already scaled. Returns the hip joints and the heels' floor there: (Vector, z)."""
+    rule = DRIVERS[name]
+    seat = [o for o, src in parts if re.match(rule['seat'], src.name)]
+    rest = [o for o, src in parts if not re.match(rule['seat'], src.name)]
+    cushion = next(o for o, src in parts if re.match(rule['cushion'], src.name) and box([o])[0][0] + box([o])[1][0] < 0)
+    back = next(o for o, src in parts if re.match(rule['back'], src.name) and box([o])[0][0] + box([o])[1][0] < 0)
+    verts, faces = [], []
+    for o in rest:
+        base = len(verts)
+        verts += [v.co.copy() for v in o.data.vertices]
+        faces += [[base + i for i in f.vertices] for f in o.data.polygons]
+    tree = BVHTree.FromPolygons(verts, faces)
+    lo, hi = box([cushion])
+    top = hi[2]
+    x = (lo[0] + hi[0]) / 2
+    low = [v.co[1] for v in back.data.vertices if v.co[2] < box([back])[0][2] + 0.15]
+    hips = max(low) + 0.12
+    roof = tree.ray_cast(Vector((x, hips, top + 0.3)), Vector((0, 0, 1)))[0]
+    floor = tree.ray_cast(Vector((x, hips + 0.45, top)), Vector((0, 0, -1)))[0]
+    floor = floor[2] if floor else lo[2] - 0.05
+    drop = max(0.0, top + SITS - roof[2]) if roof else 0.0
+    if top - drop < floor + 0.04:
+        print(f'{name}: the seat would need to go {drop:.2f} down, into the floor; held 4 cm over it')
+        drop = top - floor - 0.04
+    for o, src in parts:
+        if o not in seat:
+            continue
+        a, b = box([o])
+        for v in o.data.vertices:
+            if re.match(rule['back'], src.name):
+                v.co[2] = b[2] - (b[2] - v.co[2]) * (b[2] - a[2] + drop) / (b[2] - a[2])
+            else:
+                v.co[2] = max(floor + 0.005, v.co[2] - drop)
+    print(f'{name}: roof lining {roof[2] if roof else 0:.2f}, cushion {top:.2f} -> {top - drop:.2f}, floor {floor:.2f}')
+    return Vector((x, hips, top - drop + 0.09)), floor
 
 
 def write(name, objects, pivot):
@@ -178,7 +274,8 @@ def lamps(parts, material, end, lo, hi, within=0.25):
 def export(name):
     bpy.ops.wm.open_mainfile(filepath=os.path.join(ART, FLEET[name]))
     prepare_materials()
-    parts, dropped = gather()
+    parts, dropped = gather(1.0 if name in AIRCRAFT else SCALE)
+    sits = fit_driver(name, parts) if name in DRIVERS else None
     body = [(o, src) for o, src in parts if not ROTOR.match(top(src).name) and not TAIL_ROTOR.match(top(src).name)]
     rotor = [o for o, src in parts if ROTOR.match(top(src).name)]
     tail = [o for o, src in parts if TAIL_ROTOR.match(top(src).name)]
@@ -215,6 +312,34 @@ def export(name):
     if wheel:
         a, b = box(wheel)
         facts['SteeringWheel'] = engine((a + b) / 2)
+        facts['SteeringRadius'], axis = steering(wheel)
+        facts['SteeringAxis'] = engine(axis)
+    if sits:
+        facts['Seat'] = engine(sits[0] - pivot)
+        facts['Heel'] = round(sits[1] - pivot[2], 3)
+    facts['Scale'] = 1.0 if name in AIRCRAFT else SCALE
+    if name in ROLLING:
+        wheels = {}
+        for o, src in body:
+            found = TIRE.match(top(src).name)
+            if found:
+                wheels.setdefault(found.groups(), []).append(o)
+        hubs = {}
+        for key, group in wheels.items():
+            a, b = box(group)
+            hubs[key] = (a + b) / 2
+        # The driver's side is -x: the other side's hubs are the ones written.
+        far = 'R' if hubs[('R', 'front')][0] > 0 else 'L'
+        near = 'L' if far == 'R' else 'R'
+        facts['WheelFront'], facts['WheelRear'] = engine(hubs[(far, 'front')]), engine(hubs[(far, 'rear')])
+        glass = next(o for o, src in body if src.name == WINDOW)
+        a, b = box([glass])
+        facts['Sill'] = engine(Vector((a[0], (a[1] + b[1]) / 2, a[2])))
+        tyres = {o for group in wheels.values() for o in group}
+        rolling = copies([o for o, _ in body if o not in tyres and o is not glass])
+        wheel = copies(wheels[(near, 'front')])
+        write(name + 'Rolling', rolling, Vector((0, 0, 0)))
+        write(name + 'Wheel', wheel, hubs[(near, 'front')])
     facts.update(write(name, [o for o, _ in body], Vector((0, 0, 0))))
     if rotor and hub:
         write(name + 'Rotor', rotor, FACE_Z @ hub.matrix_world.translation)
@@ -238,4 +363,5 @@ def main():
         f.write('\n')
 
 
-main()
+if __name__ == "__main__":
+    main()
