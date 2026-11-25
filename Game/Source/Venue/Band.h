@@ -199,6 +199,9 @@ private:
     // A planted carried member's throw (PlaceCarried) put into their pose: the body off the feet.
     void CarryPose( const Member& inMember, Performer::Pose& ioPose ) const;
     void DivePose( const Member& inMember, Performer::Pose& ioPose, bool inKeepLean ) const;
+    // Hanging aloft (m_aloft), laid over a playing pose before DivePose: nothing under the feet,
+    // so the legs dangle and tread the air slowly, each out of step with the other.
+    void FloatPose( const Member& inMember, Performer::Pose& ioPose ) const;
 
     // Where a piece is struck (the drummer's space): its middle, or where a hand's (0 left, 1
     // right) stick lands on it.
@@ -240,6 +243,10 @@ private:
     float m_fallSeconds = 0.f;
     float m_dive = 0.f;
     float m_air = 0.f;          // how far the band is in the air with its gear (a fall, or aloft)
+    // How far the band hangs aloft (StoryPose Aloft, Reach, Shield), 0 to 1: the legs float
+    // (FloatPose) on the song's clock (m_poseSeconds, set each Update).
+    float m_aloft = 0.f;
+    float m_poseSeconds = 0.f;
     // The singer's plea (StoryPose Reach, Shield) as last set: how far the free hand is up toward
     // the light (0 to 1), how far it has come across the eyes, and how long the pose has held.
     float m_reach = 0.f;

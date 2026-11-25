@@ -21,6 +21,7 @@
 #include "CoreGame/Practice.h"
 #include "CoreGame/Calibration.h"
 #include "CoreGame/ClickTrack.h"
+#include "Venue/VenueLayout.h"
 #include "ECS/Core.h"
 #include <algorithm>
 #include <cmath>
@@ -28,6 +29,27 @@
 
 namespace
 {
+    // Puts inEntity and everything under it on the highway's layer (VenueLayout::kHighwayLayer), the
+    // only one its camera draws over a venue. A Model's nodes loaded later take its layer.
+    void MarkHighway( const EntityHandle& inEntity )
+    {
+        if( !inEntity )
+        {
+            return;
+        }
+        inEntity->SetLayer( VenueLayout::kHighwayLayer );
+        if( Transform* transform = inEntity->TryGetComponent<Transform>() )
+        {
+            for( Transform* child : transform->GetChildren() )
+            {
+                if( child )
+                {
+                    MarkHighway( child->Parent );
+                }
+            }
+        }
+    }
+
     constexpr const char* kModel = "in_game";
     // Lanes left to right, as a kit sits in front of the drummer. The hi-hat's open and closed
     // notes share a column (and either pad hits either), and the kick is a bar across all of them.
@@ -250,6 +272,22 @@ void NoteHighwayCore::OnStart()
             entity->AddComponent<Transform>( lane );
             m_lanes[lane] = entity;
         }
+    }
+    // The whole highway scene is on the highway's layer (no venue is built yet; one that is, an
+    // editor preview's, keeps its own).
+    if( root )
+    {
+        for( Transform* child : root->GetChildren() )
+        {
+            if( child && child->GetName() != "Venue" )
+            {
+                MarkHighway( child->Parent );
+            }
+        }
+    }
+    for( const auto& [name, lane] : m_lanes )
+    {
+        MarkHighway( lane );
     }
 
     // --play-track <index> starts a track straight away (a gameplay scene opened on its own).
@@ -664,6 +702,7 @@ void NoteHighwayCore::SpawnNote( const NoteData& inNote, NoteState& outState )
     {
         return;
     }
+    MarkHighway( note );
     outState.Note = note;
 
     Transform& transform = note->GetComponent<Transform>();
@@ -1311,6 +1350,7 @@ EntityHandle NoteHighwayCore::SpawnBox( const Vector3& inPosition, const Vector3
     {
         return box;
     }
+    MarkHighway( box );
     Transform& transform = box->GetComponent<Transform>();
     if( inParent )
     {

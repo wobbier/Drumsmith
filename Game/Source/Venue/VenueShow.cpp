@@ -112,6 +112,7 @@ void VenueShow::Clear()
         camera.OverlayDarkOpacity = 1.f;
         camera.OverlayOpacity = 1.f;
         camera.OverlayTopFade = 0.f;
+        camera.CullingMask = 0xFFFFFFFFu;
         camera.SetCurrent();
         camera.SunShadows = m_highwaySunShadows;
         if( m_highwayCamera->HasComponent<PostProcess>() )
@@ -600,6 +601,7 @@ void VenueShow::ApplyPresentation()
         camera.OverlayDarkOpacity = 1.f;
         camera.OverlayOpacity = 1.f;
         camera.OverlayTopFade = 0.f;
+        camera.CullingMask = 0xFFFFFFFFu;
         camera.SetCurrent();
         camera.SunShadows = m_highwaySunShadows;
         if( post )
@@ -610,6 +612,10 @@ void VenueShow::ApplyPresentation()
         return;
     }
     camera.Overlay = true;
+    // Over a venue it draws the highway alone: the venue is in the same world, and a big one (Free
+    // Bird's Earth, 3 km of ground) reaches the highway's path, where it would hide the notes and
+    // dim the picture as the highway's see-through board.
+    camera.CullingMask = 1u << VenueLayout::kHighwayLayer;
     // Over the venue the highway draws no sun cascades of its own (DRU-81): four shadow passes
     // for a few notes, whose shadows don't read against the see-through board.
     camera.SunShadows = false;

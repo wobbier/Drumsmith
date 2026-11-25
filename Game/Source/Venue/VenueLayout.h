@@ -4,7 +4,9 @@
 // The procedural rooms' numbers (Docs/Venue-and-Band.md), in venue space: metres, +x is the
 // crowd's right, +y up, +z from the crowd toward the back wall. The crowd stands at z < 0 facing
 // +z; the band faces -z. VenueShow places the venue far from the note highway (kVenueOrigin), so
-// the highway's overlay camera never sees it and the venue's cameras never see the highway.
+// the venue's cameras never see the highway; the highway's overlay camera draws only the highway's
+// own layer (kHighwayLayer), so nothing of a venue reaches it however far the venue spreads (Free
+// Bird's Earth runs 3 km out, under the highway's path).
 // The floor plan the show is built from is a VenuePlan (Venue/VenuePlan.h): only
 // VenuePlan::ForStyle reads the stage, member and crowd numbers here, to fill one for each of
 // the three rooms. Beyond kVenueOrigin, the arena's own geometry (VenueShow::BuildArena) reads
@@ -16,6 +18,9 @@ namespace VenueLayout
     // resolves to half a millimetre, which close-ups show as vertices crawling as the camera
     // moves. Under 512 m it's 30 microns.
     const Vector3 kVenueOrigin( -500.f, 0.f, 0.f );
+    // The entity layer of everything that is the note highway (NoteHighwayCore marks its scene and
+    // what it spawns): the only layer its camera draws over a venue (Camera::CullingMask).
+    constexpr uint8_t kHighwayLayer = 8;
 
     // The stage: a deck kStageHeight high from the front edge (z 0) to the back wall.
     constexpr float kStageHeight = 1.2f;

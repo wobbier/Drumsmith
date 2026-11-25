@@ -218,6 +218,7 @@ void Band::Clear()
     m_fallSeconds = 0.f;
     m_dive = 0.f;
     m_air = 0.f;
+    m_aloft = 0.f;
     m_reach = 0.f;
     m_shield = 0.f;
     m_reachSeconds = 0.f;
@@ -315,6 +316,9 @@ void Band::SetStoryState( StoryPose inFrom, float inFromSeconds, StoryPose inTo,
     // is in their hand.
     const auto airborne = []( StoryPose inPose ) { return inPose == StoryPose::Falling || inPose == StoryPose::Aloft || inPose == StoryPose::Reach || inPose == StoryPose::Shield; };
     m_air = ( airborne( inTo ) ? u : 0.f ) + ( airborne( inFrom ) ? 1.f - u : 0.f );
+    // Hanging in the air without the fall's tumble: the legs float (FloatPose).
+    const auto aloft = []( StoryPose inPose ) { return inPose == StoryPose::Aloft || inPose == StoryPose::Reach || inPose == StoryPose::Shield; };
+    m_aloft = ( aloft( inTo ) ? u : 0.f ) + ( aloft( inFrom ) ? 1.f - u : 0.f );
     // The singer's plea: the free hand goes up toward the light over about a second and a half
     // (Reach), then comes across in front of the eyes in about half a second (Shield); whatever
     // follows takes it down again as it blends in.
@@ -2112,8 +2116,42 @@ void Band::CarryPose( const Member& inMember, Performer::Pose& ioPose ) const
 }
 
 
+void Band::FloatPose( const Member& inMember, Performer::Pose& ioPose ) const
+{
+    const float aloft = m_aloft;
+    if( aloft <= 0.f || ioPose.Seated || ioPose.Kneeling )
+    {
+        return;
+    }
+    // Nowhere to walk to and nothing to push off: no steps, and the knees don't dip on the beat.
+    ioPose.Offset *= 1.f - aloft;
+    ioPose.Crouch *= 1.f - 0.8f * aloft;
+    const float t = m_poseSeconds;
+    for( int side = 0; side < 2; ++side )
+    {
+        const float s = side == 0 ? -1.f : 1.f;
+        Performer::Leg& leg = ioPose.Legs[side];
+        // A lazy tread, each foot on its own slow loop and the two out of step: the legs hang
+        // long, a knee coming up only as its foot swings forward, then back down straight,
+        // drifting in and out a little.
+        const float phase = inMember.Phase * 2.3f + static_cast<float>( side ) * 2.4f;
+        const float tread = std::sin( t * 1.1f + phase );
+        const float lift = std::max( std::sin( t * 1.1f + phase + 0.6f ), 0.f );
+        const float drift = std::sin( t * 0.37f + phase * 1.7f );
+        const glm::vec3 planted = glm::vec3( s * ( 0.1f + 0.78f * std::sin( leg.Spread * kDeg ) ), 0.f, 0.f ) + ioPose.Offset;
+        const glm::vec3 hanging( s * ( 0.13f + 0.04f * drift ), 0.12f * lift * lift, 0.02f + 0.1f * tread );
+        leg.Reach = true;
+        leg.Target = planted + ( hanging - planted ) * aloft;
+        leg.Pole = glm::vec3( s * 0.2f, 0.f, 1.f );
+        // The feet hang pointed, as they do with no weight on them.
+        leg.Toe += ( 32.f + 10.f * std::sin( t * 0.6f + phase ) - leg.Toe ) * aloft;
+    }
+}
+
+
 void Band::DivePose( const Member& inMember, Performer::Pose& ioPose, bool inKeepLean ) const
 {
+    FloatPose( inMember, ioPose );
     const float dive = m_dive;
     if( dive <= 0.f )
     {
@@ -2133,7 +2171,8 @@ void Band::DivePose( const Member& inMember, Performer::Pose& ioPose, bool inKee
         Performer::Leg& leg = ioPose.Legs[side];
         // From about where the foot is planted to trailing behind, the two kicking in turn.
         const float kick = std::sin( m_fallSeconds * 2.3f + inMember.Phase + static_cast<float>( side ) * kPi );
-        const glm::vec3 planted = glm::vec3( s * ( 0.1f + 0.78f * std::sin( leg.Spread * kDeg ) ), 0.f, 0.f ) + ioPose.Offset;
+        // (From where the legs were floating, if they were: FloatPose.)
+        const glm::vec3 planted = leg.Reach ? leg.Target : glm::vec3( s * ( 0.1f + 0.78f * std::sin( leg.Spread * kDeg ) ), 0.f, 0.f ) + ioPose.Offset;
         const glm::vec3 trailing( s * 0.17f, 0.1f + 0.07f * kick, -0.3f - 0.1f * kick );
         leg.Reach = true;
         leg.Target = planted + ( trailing - planted ) * dive;
@@ -2183,6 +2222,7 @@ void Band::Update( double inSeconds, float inDeltaTime, float inCrowdEnergy )
     double beat = 0.0;
     int measureBeat = 0;
     VenueTiming::BeatAt( m_beats, m_bpm, inSeconds, beat, measureBeat );
+    m_poseSeconds = static_cast<float>( inSeconds );
     for( int index = 0; index < VenueData::MemberCount; ++index )
     {
         Member& member = m_members[index];
